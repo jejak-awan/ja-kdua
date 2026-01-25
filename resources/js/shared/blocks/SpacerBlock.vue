@@ -1,41 +1,53 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ styles: wrapperBaseStyles, settings }">
-      <div class="spacer-block" :class="{ 'spacer-block--edit': mode === 'edit' }" :style="spacerStyles">
+    <template #default="{ settings, device: blockDevice }">
+      <div 
+        class="spacer-block" 
+        :id="getVal(settings, 'html_id', blockDevice)"
+        :class="{ 'spacer-block--edit': mode === 'edit' }" 
+        :style="spacerStyles(settings, blockDevice)"
+        aria-hidden="true"
+      >
         <div v-if="mode === 'edit'" class="spacer-label">
           <ArrowUpDown class="spacer-icon" />
-          <span>{{ height }}px</span>
+          <span>{{ getHeight(settings, blockDevice) }}px</span>
         </div>
       </div>
     </template>
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed } from 'vue'
+<script setup lang="ts">
 import { ArrowUpDown } from 'lucide-vue-next'
 import BaseBlock from '../components/BaseBlock.vue'
-import { getVal } from '../utils/styleUtils'
+import { 
+    getVal,
+    getLayoutStyles
+} from '../utils/styleUtils'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<{
+  module: any;
+  mode?: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile' | null;
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const settings = computed(() => props.module?.settings || {})
-
-const height = computed(() => {
-    const h = getVal(settings.value, 'height', props.device) || 50
+const getHeight = (settings: any, device: string) => {
+    const h = getVal(settings, 'height', device) || 50
     return typeof h === 'number' ? h : parseInt(h) || 50
-})
+}
 
-const spacerStyles = computed(() => {
+const spacerStyles = (settings: any, device: string) => {
+  const h = getHeight(settings, device)
   return {
-    height: `${height.value}px`,
-    minHeight: `${height.value}px`
+    height: `${h}px`,
+    minHeight: `${h}px`,
+    width: '100%',
+    ...getLayoutStyles(settings, device)
   }
-})
+}
 </script>
 
 <style scoped>

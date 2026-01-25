@@ -1,11 +1,18 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="group-block">
+  <BaseBlock 
+    :module="module" 
+    :mode="mode"
+    :settings="settings"
+    class="group-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Group Container'"
+  >
     <component
       :is="settings.link_url ? 'a' : 'div'"
-      class="group-inner relative overflow-hidden transition-all duration-300 w-full min-h-[50px]"
-      :href="mode === 'view' ? settings.link_url : null"
-      :target="mode === 'view' && settings.link_url ? (settings.link_target || '_self') : null"
-      :style="innerStyles"
+      class="group-inner relative transition-all duration-300 w-full min-h-[50px]"
+      :href="mode === 'view' ? settings.link_url : undefined"
+      :target="mode === 'view' && settings.link_url ? (settings.link_target || '_self') : undefined"
+      :style="containerStyles"
     >
         <!-- Overlay -->
         <div v-if="settings.overlayColor" class="group-overlay absolute inset-0 pointer-events-none z-0" :style="overlayStyles" />
@@ -15,21 +22,26 @@
             <!-- Builder Mode -->
             <template v-if="mode === 'edit'">
                 <slot />
-                <div v-if="!module.children?.length" class="group-placeholder flex flex-col items-center justify-center p-10 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-2xl text-gray-400 gap-3">
-                    <Square class="w-10 h-10 opacity-30" />
-                    <span class="font-bold">Group Container</span>
-                    <small>Drop modules here</small>
+                <div v-if="!module.children?.length" class="group-placeholder flex flex-col items-center justify-center p-12 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl text-slate-400 gap-4 transition-colors hover:border-primary/50 group-hover:bg-slate-50/50 dark:group-hover:bg-slate-900/50">
+                    <div class="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-900 flex items-center justify-center shadow-sm">
+                        <Square class="w-8 h-8 opacity-40 text-primary" />
+                    </div>
+                    <div class="text-center">
+                        <span class="font-black text-slate-600 dark:text-slate-400 block tracking-tight">Group Container</span>
+                        <small class="opacity-60 font-medium">Drag and drop components here to group them</small>
+                    </div>
                 </div>
             </template>
 
             <!-- Renderer Mode -->
             <template v-else>
                 <div 
-                    v-for="child in nestedBlocks" 
+                    v-for="child in (module.children || [])" 
                     :key="child.id" 
-                    class="group-child-wrapper"
+                    class="group-child-wrapper w-full"
                 >
                     <BlockRenderer
+                      v-if="BlockRenderer"
                       :block="child"
                       :mode="mode"
                     />
@@ -40,38 +52,45 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Square } from 'lucide-vue-next'
 import { 
-  getResponsiveValue
+  getVal,
+  getLayoutStyles
 } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  nestedBlocks: { type: Array, default: () => [] }
-})
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+}>()
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
+const builder = inject<any>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
-const BlockRenderer = inject('BlockRenderer', null)
+const BlockRenderer = inject<any>('BlockRenderer', null)
 
-const innerStyles = computed(() => ({}))
+const containerStyles = computed(() => {
+    const styles = getLayoutStyles(settings.value, device.value)
+    return {
+        ...styles,
+        overflow: 'hidden'
+    }
+})
 
 const overlayStyles = computed(() => ({
   backgroundColor: settings.value.overlayColor || 'transparent'
 }))
 
 const contentStyles = computed(() => {
-  const direction = getResponsiveValue(settings.value, 'direction', device.value) || 'column'
-  const alignItems = getResponsiveValue(settings.value, 'alignItems', device.value) || 'stretch'
-  const justifyContent = getResponsiveValue(settings.value, 'justifyContent', device.value) || 'flex-start'
-  const gap = getResponsiveValue(settings.value, 'gap', device.value) || 20
-  const wrap = getResponsiveValue(settings.value, 'wrap', device.value)
+  const direction = getVal(settings.value, 'direction', device.value) || 'column'
+  const alignItems = getVal(settings.value, 'alignItems', device.value) || 'stretch'
+  const justifyContent = getVal(settings.value, 'justifyContent', device.value) || 'flex-start'
+  const gap = parseInt(getVal(settings.value, 'gap', device.value)) ?? 20
+  const wrap = getVal(settings.value, 'wrap', device.value)
 
   return {
     display: 'flex',
@@ -79,14 +98,14 @@ const contentStyles = computed(() => {
     alignItems: alignItems,
     justifyContent: justifyContent,
     gap: `${gap}px`,
-    flexWrap: wrap ? 'wrap' : 'nowrap'
+    flexWrap: (wrap ? 'wrap' : 'nowrap') as any
   }
 })
 </script>
 
 <style scoped>
 .group-block { width: 100%; }
-.group-child-wrapper { width: 100%; }
-a.group-inner { cursor: pointer; text-decoration: none; color: inherit; }
+a.group-inner { cursor: pointer; text-decoration: none; color: inherit; display: block; }
 a.group-inner:hover { transform: translateY(-2px); }
 </style>
+

@@ -17,6 +17,7 @@ import {
     interactionsSettings,
     scrollEffectsSettings,
     attributesSettings,
+    layoutSettings,
     adminLabelSettings,
 } from '../commonSettings';
 
@@ -66,6 +67,7 @@ const BeforeAfterModule: ModuleDefinition = {
                 ]
             },
             backgroundSettings,
+            layoutSettings,
             adminLabelSettings('Before/After')
         ],
         design: [
@@ -91,6 +93,14 @@ const BeforeAfterModule: ModuleDefinition = {
             borderSettings,
             boxShadowSettings,
             sizingSettings,
+            {
+                id: 'premium_interactive',
+                label: 'Interactive States',
+                fields: [
+                    { name: 'hover_scale', type: 'range', label: 'Hover Scale', min: 0.8, max: 1.5, step: 0.05, default: 1 },
+                    { name: 'hover_brightness', type: 'range', label: 'Hover Brightness', min: 50, max: 150, step: 10, unit: '%', default: 100 }
+                ]
+            },
             filterSettings,
             transformSettings,
             animationSettings

@@ -1,58 +1,67 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="number-counter-block">
-    <template #default="{ settings: blockSettings }">
-      <Card class="number-counter-card group border-none shadow-xl rounded-[40px] overflow-hidden bg-white dark:bg-slate-900 transition-all duration-500 hover:-translate-y-2 p-10 flex flex-col items-center">
-        <div 
-            class="counter-wrapper flex transition-all duration-300 w-full" 
-            :class="[
-                layout === 'horizontal' ? 'flex-row items-center gap-12' : 'flex-col items-center gap-8',
-                alignment === 'left' ? 'text-left items-start' : (alignment === 'right' ? 'text-right items-end' : 'text-center items-center')
-            ]"
-        >
-          <div class="number-display flex items-baseline font-black tracking-tighter bg-primary/5 px-8 py-6 rounded-[24px] transition-all duration-500 group-hover:bg-primary/10 group-hover:scale-105" :style="wrapperStyles">
-            <span v-if="blockSettings.prefix" class="number-prefix opacity-40 mr-2 text-2xl" :style="prefixStyles">{{ blockSettings.prefix }}</span>
-            <span class="number-value bg-clip-text text-5xl lg:text-6xl tabular-nums" :style="numberStyles">{{ displayNumber }}</span>
-            <span v-if="blockSettings.suffix" class="number-suffix opacity-40 ml-2 text-2xl" :style="suffixStyles">{{ blockSettings.suffix || '%' }}</span>
-          </div>
-          
-          <div class="counter-text flex-1">
-            <h4 v-if="blockSettings.title" class="counter-title text-[10px] font-black uppercase tracking-[0.2em] mb-3 text-slate-400 group-hover:text-primary transition-colors duration-300" :style="titleStyles">{{ blockSettings.title || 'Performance' }}</h4>
-            <p v-if="blockSettings.description" class="counter-description text-slate-500 font-medium text-sm leading-relaxed max-w-sm mx-auto opacity-80" :style="descriptionStyles">{{ blockSettings.description }}</p>
-          </div>
+  <BaseBlock 
+    :module="module" 
+    :mode="mode"
+    :settings="settings"
+    class="number-counter-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Number Counter'"
+    :style="cardStyles"
+  >
+    <div 
+        class="counter-container flex flex-col items-center" 
+        :style="containerStyles"
+    >
+      <div 
+          class="counter-wrapper flex transition-all duration-300 w-full" 
+          :class="[
+              layout === 'horizontal' ? 'flex-row items-center gap-12' : 'flex-col items-center gap-8',
+              alignment === 'left' ? 'text-left items-start' : (alignment === 'right' ? 'text-right items-end' : 'text-center items-center')
+          ]"
+      >
+        <div class="number-display flex items-baseline font-black tracking-tighter bg-primary/5 px-8 py-6 rounded-[24px] transition-all" :style="wrapperStyles">
+          <span v-if="settings.prefix" class="number-prefix opacity-40 mr-2 text-2xl" :style="prefixStyles">{{ settings.prefix }}</span>
+          <span class="number-value bg-clip-text text-5xl lg:text-6xl tabular-nums" :style="numberStyles">{{ displayNumber }}</span>
+          <span v-if="settings.suffix" class="number-suffix opacity-40 ml-2 text-2xl" :style="suffixStyles">{{ settings.suffix || '%' }}</span>
         </div>
-      </Card>
-    </template>
+        
+        <div class="counter-text flex-1">
+          <h4 v-if="settings.title" class="counter-title text-[10px] font-black uppercase tracking-[0.2em] mb-3 text-slate-400 dark:text-slate-500 transition-colors duration-300" :style="titleStyles">{{ settings.title || 'Performance' }}</h4>
+          <p v-if="settings.description" class="counter-description text-slate-500 dark:text-slate-400 font-medium text-sm leading-relaxed max-w-sm opacity-80" :style="descriptionStyles">{{ settings.description }}</p>
+        </div>
+      </div>
+    </div>
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, onMounted, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Card } from '../ui'
 import { 
-  getTypographyStyles,
-  getResponsiveValue
+  getVal,
+  getLayoutStyles,
+  getTypographyStyles
 } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
-})
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+}>()
 
-const builder = inject('builder', null)
-const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
-const settings = computed(() => props.module.settings || {})
+const builder = inject<any>('builder', null)
+const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
 const animatedValue = ref(0)
-const targetNumber = computed(() => parseFloat(getResponsiveValue(settings.value, 'number', currentDevice.value)) || 100)
-const decimals = computed(() => getResponsiveValue(settings.value, 'decimals', currentDevice.value) || 0)
-const layout = computed(() => getResponsiveValue(settings.value, 'layout', currentDevice.value) || 'vertical')
-const alignment = computed(() => getResponsiveValue(settings.value, 'alignment', currentDevice.value) || 'center')
+const targetNumber = computed(() => parseFloat(getVal(settings.value, 'number', device.value)) || 100)
+const decimals = computed(() => parseInt(getVal(settings.value, 'decimals', device.value)) || 0)
+const layout = computed(() => getVal(settings.value, 'layout', device.value) || 'vertical')
+const alignment = computed(() => getVal(settings.value, 'alignment', device.value) || 'center')
 
 const displayNumber = computed(() => {
   let num = animatedValue.value
-  const useSeparator = getResponsiveValue(settings.value, 'separator', currentDevice.value) !== false
+  const useSeparator = getVal(settings.value, 'separator', device.value) !== false
   if (useSeparator) {
     return num.toLocaleString('en-US', { minimumFractionDigits: decimals.value, maximumFractionDigits: decimals.value })
   }
@@ -65,11 +74,11 @@ onMounted(() => {
       return
   }
   
-  const duration = getResponsiveValue(settings.value, 'duration', currentDevice.value) || 2000
-  const easing = getResponsiveValue(settings.value, 'easing', currentDevice.value) || 'easeOut'
+  const duration = parseInt(getVal(settings.value, 'duration', device.value)) || 2000
+  const easing = getVal(settings.value, 'easing', device.value) || 'easeOut'
   const start = performance.now()
   
-  const animate = (now) => {
+  const animate = (now: number) => {
     const progress = Math.min((now - start) / duration, 1)
     const eased = easing === 'linear' ? progress : 
                   easing === 'easeIn' ? progress * progress :
@@ -81,18 +90,43 @@ onMounted(() => {
   requestAnimationFrame(animate)
 })
 
+const containerStyles = computed(() => {
+  const styles = getLayoutStyles(settings.value, device.value)
+  return styles
+})
+
 const wrapperStyles = computed(() => ({
     color: settings.value.numberColor || 'currentColor'
 }))
 
-const numberStyles = computed(() => getTypographyStyles(settings.value, 'number_', currentDevice.value))
-const prefixStyles = computed(() => getTypographyStyles(settings.value, 'prefix_', currentDevice.value))
-const suffixStyles = computed(() => getTypographyStyles(settings.value, 'suffix_', currentDevice.value))
+const numberStyles = computed(() => getTypographyStyles(settings.value, 'number_', device.value))
+const prefixStyles = computed(() => getTypographyStyles(settings.value, 'prefix_', device.value))
+const suffixStyles = computed(() => getTypographyStyles(settings.value, 'suffix_', device.value))
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', currentDevice.value))
-const descriptionStyles = computed(() => getTypographyStyles(settings.value, 'description_', currentDevice.value))
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    const hoverScale = getVal(settings.value, 'hover_scale', device.value) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', device.value) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
+})
+
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
+const descriptionStyles = computed(() => getTypographyStyles(settings.value, 'description_', device.value))
 </script>
 
 <style scoped>
 .number-counter-block { width: 100%; }
+.number-display {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease, background-color 0.3s ease;
+}
+.number-counter-block:hover .number-display {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+    background-color: rgba(var(--primary-rgb), 0.1);
+}
 </style>
+

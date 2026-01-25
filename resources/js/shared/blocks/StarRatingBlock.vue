@@ -1,14 +1,15 @@
 <template>
   <BaseBlock
-    :id="id"
+    :module="module"
     :mode="mode"
     :settings="settings"
-    :is-preview="isPreview"
-    class="star-rating-block-wrapper"
+    class="star-rating-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Star Rating'"
   >
     <div 
       class="star-rating-container flex items-center gap-4 flex-wrap"
-      :class="containerClasses"
+      :style="containerStyles"
     >
       <div class="stars-group flex gap-1">
         <div 
@@ -41,29 +42,23 @@
       
       <div class="rating-info flex items-center gap-3">
         <Badge 
-          v-if="getVal(settings, 'showNumber') !== false" 
+          v-if="getVal(settings, 'showNumber', device) !== false" 
           variant="secondary"
           class="rating-number font-black text-lg h-9 px-4 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border-none" 
           :style="textStyles"
-          :contenteditable="mode === 'edit'"
-          @blur="updateField('rating', $event.target.innerText)"
           v-text="ratingValue.toFixed(1)"
         ></Badge>
         
-        <div v-if="getVal(settings, 'showReviewCount') !== false" class="review-count-wrapper flex items-center gap-1.5 text-slate-400 font-medium text-sm">
+        <div v-if="getVal(settings, 'showReviewCount', device) !== false" class="review-count-wrapper flex items-center gap-1.5 text-slate-400 dark:text-slate-500 font-medium text-sm">
           <span class="opacity-30 font-bold ml-1">(</span>
           <span 
             class="review-number outline-none"
             :style="reviewStyles"
-            :contenteditable="mode === 'edit'"
-            @blur="updateField('reviewCount', $event.target.innerText)"
             v-text="reviewCount"
           ></span>
           <span 
             class="review-label outline-none"
             :style="reviewStyles"
-            :contenteditable="mode === 'edit'"
-            @blur="updateField('reviewText', $event.target.innerText)"
             v-text="reviewText"
           ></span>
           <span class="opacity-30 font-bold">)</span>
@@ -73,58 +68,62 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import { Star } from 'lucide-vue-next'
 import { Badge } from '../ui'
 import BaseBlock from '../components/BaseBlock.vue'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { 
+  getVal, 
+  getLayoutStyles,
+  getTypographyStyles 
+} from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  id: String,
-  mode: { type: String, default: 'view' },
-  settings: { type: Object, default: () => ({}) },
-  isPreview: Boolean,
-  device: { type: String, default: 'desktop' }
-})
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+}>()
 
-const builder = inject('builder', null)
-const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
+const builder = inject<any>('builder', null)
+const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
-const ratingValue = computed(() => parseFloat(getVal(props.settings, 'rating', currentDevice.value)) || 4.5)
-const maxRating = computed(() => parseInt(getVal(props.settings, 'maxRating', currentDevice.value)) || 5)
-const reviewCount = computed(() => getVal(props.settings, 'reviewCount', currentDevice.value) || 0)
-const reviewText = computed(() => getVal(props.settings, 'reviewText', currentDevice.value) || 'reviews')
+const ratingValue = computed(() => parseFloat(getVal(settings.value, 'rating', device.value)) || 4.5)
+const maxRating = computed(() => parseInt(getVal(settings.value, 'maxRating', device.value)) || 5)
+const reviewCount = computed(() => getVal(settings.value, 'reviewCount', device.value) || 0)
+const reviewText = computed(() => getVal(settings.value, 'reviewText', device.value) || 'reviews')
 
-const starSize = computed(() => parseInt(getVal(props.settings, 'starSize', currentDevice.value)) || 24)
-const starColor = computed(() => getVal(props.settings, 'starColor', currentDevice.value) || '#f59e0b')
-const emptyStarColor = computed(() => getVal(props.settings, 'emptyStarColor', currentDevice.value) || '#e2e8f0')
+const starSize = computed(() => parseInt(getVal(settings.value, 'starSize', device.value)) || 24)
+const starColor = computed(() => getVal(settings.value, 'starColor', device.value) || '#f59e0b')
+const emptyStarColor = computed(() => getVal(settings.value, 'emptyStarColor', device.value) || '#e2e8f0')
 
-const getStarFillWidth = (i) => {
+const getStarFillWidth = (i: number) => {
   const rating = ratingValue.value
   if (i <= Math.floor(rating)) return '100%'
   if (i === Math.ceil(rating)) return `${(rating % 1) * 100}%`
   return '0%'
 }
 
-const textStyles = computed(() => getTypographyStyles(props.settings, 'text_', currentDevice.value))
-const reviewStyles = computed(() => getTypographyStyles(props.settings, 'review_', currentDevice.value))
-
-const containerClasses = computed(() => {
-    const align = getVal(props.settings, 'alignment', currentDevice.value) || 'center'
-    if (align === 'center') return 'justify-center text-center'
-    if (align === 'right') return 'justify-end text-right'
-    return 'justify-start text-left'
+const containerStyles = computed(() => {
+  const layout = getLayoutStyles(settings.value, device.value)
+  const align = getVal(settings.value, 'alignment', device.value) || 'center'
+  
+  return {
+    ...layout,
+    justifyContent: (align === 'center' ? 'center' : (align === 'right' ? 'flex-end' : 'flex-start')) as any,
+    textAlign: (align === 'center' ? 'center' : (align === 'right' ? 'right' : 'left')) as any
+  }
 })
 
-const updateField = (key, value) => {
-  if (props.mode !== 'edit' || !builder) return
-  builder.updateModuleSettings(props.id, { [key]: value })
-}
+const textStyles = computed(() => getTypographyStyles(settings.value, 'text_', device.value))
+const reviewStyles = computed(() => getTypographyStyles(settings.value, 'review_', device.value))
+
 </script>
 
 <style scoped>
-.star-rating-block-wrapper { width: 100%; }
+.star-rating-block { width: 100%; }
 .rating-number { transition: transform 0.2s ease; }
 .rating-number:hover { transform: scale(1.05); }
 </style>
+

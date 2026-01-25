@@ -18,7 +18,8 @@ import {
     conditionsSettings,
     interactionsSettings,
     scrollEffectsSettings,
-    attributesSettings
+    attributesSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -59,6 +60,10 @@ export default {
             styles: { all: { width: 1, color: '#e2e8f0', style: 'solid' } }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
+        aria_label: '',
+        html_id: '',
+        hover_scale: 1,
+        hover_brightness: 100,
         animation_effect: '', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 
@@ -109,6 +114,7 @@ export default {
             },
             linkSettings,
             backgroundSettings,
+            layoutSettings,
             orderSettings,
             adminLabelSettings('Accordion')
         ],
@@ -140,6 +146,14 @@ export default {
                     name: `content_${f.name}`,
                     label: `Content ${f.label}`
                 }))
+            },
+            {
+                id: 'premium_interactive',
+                label: 'Interactive States',
+                fields: [
+                    { name: 'hover_scale', type: 'range', label: 'Item Hover Scale', min: 0.8, max: 1.5, step: 0.05, default: 1 },
+                    { name: 'hover_brightness', type: 'range', label: 'Item Hover Brightness', min: 50, max: 150, step: 10, unit: '%', default: 100 }
+                ]
             },
             spacingSettings,
             borderSettings,

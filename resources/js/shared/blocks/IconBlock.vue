@@ -1,19 +1,25 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
     <template #default="{ settings, device: blockDevice }">
-      <div class="icon-block" :style="iconBlockStyles(settings, blockDevice)">
+      <div 
+        class="icon-block" 
+        :id="getVal(settings, 'html_id', blockDevice)"
+        :style="iconBlockStyles(settings, blockDevice)"
+      >
         <component
           :is="getVal(settings, 'linkUrl') ? 'a' : 'div'"
           class="icon-wrapper transition-all duration-300 group"
           :href="getVal(settings, 'linkUrl') || undefined"
           :target="getVal(settings, 'linkTarget') || '_self'"
+          :aria-label="getVal(settings, 'aria_label', blockDevice) || undefined"
+          :role="getVal(settings, 'aria_label', blockDevice) ? 'img' : undefined"
           :style="iconWrapperStyles(settings, blockDevice)"
         >
           <LucideIcon 
             :name="iconName(settings, blockDevice)" 
             :size="iconSize(settings, blockDevice)" 
             :style="iconStyles(settings, blockDevice)"
-            class="transition-transform duration-300 group-hover:scale-110"
+            class="transition-transform duration-500 linear group-hover:hover-scale"
           />
         </component>
       </div>
@@ -27,7 +33,8 @@ import LucideIcon from '../../components/ui/LucideIcon.vue'
 import { 
     getVal, 
     getTextGradientStyles,
-    getMaskStyles 
+    getMaskStyles,
+    getLayoutStyles
 } from '../utils/styleUtils'
 
 const props = withDefaults(defineProps<{
@@ -51,6 +58,7 @@ const iconSize = (settings: any, device: string) => {
 const iconBlockStyles = (settings: any, device: string) => {
   return {
     width: '100%',
+    ...getLayoutStyles(settings, device),
     textAlign: (getVal(settings, 'alignment', device) || 'center') as any
   }
 }
@@ -61,7 +69,22 @@ const iconWrapperStyles = (settings: any, device: string) => {
     alignItems: 'center',
     justifyContent: 'center',
     textDecoration: 'none',
-    position: 'relative'
+    position: 'relative',
+    transition: 'all 0.3s ease-in-out'
+  }
+
+  // Set CSS Variables for Hover States
+  const hoverScale = getVal(settings, 'hover_scale', device) || 1.1;
+  styles['--hover-scale'] = `scale(${hoverScale})`;
+  
+  const hoverColor = getVal(settings, 'hover_color', device);
+  if (hoverColor) {
+      styles['--hover-color'] = hoverColor;
+  }
+
+  const hoverBgColor = getVal(settings, 'hover_background_color', device);
+  if (hoverBgColor) {
+      styles['--hover-bg-color'] = hoverBgColor;
   }
 
   // 1. Background Shape
@@ -82,7 +105,8 @@ const iconWrapperStyles = (settings: any, device: string) => {
 
 const iconStyles = (settings: any, device: string) => {
     const styles: Record<string, any> = {
-        display: 'block'
+        display: 'block',
+        transition: 'color 0.3s ease-in-out'
     }
 
     if (getVal(settings, 'use_gradient', device)) {
@@ -96,11 +120,31 @@ const iconStyles = (settings: any, device: string) => {
 </script>
 
 <style scoped>
-.icon-block { width: 100%; }
+.icon-block { 
+  width: 100%; 
+}
+
 .icon-wrapper {
     cursor: default;
 }
+
 a.icon-wrapper {
     cursor: pointer;
+}
+
+.icon-wrapper:hover {
+    background-color: var(--hover-bg-color) !important;
+}
+
+.icon-wrapper:hover :deep(svg) {
+    color: var(--hover-color) !important;
+}
+
+.group-hover\:hover-scale {
+    transition: transform 0.3s ease-in-out;
+}
+
+.group:hover .group-hover\:hover-scale {
+    transform: var(--hover-scale);
 }
 </style>

@@ -1,61 +1,70 @@
 <template>
-  <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ settings }">
-      <div class="social-links-block w-full flex flex-wrap" :style="containerStyles">
-        <Button 
-          v-for="(link, index) in links" 
-          :key="index"
-          as="a"
-          :href="mode === 'view' ? (link.url || '#') : null"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="social-link-btn group transition-all duration-300 hover:scale-110 active:scale-95 shadow-md hover:shadow-xl"
-          :class="buttonClass(link)"
-          :style="getButtonStyle(link)"
-          variant="outline"
-          @click="mode === 'edit' ? $event.preventDefault() : null"
-        >
-          <LucideIcon 
-            :name="getIconName(link.network)" 
-            class="transition-transform duration-500 group-hover:rotate-[360deg]" 
-            :size="iconSize" 
-          />
-          <span v-if="showLabels" class="ml-2 font-black text-[10px] uppercase tracking-widest">
-            {{ link.network }}
-          </span>
-        </Button>
-      </div>
-    </template>
+  <BaseBlock 
+    :module="module" 
+    :mode="mode"
+    :settings="settings"
+    class="social-links-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Social Links'"
+  >
+    <div class="social-links-container w-full flex flex-wrap" :style="containerStyles">
+      <Button 
+        v-for="(link, index) in displayLinks" 
+        :key="index"
+        as="a"
+        :href="mode === 'view' ? (link.url || '#') : undefined"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="social-link-btn group transition-all duration-300 hover:scale-[var(--hover-scale)] active:scale-95 shadow-md hover:shadow-xl"
+        :class="buttonClass(link)"
+        :style="getButtonStyle(link)"
+        variant="outline"
+        @click="mode === 'edit' ? $event.preventDefault() : null"
+      >
+        <LucideIcon 
+          :name="getIconName(link.network)" 
+          class="transition-transform duration-500 group-hover:rotate-[360deg]" 
+          :size="iconSize" 
+        />
+        <span v-if="showLabels" class="ml-2 font-black text-[10px] uppercase tracking-widest">
+          {{ link.network }}
+        </span>
+      </Button>
+    </div>
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Button } from '../ui'
 import LucideIcon from '../../components/ui/LucideIcon.vue'
-import { getVal } from '../utils/styleUtils'
+import { 
+  getVal,
+  getLayoutStyles,
+  getTypographyStyles
+} from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
-})
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+}>()
 
-const builder = inject('builder', null)
-const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
-const settings = computed(() => props.module?.settings || {})
+const builder = inject<any>('builder', null)
+const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
-const links = computed(() => settings.value.links || [
+const displayLinks = computed(() => settings.value.links || [
     { network: 'facebook', url: '#' },
     { network: 'twitter', url: '#' },
     { network: 'instagram', url: '#' },
     { network: 'linkedin', url: '#' }
 ])
 
-const showLabels = computed(() => getVal(settings.value, 'showLabels', currentDevice.value))
+const showLabels = computed(() => getVal(settings.value, 'showLabels', device.value))
 
-const iconMap = {
+const iconMap: Record<string, string> = {
   facebook: 'Facebook',
   twitter: 'Twitter',
   instagram: 'Instagram',
@@ -68,22 +77,29 @@ const iconMap = {
   website: 'Globe'
 }
 
-const getIconName = (network) => iconMap[network] || 'Globe'
+const getIconName = (network: string) => iconMap[network] || 'Globe'
 
 const containerStyles = computed(() => {
-  const gap = parseInt(getVal(settings.value, 'gap', currentDevice.value)) || 16
-  const align = getVal(settings.value, 'alignment', currentDevice.value) || 'center'
+  const layout = getLayoutStyles(settings.value, device.value)
+  const gap = parseInt(getVal(settings.value, 'gap', device.value)) || 16
+  const align = getVal(settings.value, 'alignment', device.value) || 'center'
   
+  const hoverScale = getVal(settings.value, 'hover_scale', device.value) || 1.1
+  const hoverBrightness = getVal(settings.value, 'hover_brightness', device.value) || 110
+
   return {
+    ...layout,
     gap: `${gap}px`,
     justifyContent: align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start',
+    '--hover-scale': hoverScale,
+    '--hover-brightness': `${hoverBrightness}%`
   }
 })
 
-const iconSize = computed(() => parseInt(getVal(settings.value, 'iconSize', currentDevice.value)) || 20)
+const iconSize = computed(() => parseInt(getVal(settings.value, 'iconSize', device.value)) || 20)
 
-const buttonClass = (link) => {
-    const style = getVal(settings.value, 'displayStyle', currentDevice.value) || 'icon-circle'
+const buttonClass = (link: any) => {
+    const style = getVal(settings.value, 'displayStyle', device.value) || 'icon-circle'
     const spv = iconSize.value
     const res = []
     
@@ -98,18 +114,23 @@ const buttonClass = (link) => {
     return res
 }
 
-const getButtonStyle = (link) => {
-  const color = getVal(settings.value, 'color', currentDevice.value) || 'currentColor'
-  const bgColor = getVal(settings.value, 'backgroundColor', currentDevice.value) || 'rgba(var(--primary), 0.05)'
+const getButtonStyle = (link: any) => {
+  const color = getVal(settings.value, 'color', device.value) || 'currentColor'
+  const bgColor = getVal(settings.value, 'backgroundColor', device.value) || 'rgba(var(--primary), 0.05)'
   
   return {
     color: link.useCustomColor ? link.iconColor : color,
     backgroundColor: link.useCustomColor ? (link.backgroundColor || 'transparent') : bgColor,
-    borderColor: 'transparent'
+    borderColor: 'transparent',
+    filter: 'brightness(var(--hover-brightness, 100%))'
   }
 }
 </script>
 
 <style scoped>
 .social-links-block { width: 100%; }
+.social-link-btn:hover {
+    filter: brightness(var(--hover-brightness));
+}
 </style>
+

@@ -19,7 +19,8 @@ import {
     conditionsSettings,
     interactionsSettings,
     scrollEffectsSettings,
-    attributesSettings
+    attributesSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -39,6 +40,12 @@ const AlertModule: ModuleDefinition = {
         message: 'This is an informational alert message.',
         dismissible: false,
         showIcon: true,
+        layout_type: 'block',
+        gap_x: '0px',
+        gap_y: '0px',
+        aria_label: '',
+        html_id: '',
+        hover_opacity: 1,
         // Spacing
         padding: { top: 16, bottom: 16, left: 20, right: 20, unit: 'px' },
         margin: { top: 0, bottom: 16, left: 0, right: 0, unit: 'px' },
@@ -99,7 +106,9 @@ const AlertModule: ModuleDefinition = {
                         name: 'showIcon',
                         type: 'toggle',
                         label: 'Show Icon'
-                    }
+                    },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             linkSettings,
@@ -108,6 +117,14 @@ const AlertModule: ModuleDefinition = {
             adminLabelSettings('Alert')
         ],
         design: [
+            layoutSettings,
+            {
+                id: 'premium_states',
+                label: 'Interactive States',
+                fields: [
+                    { name: 'hover_opacity', type: 'range', label: 'Hover Opacity', min: 0, max: 1, step: 0.1, default: 1 }
+                ]
+            },
             {
                 id: 'titleTypography',
                 label: 'Title Typography',

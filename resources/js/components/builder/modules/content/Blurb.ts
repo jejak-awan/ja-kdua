@@ -19,7 +19,8 @@ import {
     conditionsSettings,
     interactionsSettings,
     scrollEffectsSettings,
-    attributesSettings
+    attributesSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -52,6 +53,13 @@ const BlurbModule: ModuleDefinition = {
         iconColor: '#4f46e5',
         iconBackgroundColor: 'rgba(79, 70, 229, 0.08)',
         iconBackgroundShape: 'rounded',
+        layout_type: 'block',
+        gap_x: '0px',
+        gap_y: '0px',
+        aria_label: '',
+        html_id: '',
+        hover_scale: 1.05,
+        hover_brightness: 100,
         // Typography Defaults
         title_font_size: 20,
         title_font_weight: '700',
@@ -122,7 +130,9 @@ const BlurbModule: ModuleDefinition = {
                         type: 'upload',
                         label: 'Image',
                         responsive: true
-                    }
+                    },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             linkSettings,
@@ -132,9 +142,9 @@ const BlurbModule: ModuleDefinition = {
         ],
         design: [
             {
-                id: 'layout',
-                label: 'Layout',
+                ...layoutSettings,
                 fields: [
+                    ...layoutSettings.fields!,
                     {
                         name: 'iconPosition',
                         type: 'select',
@@ -157,6 +167,14 @@ const BlurbModule: ModuleDefinition = {
                             { value: 'right', label: 'Right', icon: 'AlignRight' }
                         ]
                     }
+                ]
+            },
+            {
+                id: 'premium_styling',
+                label: 'Premium Interactive',
+                fields: [
+                    { name: 'hover_scale', type: 'range', label: 'Hover Scale', min: 0.8, max: 1.5, step: 0.05, default: 1.05 },
+                    { name: 'hover_brightness', type: 'range', label: 'Hover Brightness', min: 50, max: 150, step: 10, unit: '%', default: 100 }
                 ]
             },
             {

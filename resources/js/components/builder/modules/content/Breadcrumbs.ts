@@ -18,7 +18,8 @@ import {
     conditionsSettings,
     interactionsSettings,
     scrollEffectsSettings,
-    attributesSettings
+    attributesSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -70,7 +71,9 @@ const BreadcrumbsModule: ModuleDefinition = {
                     { name: 'items', type: 'textarea', label: 'Items (JSON)', description: '[{text, url}]' },
                     { name: 'separator', type: 'text', label: 'Separator' },
                     { name: 'showHome', type: 'toggle', label: 'Show Home' },
-                    { name: 'homeIcon', type: 'toggle', label: 'Use Home Icon' }
+                    { name: 'homeIcon', type: 'toggle', label: 'Use Home Icon' },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             backgroundSettings,
@@ -78,6 +81,7 @@ const BreadcrumbsModule: ModuleDefinition = {
             adminLabelSettings('Breadcrumbs')
         ],
         design: [
+            layoutSettings,
             {
                 id: 'linksTypography',
                 label: 'Links Typography',

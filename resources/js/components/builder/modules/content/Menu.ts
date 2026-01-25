@@ -18,6 +18,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -60,6 +61,8 @@ const MenuModule: ModuleDefinition = {
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
+        aria_label: '',
+        html_id: '',
         animation_effect: '', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 
@@ -70,7 +73,9 @@ const MenuModule: ModuleDefinition = {
                 label: 'Menu',
                 fields: [
                     { name: 'menuId', type: 'text', label: 'Menu ID/Slug' },
-                    { name: 'style', type: 'select', label: 'Style', responsive: true, options: [{ value: 'horizontal', label: 'Horizontal' }, { value: 'vertical', label: 'Vertical' }, { value: 'dropdown', label: 'Dropdown' }] }
+                    { name: 'style', type: 'select', label: 'Style', responsive: true, options: [{ value: 'horizontal', label: 'Horizontal' }, { value: 'vertical', label: 'Vertical' }, { value: 'dropdown', label: 'Dropdown' }] },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             {

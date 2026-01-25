@@ -49,6 +49,8 @@ const MapPinModule: ModuleDefinition = {
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
+        aria_label: '',
+        html_id: '',
         animation_effect: '', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 

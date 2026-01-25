@@ -1,6 +1,14 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="toc-block">
-    <div class="toc-container bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
+  <BaseBlock 
+    :module="module" 
+    :settings="settings" 
+    :mode="mode"
+    class="toc-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Table of Contents'"
+    :style="cardStyles"
+  >
+    <div class="toc-container bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm" :style="containerStyles">
         <div v-if="collapsibleValue" class="toc-header flex justify-between items-center cursor-pointer group" @click="expanded = !expanded">
           <span class="toc-title font-bold text-lg" :style="titleStyles">{{ titleValue }}</span>
           <div class="toc-toggle-icon w-8 h-8 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 shadow-sm transition-all group-hover:scale-110">
@@ -22,28 +30,31 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { ChevronDown } from 'lucide-vue-next'
 import { 
+  getVal,
+  getLayoutStyles,
   getTypographyStyles,
   getResponsiveValue
 } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' }
-})
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+}>()
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
+const builder = inject<any>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 const device = computed(() => builder?.device?.value || 'desktop')
 
-const titleValue = computed(() => getResponsiveValue(settings.value, 'title', device.value) || 'Table of Contents')
-const showNumbersValue = computed(() => getResponsiveValue(settings.value, 'showNumbers', device.value) !== false)
-const collapsibleValue = computed(() => getResponsiveValue(settings.value, 'collapsible', device.value))
-const expanded = ref(getResponsiveValue(settings.value, 'defaultExpanded', device.value) !== false)
+const titleValue = computed(() => getVal(settings.value, 'title', device.value) || 'Table of Contents')
+const showNumbersValue = computed(() => getVal(settings.value, 'showNumbers', device.value) !== false)
+const collapsibleValue = computed(() => getVal(settings.value, 'collapsible', device.value))
+const expanded = ref(getVal(settings.value, 'defaultExpanded', device.value) !== false)
 
 const displayItems = computed(() => {
     // In builder mode, we show mock items
@@ -66,12 +77,32 @@ const displayItems = computed(() => {
     ]
 })
 
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    
+    // Interactive states
+    const hoverScale = getVal(settings.value, 'hover_scale', device.value) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', device.value) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
+})
+
+const containerStyles = computed(() => getLayoutStyles(settings.value, device.value))
 const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
 const linkStyles = computed(() => getTypographyStyles(settings.value, 'link_', device.value))
 </script>
 
 <style scoped>
 .toc-block { width: 100%; }
+
+.toc-block:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
+
 .toc-list { list-style: none; padding: 0; margin: 0; }
 .toc-list--numbered { counter-reset: toc; }
 .toc-list--numbered .toc-item { counter-increment: toc; }
@@ -88,3 +119,4 @@ const linkStyles = computed(() => getTypographyStyles(settings.value, 'link_', d
   overflow: hidden;
 }
 </style>
+

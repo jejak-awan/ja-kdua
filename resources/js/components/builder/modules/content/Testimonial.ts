@@ -19,7 +19,8 @@ import {
     conditionsSettings,
     interactionsSettings,
     scrollEffectsSettings,
-    attributesSettings
+    attributesSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -66,6 +67,10 @@ const TestimonialModule: ModuleDefinition = {
             }
         },
         boxShadow: { preset: 'high', horizontal: 0, vertical: 20, blur: 50, spread: -10, color: 'rgba(0,0,0,0.15)', inset: false },
+        aria_label: '',
+        html_id: '',
+        hover_scale: 1,
+        hover_brightness: 100,
         animation_effect: 'animate-fade-up',
         animation_duration: 1000,
         animation_delay: 0,
@@ -101,7 +106,17 @@ const TestimonialModule: ModuleDefinition = {
                         type: 'upload',
                         label: 'Author Photo',
                         responsive: true
-                    }
+                    },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
+                ]
+            },
+            {
+                id: 'premium_interactive',
+                label: 'Interactive States',
+                fields: [
+                    { name: 'hover_scale', type: 'range', label: 'Hover Scale', min: 0.8, max: 1.5, step: 0.05, default: 1 },
+                    { name: 'hover_brightness', type: 'range', label: 'Hover Brightness', min: 50, max: 150, step: 10, unit: '%', default: 100 }
                 ]
             },
             linkSettings,
@@ -205,7 +220,8 @@ const TestimonialModule: ModuleDefinition = {
             sizingSettings,
             filterSettings,
             transformSettings,
-            animationSettings
+            animationSettings,
+            layoutSettings
         ],
         advanced: [
             visibilitySettings,

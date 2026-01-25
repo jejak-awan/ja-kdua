@@ -18,6 +18,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -48,6 +49,13 @@ const CTAModule: ModuleDefinition = {
         gradientStart: '#4f46e5',
         gradientEnd: '#7c3aed',
         gradientDirection: 'to right',
+        layout_type: 'block',
+        gap_x: '0px',
+        gap_y: '20px',
+        aria_label: '',
+        html_id: '',
+        hover_scale: 1,
+        hover_brightness: 100,
         background: { color: 'transparent', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         textColor: '#ffffff',
         buttonBackgroundColor: '#ffffff',
@@ -119,7 +127,9 @@ const CTAModule: ModuleDefinition = {
                             { value: '_self', label: 'Same Window' },
                             { value: '_blank', label: 'New Tab' }
                         ]
-                    }
+                    },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             backgroundSettings,
@@ -127,9 +137,9 @@ const CTAModule: ModuleDefinition = {
         ],
         design: [
             {
-                id: 'layout',
-                label: 'Layout',
+                ...layoutSettings,
                 fields: [
+                    ...layoutSettings.fields!,
                     {
                         name: 'layout',
                         type: 'select',
@@ -151,6 +161,14 @@ const CTAModule: ModuleDefinition = {
                             { value: 'right', label: 'Right', icon: 'AlignRight' }
                         ]
                     }
+                ]
+            },
+            {
+                id: 'premium_interactive',
+                label: 'Interactive States',
+                fields: [
+                    { name: 'hover_scale', type: 'range', label: 'Hover Scale', min: 0.8, max: 1.5, step: 0.05, default: 1 },
+                    { name: 'hover_brightness', type: 'range', label: 'Hover Brightness', min: 50, max: 150, step: 10, unit: '%', default: 100 }
                 ]
             },
             {

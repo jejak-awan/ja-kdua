@@ -1,133 +1,160 @@
 <template>
-  <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ settings }">
-      <div class="portfolio-block w-full">
-        <h2 
-          v-if="settings.title || mode === 'edit'" 
-          class="portfolio-title text-center mb-12" 
-          :style="titleDisplayStyles"
-          :contenteditable="mode === 'edit'"
-          @blur="e => updateResponsiveField('title', e.target.innerText)"
-          v-text="settings.title"
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
+    :device="device"
+    class="portfolio-block transition-all duration-500"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Portfolio'"
+    :style="cardStyles"
+  >
+    <div class="portfolio-wrapper w-full" :style="containerStyles">
+      <h2 
+        v-if="settings.title || mode === 'edit'" 
+        class="portfolio-main-title text-center mb-16 tracking-tighter outline-none" 
+        :style="mainTitleStyles"
+        :contenteditable="mode === 'edit'"
+        @blur="(e: any) => updateField('title', (e.target as HTMLElement).innerText)"
+        v-text="settings.title || 'Selected Works'"
+      ></h2>
+
+      <!-- Filter -->
+      <div v-if="settings.showFilter !== false" class="portfolio-filter flex justify-center gap-4 mb-16 flex-wrap">
+        <Button 
+          v-for="cat in categories" 
+          :key="cat" 
+          :variant="activeFilter === cat ? 'default' : 'outline'"
+          class="rounded-full px-8 py-6 font-black uppercase tracking-widest text-[10px] transition-all duration-500 shadow-xl hover:shadow-2xl"
+          :style="activeFilter === cat ? {} : filterTypographyStyles"
+          @click="activeFilter = cat"
         >
-        </h2>
-
-        <!-- Filter -->
-        <div v-if="settings.showFilter !== false" class="portfolio-filter flex justify-center gap-2 mb-12 flex-wrap">
-          <Button 
-            v-for="cat in categories" 
-            :key="cat" 
-            :variant="activeFilter === cat ? 'default' : 'outline'"
-            class="rounded-full px-6 transition-all duration-300"
-            :style="activeFilter === cat ? {} : filterTypographyStyles"
-            @click="activeFilter = cat"
-          >
-            {{ cat }}
-          </Button>
-        </div>
-        
-        <!-- Grid -->
-        <div class="portfolio-grid" :style="gridStyles">
-          <Card 
-            v-for="item in mockItems" 
-            :key="item.id" 
-            class="portfolio-item group relative overflow-hidden bg-slate-100 rounded-[30px] border-none aspect-square cursor-pointer"
-          >
-            <!-- Image Area -->
-            <div class="absolute inset-0 z-0 bg-slate-200 flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
-               <LucideIcon name="Layers" class="w-16 h-16 text-slate-300 opacity-50" />
-            </div>
-
-            <!-- Overlay -->
-            <div 
-                class="item-overlay absolute inset-0 z-10 flex flex-col items-center justify-center p-8 opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-sm bg-primary/80"
-                :style="overlayStyles"
-            >
-              <Badge 
-                v-if="settings.showCategory !== false" 
-                variant="secondary"
-                class="mb-3 rounded-full uppercase tracking-widest text-[10px] font-bold py-1 px-4 bg-white/20 text-white border-white/30 backdrop-blur-md"
-              >
-                {{ item.category }}
-              </Badge>
-              <h4 
-                v-if="settings.showTitle !== false" 
-                class="item-title text-white text-2xl font-black text-center tracking-tighter"
-                :style="itemTitleStyles"
-              >
-                {{ item.title }}
-              </h4>
-              
-              <!-- Action Button (Optional Visual) -->
-              <div class="mt-6 w-12 h-12 rounded-full bg-white text-primary flex items-center justify-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-100">
-                 <LucideIcon name="ArrowUpRight" :size="20" />
-              </div>
-            </div>
-          </Card>
-        </div>
+          {{ cat }}
+        </Button>
       </div>
-    </template>
+      
+      <!-- Grid -->
+      <div class="portfolio-grid transition-all duration-500" :style="gridStyles">
+        <Card 
+          v-for="item in mockItems" 
+          :key="item.id" 
+          class="portfolio-item group relative overflow-hidden bg-slate-50 dark:bg-slate-900 rounded-[3.5rem] border-none aspect-square cursor-pointer transition-all duration-700 shadow-2xl hover:-translate-y-4"
+        >
+          <!-- Image Area -->
+          <div class="absolute inset-0 z-0 bg-slate-100 dark:bg-slate-950 flex items-center justify-center transition-transform duration-1000 group-hover:scale-110">
+             <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10" />
+             <LucideIcon name="Layers" class="w-24 h-24 text-slate-200 dark:text-slate-800 opacity-30" />
+          </div>
+
+          <!-- Overlay -->
+          <div 
+              class="item-overlay absolute inset-0 z-20 flex flex-col items-center justify-center p-12 opacity-0 group-hover:opacity-100 transition-all duration-700 backdrop-blur-xl bg-primary/80"
+              :style="overlayStyles"
+          >
+            <Badge 
+              v-if="settings.showCategory !== false" 
+              variant="secondary"
+              class="mb-6 rounded-2xl font-black px-6 py-2 text-[10px] uppercase tracking-[0.3em] bg-white/10 text-white border-white/20 backdrop-blur-md shadow-2xl transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-500"
+            >
+              {{ item.category }}
+            </Badge>
+            <h4 
+              v-if="settings.showTitle !== false" 
+              class="item-title text-white text-3xl font-black text-center tracking-tighter leading-none max-w-xs transform -translate-y-2 group-hover:translate-y-0 transition-transform duration-500 delay-75"
+              :style="itemTitleStyles"
+            >
+              {{ item.title }}
+            </h4>
+            
+            <div class="mt-10 w-16 h-16 rounded-3xl bg-white text-primary flex items-center justify-center transform translate-y-8 group-hover:translate-y-0 transition-all duration-700 delay-150 shadow-2xl hover:scale-110">
+               <LucideIcon name="ArrowUpRight" class="w-7 h-7" />
+            </div>
+          </div>
+        </Card>
+      </div>
+    </div>
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Card, Button, Badge } from '../ui'
 import LucideIcon from '../../components/ui/LucideIcon.vue'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { 
+  getVal, 
+  getLayoutStyles, 
+  getTypographyStyles 
+} from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance;
+  mode?: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile';
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module?.settings || {})
+const builder = inject<any>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
-const categories = ['All', 'Web', 'Mobile', 'Branding']
+const categories = ['All', 'UX/UI', 'Development', 'Branding']
 const activeFilter = ref('All')
 
 const mockItems = computed(() => {
     const count = getVal(settings.value, 'itemsPerPage', props.device) || 9
     return Array.from({ length: count }, (_, i) => ({
-        id: i + 1, title: `Creative Project ${i + 1}`, category: categories[1 + (i % 3)]
+        id: i + 1, title: `Creative Nexus ${i + 1}`, category: categories[1 + (i % 3)]
     }))
 })
+
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
+})
+
+const containerStyles = computed(() => getLayoutStyles(settings.value, props.device))
 
 const gridStyles = computed(() => {
     const cols = getVal(settings.value, 'columns', props.device) || 3
     const gap = getVal(settings.value, 'gap', props.device) || 24
     return { 
         display: 'grid', 
-        gridTemplateColumns: `repeat(${cols}, 1fr)`, 
+        gridTemplateColumns: props.device === 'mobile' ? '1fr' : (props.device === 'tablet' ? 'repeat(2, 1fr)' : `repeat(${cols}, 1fr)`), 
         gap: `${gap}px`,
         width: '100%'
     }
 })
 
 const overlayStyles = computed(() => ({ 
-    backgroundColor: settings.value.overlayColor || '', 
+    backgroundColor: getVal(settings.value, 'overlayColor', props.device) || '', 
 }))
 
 const filterTypographyStyles = computed(() => getTypographyStyles(settings.value, 'filter_', props.device))
-const titleDisplayStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
+const mainTitleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
 const itemTitleStyles = computed(() => getTypographyStyles(settings.value, 'item_title_', props.device))
 
-const updateResponsiveField = (fieldName, value) => {
+const updateField = (key: string, value: string) => {
   if (props.mode !== 'edit' || !builder) return
-  const current = settings.value[fieldName]
-  let newValue
-  if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
-    newValue = { ...current, [props.device]: value }
-  } else {
-    newValue = { [props.device]: value }
-  }
-  builder.updateModuleSettings(props.module.id, { [fieldName]: newValue })
+  builder.updateModuleSettings(props.module.id, { [key]: value })
 }
 </script>
 
 <style scoped>
-.portfolio-block { width: 100%; }
+.portfolio-block {
+    width: 100%;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.4s ease;
+}
+.portfolio-block:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
+.portfolio-item:hover { z-index: 30; }
 </style>

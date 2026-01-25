@@ -18,6 +18,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -43,6 +44,13 @@ const FeatureModule: ModuleDefinition = {
         iconColor: '#2059ea',
         iconBackgroundColor: 'rgba(32, 89, 234, 0.1)',
         iconBorderRadius: 50,
+        layout_type: 'block',
+        gap_x: '0px',
+        gap_y: '20px',
+        aria_label: '',
+        html_id: '',
+        hover_scale: 1.05,
+        hover_brightness: 100,
         // Background
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         // Spacing
@@ -61,7 +69,9 @@ const FeatureModule: ModuleDefinition = {
                 fields: [
                     { name: 'icon', type: 'iconPicker', label: 'Icon' },
                     { name: 'title', type: 'text', label: 'Title' },
-                    { name: 'description', type: 'textarea', label: 'Description' }
+                    { name: 'description', type: 'textarea', label: 'Description' },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             backgroundSettings,
@@ -69,11 +79,19 @@ const FeatureModule: ModuleDefinition = {
         ],
         design: [
             {
-                id: 'layout',
-                label: 'Layout',
+                ...layoutSettings,
                 fields: [
+                    ...layoutSettings.fields!,
                     { name: 'layout', type: 'select', label: 'Icon Position', options: [{ value: 'top', label: 'Top' }, { value: 'left', label: 'Left' }, { value: 'right', label: 'Right' }], responsive: true },
                     { name: 'alignment', type: 'buttonGroup', label: 'Alignment', options: [{ value: 'left', label: 'Left', icon: 'AlignLeft' }, { value: 'center', label: 'Center', icon: 'AlignCenter' }], responsive: true }
+                ]
+            },
+            {
+                id: 'premium_interactive',
+                label: 'Interactive States',
+                fields: [
+                    { name: 'hover_scale', type: 'range', label: 'Hover Scale', min: 0.8, max: 1.5, step: 0.05, default: 1.05 },
+                    { name: 'hover_brightness', type: 'range', label: 'Hover Brightness', min: 50, max: 150, step: 10, unit: '%', default: 100 }
                 ]
             },
             {

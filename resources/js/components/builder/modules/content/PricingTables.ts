@@ -18,6 +18,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -77,6 +78,10 @@ const PricingTablesModule: ModuleDefinition = {
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         border: { radius: { tl: 40, tr: 40, bl: 40, br: 40, linked: true }, styles: { all: { width: 0, color: '#e0e0e0', style: 'solid' } } },
         boxShadow: { preset: 'high', horizontal: 0, vertical: 20, blur: 40, spread: -5, color: 'rgba(0,0,0,0.1)', inset: false },
+        aria_label: '',
+        html_id: '',
+        hover_scale: 1.02,
+        hover_brightness: 100,
         animation_effect: 'animate-fade-up', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 
@@ -105,6 +110,14 @@ const PricingTablesModule: ModuleDefinition = {
                 ]
             },
             backgroundSettings,
+            {
+                id: 'premium_interactive',
+                label: 'Interactive States',
+                fields: [
+                    { name: 'hover_scale', type: 'range', label: 'Card Hover Scale', min: 0.8, max: 1.2, step: 0.01, default: 1.02 },
+                    { name: 'hover_brightness', type: 'range', label: 'Card Hover Brightness', min: 50, max: 150, step: 10, unit: '%', default: 100 }
+                ]
+            },
             adminLabelSettings('Pricing Tables')
         ],
         design: [

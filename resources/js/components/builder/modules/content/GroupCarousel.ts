@@ -19,6 +19,7 @@ import {
     interactionsSettings,
     scrollEffectsSettings,
     attributesSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -73,6 +74,8 @@ const GroupCarouselModule: ModuleDefinition = {
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
+        aria_label: '',
+        html_id: '',
         animation_effect: '', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 
@@ -97,7 +100,9 @@ const GroupCarouselModule: ModuleDefinition = {
                     { name: 'slidesPerGroup', type: 'range', label: 'Slides Per Group', min: 1, max: 6, step: 1 },
                     { name: 'gap', type: 'range', label: 'Gap', min: 0, max: 60, step: 4, unit: 'px' },
                     { name: 'loop', type: 'toggle', label: 'Loop Slides' },
-                    { name: 'centeredSlides', type: 'toggle', label: 'Centered' }
+                    { name: 'centeredSlides', type: 'toggle', label: 'Centered' },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             {

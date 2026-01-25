@@ -18,7 +18,8 @@ import {
     conditionsSettings,
     interactionsSettings,
     scrollEffectsSettings,
-    attributesSettings
+    attributesSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -60,6 +61,8 @@ const GroupModule: ModuleDefinition = {
         // Link
         link_url: '',
         link_target: '_self',
+        aria_label: '',
+        html_id: '',
         animation_effect: '', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 
@@ -142,6 +145,7 @@ const GroupModule: ModuleDefinition = {
             conditionsSettings,
             interactionsSettings,
             scrollEffectsSettings,
+            layoutSettings,
             attributesSettings
         ]
     }

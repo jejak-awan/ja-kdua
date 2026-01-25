@@ -1,7 +1,13 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="sidebar-block">
-    <!-- Sidebar Widgets -->
-    <div class="sidebar-widgets-container flex flex-col gap-10">
+  <BaseBlock 
+    :module="module" 
+    :settings="settings" 
+    :mode="mode"
+    class="sidebar-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Sidebar'"
+  >
+    <div class="sidebar-widgets-container flex flex-col" :style="containerStyles">
       <!-- Builder Mode -->
       <template v-if="mode === 'edit'">
         <slot />
@@ -10,7 +16,7 @@
       <!-- Renderer Mode -->
       <template v-else>
         <template v-if="nestedBlocks && nestedBlocks.length">
-            <div v-for="child in nestedBlocks" :key="child.id" class="sidebar-widget-item">
+            <div v-for="child in nestedBlocks" :key="child.id" class="sidebar-widget-item mb-10 last:mb-0">
                 <BlockRenderer
                   :block="child"
                   :mode="mode"
@@ -37,28 +43,39 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { 
+  getVal,
+  getLayoutStyles,
   getResponsiveValue
 } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
 // We avoid direct import of BlockRenderer to prevent circular dependencies
 // In the renderer environment, it will be globally available or passed down
-const BlockRenderer = inject('BlockRenderer', null)
+const BlockRenderer = inject<any>('BlockRenderer', null)
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  nestedBlocks: { type: Array, default: () => [] }
-})
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+  nestedBlocks?: any[]
+}>()
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
+const builder = inject<any>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
-const showTitle = computed(() => getResponsiveValue(settings.value, 'showTitle', device.value) !== false)
+const showTitle = computed(() => getVal(settings.value, 'showTitle', device.value) !== false)
+
+const containerStyles = computed(() => {
+    const layout = getLayoutStyles(settings.value, device.value)
+    return {
+        ...layout,
+        gap: '2.5rem' // Standard 10 spacing
+    }
+})
 </script>
 
 <style scoped>
@@ -66,3 +83,4 @@ const showTitle = computed(() => getResponsiveValue(settings.value, 'showTitle',
 .sidebar-widget-item { transition: all 0.3s ease; }
 .sidebar-widget-item:hover { transform: translateX(5px); }
 </style>
+

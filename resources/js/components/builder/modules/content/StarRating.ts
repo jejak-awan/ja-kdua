@@ -18,6 +18,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -59,6 +60,8 @@ const StarRatingModule: ModuleDefinition = {
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
+        aria_label: '',
+        html_id: '',
         animation_effect: '', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 
@@ -73,7 +76,9 @@ const StarRatingModule: ModuleDefinition = {
                     { name: 'showNumber', type: 'toggle', label: 'Show Rating Number', responsive: true },
                     { name: 'showReviewCount', type: 'toggle', label: 'Show Review Count', responsive: true },
                     { name: 'reviewCount', type: 'text', label: 'Review Count', responsive: true },
-                    { name: 'reviewText', type: 'text', label: 'Review Text', responsive: true }
+                    { name: 'reviewText', type: 'text', label: 'Review Text', responsive: true },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             backgroundSettings,
@@ -81,10 +86,10 @@ const StarRatingModule: ModuleDefinition = {
         ],
         design: [
             {
-                id: 'style',
-                label: 'Rating Style',
+                ...layoutSettings,
                 fields: [
-                    { name: 'starSize', type: 'range', label: 'Star Size', min: 16, max: 48, step: 2, unit: 'px', responsive: true },
+                    ...layoutSettings.fields!,
+                    { name: 'starSize', type: 'range', label: 'Star Size', min: 16, max: 80, step: 2, unit: 'px', responsive: true },
                     { name: 'starColor', type: 'color', label: 'Star Color', responsive: true },
                     { name: 'emptyStarColor', type: 'color', label: 'Empty Star Color', responsive: true },
                     {

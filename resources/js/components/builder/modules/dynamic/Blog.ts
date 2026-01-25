@@ -18,6 +18,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -66,6 +67,12 @@ const BlogModule: ModuleDefinition = {
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
+
+        hover_scale: 1,
+        hover_brightness: 100,
+
+        aria_label: '',
+        html_id: '',
         animation_effect: '',
         animation_duration: 1000,
         animation_delay: 0,
@@ -154,7 +161,9 @@ const BlogModule: ModuleDefinition = {
                         type: 'toggle',
                         label: 'Show Category',
                         responsive: true
-                    }
+                    },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             backgroundSettings,
@@ -260,9 +269,18 @@ const BlogModule: ModuleDefinition = {
             borderSettings,
             boxShadowSettings,
             sizingSettings,
+            {
+                id: 'premium_interactive',
+                label: 'Interactive States',
+                fields: [
+                    { name: 'hover_scale', type: 'range', label: 'Hover Scale', min: 0.8, max: 1.5, step: 0.05, default: 1 },
+                    { name: 'hover_brightness', type: 'range', label: 'Hover Brightness', min: 50, max: 150, step: 10, unit: '%', default: 100 }
+                ]
+            },
             filterSettings,
             transformSettings,
-            animationSettings
+            animationSettings,
+            layoutSettings
         ],
         advanced: [
             visibilitySettings,

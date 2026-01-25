@@ -1,49 +1,53 @@
 <template>
   <BaseBlock
-    :id="id"
+    :module="module"
     :mode="mode"
     :settings="settings"
-    :is-preview="isPreview"
-    class="quote-block-wrapper"
+    class="quote-block-wrapper transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Quote'"
   >
-    <Card class="quote-container relative overflow-hidden bg-white dark:bg-slate-900 border-none shadow-2xl rounded-[40px] p-10 md:p-16 group transition-all duration-700 hover:-translate-y-2">
+    <Card 
+        class="quote-container relative overflow-hidden bg-white dark:bg-slate-900 border-none shadow-2xl rounded-[3rem] p-10 md:p-20 group transition-all duration-700 hover:-translate-y-3"
+        :style="containerStyles"
+    >
       <!-- Background Decorative Quote -->
-      <div class="absolute -top-10 -left-10 text-slate-100 dark:text-slate-800 transition-transform duration-1000 group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
-          <QuoteIcon :size="200" />
+      <div class="absolute -top-12 -left-12 text-slate-100 dark:text-slate-800 transition-all duration-1000 group-hover:scale-125 group-hover:rotate-12 pointer-events-none">
+          <QuoteIcon :size="240" />
       </div>
 
       <div class="relative z-10 flex flex-col h-full">
-          <div class="quote-header mb-10">
-              <div class="w-16 h-1 bg-primary rounded-full mb-8 transform origin-left transition-transform duration-700 group-hover:scale-x-150"></div>
+          <div class="quote-header mb-12">
+              <div class="w-20 h-1.5 bg-primary rounded-full mb-10 transform origin-left transition-transform duration-700 group-hover:scale-x-125"></div>
           </div>
           
           <div 
-            class="quote-content font-black italic tracking-tight leading-[1.2] text-slate-800 dark:text-slate-100 mb-10 transition-colors duration-500 group-hover:text-primary" 
+            class="quote-content font-black italic tracking-tight leading-tight text-slate-900 dark:text-white mb-12 transition-colors duration-500 group-hover:text-primary decoration-primary/20 decoration-8 underline-offset-8" 
             :style="contentStyles"
             :contenteditable="mode === 'edit'"
-            @blur="updateField('content', $event.target.innerText)"
-            v-text="getVal(settings, 'content', currentDevice) || 'Your voice, amplified with style and precision through our premium design system.'"
+            @blur="(e: any) => updateField('content', (e.target as HTMLElement).innerText)"
+            v-text="getVal(settings, 'content', device) || 'Your voice, amplified with style and precision through our premium design system.'"
           ></div>
           
-          <footer v-if="hasAuthor" class="quote-footer flex items-center gap-6 mt-auto">
-             <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-primary font-bold text-xl uppercase">
-                {{ (getVal(settings, 'author', currentDevice) || 'A')[0] }}
+          <footer v-if="hasAuthor" class="quote-footer flex items-center gap-8 mt-auto">
+             <div class="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-primary font-black text-2xl uppercase shadow-sm border border-slate-100 dark:border-slate-700 transition-transform group-hover:rotate-6">
+                {{ (getVal(settings, 'author', device) || 'A')[0] }}
              </div>
-             <cite class="quote-author-wrapper not-italic flex flex-col">
+             <cite class="quote-author-wrapper not-italic flex flex-col gap-1">
                <span 
-                 class="quote-author font-black text-slate-900 dark:text-white text-lg tracking-tight" 
+                 class="quote-author font-black text-slate-900 dark:text-white text-xl tracking-tight leading-none" 
                  :style="authorStyles"
                  :contenteditable="mode === 'edit'"
-                 @blur="updateField('author', $event.target.innerText)"
-                 v-text="getVal(settings, 'author', currentDevice) || 'Antigravity AI'"
+                 @blur="(e: any) => updateField('author', (e.target as HTMLElement).innerText)"
+                 v-text="getVal(settings, 'author', device) || 'Creative Director'"
                ></span>
                <span 
                  v-if="hasTitle" 
-                 class="author-title text-sm font-bold text-slate-400 uppercase tracking-widest mt-1" 
+                 class="author-title text-xs font-bold text-slate-500 uppercase tracking-[0.2em] mt-1" 
                  :style="authorTitleStyles"
                  :contenteditable="mode === 'edit'"
-                 @blur="updateField('authorTitle', $event.target.innerText)"
-                 v-text="getVal(settings, 'authorTitle', currentDevice) || 'Lead Software Engineer'"
+                 @blur="(e: any) => updateField('authorTitle', (e.target as HTMLElement).innerText)"
+                 v-text="getVal(settings, 'authorTitle', device) || 'Industrial Design Studio'"
                ></span>
              </cite>
           </footer>
@@ -52,43 +56,50 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import { Quote as QuoteIcon } from 'lucide-vue-next'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Card } from '../ui'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { 
+  getVal, 
+  getLayoutStyles, 
+  getTypographyStyles 
+} from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  id: String,
-  mode: { type: String, default: 'view' },
-  settings: { type: Object, default: () => ({}) },
-  isPreview: Boolean,
-  device: { type: String, default: 'desktop' }
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+}>()
+
+const builder = inject<any>('builder', null)
+const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+
+const hasAuthor = computed(() => props.mode === 'edit' || !!getVal(settings.value, 'author', device.value))
+const hasTitle = computed(() => props.mode === 'edit' || !!getVal(settings.value, 'authorTitle', device.value))
+
+const containerStyles = computed(() => {
+    return getLayoutStyles(settings.value, device.value)
 })
 
-const builder = inject('builder', null)
-const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
-
-const hasAuthor = computed(() => props.mode === 'edit' || !!getVal(props.settings, 'author', currentDevice.value))
-const hasTitle = computed(() => props.mode === 'edit' || !!getVal(props.settings, 'authorTitle', currentDevice.value))
-
 const contentStyles = computed(() => {
-    const defaultSize = currentDevice.value === 'mobile' ? '32px' : '48px'
-    const styles = getTypographyStyles(props.settings, 'quote_', currentDevice.value)
+    const defaultSize = device.value === 'mobile' ? '32px' : '48px'
+    const styles = getTypographyStyles(settings.value, 'quote_', device.value)
     return {
         fontSize: styles.fontSize || defaultSize,
-        textAlign: getVal(props.settings, 'alignment', currentDevice.value) || 'left',
+        textAlign: (getVal(settings.value, 'alignment', device.value) || 'left') as any,
         ...styles
     }
 })
 
-const authorStyles = computed(() => getTypographyStyles(props.settings, 'author_', currentDevice.value))
-const authorTitleStyles = computed(() => getTypographyStyles(props.settings, 'author_title_', currentDevice.value))
+const authorStyles = computed(() => getTypographyStyles(settings.value, 'author_', device.value))
+const authorTitleStyles = computed(() => getTypographyStyles(settings.value, 'author_title_', device.value))
 
-const updateField = (key, value) => {
+const updateField = (key: string, value: string) => {
   if (props.mode !== 'edit' || !builder) return
-  builder.updateModuleSettings(props.id, { [key]: value })
+  builder.updateModuleSettings(props.module.id, { [key]: value })
 }
 </script>
 
@@ -98,3 +109,4 @@ const updateField = (key, value) => {
 .quote-author:focus { outline: none; }
 .author-title:focus { outline: none; }
 </style>
+

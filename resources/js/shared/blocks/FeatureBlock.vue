@@ -1,97 +1,158 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="feature-block">
-    <Card :class="cardClasses" :style="cardStyles">
+  <BaseBlock :module="module" :mode="mode" :device="device">
+    <template #default="{ settings, device: blockDevice }">
       <div 
-        class="feature-inner flex transition-all duration-300 group" 
-        :class="[
-            layout === 'top' ? 'flex-col items-center text-center gap-6' : 
-            layout === 'right' ? 'flex-row-reverse items-start gap-6' : 
-            'flex-row items-start gap-6',
-            alignment === 'left' ? 'text-left' : (alignment === 'right' ? 'text-right' : 'text-center')
-        ]"
+        class="feature-block-container"
+        :id="getVal(settings, 'html_id', blockDevice)"
+        :style="containerStyles(settings, blockDevice)"
       >
-        <div class="feature-icon-wrap relative flex-shrink-0" :style="iconWrapperStyles">
-          <div class="icon-glow absolute inset-0 opacity-20 blur-xl group-hover:opacity-40 transition-opacity" :style="{ backgroundColor: settings.iconColor || '#3b82f6' }"></div>
-          <div class="icon-container relative z-10 flex items-center justify-center" :style="iconStyles">
-            <component :is="iconComponent" class="w-full h-full transition-transform duration-500 group-hover:scale-110" />
-          </div>
-        </div>
-        
-        <div class="feature-content flex-1 pt-1">
-          <CardTitle class="text-xl font-bold mb-3 tracking-tight" :style="titleStyles">{{ settings.title || 'Feature Title' }}</CardTitle>
-          <CardDescription class="opacity-70 leading-relaxed text-sm" :style="descriptionStyles">{{ settings.description || 'Describe the unique value of this feature or service here.' }}</CardDescription>
-        </div>
+        <Card 
+            class="feature-card transition-all duration-500 group overflow-hidden" 
+            :class="cardClasses(settings, blockDevice)" 
+            :style="cardStyles(settings, blockDevice)"
+            :aria-label="getVal(settings, 'aria_label', blockDevice) || undefined"
+        >
+            <div 
+                class="feature-inner flex transition-all duration-500" 
+                :class="innerClasses(settings, blockDevice)"
+            >
+                <div class="feature-icon-wrap relative flex-shrink-0" :style="iconWrapperStyles(settings, blockDevice)">
+                    <div class="icon-glow absolute inset-0 opacity-20 blur-xl group-hover:opacity-40 transition-opacity" :style="{ backgroundColor: getVal(settings, 'iconColor', blockDevice) || '#3b82f6' }"></div>
+                    <div class="icon-container relative z-10 flex items-center justify-center transition-transform duration-500 group-hover:scale-110" :style="iconStyles(settings, blockDevice)">
+                        <component :is="iconComponent(settings, blockDevice)" class="w-full h-full" />
+                    </div>
+                </div>
+                
+                <div class="feature-content flex-1 pt-1 min-w-0">
+                    <CardTitle 
+                        v-if="mode === 'edit' || getVal(settings, 'title', blockDevice)"
+                        class="text-xl font-bold mb-3 tracking-tight transition-all duration-300" 
+                        :style="getTypographyStyles(settings, 'title_', blockDevice)"
+                        :contenteditable="mode === 'edit'"
+                        @blur="(e: any) => updateField('title', (e.target as HTMLElement).innerText)"
+                    >
+                        {{ getVal(settings, 'title', blockDevice) || 'Feature Title' }}
+                    </CardTitle>
+                    <CardDescription 
+                        v-if="mode === 'edit' || getVal(settings, 'description', blockDevice)"
+                        class="opacity-70 leading-relaxed text-sm transition-all duration-300" 
+                        :style="getTypographyStyles(settings, 'description_', blockDevice)"
+                        :contenteditable="mode === 'edit'"
+                        @blur="(e: any) => updateField('description', (e.target as HTMLElement).innerText)"
+                    >
+                        {{ getVal(settings, 'description', blockDevice) || 'Describe the unique value of this feature or service here.' }}
+                    </CardDescription>
+                </div>
+            </div>
+        </Card>
       </div>
-    </Card>
+    </template>
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed, inject } from 'vue'
+<script setup lang="ts">
+import { inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Card, CardTitle, CardDescription } from '../ui'
 import * as LucideIcons from 'lucide-vue-next'
 import { 
-  getTypographyStyles,
-  getResponsiveValue
+    getVal, 
+    getTypographyStyles,
+    getLayoutStyles,
+    toCSS
 } from '../utils/styleUtils'
+import type { BlockInstance, BuilderInstance } from '../../types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance;
+  mode?: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile' | null;
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
+const builder = inject<BuilderInstance>('builder', null as any)
 
-const iconComponent = computed(() => {
-  const iconName = settings.value.icon || 'Zap'
-  return LucideIcons[iconName] || LucideIcons.Zap
-})
+const iconComponent = (settings: any, device: string) => {
+  const iconName = getVal(settings, 'icon', device) || 'Zap'
+  return (LucideIcons as any)[iconName] || LucideIcons.Zap
+}
 
-const layout = computed(() => getResponsiveValue(settings.value, 'layout', device.value) || 'top')
-const alignment = computed(() => getResponsiveValue(settings.value, 'alignment', device.value) || 'center')
+const containerStyles = (settings: any, device: string) => {
+    return {
+        width: '100%',
+        ...getLayoutStyles(settings, device)
+    }
+}
 
-const iconWrapperStyles = computed(() => {
-  const size = getResponsiveValue(settings.value, 'iconSize', device.value) || 48
-  const bgColor = getResponsiveValue(settings.value, 'iconBackgroundColor', device.value) || 'rgba(59, 130, 246, 0.1)'
-  const borderRadius = getResponsiveValue(settings.value, 'iconBorderRadius', device.value) || 24
+const innerClasses = (settings: any, device: string) => {
+    const layout = getVal(settings, 'layout', device) || 'top'
+    const align = getVal(settings, 'alignment', device) || 'center'
+    
+    return [
+        layout === 'top' ? 'flex-col items-center text-center gap-6' : 
+        layout === 'right' ? 'flex-row-reverse items-start gap-6' : 
+        'flex-row items-start gap-6',
+        align === 'left' ? 'text-left' : (align === 'right' ? 'text-right' : 'text-center')
+    ]
+}
+
+const iconWrapperStyles = (settings: any, device: string) => {
+  const size = getVal(settings, 'iconSize', device) || 48
+  const bgColor = getVal(settings, 'iconBackgroundColor', device) || 'rgba(59, 130, 246, 0.1)'
+  const borderRadius = getVal(settings, 'iconBorderRadius', device) || 24
   
   return {
-    width: `${size + 32}px`, 
-    height: `${size + 32}px`,
+    width: toCSS(size + 32),
+    height: toCSS(size + 32),
     backgroundColor: bgColor,
-    borderRadius: typeof borderRadius === 'string' ? borderRadius : `${borderRadius}px`,
+    borderRadius: typeof borderRadius === 'string' ? borderRadius : toCSS(borderRadius),
     display: 'flex', 
     alignItems: 'center', 
     justifyContent: 'center'
   }
-})
+}
 
-const iconStyles = computed(() => {
-  const size = getResponsiveValue(settings.value, 'iconSize', device.value) || 48
-  const color = getResponsiveValue(settings.value, 'iconColor', device.value) || '#3b82f6'
+const iconStyles = (settings: any, device: string) => {
+  const size = getVal(settings, 'iconSize', device) || 48
+  const color = getVal(settings, 'iconColor', device) || '#3b82f6'
   return { 
-    width: `${size}px`, 
-    height: `${size}px`, 
+    width: toCSS(size),
+    height: toCSS(size),
     color: color
   }
-})
+}
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
-const descriptionStyles = computed(() => getTypographyStyles(settings.value, 'description_', device.value))
-
-const cardClasses = computed(() => {
-    // If the card style 'boxed' is selected, apply card styling, otherwise keep it transparent
-    return getResponsiveValue(settings.value, 'variant', device.value) === 'boxed' 
+const cardClasses = (settings: any, device: string) => {
+    return getVal(settings, 'variant', device) === 'boxed' 
         ? 'p-6 border bg-card text-card-foreground shadow-sm' 
         : 'border-none shadow-none bg-transparent p-0'
-})
+}
 
-const cardStyles = computed(() => ({}))
+const cardStyles = (settings: any, device: string) => {
+    const style: Record<string, any> = {
+        willChange: 'transform, filter',
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+    }
+
+    style['--hover-scale'] = `scale(${getVal(settings, 'hover_scale', device) || 1.05})`;
+    style['--hover-brightness'] = `brightness(${getVal(settings, 'hover_brightness', device) || 100}%)`;
+
+    return style
+}
+
+const updateField = (key: string, value: string) => {
+  if (props.mode !== 'edit' || !builder) return
+  builder.updateModuleSettings(props.module.id, { [key]: value })
+}
 </script>
 
 <style scoped>
-.feature-block { width: 100%; }
+.feature-block-container { width: 100%; }
+
+.feature-card:hover {
+    transform: var(--hover-scale);
+    filter: var(--hover-brightness);
+}
 </style>

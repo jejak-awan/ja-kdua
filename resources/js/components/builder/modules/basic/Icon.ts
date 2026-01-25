@@ -10,14 +10,15 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    linkSettings,
     orderSettings,
     adminLabelSettings,
     cssSettings,
     conditionsSettings,
     interactionsSettings,
     scrollEffectsSettings,
-    attributesSettings
+    attributesSettings,
+    layoutSettings,
+    linkSettings
 } from '../commonSettings';
 
 /**
@@ -36,12 +37,20 @@ export default {
         size: 48,
         color: '#2059ea',
         alignment: 'center',
+        layout_type: 'block',
+        gap_x: '0px',
+        gap_y: '0px',
+        aria_label: '',
+        html_id: '',
         use_glow: false,
         glow_color: 'rgba(32, 89, 234, 0.5)',
         use_background: false,
-        background_shape: 'circle', // circle, squircle, diamond, blob
+        background_shape: 'circle',
         background_color: '#f3f4f6',
         use_gradient: false,
+        hover_color: '',
+        hover_background_color: '',
+        hover_scale: 1.1,
         padding: { top: 10, bottom: 10, left: 10, right: 10, unit: 'px' },
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         border: { radius: { tl: 0, tr: 0, bl: 0, br: 0, linked: true }, styles: { all: { width: 0, color: '#333333', style: 'solid' } } },
@@ -56,12 +65,16 @@ export default {
                 label: 'Icon Settings',
                 fields: [
                     { name: 'icon', type: 'icon', label: 'Select Icon', responsive: true },
-                    { name: 'size', type: 'range', label: 'Icon Size', min: 12, max: 200, unit: 'px', responsive: true }
+                    { name: 'size', type: 'range', label: 'Icon Size', min: 12, max: 200, unit: 'px', responsive: true },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
+            linkSettings,
             adminLabelSettings('Icon')
         ],
         design: [
+            layoutSettings,
             {
                 id: 'premium_styling',
                 label: 'Premium Styling',
@@ -84,7 +97,17 @@ export default {
                         ],
                         show_if: { field: 'use_background', value: true }
                     },
-                    { name: 'background_color', type: 'color', label: 'Shape Background', show_if: { field: 'use_background', value: true } }
+                    { name: 'background_color', type: 'color', label: 'Shape Background', show_if: { field: 'use_background', value: true } },
+                    {
+                        name: 'hover_states',
+                        type: 'group',
+                        label: 'Hover States',
+                        fields: [
+                            { name: 'hover_color', type: 'color', label: 'Hover Icon Color' },
+                            { name: 'hover_background_color', type: 'color', label: 'Hover Background Color', show_if: { field: 'use_background', value: true } },
+                            { name: 'hover_scale', type: 'range', label: 'Hover Scale', min: 0.8, max: 2, step: 0.1, default: 1.1 }
+                        ]
+                    }
                 ]
             },
             {

@@ -1,12 +1,20 @@
 <template>
-  <BaseBlock :module="module" :mode="mode" :device="device" class="row-block">
-    <div class="row-inner flex flex-wrap w-full" :style="rowStyles">
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
+    :device="device" 
+    class="row-block transition-all duration-500"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Row'"
+    :style="cardStyles"
+  >
+    <div class="row-inner flex flex-wrap w-full transition-all duration-500" :style="rowStyles">
       <!-- Builder Mode -->
       <template v-if="mode === 'edit'">
         <slot />
         <!-- Auto Generated Columns if empty -->
-        <div v-if="!module.children?.length" class="row-empty w-full flex justify-center p-8 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-xl text-gray-300">
-           <Layout class="w-8 h-8 opacity-20" />
+        <div v-if="!module.children?.length" class="row-empty w-full flex justify-center p-10 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl text-gray-300 bg-gray-50/30 dark:bg-gray-900/30 transition-all duration-300">
+           <LayoutIcon class="w-10 h-10 opacity-10 animate-pulse" />
         </div>
       </template>
 
@@ -15,10 +23,11 @@
         <div 
           v-for="(child, index) in nestedBlocks" 
           :key="child.id" 
-          class="row-column h-full"
+          class="row-column h-full transition-all duration-300"
           :style="getColumnStyles(index)"
         >
           <BlockRenderer
+            v-if="BlockRenderer"
             :block="child"
             :mode="mode"
           />
@@ -31,17 +40,18 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Layout } from 'lucide-vue-next'
+import { Layout as LayoutIcon } from 'lucide-vue-next'
 import { 
-  getResponsiveValue,
-  getVal
+    getVal,
+    getLayoutStyles,
+    getResponsiveValue 
 } from '../utils/styleUtils'
-import type { BlockInstance, BuilderInstance } from '../../types/builder'
+import type { BlockInstance, BuilderInstance } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
-  mode: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile' | null;
+  mode?: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile';
   nestedBlocks?: BlockInstance[];
 }>(), {
   mode: 'view',
@@ -49,25 +59,38 @@ const props = withDefaults(defineProps<{
   nestedBlocks: () => []
 })
 
-const builder = inject<BuilderInstance>('builder', null as any)
-const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
+const builder = inject<BuilderInstance | null>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
-const BlockRenderer = inject('BlockRenderer', null)
+// @ts-ignore
+const BlockRenderer = inject<any>('BlockRenderer', null)
+
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
+})
 
 const rowStyles = computed(() => {
-    const layout = getVal(settings.value, 'layout_type', device.value) || 'flex'
-    const gutterX = getVal(settings.value, 'gap_x', device.value) || 0
-    const gutterY = getVal(settings.value, 'gap_y', device.value) || 0
-    const vAlign = getVal(settings.value, 'align_items', device.value) || 'stretch'
-    const justify = getVal(settings.value, 'justify_content', device.value) || 'flex-start'
+    const layoutStyles = getLayoutStyles(settings.value, props.device)
+    const layout = getVal(settings.value, 'layout_type', props.device) || 'flex'
+    const gutterX = getVal(settings.value, 'gap_x', props.device) || 0
+    const gutterY = getVal(settings.value, 'gap_y', props.device) || 0
+    const vAlign = getVal(settings.value, 'align_items', props.device) || 'stretch'
+    const justify = getVal(settings.value, 'justify_content', props.device) || 'flex-start'
     
     // Auto-stacking logic for mobile/tablet
-    const isMobile = device.value === 'mobile'
-    const isTablet = device.value === 'tablet'
-    const hasResponsiveColumns = settings.value[`columns_${device.value}`] || (isMobile && settings.value.columns_mobile)
+    const isMobile = props.device === 'mobile'
+    const isTablet = props.device === 'tablet'
+    const hasResponsiveColumns = settings.value[`columns_${props.device}`] || (isMobile && settings.value.columns_mobile)
     
     const styles: Record<string, any> = {
+        ...layoutStyles,
         '--row-align': vAlign,
         '--row-gutter-x': typeof gutterX === 'number' ? `${gutterX}px` : gutterX,
         '--row-gutter-y': typeof gutterY === 'number' ? `${gutterY}px` : gutterY,
@@ -81,7 +104,7 @@ const rowStyles = computed(() => {
         styles.alignItems = 'var(--row-align)'
         styles.justifyContent = justify
         
-        const columns = getVal(settings.value, 'columns', device.value) || '1-1'
+        const columns = getVal(settings.value, 'columns', props.device) || '1-1'
         const colCount = (!hasResponsiveColumns && (isMobile || isTablet)) ? 1 : columns.split('-').length
         styles.gridTemplateColumns = `repeat(${colCount}, 1fr)`
     } else if (layout === 'block') {
@@ -90,14 +113,14 @@ const rowStyles = computed(() => {
         // Default Flex
         styles.display = 'flex'
         styles.flexDirection = (!hasResponsiveColumns && (isMobile || isTablet)) ? 'column' : 'row'
-        styles.flexWrap = 'wrap' // Allow wrapping on responsive
+        styles.flexWrap = 'wrap' 
         styles.alignItems = 'var(--row-align)'
         styles.gap = 'var(--row-gutter-x)'
         styles.justifyContent = justify
     }
     
     // Legacy column widths support (for flex mode)
-    const columns = getVal(settings.value, 'columns', device.value) || '1-1'
+    const columns = getVal(settings.value, 'columns', props.device) || '1-1'
     const colWidths = columns.split('-').map((fraction: string) => {
         const parts = fraction.split('/').map(Number)
         if (parts.length === 2) return `${(parts[0] / parts[1]) * 100}%`
@@ -127,11 +150,16 @@ const getColumnStyles = (index: number) => {
     max-width: 100% !important;
     height: auto;
     position: relative;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.4s ease;
+}
+.row-block:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
 }
 
 /* Builder Mode: Ensure the draggable container inherits the flex layout */
 .row-inner :deep(.children-container) {
-    display: inherit; /* Should be flex/grid based on row-inner */
+    display: inherit; 
     flex-direction: inherit;
     flex-wrap: inherit;
     width: 100%;
@@ -149,5 +177,4 @@ const getColumnStyles = (index: number) => {
 .row-inner:deep(.children-container > :nth-child(4)) { width: var(--col-width-3, 100%); height: 100%; }
 .row-inner:deep(.children-container > :nth-child(5)) { width: var(--col-width-4, 100%); height: 100%; }
 .row-inner:deep(.children-container > :nth-child(6)) { width: var(--col-width-5, 100%); height: 100%; }
-
 </style>

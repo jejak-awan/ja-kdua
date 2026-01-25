@@ -5,44 +5,54 @@
     :device="device"
     class="alert-block"
   >
-    <template #default="{ settings }">
-      <div v-if="!dismissed" class="w-full">
+    <template #default="{ settings, device: blockDevice }">
+      <div 
+        v-if="!dismissed" 
+        class="w-full"
+        :id="getVal(settings, 'html_id', blockDevice)"
+        :style="containerStyles(settings, blockDevice)"
+      >
         <Alert 
+           class="transition-all duration-300 relative overflow-hidden"
            :class="[
-             alertClasses(settings),
+             alertClasses(settings, blockDevice),
              getVal(settings, 'class')
            ]"
-           :style="alertStyles(settings)"
+           :style="alertStyles(settings, blockDevice)"
+           :aria-label="getVal(settings, 'aria_label', blockDevice) || undefined"
+           :role="getVal(settings, 'aria_label', blockDevice) ? 'alert' : undefined"
         >
           <component 
-            v-if="getVal(settings, 'showIcon') !== false"
-            :is="getAlertIcon(settings)" 
-            class="h-4 w-4" 
-            :style="{ color: getVal(settings, 'iconColor') || textColors(settings).icon }"
+            v-if="getVal(settings, 'showIcon', blockDevice) !== false"
+            :is="getAlertIcon(settings, blockDevice)" 
+            class="h-4 w-4 shrink-0" 
+            :style="{ color: getVal(settings, 'iconColor') || themeColors(settings, blockDevice).icon }"
           />
           
-          <div class="flex-1">
+          <div class="flex-1 min-w-0">
             <AlertTitle 
-              v-if="mode === 'edit' || getVal(settings, 'title')"
+              v-if="mode === 'edit' || getVal(settings, 'title', blockDevice)"
               :contenteditable="mode === 'edit'"
-              @blur="onTitleBlur($event, settings)"
-              class="mb-2"
-              :style="getTypographyStyles(settings, 'title_')"
-              v-html="getVal(settings, 'title') || (mode === 'edit' ? 'Alert Title' : '')"
+              @blur="onTitleBlur($event)"
+              class="mb-2 transition-all duration-300"
+              :style="getTypographyStyles(settings, 'title_', blockDevice)"
+              v-html="getVal(settings, 'title', blockDevice) || (mode === 'edit' ? 'Alert Title' : '')"
             />
             
             <AlertDescription 
               :contenteditable="mode === 'edit'"
-              @blur="onMessageBlur($event, settings)"
-              :style="getTypographyStyles(settings, 'message_')"
-              v-html="getVal(settings, 'message') || (mode === 'edit' ? 'Alert message goes here...' : '')"
+              @blur="onMessageBlur($event)"
+              class="transition-all duration-300"
+              :style="getTypographyStyles(settings, 'message_', blockDevice)"
+              v-html="getVal(settings, 'message', blockDevice) || (mode === 'edit' ? 'Alert message goes here...' : '')"
             />
           </div>
 
           <button 
-            v-if="getVal(settings, 'dismissible')" 
+            v-if="getVal(settings, 'dismissible', blockDevice)" 
             class="absolute right-4 top-4 rounded-sm hover:opacity-100 opacity-60 transition-opacity"
             @click="dismissed = true"
+            aria-label="Dismiss alert"
           >
             <X class="h-4 w-4" />
           </button>
@@ -52,25 +62,33 @@
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed, ref, inject } from 'vue'
+<script setup lang="ts">
+import { ref, inject } from 'vue'
 import { Info, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-vue-next'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Alert, AlertTitle, AlertDescription } from '../ui'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { 
+    getVal, 
+    getTypographyStyles,
+    getLayoutStyles 
+} from '../utils/styleUtils'
+import type { BlockInstance, BuilderInstance } from '../../types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance;
+  mode?: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile' | null;
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
+const builder = inject<BuilderInstance>('builder', null as any)
 const dismissed = ref(false)
 
-const getAlertIcon = (settings) => {
-  const variant = getVal(settings, 'variant') || 'info'
-  const icons = { 
+const getAlertIcon = (settings: any, device: string) => {
+  const variant = getVal(settings, 'variant', device) || 'info'
+  const icons: Record<string, any> = { 
     info: Info, 
     success: CheckCircle, 
     warning: AlertTriangle, 
@@ -81,9 +99,9 @@ const getAlertIcon = (settings) => {
   return icons[variant] || Info
 }
 
-const themeColors = (settings) => {
-  const variant = getVal(settings, 'variant') || 'info'
-  const colors = {
+const themeColors = (settings: any, device: string) => {
+  const variant = getVal(settings, 'variant', device) || 'info'
+  const colors: Record<string, any> = {
     info: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-900', icon: 'text-blue-600' },
     success: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-900', icon: 'text-green-600' },
     warning: { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-900', icon: 'text-yellow-600' },
@@ -94,36 +112,43 @@ const themeColors = (settings) => {
   return colors[variant] || colors.info
 }
 
-const textColors = (settings) => {
-    return themeColors(settings)
-}
-
-const alertClasses = (settings) => {
-    const colors = themeColors(settings)
+const alertClasses = (settings: any, device: string) => {
+    const colors = themeColors(settings, device)
     return `${colors.bg} ${colors.border} ${colors.text}`
 }
 
-const alertStyles = (settings) => {
-    // Override with manual styles if provided in settings (advanced)
-    return {}
+const containerStyles = (settings: any, device: string) => {
+  return {
+    ...getLayoutStyles(settings, device)
+  }
 }
 
-const updateSettings = (settings, key, value) => {
+const alertStyles = (settings: any, device: string) => {
+    const style: Record<string, any> = {
+      '--hover-opacity': getVal(settings, 'hover_opacity', device) ?? 1
+    }
+    return style
+}
+
+const onTitleBlur = (e: any) => {
   if (props.mode !== 'edit' || !builder) return
-  // This logic assumes we can update the module. In standard BaseBlock pattern, we might need a specific update method
-  // But usually we can trigger an update via builder
-  builder.updateModuleSettings(props.module.id, { [key]: value })
+  builder.updateModuleSettings(props.module.id, { title: e.target.innerText })
 }
 
-const onTitleBlur = (e, settings) => {
-    updateSettings(settings, 'title', e.target.innerText)
-}
-
-const onMessageBlur = (e, settings) => {
-    updateSettings(settings, 'message', e.target.innerText)
+const onMessageBlur = (e: any) => {
+  if (props.mode !== 'edit' || !builder) return
+  builder.updateModuleSettings(props.module.id, { message: e.target.innerText })
 }
 </script>
 
 <style scoped>
 .alert-block { width: 100%; }
+
+.alert-block :deep(.alert) {
+  will-change: opacity, transform;
+}
+
+.alert-block :deep(.alert:hover) {
+  opacity: var(--hover-opacity);
+}
 </style>

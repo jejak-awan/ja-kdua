@@ -1,18 +1,23 @@
 <template>
-  <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ settings, device: blockDevice }">
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
+    :device="device"
+    class="accordion-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Accordion'"
+    :style="cardStyles"
+  >
+    <template #default="{ settings: blockSettings, device: blockDevice }">
       <div 
-        class="accordion-block mx-auto" 
-        :class="[
-            getVal(settings, 'width', blockDevice) || 'max-w-4xl',
-            getVal(settings, 'padding', blockDevice) || 'py-20'
-        ]"
+        class="accordion-container mx-auto" 
+        :style="containerStyles"
       >
         <Accordion 
-          :type="getVal(settings, 'allowMultiple') ? 'multiple' : 'single'" 
+          :type="getVal(blockSettings, 'allowMultiple') ? 'multiple' : 'single'" 
           :collapsible="true"
           class="accordion-list flex flex-col"
-          :style="{ gap: (getVal(settings, 'gap', blockDevice) || 16) + 'px' }"
+          :style="{ gap: (getVal(blockSettings, 'gap', blockDevice) || 16) + 'px' }"
         >
           <AccordionItem 
             v-for="(item, index) in items" 
@@ -20,19 +25,20 @@
             :value="`item-${index}`"
             class="accordion-item transition-all duration-300 border-none"
             :class="[
-                getItemClasses(settings, index),
+                getItemClasses(blockSettings, index),
             ]"
-            :style="getItemStyles(settings, index)"
+            :style="getItemStyles(blockSettings, index)"
           >
             <!-- Header -->
             <AccordionTrigger 
               class="accordion-header w-full flex items-center justify-between text-left focus:outline-none group hover:no-underline"
-              :class="headerPadding(settings)"
+              :class="headerPadding(blockSettings)"
               @click="toggle(index)"
             >
               <span 
                 class="accordion-title font-bold text-lg"
                 :class="{ 'text-primary': openIndices.includes(index) }"
+                :style="headerTypographyStyles(blockSettings)"
               >
                 {{ item.title || 'Question' }}
               </span>
@@ -40,17 +46,17 @@
               <template #icon>
                 <div 
                   class="accordion-icon ml-4 transition-all duration-300 shrink-0 [&[data-state=open]]:rotate-180"
-                  :style="iconStyles(settings)"
+                  :style="iconStyles(blockSettings)"
                 >
-                  <LucideIcon :name="getIconName(settings)" class="w-full h-full opacity-60 group-hover:opacity-100" />
+                  <LucideIcon :name="getIconName(blockSettings)" class="w-full h-full opacity-60 group-hover:opacity-100" />
                 </div>
               </template>
             </AccordionTrigger>
 
             <!-- Content -->
-            <AccordionContent class="accordion-content" :style="contentContainerStyles(settings)">
+            <AccordionContent class="accordion-content" :style="contentContainerStyles(blockSettings)">
                 <div class="p-6 pt-0">
-                    <div class="prose max-w-none text-slate-600 leading-relaxed" :style="contentTypographyStyles(settings)" v-html="item.content || 'Answer goes here...'"></div>
+                    <div class="prose max-w-none text-slate-600 leading-relaxed" :style="contentTypographyStyles(blockSettings)" v-html="item.content || 'Answer goes here...'"></div>
                 </div>
             </AccordionContent>
           </AccordionItem>
@@ -60,24 +66,28 @@
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed, ref, onMounted } from 'vue'
+<script setup lang="ts">
+import { computed, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../ui'
 import LucideIcon from '../../components/ui/LucideIcon.vue'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { getVal, getLayoutStyles, getTypographyStyles } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance
+  mode?: 'view' | 'edit'
+  device?: 'desktop' | 'tablet' | 'mobile'
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
 const settings = computed(() => props.module?.settings || {})
 const items = computed(() => settings.value.items || [])
-const openIndices = ref([])
+const openIndices = ref<number[]>([])
 
-const toggle = (index) => {
+const toggle = (index: number) => {
     if (getVal(settings.value, 'allowMultiple')) {
         if (openIndices.value.includes(index)) {
              openIndices.value = openIndices.value.filter(i => i !== index)
@@ -89,13 +99,13 @@ const toggle = (index) => {
     }
 }
 
-const getIconName = (settings) => {
+const getIconName = (settings: any) => {
     const icon = getVal(settings, 'toggleIcon')
     if (typeof icon === 'string') return icon.replace('lucide:', '')
     return 'ChevronDown'
 }
 
-const iconStyles = (settings) => {
+const iconStyles = (settings: any) => {
     const size = parseInt(getVal(settings, 'iconSize')) || 20
     const color = getVal(settings, 'iconColor') || 'currentColor'
     return {
@@ -105,7 +115,7 @@ const iconStyles = (settings) => {
     }
 }
 
-const getItemClasses = (settings, index) => {
+const getItemClasses = (settings: any, index: any) => {
     const variant = getVal(settings, 'variant') || 'simple'
     const isOpen = openIndices.value.includes(index)
     
@@ -119,7 +129,7 @@ const getItemClasses = (settings, index) => {
     return 'border-b border-gray-200 last:border-0'
 }
 
-const getItemStyles = (settings, index) => {
+const getItemStyles = (settings: any, index: any) => {
     const isOpen = openIndices.value.includes(index)
     const bgColor = isOpen 
         ? (getVal(settings, 'openHeaderBackgroundColor') || getVal(settings, 'headerBackgroundColor') || '#f1f5f9')
@@ -129,19 +139,33 @@ const getItemStyles = (settings, index) => {
         backgroundColor: bgColor
     }
     
-    // Apply header typography to the outer item if needed, but usually we apply to specific span
     return styles
 }
 
-const contentContainerStyles = (settings) => ({
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
+})
+
+const containerStyles = computed(() => {
+    return getLayoutStyles(settings.value, props.device)
+})
+
+const contentContainerStyles = (settings: any) => ({
     backgroundColor: getVal(settings, 'contentBackgroundColor') || 'transparent'
 })
 
-const contentTypographyStyles = (settings) => getTypographyStyles(settings, 'content_', props.device)
+const contentTypographyStyles = (settings: any) => getTypographyStyles(settings, 'content_', props.device)
 
-const headerTypographyStyles = (settings) => getTypographyStyles(settings, 'header_', props.device)
+const headerTypographyStyles = (settings: any) => getTypographyStyles(settings, 'header_', props.device)
 
-const headerPadding = (settings) => {
+const headerPadding = (settings: any) => {
     const variant = getVal(settings, 'variant') || 'simple'
     return variant === 'boxed' ? 'p-6' : 'py-5'
 }
@@ -150,4 +174,11 @@ const headerPadding = (settings) => {
 
 <style scoped>
 .accordion-block { width: 100%; }
+.accordion-item {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+.accordion-item:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
 </style>

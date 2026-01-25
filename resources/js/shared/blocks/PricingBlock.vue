@@ -1,114 +1,144 @@
 <template>
-  <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ settings }">
-      <div 
-        class="pricing-block mx-auto w-full px-6" 
-        :class="[getVal(settings, 'width') || 'max-w-6xl', getVal(settings, 'padding') || 'py-20']"
-      >
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
+    :settings="settings"
+    class="pricing-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Pricing Tables'"
+  >
+    <div 
+        class="pricing-container mx-auto w-full transition-all duration-300" 
+        :style="containerStyles"
+    >
         <div class="pricing-grid grid items-stretch" :style="gridStyles">
           <Card 
             v-for="(item, index) in items" 
             :key="index"
-            class="flex flex-col transition-all duration-500 hover:-translate-y-4 group rounded-[2.5rem] p-10 relative overflow-visible"
+            class="flex flex-col transition-all duration-500 group rounded-[3rem] p-12 relative overflow-visible border-none shadow-2xl pricing-card"
             :class="[
-                item.isFeatured ? 'shadow-2xl z-10 border-primary' : 'bg-white shadow-xl border-slate-100',
+                item.isFeatured ? 'z-10' : 'bg-white',
             ]"
             :style="getCardStyle(item)"
           >
             <!-- Featured Badge -->
             <Badge 
               v-if="item.isFeatured" 
-              class="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-1.5 uppercase tracking-widest"
-              variant="default"
+              class="absolute -top-5 left-1/2 -translate-x-1/2 px-8 py-2.5 uppercase tracking-[0.2em] font-black text-[10px] shadow-xl border-none"
+              :style="{ backgroundColor: getVal(settings, 'accentColor', device) || 'var(--primary)', color: '#fff' }"
             >
               Most Popular
             </Badge>
 
-            <CardHeader class="p-0 mb-10 text-center">
-              <CardTitle class="text-xl font-bold text-slate-900 mb-6" :style="titleStyles">{{ item.title || item.name || 'Plan Name' }}</CardTitle>
-              <div class="flex items-baseline justify-center gap-1">
-                <span class="text-2xl font-bold opacity-40">$</span>
-                <span class="text-6xl font-black tracking-tighter" :style="priceStyles">{{ item.price || '0' }}</span>
-                <span class="text-slate-400 font-medium">{{ item.period || '/mo' }}</span>
+            <CardHeader class="p-0 mb-12 text-center">
+              <CardTitle class="text-2xl font-black text-slate-900 mb-8 tracking-tighter" :style="titleStyles">{{ item.title || 'Starter' }}</CardTitle>
+              <div class="flex items-baseline justify-center gap-1 group-hover:scale-110 transition-transform duration-500">
+                <span class="text-3xl font-black opacity-30 tracking-tighter">{{ item.currency || '$' }}</span>
+                <span class="text-7xl font-black tracking-tighter" :style="priceStyles">{{ item.price || '0' }}</span>
+                <span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest ml-1">{{ item.period || '/mo' }}</span>
               </div>
             </CardHeader>
 
             <CardContent class="p-0 flex flex-col flex-grow">
-              <ul class="flex flex-col gap-5 mb-12">
-                <li 
-                  v-for="(feature, fIndex) in parseFeatures(item.features)" 
-                  :key="fIndex"
-                  class="flex items-center gap-4 text-slate-600 font-medium text-left"
-                >
-                  <div class="flex-shrink-0 w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center" :style="{ backgroundColor: getVal(settings, 'accentColor') + '10' }">
-                      <CheckIcon class="w-4 h-4" :style="{ color: getVal(settings, 'accentColor') || 'currentColor' }" />
-                  </div>
-                  <span>{{ feature }}</span>
-                </li>
-              </ul>
+                <div class="w-full h-px bg-slate-100 dark:bg-slate-800 mb-10"></div>
+                <ul class="flex flex-col gap-6 mb-14">
+                    <li 
+                      v-for="(feature, fIndex) in parseFeatures(item.features)" 
+                      :key="fIndex"
+                      class="flex items-center gap-4 text-slate-600 dark:text-slate-400 font-bold text-sm text-left"
+                    >
+                      <div class="flex-shrink-0 w-7 h-7 bg-slate-50 dark:bg-slate-900 rounded-xl flex items-center justify-center shadow-sm border border-slate-100 dark:border-slate-800" :style="{ color: getVal(settings, 'accentColor', device) || 'var(--primary)' }">
+                          <CheckIcon class="w-4 h-4" stroke-width="3" />
+                      </div>
+                      <span class="tracking-tight leading-tight">{{ feature }}</span>
+                    </li>
+                </ul>
             </CardContent>
 
-            <CardFooter class="p-0">
+            <CardFooter class="p-0 mt-auto">
                 <Button 
-                  class="w-full py-8 rounded-2xl font-bold shadow-lg"
+                  class="w-full py-8 rounded-[1.5rem] font-black uppercase tracking-[0.15em] text-xs shadow-2xl transition-all duration-500 hover:scale-[1.02] active:scale-95 border-none"
                   :variant="item.isFeatured ? 'default' : 'secondary'"
-                  :style="item.isFeatured ? { backgroundColor: getVal(settings, 'accentColor') } : {}"
+                  :style="item.isFeatured ? { backgroundColor: getVal(settings, 'accentColor', device) || 'var(--primary)', color: '#fff' } : {}"
                 >
-                  {{ item.buttonText || 'Get Started' }}
+                  {{ item.buttonText || 'Join Program' }}
                 </Button>
             </CardFooter>
           </Card>
         </div>
-      </div>
-    </template>
+    </div>
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed } from 'vue'
+<script setup lang="ts">
+import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, Button, Badge } from '../ui'
 import { Check as CheckIcon } from 'lucide-vue-next'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { 
+  getVal, 
+  getLayoutStyles, 
+  getTypographyStyles 
+} from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
-})
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+}>()
 
-const settings = computed(() => props.module?.settings || {})
+const builder = inject<any>('builder', null)
+const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+
 const items = computed(() => settings.value.items || [])
 
-const parseFeatures = (features) => {
+const parseFeatures = (features: string | string[]) => {
   if (!features) return []
   if (Array.isArray(features)) return features
   return features.split('\n').filter(f => f.trim() !== '')
 }
 
+const containerStyles = computed(() => {
+    return getLayoutStyles(settings.value, device.value)
+})
+
 const gridStyles = computed(() => {
-    const cols = getVal(settings.value, 'columns', props.device) || 3
-    const gap = getVal(settings.value, 'gap', props.device) || 32
+    const cols = parseInt(getVal(settings.value, 'columns', device.value)) || 3
+    const gap = parseInt(getVal(settings.value, 'gap', device.value)) || 32
     return {
-        gridTemplateColumns: props.device === 'mobile' ? '1fr' : `repeat(${cols}, minmax(0, 1fr))`,
+        gridTemplateColumns: device.value === 'mobile' ? '1fr' : (device.value === 'tablet' ? 'repeat(2, 1fr)' : `repeat(${cols}, minmax(0, 1fr))`),
         gap: `${gap}px`
     }
 })
 
-const getCardStyle = (item) => {
+const getCardStyle = (item: any) => {
     const bgColor = item.isFeatured 
-        ? (getVal(settings.value, 'featuredCardBackgroundColor', props.device) || '#ffffff')
-        : (getVal(settings.value, 'cardBackgroundColor', props.device) || '#ffffff')
+        ? (getVal(settings.value, 'featuredCardBackgroundColor', device.value) || '#ffffff')
+        : (getVal(settings.value, 'cardBackgroundColor', device.value) || '#ffffff')
     
+    const hoverScale = getVal(settings.value, 'hover_scale', device.value) || 1.02
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', device.value) || 100
+
     return {
-        backgroundColor: bgColor
+        backgroundColor: bgColor,
+        '--hover-scale': hoverScale,
+        '--hover-brightness': `${hoverBrightness}%`
     }
 }
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
-const priceStyles = computed(() => getTypographyStyles(settings.value, 'price_', props.device))
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
+const priceStyles = computed(() => getTypographyStyles(settings.value, 'price_', device.value))
 </script>
 
 <style scoped>
 .pricing-block { width: 100%; }
+.pricing-card {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+.pricing-card:hover {
+  transform: scale(var(--hover-scale, 1.02));
+  filter: brightness(var(--hover-brightness, 100%));
+}
 </style>
+

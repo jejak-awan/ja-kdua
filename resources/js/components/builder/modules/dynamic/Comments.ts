@@ -18,6 +18,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -48,6 +49,8 @@ const CommentsModule: ModuleDefinition = {
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         border: { radius: { tl: 8, tr: 8, bl: 8, br: 8, linked: true }, styles: { all: { width: 1, color: '#e0e0e0', style: 'solid' }, top: { width: 1, color: '#e0e0e0', style: 'solid' }, right: { width: 1, color: '#e0e0e0', style: 'solid' }, bottom: { width: 1, color: '#e0e0e0', style: 'solid' }, left: { width: 1, color: '#e0e0e0', style: 'solid' } } },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
+        aria_label: '',
+        html_id: '',
         animation_effect: '', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 
@@ -60,7 +63,9 @@ const CommentsModule: ModuleDefinition = {
                     { name: 'title', type: 'text', label: 'Title' },
                     { name: 'showForm', type: 'toggle', label: 'Show Comment Form', responsive: true },
                     { name: 'showAvatar', type: 'toggle', label: 'Show Avatars', responsive: true },
-                    { name: 'showReplyButton', type: 'toggle', label: 'Show Reply Button', responsive: true }
+                    { name: 'showReplyButton', type: 'toggle', label: 'Show Reply Button', responsive: true },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             {
@@ -136,7 +141,8 @@ const CommentsModule: ModuleDefinition = {
             sizingSettings,
             filterSettings,
             transformSettings,
-            animationSettings
+            animationSettings,
+            layoutSettings
         ],
         advanced: [
             visibilitySettings,

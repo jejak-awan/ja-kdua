@@ -1,73 +1,58 @@
 <template>
-  <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ settings }">
-      <Card class="counter-block border-none shadow-xl rounded-[32px] overflow-hidden bg-white dark:bg-slate-900 group transition-all duration-500 hover:-translate-y-2" :style="counterBlockStyles">
-        <CardContent class="p-8 flex flex-col items-center">
-            <div 
-              class="counter-number font-black text-5xl lg:text-6xl tracking-tighter text-primary bg-primary/5 w-full py-6 rounded-[24px] mb-6 text-center tabular-nums transition-all duration-500 group-hover:bg-primary/10 group-hover:scale-105" 
-              :style="numberStyles"
-              :contenteditable="mode === 'edit'"
-              @blur="onNumberBlur"
-              @input="onNumberInput"
-            >
-              {{ prefixValue }}{{ isEditing ? targetNumber : formattedDisplayNumber }}{{ suffixValue }}
-            </div>
-            <div 
-              v-if="titleValue || mode === 'edit'" 
-              class="counter-title uppercase text-[10px] font-black tracking-[0.2em] text-slate-400 group-hover:text-primary transition-colors duration-300" 
-              :style="titleStyles"
-              :contenteditable="mode === 'edit'"
-              @blur="e => updateResponsiveField('title', e.target.innerText)"
-            >
-              {{ titleValue || 'Metric Label' }}
-            </div>
-        </CardContent>
-      </Card>
-    </template>
+  <BaseBlock 
+    :module="module" 
+    :mode="mode"
+    :settings="settings"
+    class="counter-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Number Counter'"
+  >
+    <div class="counter-container flex flex-col items-center" :style="containerStyles">
+        <div 
+          class="counter-number font-black text-5xl lg:text-6xl tracking-tighter text-primary bg-primary/5 w-full py-6 rounded-[24px] mb-6 text-center tabular-nums transition-all duration-500 hover:bg-primary/10 hover:scale-105" 
+          :style="numberStyles"
+        >
+          {{ prefixValue }}{{ formattedDisplayNumber }}{{ suffixValue }}
+        </div>
+        <div 
+          v-if="titleValue || mode === 'edit'" 
+          class="counter-title uppercase text-[10px] font-black tracking-[0.2em] text-slate-400 dark:text-slate-500 transition-colors duration-300" 
+          :style="titleStyles"
+        >
+          {{ titleValue || 'Metric Label' }}
+        </div>
+    </div>
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, onMounted, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Card, CardContent } from '../ui'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { 
+  getVal, 
+  getLayoutStyles,
+  getTypographyStyles 
+} from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
-})
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+}>()
 
-const builder = inject('builder', null)
-const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
-const settings = computed(() => props.module?.settings || {})
+const builder = inject<any>('builder', null)
+const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
-const targetNumber = computed(() => parseFloat(getVal(settings.value, 'number', currentDevice.value)) || 0)
-const prefixValue = computed(() => getVal(settings.value, 'prefix', currentDevice.value) || '')
-const suffixValue = computed(() => getVal(settings.value, 'suffix', currentDevice.value) || '')
-const titleValue = computed(() => getVal(settings.value, 'title', currentDevice.value))
+const targetNumber = computed(() => parseFloat(getVal(settings.value, 'number', device.value)) || 0)
+const prefixValue = computed(() => getVal(settings.value, 'prefix', device.value) || '')
+const suffixValue = computed(() => getVal(settings.value, 'suffix', device.value) || '')
+const titleValue = computed(() => getVal(settings.value, 'title', device.value))
 
 const displayNumber = ref(0)
-const isEditing = ref(false)
 
-const onNumberBlur = (e) => {
-    isEditing.value = false
-    const val = parseInt(e.target.innerText.replace(prefixValue.value, '').replace(suffixValue.value, '')) || 0
-    updateResponsiveField('number', val)
-}
-
-const onNumberInput = () => {
-    isEditing.value = true
-}
-
-const updateResponsiveField = (fieldName, value) => {
-    if (props.mode !== 'edit' || !builder) return
-    builder.updateModuleSettings(props.module.id, { [fieldName]: value })
-}
-
-const decimals = computed(() => parseInt(getVal(settings.value, 'decimals', currentDevice.value)) || 0)
-const useSeparator = computed(() => getVal(settings.value, 'separator', currentDevice.value) !== false)
+const decimals = computed(() => parseInt(getVal(settings.value, 'decimals', device.value)) || 0)
+const useSeparator = computed(() => getVal(settings.value, 'separator', device.value) !== false)
 
 const formattedDisplayNumber = computed(() => {
     let num = displayNumber.value.toFixed(decimals.value)
@@ -84,10 +69,10 @@ onMounted(() => {
 })
 
 const animateNumber = () => {
-    const duration = parseInt(getVal(settings.value, 'duration', currentDevice.value)) || 2000
-    let start = null
+    const duration = parseInt(getVal(settings.value, 'duration', device.value)) || 2000
+    let start: number | null = null
     
-    const step = (timestamp) => {
+    const step = (timestamp: number) => {
         if (!start) start = timestamp
         const progress = Math.min((timestamp - start) / duration, 1)
         
@@ -106,14 +91,22 @@ const animateNumber = () => {
     window.requestAnimationFrame(step)
 }
 
-const counterBlockStyles = computed(() => ({
-    backgroundColor: settings.value.cardBackgroundColor || ''
-}))
+const containerStyles = computed(() => {
+  const layout = getLayoutStyles(settings.value, device.value)
+  const align = getVal(settings.value, 'alignment', device.value) || 'center'
+  
+  return {
+    ...layout,
+    alignItems: align === 'center' ? 'center' : (align === 'right' ? 'flex-end' : 'flex-start'),
+    textAlign: align
+  }
+})
 
-const numberStyles = computed(() => getTypographyStyles(settings.value, 'number_', currentDevice.value))
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', currentDevice.value))
+const numberStyles = computed(() => getTypographyStyles(settings.value, 'number_', device.value))
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
 </script>
 
 <style scoped>
 .counter-block { width: 100%; }
 </style>
+

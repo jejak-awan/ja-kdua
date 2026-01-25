@@ -1,6 +1,8 @@
 <template>
   <div 
     class="map-pin-block" 
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Map Pin'"
     :style="pinStyles"
   >
      <MapPin class="marker-icon" />
@@ -8,18 +10,23 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { MapPin } from 'lucide-vue-next'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  index: { type: Number, default: 0 },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance
+  index?: number
+  mode?: 'view' | 'edit'
+  device?: 'desktop' | 'tablet' | 'mobile'
+}>(), {
+  index: 0,
+  mode: 'view',
+  device: 'desktop'
 })
 
-const settings = computed(() => props.module?.settings || {})
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
 // Just for simulation, we offset pins visually so they don't overlap in the simulation
 const pinStyles = computed(() => ({

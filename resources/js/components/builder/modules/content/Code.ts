@@ -18,6 +18,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -57,6 +58,8 @@ const CodeModule: ModuleDefinition = {
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
+        aria_label: '',
+        html_id: '',
         animation_effect: '',
         animation_duration: 1000,
         animation_delay: 0,
@@ -87,7 +90,9 @@ const CodeModule: ModuleDefinition = {
                             { value: 'python', label: 'Python' },
                             { value: 'json', label: 'JSON' }
                         ]
-                    }
+                    },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             backgroundSettings,
@@ -143,6 +148,7 @@ const CodeModule: ModuleDefinition = {
                     label: `Code ${f.label}`
                 }))
             },
+            layoutSettings,
             spacingSettings,
             borderSettings,
             boxShadowSettings,

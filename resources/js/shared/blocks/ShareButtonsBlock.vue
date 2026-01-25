@@ -1,13 +1,20 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="share-buttons-block">
+  <BaseBlock 
+    :module="module" 
+    :mode="mode"
+    :settings="settings"
+    class="share-buttons-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Social Share'"
+  >
     <div class="share-buttons-container flex flex-wrap items-center w-full" :style="wrapperStyles">
         <Badge v-if="labelValue" variant="secondary" class="share-label mr-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 font-black text-[10px] uppercase tracking-[0.2em] px-4 py-1.5 border-none" :style="labelStyles">{{ labelValue }}</Badge>
         
-        <div class="share-buttons-list flex flex-wrap gap-3">
+        <div class="share-buttons-list flex flex-wrap" :style="listStyles">
           <Button 
             v-for="(item, index) in platformList" 
             :key="index" 
-            class="share-button-item group transition-all duration-500 hover:scale-110 active:scale-95 shadow-md hover:shadow-xl rounded-full"
+            class="share-button-item group transition-all duration-500 hover:scale-[var(--hover-scale)] active:scale-95 shadow-md hover:shadow-xl rounded-full"
             :class="[
                 showLabels ? 'px-6 h-12' : 'p-0 w-12 h-12',
                 currentSize === 'small' ? 'h-10 w-10' : (currentSize === 'large' ? 'h-16 w-16' : 'h-12 w-12')
@@ -24,49 +31,50 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Button, Badge } from '../ui'
 import { Facebook, Twitter, Linkedin, Mail, MessageCircle, Link2 } from 'lucide-vue-next'
 import { 
+  getVal,
+  getLayoutStyles,
   getTypographyStyles,
   getResponsiveValue
 } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
-})
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+}>()
 
-const builder = inject('builder', null)
-const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
-const settings = computed(() => props.module.settings || {})
+const builder = inject<any>('builder', null)
+const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
-const labelValue = computed(() => getResponsiveValue(settings.value, 'label', currentDevice.value))
-const showLabels = computed(() => getResponsiveValue(settings.value, 'showLabels', currentDevice.value))
-const currentStyle = computed(() => getResponsiveValue(settings.value, 'style', currentDevice.value) || 'filled')
-const currentSize = computed(() => getResponsiveValue(settings.value, 'size', currentDevice.value) || 'medium')
+const labelValue = computed(() => getVal(settings.value, 'label', device.value))
+const showLabels = computed(() => getVal(settings.value, 'showLabels', device.value))
+const currentStyle = computed(() => getVal(settings.value, 'style', device.value) || 'filled')
+const currentSize = computed(() => getVal(settings.value, 'size', device.value) || 'medium')
 
 const platformList = computed(() => {
-  return (props.module.children || []).map(child => ({
-    network: child.settings.network || 'facebook',
-    label: child.settings.customLabel || ''
+  const children = props.module.children || []
+  if (children.length === 0) {
+    return [
+        { network: 'facebook', label: '' },
+        { network: 'twitter', label: '' },
+        { network: 'linkedin', label: '' },
+        { network: 'whatsapp', label: '' }
+    ]
+  }
+  return children.map(child => ({
+    network: (child.settings as any).network || 'facebook',
+    label: (child.settings as any).customLabel || ''
   }))
 })
 
-if (platformList.value.length === 0) {
-    // Fallback/Demo platforms if no children defined yet
-    platformList.value = [
-        { network: 'facebook' },
-        { network: 'twitter' },
-        { network: 'linkedin' },
-        { network: 'whatsapp' }
-    ]
-}
-
-const platformColors = { 
+const platformColors: Record<string, string> = { 
     facebook: '#1877f2', 
     twitter: '#1da1f2', 
     linkedin: '#0077b5', 
@@ -74,15 +82,18 @@ const platformColors = {
     email: '#ea4335' 
 }
 
-const getIcon = (p) => ({ 
-    facebook: Facebook, 
-    twitter: Twitter, 
-    linkedin: Linkedin, 
-    whatsapp: MessageCircle, 
-    email: Mail 
-}[p] || Link2)
+const getIcon = (p: string) => {
+    const icons: Record<string, any> = { 
+        facebook: Facebook, 
+        twitter: Twitter, 
+        linkedin: Linkedin, 
+        whatsapp: MessageCircle, 
+        email: Mail 
+    }
+    return icons[p] || Link2
+}
 
-const handleShare = (network) => {
+const handleShare = (network: string) => {
     if (props.mode === 'edit') return
     const url = window.location.href
     const text = document.title
@@ -100,13 +111,27 @@ const handleShare = (network) => {
 }
 
 const wrapperStyles = computed(() => {
-  const alignment = getResponsiveValue(settings.value, 'alignment', currentDevice.value) || 'left'
+  const align = getVal(settings.value, 'alignment', device.value) || 'left'
   return { 
-    justifyContent: alignment === 'center' ? 'center' : (alignment === 'right' ? 'flex-end' : 'flex-start')
+    justifyContent: align === 'center' ? 'center' : (align === 'right' ? 'flex-end' : 'flex-start')
   }
 })
 
-const labelStyles = computed(() => getTypographyStyles(settings.value, 'label_', currentDevice.value))
+const listStyles = computed(() => {
+    const layout = getLayoutStyles(settings.value, device.value)
+    const gap = getVal(settings.value, 'gap', device.value) ?? 12
+    const hoverScale = getVal(settings.value, 'hover_scale', device.value) || 1.1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', device.value) || 110
+
+    return {
+        ...layout,
+        gap: `${gap}px`,
+        '--hover-scale': hoverScale,
+        '--hover-brightness': `${hoverBrightness}%`
+    }
+})
+
+const labelStyles = computed(() => getTypographyStyles(settings.value, 'label_', device.value))
 
 const iconSizeClass = computed(() => [
     currentSize.value === 'small' ? 'w-4 h-4' : 
@@ -114,14 +139,34 @@ const iconSizeClass = computed(() => [
     'w-6 h-6'
 ])
 
-const buttonStyles = (platform) => {
+const buttonStyles = (platform: string) => {
   const color = platformColors[platform] || '#666'
-  if (currentStyle.value === 'filled') return { backgroundColor: color, color: '#fff', borderColor: 'transparent' }
-  if (currentStyle.value === 'outline') return { border: `2px solid ${color}`, color, backgroundColor: 'transparent' }
-  return { color, backgroundColor: 'transparent', borderColor: 'transparent' }
+  const styles: Record<string, any> = {
+      filter: 'brightness(var(--hover-brightness, 100%)) transition-all duration-300'
+  }
+  
+  if (currentStyle.value === 'filled') {
+      styles.backgroundColor = color
+      styles.color = '#fff'
+      styles.borderColor = 'transparent'
+  } else if (currentStyle.value === 'outline') {
+      styles.border = `2px solid ${color}`
+      styles.color = color
+      styles.backgroundColor = 'transparent'
+  } else {
+      styles.color = color
+      styles.backgroundColor = 'transparent'
+      styles.borderColor = 'transparent'
+  }
+  
+  return styles
 }
 </script>
 
 <style scoped>
 .share-buttons-block { width: 100%; }
+.share-button-item:hover {
+    filter: brightness(var(--hover-brightness));
+}
 </style>
+

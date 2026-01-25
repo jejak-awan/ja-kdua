@@ -18,6 +18,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -51,6 +52,13 @@ const HeroModule: ModuleDefinition = {
         minHeight: 700,
         alignment: 'center',
         contentMaxWidth: 1200,
+        layout_type: 'block',
+        gap_x: '0px',
+        gap_y: '20px',
+        aria_label: '',
+        html_id: '',
+        hover_scale: 1,
+        hover_brightness: 100,
         // Background - Modified to support gradient keys
         gradientStart: '#4f46e5',
         gradientEnd: '#7c3aed',
@@ -96,7 +104,9 @@ const HeroModule: ModuleDefinition = {
                     { name: 'eyebrow', type: 'text', label: 'Eyebrow / Badge' },
                     { name: 'title', type: 'text', label: 'Title' },
                     { name: 'subtitle', type: 'text', label: 'Subtitle' },
-                    { name: 'content', type: 'richtext', label: 'Content' }
+                    { name: 'content', type: 'richtext', label: 'Content' },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             {
@@ -133,9 +143,9 @@ const HeroModule: ModuleDefinition = {
         ],
         design: [
             {
-                id: 'layout',
-                label: 'Layout',
+                ...layoutSettings,
                 fields: [
+                    ...layoutSettings.fields!,
                     { name: 'minHeight', type: 'range', label: 'Min Height', min: 400, max: 1000, step: 50, unit: 'px', responsive: true },
                     { name: 'contentMaxWidth', type: 'range', label: 'Content Max Width', min: 400, max: 1600, step: 50, unit: 'px', responsive: true },
                     {
@@ -159,6 +169,14 @@ const HeroModule: ModuleDefinition = {
                         ],
                         responsive: true
                     }
+                ]
+            },
+            {
+                id: 'premium_interactive',
+                label: 'Interactive States',
+                fields: [
+                    { name: 'hover_scale', type: 'range', label: 'Hover Scale', min: 0.8, max: 1.5, step: 0.05, default: 1 },
+                    { name: 'hover_brightness', type: 'range', label: 'Hover Brightness', min: 50, max: 150, step: 10, unit: '%', default: 100 }
                 ]
             },
             {

@@ -1,84 +1,98 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="post-title-block">
-    <div class="container mx-auto">
-      <!-- Meta (Optional integration) -->
-      <div v-if="hasMeta" class="post-meta-mini mb-6 flex flex-wrap gap-4 text-sm opacity-70">
-          <span v-if="settings.show_category" class="flex items-center gap-1">
-              <Tag class="w-4 h-4" />
-              {{ category }}
-          </span>
-          <span v-if="settings.show_date" class="flex items-center gap-1">
-              <Calendar class="w-4 h-4" />
-              {{ date }}
-          </span>
-          <span v-if="settings.show_author" class="flex items-center gap-1">
-              <User class="w-4 h-4" />
-              {{ author }}
-          </span>
-      </div>
-
+  <BaseBlock 
+    :module="module" 
+    :mode="mode"
+    :device="device"
+    class="post-title-block transition-all duration-500"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Post Title'"
+    :style="cardStyles"
+  >
+    <div class="w-full" :style="containerStyles">
       <component 
-        :is="settings.tag || 'h1'" 
-        class="post-title" 
+        :is="tag" 
+        class="post-title transition-all duration-500 font-serif leading-tight outline-none" 
+        :class="alignmentClass"
         :style="titleStyles"
         :contenteditable="mode === 'edit'"
         @blur="updateTitle"
-      >
-        {{ displayTitle }}
-      </component>
+        v-text="displayTitle"
+      ></component>
     </div>
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Calendar, User, Tag } from 'lucide-vue-next'
 import { 
+  getVal,
+  getLayoutStyles,
   getTypographyStyles
 } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance;
+  mode?: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile';
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
+const builder = inject<any>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
 // Dynamic data injection
-const postTitle = inject('postTitle', 'Sample Post Title')
-const postDate = inject('postDate', 'January 10, 2026')
-const postAuthor = inject('postAuthor', 'Author Name')
-const postCategory = inject('postCategory', 'Category')
+const postTitle = inject<string>('postTitle', 'Dynamic Post Title')
 
 const displayTitle = computed(() => {
     if (props.mode === 'edit') return settings.value.title || postTitle
     return postTitle
 })
 
-const date = computed(() => postDate)
-const author = computed(() => postAuthor)
-const category = computed(() => postCategory)
+const tag = computed(() => getVal(settings.value, 'tag', props.device) || 'h1')
 
-const hasMeta = computed(() => settings.value.show_date || settings.value.show_author || settings.value.show_category)
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
+})
 
-const updateTitle = (event) => {
-    if (props.mode !== 'edit') return
-    builder?.updateModuleSettings(props.module.id, { title: event.target.innerText })
+const containerStyles = computed(() => {
+    return getLayoutStyles(settings.value, props.device)
+})
+
+const alignmentClass = computed(() => {
+    const align = getVal(settings.value, 'alignment', props.device) || 'left'
+    return `text-${align}`
+})
+
+const updateTitle = (event: FocusEvent) => {
+    if (props.mode !== 'edit' || !builder) return
+    const text = (event.target as HTMLElement).innerText
+    builder.updateModuleSettings(props.module.id, { title: text })
 }
 
 const titleStyles = computed(() => {
-  return getTypographyStyles(settings.value, '', device.value)
+  return getTypographyStyles(settings.value, '', props.device)
 })
 </script>
 
 <style scoped>
-.post-title-block { width: 100%; }
-.post-title { margin: 0; outline: none; }
-[contenteditable]:focus {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
+.post-title-block {
+    width: 100%;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.4s ease;
 }
+.post-title-block:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
+.post-title { margin: 0; word-wrap: break-word; }
 </style>

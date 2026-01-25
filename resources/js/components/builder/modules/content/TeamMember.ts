@@ -17,7 +17,8 @@ import {
     conditionsSettings,
     interactionsSettings,
     scrollEffectsSettings,
-    attributesSettings
+    attributesSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -63,6 +64,8 @@ const TeamMemberModule: ModuleDefinition = {
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
+        aria_label: '',
+        html_id: '',
         animation_effect: '',
         animation_duration: 1000,
         animation_delay: 0,
@@ -98,7 +101,9 @@ const TeamMemberModule: ModuleDefinition = {
                         type: 'upload',
                         label: 'Photo',
                         responsive: true
-                    }
+                    },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             {
@@ -233,7 +238,8 @@ const TeamMemberModule: ModuleDefinition = {
             sizingSettings,
             filterSettings,
             transformSettings,
-            animationSettings
+            animationSettings,
+            layoutSettings
         ],
         advanced: [
             visibilitySettings,

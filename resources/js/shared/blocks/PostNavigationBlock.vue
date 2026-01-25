@@ -1,131 +1,141 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="post-nav-block" :style="wrapperStyles">
-    <!-- Previous Post -->
-    <a 
-        v-if="prevPost || mode === 'edit'" 
-        :href="mode === 'view' ? (prevPost?.url || '#') : null" 
-        class="post-nav-item post-nav-item--prev" 
-        :style="itemStyles"
-        @click="handleLinkClick"
-    >
-      <ChevronLeft :style="iconStyles" />
-      <div class="post-nav-content">
-        <span 
-          v-if="settings.showLabels !== false" 
-          class="post-nav-label" 
-          :style="labelStyles"
-          :contenteditable="mode === 'edit'"
-          @blur="updateText('prevLabel', $event)"
-        >{{ settings.prevLabel || 'Previous Post' }}</span>
-        <span class="post-nav-title" :style="titleStyles">{{ prevPost?.title || (mode === 'edit' ? 'Previous Post Title' : '') }}</span>
-      </div>
-    </a>
-    <div v-else class="flex-1"></div>
+  <BaseBlock 
+    :module="module" 
+    :mode="mode"
+    :device="device"
+    class="post-nav-block transition-all duration-500"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Post Navigation'"
+    :style="cardStyles"
+  >
+    <div class="post-nav-container w-full" :style="containerStyles">
+        <div class="flex flex-col md:flex-row items-stretch justify-between gap-8 w-full">
+            <!-- Previous Post -->
+            <a 
+                v-if="prevPost || mode === 'edit'" 
+                :href="mode === 'view' ? (prevPost?.url || '#') : '#'" 
+                class="post-nav-item post-nav-item--prev group flex-1 flex items-center gap-8 p-10 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-50 dark:border-slate-800 transition-all duration-700 hover:-translate-x-2 hover:shadow-primary/10" 
+                :style="itemStyles"
+                @click="handleLinkClick"
+            >
+              <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-950 flex items-center justify-center transition-all duration-500 group-hover:bg-primary group-hover:text-white group-hover:scale-110 shadow-xl">
+                  <LucideIcon name="ChevronLeft" class="w-7 h-7" :style="iconStyles" />
+              </div>
+              <div class="post-nav-content flex flex-col gap-2">
+                <span 
+                  v-if="settings.showLabels !== false" 
+                  class="post-nav-label text-[10px] font-black uppercase tracking-[0.3em] text-primary/60 outline-none" 
+                  :style="labelStyles"
+                  :contenteditable="mode === 'edit'"
+                  @blur="(e: any) => updateField('prevLabel', (e.target as HTMLElement).innerText)"
+                >{{ settings.prevLabel || 'Back' }}</span>
+                <span class="post-nav-title text-2xl font-black leading-tight tracking-tighter text-slate-900 dark:text-white" :style="titleStyles">
+                    {{ prevPost?.title || (mode === 'edit' ? 'The Art of Digital Influence' : '') }}
+                </span>
+              </div>
+            </a>
+            <div v-else class="flex-1"></div>
 
-    <!-- Next Post -->
-    <a 
-        v-if="nextPost || mode === 'edit'" 
-        :href="mode === 'view' ? (nextPost?.url || '#') : null" 
-        class="post-nav-item post-nav-item--next" 
-        :style="itemStyles"
-        @click="handleLinkClick"
-    >
-      <div class="post-nav-content" style="text-align: right">
-        <span 
-          v-if="settings.showLabels !== false" 
-          class="post-nav-label" 
-          :style="labelStyles"
-          :contenteditable="mode === 'edit'"
-          @blur="updateText('nextLabel', $event)"
-        >{{ settings.nextLabel || 'Next Post' }}</span>
-        <span class="post-nav-title" :style="titleStyles">{{ nextPost?.title || (mode === 'edit' ? 'Next Post Title' : '') }}</span>
-      </div>
-      <ChevronRight :style="iconStyles" />
-    </a>
-    <div v-else class="flex-1"></div>
+            <!-- Next Post -->
+            <a 
+                v-if="nextPost || mode === 'edit'" 
+                :href="mode === 'view' ? (nextPost?.url || '#') : '#'" 
+                class="post-nav-item post-nav-item--next group flex-1 flex flex-row-reverse items-center text-right gap-8 p-10 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-50 dark:border-slate-800 transition-all duration-700 hover:translate-x-2 hover:shadow-primary/10" 
+                :style="itemStyles"
+                @click="handleLinkClick"
+            >
+              <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-950 flex items-center justify-center transition-all duration-500 group-hover:bg-primary group-hover:text-white group-hover:scale-110 shadow-xl">
+                  <LucideIcon name="ChevronRight" class="w-7 h-7" :style="iconStyles" />
+              </div>
+              <div class="post-nav-content flex flex-col gap-2">
+                <span 
+                  v-if="settings.showLabels !== false" 
+                  class="post-nav-label text-[10px] font-black uppercase tracking-[0.3em] text-primary/60 outline-none" 
+                  :style="labelStyles"
+                  :contenteditable="mode === 'edit'"
+                  @blur="(e: any) => updateField('nextLabel', (e.target as HTMLElement).innerText)"
+                >{{ settings.nextLabel || 'Up Next' }}</span>
+                <span class="post-nav-title text-2xl font-black leading-tight tracking-tighter text-slate-900 dark:text-white" :style="titleStyles">
+                    {{ nextPost?.title || (mode === 'edit' ? 'Mastering Advanced Layouts' : '') }}
+                </span>
+              </div>
+            </a>
+            <div v-else class="flex-1"></div>
+        </div>
+    </div>
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import LucideIcon from '../../components/ui/LucideIcon.vue'
 import { 
-  getTypographyStyles,
-  getResponsiveValue
+  getVal,
+  getLayoutStyles,
+  getTypographyStyles
 } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance;
+  mode?: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile';
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
+const builder = inject<any>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
-// Dynamic data injection
-const prevPost = inject('prevPost', { title: 'How to Build a Website', url: '#' })
-const nextPost = inject('nextPost', { title: '10 Tips for SEO Success', url: '#' })
+// Mock dynamic data
+const prevPost = inject<any>('prevPost', { title: 'The Art of Digital Influence', url: '#' })
+const nextPost = inject<any>('nextPost', { title: 'Mastering Advanced Layouts', url: '#' })
 
-const updateText = (key, event) => {
-    if (props.mode !== 'edit') return
-    builder?.updateModuleSettings(props.module.id, { [key]: event.target.innerText })
+const updateField = (key: string, value: string) => {
+    if (props.mode !== 'edit' || !builder) return
+    builder.updateModuleSettings(props.module.id, { [key]: value })
 }
 
-const handleLinkClick = (event) => {
+const handleLinkClick = (event: MouseEvent) => {
     if (props.mode === 'edit') event.preventDefault()
 }
 
-const wrapperStyles = computed(() => {
-  return { 
-    display: 'flex', 
-    justifyContent: 'space-between', 
-    gap: '20px', 
-    width: '100%'
-  }
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
 })
 
-const itemStyles = computed(() => {
-    return { 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '12px', 
-        textDecoration: 'none', 
-        flex: 1,
-        color: 'inherit'
-    }
-})
+const containerStyles = computed(() => getLayoutStyles(settings.value, props.device))
 
-const iconStyles = computed(() => ({ 
-    width: '24px', 
-    height: '24px', 
-    color: settings.value.label_color || '#3b82f6',
-    flexShrink: 0 
+const itemStyles = computed(() => ({ 
+    textDecoration: 'none', 
+    color: 'inherit'
 }))
 
-const labelStyles = computed(() => {
-    const styles = getTypographyStyles(settings.value, 'label_', device.value)
-    return {
-        ...styles,
-        textTransform: 'uppercase',
-        fontSize: '0.75rem',
-        letterSpacing: '0.05em',
-        opacity: 0.7
-    }
-})
+const iconStyles = computed(() => ({ 
+    color: getVal(settings.value, 'label_color', props.device) || 'currentColor'
+}))
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
+const labelStyles = computed(() => getTypographyStyles(settings.value, 'label_', props.device))
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
 </script>
 
 <style scoped>
-.post-nav-block { width: 100%; }
-.post-nav-item { transition: opacity 0.2s; }
-.post-nav-item:hover { opacity: 0.7; }
-.post-nav-content { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-.post-nav-label { outline: none; }
-[contenteditable]:focus {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
+.post-nav-block {
+    width: 100%;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.4s ease;
 }
+.post-nav-block:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
+.post-nav-label { outline: none; }
 </style>

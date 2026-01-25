@@ -1,21 +1,30 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="search-block">
-    <div class="search-form-container mx-auto" :style="formStyles">
+  <BaseBlock 
+    :module="module" 
+    :mode="mode"
+    :settings="settings"
+    class="search-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Search'"
+  >
+    <div class="search-form-wrapper mx-auto w-full" :style="containerStyles">
       <form 
         @submit.prevent="handleSearch" 
-        class="search-form flex items-stretch bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden focus-within:ring-2 focus-within:ring-primary/20 transition-all"
+        class="search-form group flex items-stretch bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-800/50 overflow-hidden focus-within:ring-4 focus-within:ring-primary/10 transition-all duration-500 hover:shadow-primary/5"
+        :style="formStyles"
       >
         <label for="search-input" class="sr-only">Search</label>
         <div class="relative flex-1 flex items-center h-full">
-            <SearchIcon 
+            <LucideIcon 
               v-if="currentButtonStyle === 'text'" 
-              class="absolute left-4 w-5 h-5 text-muted-foreground z-10 pointer-events-none" 
+              name="Search"
+              class="absolute left-6 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors z-10 pointer-events-none" 
             />
             <Input 
               id="search-input"
               type="text" 
-              class="w-full bg-transparent border-none shadow-none focus-visible:ring-0 h-full"
-              :class="currentButtonStyle === 'text' ? 'pl-11 pr-4' : 'px-6'"
+              class="w-full bg-transparent border-none shadow-none focus-visible:ring-0 h-full text-slate-900 dark:text-white font-medium"
+              :class="currentButtonStyle === 'text' ? 'pl-14 pr-6' : 'px-8'"
               :placeholder="placeholderValue"
               :style="inputStyles"
               v-model="searchQuery"
@@ -24,10 +33,10 @@
         <Button 
             v-if="showButton" 
             type="submit"
-            class="h-full px-8 font-bold transition-all hover:brightness-110 active:scale-95 whitespace-nowrap rounded-none" 
+            class="h-auto px-10 font-black uppercase tracking-widest text-[10px] transition-all duration-500 hover:brightness-110 active:scale-95 whitespace-nowrap rounded-none bg-primary text-white border-none shadow-xl group-focus-within:px-12" 
             :style="buttonStyles"
         >
-          <SearchIcon v-if="currentButtonStyle !== 'text'" class="w-5 h-5 mr-2" />
+          <LucideIcon v-if="currentButtonStyle !== 'text'" name="Search" class="w-5 h-5" :class="currentButtonStyle === 'both' ? 'mr-3' : ''" />
           <span v-if="currentButtonStyle !== 'icon'">{{ buttonTextValue }}</span>
         </Button>
       </form>
@@ -35,25 +44,26 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Input, Button } from '../ui'
-import { Search as SearchIcon } from 'lucide-vue-next'
+import LucideIcon from '../../components/ui/LucideIcon.vue'
 import { 
-  getTypographyStyles,
-  getResponsiveValue
+  getVal,
+  getLayoutStyles,
+  getTypographyStyles
 } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
-})
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+}>()
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || props.device)
+const builder = inject<any>('builder', null)
+const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
 const searchQuery = ref('')
 
@@ -63,16 +73,18 @@ const handleSearch = () => {
     window.location.href = `/search?q=${encodeURIComponent(searchQuery.value)}`
 }
 
-const currentButtonStyle = computed(() => getResponsiveValue(settings.value, 'buttonStyle', device.value) || 'icon')
-const placeholderValue = computed(() => getResponsiveValue(settings.value, 'placeholder', device.value) || 'Search...')
-const buttonTextValue = computed(() => getResponsiveValue(settings.value, 'buttonText', device.value) || 'Search')
-const showButton = computed(() => getResponsiveValue(settings.value, 'showButton', device.value) !== false)
+const currentButtonStyle = computed(() => getVal(settings.value, 'buttonStyle', device.value) || 'icon')
+const placeholderValue = computed(() => getVal(settings.value, 'placeholder', device.value) || 'Search...')
+const buttonTextValue = computed(() => getVal(settings.value, 'buttonText', device.value) || 'Search')
+const showButton = computed(() => getVal(settings.value, 'showButton', device.value) !== false)
+
+const containerStyles = computed(() => getLayoutStyles(settings.value, device.value))
 
 const formStyles = computed(() => {
-  const styles = {}
-  const height = getResponsiveValue(settings.value, 'height', device.value) || 56
-  styles.height = `${height}px`
-  return styles
+  const h = getVal(settings.value, 'height', device.value) || 64
+  return {
+    height: typeof h === 'number' ? `${h}px` : h
+  }
 })
 
 const inputStyles = computed(() => {
@@ -85,8 +97,8 @@ const inputStyles = computed(() => {
 
 const buttonStyles = computed(() => {
   const styles = getTypographyStyles(settings.value, 'button_', device.value)
-  const bgColor = getResponsiveValue(settings.value, 'buttonBackgroundColor', device.value) || ''
-  const textColor = getResponsiveValue(settings.value, 'buttonTextColor', device.value) || ''
+  const bgColor = getVal(settings.value, 'buttonBackgroundColor', device.value) || ''
+  const textColor = getVal(settings.value, 'buttonTextColor', device.value) || ''
   
   return {
     ...styles,

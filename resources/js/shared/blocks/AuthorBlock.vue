@@ -1,10 +1,18 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="author-block">
+  <BaseBlock 
+    :module="module" 
+    :settings="settings" 
+    :mode="mode"
+    class="author-block transition-all duration-300"
+    :style="cardStyles"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label"
+  >
     <div :class="[
-      'flex gap-6',
+      'author-container flex',
       layout === 'vertical' ? 'flex-col items-center text-center' : 'items-start text-left'
-    ]">
-      <Avatar :style="imageStyles" class="flex-shrink-0">
+    ]" :style="containerStyles">
+      <Avatar :style="imageStyles" class="flex-shrink-0 author-avatar">
         <AvatarImage 
           v-if="authorImage" 
           :src="authorImage" 
@@ -18,7 +26,7 @@
 
       <div class="author-content flex-1 max-w-full">
         <h4 
-          class="font-bold mb-1 outline-none" 
+          class="font-bold mb-1 outline-none author-name" 
           :style="nameStyles"
           :contenteditable="mode === 'edit'"
           @blur="updateText('name', $event)"
@@ -27,7 +35,7 @@
         
         <p 
           v-if="authorTitle || mode === 'edit'" 
-          class="text-sm opacity-80 mb-3 outline-none" 
+          class="text-sm opacity-80 mb-3 outline-none author-title" 
           :style="titleStyles"
           :contenteditable="mode === 'edit'"
           @blur="updateText('title', $event)"
@@ -36,14 +44,14 @@
         
         <div 
           v-if="authorBio || mode === 'edit'" 
-          class="mb-4 leading-relaxed outline-none" 
+          class="mb-4 leading-relaxed outline-none author-bio" 
           :style="bioStyles"
           :contenteditable="mode === 'edit'"
           @blur="updateText('bio', $event)"
           v-text="authorBio || (mode === 'edit' ? 'Author bio goes here...' : '')"
         ></div>
         
-        <div v-if="settings.showSocial !== false && activeSocialLinks.length" class="flex gap-3" :class="layout === 'vertical' ? 'justify-center' : ''">
+        <div v-if="settings.showSocial !== false && activeSocialLinks.length" class="flex gap-3 author-social" :class="layout === 'vertical' ? 'justify-center' : ''">
           <a 
               v-for="(link, i) in activeSocialLinks" 
               :key="i" 
@@ -60,23 +68,27 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Avatar, AvatarImage, AvatarFallback } from '../ui'
 import { UserCircle, Twitter, Linkedin, Facebook, Instagram, Github, Globe } from 'lucide-vue-next'
 import { 
+  getVal,
+  getLayoutStyles,
   getTypographyStyles,
   getResponsiveValue
 } from '../utils/styleUtils'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' }
-})
+import type { BlockInstance } from '@/types/builder'
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+}>()
+
+const builder = inject<any>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 const device = computed(() => builder?.device?.value || 'desktop')
 
 // Dynamic data injection
@@ -86,10 +98,10 @@ const injectedAuthorBio = inject('authorBio', 'Passionate about sharing knowledg
 const injectedAuthorImage = inject('authorImage', null)
 const injectedAuthorSocial = inject('authorSocial', [])
 
-const authorName = computed(() => props.mode === 'edit' ? (settings.value.name || injectedAuthorName) : injectedAuthorName)
-const authorTitle = computed(() => props.mode === 'edit' ? (settings.value.title || injectedAuthorTitle) : injectedAuthorTitle)
-const authorBio = computed(() => props.mode === 'edit' ? (settings.value.bio || injectedAuthorBio) : injectedAuthorBio)
-const authorImage = computed(() => props.mode === 'edit' ? (settings.value.image || injectedAuthorImage) : injectedAuthorImage)
+const authorName = computed(() => props.mode === 'edit' ? (getVal(settings.value, 'name', device.value) || injectedAuthorName) : injectedAuthorName)
+const authorTitle = computed(() => props.mode === 'edit' ? (getVal(settings.value, 'title', device.value) || injectedAuthorTitle) : injectedAuthorTitle)
+const authorBio = computed(() => props.mode === 'edit' ? (getVal(settings.value, 'bio', device.value) || injectedAuthorBio) : injectedAuthorBio)
+const authorImage = computed(() => props.mode === 'edit' ? (getVal(settings.value, 'image', device.value) || injectedAuthorImage) : injectedAuthorImage)
 
 const layout = computed(() => getResponsiveValue(settings.value, 'layout', device.value) || 'horizontal')
 
@@ -100,19 +112,35 @@ const activeSocialLinks = computed(() => {
     return []
 })
 
-const getSocialIcon = (p) => {
-  const icons = { twitter: Twitter, linkedin: Linkedin, facebook: Facebook, instagram: Instagram, github: Github }
+const getSocialIcon = (p: string) => {
+  const icons: Record<string, any> = { twitter: Twitter, linkedin: Linkedin, facebook: Facebook, instagram: Instagram, github: Github }
   return icons[p?.toLowerCase()] || Globe
 }
 
-const updateText = (key, event) => {
+const updateText = (key: string, event: Event) => {
     if (props.mode !== 'edit') return
-    builder?.updateModuleSettings(props.module.id, { [key]: event.target.innerText })
+    const target = event.target as HTMLElement
+    builder?.updateModuleSettings(props.module.id, { [key]: target.innerText })
 }
 
-const handleLinkClick = (event) => {
+const handleLinkClick = (event: MouseEvent) => {
     if (props.mode === 'edit') event.preventDefault()
 }
+
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    
+    // Interactive states
+    const hoverScale = getVal(settings.value, 'hover_scale', device.value) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', device.value) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
+})
+
+const containerStyles = computed(() => getLayoutStyles(settings.value, device.value))
 
 const imageStyles = computed(() => {
   const size = getResponsiveValue(settings.value, 'imageSize', device.value) || 100
@@ -125,10 +153,23 @@ const bioStyles = computed(() => getTypographyStyles(settings.value, 'bio_', dev
 </script>
 
 <style scoped>
-.author-block { width: 100%; }
+.author-block {
+    width: 100%;
+}
+
+.author-block:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
+
+.author-container {
+    transition: all 0.3s ease;
+}
+
 /* Edit mode placeholder overrides */
 [contenteditable="true"]:empty:before {
   content: 'Add details...';
   opacity: 0.3;
 }
 </style>
+

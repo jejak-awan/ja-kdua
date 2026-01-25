@@ -18,7 +18,8 @@ import {
     conditionsSettings,
     interactionsSettings,
     scrollEffectsSettings,
-    attributesSettings
+    attributesSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -38,14 +39,22 @@ const ImageModule: ModuleDefinition = {
         title: '',
         showCaption: false,
         caption: '',
-        alignment: 'left',
+        alignment: 'center',
+        layout_type: 'block',
+        gap_x: '0px',
+        gap_y: '0px',
+        aria_label: '',
+        html_id: '',
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         padding: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         border: { radius: { tl: 0, tr: 0, bl: 0, br: 0, linked: true }, styles: { all: { width: 0, color: '#333333', style: 'solid' } } },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
-        width: '100%', // Divi refinement
-        forceFullwidth: false
+        width: '100%',
+        forceFullwidth: false,
+        hover_scale: 1.05,
+        hover_brightness: 100,
+        hover_shadow: 'none'
     },
 
     settings: {
@@ -54,18 +63,20 @@ const ImageModule: ModuleDefinition = {
                 id: 'content',
                 label: 'Content',
                 fields: [
-                    { name: 'src', type: 'image', label: 'Image Source' },
+                    { name: 'src', type: 'upload', label: 'Image Source', responsive: true },
                     { name: 'alt', type: 'text', label: 'Alt Text' },
                     { name: 'title', type: 'text', label: 'Title Text' },
                     { name: 'showCaption', type: 'toggle', label: 'Show Caption', default: false },
                     { name: 'caption', type: 'text', label: 'Caption', show_if: { field: 'showCaption', value: true } },
-                    { name: 'link_url', type: 'text', label: 'Link URL' },
-                    { name: 'link_target', type: 'select', label: 'Link Target', options: [{ label: 'Same Window', value: '_self' }, { label: 'New Tab', value: '_blank' }], default: '_self' }
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
+            linkSettings,
             adminLabelSettings('Image')
         ],
         design: [
+            layoutSettings,
             {
                 id: 'alignment',
                 label: 'Alignment',
@@ -105,7 +116,7 @@ const ImageModule: ModuleDefinition = {
                     {
                         name: 'hover_effect',
                         type: 'select',
-                        label: 'Hover Animation',
+                        label: 'Hover Style Preset',
                         options: [
                             { label: 'None', value: 'none' },
                             { label: 'Zoom In', value: 'zoom' },
@@ -114,6 +125,25 @@ const ImageModule: ModuleDefinition = {
                             { label: 'Grayscale to Color', value: 'reveal' }
                         ],
                         responsive: true
+                    },
+                    {
+                        name: 'interactive_states',
+                        type: 'group',
+                        label: 'Interactive States',
+                        fields: [
+                            { name: 'hover_scale', type: 'range', label: 'Hover Scale', min: 0.8, max: 1.5, step: 0.05, default: 1.05 },
+                            { name: 'hover_brightness', type: 'range', label: 'Hover Brightness', min: 50, max: 150, step: 10, unit: '%', default: 100 },
+                            {
+                                name: 'hover_shadow', type: 'select', label: 'Hover Shadow', options: [
+                                    { label: 'None', value: 'none' },
+                                    { label: 'Subtle', value: 'shadow-sm' },
+                                    { label: 'Medium', value: 'shadow-md' },
+                                    { label: 'Large', value: 'shadow-lg' },
+                                    { label: 'Extra Large', value: 'shadow-xl' },
+                                    { label: '2XL Neon', value: 'shadow-2xl' }
+                                ]
+                            }
+                        ]
                     }
                 ]
             },

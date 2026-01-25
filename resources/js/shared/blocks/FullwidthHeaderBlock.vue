@@ -1,117 +1,127 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="fullwidth-header-block" :style="wrapperStyles">
-    <div v-if="settings.overlayColor" class="header-overlay" :style="overlayStyles" />
-    <div class="header-content" :style="contentStyles">
-      <h1 
-        class="header-title" 
-        :style="titleStyles"
-        :contenteditable="mode === 'edit'"
-        @blur="updateText('title', $event)"
-      >{{ settings.title || 'Welcome' }}</h1>
-      
-      <p 
-        v-if="settings.subtitle || mode === 'edit'" 
-        class="header-subtitle" 
-        :style="subtitleStyles"
-        :contenteditable="mode === 'edit'"
-        @blur="updateText('subtitle', $event)"
-      >{{ settings.subtitle || 'Your subtitle goes here' }}</p>
-      
-      <div 
-        class="header-buttons" 
-        :style="{ justifyContent: horizontalAlignment === 'right' ? 'flex-end' : horizontalAlignment === 'center' ? 'center' : 'flex-start' }"
-      >
-        <a 
-          :href="settings.buttonUrl || '#'" 
-          class="header-button header-button--primary" 
-          :style="button1Styles"
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
+    :device="device"
+    class="fullwidth-header-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Fullwidth Header'"
+    :style="cardStyles"
+  >
+    <template #default="{ settings: blockSettings }">
+      <div v-if="blockSettings.overlayColor" class="header-overlay absolute inset-0 pointer-events-none z-1" :style="overlayStyles" />
+      <div class="header-content relative z-[2] w-full max-w-[1200px] px-5 py-10" :style="contentStyles">
+        <h1 
+          class="header-title font-bold" 
+          :style="titleStyles"
           :contenteditable="mode === 'edit'"
-          @blur="updateText('buttonText', $event)"
-          @click.prevent="handleLinkClick(settings.buttonUrl)"
-        >{{ settings.buttonText || 'Get Started' }}</a>
+          @blur="updateText('title', $event)"
+        >{{ blockSettings.title || 'Welcome' }}</h1>
         
-        <a 
-          v-if="settings.showButton2 !== false || mode === 'edit'" 
-          :href="settings.button2Url || '#'" 
-          class="header-button header-button--secondary" 
-          :style="button2Styles"
+        <p 
+          v-if="blockSettings.subtitle || mode === 'edit'" 
+          class="header-subtitle mt-4" 
+          :style="subtitleStyles"
           :contenteditable="mode === 'edit'"
-          @blur="updateText('button2Text', $event)"
-          @click.prevent="handleLinkClick(settings.button2Url)"
-        >{{ settings.button2Text || 'Learn More' }}</a>
+          @blur="updateText('subtitle', $event)"
+        >{{ blockSettings.subtitle || 'Your subtitle goes here' }}</p>
+        
+        <div 
+          class="header-buttons flex gap-4 flex-wrap mt-8" 
+          :style="{ justifyContent: horizontalAlignment === 'right' ? 'flex-end' : horizontalAlignment === 'center' ? 'center' : 'flex-start' }"
+        >
+          <a 
+            :href="blockSettings.buttonUrl || '#'" 
+            class="header-button header-button--primary inline-block py-3.5 px-8 rounded-md transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:opacity-90" 
+            :style="button1Styles"
+            :contenteditable="mode === 'edit'"
+            @blur="updateText('buttonText', $event)"
+            @click.prevent="handleLinkClick(blockSettings.buttonUrl)"
+          >{{ blockSettings.buttonText || 'Get Started' }}</a>
+          
+          <a 
+            v-if="blockSettings.showButton2 !== false || mode === 'edit'" 
+            :href="blockSettings.button2Url || '#'" 
+            class="header-button header-button--secondary inline-block py-3.5 px-8 rounded-md transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:opacity-90" 
+            :style="button2Styles"
+            :contenteditable="mode === 'edit'"
+            @blur="updateText('button2Text', $event)"
+            @click.prevent="handleLinkClick(blockSettings.button2Url)"
+          >{{ blockSettings.button2Text || 'Learn More' }}</a>
+        </div>
       </div>
-    </div>
+    </template>
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed, inject } from 'vue'
+<script setup lang="ts">
+import { computed } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { 
-  getTypographyStyles,
-  getResponsiveValue
+    getVal,
+    getTypographyStyles,
+    getLayoutStyles,
+    getResponsiveValue 
 } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance
+  mode?: 'view' | 'edit'
+  device?: 'desktop' | 'tablet' | 'mobile'
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
-const horizontalAlignment = computed(() => getResponsiveValue(settings.value, 'textAlignment', device.value) || 'center')
+const horizontalAlignment = computed(() => getVal(settings.value, 'textAlignment', props.device) || 'center')
 
-const updateText = (key, event) => {
-    if (props.mode !== 'edit') return
-    const value = event.target.innerText
-    builder?.updateModuleSettings(props.module.id, { [key]: value })
+const updateText = (key: string, event: FocusEvent) => {
+    if (props.mode !== 'edit' || !event.target) return
+    const value = (event.target as HTMLElement).innerText
+    // @ts-ignore
+    window.builder?.updateModuleSettings(props.module.id, { [key]: value })
 }
 
-const handleLinkClick = (url) => {
+const handleLinkClick = (url: string) => {
     if (props.mode === 'edit') return
     if (url) window.location.href = url
 }
 
-const wrapperStyles = computed(() => {
-  const styles = { 
-    position: 'relative', 
-    display: 'flex', 
-    flexDirection: 'column',
-    overflow: 'hidden',
-    minHeight: `${getResponsiveValue(settings.value, 'height', device.value) || 400}px`,
-    textAlign: horizontalAlignment.value
-  }
-  
-  const vAlign = settings.value.contentAlignment || 'center'
-  styles.justifyContent = vAlign === 'top' ? 'flex-start' : vAlign === 'bottom' ? 'flex-end' : 'center'
-  return styles
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
 })
 
 const contentStyles = computed(() => {
-  const alignment = horizontalAlignment.value
-  return { 
-    position: 'relative', 
-    zIndex: 2, 
-    width: '100%',
-    maxWidth: '1200px',
-    margin: alignment === 'center' ? '0 auto' : alignment === 'right' ? '0 0 0 auto' : '0 auto 0 0',
-    padding: '40px 20px'
-  }
-})
-
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
-const subtitleStyles = computed(() => {
-    const styles = getTypographyStyles(settings.value, 'subtitle_', device.value)
-    return {
-        ...styles,
-        marginTop: '16px'
+    const layoutStyles = getLayoutStyles(settings.value, props.device)
+    const alignment = horizontalAlignment.value
+    const vAlign = settings.value.contentAlignment || 'center'
+    
+    return { 
+        ...layoutStyles,
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: `${getResponsiveValue(settings.value, 'height', props.device) || 400}px`,
+        textAlign: alignment,
+        justifyContent: vAlign === 'top' ? 'flex-start' : vAlign === 'bottom' ? 'flex-end' : 'center',
+        margin: alignment === 'center' ? '0 auto' : alignment === 'right' ? '0 0 0 auto' : '0 auto 0 0',
     }
 })
 
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
+const subtitleStyles = computed(() => getTypographyStyles(settings.value, 'subtitle_', props.device))
+
 const button1Styles = computed(() => {
-  const styles = getTypographyStyles(settings.value, 'button1_', device.value)
+  const styles = getTypographyStyles(settings.value, 'button1_', props.device)
   return {
     ...styles,
     backgroundColor: settings.value.buttonBackgroundColor || styles.backgroundColor || '#3b82f6',
@@ -120,7 +130,7 @@ const button1Styles = computed(() => {
 })
 
 const button2Styles = computed(() => {
-  const styles = getTypographyStyles(settings.value, 'button2_', device.value)
+  const styles = getTypographyStyles(settings.value, 'button2_', props.device)
   return {
     ...styles,
     backgroundColor: settings.value.button2BackgroundColor || styles.backgroundColor || 'transparent',
@@ -130,19 +140,19 @@ const button2Styles = computed(() => {
 })
 
 const overlayStyles = computed(() => ({ 
-  position: 'absolute', 
-  inset: 0, 
   backgroundColor: settings.value.overlayColor || 'transparent',
-  zIndex: 1
 }))
 </script>
 
 <style scoped>
 .fullwidth-header-block { width: 100%; }
-.header-overlay { position: absolute; inset: 0; pointer-events: none; }
-.header-buttons { display: flex; gap: 16px; justify-content: inherit; flex-wrap: wrap; margin-top: 32px; }
-.header-button { display: inline-block; padding: 14px 32px; text-decoration: none; border-radius: 6px; transition: transform 0.2s, opacity 0.2s; cursor: pointer; }
-.header-button:hover { transform: translateY(-2px); opacity: 0.9; }
+.fullwidth-header-block {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+.fullwidth-header-block:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
 [contenteditable]:focus {
   outline: none;
   background: rgba(255, 255, 255, 0.1);

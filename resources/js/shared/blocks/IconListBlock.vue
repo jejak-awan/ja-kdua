@@ -1,17 +1,19 @@
 <template>
   <BaseBlock
-    :id="id"
+    :module="module"
     :mode="mode"
     :settings="settings"
-    :is-preview="isPreview"
-    class="icon-list-wrapper"
+    class="icon-list-wrapper transition-all duration-300"
+    :style="cardStyles"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Icon List'"
   >
     <div class="icon-list-container" :style="listStyles">
       <div 
         v-for="(item, index) in items" 
         :key="index"
-        class="icon-list-item group flex items-start gap-4"
-        :style="itemStyles"
+        class="icon-list-item group flex items-start gap-4 transition-all duration-300"
+        :style="itemStyles(index as number)"
       >
         <div class="icon-wrapper shrink-0 transition-transform duration-300 group-hover:scale-110" :style="iconWrapperStyles">
           <LucideIcon 
@@ -25,14 +27,14 @@
             class="icon-list-text font-bold" 
             :style="textStyles"
             :contenteditable="mode === 'edit'"
-            @blur="updateItemText(index, $event.target.innerText)"
+            @blur="updateItemField(index as number, 'text', ($event.target as HTMLElement).innerText)"
             v-text="item.text || item.title || 'List Item'"
           ></div>
           <div 
             v-if="item.description || mode === 'edit'" 
             class="icon-list-desc mt-1 text-sm text-slate-500 leading-relaxed font-medium"
             :contenteditable="mode === 'edit'"
-            @blur="updateItemDesc(index, $event.target.innerText)"
+            @blur="updateItemField(index as number, 'description', ($event.target as HTMLElement).innerText)"
             v-text="item.description"
           ></div>
         </div>
@@ -47,56 +49,78 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import LucideIcon from '../../components/ui/LucideIcon.vue'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { 
+    getVal, 
+    getLayoutStyles,
+    getTypographyStyles,
+    getResponsiveValue 
+} from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  id: String,
-  mode: { type: String, default: 'view' },
-  settings: { type: Object, default: () => ({}) },
-  isPreview: Boolean,
-  device: { type: String, default: 'desktop' }
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+}>()
+
+const builder = inject<any>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const device = computed(() => builder?.device?.value || 'desktop')
+
+const items = computed(() => settings.value.items || [])
+const defaultIcon = computed(() => getVal(settings.value, 'defaultIcon', device.value) || 'check')
+const iconSize = computed(() => parseInt(getVal(settings.value, 'iconSize', device.value)) || 20)
+
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    
+    // Interactive states
+    const hoverScale = getVal(settings.value, 'hover_scale', device.value) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', device.value) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
 })
 
-const builder = inject('builder', null)
-const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
-
-const items = computed(() => props.settings.items || [])
-const defaultIcon = computed(() => getVal(props.settings, 'defaultIcon', currentDevice.value) || 'check')
-const iconSize = computed(() => parseInt(getVal(props.settings, 'iconSize', currentDevice.value)) || 20)
-
-const listStyles = computed(() => ({
-  display: 'flex',
-  flexDirection: getVal(props.settings, 'layout', currentDevice.value) === 'horizontal' ? 'row' : 'column',
-  flexWrap: 'wrap',
-  gap: `${getVal(props.settings, 'gap', currentDevice.value) || 12}px`,
-  width: '100%'
-}))
-
-const itemStyles = computed(() => {
-  const align = getVal(props.settings, 'alignment', currentDevice.value) || 'left'
+const listStyles = computed(() => {
+  const styles = getLayoutStyles(settings.value, device.value)
+  
   return {
-    justifyContent: align === 'center' ? 'center' : 'flex-start',
-    textAlign: align,
-    flex: getVal(props.settings, 'layout', currentDevice.value) === 'horizontal' ? '1 1 auto' : '0 0 auto'
+    ...styles,
+    display: 'flex',
+    flexDirection: (getVal(settings.value, 'layout', device.value) === 'horizontal' ? 'row' : 'column') as any,
+    flexWrap: 'wrap' as any,
+    gap: `${getVal(settings.value, 'gap', device.value) || 12}px`,
+    width: '100%'
   }
 })
 
+const itemStyles = (index: number) => {
+  const align = getVal(settings.value, 'alignment', device.value) || 'left'
+  return {
+    justifyContent: align === 'center' ? 'center' : 'flex-start',
+    textAlign: align as any,
+    flex: getVal(settings.value, 'layout', device.value) === 'horizontal' ? '1 1 auto' : '0 0 auto'
+  }
+}
+
 const iconWrapperStyles = computed(() => {
-  const s = {
+  const s: Record<string, any> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'
   }
   
-  const bgColor = getVal(props.settings, 'iconBgColor', currentDevice.value)
+  const bgColor = getVal(settings.value, 'iconBgColor', device.value)
   if (bgColor && bgColor !== 'transparent') {
     s.backgroundColor = bgColor
     s.padding = '8px'
-    const shape = getVal(props.settings, 'iconBackgroundShape', currentDevice.value)
+    const shape = getVal(settings.value, 'iconBackgroundShape', device.value)
     s.borderRadius = shape === 'circle' ? '50%' : shape === 'square' ? '8px' : '0'
   }
   
@@ -104,28 +128,29 @@ const iconWrapperStyles = computed(() => {
 })
 
 const iconStyles = computed(() => ({
-  color: getVal(props.settings, 'iconColor', currentDevice.value) || 'inherit'
+  color: getVal(settings.value, 'iconColor', device.value) || 'inherit'
 }))
 
-const textStyles = computed(() => getTypographyStyles(props.settings, 'text_', currentDevice.value))
+const textStyles = computed(() => getTypographyStyles(settings.value, 'text_', device.value))
 
-const updateItemText = (index, value) => {
-  if (props.mode !== 'edit' || !builder) return
-  const newItems = [...items.value]
-  newItems[index] = { ...newItems[index], text: value }
-  builder.updateModuleSettings(props.id, { items: newItems })
-}
-
-const updateItemDesc = (index, value) => {
-  if (props.mode !== 'edit' || !builder) return
-  const newItems = [...items.value]
-  newItems[index] = { ...newItems[index], description: value }
-  builder.updateModuleSettings(props.id, { items: newItems })
+const updateItemField = (index: number, key: string, value: string) => {
+    if (props.mode !== 'edit' || !builder) return
+    const newItems = [...items.value]
+    newItems[index] = { ...newItems[index], [key]: value }
+    builder.updateModuleSettings(props.module.id, { items: newItems })
 }
 </script>
 
 <style scoped>
-.icon-list-wrapper { width: 100%; }
+.author-block {
+    width: 100%;
+}
+
+.icon-list-wrapper:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
+
 .icon-list-text { outline: none; transition: color 0.2s ease; }
 .icon-list-desc { outline: none; }
 .icon-list-desc[contenteditable="true"]:empty:before {
@@ -133,3 +158,4 @@ const updateItemDesc = (index, value) => {
   opacity: 0.3;
 }
 </style>
+

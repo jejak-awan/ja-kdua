@@ -1,15 +1,29 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ styles: wrapperBaseStyles, settings }">
-      <div class="logo-block" :style="logoWrapperStyles">
+    <template #default="{ settings, device: blockDevice }">
+      <div 
+        class="logo-block" 
+        :id="getVal(settings, 'html_id', blockDevice)"
+        :style="logoWrapperStyles(settings, blockDevice)"
+      >
         <component
-          :is="settings.link ? 'a' : 'div'"
-          :href="settings.link || undefined"
-          :target="settings.link ? (settings.openInNewTab ? '_blank' : '_self') : undefined"
-          class="logo-link"
+          :is="getVal(settings, 'link_url') ? 'a' : 'div'"
+          :href="getVal(settings, 'link_url') || undefined"
+          :target="getVal(settings, 'link_target') || '_self'"
+          :aria-label="getVal(settings, 'aria_label', blockDevice) || undefined"
+          :role="getVal(settings, 'aria_label', blockDevice) ? 'img' : undefined"
+          class="logo-link group transition-all duration-300"
+          :style="logoLinkStyles(settings, blockDevice)"
+          @click="onLinkClick"
         >
-          <img v-if="settings.image" :src="settings.image" :alt="settings.altText || 'Logo'" :style="imageStyles" />
-          <div v-else class="logo-placeholder" :style="placeholderStyles">
+          <img 
+            v-if="getVal(settings, 'image')" 
+            :src="getVal(settings, 'image')" 
+            :alt="getVal(settings, 'altText') || 'Logo'" 
+            class="logo-image transition-all duration-500 ease-out"
+            :style="imageStyles(settings, blockDevice)" 
+          />
+          <div v-else class="logo-placeholder" :style="placeholderStyles(settings, blockDevice)">
             <ImageIcon class="placeholder-icon" />
           </div>
         </component>
@@ -18,40 +32,61 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { Image as ImageIcon } from 'lucide-vue-next'
 import BaseBlock from '../components/BaseBlock.vue'
-import { getVal, toCSS } from '../utils/styleUtils'
+import { 
+    getVal, 
+    toCSS,
+    getLayoutStyles
+} from '../utils/styleUtils'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<{
+  module: any;
+  mode?: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile' | null;
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const settings = computed(() => props.module?.settings || {})
-
-const logoWrapperStyles = computed(() => {
+const logoWrapperStyles = (settings: any, device: string) => {
+  const align = getVal(settings, 'alignment', device) || 'left'
   return {
-    textAlign: getVal(settings.value, 'alignment', props.device) || 'left',
-    width: '100%'
+    textAlign: align as any,
+    width: '100%',
+    display: 'flex',
+    justifyContent: align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start',
+    ...getLayoutStyles(settings, device)
   }
-})
+}
 
-const imageStyles = computed(() => {
-  const align = getVal(settings.value, 'alignment', props.device) || 'left'
-  const maxWidth = getVal(settings.value, 'maxWidth', props.device) || 200
+const logoLinkStyles = (settings: any, device: string) => {
+  const styles: Record<string, any> = {
+    display: 'inline-block',
+    textDecoration: 'none',
+    position: 'relative'
+  }
+
+  // Set CSS Variables for Hover States
+  styles['--hover-scale'] = `scale(${getVal(settings, 'hover_scale', device) || 1.05})`;
+  styles['--hover-opacity'] = getVal(settings, 'hover_opacity', device) ?? 1;
+
+  return styles
+}
+
+const imageStyles = (settings: any, device: string) => {
+  const maxWidth = getVal(settings, 'maxWidth', device) || 200
   return { 
     maxWidth: toCSS(maxWidth), 
-    height: settings.value.height || 'auto', 
-    display: 'block',
-    margin: align === 'center' ? '0 auto' : align === 'right' ? '0 0 0 auto' : '0'
+    height: getVal(settings, 'height') || 'auto', 
+    display: 'block'
   }
-})
+}
 
-const placeholderStyles = computed(() => {
-  const maxWidth = getVal(settings.value, 'maxWidth', props.device) || 200
+const placeholderStyles = (settings: any, device: string) => {
+  const maxWidth = getVal(settings, 'maxWidth', device) || 200
   return { 
     width: toCSS(maxWidth), 
     height: '60px', 
@@ -61,11 +96,30 @@ const placeholderStyles = computed(() => {
     backgroundColor: 'rgba(0,0,0,0.05)', 
     borderRadius: '4px' 
   }
-})
+}
+
+const onLinkClick = (e: MouseEvent) => {
+  if (props.mode === 'edit') {
+    e.preventDefault()
+  }
+}
 </script>
 
 <style scoped>
 .logo-block { width: 100%; }
-.logo-link { display: inline-block; text-decoration: none; }
+
+.logo-link {
+    will-change: transform, opacity;
+}
+
+.logo-image {
+    will-change: transform, opacity;
+}
+
+.logo-link:hover {
+    transform: var(--hover-scale);
+    opacity: var(--hover-opacity);
+}
+
 .placeholder-icon { width: 32px; height: 32px; color: #ccc; }
 </style>

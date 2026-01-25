@@ -1,57 +1,76 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="newsletter-block">
-    <div v-if="settings.title || settings.subtitle" class="newsletter-header mb-8 text-center">
-      <h3 v-if="settings.title" class="newsletter-title text-2xl font-bold mb-2" :style="titleStyles">{{ settings.title }}</h3>
-      <p v-if="settings.subtitle" class="newsletter-subtitle opacity-70" :style="subtitleStyles">{{ settings.subtitle }}</p>
-    </div>
-    
-    <form @submit.prevent="handleSubscribe" class="newsletter-form flex gap-3 max-w-lg mx-auto" :class="[layout === 'stacked' ? 'flex-col' : '']">
-      <div class="relative flex-1">
-        <Mail class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
-        <Input 
-            type="email" 
-            class="pl-10 h-12 rounded-xl"
-            :style="inputStyles"
-            :placeholder="settings.placeholder || 'Enter your email'" 
-            required
-        />
-      </div>
-      <Button 
-        type="submit" 
-        class="h-12 px-8 rounded-xl font-bold shadow-lg shadow-primary/20" 
-        :style="buttonStyles"
-        :disabled="loading"
-      >
-        <Loader2 v-if="loading" class="w-5 h-5 animate-spin mr-2" />
-        <span>{{ settings.buttonText || 'Subscribe' }}</span>
-      </Button>
-    </form>
-    
-    <div v-if="subscribed" class="success-message mt-6 text-green-600 font-medium text-center">
-        {{ settings.successMessage || 'Successfully subscribed! Thank you.' }}
-    </div>
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
+    :device="device"
+    class="newsletter-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Newsletter Signup'"
+    :style="cardStyles"
+  >
+    <template #default="{ settings: blockSettings }">
+        <div v-if="blockSettings.title || blockSettings.subtitle" class="newsletter-header mb-8 text-center">
+          <h3 v-if="blockSettings.title" class="newsletter-title text-2xl font-bold mb-2" :style="titleStyles">{{ blockSettings.title }}</h3>
+          <p v-if="blockSettings.subtitle" class="newsletter-subtitle opacity-70" :style="subtitleStyles">{{ blockSettings.subtitle }}</p>
+        </div>
+        
+        <form 
+            @submit.prevent="handleSubscribe" 
+            class="newsletter-form flex gap-3 max-w-lg mx-auto" 
+            :class="[layout === 'stacked' ? 'flex-col' : '']"
+            :style="containerStyles"
+        >
+          <div class="relative flex-1">
+            <Mail class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
+            <Input 
+                type="email" 
+                class="pl-10 h-12 rounded-xl"
+                :style="inputStyles"
+                :placeholder="blockSettings.placeholder || 'Enter your email'" 
+                required
+            />
+          </div>
+          <Button 
+            type="submit" 
+            class="h-12 px-8 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 active:translate-y-0" 
+            :style="buttonStyles"
+            :disabled="loading"
+          >
+            <Loader2 v-if="loading" class="w-5 h-5 animate-spin mr-2" />
+            <span>{{ loading ? 'Subscribing...' : (blockSettings.buttonText || 'Subscribe') }}</span>
+          </Button>
+        </form>
+        
+        <div v-if="subscribed" class="success-message mt-6 text-green-600 font-medium text-center">
+            {{ blockSettings.successMessage || 'Successfully subscribed! Thank you.' }}
+        </div>
+    </template>
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed, inject, ref } from 'vue'
+<script setup lang="ts">
+import { computed, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Input, Button } from '../ui'
 import { Mail, Loader2 } from 'lucide-vue-next'
 import { 
   getTypographyStyles,
+  getLayoutStyles,
+  getVal,
   getResponsiveValue
 } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance
+  mode?: 'view' | 'edit'
+  device?: 'desktop' | 'tablet' | 'mobile'
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || props.device)
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
 const loading = ref(false)
 const subscribed = ref(false)
@@ -65,11 +84,26 @@ const handleSubscribe = () => {
     }, 1500)
 }
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
-const subtitleStyles = computed(() => getTypographyStyles(settings.value, 'subtitle_', device.value))
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
+})
+
+const containerStyles = computed(() => {
+    return getLayoutStyles(settings.value, props.device)
+})
+
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
+const subtitleStyles = computed(() => getTypographyStyles(settings.value, 'subtitle_', props.device))
 
 const inputStyles = computed(() => {
-    const styles = getTypographyStyles(settings.value, 'input_', device.value)
+    const styles = getTypographyStyles(settings.value, 'input_', props.device)
     return {
         ...styles,
         backgroundColor: settings.value.inputBackgroundColor || 'transparent'
@@ -77,7 +111,7 @@ const inputStyles = computed(() => {
 })
 
 const buttonStyles = computed(() => {
-    const styles = getTypographyStyles(settings.value, 'button_', device.value)
+    const styles = getTypographyStyles(settings.value, 'button_', props.device)
     return {
         ...styles,
         backgroundColor: settings.value.buttonBackgroundColor || '',
@@ -85,11 +119,18 @@ const buttonStyles = computed(() => {
     }
 })
 
-const layout = computed(() => getResponsiveValue(settings.value, 'layout', device.value) || 'inline')
+const layout = computed(() => getResponsiveValue(settings.value, 'layout', props.device) || 'inline')
 </script>
 
 <style scoped>
 .newsletter-block { width: 100%; }
+.newsletter-block {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+.newsletter-block:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
 .success-message { animation: fadeIn 0.3s ease-out; }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }

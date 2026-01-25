@@ -3,14 +3,15 @@
     <template #default="{ mode: blockMode, settings, device: blockDevice }">
       <div 
         class="image-block-container" 
-        :class="alignmentClass(settings, blockDevice)"
+        :id="getVal(settings, 'html_id', blockDevice)"
+        :style="containerStyles(settings, blockDevice)"
       >
         <figure 
           ref="figureRef"
           class="image-figure relative transition-all duration-500"
           :class="[
-            radiusClass(settings),
-            shadowClass(settings),
+            shadowClass(settings, blockDevice),
+            hoverShadowClass(settings, blockDevice),
             hoverEffectClass(settings)
           ]"
           :style="figureStyles(settings, blockDevice)"
@@ -19,19 +20,22 @@
         >
           <!-- The Link or Div -->
           <component
-            :is="getVal(settings, 'linkUrl') ? 'a' : 'div'"
+            :is="getVal(settings, 'link_url') ? 'a' : 'div'"
             class="image-link-wrapper block relative h-full w-full overflow-hidden"
-            :href="getVal(settings, 'linkUrl') || undefined"
-            :target="getVal(settings, 'linkNewTab') ? '_blank' : '_self'"
+            :href="getVal(settings, 'link_url') || undefined"
+            :target="getVal(settings, 'link_target') || '_self'"
+            :aria-label="getVal(settings, 'aria_label', blockDevice) || undefined"
+            :role="getVal(settings, 'aria_label', blockDevice) ? 'img' : undefined"
             @click="onLinkClick"
             :style="maskStyles(settings, blockDevice)"
           >
             <!-- Image Element -->
             <img 
-              v-if="getVal(settings, 'url')"
-              :src="getVal(settings, 'url')"
+              v-if="getVal(settings, 'src', blockDevice)"
+              :src="getVal(settings, 'src', blockDevice)"
               :alt="getVal(settings, 'alt') || 'Image'"
-              class="block w-full h-full transition-all duration-700 ease-out"
+              :title="getVal(settings, 'title') || undefined"
+              class="block w-full h-full transition-all duration-700 ease-out image-element"
               :class="[objectFitClass(settings), filterClasses(settings)]"
               :style="imageElementStyles(settings, blockDevice)"
               :loading="getVal(settings, 'lazyLoad') !== false ? 'lazy' : 'eager'"
@@ -65,7 +69,7 @@
 
           <!-- Caption -->
           <figcaption 
-            v-if="getVal(settings, 'caption')" 
+            v-if="getVal(settings, 'showCaption') && getVal(settings, 'caption')" 
             class="image-caption-container transition-all duration-300"
             :class="captionStaticClass(settings)"
             :style="captionStyles(settings, blockDevice)"
@@ -84,7 +88,9 @@ import BaseBlock from '../components/BaseBlock.vue'
 import { 
     getTypographyStyles, 
     getVal,
-    getMaskStyles 
+    getMaskStyles,
+    getLayoutStyles,
+    toCSS
 } from '../utils/styleUtils'
 import { Image as ImageIcon, ZoomIn } from 'lucide-vue-next'
 import type { BlockInstance } from '../../types/builder'
@@ -122,12 +128,14 @@ const handleMouseLeave = () => {
     tiltStyle.value.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)'
 }
 
-const alignmentClass = (settings: any, device: string) => {
+const containerStyles = (settings: any, device: string) => {
   const align = getVal(settings, 'alignment', device) || 'center'
   return {
-    'flex justify-start text-left': align === 'left',
-    'flex justify-center text-center': align === 'center',
-    'flex justify-end text-right': align === 'right'
+    width: '100%',
+    display: 'flex',
+    justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center',
+    textAlign: align as any,
+    ...getLayoutStyles(settings, device)
   }
 }
 
@@ -137,14 +145,19 @@ const figureStyles = (settings: any, device: string) => {
   const aspectRatio = getVal(settings, 'aspectRatio', device) || 'auto'
   
   const style: Record<string, any> = {
-    maxWidth: width > 0 && width !== '100%' ? toWidth(width) : '100%',
-    width: '100%',
+    maxWidth: width > 0 && width !== '100%' ? toCSS(width) : '100%',
+    width: getVal(settings, 'forceFullwidth', device) ? '100%' : 'auto',
     position: 'relative',
-    display: 'inline-block'
+    display: 'inline-block',
+    transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
   }
   
   if (aspectRatio !== 'auto') style.aspectRatio = aspectRatio
-  else if (height) style.height = height
+  else if (height) style.height = toCSS(height)
+
+  // Hover Variables
+  style['--hover-scale'] = `scale(${getVal(settings, 'hover_scale', device) || 1.05})`;
+  style['--hover-brightness'] = `brightness(${getVal(settings, 'hover_brightness', device) || 100}%)`;
 
   // Add 3D Tilt transform if active
   if (getVal(settings, 'hover_effect') === 'tilt') {
@@ -154,8 +167,6 @@ const figureStyles = (settings: any, device: string) => {
 
   return style
 }
-
-const toWidth = (val: any) => typeof val === 'number' ? `${val}px` : val
 
 const maskStyles = (settings: any, device: string) => {
     return getMaskStyles(settings, '', device)
@@ -178,7 +189,8 @@ const imageElementStyles = (settings: any, device: string) => {
   return {
     height: '100%',
     objectPosition: getVal(settings, 'objectPosition', device) || 'center',
-    filter: filters.length ? filters.join(' ') : undefined
+    filter: filters.length ? filters.join(' ') : undefined,
+    transition: 'all 0.5s ease-in-out'
   }
 }
 
@@ -192,18 +204,22 @@ const objectFitClass = (settings: any) => {
   }
 }
 
-const radiusClass = (settings: any) => getVal(settings, 'radius') || 'rounded-lg'
-const shadowClass = (settings: any) => {
-  const s = getVal(settings, 'shadow')
+const shadowClass = (settings: any, device: string) => {
+  const s = getVal(settings, 'shadow', device)
   return s && s !== 'none' ? s : ''
+}
+
+const hoverShadowClass = (settings: any, device: string) => {
+  const s = getVal(settings, 'hover_shadow', device)
+  return s && s !== 'none' ? `group-hover:${s}` : ''
 }
 
 const hoverEffectClass = (settings: any) => {
   const effect = getVal(settings, 'hover_effect') || 'none'
   return {
     'group': true,
-    'hover:scale-[1.02]': effect === 'zoom',
-    'hover:-translate-y-2 hover:shadow-2xl': effect === 'lift',
+    'hover:scale-custom': effect === 'zoom',
+    'hover:-translate-y-2': effect === 'lift',
   }
 }
 
@@ -214,6 +230,10 @@ const filterClasses = (settings: any) => {
   if (effect === 'colorize') classes.push('grayscale group-hover:grayscale-0')
   if (effect === 'desaturate') classes.push('group-hover:grayscale')
   if (effect === 'brighten') classes.push('group-hover:brightness-110')
+  
+  // Custom interactive brightness
+  classes.push('group-hover:brightness-custom')
+  
   return classes.join(' ')
 }
 
@@ -251,6 +271,18 @@ const onLinkClick = (e: MouseEvent) => {
 .image-figure {
   margin: 0;
   vertical-align: top;
-  will-change: transform;
+  will-change: transform, filter, box-shadow;
+}
+
+.image-element {
+  will-change: transform, filter;
+}
+
+.hover\:scale-custom:hover {
+  transform: var(--hover-scale);
+}
+
+.group:hover .group-hover\:brightness-custom {
+  filter: var(--hover-brightness);
 }
 </style>

@@ -18,6 +18,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -54,6 +55,10 @@ const FAQModule: ModuleDefinition = {
             }
         },
         boxShadow: { preset: 'medium', horizontal: 0, vertical: 10, blur: 30, spread: -5, color: 'rgba(0,0,0,0.05)', inset: false },
+        aria_label: '',
+        html_id: '',
+        hover_scale: 1,
+        hover_brightness: 100,
         animation_effect: 'animate-fade-up', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 
@@ -76,11 +81,19 @@ const FAQModule: ModuleDefinition = {
                 ]
             },
             {
-                id: 'behavior',
-                label: 'Behavior',
+                ...layoutSettings,
                 fields: [
-                    { name: 'layout', type: 'select', label: 'Layout', responsive: true, options: [{ value: 'accordion', label: 'Accordion' }, { value: 'list', label: 'List (Always Open)' }] },
+                    ...layoutSettings.fields!,
+                    { name: 'layout', type: 'select', label: 'Display Mode', responsive: true, options: [{ value: 'accordion', label: 'Accordion' }, { value: 'list', label: 'List (Always Open)' }] },
                     { name: 'allowMultiple', type: 'toggle', label: 'Allow Multiple Open', responsive: true }
+                ]
+            },
+            {
+                id: 'premium_interactive',
+                label: 'Interactive States',
+                fields: [
+                    { name: 'hover_scale', type: 'range', label: 'Item Hover Scale', min: 0.8, max: 1.5, step: 0.05, default: 1 },
+                    { name: 'hover_brightness', type: 'range', label: 'Item Hover Brightness', min: 50, max: 150, step: 10, unit: '%', default: 100 }
                 ]
             },
             backgroundSettings,

@@ -1,71 +1,86 @@
 <template>
-  <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ settings }">
-      <div class="video-block w-full">
-        <div class="video-container relative group overflow-hidden rounded-[40px] shadow-2xl bg-slate-900 border border-slate-100/10" :style="containerStyles">
-          <!-- YouTube -->
-          <iframe 
-            v-if="videoType === 'youtube' && youtubeId"
-            :src="youtubeEmbedUrl"
-            class="video-iframe absolute inset-0 w-full h-full grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-          />
-          
-          <!-- Vimeo -->
-          <iframe 
-            v-else-if="videoType === 'vimeo' && vimeoId"
-            :src="vimeoEmbedUrl"
-            class="video-iframe absolute inset-0 w-full h-full grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
-            frameborder="0"
-            allow="autoplay; fullscreen; picture-in-picture"
-            allowfullscreen
-          />
-          
-          <!-- Self-hosted -->
-          <video 
-            v-else-if="videoType === 'selfHosted' && videoUrl"
-            :src="videoUrl"
-            :poster="settings.posterImage"
-            :autoplay="settings.autoplay"
-            :loop="settings.loop"
-            :muted="settings.muted"
-            :controls="settings.controls !== false"
-            class="video-element absolute inset-0 w-full h-full object-cover"
-          />
-          
-          <!-- Placeholder (Mode Edit Only or empty URL) -->
-          <div v-else class="video-placeholder absolute inset-0 flex flex-col items-center justify-center gap-6 bg-slate-900 text-slate-700">
-            <div class="w-20 h-20 rounded-full border-2 border-slate-800 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:border-primary group-hover:text-primary">
-                <Play :size="32" class="translate-x-0.5" />
-            </div>
-            <span class="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">{{ mode === 'edit' ? 'Video Stream Ready' : 'No Source' }}</span>
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
+    :device="device"
+    class="video-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Video Player'"
+    :style="cardStyles"
+  >
+    <template #default="{ settings: blockSettings }">
+      <div 
+        class="video-container relative group overflow-hidden rounded-[40px] shadow-2xl bg-slate-900 border border-slate-100/10" 
+        :style="containerStyles"
+      >
+        <!-- YouTube -->
+        <iframe 
+          v-if="videoType === 'youtube' && youtubeId"
+          :src="youtubeEmbedUrl"
+          class="video-iframe absolute inset-0 w-full h-full grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        />
+        
+        <!-- Vimeo -->
+        <iframe 
+          v-else-if="videoType === 'vimeo' && vimeoId"
+          :src="vimeoEmbedUrl"
+          class="video-iframe absolute inset-0 w-full h-full grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
+          frameborder="0"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowfullscreen
+        />
+        
+        <!-- Self-hosted -->
+        <video 
+          v-else-if="videoType === 'selfHosted' && videoUrl"
+          :src="videoUrl"
+          :poster="blockSettings.posterImage"
+          :autoplay="blockSettings.autoplay"
+          :loop="blockSettings.loop"
+          :muted="blockSettings.muted"
+          :controls="blockSettings.controls !== false"
+          class="video-element absolute inset-0 w-full h-full object-cover"
+        />
+        
+        <!-- Placeholder (Mode Edit Only or empty URL) -->
+        <div v-else class="video-placeholder absolute inset-0 flex flex-col items-center justify-center gap-6 bg-slate-900 text-slate-700">
+          <div class="w-20 h-20 rounded-full border-2 border-slate-800 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:border-primary group-hover:text-primary">
+              <Play :size="32" class="translate-x-0.5" />
           </div>
+          <span class="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">{{ mode === 'edit' ? 'Video Stream Ready' : 'No Source' }}</span>
         </div>
       </div>
     </template>
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed, inject } from 'vue'
+<script setup lang="ts">
+import { computed } from 'vue'
 import { Play } from 'lucide-vue-next'
 import BaseBlock from '../components/BaseBlock.vue'
-import { getVal } from '../utils/styleUtils'
+import { 
+    getVal,
+    getLayoutStyles,
+    getResponsiveValue 
+} from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance
+  mode?: 'view' | 'edit'
+  device?: 'desktop' | 'tablet' | 'mobile'
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
-const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
-const settings = computed(() => props.module?.settings || {})
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
 // Unified URL
-const videoUrl = computed(() => getVal(settings.value, 'url', currentDevice.value) || '')
+const videoUrl = computed(() => getVal(settings.value, 'url', props.device) || '')
 
 // Detect Type
 const videoType = computed(() => {
@@ -114,24 +129,52 @@ const vimeoEmbedUrl = computed(() => {
 
 // Aspect ratio padding
 const aspectRatioPadding = computed(() => {
-  const ratioMap = {
+  const ratioMap: Record<string, string> = {
     '16:9': '56.25%',
     '4:3': '75%',
     '1:1': '100%',
     '9:16': '177.78%',
     '21:9': '42.86%'
   }
-  const ratio = getVal(settings.value, 'aspectRatio', currentDevice.value) || '16:9'
+  const ratio = getVal(settings.value, 'aspectRatio', props.device) || '16:9'
   return ratioMap[ratio] || '56.25%'
 })
 
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
+})
+
 const containerStyles = computed(() => {
-  return {
-    paddingTop: aspectRatioPadding.value,
-  }
+    const layoutStyles = getLayoutStyles(settings.value, props.device)
+    const alignment = getVal(settings.value, 'alignment', props.device) || 'center'
+    
+    let marginX = 'auto'
+    if (alignment === 'left') marginX = '0'
+    if (alignment === 'right') marginX = 'auto 0'
+
+    return {
+        ...layoutStyles,
+        paddingTop: aspectRatioPadding.value,
+        marginLeft: alignment === 'left' ? '0' : (alignment === 'right' ? 'auto' : 'auto'),
+        marginRight: alignment === 'right' ? '0' : (alignment === 'left' ? 'auto' : 'auto')
+    }
 })
 </script>
 
 <style scoped>
 .video-block { width: 100%; }
+.video-block {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+.video-block:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
 </style>

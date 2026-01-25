@@ -1,114 +1,110 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="fullwidth-map-block" :style="wrapperStyles">
-    <div class="map-container" :style="containerStyles">
-      <iframe
-        :src="mapUrl"
-        class="map-iframe"
-        :class="{ 'map-iframe--grayscale': settings.grayscale }"
-        frameborder="0"
-        allowfullscreen
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-      />
-      <div 
-        v-if="settings.showMarker !== false || mode === 'edit'" 
-        class="map-marker-label"
-      >
-        <MapPin class="marker-icon" />
-        <span 
-          :contenteditable="mode === 'edit'"
-          @blur="updateText('markerTitle', $event)"
-        >{{ settings.markerTitle || 'Our Location' }}</span>
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
+    :device="device"
+    class="fullwidth-map-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Fullwidth Map'"
+    :style="cardStyles"
+  >
+    <template #default="{ settings: blockSettings }">
+      <div class="map-container relative w-full overflow-hidden transition-all duration-300" :style="containerStyles">
+        <iframe
+          :src="mapUrl"
+          class="map-iframe w-full h-full border-0 transition-all duration-500"
+          :class="{ 'grayscale': blockSettings.grayscale }"
+          frameborder="0"
+          allowfullscreen
+          loading="lazy"
+    <div class="map-wrapper relative w-full overflow-hidden" :style="containerStyles">
+      <div v-if="mode === 'edit'" class="builder-placeholder h-full bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-12 text-center">
+          <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6 shadow-2xl">
+              <MapPin class="w-10 h-10 text-primary animate-bounce" />
+          </div>
+          <h3 class="text-xl font-black tracking-tighter mb-3 uppercase">{{ settings.address || 'Global Hub' }}</h3>
+          <p class="text-xs font-black tracking-widest text-slate-400 dark:text-slate-500 uppercase opacity-60">Interactive Map Preview</p>
+          <div class="mt-8 flex gap-4 opacity-50">
+              <div class="bg-slate-200 dark:bg-slate-800 h-10 w-32 rounded-full"></div>
+              <div class="bg-slate-200 dark:bg-slate-800 h-10 w-10 rounded-full"></div>
+          </div>
       </div>
-      
-      <!-- Child Pins -->
-      <div 
-        v-for="(pin, index) in childPins" 
-        :key="index" 
-        class="map-marker-label" 
-        :style="{ top: `${60 + index * 50}px`, left: '16px' }"
-      >
-         <MapPin class="marker-icon" />
-         <span>{{ pin.title || 'Pin' }}</span>
+      <div v-else class="map-container h-full" :class="{ 'grayscale': settings.grayscale }">
+          <iframe 
+            width="100%" 
+            height="100%" 
+            frameborder="0" 
+            scrolling="no" 
+            marginheight="0" 
+            marginwidth="0" 
+            :src="mapUrl"
+          ></iframe>
       </div>
     </div>
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { MapPin } from 'lucide-vue-next'
 import { 
-  getResponsiveValue
+    getVal,
+    getLayoutStyles,
+    getResponsiveValue 
 } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance;
+  mode?: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile';
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
-
-const updateText = (key, event) => {
-    if (props.mode !== 'edit') return
-    const value = event.target.innerText
-    builder?.updateModuleSettings(props.module.id, { [key]: value })
-}
+const builder = inject<any>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
 const mapUrl = computed(() => {
   const address = encodeURIComponent(settings.value.address || 'New York, NY')
   const zoom = settings.value.zoom || 14
-  return `https://maps.google.com/maps?q=${address}&z=${zoom}&output=embed`
+  return `https://maps.google.com/maps?q=${address}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`
 })
 
-const wrapperStyles = computed(() => {
-  return { width: '100%' }
-})
-
-const childPins = computed(() => {
-  return (props.module.children || []).map(child => ({
-    title: child.settings?.title,
-    address: child.settings?.address
-  }))
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
 })
 
 const containerStyles = computed(() => {
-  const height = getResponsiveValue(settings.value, 'height', device.value) || 500
-  return {
-    height: `${height}px`,
-    overflow: 'hidden',
-    position: 'relative'
-  }
+    const layout = getLayoutStyles(settings.value, props.device)
+    const height = getResponsiveValue(settings.value, 'height', props.device) || 500
+    return { 
+        ...layout,
+        width: '100%', 
+        height: `${height}px` 
+    }
 })
 </script>
 
 <style scoped>
-.fullwidth-map-block { width: 100%; }
-.map-container { position: relative; }
-.map-iframe { width: 100%; height: 100%; border: 0; }
-.map-iframe--grayscale { filter: grayscale(100%); }
-.map-marker-label {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  background: white;
-  padding: 8px 16px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  font-weight: 500;
-  z-index: 10;
-  color: #333;
+.fullwidth-map-block {
+    width: 100%;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.4s ease;
 }
-.marker-icon { width: 18px; height: 18px; color: #e53935; }
-[contenteditable]:focus {
-  outline: none;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
+.fullwidth-map-block:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
+.map-container.grayscale iframe {
+    filter: grayscale(1) invert(0.1) contrast(1.1);
 }
 </style>

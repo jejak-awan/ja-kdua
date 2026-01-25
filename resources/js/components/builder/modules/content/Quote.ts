@@ -18,6 +18,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -55,6 +56,8 @@ const QuoteModule: ModuleDefinition = {
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
+        aria_label: '',
+        html_id: '',
         animation_effect: '', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 
@@ -66,7 +69,9 @@ const QuoteModule: ModuleDefinition = {
                 fields: [
                     { name: 'content', type: 'textarea', label: 'Quote Text', responsive: true },
                     { name: 'author', type: 'text', label: 'Author', responsive: true },
-                    { name: 'authorTitle', type: 'text', label: 'Author Title', responsive: true }
+                    { name: 'authorTitle', type: 'text', label: 'Author Title', responsive: true },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             backgroundSettings,
@@ -99,6 +104,7 @@ const QuoteModule: ModuleDefinition = {
                     label: `Author ${f.label}`
                 }))
             },
+            layoutSettings,
             spacingSettings,
             borderSettings,
             boxShadowSettings,

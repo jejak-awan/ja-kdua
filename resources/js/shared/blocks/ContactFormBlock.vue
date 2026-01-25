@@ -1,71 +1,89 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="contact-form-block">
-    <div class="contact-form-container mx-auto" :style="formStyles">
-      <!-- Header -->
-      <div v-if="settings.title || settings.description" class="form-header text-center mb-10">
-        <h2 v-if="settings.title" class="form-title text-3xl font-bold mb-3" :style="titleStyles">{{ settings.title }}</h2>
-        <p v-if="settings.description" class="form-description opacity-70" :style="descriptionStyles">{{ settings.description }}</p>
-      </div>
-      
-      <!-- Fields Container -->
-      <form @submit.prevent="handleSubmit" class="form-grid grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <!-- Builder Mode -->
-        <template v-if="mode === 'edit'">
-            <slot />
-        </template>
-        
-        <!-- Renderer Mode -->
-        <template v-else>
-            <ContactFieldBlock 
-              v-for="child in nestedBlocks" 
-              :key="child.id"
-              :module="child"
-              mode="view"
-            />
-        </template>
-        
-        <!-- Submit Button -->
-        <div class="form-footer col-span-full text-center mt-6">
-          <Button 
-            type="submit" 
-            class="h-14 px-12 rounded-full font-bold shadow-xl shadow-primary/20"
-            :style="buttonStyles"
-            :disabled="isSubmitting"
-          >
-            <Loader2 v-if="isSubmitting" class="w-5 h-5 animate-spin mr-2" />
-            <Send v-else class="w-5 h-5 mr-2" />
-            <span>{{ isSubmitting ? (settings.submittingText || 'Sending...') : (settings.buttonText || 'Send Message') }}</span>
-          </Button>
-          
-          <div v-if="submitted" class="success-message mt-6 p-4 rounded-lg bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
-            {{ settings.successMessage || 'Thank you! Your message has been sent.' }}
-          </div>
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
+    :device="device"
+    class="contact-form-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Contact Form'"
+    :style="cardStyles"
+  >
+    <template #default="{ settings: blockSettings, device: blockDevice }">
+      <div 
+        class="contact-form-container mx-auto" 
+        :style="containerStyles"
+      >
+        <!-- Header -->
+        <div v-if="blockSettings.title || blockSettings.description" class="form-header text-center mb-10">
+          <h2 v-if="blockSettings.title" class="form-title text-3xl font-bold mb-3" :style="titleStyles">{{ blockSettings.title }}</h2>
+          <p v-if="blockSettings.description" class="form-description opacity-70" :style="descriptionStyles">{{ blockSettings.description }}</p>
         </div>
-      </form>
-    </div>
+        
+        <!-- Fields Container -->
+        <form @submit.prevent="handleSubmit" class="form-grid grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <!-- Builder Mode -->
+          <template v-if="mode === 'edit'">
+              <slot />
+          </template>
+          
+          <!-- Renderer Mode -->
+          <template v-else>
+              <ContactFieldBlock 
+                v-for="child in nestedBlocks" 
+                :key="child.id"
+                :module="child"
+                mode="view"
+              />
+          </template>
+          
+          <!-- Submit Button -->
+          <div class="form-footer col-span-full text-center mt-6">
+            <Button 
+              type="submit" 
+              class="h-14 px-12 rounded-full font-bold shadow-xl shadow-primary/20 transition-all hover:-translate-y-1 active:translate-y-0"
+              :style="buttonStyles"
+              :disabled="isSubmitting"
+            >
+              <Loader2 v-if="isSubmitting" class="w-5 h-5 animate-spin mr-2" />
+              <Send v-else class="w-5 h-5 mr-2" />
+              <span>{{ isSubmitting ? (blockSettings.submittingText || 'Sending...') : (blockSettings.buttonText || 'Send Message') }}</span>
+            </Button>
+            
+            <div v-if="submitted" class="success-message mt-6 p-4 rounded-lg bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
+              {{ blockSettings.successMessage || 'Thank you! Your message has been sent.' }}
+            </div>
+          </div>
+        </form>
+      </div>
+    </template>
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed, inject, ref } from 'vue'
+<script setup lang="ts">
+import { computed, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import ContactFieldBlock from './ContactFieldBlock.vue'
 import { Button } from '../ui'
 import { Send, Loader2 } from 'lucide-vue-next'
 import { 
   getTypographyStyles,
-  getResponsiveValue
+  getLayoutStyles,
+  getVal
 } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  nestedBlocks: { type: Array, default: () => [] }
+const props = withDefaults(defineProps<{
+  module: BlockInstance
+  mode?: 'view' | 'edit'
+  device?: 'desktop' | 'tablet' | 'mobile'
+  nestedBlocks?: any[]
+}>(), {
+  mode: 'view',
+  device: 'desktop',
+  nestedBlocks: () => []
 })
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
 const isSubmitting = ref(false)
 const submitted = ref(false)
@@ -79,16 +97,26 @@ const handleSubmit = () => {
     }, 1500)
 }
 
-const formStyles = computed(() => {
-    const styles = {}
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
     return styles
 })
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
-const descriptionStyles = computed(() => getTypographyStyles(settings.value, 'description_', device.value))
+const containerStyles = computed(() => {
+    return getLayoutStyles(settings.value, props.device)
+})
+
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
+const descriptionStyles = computed(() => getTypographyStyles(settings.value, 'description_', props.device))
 
 const buttonStyles = computed(() => {
-    const styles = getTypographyStyles(settings.value, 'button_', device.value)
+    const styles = getTypographyStyles(settings.value, 'button_', props.device)
     return {
         ...styles,
         backgroundColor: settings.value.buttonBackgroundColor || '',
@@ -99,6 +127,13 @@ const buttonStyles = computed(() => {
 
 <style scoped>
 .contact-form-block { width: 100%; }
+.contact-form-block {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+.contact-form-block:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
 .success-message { animation: fadeIn 0.3s ease-out; }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }

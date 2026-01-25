@@ -20,6 +20,7 @@ import {
     interactionsSettings,
     scrollEffectsSettings,
     attributesSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -58,7 +59,8 @@ const CounterModule: ModuleDefinition = {
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
-        // Animation
+        aria_label: '',
+        html_id: '',
         animation_effect: '',
         animation_duration: 1000,
         animation_delay: 0,
@@ -76,7 +78,9 @@ const CounterModule: ModuleDefinition = {
                     { name: 'suffix', type: 'text', label: 'Suffix (e.g., %)', responsive: true },
                     { name: 'decimals', type: 'range', label: 'Decimals', min: 0, max: 4, step: 1, responsive: true },
                     { name: 'separator', type: 'toggle', label: 'Thousands Separator', responsive: true },
-                    { name: 'title', type: 'text', label: 'Title', responsive: true }
+                    { name: 'title', type: 'text', label: 'Title', responsive: true },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             {
@@ -107,9 +111,9 @@ const CounterModule: ModuleDefinition = {
         ],
         design: [
             {
-                id: 'layout',
-                label: 'Layout',
+                ...layoutSettings,
                 fields: [
+                    ...layoutSettings.fields!,
                     {
                         name: 'alignment',
                         type: 'buttonGroup',

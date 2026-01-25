@@ -1,15 +1,17 @@
 <template>
   <BaseBlock
-    :id="id"
+    :module="module"
     :mode="mode"
     :settings="settings"
-    :is-preview="isPreview"
-    class="countdown-block"
+    class="countdown-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Countdown Timer'"
+    :style="cardStyles"
   >
-    <div class="countdown-items flex flex-wrap gap-6 w-full" :style="itemsStyles">
+    <div class="countdown-items flex flex-wrap" :style="containerStyles">
       <Card 
-        v-if="getVal(settings, 'showDays') !== false" 
-        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-transform duration-500 hover:-translate-y-2"
+        v-if="getVal(settings, 'showDays', device) !== false" 
+        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-all"
         :style="unitBaseStyles"
       >
         <CardContent class="p-0 flex flex-col items-center">
@@ -17,16 +19,14 @@
             <div 
               class="countdown-label uppercase text-[10px] font-black tracking-[0.2em] text-slate-400 group-hover:text-primary transition-colors duration-300" 
               :style="labelStyles"
-              :contenteditable="mode === 'edit'"
-              @blur="updateField('daysLabel', $event.target.innerText)"
-              v-text="getVal(settings, 'daysLabel') || 'Days'"
+              v-text="getVal(settings, 'daysLabel', device) || 'Days'"
             ></div>
         </CardContent>
       </Card>
       
       <Card 
-        v-if="getVal(settings, 'showHours') !== false" 
-        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-transform duration-500 hover:-translate-y-2"
+        v-if="getVal(settings, 'showHours', device) !== false" 
+        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-all"
         :style="unitBaseStyles"
       >
         <CardContent class="p-0 flex flex-col items-center">
@@ -34,16 +34,14 @@
             <div 
               class="countdown-label uppercase text-[10px] font-black tracking-[0.2em] text-slate-400 group-hover:text-primary transition-colors duration-300" 
               :style="labelStyles"
-              :contenteditable="mode === 'edit'"
-              @blur="updateField('hoursLabel', $event.target.innerText)"
-              v-text="getVal(settings, 'hoursLabel') || 'Hours'"
+              v-text="getVal(settings, 'hoursLabel', device) || 'Hours'"
             ></div>
         </CardContent>
       </Card>
       
       <Card 
-        v-if="getVal(settings, 'showMinutes') !== false" 
-        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-transform duration-500 hover:-translate-y-2"
+        v-if="getVal(settings, 'showMinutes', device) !== false" 
+        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-all"
         :style="unitBaseStyles"
       >
         <CardContent class="p-0 flex flex-col items-center">
@@ -51,16 +49,14 @@
             <div 
               class="countdown-label uppercase text-[10px] font-black tracking-[0.2em] text-slate-400 group-hover:text-primary transition-colors duration-300" 
               :style="labelStyles"
-              :contenteditable="mode === 'edit'"
-              @blur="updateField('minutesLabel', $event.target.innerText)"
-              v-text="getVal(settings, 'minutesLabel') || 'Minutes'"
+              v-text="getVal(settings, 'minutesLabel', device) || 'Minutes'"
             ></div>
         </CardContent>
       </Card>
       
       <Card 
-        v-if="getVal(settings, 'showSeconds') !== false" 
-        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-transform duration-500 hover:-translate-y-2"
+        v-if="getVal(settings, 'showSeconds', device) !== false" 
+        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-all"
         :style="unitBaseStyles"
       >
         <CardContent class="p-0 flex flex-col items-center">
@@ -68,9 +64,7 @@
             <div 
               class="countdown-label uppercase text-[10px] font-black tracking-[0.2em] text-slate-400 group-hover:text-primary transition-colors duration-300" 
               :style="labelStyles"
-              :contenteditable="mode === 'edit'"
-              @blur="updateField('secondsLabel', $event.target.innerText)"
-              v-text="getVal(settings, 'secondsLabel') || 'Seconds'"
+              v-text="getVal(settings, 'secondsLabel', device) || 'Seconds'"
             ></div>
         </CardContent>
       </Card>
@@ -78,32 +72,35 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Card, CardContent } from '../ui'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { 
+  getVal, 
+  getLayoutStyles,
+  getTypographyStyles 
+} from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  id: String,
-  mode: { type: String, default: 'view' },
-  settings: { type: Object, default: () => ({}) },
-  isPreview: Boolean,
-  device: { type: String, default: 'desktop' }
-})
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+}>()
 
-const builder = inject('builder', null)
-const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
+const builder = inject<any>('builder', null)
+const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
 const timeLeft = ref({ days: 0, hours: 0, minutes: 0, seconds: 0 })
-let interval = null
+let interval: any = null
 
 const calculateTimeLeft = () => {
-  const targetDate = getVal(props.settings, 'endDate', currentDevice.value) || new Date(Date.now() + 864000000).toISOString().split('T')[0]
-  const targetTime = getVal(props.settings, 'endTime', currentDevice.value) || '00:00'
-  const target = new Date(`${targetDate}T${targetTime}:00`)
+  const endDate = getVal(settings.value, 'endDate', device.value) || new Date(Date.now() + 864000000).toISOString().split('T')[0]
+  const endTime = getVal(settings.value, 'endTime', device.value) || '00:00'
+  const target = new Date(`${endDate}T${endTime}:00`)
   const now = new Date()
-  const diff = target - now
+  const diff = target.getTime() - now.getTime()
 
   if (diff <= 0) {
     timeLeft.value = { days: 0, hours: 0, minutes: 0, seconds: 0 }
@@ -127,27 +124,49 @@ onUnmounted(() => {
   if (interval) clearInterval(interval)
 })
 
-const itemsStyles = computed(() => {
-  const alignment = getVal(props.settings, 'alignment', currentDevice.value) || 'center'
+const containerStyles = computed(() => {
+  const layout = getLayoutStyles(settings.value, device.value)
+  const align = getVal(settings.value, 'alignment', device.value) || 'center'
+  const gap = parseInt(getVal(settings.value, 'gap', device.value)) || 24
+  
   return {
-    justifyContent: alignment === 'center' ? 'center' : (alignment === 'right' ? 'flex-end' : 'flex-start'),
+    ...layout,
+    gap: `${gap}px`,
+    justifyContent: align === 'center' ? 'center' : (align === 'right' ? 'flex-end' : 'flex-start'),
   }
 })
 
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    const hoverScale = getVal(settings.value, 'hover_scale', device.value) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', device.value) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
+})
+
 const unitBaseStyles = computed(() => ({
-    backgroundColor: getVal(props.settings, 'itemBackgroundColor', currentDevice.value) || '',
+    backgroundColor: getVal(settings.value, 'itemBackgroundColor', device.value) || '',
+    borderRadius: `${parseInt(getVal(settings.value, 'itemBorderRadius', device.value)) || 32}px`,
+    padding: `${parseInt(getVal(settings.value, 'itemPadding', device.value)) || 24}px`
 }))
 
-const numberStyles = computed(() => getTypographyStyles(props.settings, 'number_', currentDevice.value))
-const labelStyles = computed(() => getTypographyStyles(props.settings, 'label_', currentDevice.value))
+const numberStyles = computed(() => getTypographyStyles(settings.value, 'number_', device.value))
+const labelStyles = computed(() => getTypographyStyles(settings.value, 'label_', device.value))
 
-const updateField = (key, value) => {
-  if (props.mode !== 'edit' || !builder) return
-  builder.updateModuleSettings(props.id, { [key]: value })
-}
 </script>
 
 <style scoped>
 .countdown-block { width: 100%; }
 .countdown-number { font-variant-numeric: tabular-nums; }
+.countdown-unit {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+.countdown-unit:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
 </style>
+

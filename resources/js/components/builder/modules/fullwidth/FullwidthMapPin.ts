@@ -36,7 +36,9 @@ const FullwidthMapPinModule: ModuleDefinition = {
                     { name: 'title', type: 'text', label: 'Title' },
                     { name: 'content', type: 'richtext', label: 'Description' },
                     { name: 'lat', type: 'text', label: 'Latitude' },
-                    { name: 'lng', type: 'text', label: 'Longitude' }
+                    { name: 'lng', type: 'text', label: 'Longitude' },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             adminLabelSettings('Pin')

@@ -2,86 +2,85 @@
   <BaseBlock :module="module" :mode="mode" :device="device">
     <template #default="{ settings, device: blockDevice }">
       <div 
-        class="hero-inner relative z-10 w-full flex" 
-        :class="[
-            getVal(settings, 'layout') === 'split' ? 'lg:flex-row flex-col' : 'flex-col',
-            alignmentClasses(settings, blockDevice).container
-        ]"
-        :style="heroInnerStyles(settings, blockDevice)"
+        class="hero-block-container"
+        :id="getVal(settings, 'html_id', blockDevice)"
+        :style="containerStyles(settings, blockDevice)"
       >
-        <!-- Text Content Area -->
         <div 
-            class="hero-content-area flex flex-col"
-            :class="[
-                getVal(settings, 'layout') === 'split' ? 'lg:w-1/2 w-full' : 'w-full',
-                getVal(settings, 'useGlass') ? 'bg-white/10 backdrop-blur-md border border-white/20 p-10 md:p-16 rounded-[40px]' : ''
-            ]"
-            :style="{ maxWidth: (getVal(settings, 'contentMaxWidth') || 1200) + 'px' }"
+            class="hero-inner relative overflow-hidden transition-all duration-700 group" 
+            :style="innerStyles(settings, blockDevice)"
         >
-          <div 
-            class="hero-text-wrapper flex flex-col"
-            :class="alignmentClasses(settings, blockDevice).text"
-          >
-            <!-- Eyebrow / Badge -->
-            <Badge 
-                v-if="getVal(settings, 'eyebrow')"
-                variant="outline"
-                class="mb-6 w-fit border-primary/30 bg-primary/5 text-primary-foreground font-bold tracking-widest uppercase text-xs px-4 py-1.5 rounded-full"
-            >
-                {{ getVal(settings, 'eyebrow') }}
-            </Badge>
+            <!-- Decorative Orbs -->
+            <div class="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl transition-transform duration-1000 group-hover:scale-125"></div>
+            <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-primary/20 rounded-full blur-3xl transition-transform duration-1000 group-hover:scale-125"></div>
 
-            <component 
-                :is="getVal(settings, 'titleTag') || 'h1'"
-                v-if="getVal(settings, 'title')" 
-                class="hero-title font-black mb-8 leading-[1.1] text-pretty whitespace-pre-line" 
-                :class="{ 'drop-shadow-lg': getVal(settings, 'titleShadow') }"
-                :style="titleStyles(settings, blockDevice)"
-                :contenteditable="mode === 'edit'"
-                @blur="e => updateField('title', e.target.innerText)"
-            >
-                {{ getVal(settings, 'title') }}
-            </component>
-
+            <!-- Background Image & Overlay -->
             <div 
-                v-if="getVal(settings, 'subtitle')"
-                class="hero-subtitle mb-12 opacity-90 leading-relaxed font-medium"
-                :style="subtitleStyles(settings, blockDevice)"
-                :contenteditable="mode === 'edit'"
-                @blur="e => updateField('subtitle', e.target.innerText)"
+                v-if="getVal(settings, 'bgImage', blockDevice)"
+                class="absolute inset-0 z-0"
             >
-                {{ getVal(settings, 'subtitle') }}
-            </div>
-
-            <!-- Nested blocks for buttons -->
-            <div class="hero-nested-blocks w-full flex flex-wrap gap-4" :class="alignmentClasses(settings, blockDevice).buttons">
-                <template v-if="mode === 'edit'">
-                    <slot />
-                    <div v-if="!nestedBlocks.length" class="p-4 border border-dashed border-white/20 rounded-xl text-xs text-white/40">
-                        Drop buttons here
-                    </div>
-                </template>
-                <template v-else>
-                    <slot />
-                </template>
-            </div>
-          </div>
-        </div>
-
-        <!-- Media Area (Visible in split layout) -->
-        <div 
-            v-if="getVal(settings, 'layout') === 'split'"
-            class="hero-media-area lg:w-1/2 w-full flex items-center justify-center p-8 lg:p-0"
-        >
-            <div class="relative w-full aspect-video lg:aspect-square group overflow-hidden rounded-[30px] shadow-2xl">
                 <img 
-                    v-if="getVal(settings, 'image')"
-                    :src="getVal(settings, 'image')" 
-                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    :src="getVal(settings, 'bgImage', blockDevice)"
+                    class="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110"
+                    alt=""
                 />
-                <div v-else class="w-full h-full bg-slate-800/50 flex flex-col items-center justify-center text-white/20 gap-4">
-                    <LucideIcon name="Image" :size="64" />
-                    <span class="font-bold">Add split image in settings</span>
+                <div 
+                    class="absolute inset-0 bg-black transition-opacity duration-500"
+                    :style="{ opacity: (getVal(settings, 'overlayOpacity', blockDevice) || 0) / 100 }"
+                ></div>
+            </div>
+
+            <!-- Content Wrapper -->
+            <div 
+                class="hero-content relative z-10 w-full flex"
+                :class="layoutClasses(settings, blockDevice)"
+                :style="contentWrapperStyles(settings, blockDevice)"
+            >
+                <!-- Text Area -->
+                <div 
+                    class="hero-text-area"
+                    :style="{ maxWidth: toCSS(getVal(settings, 'contentMaxWidth', blockDevice) || 1200) }"
+                    :class="[
+                       isCenter(settings, blockDevice) ? 'text-center mx-auto' : 'text-left'
+                    ]"
+                >
+                    <Badge 
+                        v-if="getVal(settings, 'eyebrow', blockDevice)"
+                        class="mb-8 rounded-full bg-white/10 text-white border-white/20 backdrop-blur-md px-6 py-2 text-sm font-semibold tracking-wide"
+                    >
+                        {{ getVal(settings, 'eyebrow', blockDevice) }}
+                    </Badge>
+
+                    <h1 
+                        class="hero-title font-black leading-tight mb-8 tracking-tighter transition-all duration-500" 
+                        :style="getTypographyStyles(settings, 'title_', blockDevice)"
+                        :contenteditable="mode === 'edit'"
+                        @blur="e => updateField('title', (e.target as HTMLElement).innerText)"
+                    >
+                        {{ getVal(settings, 'title', blockDevice) }}
+                    </h1>
+                    
+                    <div 
+                        v-if="mode === 'edit' || getVal(settings, 'subtitle', blockDevice)"
+                        class="hero-subtitle text-xl opacity-90 leading-relaxed font-medium mb-12 transition-all duration-500" 
+                        :style="getTypographyStyles(settings, 'subtitle_', blockDevice)"
+                        :contenteditable="mode === 'edit'"
+                        @blur="e => updateField('subtitle', (e.target as HTMLElement).innerText)"
+                    >
+                        {{ getVal(settings, 'subtitle', blockDevice) }}
+                    </div>
+
+                    <!-- Split Image -->
+                    <div 
+                        v-if="getVal(settings, 'layout', blockDevice) === 'split' && getVal(settings, 'image', blockDevice)"
+                        class="hero-split-image mt-12 rounded-3xl overflow-hidden shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]"
+                    >
+                         <img 
+                            :src="getVal(settings, 'image', blockDevice)"
+                            class="w-full h-auto object-cover"
+                            alt="Hero"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
@@ -90,86 +89,98 @@
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed, inject } from 'vue'
+<script setup lang="ts">
+import { inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Badge, Button } from '../ui'
-import LucideIcon from '../../components/ui/LucideIcon.vue'
-import { getVal } from '../utils/styleUtils'
+import { Badge } from '../ui'
+import { 
+    getVal, 
+    getTypographyStyles,
+    getLayoutStyles,
+    toCSS
+} from '../utils/styleUtils'
+import type { BlockInstance, BuilderInstance } from '../../types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' },
-  nestedBlocks: { type: Array, default: () => [] }
+const props = withDefaults(defineProps<{
+  module: BlockInstance;
+  mode?: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile' | null;
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
+const builder = inject<BuilderInstance>('builder', null as any)
 
-const heroInnerStyles = (settings, device) => {
-    const minHeight = getVal(settings, 'minHeight', device) || 700
-    const vAlign = getVal(settings, 'verticalAlign') || 'center'
-    
+const containerStyles = (settings: any, device: string) => {
     return {
-        minHeight: `${minHeight}px`,
-        justifyContent: vAlign === 'center' ? 'center' : (vAlign === 'end' ? 'flex-end' : 'flex-start'),
-        alignItems: 'center'
+        width: '100%',
+        ...getLayoutStyles(settings, device)
     }
 }
 
-const alignmentClasses = (settings, device) => {
-    const align = getVal(settings, 'titleAlign', device) || 'center'
-    const res = {
-        container: 'mx-auto',
-        text: 'text-center items-center',
-        buttons: 'justify-center'
+const innerStyles = (settings: any, device: string) => {
+    const style: Record<string, any> = {
+        minHeight: toCSS(getVal(settings, 'minHeight', device) || 700),
+        willChange: 'transform, filter',
+        transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+        display: 'flex',
+        alignItems: getVal(settings, 'verticalAlign', device) || 'center'
     }
 
-    if (align === 'left') {
-        res.container = 'mr-auto'
-        res.text = 'text-left items-start'
-        res.buttons = 'justify-start'
-    } else if (align === 'right') {
-        res.container = 'ml-auto'
-        res.text = 'text-right items-end'
-        res.buttons = 'justify-end'
-    }
-
-    return res
-}
-
-const titleStyles = (settings, device) => {
-    const fontSize = getVal(settings, 'titleSize', device) || 72
-    const color = getVal(settings, 'titleColor') || '#ffffff'
-    const weight = getVal(settings, 'titleWeight') || '900'
+    // Background logic
+    const baseColor = getVal(settings, 'bgColor') || 'transparent'
+    const gradStart = getVal(settings, 'gradientStart') || '#4f46e5'
+    const gradEnd = getVal(settings, 'gradientEnd') || '#7c3aed'
     
+    if (baseColor === 'transparent') {
+        style.background = `linear-gradient(135deg, ${gradStart}, ${gradEnd})`
+    }
+
+    // Interactive Variables
+    style['--hover-scale'] = `scale(${getVal(settings, 'hover_scale', device) || 1})`;
+    style['--hover-brightness'] = `brightness(${getVal(settings, 'hover_brightness', device) || 100}%)`;
+
+    return style
+}
+
+const contentWrapperStyles = (settings: any, device: string) => {
     return {
-        fontSize: `${fontSize}px`,
-        color: color,
-        fontWeight: weight
+        padding: '0 2rem'
     }
 }
 
-const subtitleStyles = (settings, device) => {
-    const fontSize = getVal(settings, 'subtitleSize', device) || 22
-    const color = getVal(settings, 'subtitleColor') || 'rgba(255, 255, 255, 0.9)'
-    const maxWidth = getVal(settings, 'subtitleMaxWidth') || 800
-    
-    return {
-        fontSize: `${fontSize}px`,
-        color: color,
-        maxWidth: `${maxWidth}px`
-    }
+const isCenter = (settings: any, device: string) => {
+    const align = getVal(settings, 'alignment', device) || 'center'
+    return align === 'center'
 }
 
-const updateField = (key, value) => {
+const layoutClasses = (settings: any, device: string) => {
+    const layout = getVal(settings, 'layout', device) || 'centered'
+    if (layout === 'split') {
+        return 'flex-col lg:flex-row items-center justify-between gap-16'
+    }
+    return 'flex-col items-center justify-center'
+}
+
+const updateField = (key: string, value: string) => {
   if (props.mode !== 'edit' || !builder) return
   builder.updateModuleSettings(props.module.id, { [key]: value })
 }
 </script>
 
 <style scoped>
-.hero-title { letter-spacing: -0.04em; }
-.hero-inner { width: 100%; transition: all 0.5s ease-out; }
-.hero-content-area { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+.hero-block-container { 
+    width: 100%; 
+}
+
+.hero-inner:hover {
+    transform: var(--hover-scale);
+    filter: var(--hover-brightness);
+}
+
+.hero-title { 
+    letter-spacing: -0.04em; 
+    white-space: pre-line;
+}
 </style>

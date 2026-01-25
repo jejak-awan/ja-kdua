@@ -18,6 +18,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -39,9 +40,10 @@ const AuthorModule: ModuleDefinition = {
         // Social
         socialLinks: [{ platform: 'twitter', url: '#' }, { platform: 'linkedin', url: '#' }],
         showSocial: true,
-        // Layout
-        layout: 'horizontal',
-        imageSize: 100,
+        aria_label: '',
+        html_id: '',
+        hover_scale: 1,
+        hover_brightness: 100,
         // Background
         background: { color: '#f9f9f9', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         // Spacing
@@ -49,13 +51,9 @@ const AuthorModule: ModuleDefinition = {
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         // Border
         border: {
-            radius: { tl: 8, tr: 8, bl: 8, br: 8, linked: true },
+            radius: { tl: 12, tr: 12, bl: 12, br: 12, linked: true },
             styles: {
-                all: { width: 0, color: '#e0e0e0', style: 'solid' },
-                top: { width: 0, color: '#e0e0e0', style: 'solid' },
-                right: { width: 0, color: '#e0e0e0', style: 'solid' },
-                bottom: { width: 0, color: '#e0e0e0', style: 'solid' },
-                left: { width: 0, color: '#e0e0e0', style: 'solid' }
+                all: { width: 0, color: '#e0e0e0', style: 'solid' }
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
@@ -71,7 +69,9 @@ const AuthorModule: ModuleDefinition = {
                     { name: 'name', type: 'text', label: 'Name' },
                     { name: 'title', type: 'text', label: 'Title/Role' },
                     { name: 'bio', type: 'textarea', label: 'Bio' },
-                    { name: 'image', type: 'upload', label: 'Photo' }
+                    { name: 'image', type: 'upload', label: 'Photo' },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             {
@@ -87,11 +87,19 @@ const AuthorModule: ModuleDefinition = {
         ],
         design: [
             {
-                id: 'layout',
-                label: 'Layout',
+                ...layoutSettings,
                 fields: [
-                    { name: 'layout', type: 'select', label: 'Layout', options: [{ value: 'horizontal', label: 'Horizontal' }, { value: 'vertical', label: 'Vertical' }], responsive: true },
-                    { name: 'imageSize', type: 'range', label: 'Image Size', min: 60, max: 150, step: 10, unit: 'px', responsive: true }
+                    ...layoutSettings.fields!,
+                    { name: 'layout', type: 'select', label: 'Layout Orientation', options: [{ value: 'horizontal', label: 'Horizontal' }, { value: 'vertical', label: 'Vertical' }], responsive: true },
+                    { name: 'imageSize', type: 'range', label: 'Image Size', min: 60, max: 200, step: 10, unit: 'px', responsive: true }
+                ]
+            },
+            {
+                id: 'premium_interactive',
+                label: 'Interactive States',
+                fields: [
+                    { name: 'hover_scale', type: 'range', label: 'Hover Scale', min: 0.8, max: 1.5, step: 0.05, default: 1 },
+                    { name: 'hover_brightness', type: 'range', label: 'Hover Brightness', min: 50, max: 150, step: 10, unit: '%', default: 100 }
                 ]
             },
             {

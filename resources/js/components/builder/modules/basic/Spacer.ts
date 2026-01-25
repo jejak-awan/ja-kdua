@@ -17,6 +17,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -32,6 +33,10 @@ const SpacerModule: ModuleDefinition = {
 
     defaults: {
         height: 50,
+        layout_type: 'block',
+        gap_x: '0px',
+        gap_y: '0px',
+        html_id: '',
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         padding: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' }
@@ -53,13 +58,15 @@ const SpacerModule: ModuleDefinition = {
                         unit: 'px',
                         showInput: true,
                         responsive: true
-                    }
+                    },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             backgroundSettings,
             adminLabelSettings('Spacer')
         ],
         design: [
+            layoutSettings,
             spacingSettings,
             borderSettings,
             boxShadowSettings,

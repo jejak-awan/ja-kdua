@@ -1,41 +1,67 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="menu-block">
+  <BaseBlock 
+    :module="module" 
+    :mode="mode"
+    :settings="settings"
+    class="menu-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Main Navigation'"
+  >
     <nav 
-        class="menu-nav flex items-center w-full" 
+        class="menu-nav flex items-center w-full transition-all duration-300" 
         :class="[
             alignment === 'center' ? 'justify-center' : (alignment === 'right' ? 'justify-end' : 'justify-start'),
             menuStyle === 'vertical' ? 'flex-col' : 'flex-row'
         ]"
+        :style="containerStyles"
     >
       <!-- Logo Section -->
-      <div v-if="showLogo && settings.logoImage" class="menu-logo flex-shrink-0 mr-8" :class="logoPosition === 'right' ? 'order-last ml-8 mr-0' : ''">
-        <img :src="settings.logoImage" alt="Logo" class="logo-image h-10 w-auto object-contain" />
+      <div v-if="showLogo && settings.logoImage" class="menu-logo flex-shrink-0 mr-10" :class="logoPosition === 'right' ? 'order-last ml-10 mr-0' : ''">
+        <img :src="settings.logoImage" alt="Logo" class="logo-image h-12 w-auto object-contain transition-transform duration-300 hover:scale-105" />
       </div>
       
       <!-- Desktop Menu -->
       <ul 
-        class="menu-items hidden md:flex list-none p-0 m-0" 
-        :class="menuStyle === 'vertical' ? 'flex-col gap-4' : 'flex-row gap-8'"
+        class="menu-items hidden md:flex list-none p-0 m-0 transition-all duration-300" 
+        :class="menuStyle === 'vertical' ? 'flex-col gap-6' : 'flex-row gap-10'"
         :style="menuStyles"
       >
-        <li v-for="item in menuItems" :key="item" class="menu-item">
-          <a href="#" class="menu-link block transition-all hover:text-blue-500 font-medium" :style="linkStyles">{{ item }}</a>
+        <li v-for="item in menuItems" :key="item" class="menu-item group/item">
+          <a 
+            href="#" 
+            class="menu-link block transition-all duration-300 font-bold tracking-tight relative pb-1" 
+            :style="linkStyles"
+            @click.prevent
+          >
+            {{ item }}
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover/item:w-full"></span>
+          </a>
         </li>
       </ul>
       
       <!-- Mobile Toggle -->
-      <button class="menu-toggle md:hidden p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700" @click="mobileOpen = !mobileOpen">
-        <MenuIcon class="w-6 h-6" />
+      <button 
+        class="menu-toggle md:hidden p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-all active:scale-95" 
+        @click="mobileOpen = !mobileOpen"
+        aria-label="Toggle Menu"
+      >
+        <MenuIcon class="w-6 h-6 text-slate-600 dark:text-slate-400" />
       </button>
       
-      <!-- Mobile Menu (Simple overlay as placeholder) -->
-      <div v-if="mobileOpen" class="mobile-menu-overlay fixed inset-0 z-[100] bg-white dark:bg-gray-900 md:hidden p-10">
-        <button class="absolute top-6 right-6 p-2" @click="mobileOpen = false">
-            <X class="w-8 h-8" />
+      <!-- Mobile Menu Overlay -->
+      <div v-if="mobileOpen" class="mobile-menu-overlay fixed inset-0 z-[100] bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl md:hidden p-12 transition-all duration-500">
+        <button class="absolute top-10 right-10 p-3 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" @click="mobileOpen = false">
+            <X class="w-10 h-10 text-slate-800 dark:text-white" />
         </button>
-        <ul class="flex flex-col gap-6 mt-12 text-center text-xl font-bold">
-            <li v-for="item in menuItems" :key="item">
-                <a href="#" @click="mobileOpen = false">{{ item }}</a>
+        <ul class="flex flex-col gap-8 mt-20 text-center text-3xl font-black tracking-tighter">
+            <li v-for="(item, index) in menuItems" :key="item" :style="{ animationDelay: `${index * 100}ms` }" class="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
+                <a 
+                    href="#" 
+                    class="text-slate-900 dark:text-white hover:text-primary transition-colors"
+                    @click="mobileOpen = false"
+                >
+                    {{ item }}
+                </a>
             </li>
         </ul>
       </div>
@@ -43,34 +69,40 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Menu as MenuIcon, X } from 'lucide-vue-next'
 import { 
-  getTypographyStyles,
-  getResponsiveValue
+  getVal,
+  getLayoutStyles,
+  getTypographyStyles
 } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' }
-})
+const props = defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+}>()
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
+const builder = inject<any>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
 const mobileOpen = ref(false)
-const menuItems = ['Home', 'About', 'Services', 'Portfolio', 'Contact']
+const menuItems = ['Home', 'Products', 'Services', 'Insights', 'Company']
 
-const showLogo = computed(() => getResponsiveValue(settings.value, 'showLogo', device.value))
-const logoPosition = computed(() => getResponsiveValue(settings.value, 'logoPosition', device.value) || 'left')
-const menuStyle = computed(() => getResponsiveValue(settings.value, 'style', device.value) || 'horizontal')
-const alignment = computed(() => getResponsiveValue(settings.value, 'alignment', device.value) || 'left')
+const showLogo = computed(() => getVal(settings.value, 'showLogo', device.value))
+const logoPosition = computed(() => getVal(settings.value, 'logoPosition', device.value) || 'left')
+const menuStyle = computed(() => getVal(settings.value, 'style', device.value) || 'horizontal')
+const alignment = computed(() => getVal(settings.value, 'alignment', device.value) || 'left')
+
+const containerStyles = computed(() => {
+    return getLayoutStyles(settings.value, device.value)
+})
 
 const menuStyles = computed(() => {
-  const bgColor = getResponsiveValue(settings.value, 'menuBackgroundColor', device.value) || 'transparent'
+  const bgColor = getVal(settings.value, 'menuBackgroundColor', device.value) || 'transparent'
   return { 
     backgroundColor: bgColor 
   }
@@ -84,9 +116,25 @@ const linkStyles = computed(() => {
 
 <style scoped>
 .menu-block { width: 100%; }
-.mobile-menu-overlay { animation: fadeIn 0.3s ease-out; }
+.mobile-menu-overlay { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to { opacity: 1; backdrop-filter: blur(12px); }
+}
+
+.animate-in {
+    animation-name: enter;
+}
+
+@keyframes enter {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 </style>
+

@@ -18,6 +18,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -67,6 +68,10 @@ const CountdownModule: ModuleDefinition = {
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
+        aria_label: '',
+        html_id: '',
+        hover_scale: 1,
+        hover_brightness: 100,
         animation_effect: '',
         animation_duration: 1000,
         animation_delay: 0,
@@ -146,7 +151,9 @@ const CountdownModule: ModuleDefinition = {
                         type: 'text',
                         label: 'Seconds Label',
                         responsive: true
-                    }
+                    },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             backgroundSettings,
@@ -172,9 +179,9 @@ const CountdownModule: ModuleDefinition = {
                 }))
             },
             {
-                id: 'layout',
-                label: 'Layout',
+                ...layoutSettings,
                 fields: [
+                    ...layoutSettings.fields!,
                     {
                         name: 'alignment',
                         type: 'buttonGroup',
@@ -191,7 +198,7 @@ const CountdownModule: ModuleDefinition = {
                         type: 'range',
                         label: 'Gap',
                         min: 8,
-                        max: 48,
+                        max: 64,
                         step: 4,
                         unit: 'px',
                         responsive: true
@@ -227,6 +234,14 @@ const CountdownModule: ModuleDefinition = {
                         unit: 'px',
                         responsive: true
                     }
+                ]
+            },
+            {
+                id: 'premium_interactive',
+                label: 'Interactive States',
+                fields: [
+                    { name: 'hover_scale', type: 'range', label: 'Item Hover Scale', min: 0.8, max: 1.5, step: 0.05, default: 1 },
+                    { name: 'hover_brightness', type: 'range', label: 'Item Hover Brightness', min: 50, max: 150, step: 10, unit: '%', default: 100 }
                 ]
             },
             spacingSettings,

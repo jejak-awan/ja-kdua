@@ -18,6 +18,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -54,6 +55,8 @@ const NumberBoxModule: ModuleDefinition = {
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
+        aria_label: '',
+        html_id: '',
         animation_effect: '', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 
@@ -65,7 +68,9 @@ const NumberBoxModule: ModuleDefinition = {
                 fields: [
                     { name: 'number', type: 'text', label: 'Number' },
                     { name: 'title', type: 'text', label: 'Title' },
-                    { name: 'description', type: 'textarea', label: 'Description' }
+                    { name: 'description', type: 'textarea', label: 'Description' },
+                    { name: 'aria_label', type: 'text', label: 'ARIA Label' },
+                    { name: 'html_id', type: 'text', label: 'HTML ID' }
                 ]
             },
             backgroundSettings,
@@ -73,10 +78,27 @@ const NumberBoxModule: ModuleDefinition = {
         ],
         design: [
             {
-                id: 'layout',
-                label: 'Layout',
+                ...layoutSettings,
                 fields: [
-                    { name: 'layout', type: 'select', label: 'Layout', options: [{ value: 'horizontal', label: 'Horizontal' }, { value: 'vertical', label: 'Vertical' }] }
+                    ...layoutSettings.fields!,
+                    {
+                        name: 'layout',
+                        type: 'select',
+                        label: 'Layout',
+                        options: [{ value: 'horizontal', label: 'Horizontal' }, { value: 'vertical', label: 'Vertical' }],
+                        responsive: true
+                    },
+                    {
+                        name: 'alignment',
+                        type: 'buttonGroup',
+                        label: 'Alignment',
+                        responsive: true,
+                        options: [
+                            { value: 'left', label: 'Left', icon: 'AlignLeft' },
+                            { value: 'center', label: 'Center', icon: 'AlignCenter' },
+                            { value: 'right', label: 'Right', icon: 'AlignRight' }
+                        ]
+                    }
                 ]
             },
             {

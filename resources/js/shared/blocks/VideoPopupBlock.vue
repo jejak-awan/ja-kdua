@@ -1,12 +1,20 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="video-popup-block">
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
+    :device="device"
+    class="video-popup-block transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Video Popup'"
+    :style="cardStyles"
+  >
     <template #default="{ settings: blockSettings }">
       <Card 
           class="video-popup-container relative group h-[500px] rounded-[48px] overflow-hidden cursor-pointer shadow-2xl border-none transition-all duration-700 hover:-translate-y-2 bg-slate-900" 
           :style="containerStyles"
           @click="openPopup"
       >
-        <!-- Thumbnail Overlay -->
+        <!-- Thumbnail Layer -->
         <div 
             v-if="blockSettings.thumbnailImage" 
             class="thumbnail-layer absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110" 
@@ -16,7 +24,7 @@
              <Film :size="120" class="opacity-10" />
         </div>
         
-        <!-- Glass Overlay -->
+        <!-- Overlay -->
         <div class="video-popup-overlay absolute inset-0 transition-all duration-700 bg-slate-900/40 group-hover:bg-primary/20 backdrop-blur-[2px] group-hover:backdrop-blur-none" :style="overlayStyles" />
         
         <!-- Content Wrap -->
@@ -44,25 +52,29 @@
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed, inject } from 'vue'
+<script setup lang="ts">
+import { computed } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Card, Button } from '../ui'
 import { Play, Film } from 'lucide-vue-next'
 import { 
   getTypographyStyles,
+  getLayoutStyles,
+  getVal,
   getResponsiveValue
 } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance
+  mode?: 'view' | 'edit'
+  device?: 'desktop' | 'tablet' | 'mobile'
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
-const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
-const settings = computed(() => props.module.settings || {})
+const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
 const openPopup = () => {
     if (props.mode === 'edit') return
@@ -71,11 +83,25 @@ const openPopup = () => {
     console.log('Opening video popup:', videoUrl)
 }
 
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
+})
+
 const containerStyles = computed(() => {
-  const height = getResponsiveValue(settings.value, 'height', currentDevice.value) || 500
-  return {
-    height: typeof height === 'number' ? `${height}px` : height
-  }
+    const layoutStyles = getLayoutStyles(settings.value, props.device)
+    const height = getResponsiveValue(settings.value, 'height', props.device) || 500
+    
+    return {
+        ...layoutStyles,
+        height: typeof height === 'number' ? `${height}px` : height
+    }
 })
 
 const overlayStyles = computed(() => ({ 
@@ -83,13 +109,25 @@ const overlayStyles = computed(() => ({
 }))
 
 const buttonStyles = computed(() => {
-    const color = settings.value.iconBackgroundColor || ''
-    return color ? { backgroundColor: color } : {}
+  const size = getResponsiveValue(settings.value, 'iconSize', props.device) || 80
+  const color = settings.value.iconBackgroundColor || ''
+  return {
+    width: `${size}px`,
+    height: `${size}px`,
+    backgroundColor: color
+  }
 })
 
-const buttonTextStyles = computed(() => getTypographyStyles(settings.value, 'button_', currentDevice.value))
+const buttonTextStyles = computed(() => getTypographyStyles(settings.value, 'button_', props.device))
 </script>
 
 <style scoped>
 .video-popup-block { width: 100%; }
+.video-popup-block {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+.video-popup-block:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
 </style>

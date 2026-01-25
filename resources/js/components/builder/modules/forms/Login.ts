@@ -15,7 +15,8 @@ import {
     conditionsSettings,
     interactionsSettings,
     scrollEffectsSettings,
-    attributesSettings
+    attributesSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -72,6 +73,11 @@ const LoginModule: ModuleDefinition = {
         // Box Shadow
         boxShadow: { preset: 'none', horizontal: 0, vertical: 4, blur: 12, spread: 0, color: 'rgba(0,0,0,0.1)', inset: false },
 
+        aria_label: '',
+        html_id: '',
+        hover_scale: 1,
+        hover_brightness: 100,
+
         // Sizing
         width: '100%',
         height: 'auto',
@@ -113,6 +119,7 @@ const LoginModule: ModuleDefinition = {
                 ]
             },
             backgroundSettings,
+            layoutSettings,
             adminLabelSettings('Login')
         ],
         design: [
@@ -165,6 +172,14 @@ const LoginModule: ModuleDefinition = {
             borderSettings,
             boxShadowSettings,
             sizingSettings,
+            {
+                id: 'premium_interactive',
+                label: 'Interactive States',
+                fields: [
+                    { name: 'hover_scale', type: 'range', label: 'Hover Scale', min: 0.8, max: 1.5, step: 0.05, default: 1 },
+                    { name: 'hover_brightness', type: 'range', label: 'Hover Brightness', min: 50, max: 150, step: 10, unit: '%', default: 100 }
+                ]
+            },
             animationSettings
         ],
         advanced: [

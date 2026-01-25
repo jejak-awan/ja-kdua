@@ -1,18 +1,24 @@
 <template>
-  <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ styles: wrapperBaseStyles, settings }">
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
+    :device="device"
+    class="slider-block relative group transition-all duration-300"
+    :id="settings.html_id"
+    :aria-label="settings.aria_label || 'Slider'"
+    :style="cardStyles"
+  >
+    <template #default="{ settings: blockSettings }">
       <div 
-        class="slider-block relative group" 
-        :style="sliderBlockStyles"
-        @mouseenter="plugin?.stop"
-        @mouseleave="plugin?.play"
+        class="slider-container relative" 
+        :style="containerStyles"
       >
         <Carousel 
           class="w-full h-full" 
           :opts="{ loop: true }"
           :plugins="[plugin]"
         >
-          <CarouselContent :style="containerStyles">
+          <CarouselContent class="h-full">
             <CarouselItem 
               v-for="(slide, index) in items" 
               :key="index"
@@ -28,9 +34,9 @@
                   ></div>
                   <!-- Overlay -->
                   <div 
-                    v-if="getVal(settings, 'overlayEnabled') !== false" 
+                    v-if="getVal(blockSettings, 'overlayEnabled') !== false" 
                     class="absolute inset-0 z-0 pointer-events-none" 
-                    :style="{ backgroundColor: getVal(settings, 'overlay_color') || 'rgba(0,0,0,0.4)' }"
+                    :style="{ backgroundColor: getVal(blockSettings, 'overlayColor') || 'rgba(0,0,0,0.4)' }"
                   ></div>
                   
                   <!-- Content -->
@@ -48,19 +54,19 @@
                     <div 
                         class="slider-text prose prose-lg prose-invert mb-8" 
                         :style="contentStyles" 
-                        v-html="slide.subtitle"
+                        v-html="slide.content"
                     ></div>
                     
                     <div 
-                        v-if="slide.button_text"
+                        v-if="slide.buttonText"
                     >
                          <a 
-                            :href="slide.button_url || '#'" 
-                            class="inline-flex items-center justify-center transition-transform hover:-translate-y-1 active:translate-y-0"
+                            :href="slide.buttonUrl || '#'" 
+                            class="inline-flex items-center justify-center transition-all hover:-translate-y-1 active:translate-y-0"
                             :style="buttonStyles" 
-                            @click="mode === 'edit' ? e => e.preventDefault() : undefined"
+                            @click="mode === 'edit' ? ($event: Event) => $event.preventDefault() : undefined"
                         >
-                            {{ slide.button_text }}
+                            {{ slide.buttonText }}
                         </a>
                     </div>
                   </div>
@@ -68,16 +74,16 @@
             </CarouselItem>
           </CarouselContent>
           
-          <CarouselPrevious v-if="(getVal(settings, 'show_arrows') !== false) && items.length > 1" class="left-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <CarouselNext v-if="(getVal(settings, 'show_arrows') !== false) && items.length > 1" class="right-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <CarouselPrevious v-if="(getVal(blockSettings, 'showArrows') !== false) && items.length > 1" class="left-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <CarouselNext v-if="(getVal(blockSettings, 'showArrows') !== false) && items.length > 1" class="right-4 opacity-0 group-hover:opacity-100 transition-opacity" />
         </Carousel>
       </div>
     </template>
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed, watch } from 'vue'
+<script setup lang="ts">
+import { computed } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import Carousel from '../ui/Carousel.vue'
 import CarouselContent from '../ui/CarouselContent.vue'
@@ -85,15 +91,19 @@ import CarouselItem from '../ui/CarouselItem.vue'
 import CarouselNext from '../ui/CarouselNext.vue'
 import CarouselPrevious from '../ui/CarouselPrevious.vue'
 import Autoplay from 'embla-carousel-autoplay'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { getVal, getLayoutStyles, getTypographyStyles } from '../utils/styleUtils'
+import type { BlockInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance
+  mode?: 'view' | 'edit'
+  device?: 'desktop' | 'tablet' | 'mobile'
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const settings = computed(() => props.module?.settings || {})
+const settings = computed(() => (props.module?.settings || {}) as Record<string, any>)
 const items = computed(() => settings.value.items || [])
 
 const autoplayEnabled = computed(() => getVal(settings.value, 'autoplay', props.device) !== false)
@@ -105,45 +115,52 @@ const plugin = Autoplay({
   stopOnMouseEnter: true,
 })
 
-// Since plugin creation is static, we might need a key to force re-render if autoplay settings change substantially,
-// or we can just rely on the fact that these are usually set once. For builder live preview, a watcher might be needed.
-// However, Autoplay instance config is not reactive by default. Simple fix: recreation on component mount/update isn't ideal for carousel.
-// For now, simple implementation.
-
-const sliderBlockStyles = computed(() => ({ width: '100%' }))
-
-const containerStyles = computed(() => {
-  const height = getVal(settings.value, 'height', props.device) || 'h-[500px]'
-  if (height.includes('h-screen')) return { height: '100vh' }
-  const match = height.match(/\d+/)
-  if (match) return { height: `${match[0]}px` }
-  return { height: '500px' } 
-})
-
-const getContentAlignmentClass = (slide) => {
-    const align = slide.alignment || 'center'
-    if (align === 'left') return 'items-start text-left'
-    if (align === 'right') return 'items-end text-right'
-    return 'items-center text-center'
-}
-
 const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
 const contentStyles = computed(() => getTypographyStyles(settings.value, 'content_', props.device))
+
 const buttonStyles = computed(() => {
     const styles = getTypographyStyles(settings.value, 'button_', props.device)
     return {
         ...styles,
         padding: '12px 32px',
         backgroundColor: styles.color || '#ffffff',
-        color: styles.color ? '#ffffff' : '#000000', 
+        color: styles.color ? '#000000' : '#000000', 
         borderRadius: '99px',
         textDecoration: 'none'
     }
 })
+
+const cardStyles = computed(() => {
+    const styles: Record<string, any> = {}
+    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles
+})
+
+const containerStyles = computed(() => {
+    const layout = getLayoutStyles(settings.value, props.device)
+    const height = getVal(settings.value, 'height', props.device) || 500
+    
+    return {
+        ...layout,
+        height: typeof height === 'number' ? `${height}px` : height
+    }
+})
+
+const getContentAlignmentClass = (slide: any) => {
+    const align = slide.alignment || 'center'
+    if (align === 'left') return 'items-start text-left'
+    if (align === 'right') return 'items-end text-right'
+    return 'items-center text-center'
+}
 </script>
 
 <style scoped>
-/* Ensure Carousel item takes full height */
+.slider-block { width: 100%; }
 :deep(.embla__container) {
   height: 100%;
 }
