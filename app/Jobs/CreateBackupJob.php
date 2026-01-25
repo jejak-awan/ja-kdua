@@ -58,13 +58,13 @@ class CreateBackupJob implements ShouldQueue
                 $backup->update(['description' => $this->description]);
             }
 
-            Log::info('CreateBackupJob: Backup created successfully', [
+            Log::channel('backup')->info('CreateBackupJob: Backup created successfully', [
                 'backup_id' => $backup->id ?? null,
                 'type' => $this->type,
                 'name' => $this->name,
             ]);
         } catch (\Exception $e) {
-            Log::error('CreateBackupJob failed: '.$e->getMessage(), [
+            Log::channel('backup')->error('CreateBackupJob failed: '.$e->getMessage(), [
                 'type' => $this->type,
                 'name' => $this->name,
                 'error' => $e->getMessage(),
@@ -88,7 +88,7 @@ class CreateBackupJob implements ShouldQueue
      */
     public function failed(\Throwable $exception): void
     {
-        Log::error('CreateBackupJob permanently failed', [
+        Log::channel('backup')->error('CreateBackupJob permanently failed', [
             'type' => $this->type,
             'name' => $this->name,
             'error' => $exception->getMessage(),

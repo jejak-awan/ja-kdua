@@ -62,12 +62,12 @@ class SendEmailJob implements ShouldQueue
                 }
             });
 
-            Log::info('SendEmailJob: Email sent successfully', [
+            Log::channel('email')->info('SendEmailJob: Email sent successfully', [
                 'to' => $this->to,
                 'subject' => $this->subject,
             ]);
         } catch (\Exception $e) {
-            Log::error('SendEmailJob failed: '.$e->getMessage(), [
+            Log::channel('email')->error('SendEmailJob failed: '.$e->getMessage(), [
                 'to' => $this->to,
                 'subject' => $this->subject,
                 'error' => $e->getMessage(),
@@ -81,7 +81,7 @@ class SendEmailJob implements ShouldQueue
      */
     public function failed(\Throwable $exception): void
     {
-        Log::error('SendEmailJob permanently failed', [
+        Log::channel('email')->error('SendEmailJob permanently failed', [
             'to' => $this->to,
             'subject' => $this->subject,
             'error' => $exception->getMessage(),

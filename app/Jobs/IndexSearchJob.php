@@ -41,10 +41,10 @@ class IndexSearchJob implements ShouldQueue
             } elseif ($this->contentId) {
                 $this->indexContent($this->contentId);
             } else {
-                Log::warning('IndexSearchJob: No content ID or reindex flag provided');
+                Log::channel('jobs')->warning('IndexSearchJob: No content ID or reindex flag provided');
             }
         } catch (\Exception $e) {
-            Log::error('IndexSearchJob failed: '.$e->getMessage(), [
+            Log::channel('jobs')->error('IndexSearchJob failed: '.$e->getMessage(), [
                 'content_id' => $this->contentId,
                 'reindex_all' => $this->reindexAll,
                 'error' => $e->getMessage(),
@@ -62,7 +62,7 @@ class IndexSearchJob implements ShouldQueue
         // For example, using Laravel Scout, Elasticsearch, Algolia, etc.
 
         // For now, we'll just log it
-        Log::info('IndexSearchJob: Content indexed', [
+        Log::channel('jobs')->info('IndexSearchJob: Content indexed', [
             'content_id' => $contentId,
             'title' => $content->title,
         ]);
@@ -76,7 +76,7 @@ class IndexSearchJob implements ShouldQueue
 
     protected function reindexAll(): void
     {
-        Log::info('IndexSearchJob: Starting full reindex');
+        Log::channel('jobs')->info('IndexSearchJob: Starting full reindex');
 
         // Index all published content
         $contents = Content::where('status', 'published')
@@ -86,7 +86,7 @@ class IndexSearchJob implements ShouldQueue
                 }
             });
 
-        Log::info('IndexSearchJob: Full reindex completed');
+        Log::channel('jobs')->info('IndexSearchJob: Full reindex completed');
     }
 
     /**
@@ -94,7 +94,7 @@ class IndexSearchJob implements ShouldQueue
      */
     public function failed(\Throwable $exception): void
     {
-        Log::error('IndexSearchJob permanently failed', [
+        Log::channel('jobs')->error('IndexSearchJob permanently failed', [
             'content_id' => $this->contentId,
             'reindex_all' => $this->reindexAll,
             'error' => $exception->getMessage(),

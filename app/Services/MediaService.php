@@ -53,7 +53,7 @@ class MediaService
             try {
                 $this->generateThumbnail($media);
             } catch (\Exception $e) {
-                Log::warning('Auto-thumbnail generation failed: '.$e->getMessage());
+                Log::channel('media')->warning('Auto-thumbnail generation failed: '.$e->getMessage());
             }
         }
 
@@ -88,7 +88,7 @@ class MediaService
 
             return true;
         } catch (\Exception $e) {
-            Log::warning('Image optimization failed: '.$e->getMessage());
+            Log::channel('media')->warning('Image optimization failed: '.$e->getMessage());
 
             return false;
         }
@@ -130,7 +130,7 @@ class MediaService
 
                 return $thumbnailPath;
             } catch (\Exception $e) {
-                Log::warning('SVG thumbnail generation failed: '.$e->getMessage());
+                Log::channel('media')->warning('SVG thumbnail generation failed: '.$e->getMessage());
             }
         }
 
@@ -153,7 +153,7 @@ class MediaService
 
             return $thumbnailPath;
         } catch (\Exception $e) {
-            Log::warning('Thumbnail generation failed: '.$e->getMessage());
+            Log::channel('media')->warning('Thumbnail generation failed: '.$e->getMessage());
 
             return null;
         }
@@ -187,7 +187,7 @@ class MediaService
 
             return true;
         } catch (\Exception $e) {
-            Log::error('Image resize failed: '.$e->getMessage());
+            Log::channel('media')->error('Image resize failed: '.$e->getMessage());
 
             return false;
         }
@@ -360,7 +360,7 @@ class MediaService
                     $model = $modelClass::find($usage->model_id);
                 }
             } catch (\Exception $e) {
-                Log::warning('Failed to load model for usage: '.$e->getMessage());
+                Log::channel('media')->warning('Failed to load model for usage: '.$e->getMessage());
             }
 
             return [
@@ -425,7 +425,7 @@ class MediaService
                 try {
                     $this->generateThumbnail($newMedia);
                 } catch (\Exception $e) {
-                    Log::warning('Thumbnail generation failed for edited image: '.$e->getMessage());
+                    Log::channel('media')->warning('Thumbnail generation failed for edited image: '.$e->getMessage());
                 }
 
                 return $newMedia;
@@ -439,12 +439,12 @@ class MediaService
             try {
                 $this->generateThumbnail($media);
             } catch (\Exception $e) {
-                Log::warning('Thumbnail regeneration failed: '.$e->getMessage());
+                Log::channel('media')->warning('Thumbnail regeneration failed: '.$e->getMessage());
             }
 
             return $media->fresh();
         } catch (\Exception $e) {
-            Log::error('Image editing failed: '.$e->getMessage());
+            Log::channel('media')->error('Image editing failed: '.$e->getMessage());
 
             return null;
         }
@@ -555,11 +555,11 @@ class MediaService
                     }
                 } catch (\Exception $e) {
                     $stats['errors']++;
-                    Log::error("Failed to import file during scan: {$filePath} - " . $e->getMessage());
+                    Log::channel('media')->error("Failed to import file during scan: {$filePath} - " . $e->getMessage());
                     }
             }
         } catch (\Exception $e) {
-            Log::error("Media scan failed: " . $e->getMessage());
+            Log::channel('media')->error("Media scan failed: " . $e->getMessage());
         }
 
         return $stats;
@@ -571,7 +571,7 @@ class MediaService
     protected function sanitizeSvg(string $filePath): void
     {
         if (! class_exists(\enshrined\svgSanitize\Sanitizer::class)) {
-            Log::warning('SVG Sanitizer class not found. Skipping sanitization.');
+            Log::channel('media')->warning('SVG Sanitizer class not found. Skipping sanitization.');
             return;
         }
 
@@ -584,7 +584,7 @@ class MediaService
             
             file_put_contents($filePath, $cleanContent);
         } catch (\Exception $e) {
-            Log::error('SVG sanitization failed: '.$e->getMessage());
+            Log::channel('media')->error('SVG sanitization failed: '.$e->getMessage());
             // We do not stop the upload, but maybe we should?
             // For now, log the error.
         }

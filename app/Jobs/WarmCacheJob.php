@@ -41,7 +41,7 @@ class WarmCacheJob implements ShouldQueue
      */
     public function handle(CacheWarmingService $warmingService): void
     {
-        Log::info('Starting scheduled cache warming', [
+        Log::channel('jobs')->info('Starting scheduled cache warming', [
             'type' => $this->type,
             'limit' => $this->limit,
         ]);
@@ -49,14 +49,14 @@ class WarmCacheJob implements ShouldQueue
         try {
             if ($this->type) {
                 $count = $warmingService->warmByType($this->type, $this->limit);
-                Log::info("Cache warming completed for {$this->type}: {$count} items");
+                Log::channel('jobs')->info("Cache warming completed for {$this->type}: {$count} items");
             } else {
                 $results = $warmingService->warmAll();
                 $total = array_sum($results);
-                Log::info("Cache warming completed: {$total} total items", $results);
+                Log::channel('jobs')->info("Cache warming completed: {$total} total items", $results);
             }
         } catch (\Exception $e) {
-            Log::error('Cache warming job failed: '.$e->getMessage(), [
+            Log::channel('jobs')->error('Cache warming job failed: '.$e->getMessage(), [
                 'type' => $this->type,
                 'exception' => $e,
             ]);

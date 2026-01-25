@@ -73,6 +73,70 @@ return [
             'replace_placeholders' => true,
         ],
 
+        /*
+        |--------------------------------------------------------------------------
+        | Category-Based Log Channels
+        |--------------------------------------------------------------------------
+        |
+        | These channels split logs by purpose for easier debugging and monitoring.
+        | Each has different retention based on importance.
+        |
+        */
+
+        // Security logs - Auth, login attempts, blocked IPs (longer retention for audit)
+        'security' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/security.log'),
+            'level' => 'info',
+            'days' => 90,
+            'replace_placeholders' => true,
+        ],
+
+        // Queue job logs - All background job activity
+        'jobs' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/jobs.log'),
+            'level' => 'info',
+            'days' => 7,
+            'replace_placeholders' => true,
+        ],
+
+        // Media processing logs - Thumbnail generation, image optimization
+        'media' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/media.log'),
+            'level' => 'info',
+            'days' => 7,
+            'replace_placeholders' => true,
+        ],
+
+        // Email delivery logs
+        'email' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/email.log'),
+            'level' => 'info',
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
+
+        // Backup operation logs
+        'backup' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/backup.log'),
+            'level' => 'info',
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
+
+        // Slow queries for performance monitoring
+        'slow-queries' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/slow-queries.log'),
+            'level' => 'debug',
+            'days' => 14,
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

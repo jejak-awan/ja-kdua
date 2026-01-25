@@ -43,7 +43,7 @@ class ProcessImageJob implements ShouldQueue
             $media = Media::findOrFail($this->mediaId);
 
             if (! str_starts_with($media->mime_type, 'image/')) {
-                Log::warning("ProcessImageJob: Media {$this->mediaId} is not an image");
+                Log::channel('media')->warning("ProcessImageJob: Media {$this->mediaId} is not an image");
 
                 return;
             }
@@ -59,10 +59,10 @@ class ProcessImageJob implements ShouldQueue
                     $this->optimizeImage($media);
                     break;
                 default:
-                    Log::warning("ProcessImageJob: Unknown action {$this->action}");
+                    Log::channel('media')->warning("ProcessImageJob: Unknown action {$this->action}");
             }
         } catch (\Exception $e) {
-            Log::error('ProcessImageJob failed: '.$e->getMessage(), [
+            Log::channel('media')->error('ProcessImageJob failed: '.$e->getMessage(), [
                 'media_id' => $this->mediaId,
                 'action' => $this->action,
                 'trace' => $e->getTraceAsString(),
@@ -110,11 +110,11 @@ class ProcessImageJob implements ShouldQueue
                 $imagick->clear();
                 $imagick->destroy();
 
-                Log::info("ProcessImageJob: SVG thumbnail generated for media {$media->id}");
+                Log::channel('media')->info("ProcessImageJob: SVG thumbnail generated for media {$media->id}");
 
                 return;
             } catch (\Exception $e) {
-                Log::warning('ProcessImageJob: SVG thumbnail generation failed with Imagick: '.$e->getMessage());
+                Log::channel('media')->warning('ProcessImageJob: SVG thumbnail generation failed with Imagick: '.$e->getMessage());
                 // Fall through to try Intervention Image
             }
         }
@@ -140,9 +140,9 @@ class ProcessImageJob implements ShouldQueue
                         $image->save($thumbnailFullPath, quality: $this->quality ?? 85);
                     }
 
-                    Log::info("ProcessImageJob: Thumbnail generated for media {$media->id}");
+                    Log::channel('media')->info("ProcessImageJob: Thumbnail generated for media {$media->id}");
                 } catch (\Exception $e) {
-                    Log::warning('ProcessImageJob: Thumbnail generation failed: '.$e->getMessage());
+                    Log::channel('media')->warning('ProcessImageJob: Thumbnail generation failed: '.$e->getMessage());
                 }
             }
         }
@@ -151,7 +151,7 @@ class ProcessImageJob implements ShouldQueue
     protected function resizeImage(Media $media): void
     {
         if (! $this->width && ! $this->height) {
-            Log::warning('ProcessImageJob: Resize requires width or height');
+            Log::channel('media')->warning('ProcessImageJob: Resize requires width or height');
 
             return;
         }
@@ -183,7 +183,7 @@ class ProcessImageJob implements ShouldQueue
                 // Update file size
                 $media->update(['size' => filesize($fullPath)]);
 
-                Log::info("ProcessImageJob: Image resized for media {$media->id}");
+                Log::channel('media')->info("ProcessImageJob: Image resized for media {$media->id}");
             }
         }
     }
@@ -214,7 +214,7 @@ class ProcessImageJob implements ShouldQueue
                 // Update file size
                 $media->update(['size' => filesize($fullPath)]);
 
-                Log::info("ProcessImageJob: Image optimized for media {$media->id}");
+                Log::channel('media')->info("ProcessImageJob: Image optimized for media {$media->id}");
             }
         }
     }
@@ -224,7 +224,7 @@ class ProcessImageJob implements ShouldQueue
      */
     public function failed(\Throwable $exception): void
     {
-        Log::error('ProcessImageJob permanently failed', [
+        Log::channel('media')->error('ProcessImageJob permanently failed', [
             'media_id' => $this->mediaId,
             'action' => $this->action,
             'error' => $exception->getMessage(),
