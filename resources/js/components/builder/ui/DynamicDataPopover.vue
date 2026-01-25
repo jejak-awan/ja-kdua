@@ -1,41 +1,73 @@
 <template>
-  <div class="dynamic-data-popover">
-    <div class="popover-search">
-      <Search :size="14" />
-      <input 
-        v-model="searchQuery" 
-        type="text" 
-        :placeholder="$t('builder.dynamic.search', 'Search dynamic data...')"
-        autofocus
-      >
+  <div class="dynamic-data-popover flex flex-col h-full bg-body overflow-hidden">
+    <!-- Close button if showClose is true (for mobile or specific modals) -->
+    <div v-if="showClose" class="flex items-center justify-between px-6 py-4 border-b border-border">
+      <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{{ $t('builder.dynamic.title', 'Dynamic Data') }}</h3>
+      <button @click="$emit('close')" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full transition-colors text-muted-foreground">
+        <X :size="16" />
+      </button>
     </div>
 
-    <div class="popover-content custom-scrollbar">
+    <!-- Search Section -->
+    <div class="p-4 border-b border-border/50">
+      <div class="relative group">
+        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+        <Input 
+          v-model="searchQuery" 
+          :placeholder="$t('builder.dynamic.search', 'Search dynamic data...')"
+          class="pl-10 h-10 bg-slate-50 dark:bg-slate-900/50 border-none focus-visible:ring-1 focus-visible:ring-primary rounded-xl text-sm"
+          autofocus
+        />
+      </div>
+    </div>
+
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto no-scrollbar custom-scrollbar pt-2 pb-6">
       <!-- Loading State -->
-      <div v-if="loading" class="loading-state">
-        <div class="loading-spinner"></div>
-        <span>{{ $t('builder.dynamic.loading', 'Loading...') }}</span>
+      <div v-if="loading" class="flex flex-col items-center justify-center p-12 gap-4">
+        <Loader2 class="w-8 h-8 text-primary animate-spin" />
+        <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest animate-pulse">{{ $t('builder.dynamic.loading', 'Scanning Sources...') }}</span>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="error" class="flex flex-col items-center justify-center p-12 text-center gap-4">
+        <AlertCircle class="w-10 h-10 text-destructive opacity-50" />
+        <p class="text-xs font-bold text-destructive/80 uppercase tracking-widest">{{ error }}</p>
+        <Button variant="outline" size="sm" class="rounded-full" @click="fetchDynamicSources">
+          {{ $t('builder.common.retry', 'Retry') }}
+        </Button>
       </div>
 
       <!-- Content -->
       <template v-else>
-        <div v-for="(group, groupName) in filteredGroups" :key="groupName" class="data-group">
-          <h4 class="group-title">{{ group.label }}</h4>
-          <div class="group-items">
+        <div v-for="(group, groupName) in filteredGroups" :key="groupName" class="mb-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <div class="px-6 py-2">
+            <h4 class="text-[9px] font-black uppercase tracking-[0.3em] text-primary/70 dark:text-primary/50">{{ group.label }}</h4>
+          </div>
+          
+          <div class="flex flex-col">
             <button 
               v-for="item in group.items" 
               :key="item.id"
-              class="data-item"
+              class="group flex items-center justify-between px-6 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all duration-300 active:scale-[0.98] text-left"
               @click="selectItem(item)"
             >
-              <span class="item-label">{{ item.label }}</span>
-              <span class="item-tag">{{ item.tag }}</span>
+              <div class="flex flex-col items-start gap-1">
+                <span class="text-sm font-black text-slate-700 dark:text-slate-200 group-hover:text-primary transition-colors tracking-tight leading-none">{{ item.label }}</span>
+                <span v-if="item.description" class="text-[10px] text-muted-foreground line-clamp-1 opacity-60 group-hover:opacity-100 transition-opacity">{{ item.description }}</span>
+              </div>
+              
+              <Badge variant="outline" class="bg-slate-100/50 dark:bg-slate-800/30 border-slate-200/60 dark:border-slate-800/60 text-[10px] font-mono font-medium px-2 py-0.5 text-slate-500 dark:text-slate-400 group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/20 transition-all duration-300">
+                {{ item.tag }}
+              </Badge>
             </button>
           </div>
         </div>
         
-        <div v-if="Object.keys(filteredGroups).length === 0" class="no-results">
-          {{ $t('builder.dynamic.noResults', 'No dynamic data found') }}
+        <!-- Empty State -->
+        <div v-if="Object.keys(filteredGroups).length === 0" class="flex flex-col items-center justify-center p-12 text-center opacity-40 animate-in fade-in duration-500">
+          <SearchX class="w-12 h-12 mb-4 text-muted-foreground" />
+          <p class="text-[10px] font-black uppercase tracking-widest">{{ $t('builder.dynamic.noResults', 'No dynamic data found') }}</p>
         </div>
       </template>
     </div>
@@ -44,7 +76,8 @@
 
 <script setup>
   import { ref, computed, onMounted, inject } from 'vue'
-  import { Search } from 'lucide-vue-next'
+  import { Search, Loader2, X, AlertCircle, SearchX } from 'lucide-vue-next'
+  import { Input, Badge, Button } from './index'
   import api from '@/services/api'
 
   const props = defineProps({
@@ -55,10 +88,14 @@
     contentId: {
       type: [Number, String],
       default: null
+    },
+    showClose: {
+      type: Boolean,
+      default: false
     }
   })
 
-  const emit = defineEmits(['select'])
+  const emit = defineEmits(['select', 'close'])
   const builder = inject('builder', null)
 
   const searchQuery = ref('')
@@ -94,20 +131,28 @@
     page: {
       label: 'Page / Post',
       items: [
-        { id: 'post_title', label: 'Post Title', tag: '{{post_title}}' },
-        { id: 'post_excerpt', label: 'Post Excerpt', tag: '{{post_excerpt}}' },
-        { id: 'post_date', label: 'Post Date', tag: '{{post_date}}' },
-        { id: 'post_author', label: 'Author Name', tag: '{{post_author}}' },
-        { id: 'post_featured_image', label: 'Featured Image', tag: '{{post_featured_image}}' },
-        { id: 'post_url', label: 'Post URL', tag: '{{post_url}}' }
+        { id: 'post_title', label: 'Post Title', tag: '{{post_title}}', description: 'Display the current post or page title' },
+        { id: 'post_excerpt', label: 'Post Excerpt', tag: '{{post_excerpt}}', description: 'Display a short summary of the content' },
+        { id: 'post_date', label: 'Post Date', tag: '{{post_date}}', description: 'Publication date of this content' },
+        { id: 'post_author', label: 'Author Name', tag: '{{post_author}}', description: 'Display the name of the content creator' },
+        { id: 'post_featured_image', label: 'Featured Image', tag: '{{post_featured_image}}', description: 'Primary image associated with this post' },
+        { id: 'post_url', label: 'Post URL', tag: '{{post_url}}', description: 'Permalink to the current content' }
       ]
+    },
+    item: {
+        label: 'Current Loop Item',
+        items: [
+            { id: 'loop_title', label: 'Item Title', tag: '{{loop_title}}', description: 'Title of the current item in a grid or list' },
+            { id: 'loop_excerpt', label: 'Item Excerpt', tag: '{{loop_excerpt}}', description: 'Short description of the loop item' },
+            { id: 'loop_date', label: 'Item Date', tag: '{{loop_date}}', description: 'Date associated with the current item' }
+        ]
     },
     site: {
       label: 'Site Settings',
       items: [
-        { id: 'site_title', label: 'Site Title', tag: '{{site_title}}' },
-        { id: 'site_tagline', label: 'Site Tagline', tag: '{{site_tagline}}' },
-        { id: 'current_date', label: 'Current Date', tag: '{{current_date}}' }
+        { id: 'site_title', label: 'Site Title', tag: '{{site_title}}', description: 'Global website title' },
+        { id: 'site_tagline', label: 'Site Tagline', tag: '{{site_tagline}}', description: 'Website slogan or description' },
+        { id: 'current_date', label: 'Current Date', tag: '{{current_date}}', description: 'Today\'s dynamic date' }
       ]
     }
   })
@@ -119,7 +164,8 @@
     Object.entries(dataGroups.value).forEach(([key, group]) => {
       const items = group.items.filter(item => 
         item.label.toLowerCase().includes(query) || 
-        item.tag.toLowerCase().includes(query)
+        item.tag.toLowerCase().includes(query) ||
+        (item.description && item.description.toLowerCase().includes(query))
       )
 
       if (items.length > 0) {
@@ -144,119 +190,14 @@
 
 <style scoped>
 .dynamic-data-popover {
-  width: 280px;
-  max-height: 400px;
-  display: flex;
-  flex-direction: column;
-  background: var(--builder-bg-primary);
-  color: var(--builder-text-primary);
+  width: 320px;
+  max-height: 500px;
+  min-height: 400px;
 }
 
-.popover-search {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-bottom: 1px solid var(--builder-border);
-  color: var(--builder-text-muted);
-}
-
-.popover-search input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  font-size: var(--font-size-sm);
-  color: var(--builder-text-primary);
-  outline: none;
-}
-
-.popover-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--spacing-xs) 0;
-}
-
-.data-group {
-  padding: var(--spacing-xs) 0;
-}
-
-.group-title {
-  padding: var(--spacing-xs) var(--spacing-md);
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--builder-text-muted);
-  letter-spacing: 0.5px;
-}
-
-.group-items {
-  display: flex;
-  flex-direction: column;
-}
-
-.data-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: transparent;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.data-item:hover {
-  background: var(--builder-bg-secondary);
-}
-
-.item-label {
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-}
-
-.item-tag {
-  font-size: 10px;
-  color: var(--builder-text-muted);
-  background: var(--builder-bg-tertiary);
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-xl);
-  gap: var(--spacing-sm);
-  color: var(--builder-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-.loading-spinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid var(--builder-border);
-  border-top-color: var(--builder-accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.no-results {
-  padding: var(--spacing-lg);
-  text-align: center;
-  color: var(--builder-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-/* Scrollbar */
+/* Custom Scrollbar for a pro feel */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -264,7 +205,19 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--builder-border);
-  border-radius: 10px;
+  background: hsl(var(--border));
+  border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.3);
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 </style>
