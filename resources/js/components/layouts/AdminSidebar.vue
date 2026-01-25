@@ -265,10 +265,10 @@ onMounted(() => {
 });
 
 const initializeExpandedSections = () => {
-    // Default: first 3 sections expanded
-    sidebarSections.forEach((section, index) => {
-        expandedSections.value[section.key] = index < 3;
-    });
+    // Default: only first section expanded (Content)
+    if (sidebarSections.length > 0) {
+        expandedSections.value[sidebarSections[0].key] = true;
+    }
 };
 
 // Save to localStorage when changed
@@ -282,6 +282,9 @@ watch(() => $route.name, () => {
 });
 
 const autoExpandActiveSection = () => {
+    // Clear all first to ensure single-accordion behavior
+    expandedSections.value = {};
+    
     for (const section of sidebarSections) {
         const items = filteredNavigation.value[section.key] || [];
         if (items.some(item => item.name === $route.name)) {
@@ -292,7 +295,11 @@ const autoExpandActiveSection = () => {
 };
 
 const toggleSection = (key) => {
-    expandedSections.value[key] = !expandedSections.value[key];
+    const isCurrentlyExpanded = expandedSections.value[key];
+    // Clear all others (Accordion behavior)
+    expandedSections.value = {};
+    // Toggle the clicked one
+    expandedSections.value[key] = !isCurrentlyExpanded;
 };
 
 const openPopup = async (key, event = null) => {
