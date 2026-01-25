@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Backup;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Process\Process;
 
@@ -191,11 +192,24 @@ class BackupService
                 'password' => $encryptionPassword, // Store the password (model casts it to encrypted)
             ]);
 
+            Log::channel('backup')->info('Backup created successfully', [
+                'backup_id' => $backup->id,
+                'name' => $backup->name,
+                'type' => $backup->type,
+                'size' => $size,
+            ]);
+
             return $backup;
         } catch (\Exception $e) {
             $backup->update([
                 'status' => 'failed',
                 'error_message' => $e->getMessage(),
+            ]);
+
+            Log::channel('backup')->error('Backup creation failed', [
+                'backup_id' => $backup->id,
+                'name' => $backup->name,
+                'error' => $e->getMessage(),
             ]);
 
             // Attempt cleanup on failure
@@ -349,6 +363,9 @@ class BackupService
 
     public function deleteBackup(Backup $backup)
     {
+        $backupId = $backup->id;
+        $backupName = $backup->name;
+
         // Delete file
         if (Storage::disk($backup->disk)->exists($backup->path)) {
             Storage::disk($backup->disk)->delete($backup->path);
@@ -356,6 +373,11 @@ class BackupService
 
         // Delete record
         $backup->delete();
+
+        Log::channel('backup')->info('Backup deleted', [
+            'backup_id' => $backupId,
+            'name' => $backupName,
+        ]);
     }
 
     public function listBackups($type = null)
