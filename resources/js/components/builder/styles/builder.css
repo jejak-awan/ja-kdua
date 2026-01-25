@@ -51,8 +51,7 @@
 }
 
 /* --- Theme: Dark (Default) --- */
-.ja-builder,
-.ja-builder--dark {
+.ja-builder.ja-builder--dark {
     --builder-bg-primary: #1a1e25;
     --builder-bg-secondary: #242830;
     --builder-bg-tertiary: #2d323b;
@@ -106,24 +105,18 @@
 
     /* --- Shadcn UI Token Mapping (Dark) --- */
     --background: 218 17% 12%;
-    /* #1a1e25 */
     --foreground: 210 40% 98%;
-    /* #f8fafc */
     --card: 220 14% 16%;
-    /* #242830 */
     --popover: 218 17% 12%;
-    /* #1a1e25 */
     --border: 220 14% 16%;
-    /* #242830 */
     --muted: 217 19% 27%;
     --accent: 220 14% 20%;
     --primary: 223 82% 52%;
-    /* #2059ea */
     --primary-foreground: 210 40% 98%;
 }
 
 /* --- Theme: Light --- */
-.ja-builder--light {
+.ja-builder.ja-builder--light {
     --builder-bg-primary: #ffffff;
     --builder-bg-secondary: #f8fafc;
     --builder-bg-tertiary: #f1f5f9;

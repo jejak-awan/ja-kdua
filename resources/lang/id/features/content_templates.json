@@ -20,6 +20,8 @@
         "content": "Isi Templat",
         "name": "Nama",
         "namePlaceholder": "Nama templat",
+        "slug": "Slug",
+        "slugHelp": "Versi ramah URL",
         "description": "Deskripsi",
         "descriptionPlaceholder": "Deskripsi templat",
         "type": "Tipe",

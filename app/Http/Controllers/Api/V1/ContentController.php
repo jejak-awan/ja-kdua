@@ -232,6 +232,26 @@ class ContentController extends BaseApiController
             }
         }
 
+        // Check for manual slug conflict
+        $existing = Content::withTrashed()->where('slug', $validated['slug'])->first();
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Slug already exists',
+                'code' => 'SLUG_CONFLICT', // Frontend expects 'code'
+                'error_code' => 'SLUG_CONFLICT', // Standard compliance
+                'data' => [
+                    'conflict' => [
+                        'id' => $existing->id,
+                        'title' => $existing->title,
+                        'is_trashed' => $existing->trashed(),
+                        'slug' => $existing->slug,
+                        'suggested_slug' => $this->contentService->generateUniqueSlug($validated['slug'])
+                    ]
+                ]
+            ], 409);
+        }
+
         $createRevision = $request->input('create_revision', false);
 
         $content = $this->contentService->create($validated, $request->user()->id, $createRevision);
@@ -408,8 +428,11 @@ class ContentController extends BaseApiController
             return $this->validationError($e->errors());
         }
 
-        // Force status to draft for auto-save
+        // Force status to draft and ensure editor_type has a default for auto-save
         $validated['status'] = 'draft';
+        if (! isset($validated['editor_type']) || empty($validated['editor_type'])) {
+            $validated['editor_type'] = 'classic';
+        }
 
         if ($content) {
             // Update existing content
@@ -446,8 +469,25 @@ class ContentController extends BaseApiController
                 $validated['slug'] = \Illuminate\Support\Str::slug($validated['title']);
             }
 
-            // Ensure slug is unique
-            $validated['slug'] = $this->contentService->generateUniqueSlug($validated['slug']);
+            // Ensure slug is unique for autosave check
+            $existing = Content::withTrashed()->where('slug', $validated['slug'])->first();
+            if ($existing) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Slug conflict',
+                    'code' => 'SLUG_CONFLICT',
+                    'error_code' => 'SLUG_CONFLICT',
+                    'data' => [
+                        'conflict' => [
+                            'id' => $existing->id,
+                            'title' => $existing->title,
+                            'is_trashed' => $existing->trashed(),
+                            'slug' => $existing->slug,
+                            'suggested_slug' => $this->contentService->generateUniqueSlug($validated['slug'])
+                        ]
+                    ]
+                ], 409);
+            }
 
             // Use service create
             $content = $this->contentService->create($validated, $request->user()->id, false);

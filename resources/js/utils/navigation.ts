@@ -11,11 +11,9 @@ export interface NavItem {
 }
 
 export const navigationGroups: Record<string, NavItem[]> = {
-    // Content Management (4 items)
+    // Content Management (1 item)
     content: [
-        { name: 'contents', to: '/admin/contents', label: 'Contents', permission: 'view content' },
-        { name: 'categories', to: '/admin/categories', label: 'Categories', permission: 'view categories' },
-        { name: 'tags', to: '/admin/tags', label: 'Tags', permission: 'view tags' },
+        { name: 'content-studio', to: '/admin/content-studio', label: 'Content Studio', permission: 'view content' },
     ],
 
     // Media (2 items)

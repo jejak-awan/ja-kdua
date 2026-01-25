@@ -23,6 +23,7 @@
         "metaTitle": "Meta Title",
         "metaDescription": "Meta Description",
         "metaKeywords": "Meta Keywords",
+        "keywordsPlaceholder": "Enter meta keywords separated by commas",
         "publishDate": "Publish Date",
         "selectCategory": "Select Category",
         "addTags": "Add Tags",
@@ -93,7 +94,13 @@
         "duplicateFailed": "Failed to duplicate content",
         "restoreFailed": "Failed to restore content",
         "rescheduleFailed": "Failed to reschedule content",
-        "unsavedChanges": "You have unsaved changes. Are you sure you want to leave?"
+        "unsavedChanges": "You have unsaved changes. Are you sure you want to leave?",
+        "approved": "Content approved successfully",
+        "rejected": "Content rejected successfully",
+        "rejectReason": "Please provide a reason for rejection"
+    },
+    "placeholders": {
+        "rejectionReason": "Enter rejection reason here..."
     },
     "status": {
         "draft": "Draft",
@@ -111,7 +118,9 @@
         "moveToTrash": "Move to Trash",
         "duplicate": "Duplicate",
         "approve": "Approve",
-        "reject": "Reject"
+        "reject": "Reject",
+        "emptyTrash": "Empty Trash",
+        "restore": "Restore"
     },
     "tabs": {
         "content": "Content",

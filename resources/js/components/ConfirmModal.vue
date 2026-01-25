@@ -19,6 +19,16 @@
                 <p class="text-sm text-muted-foreground whitespace-pre-wrap break-words">{{ message }}</p>
             </div>
 
+            <div v-if="input" class="pb-4">
+                <Input
+                    v-model="inputValue"
+                    :placeholder="inputPlaceholder"
+                    class="w-full"
+                    @keyup.enter="handleConfirm"
+                    autofocus
+                />
+            </div>
+
             <DialogFooter class="gap-2 sm:gap-0">
                 <Button
                     variant="outline"
@@ -38,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { AlertTriangle, Info, Trash2, HelpCircle } from 'lucide-vue-next';
 import Dialog from './ui/dialog.vue';
 import DialogContent from './ui/dialog-content.vue';
@@ -47,6 +57,7 @@ import DialogFooter from './ui/dialog-footer.vue';
 import DialogHeader from './ui/dialog-header.vue';
 import DialogTitle from './ui/dialog-title.vue';
 import Button from './ui/button.vue';
+import Input from './ui/input.vue';
 
 const props = defineProps({
     isOpen: {
@@ -77,10 +88,27 @@ const props = defineProps({
     cancelText: {
         type: String,
         default: 'Cancel'
+    },
+    input: {
+        type: Boolean,
+        default: false
+    },
+    inputPlaceholder: {
+        type: String,
+        default: ''
     }
 });
 
 const emit = defineEmits(['confirm', 'cancel', 'update:isOpen']);
+
+const inputValue = ref('');
+
+// Reset input when modal opens
+watch(() => props.isOpen, (newVal) => {
+    if (newVal) {
+        inputValue.value = '';
+    }
+});
 
 import { CheckCircle2 } from 'lucide-vue-next';
 
@@ -109,7 +137,7 @@ const confirmVariant = computed(() => {
 });
 
 const handleConfirm = () => {
-    emit('confirm');
+    emit('confirm', props.input ? inputValue.value : true);
     emit('update:isOpen', false);
 };
 

@@ -30,7 +30,9 @@
     },
     "form": {
         "createTitle": "Create Tag",
+        "createDescription": "Create a new tag to organize content.",
         "editTitle": "Edit Tag",
+        "editDescription": "Update tag details.",
         "name": "Name",
         "namePlaceholder": "Tag name",
         "slug": "Slug",

@@ -45,7 +45,9 @@
         "reject": "Apakah Anda yakin ingin menolak {item} ini?",
         "duplicate": "Apakah Anda yakin ingin menduplikasi {item} ini?",
         "deletePermanently": "Apakah Anda yakin ingin menghapus {item} secara permanen? Tindakan ini tidak dapat dibatalkan.",
-        "bulkAction": "Apakah Anda yakin ingin {action} {count} item terpilih?"
+        "bulkAction": "Apakah Anda yakin ingin {action} {count} item terpilih?",
+        "restore": "Apakah Anda yakin ingin memulihkan {item} ini?",
+        "emptyTrash": "Apakah Anda yakin ingin menghapus semua item di sampah secara permanen? Tindakan ini tidak dapat dibatalkan."
     },
     "loading": {
         "default": "Memuat...",
@@ -60,6 +62,18 @@
         "default": "Tidak ada data",
         "search": "Tidak ada hasil untuk \"{query}\"",
         "filter": "Tidak ada item yang cocok dengan filter"
+    },
+    "slugConflict": {
+        "title": "Konflik Slug Terdeteksi",
+        "message": "Slug \"{slug}\" sudah digunakan.",
+        "existingTitle": "Judul Ada",
+        "status": "Status",
+        "trashed": "Sampah (Dihapus)",
+        "active": "Aktif",
+        "action": {
+            "useUnique": "Gunakan Slug Unik",
+            "overwrite": "Hapus & Timpa Lama"
+        }
     },
     "time": {
         "justNow": "Baru saja",

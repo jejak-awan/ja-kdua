@@ -40,6 +40,7 @@ import errors from './features/errors.json';
 import content_templates from './features/content_templates.json';
 import system from './features/system.json';
 import profile from './features/profile.json';
+import content_studio from './features/content_studio.json';
 
 import scheduled_tasks from './features/scheduled_tasks.json';
 import command_runner from './features/command_runner.json';
@@ -92,6 +93,7 @@ export default {
         content_templates,
         system,
         profile,
+        content_studio,
         scheduled_tasks,
         command_runner,
         email_templates,

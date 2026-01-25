@@ -7,6 +7,8 @@ export interface ConfirmOptions {
     variant?: 'warning' | 'danger' | 'info' | 'success';
     confirmText?: string;
     cancelText?: string;
+    input?: boolean;
+    inputPlaceholder?: string;
 }
 
 interface ConfirmState extends ConfirmOptions {
@@ -28,8 +30,9 @@ const confirmState = ref<ConfirmState>({
 });
 
 export function useConfirm() {
-    const confirm = (options: ConfirmOptions): Promise<boolean> => {
+    const confirm = (options: ConfirmOptions): Promise<any> => {
         return new Promise((resolve) => {
+            const inputValue = ref('');
             confirmState.value = {
                 isOpen: true,
                 title: options.title || 'Confirm',
@@ -38,8 +41,10 @@ export function useConfirm() {
                 variant: options.variant || 'warning',
                 confirmText: options.confirmText || 'OK',
                 cancelText: options.cancelText || 'Cancel',
-                onConfirm: () => {
-                    resolve(true);
+                input: options.input || false,
+                inputPlaceholder: options.inputPlaceholder || '',
+                onConfirm: (val?: string) => {
+                    resolve(options.input ? val : true);
                     confirmState.value.isOpen = false;
                 },
                 onCancel: () => {

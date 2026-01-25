@@ -47,6 +47,7 @@
                 <!-- Dashboard (standalone) -->
                 <router-link
                     :to="'/admin'"
+                    @click="$emit('close')"
                     class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 group"
                     :class="[
                         $route.name === 'dashboard'
@@ -89,6 +90,7 @@
                                     v-for="item in filteredNavigation[section.key]"
                                     :key="item.name"
                                     :to="item.to"
+                                    @click="$emit('close')"
                                     class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 group pl-9"
                                     :class="[
                                         $route.name === item.name
@@ -149,7 +151,7 @@
                                             v-for="item in filteredNavigation[section.key]"
                                             :key="item.name"
                                             :to="item.to"
-                                            @click="activePopup = null"
+                                            @click="activePopup = null; $emit('close')"
                                             class="flex items-center px-3 py-2 text-sm font-medium transition-colors duration-200 hover:bg-accent mx-1 rounded-md"
                                             :class="[
                                                 $route.name === item.name

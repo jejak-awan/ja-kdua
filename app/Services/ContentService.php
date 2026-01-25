@@ -373,6 +373,7 @@ class ContentService
                     $content->update(['status' => 'archived']);
                     break;
                 case 'delete':
+                    // Use model deletion to trigger events (for slug releasing)
                     $content->delete();
                     break;
                 case 'change_category':
@@ -496,18 +497,8 @@ class ContentService
         $baseSlug = $slug;
         $counter = 1;
 
-        $query = Content::withTrashed()->where('slug', $slug);
-        if ($excludeId) {
-            $query->where('id', '!=', $excludeId);
-        }
-
-        while ($query->exists()) {
-            $slug = $baseSlug.'-'.$counter;
-            $counter++;
-            $query = Content::withTrashed()->where('slug', $slug);
-            if ($excludeId) {
-                $query->where('id', '!=', $excludeId);
-            }
+        while (Content::withTrashed()->where('slug', $slug)->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
         }
 
         return $slug;

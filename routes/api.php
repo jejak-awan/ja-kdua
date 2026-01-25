@@ -121,6 +121,12 @@ Route::prefix('v1')->group(function () {
         Route::post('/track/batch', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'trackBatch']);
     });
 
+    // Frontend Logging (Public/Protected depends on strategy. Better protected by Sanctum if possible, but app crash might lose auth state. Let's keep it under v1 prefix which usually implies auth, but we might want it open for error reporting?
+    // Actually, if we use it from logged-in app, auth:sanctum is fine. If we want to catch login page errors, it needs to be public.
+    // Let's place it outside auth:sanctum group if possible OR keep it inside.
+    // Given complexity, let's put it inside auth group for now to prevent spam, or use throttle.
+    Route::post('logs/frontend', [App\Http\Controllers\Api\V1\FrontendLogController::class, 'store'])->middleware('throttle:60,1');
+
     // Admin Management API (aliased to bypass WAF 403 blocks on /admin/cms/)
     Route::prefix('admin/ja')->middleware(['auth:sanctum', 'throttle:300,1'])->group(function () {
         // Contents
@@ -522,11 +528,6 @@ Route::prefix('v1')->group(function () {
         Route::get('logs/{filename}', [App\Http\Controllers\Api\V1\LogController::class, 'show'])->middleware('permission:manage settings');
         Route::get('logs/{filename}/download', [App\Http\Controllers\Api\V1\LogController::class, 'download'])->middleware('permission:manage settings');
         
-        // Frontend Logging (Public/Protected depends on strategy. Better protected by Sanctum if possible, but app crash might lose auth state. Let's keep it under v1 prefix which usually implies auth, but we might want it open for error reporting?
-        // Actually, if we use it from logged-in app, auth:sanctum is fine. If we want to catch login page errors, it needs to be public.
-        // Let's place it outside auth:sanctum group if possible OR keep it inside.
-        // Given complexity, let's put it inside auth group for now to prevent spam, or use throttle.
-        Route::post('logs/frontend', [App\Http\Controllers\Api\V1\FrontendLogController::class, 'store'])->middleware('throttle:60,1');
 
         // System Information
         Route::get('system/info', [App\Http\Controllers\Api\V1\SystemController::class, 'info'])->middleware('permission:manage system');

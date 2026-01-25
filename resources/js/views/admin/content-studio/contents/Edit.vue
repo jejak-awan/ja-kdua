@@ -3,11 +3,6 @@
         <!-- Header Actions -->
         <div class="mb-8 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <Button variant="ghost" size="icon" asChild>
-                    <router-link :to="{ name: 'contents' }">
-                        <ArrowLeft class="w-4 h-4" />
-                    </router-link>
-                </Button>
                 <div class="space-y-1">
                     <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ $t('features.content.form.editTitle') }}</h1>
                     
@@ -37,45 +32,10 @@
                         </Button>
                         <AutoSaveIndicator
                             :status="autoSaveStatus"
-                            :last-saved="lastSaved"
+                            :last-saved="lastSaved || undefined"
                         />
                     </div>
                 </div>
-            </div>
-            
-            <!-- Actions -->
-            <div class="flex items-center gap-2">
-                 <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    @click="isSidebarOpen = !isSidebarOpen"
-                    :title="isSidebarOpen ? 'Close Settings' : 'Open Settings'"
-                >
-                    <PanelRightClose v-if="isSidebarOpen" class="w-4 h-4" />
-                    <PanelRightOpen v-else class="w-4 h-4" />
-                </Button>
-                <!-- Preview Button -->
-                <Button variant="outline" class="hidden lg:flex" @click="handlePreview">
-                    {{ $t('features.content.form.preview') }}
-                </Button>
-                
-                 <Button variant="ghost" @click="handleCancel">
-                    {{ $t('features.content.form.cancel') }}
-                </Button>
-                <Button
-                    @click="handleSubmit"
-                    :disabled="loading || (lockStatus?.locked_by && lockStatus.locked_by.id !== authStore.user?.id) || !isDirty"
-                    class="min-w-[120px] shadow-sm"
-                >
-                    <template v-if="loading">
-                        <Loader2 class="w-4 h-4 mr-2 animate-spin" />
-                        {{ $t('features.content.form.updating') }}
-                    </template>
-                    <template v-else>
-                        <Save class="w-4 h-4 mr-2" />
-                        {{ $t('features.content.form.update') }}
-                    </template>
-                </Button>
             </div>
         </div>
  
@@ -95,7 +55,10 @@
 
         <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
              <!-- Main Content Area (Center) -->
-            <div :class="[isSidebarOpen ? 'lg:col-span-8' : 'lg:col-span-12', 'space-y-8 transition-all duration-300 ease-in-out']">
+            <div :class="[
+                form.editor_type === 'builder' ? 'lg:col-span-12' : (isSidebarOpen ? 'lg:col-span-8' : 'lg:col-span-11'),
+                'space-y-8 transition-all duration-300 ease-in-out'
+            ]">
                 <ContentMain
                     v-model="form"
                     @save="handleSubmit"
@@ -105,22 +68,35 @@
                 />
             </div>
 
-            <!-- Sidebar (Right) -->
-            <div :class="[isSidebarOpen ? 'lg:col-span-4' : 'hidden', 'space-y-6 transition-all duration-300 ease-in-out']">
-                <ContentSidebar
-                    v-model="form"
-                    v-model:selected-tags="selectedTags"
-                    :categories="categories"
-                    :tags="tags"
-                    :menus="menus"
-                >
-                    <!-- Mobile Actions Slot -->
-                     <template #actions>
-                        <Button variant="outline" size="sm" class="w-full" @click="handlePreview">
-                            {{ $t('features.content.form.preview') }}
-                        </Button>
-                     </template>
-                </ContentSidebar>
+            <!-- Sidebar (Right) - Control Tower (Only show for classic editor) -->
+            <div v-if="form.editor_type !== 'builder'" :class="[isSidebarOpen ? 'lg:col-span-4' : 'lg:col-span-1', 'space-y-6 transition-all duration-300 ease-in-out']">
+                <ActionToolbar 
+                    :is-sidebar-open="isSidebarOpen"
+                    :loading="loading"
+                    :disabled="!isDirty"
+                    :is-edit="true"
+                    @toggle-sidebar="isSidebarOpen = !isSidebarOpen"
+                    @save="handleSubmit"
+                    @cancel="handleCancel"
+                />
+
+                <div v-show="isSidebarOpen" class="space-y-6 animate-in fade-in slide-in-from-right-4">
+                    <ContentSidebar
+                        v-model="form"
+                        v-model:selected-tags="selectedTags"
+                        :categories="categories"
+                        :tags="tags"
+                        :menus="menus"
+                        @search-tags="fetchTags"
+                    >
+                        <!-- Actions Slot -->
+                         <template #actions>
+                            <Button variant="outline" size="sm" class="w-full" @click="handlePreview">
+                                {{ $t('features.content.form.preview') }}
+                            </Button>
+                         </template>
+                    </ContentSidebar>
+                </div>
             </div>
         </div>
 
@@ -137,7 +113,7 @@
         <Dialog :open="showConfirmDialog" @update:open="showConfirmDialog = $event">
             <DialogContent class="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Confirm Navigation</DialogTitle>
+                    <DialogTitle>{{ $t('common.messages.confirm.title') || 'Confirm Navigation' }}</DialogTitle>
                     <DialogDescription>
                         {{ $t('features.content.messages.unsavedChanges') }}
                     </DialogDescription>
@@ -159,23 +135,23 @@
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useHead } from '@vueuse/head';
+import { useCmsStore } from '@/stores/cms';
 import api from '@/services/api';
 import { useAuthStore } from '@/stores/auth';
-import { parseSingleResponse } from '@/utils/responseParser';
+import { parseSingleResponse, parseResponse, ensureArray } from '@/utils/responseParser';
 // @ts-ignore
 import Button from '@/components/ui/button.vue';
 // @ts-ignore
 import Badge from '@/components/ui/badge.vue';
 import { 
-    ArrowLeft, 
     Save, 
     Loader2, 
     Lock,
     Unlock,
     Clock3,
-    PanelRightClose,
-    PanelRightOpen
 } from 'lucide-vue-next';
+import ActionToolbar from '@/components/content/ActionToolbar.vue';
 // @ts-ignore
 import Dialog from '@/components/ui/dialog.vue';
 // @ts-ignore
@@ -206,12 +182,13 @@ import type { Category, Tag } from '@/types/cms';
 
 const route = useRoute();
 const router = useRouter();
-// @ts-ignore
-const authStore = useAuthStore();
-const isSidebarOpen = ref(false);
-const contentId = route.params.id as string;
 const { t } = useI18n();
 const toast = useToast();
+const cmsStore = useCmsStore();
+
+const authStore = useAuthStore();
+const isSidebarOpen = ref(true);
+const contentId = route.params.id as string;
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(contentSchema);
 
 const loading = ref(false);
@@ -246,6 +223,10 @@ const form = ref<any>({
     blocks: [],
     comment_status: true,
     editor_type: null
+});
+
+useHead({
+    title: computed(() => `${form.value.title || t('features.content.form.editTitle')} | ${cmsStore.siteSettings?.site_name || 'JA CMS'}`)
 });
 
 const isDirty = computed(() => {
@@ -416,7 +397,7 @@ const handleUnlock = async () => {
         }
     } catch (error: any) {
         console.error('Failed to unlock content:', error);
-        toast.error.unlock(error);
+        toast.error.fromResponse(error);
     }
 };
 
@@ -457,20 +438,24 @@ const formatDateTimeLocal = (dateString: string) => {
 
 const fetchCategories = async () => {
     try {
-        const response = await api.get('/admin/ja/categories');
-        const data = response.data?.data || response.data || [];
-        categories.value = Array.isArray(data) ? data : [];
+        const response = await api.get('/admin/ja/categories', { params: { per_page: 100 } });
+        const { data } = parseResponse(response);
+        categories.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch categories:', error);
         categories.value = [];
     }
 };
 
-const fetchTags = async () => {
+const fetchTags = async (query = '') => {
     try {
-        const response = await api.get('/admin/ja/tags');
-        const data = response.data?.data || response.data || [];
-        tags.value = Array.isArray(data) ? data : [];
+        const params: any = { per_page: 50 };
+        if (query) {
+            params.search = query;
+        }
+        const response = await api.get('/admin/ja/tags', { params });
+        const { data } = parseResponse(response);
+        tags.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch tags:', error);
     }
@@ -510,7 +495,7 @@ const handleSubmit = async (status: string | null = null) => {
     // Optimistic UI update for lock status check
     const currentLock = lockStatus.value;
     if (currentLock?.is_locked && currentLock?.locked_by?.id !== authStore.user?.id) {
-        toast.error.default(t('features.content.form.locked'));
+        toast.error.action(t('features.content.form.locked'));
         loading.value = false;
         return;
     }
@@ -525,6 +510,11 @@ const handleSubmit = async (status: string | null = null) => {
         }
         if (!form.value.meta_keywords && selectedTags.value.length > 0) {
             form.value.meta_keywords = selectedTags.value.map(t => t.name).join(', ');
+        }
+
+        // Auto-select first category if none selected and categories are available
+        if (!form.value.category_id && categories.value.length > 0) {
+            form.value.category_id = categories.value[0].id;
         }
 
         // Prepare tags
@@ -560,7 +550,7 @@ const handleSubmit = async (status: string | null = null) => {
         
         // Only redirect if not saving from within the builder (status will be a string if from builder)
         if (typeof status !== 'string') {
-            router.push({ name: 'contents' });
+            router.push({ name: 'content-studio' });
         }
     } catch (error: any) {
         if (error.response?.status === 422) {
@@ -580,13 +570,13 @@ const handleCancel = () => {
     if (isDirty.value) {
         showConfirmDialog.value = true;
     } else {
-        router.push({ name: 'contents' });
+        router.push({ name: 'content-studio' });
     }
 };
 
 const confirmCancel = () => {
     showConfirmDialog.value = false;
-    router.push({ name: 'contents' });
+    router.push({ name: 'content-studio' });
 };
 
 onMounted(() => {

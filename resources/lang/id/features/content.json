@@ -23,6 +23,7 @@
         "metaTitle": "Judul Meta",
         "metaDescription": "Deskripsi Meta",
         "metaKeywords": "Kata Kunci Meta",
+        "keywordsPlaceholder": "Masukkan kata kunci meta dipisahkan dengan koma",
         "publishDate": "Tanggal Terbit",
         "selectCategory": "Pilih Kategori",
         "addTags": "Tambah Tag",
@@ -93,7 +94,13 @@
         "duplicateFailed": "Gagal menduplikasi konten",
         "restoreFailed": "Gagal memulihkan konten",
         "rescheduleFailed": "Gagal menjadwalkan ulang konten",
-        "unsavedChanges": "Anda memiliki perubahan yang belum disimpan. Apakah Anda yakin ingin meninggalkan halaman ini?"
+        "unsavedChanges": "Anda memiliki perubahan yang belum disimpan. Apakah Anda yakin ingin meninggalkan halaman ini?",
+        "approved": "Konten berhasil disetujui",
+        "rejected": "Konten berhasil ditolak",
+        "rejectReason": "Silakan berikan alasan penolakan"
+    },
+    "placeholders": {
+        "rejectionReason": "Masukkan alasan penolakan di sini..."
     },
     "status": {
         "draft": "Draf",
@@ -111,7 +118,9 @@
         "moveToTrash": "Pindahkan ke Sampah",
         "duplicate": "Duplikat",
         "approve": "Setujui",
-        "reject": "Tolak"
+        "reject": "Tolak",
+        "emptyTrash": "Kosongkan Sampah",
+        "restore": "Pulihkan"
     },
     "tabs": {
         "content": "Konten",

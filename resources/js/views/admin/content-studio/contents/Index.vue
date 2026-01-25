@@ -74,8 +74,15 @@ const cmsStore = useCmsStore();
 const { confirm } = useConfirm();
 const toast = useToast();
 
+const props = defineProps({
+    isEmbedded: {
+        type: Boolean,
+        default: false
+    }
+});
+
 useHead({
-    title: computed(() => `${t('features.content.list.title')} | ${cmsStore.siteSettings?.site_name || t('app.name')}`)
+    title: computed(() => props.isEmbedded ? null : `${t('features.content.list.title')} | ${cmsStore.siteSettings?.site_name || t('app.name')}`)
 });
 
 const loading = ref(true);
@@ -194,19 +201,19 @@ const handleBulkAction = async (action: string) => {
     };
     
     if (action === 'delete') {
-        confirmConfig.variant = 'destructive';
+        confirmConfig.variant = 'danger';
         confirmConfig.confirmText = t('common.actions.delete');
     } else if (action === 'approve') {
         confirmConfig.variant = 'success';
         confirmConfig.confirmText = t('features.content.actions.approve');
     } else if (action === 'reject') {
-        confirmConfig.variant = 'destructive';
+        confirmConfig.variant = 'danger';
         confirmConfig.confirmText = t('features.content.actions.reject');
     } else if (action === 'restore') {
         confirmConfig.variant = 'default';
         confirmConfig.confirmText = t('common.actions.restore');
     } else if (action === 'force_delete') {
-        confirmConfig.variant = 'destructive';
+        confirmConfig.variant = 'danger';
         confirmConfig.confirmText = t('common.actions.deletePermanently');
     }
 
@@ -230,6 +237,7 @@ const handleBulkAction = async (action: string) => {
     } catch (error: any) {
         console.error('Failed to perform bulk action:', error);
         toast.error.action(error);
+    } finally {
         bulkAction.value = '';
     }
 };
@@ -239,7 +247,7 @@ const handleEmptyTrash = async () => {
         title: t('features.content.actions.emptyTrash') || 'Empty Trash',
         message: t('common.messages.confirm.emptyTrash') || 'Are you sure you want to permanently delete all items in the trash? This action cannot be undone.',
         confirmText: t('common.actions.deletePermanently'),
-        variant: 'destructive'
+        variant: 'danger'
     });
 
     if (!confirmed) return;
@@ -260,7 +268,7 @@ const handleDelete = async (content: Content) => {
         title: t('common.actions.delete'),
         message: t('common.messages.confirm.delete', { item: content.title }),
         confirmText: t('common.actions.delete'),
-        variant: 'destructive'
+        variant: 'danger'
     });
     if (!confirmed) return;
     try {
@@ -299,7 +307,7 @@ const handleForceDelete = async (content: Content) => {
         title: t('common.actions.deletePermanently'),
         message: t('common.messages.confirm.deletePermanently', { item: content.title }),
         confirmText: t('common.actions.delete'),
-        variant: 'destructive'
+        variant: 'danger'
     });
     if (!confirmed) return;
     try {
@@ -352,7 +360,7 @@ const handleReject = async (content: Content) => {
         input: true,
         inputPlaceholder: t('features.content.placeholders.rejectionReason'),
         confirmText: t('features.content.actions.reject'),
-        variant: 'destructive'
+        variant: 'danger'
     });
     if (reason === false) return;
     try {
@@ -385,22 +393,9 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="container mx-auto p-6 space-y-8">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div class="space-y-1">
-                <h1 class="text-2xl font-bold tracking-tight">{{ $t('features.content.list.title') }}</h1>
-                <p class="text-muted-foreground">{{ $t('features.content.list.description') }}</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <Button variant="outline" v-if="authStore.hasPermission('manage content templates')" @click="router.push({ name: 'content-templates' })">
-                    <LayoutTemplate class="w-4 h-4 mr-2" />
-                    {{ $t('features.content.list.templates') }}
-                </Button>
-                <Button class="shadow-sm" v-if="authStore.hasPermission('create content')" @click="router.push({ name: 'contents.create' })">
-                    <Plus class="w-4 h-4 mr-2" />
-                    {{ $t('features.content.list.createNew') }}
-                </Button>
-            </div>
+    <div :class="isEmbedded ? 'space-y-6' : 'container mx-auto p-6 space-y-8'">
+        <div v-if="!isEmbedded" class="mb-6">
+            <!-- Header removed or simplified since it's redundant in Studio -->
         </div>
 
         <!-- Stats Cards -->
@@ -498,71 +493,92 @@ onMounted(() => {
 
         <Card class="overflow-hidden">
             <!-- Filters -->
+            <!-- Filters -->
             <div class="px-6 py-4 border-b border-border">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex items-center gap-2" v-if="selectedContents.length > 0">
-                        <span class="text-sm text-muted-foreground">{{ $t('features.content.list.selected', { count: selectedContents.length }) }}</span>
-                    <div class="flex items-center gap-2 border-l border-border pl-2">
-                            <!-- Actions for Non-Trashed Items -->
-                            <template v-if="statusFilter !== 'trashed'">
-                                <Button variant="outline" size="sm" @click="handleBulkAction('approve')" v-if="authStore.hasPermission('approve content')">
-                                    <CheckCircle2 class="w-4 h-4 mr-2 text-emerald-500" />
-                                    {{ $t('features.content.actions.approve') }}
-                                </Button>
-                                <Button variant="outline" size="sm" @click="handleBulkAction('reject')" v-if="authStore.hasPermission('approve content')">
-                                    <XCircle class="w-4 h-4 mr-2 text-rose-500" />
-                                    {{ $t('features.content.actions.reject') }}
-                                </Button>
-                                <Button variant="outline" size="sm" class="text-destructive hover:text-destructive" @click="handleBulkAction('delete')" v-if="authStore.hasPermission('delete content')">
-                                    <Trash2 class="w-4 h-4 mr-2" />
-                                    {{ $t('common.actions.delete') }}
-                                </Button>
-                            </template>
-                            
-                            <!-- Actions for Trashed Items -->
-                            <template v-else>
-                                <Button variant="outline" size="sm" class="text-emerald-600 hover:text-emerald-700" @click="handleBulkAction('restore')" v-if="authStore.hasPermission('delete content')">
-                                    <RotateCcw class="w-4 h-4 mr-2" />
-                                    {{ $t('common.actions.restore') }}
-                                </Button>
-                                <Button variant="outline" size="sm" class="text-destructive hover:text-destructive" @click="handleBulkAction('force_delete')" v-if="authStore.hasPermission('delete content')">
-                                    <Trash2 class="w-4 h-4 mr-2" />
-                                    {{ $t('common.actions.deletePermanently') }}
-                                </Button>
-                            </template>
+                    <!-- Left: Search & Filter -->
+                    <div class="flex items-center gap-2 flex-1 flex-wrap">
+                        <div class="relative w-full md:w-72">
+                            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input
+                                v-model="search"
+                                type="text"
+                                :placeholder="$t('common.actions.search') + '...'"
+                                class="pl-9"
+                            />
                         </div>
-                    </div>
-                    
-                    <div class="flex items-center gap-2" v-else-if="statusFilter === 'trashed' && stats.trashed > 0">
-                         <Button variant="destructive" size="sm" @click="handleEmptyTrash" v-if="authStore.hasPermission('delete content')">
-                            <Trash2 class="w-4 h-4 mr-2" />
-                            {{ $t('features.content.actions.emptyTrash') || 'Empty Trash' }}
-                        </Button>
-                    </div>
-
-                    <div class="relative w-full md:w-72" v-if="selectedContents.length === 0">
-                        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                            v-model="search"
-                            type="text"
-                            :placeholder="$t('features.comments.filter.searchPlaceholder')"
-                            class="pl-9"
-                        />
-                    </div>
-                    <div class="flex items-center gap-2" v-if="selectedContents.length === 0">
-                         <Select v-model="statusFilter">
+                        <Select v-model="statusFilter">
                             <SelectTrigger class="w-[180px]">
                                 <SelectValue placeholder="Filter by status" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All Status</SelectItem>
-                                <SelectItem value="published">Published</SelectItem>
-                                <SelectItem value="draft">Draft</SelectItem>
-                                <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="archived">Archived</SelectItem>
-                                <SelectItem value="trashed">Trashed</SelectItem>
+                                <SelectItem value="all">{{ $t('common.labels.all') }} {{ $t('common.labels.status') }}</SelectItem>
+                                <SelectItem value="published">{{ $t('features.content.status.published') }}</SelectItem>
+                                <SelectItem value="draft">{{ $t('features.content.status.draft') }}</SelectItem>
+                                <SelectItem value="pending">{{ $t('features.content.status.pending') }}</SelectItem>
+                                <SelectItem value="archived">{{ $t('features.content.status.archived') }}</SelectItem>
+                                <SelectItem value="trashed">{{ $t('features.content.status.trashed') }}</SelectItem>
                             </SelectContent>
                         </Select>
+                    </div>
+
+                    <!-- Right: Actions -->
+                    <div class="flex items-center gap-2">
+                         <!-- Empty Trash -->
+                         <Button 
+                            v-if="statusFilter === 'trashed' && stats.trashed > 0 && selectedContents.length === 0 && authStore.hasPermission('delete content')" 
+                            variant="destructive" 
+                            size="sm" 
+                            @click="handleEmptyTrash" 
+                        >
+                            <Trash2 class="w-4 h-4 mr-2" />
+                            {{ t('features.content.actions.emptyTrash') || 'Empty Trash' }}
+                        </Button>
+
+                        <!-- Bulk Actions -->
+                        <div v-if="selectedContents.length > 0" class="flex items-center gap-2 animate-in fade-in slide-in-from-right-2 mr-2">
+                             <div class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10">
+                                <span class="text-sm font-medium text-primary whitespace-nowrap">
+                                    {{ selectedContents.length }} selected
+                                </span>
+                                <div class="h-4 w-px bg-primary/20"></div>
+                                <Select
+                                    v-model="bulkAction"
+                                    @update:model-value="(val: string) => handleBulkAction(val)"
+                                >
+                                    <SelectTrigger class="w-[140px] h-8 border-primary/20">
+                                        <SelectValue placeholder="Bulk Action" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <template v-if="statusFilter !== 'trashed'">
+                                            <SelectItem value="approve" class="text-emerald-600 focus:text-emerald-600" v-if="authStore.hasPermission('approve content')">
+                                                {{ $t('features.content.actions.approve') }}
+                                            </SelectItem>
+                                            <SelectItem value="reject" class="text-rose-600 focus:text-rose-600" v-if="authStore.hasPermission('approve content')">
+                                                {{ $t('features.content.actions.reject') }}
+                                            </SelectItem>
+                                            <SelectItem value="delete" class="text-destructive focus:text-destructive" v-if="authStore.hasPermission('delete content')">
+                                                {{ $t('common.actions.delete') }}
+                                            </SelectItem>
+                                        </template>
+                                        <template v-else>
+                                            <SelectItem value="restore" class="text-emerald-600 focus:text-emerald-600" v-if="authStore.hasPermission('delete content')">
+                                                {{ $t('common.actions.restore') }}
+                                            </SelectItem>
+                                            <SelectItem value="force_delete" class="text-destructive focus:text-destructive" v-if="authStore.hasPermission('delete content')">
+                                                {{ $t('common.actions.deletePermanently') }}
+                                            </SelectItem>
+                                        </template>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <!-- Create Button -->
+                        <Button v-if="isEmbedded && authStore.hasPermission('create content')" size="sm" @click="router.push({ name: 'contents.create' })">
+                            <Plus class="w-4 h-4 mr-1" />
+                            {{ $t('features.content.list.createNew') }}
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -578,13 +594,13 @@ onMounted(() => {
                                     @update:checked="toggleSelectAll"
                                 />
                             </TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Title</TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Author</TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Status</TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Featured</TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Date</TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Editor</TableHead>
-                            <TableHead class="px-6 py-4 text-center text-xs font-bold text-muted-foreground">Actions</TableHead>
+                            <TableHead class="px-6 py-4 text-[10px] font-bold text-muted-foreground/70 tracking-wider">{{ t('common.labels.title') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-[10px] font-bold text-muted-foreground/70 tracking-wider">{{ t('common.labels.author') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-[10px] font-bold text-muted-foreground/70 tracking-wider">{{ t('common.labels.status') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-[10px] font-bold text-muted-foreground/70 tracking-wider">{{ t('features.content.form.featured') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-[10px] font-bold text-muted-foreground/70 tracking-wider">{{ t('common.labels.date') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-[10px] font-bold text-muted-foreground/70 tracking-wider">{{ t('common.labels.type') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-center text-[10px] font-bold text-muted-foreground/70 tracking-wider">{{ t('common.actions.title') }}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -602,7 +618,7 @@ onMounted(() => {
                                 <div class="flex flex-col gap-0.5">
                                     <div class="flex items-center gap-2">
                                         <span class="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{{ content.title }}</span>
-                                        <Badge v-if="content.deleted_at" variant="destructive" class="h-4.5 text-[10px] px-1.5 uppercase font-bold tracking-wider">
+                                        <Badge v-if="content.deleted_at" variant="destructive" class="h-4.5 text-[9px] px-1.5 font-bold tracking-wider">
                                             {{ t('features.content.status.trashed') }}
                                         </Badge>
                                     </div>
@@ -619,7 +635,7 @@ onMounted(() => {
                             </TableCell>
                             <TableCell class="px-6 py-4">
                                 <Badge variant="outline" :class="getStatusBadgeClass(content.status || '')" class="capitalize border-none px-2 py-0.5">
-                                    {{ content.status }}
+                                    {{ $t(`features.content.status.${content.status}`) }}
                                 </Badge>
                             </TableCell>
                             <TableCell class="px-6 py-4">
@@ -634,7 +650,7 @@ onMounted(() => {
                             <TableCell class="px-6 py-4">
                                 <div class="flex items-center gap-1.5">
                                     <component :is="content.editor_type === 'builder' ? Layout : Type" class="w-3.5 h-3.5 text-muted-foreground" />
-                                    <span class="text-xs capitalize text-muted-foreground">{{ content.editor_type || 'Classic' }}</span>
+                                    <span class="text-xs capitalize text-muted-foreground">{{ content.editor_type === 'builder' ? 'Builder' : $t('features.content.form.useDefault').replace($t('features.content.form.useDefault').split(' ')[0], '').trim() }}</span>
                                 </div>
                             </TableCell>
                             <TableCell class="px-6 py-4 text-right">

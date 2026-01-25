@@ -1,0 +1,115 @@
+<template>
+    <div class="container mx-auto p-6 space-y-8">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-foreground">
+                {{ $t('features.content_studio.title') }}
+            </h1>
+            <p class="mt-1 text-sm text-muted-foreground">
+                {{ $t('features.content_studio.description') }}
+            </p>
+        </div>
+
+        <div class="w-full">
+            <Tabs v-model="activeTab" class="w-full">
+                <div class="mb-10 flex items-center justify-between">
+                    <TabsList class="bg-transparent p-0 h-auto">
+                        <TabsTrigger value="contents" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+                            <FileText class="w-4 h-4 mr-2" />
+                            {{ $t('features.content_studio.tabs.contents') }}
+                        </TabsTrigger>
+                        <TabsTrigger value="categories" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+                            <Layers class="w-4 h-4 mr-2" />
+                            {{ $t('features.content_studio.tabs.categories') }}
+                        </TabsTrigger>
+                        <TabsTrigger value="tags" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+                            <Tag class="w-4 h-4 mr-2" />
+                            {{ $t('features.content_studio.tabs.tags') }}
+                        </TabsTrigger>
+                        <TabsTrigger value="templates" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+                            <LayoutTemplate class="w-4 h-4 mr-2" />
+                            {{ $t('features.content.list.templates') }}
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <div class="flex items-center gap-2 pb-1">
+                        <!-- Redundant button removed as it's now a tab -->
+                    </div>
+                </div>
+
+                <div class="p-0">
+                    <TabsContent value="contents">
+                        <ContentsIndex :is-embedded="true" />
+                    </TabsContent>
+                    <TabsContent value="categories">
+                        <CategoriesIndex :is-embedded="true" />
+                    </TabsContent>
+                    <TabsContent value="tags">
+                        <TagsIndex :is-embedded="true" />
+                    </TabsContent>
+                    <TabsContent value="templates">
+                        <TemplatesIndex :is-embedded="true" />
+                    </TabsContent>
+                </div>
+            </Tabs>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { ref, onMounted, watch, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useHead } from '@vueuse/head';
+import { useCmsStore } from '@/stores/cms';
+import Tabs from '@/components/ui/tabs.vue';
+import TabsList from '@/components/ui/tabs-list.vue';
+import TabsTrigger from '@/components/ui/tabs-trigger.vue';
+import TabsContent from '@/components/ui/tabs-content.vue';
+import Button from '@/components/ui/button.vue';
+import { Plus, FileText, Layers, Tag, LayoutTemplate } from 'lucide-vue-next';
+import { useAuthStore } from '@/stores/auth';
+
+// Lazy load actual index components
+import ContentsIndex from './contents/Index.vue';
+import CategoriesIndex from './categories/Index.vue';
+import TagsIndex from './tags/Index.vue';
+import TemplatesIndex from './templates/Index.vue';
+
+const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
+const authStore = useAuthStore();
+const cmsStore = useCmsStore();
+
+useHead({
+    title: computed(() => `${t('features.content_studio.title')} | ${cmsStore.siteSettings?.site_name || 'JA CMS'}`)
+});
+
+const activeTab = ref(route.query.tab || 'contents');
+
+watch(activeTab, (newTab) => {
+    router.replace({ 
+        query: { ...route.query, tab: newTab } 
+    });
+});
+
+const handleCreateContent = () => {
+    router.push({ name: 'contents.create' });
+};
+
+const handleCreateCategory = () => {
+    router.push({ name: 'categories.create' });
+};
+
+const handleCreateTag = () => {
+    router.push({ name: 'tags.create' });
+};
+</script>
+
+<style scoped>
+/* Ensure consistent padding when embedded */
+:deep(.container) {
+    padding: 0;
+    max-width: 100%;
+}
+</style>

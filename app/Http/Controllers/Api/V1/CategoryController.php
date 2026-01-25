@@ -38,10 +38,17 @@ class CategoryController extends BaseApiController
         }
 
         // Flat list
-        $categories = $query->where('is_active', true)
+        $query->where('is_active', true)
             ->with('parent')
-            ->orderBy('sort_order')
-            ->get();
+            ->orderBy('sort_order');
+
+        if ($request->has('per_page')) {
+            $perPage = (int) $request->get('per_page', 20);
+            $categories = $query->paginate($perPage);
+            return $this->success($categories, 'Categories retrieved successfully');
+        }
+
+        $categories = $query->get();
 
         return $this->success($categories, 'Categories retrieved successfully');
     }

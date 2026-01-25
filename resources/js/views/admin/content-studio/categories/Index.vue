@@ -1,18 +1,19 @@
 <template>
     <div class="space-y-6">
         <!-- Header -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div v-if="!isEmbedded" class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('features.categories.title') }}</h1>
                 <p class="text-muted-foreground mt-2">{{ $t('features.categories.description') }}</p>
             </div>
             <div class="flex space-x-3">
-                <router-link :to="{ name: 'categories.create' }" v-if="authStore.hasPermission('create categories')">
-                    <Button>
-                        <Plus class="w-4 h-4 mr-2" />
-                        {{ $t('features.categories.createNew') }}
-                    </Button>
-                </router-link>
+                <Button 
+                    v-if="authStore.hasPermission('create categories')"
+                    @click="openCreateModal"
+                >
+                    <Plus class="w-4 h-4 mr-2" />
+                    {{ $t('features.categories.createNew') }}
+                </Button>
             </div>
         </div>
 
@@ -20,7 +21,7 @@
         <Card>
             <CardHeader class="pb-3 border-b border-border">
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <!-- Actions / Search / Filter -->
+                    <!-- Left: Search / Filter -->
                     <div class="flex items-center gap-2 flex-1 flex-wrap">
                         <div class="relative w-full sm:w-72">
                             <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -42,9 +43,12 @@
                                 <SelectItem value="inactive">{{ $t('features.categories.status.inactive') }}</SelectItem>
                             </SelectContent>
                         </Select>
+                    </div>
+
+                    <!-- Right: Actions -->
+                    <div class="flex items-center gap-2">
                         <!-- Bulk Actions -->
-                        <div v-if="selectedIds.length > 0" class="flex items-center gap-2 animate-in fade-in slide-in-from-left-2">
-                             <div class="h-6 w-px bg-border mx-2"></div>
+                        <div v-if="selectedIds.length > 0" class="flex items-center gap-2 animate-in fade-in slide-in-from-right-2 mr-2">
                              <span class="text-sm text-muted-foreground whitespace-nowrap">
                                 {{ selectedIds.length }} {{ $t('common.labels.selected') }}
                              </span>
@@ -52,7 +56,18 @@
                                 <Trash2 class="w-4 h-4 mr-2" />
                                 {{ $t('common.actions.delete') }}
                             </Button>
+                            <div class="h-6 w-px bg-border mx-1"></div>
                         </div>
+
+                        <!-- Create Button -->
+                        <Button 
+                            v-if="isEmbedded && authStore.hasPermission('create categories')"
+                            size="sm"
+                            @click="openCreateModal"
+                        >
+                            <Plus class="w-4 h-4 mr-1" />
+                            {{ $t('features.categories.createNew') }}
+                        </Button>
                     </div>
                 </div>
             </CardHeader>
@@ -130,7 +145,7 @@
                                             variant="ghost" 
                                             size="icon" 
                                             class="h-8 w-8 text-muted-foreground hover:text-foreground" 
-                                            @click="editCategory(category)"
+                                            @click="openEditModal(category)"
                                         >
                                             <Edit2 class="w-4 h-4" />
                                         </Button>
@@ -161,6 +176,14 @@
                 class="border-none shadow-none mt-4"
             />
         </Card>
+
+        <!-- Category Modal -->
+        <CategoryFormModal
+            v-model:open="showModal"
+            :category="editingCategory"
+            :categories="categories"
+            @success="handleModalSuccess"
+        />
     </div>
 </template>
 
@@ -179,6 +202,7 @@ import {
     Filter
 } from 'lucide-vue-next';
 import { debounce } from '@/utils/debounce';
+import CategoryFormModal from './CategoryFormModal.vue';
 
 // Shadcn UI
 // @ts-ignore
@@ -225,6 +249,13 @@ import { useConfirm } from '@/composables/useConfirm';
 import { useToast } from '@/composables/useToast';
 import type { Category } from '@/types/cms';
 
+const props = defineProps({
+    isEmbedded: {
+        type: Boolean,
+        default: false
+    }
+});
+
 const { t } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
@@ -245,6 +276,10 @@ const pagination = ref<any>({
     from: 0,
     to: 0
 });
+
+// Modal State
+const showModal = ref(false);
+const editingCategory = ref<Category | null>(null);
 
 const { confirm } = useConfirm();
 
@@ -313,6 +348,10 @@ const fetchCategories = async (page = 1) => {
         };
         
         if (search.value) {
+            // params.tree = false; // Keep tree structure but filter?
+            // If searching, we usually flatten or just show matches.
+            // Backend might return flat list if 'tree' is false.
+            // Let's assume backend handles 'search' with 'tree=false' for simplicity in this standardized view
             params.tree = false;
             params.search = search.value;
         }
@@ -386,9 +425,23 @@ const changePerPage = (perPage: string | number) => {
     fetchCategories(1);
 };
 
-const editCategory = (category: Category) => {
-    router.push({ name: 'categories.edit', params: { id: category.id } });
+// Modal Actions
+const openCreateModal = () => {
+    editingCategory.value = null;
+    showModal.value = true;
 };
+
+const openEditModal = (category: Category) => {
+    // Clone to specific object to avoid binding issues
+    editingCategory.value = { ...category };
+    showModal.value = true;
+};
+
+const handleModalSuccess = () => {
+    fetchCategories(pagination.value.current_page);
+};
+
+// const editCategory REMOVED - replaced by openEditModal
 
 const deleteCategory = async (category: Category) => {
     const confirmed = await confirm({

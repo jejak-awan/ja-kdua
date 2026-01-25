@@ -3,11 +3,6 @@
         <!-- Header Actions -->
         <div class="mb-8 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <Button variant="ghost" size="icon" asChild>
-                    <router-link :to="{ name: 'contents' }">
-                        <ArrowLeft class="w-4 h-4" />
-                    </router-link>
-                </Button>
                 <div class="space-y-1">
                     <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ $t('features.content.list.createNew') }}</h1>
                     <AutoSaveIndicator
@@ -16,40 +11,14 @@
                     />
                 </div>
             </div>
-            
-            <div class="flex items-center gap-2">
-                 <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    @click="isSidebarOpen = !isSidebarOpen"
-                    :title="isSidebarOpen ? 'Close Settings' : 'Open Settings'"
-                >
-                    <PanelRightClose v-if="isSidebarOpen" class="w-4 h-4" />
-                    <PanelRightOpen v-else class="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" @click="handleCancel">
-                    {{ $t('features.content.form.cancel') }}
-                </Button>
-                <Button
-                    @click="handleSubmit"
-                    :disabled="loading || !isValid"
-                    class="min-w-[120px] shadow-sm"
-                >
-                    <template v-if="loading">
-                        <Loader2 class="w-4 h-4 mr-2 animate-spin" />
-                        {{ $t('features.content.form.creating') }}
-                    </template>
-                    <template v-else>
-                        <Save class="w-4 h-4 mr-2" />
-                        {{ $t('features.content.form.create') }}
-                    </template>
-                </Button>
-            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <!-- Main Content Area (Center) -->
-            <div :class="[isSidebarOpen ? 'lg:col-span-8' : 'lg:col-span-12', 'space-y-8 transition-all duration-300 ease-in-out']">
+            <div :class="[
+                form.editor_type === 'builder' ? 'lg:col-span-12' : (isSidebarOpen ? 'lg:col-span-8' : 'lg:col-span-11'),
+                'space-y-8 transition-all duration-300 ease-in-out'
+            ]">
                 <ContentMain
                     v-model="form"
                     @save="handleSubmit"
@@ -59,15 +28,26 @@
                 />
             </div>
 
-            <!-- Sidebar (Right) -->
-            <div :class="[isSidebarOpen ? 'lg:col-span-4' : 'hidden', 'space-y-6 transition-all duration-300 ease-in-out']">
-                <ContentSidebar
-                    v-model="form"
-                    v-model:selected-tags="selectedTags"
-                    :categories="categories"
-                    :tags="tags"
-                    :menus="menus"
+            <!-- Sidebar (Right) - Control Tower (Only show for classic editor) -->
+            <div v-if="form.editor_type !== 'builder'" :class="[isSidebarOpen ? 'lg:col-span-4' : 'lg:col-span-1', 'space-y-6 transition-all duration-300 ease-in-out']">
+                <ActionToolbar 
+                    :is-sidebar-open="isSidebarOpen"
+                    :loading="loading"
+                    :disabled="!isValid"
+                    @toggle-sidebar="isSidebarOpen = !isSidebarOpen"
+                    @save="handleSubmit"
+                    @cancel="handleCancel"
                 />
+
+                <div v-show="isSidebarOpen" class="space-y-6 animate-in fade-in slide-in-from-right-4">
+                    <ContentSidebar
+                        v-model="form"
+                        v-model:selected-tags="selectedTags"
+                        :categories="categories"
+                        :tags="tags"
+                        :menus="menus"
+                    />
+                </div>
             </div>
         </div>
 
@@ -75,7 +55,7 @@
         <Dialog :open="showConfirmDialog" @update:open="showConfirmDialog = $event">
             <DialogContent class="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Confirm Navigation</DialogTitle>
+                    <DialogTitle>{{ $t('common.messages.confirm.title') || 'Confirm Navigation' }}</DialogTitle>
                     <DialogDescription>
                         {{ $t('features.content.messages.unsavedChanges') }}
                     </DialogDescription>
@@ -90,6 +70,42 @@
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+
+        <!-- Slug Conflict Dialog -->
+        <Dialog :open="!!slugConflict" @update:open="slugConflict = null">
+            <DialogContent class="sm:max-w-[500px]">
+                <DialogHeader>
+                    <DialogTitle class="text-amber-600 flex items-center gap-2">
+                        <span>⚠️</span> {{ $t('common.messages.slugConflict.title') }}
+                    </DialogTitle>
+                    <DialogDescription class="pt-2 space-y-2">
+                        <p>
+                            {{ $t('common.messages.slugConflict.message', { slug: form.slug }) }}
+                        </p>
+                        <div v-if="slugConflict?.details" class="text-sm bg-muted p-3 rounded-md">
+                            <p><strong>{{ $t('common.messages.slugConflict.existingTitle') }}:</strong> {{ slugConflict.details.title }}</p>
+                            <p><strong>{{ $t('common.messages.slugConflict.status') }}:</strong> {{ slugConflict.details.is_trashed ? $t('common.messages.slugConflict.trashed') : $t('common.messages.slugConflict.active') }}</p>
+                        </div>
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter class="flex-col sm:flex-row gap-2 mt-4">
+                    <Button variant="outline" @click="slugConflict = null">
+                        {{ $t('common.actions.cancel') }}
+                    </Button>
+                    <Button 
+                        v-if="slugConflict?.details?.is_trashed" 
+                        variant="destructive" 
+                        @click="resolveConflict('force_delete')"
+                    >
+                         {{ $t('common.messages.slugConflict.action.overwrite') }}
+                    </Button>
+                    <Button @click="resolveConflict('unique')">
+                         {{ $t('common.messages.slugConflict.action.useUnique') }}
+                         <span class="ml-1 text-xs opacity-70">({{ slugConflict?.details?.suggested_slug }})</span>
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>
 
@@ -97,16 +113,16 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useHead } from '@vueuse/head';
+import { useCmsStore } from '@/stores/cms';
 import api from '@/services/api';
 // @ts-ignore
 import Button from '@/components/ui/button.vue';
 import {
-    ArrowLeft, 
     Save, 
     Loader2, 
-    PanelRightClose, 
-    PanelRightOpen 
 } from 'lucide-vue-next';
+import ActionToolbar from '@/components/content/ActionToolbar.vue';
 // @ts-ignore
 import Dialog from '@/components/ui/dialog.vue';
 // @ts-ignore
@@ -125,6 +141,7 @@ import ContentMain from '@/components/content/ContentMain.vue';
 import ContentSidebar from '@/components/content/ContentSidebar.vue';
 import { useAutoSave } from '@/composables/useAutoSave';
 import { useToast } from '@/composables/useToast';
+import { useConfirm } from '@/composables/useConfirm';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { contentSchema } from '@/schemas';
 import type { Category, Tag } from '@/types/cms';
@@ -132,9 +149,11 @@ import type { Category, Tag } from '@/types/cms';
 const { t } = useI18n();
 const router = useRouter();
 const toast = useToast();
+const cmsStore = useCmsStore();
+
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(contentSchema);
 
-const isSidebarOpen = ref(false);
+const isSidebarOpen = ref(true);
 
 const loading = ref(false);
 const categories = ref<Category[]>([]);
@@ -165,7 +184,7 @@ const form = ref<any>({
     },
     blocks: [],
     comment_status: true,
-    editor_type: null
+    editor_type: 'classic'
 });
 
 // Auto-generation logic
@@ -179,6 +198,10 @@ watch(() => form.value.title, (newTitle) => {
         form.value.meta_title = newTitle;
     }
     localStorage.setItem('last_title', newTitle);
+});
+
+useHead({
+    title: computed(() => `${t('features.content.list.createNew')} | ${cmsStore.siteSettings?.site_name || 'JA CMS'}`)
 });
 
 watch(() => form.value.excerpt, (newExcerpt) => {
@@ -227,6 +250,31 @@ const {
             contentId.value = response.data.id;
         }
     },
+    onError: (error: any) => {
+        // Handle slug conflict from autosave
+        if (error.response?.status === 409 && error.response?.data?.code === 'SLUG_CONFLICT') {
+            slugConflict.value = {
+                details: error.response.data.data?.conflict,
+                originalError: error
+            };
+            // Do not show generic toast for this specific handled error
+        }
+    },
+    shouldSave: (formData: any) => {
+        // Always save if we already have an ID (updates)
+        if (contentId.value) return true;
+
+        // For new content, require Title AND (Body OR Blocks OR Excerpt)
+        // This prevents creating empty drafts just by typing a title
+        const hasTitle = formData.title && formData.title.trim().length > 0;
+        
+        // Check content substance
+        const hasBody = formData.body && formData.body.trim().length > 0;
+        const hasBlocks = formData.blocks && formData.blocks.length > 0;
+        const hasExcerpt = formData.excerpt && formData.excerpt.trim().length > 0;
+
+        return hasTitle && (hasBody || hasBlocks || hasExcerpt);
+    }
 });
 
 const handleAutoSaveToggle = (isEnabled: boolean) => {
@@ -235,7 +283,7 @@ const handleAutoSaveToggle = (isEnabled: boolean) => {
 
 const fetchCategories = async () => {
     try {
-        const response = await api.get('/admin/ja/categories');
+        const response = await api.get('/admin/ja/categories', { params: { per_page: 100 } });
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
     } catch (error) {
@@ -244,10 +292,17 @@ const fetchCategories = async () => {
     }
 };
 
-const fetchTags = async () => {
+const fetchTags = async (query = '') => {
     try {
-        const response = await api.get('/admin/ja/tags');
+        const params: any = { per_page: 50 }; // Reduced to 50 for lighter load
+        if (query) {
+            params.search = query;
+        }
+        const response = await api.get('/admin/ja/tags', { params });
         const { data } = parseResponse(response);
+        
+        // If searching, replace. If initial load, ensure we have enough.
+        // Actually, for dropdown, we just want to show what matches.
         tags.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch tags:', error);
@@ -295,6 +350,11 @@ const handleSubmit = async (status: string | null = null) => {
         if (!form.value.meta_keywords && selectedTags.value.length > 0) {
             form.value.meta_keywords = selectedTags.value.map(t => t.name).join(', ');
         }
+
+        // Auto-select first category if none selected and categories are available
+        if (!form.value.category_id && categories.value.length > 0) {
+            form.value.category_id = categories.value[0].id;
+        }
         
         // Prepare tags: send ids for existing, names for new
         const tagIds = selectedTags.value.filter(t => t.id).map(t => t.id);
@@ -324,7 +384,7 @@ const handleSubmit = async (status: string | null = null) => {
         
         // Only redirect if not saving from within the builder
         if (typeof status !== 'string') {
-            router.push({ name: 'contents' });
+            router.push({ name: 'content-studio' });
         } else {
              // If staying, update contentId for future saves (though auto-save handles this too)
              if (response.data?.id && !contentId.value) {
@@ -334,6 +394,12 @@ const handleSubmit = async (status: string | null = null) => {
     } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
+        } else if (error.response?.status === 409 && error.response?.data?.code === 'SLUG_CONFLICT') {
+            // Handle slug conflict
+            slugConflict.value = {
+                details: error.response.data.data?.conflict,
+                originalError: error
+            };
         } else {
             console.error('Failed to create content:', error);
             toast.error.fromResponse(error);
@@ -349,13 +415,51 @@ const handleCancel = () => {
     if (hasChanges.value) {
         showConfirmDialog.value = true;
     } else {
-        router.push({ name: 'contents' });
+        router.push({ name: 'content-studio' });
     }
 };
 
 const confirmCancel = () => {
     showConfirmDialog.value = false;
-    router.push({ name: 'contents' });
+    router.push({ name: 'content-studio' });
+};
+
+// Slug Conflict Handling
+const slugConflict = ref<any>(null);
+
+const resolveConflict = async (action: 'unique' | 'force_delete') => {
+    if (!slugConflict.value) return;
+
+    const details = slugConflict.value.details;
+    const suggested = details?.suggested_slug;
+    const conflictId = details?.id;
+
+    if (action === 'unique' && suggested) {
+        // Option 1: Use suggested unique slug
+        form.value.slug = suggested;
+        slugConflict.value = null;
+        // Retry submission
+        await handleSubmit(form.value.status);
+    } else if (action === 'force_delete' && conflictId) {
+        // Option 2: Force delete the conflicting item (only if trashed)
+        try {
+            loading.value = true;
+            await api.delete(`/admin/ja/contents/${conflictId}/force-delete`);
+            slugConflict.value = null;
+            toast.success.action('Conflict resolved: Previous item deleted.');
+            // Retry submission
+            await handleSubmit(form.value.status);
+        } catch (error) {
+            console.error('Failed to force delete conflicting item:', error);
+            // toast.error.action expects an error object usually, but can handle message if we adapt or usage allows. 
+            // Looking at useToast, toast.error.actions takes (error). 
+            // Let's use toast.error.create which is generic for item actions or just pass a mock error object or use generic warning.
+            // Actually useToast has a 'warning' method.
+            toast.error.action({ message: 'Failed to remove conflicting item. Please rename your current page.' });
+        } finally {
+            loading.value = false;
+        }
+    }
 };
 
 onMounted(() => {

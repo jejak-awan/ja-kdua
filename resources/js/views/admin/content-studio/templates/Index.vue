@@ -1,27 +1,10 @@
 <template>
     <div>
-        <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
-                <Button variant="ghost" size="icon" @click="router.push({ name: 'contents' })" class="h-9 w-9">
-                    <ChevronLeft class="w-5 h-5" />
-                </Button>
-                <div>
-                    <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ t('features.content_templates.title') }}</h1>
-                    <p class="text-sm text-muted-foreground mt-1">{{ t('features.content_templates.description') }}</p>
-                </div>
-            </div>
-            <Button as-child class="shadow-sm">
-                <router-link :to="{ name: 'content-templates.create' }" class="flex items-center">
-                    <Plus class="w-4 h-4 mr-2" />
-                    {{ t('features.content_templates.create') }}
-                </router-link>
-            </Button>
-        </div>
-
         <Card>
             <CardHeader class="pb-10 border-b-0 space-y-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex items-center gap-3 w-full md:w-auto">
+                    <!-- Left: Search / Filters -->
+                    <div class="flex items-center gap-3 w-full md:w-auto flex-wrap">
                         <div class="relative w-full md:w-72">
                             <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
@@ -60,24 +43,35 @@
                         </Select>
                     </div>
 
-                    <div v-if="selectedTemplates.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 animate-in fade-in slide-in-from-top-1">
-                        <span class="text-sm font-medium text-primary">
-                            {{ selectedTemplates.length }} selected
-                        </span>
-                        <div class="h-4 w-px bg-primary/20"></div>
-                        <Select
-                            v-model="bulkAction"
-                            @update:model-value="handleBulkAction"
-                        >
-                            <SelectTrigger class="w-[140px] h-8 border-primary/20">
-                                <SelectValue placeholder="Bulk Action" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="delete" class="text-destructive focus:text-destructive">Delete Selected</SelectItem>
-                                <SelectItem value="restore" class="text-emerald-600 focus:text-emerald-600">Restore Selected</SelectItem>
-                                <SelectItem value="force_delete" class="text-destructive focus:text-destructive">Force Delete Selected</SelectItem>
-                            </SelectContent>
-                        </Select>
+                    <!-- Right: Actions -->
+                    <div class="flex items-center gap-2">
+                        <div v-if="selectedTemplates.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 animate-in fade-in slide-in-from-top-1 mr-2">
+                            <span class="text-sm font-medium text-primary">
+                                {{ selectedTemplates.length }} selected
+                            </span>
+                            <div class="h-4 w-px bg-primary/20"></div>
+                            <Select
+                                v-model="bulkAction"
+                                @update:model-value="handleBulkAction"
+                            >
+                                <SelectTrigger class="w-[140px] h-8 border-primary/20">
+                                    <SelectValue placeholder="Bulk Action" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="delete" class="text-destructive focus:text-destructive">Delete Selected</SelectItem>
+                                    <SelectItem value="restore" class="text-emerald-600 focus:text-emerald-600">Restore Selected</SelectItem>
+                                    <SelectItem value="force_delete" class="text-destructive focus:text-destructive">Force Delete Selected</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <!-- Create Button -->
+                        <Button v-if="isEmbedded && authStore.hasPermission('manage content templates')" as-child size="sm" class="shadow-sm">
+                            <router-link :to="{ name: 'content-templates.create' }" class="flex items-center">
+                                <Plus class="w-4 h-4 mr-1" />
+                                {{ t('features.content_templates.create') }}
+                            </router-link>
+                        </Button>
                     </div>
                 </div>
             </CardHeader>
@@ -204,30 +198,31 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
-import { useConfirm } from '../../../composables/useConfirm';
-import { useToast } from '../../../composables/useToast';
-import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
+import api from '../../../../services/api';
+import { useConfirm } from '../../../../composables/useConfirm';
+import { useToast } from '../../../../composables/useToast';
+import { parseResponse, ensureArray, parseSingleResponse } from '../../../../utils/responseParser';
 import { debounce } from '@/utils/debounce';
-import Card from '../../../components/ui/card.vue';
-import CardHeader from '../../../components/ui/card-header.vue';
-import CardContent from '../../../components/ui/card-content.vue';
-import Pagination from '../../../components/ui/pagination.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Table from '../../../components/ui/table.vue';
-import TableHeader from '../../../components/ui/table-header.vue';
-import TableBody from '../../../components/ui/table-body.vue';
-import TableRow from '../../../components/ui/table-row.vue';
-import TableCell from '../../../components/ui/table-cell.vue';
-import TableHead from '../../../components/ui/table-head.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
+import { useAuthStore } from '@/stores/auth';
+import Card from '../../../../components/ui/card.vue';
+import CardHeader from '../../../../components/ui/card-header.vue';
+import CardContent from '../../../../components/ui/card-content.vue';
+import Pagination from '../../../../components/ui/pagination.vue';
+import Button from '../../../../components/ui/button.vue';
+import Input from '../../../../components/ui/input.vue';
+import Table from '../../../../components/ui/table.vue';
+import TableHeader from '../../../../components/ui/table-header.vue';
+import TableBody from '../../../../components/ui/table-body.vue';
+import TableRow from '../../../../components/ui/table-row.vue';
+import TableCell from '../../../../components/ui/table-cell.vue';
+import TableHead from '../../../../components/ui/table-head.vue';
+import Badge from '../../../../components/ui/badge.vue';
+import Checkbox from '../../../../components/ui/checkbox.vue';
+import Select from '../../../../components/ui/select.vue';
+import SelectTrigger from '../../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../../components/ui/select-value.vue';
+import SelectContent from '../../../../components/ui/select-content.vue';
+import SelectItem from '../../../../components/ui/select-item.vue';
 import {
     Plus,
     Search,
@@ -244,6 +239,14 @@ const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 const router = useRouter();
+const authStore = useAuthStore();
+
+const props = defineProps({
+    isEmbedded: {
+        type: Boolean,
+        default: false
+    }
+});
 const templates = ref([]);
 const loading = ref(false);
 const search = ref('');

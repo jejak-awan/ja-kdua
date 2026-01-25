@@ -6,6 +6,7 @@ interface AutoSaveOptions {
     enabled?: boolean | Ref<boolean> | ComputedRef<boolean> | (() => boolean);
     onSave?: (data: any) => void;
     onError?: (error: any) => void;
+    shouldSave?: (form: any) => boolean;
 }
 
 interface AutoSaveReturn {
@@ -86,8 +87,14 @@ export function useAutoSave(form: Ref<any>, contentId: Ref<number | null | strin
             return;
         }
 
-        // Don't save if form is empty (new content without title)
-        if (!form.value.title || form.value.title.trim() === '') {
+        // Check custom validator or default title check
+        const shouldSaveFn = options.shouldSave;
+        if (shouldSaveFn) {
+            if (!shouldSaveFn(form.value)) {
+                return;
+            }
+        } else if (!form.value.title || form.value.title.trim() === '') {
+            // Default check: must have title
             return;
         }
 

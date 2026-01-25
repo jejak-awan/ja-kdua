@@ -1,21 +1,21 @@
 <template>
     <div>
         <!-- Header -->
-        <div class="mb-6 flex justify-between items-center">
+        <div v-if="!isEmbedded" class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.tags.title') }}</h1>
-            <router-link
-                :to="{ name: 'tags.create' }"
-                v-if="authStore.hasPermission('create tags')"
-            >
-                <Button>
+            <div class="flex space-x-3">
+                <Button 
+                    v-if="authStore.hasPermission('create tags')"
+                    @click="openCreateModal"
+                >
                     <Plus class="w-4 h-4 mr-2" />
                     {{ $t('features.tags.createNew') }}
                 </Button>
-            </router-link>
+            </div>
         </div>
 
         <!-- Statistics -->
-        <div v-if="statistics" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div v-if="statistics && !isEmbedded" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <Card class="bg-card">
                 <CardContent class="p-6">
                     <div class="flex items-center">
@@ -85,13 +85,24 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <div v-if="selectedIds.length > 0" class="flex items-center gap-2 mr-2">
+                        <div v-if="selectedIds.length > 0" class="flex items-center gap-2 mr-2 animate-in fade-in slide-in-from-right-2">
                             <span class="text-sm text-muted-foreground">{{ selectedIds.length }} {{ $t('common.labels.selected') }}</span>
                             <Button variant="destructive" size="sm" @click="bulkDelete">
                                 <Trash2 class="w-4 h-4 mr-2" />
                                 {{ $t('common.actions.delete') }}
                             </Button>
+                            <div class="h-6 w-px bg-border mx-1"></div>
                         </div>
+
+                        <!-- Add Create Button here when embedded -->
+                        <Button 
+                            v-if="isEmbedded && authStore.hasPermission('create tags')"
+                            size="sm"
+                            @click="openCreateModal"
+                        >
+                            <Plus class="w-4 h-4 mr-1" />
+                            {{ $t('features.tags.createNew') }}
+                        </Button>
                     </div>
                 </div>
             </CardContent>
@@ -150,7 +161,7 @@
                             </TableCell>
                             <TableCell>
                                 <div class="flex justify-end gap-1">
-                                    <Button v-if="authStore.hasPermission('edit tags')" variant="ghost" size="icon" @click="editTag(tag)" class="h-8 w-8">
+                                    <Button v-if="authStore.hasPermission('edit tags')" variant="ghost" size="icon" @click="openEditModal(tag)" class="h-8 w-8">
                                         <Edit class="w-4 h-4" />
                                     </Button>
                                     <Button v-if="authStore.hasPermission('delete tags')" variant="ghost" size="icon" class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" @click="deleteTag(tag)">
@@ -174,6 +185,13 @@
                 class="border-none shadow-none"
             />
         </Card>
+
+        <!-- Tag Modal -->
+        <TagFormModal
+            v-model:open="showModal"
+            :tag="editingTag"
+            @success="handleModalSuccess"
+        />
     </div>
 </template>
 
@@ -197,6 +215,7 @@ import { useConfirm } from '@/composables/useConfirm';
 import { useToast } from '@/composables/useToast';
 import { debounce } from '@/utils/debounce';
 import { parseResponse } from '@/utils/responseParser';
+import TagFormModal from './TagFormModal.vue';
 
 // @ts-ignore
 import Button from '@/components/ui/button.vue';
@@ -240,6 +259,13 @@ import SelectValue from '@/components/ui/select-value.vue';
 import { useAuthStore } from '@/stores/auth';
 import type { Tag } from '@/types/cms';
 
+const props = defineProps({
+    isEmbedded: {
+        type: Boolean,
+        default: false
+    }
+});
+
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
@@ -259,6 +285,10 @@ const pagination = ref<any>({
     from: 0,
     to: 0
 });
+
+// Modal State
+const showModal = ref(false);
+const editingTag = ref<Tag | null>(null);
 
 const onSearchInput = debounce(() => {
     fetchTags(1);
@@ -356,9 +386,22 @@ const bulkDelete = async () => {
     }
 };
 
-const editTag = (tag: Tag) => {
-    router.push({ name: 'tags.edit', params: { id: tag.id } });
+// Modal Actions
+const openCreateModal = () => {
+    editingTag.value = null;
+    showModal.value = true;
 };
+
+const openEditModal = (tag: Tag) => {
+    editingTag.value = { ...tag };
+    showModal.value = true;
+};
+
+const handleModalSuccess = () => {
+    fetchTags(pagination.value.current_page);
+};
+
+// editTag replaced by openEditModal
 
 const deleteTag = async (tag: Tag) => {
     const confirmed = await confirm({

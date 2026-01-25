@@ -65,48 +65,48 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('../views/admin/Dashboard.vue'),
             },
             {
+                path: 'content-studio',
+                name: 'content-studio',
+                component: () => import('../views/admin/content-studio/Index.vue'),
+                meta: { permission: 'manage content' },
+            },
+            {
                 path: 'contents',
                 name: 'contents',
-                component: () => import('../views/admin/contents/Index.vue'),
+                component: () => import('../views/admin/content-studio/contents/Index.vue'),
                 meta: { permission: 'manage content' },
             },
             {
                 path: 'contents/calendar',
                 name: 'contents.calendar',
-                component: () => import('../views/admin/contents/Calendar.vue'),
-            },
-            {
-                path: 'content-templates',
-                name: 'content-templates',
-                component: () => import('../views/admin/content-templates/Index.vue'),
-                meta: { permission: 'view content templates' },
+                component: () => import('../views/admin/content-studio/contents/Calendar.vue'),
             },
             {
                 path: 'content-templates/create',
                 name: 'content-templates.create',
-                component: () => import('../views/admin/content-templates/Create.vue'),
+                component: () => import('../views/admin/content-studio/templates/Create.vue'),
                 meta: { permission: 'create content templates' },
             },
             {
                 path: 'content-templates/:id/edit',
                 name: 'content-templates.edit',
-                component: () => import('../views/admin/content-templates/Edit.vue'),
+                component: () => import('../views/admin/content-studio/templates/Edit.vue'),
                 meta: { permission: 'edit content templates' },
             },
             {
                 path: 'contents/create',
                 name: 'contents.create',
-                component: () => import('../views/admin/contents/Create.vue'),
+                component: () => import('../views/admin/content-studio/contents/Create.vue'),
             },
             {
                 path: 'contents/:id/edit',
                 name: 'contents.edit',
-                component: () => import('../views/admin/contents/Edit.vue'),
+                component: () => import('../views/admin/content-studio/contents/Edit.vue'),
             },
             {
                 path: 'contents/:id/revisions',
                 name: 'contents.revisions',
-                component: () => import('../views/admin/contents/Revisions.vue'),
+                component: () => import('../views/admin/content-studio/contents/Revisions.vue'),
             },
             {
                 path: 'site-editor',
@@ -123,17 +123,7 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: 'categories',
                 name: 'categories',
-                component: () => import('../views/admin/categories/Index.vue'),
-            },
-            {
-                path: 'categories/create',
-                name: 'categories.create',
-                component: () => import('../views/admin/categories/Create.vue'),
-            },
-            {
-                path: 'categories/:id/edit',
-                name: 'categories.edit',
-                component: () => import('../views/admin/categories/Edit.vue'),
+                component: () => import('../views/admin/content-studio/categories/Index.vue'),
             },
             {
                 path: 'users',
@@ -217,17 +207,7 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: 'tags',
                 name: 'tags',
-                component: () => import('../views/admin/tags/Index.vue'),
-            },
-            {
-                path: 'tags/create',
-                name: 'tags.create',
-                component: () => import('../views/admin/tags/Create.vue'),
-            },
-            {
-                path: 'tags/:id/edit',
-                name: 'tags.edit',
-                component: () => import('../views/admin/tags/Edit.vue'),
+                component: () => import('../views/admin/content-studio/tags/Index.vue'),
             },
             {
                 path: 'email-templates',

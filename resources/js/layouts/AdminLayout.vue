@@ -10,6 +10,22 @@
             @logout="handleLogout"
         />
 
+        <!-- Mobile Backdrop -->
+        <Transition
+            enter-active-class="transition-opacity ease-linear duration-300"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition-opacity ease-linear duration-300"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div 
+                v-if="sidebarOpen" 
+                class="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden"
+                @click="closeSidebar"
+            ></div>
+        </Transition>
+
         <!-- Main Content -->
         <div :class="[
             'transition-all duration-300 ease-in-out',

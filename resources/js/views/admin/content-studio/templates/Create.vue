@@ -1,22 +1,17 @@
 <template>
     <div class="max-w-7xl mx-auto">
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ t('features.content_templates.form.editTitle') }}</h1>
-            <Button variant="ghost" @click="router.push({ name: 'content-templates' })">
+            <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ t('features.content_templates.form.createTitle') }}</h1>
+            <Button variant="ghost" @click="router.push({ name: 'content-studio', query: { tab: 'templates' } })">
                 <ChevronLeft class="w-4 h-4 mr-2" />
                 {{ t('features.content_templates.form.back') }}
             </Button>
         </div>
 
-        <div v-if="loading && !form.name" class="text-center py-12">
-            <Loader2 class="w-8 h-8 animate-spin mx-auto text-muted-foreground mb-4" />
-            <p class="text-muted-foreground">{{ t('features.content_templates.loading') }}</p>
-        </div>
-
-        <form v-else @submit.prevent="handleSubmit" class="pb-10">
+        <form @submit.prevent="handleSubmit" class="pb-10">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                 <!-- Main Content (Left) -->
-                 <div class="lg:col-span-2 space-y-6">
+                <!-- Main Content (Left) -->
+                <div class="lg:col-span-2 space-y-6">
                     <Card>
                         <CardHeader>
                             <CardTitle class="text-lg font-semibold">{{ t('features.content_templates.form.content') }}</CardTitle>
@@ -57,10 +52,10 @@
                             </div>
                         </CardContent>
                     </Card>
-                 </div>
+                </div>
 
-                 <!-- Sidebar (Right) -->
-                 <div class="space-y-6">
+                <!-- Sidebar (Right) -->
+                <div class="space-y-6">
                     <Card>
                         <CardHeader>
                             <CardTitle class="text-lg font-semibold">{{ t('features.content_templates.form.details') }}</CardTitle>
@@ -74,11 +69,29 @@
                                     id="name"
                                     v-model="form.name"
                                     required
+                                    @input="generateSlug"
                                     :class="{ 'border-destructive focus-visible:ring-destructive': errors.name }"
                                     :placeholder="t('features.content_templates.form.namePlaceholder')"
                                 />
                                 <p v-if="errors.name" class="text-sm text-destructive">
                                     {{ Array.isArray(errors.name) ? errors.name[0] : errors.name }}
+                                </p>
+                            </div>
+
+                            <div class="space-y-2">
+                                <Label for="slug">
+                                    {{ t('features.content_templates.form.slug') || 'Slug' }} <span class="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="slug"
+                                    v-model="form.slug"
+                                    required
+                                    :class="{ 'border-destructive focus-visible:ring-destructive': errors.slug }"
+                                    placeholder="template-slug"
+                                />
+                                <p class="text-xs text-muted-foreground">{{ t('features.content_templates.form.slugHelp') || 'URL-friendly version' }}</p>
+                                <p v-if="errors.slug" class="text-sm text-destructive">
+                                    {{ Array.isArray(errors.slug) ? errors.slug[0] : errors.slug }}
                                 </p>
                             </div>
 
@@ -114,15 +127,13 @@
 
                     <div class="flex items-center gap-2">
                          <div class="flex-1"></div>
-                         <Button variant="outline" as-child>
-                            <router-link :to="{ name: 'content-templates' }">
-                                {{ t('features.content_templates.form.cancel') }}
-                            </router-link>
+                         <Button variant="outline" type="button" @click="router.push({ name: 'content-studio', query: { tab: 'templates' } })">
+                            {{ t('features.content_templates.form.cancel') }}
                         </Button>
-                        <Button type="submit" :disabled="saving || !isDirty">
+                        <Button type="submit" :disabled="saving || !isValid">
                             <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                             <Save v-else class="w-4 h-4 mr-2" />
-                            {{ saving ? t('features.content_templates.form.updating') : t('features.content_templates.form.update') }}
+                            {{ saving ? t('features.content_templates.form.saving') : t('features.content_templates.form.save') }}
                         </Button>
                     </div>
                 </div>
@@ -132,27 +143,26 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
-import { useToast } from '../../../composables/useToast';
-import { useFormValidation } from '../../../composables/useFormValidation';
-import { contentTemplateSchema } from '../../../schemas';
-import { parseSingleResponse } from '../../../utils/responseParser';
-import Card from '../../../components/ui/card.vue';
-import CardHeader from '../../../components/ui/card-header.vue';
-import CardTitle from '../../../components/ui/card-title.vue';
-import CardContent from '../../../components/ui/card-content.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Label from '../../../components/ui/label.vue';
-import Textarea from '../../../components/ui/textarea.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
+import api from '../../../../services/api';
+import { useToast } from '../../../../composables/useToast';
+import { useFormValidation } from '../../../../composables/useFormValidation';
+import { contentTemplateSchema } from '../../../../schemas';
+import Card from '../../../../components/ui/card.vue';
+import CardHeader from '../../../../components/ui/card-header.vue';
+import CardTitle from '../../../../components/ui/card-title.vue';
+import CardContent from '../../../../components/ui/card-content.vue';
+import Button from '../../../../components/ui/button.vue';
+import Input from '../../../../components/ui/input.vue';
+import Label from '../../../../components/ui/label.vue';
+import Textarea from '../../../../components/ui/textarea.vue';
+import Select from '../../../../components/ui/select.vue';
+import SelectTrigger from '../../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../../components/ui/select-value.vue';
+import SelectContent from '../../../../components/ui/select-content.vue';
+import SelectItem from '../../../../components/ui/select-item.vue';
 import TiptapEditor from '@/components/TiptapEditor.vue';
 import { 
     ChevronLeft, 
@@ -162,17 +172,13 @@ import {
 
 const { t } = useI18n();
 const router = useRouter();
-const route = useRoute();
 const toast = useToast();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(contentTemplateSchema);
-const templateId = route.params.id;
-
-const loading = ref(false);
 const saving = ref(false);
-const initialForm = ref(null);
 
 const form = ref({
     name: '',
+    slug: '',
     description: '',
     type: 'post',
     title_template: '',
@@ -180,35 +186,26 @@ const form = ref({
     excerpt_template: '',
 });
 
-const isDirty = computed(() => {
-    if (!initialForm.value) return false;
-    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+const isValid = computed(() => {
+    return form.value.name?.trim() && form.value.type && form.value.slug?.trim();
 });
 
-const fetchTemplate = async () => {
-    loading.value = true;
-    try {
-        const response = await api.get(`/admin/ja/content-templates/${templateId}`);
-        const template = parseSingleResponse(response) || {};
-        
-        form.value = {
-            name: template.name || '',
-            description: template.description || '',
-            type: template.type || 'post',
-            title_template: template.title_template || '',
-            body_template: template.body_template || '',
-            excerpt_template: template.excerpt_template || '',
-        };
-        
-        // Save initial state for dirty checking
-        initialForm.value = JSON.parse(JSON.stringify(form.value));
-    } catch (error) {
-        console.error('Failed to fetch template:', error);
-        toast.error.load(error);
-        router.push({ name: 'content-templates' });
-    } finally {
-        loading.value = false;
+const generateSlug = () => {
+    if (!form.value.slug || form.value.slug === slugify(form.value.name.slice(0, -1))) {
+         form.value.slug = slugify(form.value.name);
     }
+};
+
+const slugify = (text) => {
+    return text
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-')
+        .replace(/^-+/, '')
+        .replace(/-+$/, '');
 };
 
 const handleSubmit = async () => {
@@ -217,11 +214,9 @@ const handleSubmit = async () => {
     saving.value = true;
     clearErrors();
     try {
-        await api.put(`/admin/ja/content-templates/${templateId}`, form.value);
-        toast.success.update('Template');
-        
-        // Update initial form after successful save
-        initialForm.value = JSON.parse(JSON.stringify(form.value));
+        await api.post('/admin/ja/content-templates', form.value);
+        toast.success.create('Template');
+        router.push({ name: 'content-studio', query: { tab: 'templates' } });
     } catch (error) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
@@ -232,9 +227,4 @@ const handleSubmit = async () => {
         saving.value = false;
     }
 };
-
-onMounted(() => {
-    fetchTemplate();
-});
 </script>
-

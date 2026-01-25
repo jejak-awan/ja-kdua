@@ -30,7 +30,9 @@
     },
     "form": {
         "createTitle": "Buat Tag",
+        "createDescription": "Buat tag baru untuk mengelompokkan konten.",
         "editTitle": "Edit Tag",
+        "editDescription": "Perbarui informasi tag.",
         "name": "Nama",
         "namePlaceholder": "Nama tag",
         "slug": "Slug",

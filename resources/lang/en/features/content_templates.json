@@ -20,6 +20,8 @@
         "content": "Template Content",
         "name": "Name",
         "namePlaceholder": "Template name",
+        "slug": "Slug",
+        "slugHelp": "URL-friendly version",
         "description": "Description",
         "descriptionPlaceholder": "Template description",
         "type": "Type",

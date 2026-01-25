@@ -252,22 +252,8 @@ defineExpose({ builder: builderBase })
 const globalAction = ref<string | null>(null)
 const cmsStore = useCmsStore()
 
-// UI State
-watch(() => cmsStore.isDarkMode, (isDark) => {
-  if (isDark) {
-    document.documentElement.classList.add('dark')
-    document.body.classList.add('ja-builder--dark')
-    document.body.classList.remove('ja-builder--light')
-  } else {
-    document.documentElement.classList.remove('dark')
-    document.body.classList.add('ja-builder--light')
-    document.body.classList.remove('ja-builder--dark')
-  }
-}, { immediate: true })
-
-onUnmounted(() => {
-  document.body.classList.remove('ja-builder--dark', 'ja-builder--light')
-})
+// Local theme handling is now done via classes on the root .ja-builder div in the template
+// and scoped variables in builder.css. No more global body pollution.
 
 // Correctly provide dark mode for children
 const darkMode = computed(() => cmsStore.isDarkMode)

@@ -122,6 +122,11 @@ export const getIcon = (name: string) => {
             h('line', { x1: '3', y1: '9', x2: '21', y2: '9', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
             h('line', { x1: '9', y1: '21', x2: '9', y2: '9', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
         ]),
+        'content-studio': () => h('svg', { class: 'w-5 h-5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('rect', { x: '3', y: '3', width: '18', height: '18', rx: '2', ry: '2', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M3 9h18M9 21V9' }),
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M14 13h3m-3 4h3' })
+        ]),
     };
     return icons[name as keyof typeof icons] || icons.dashboard;
 };

@@ -237,7 +237,8 @@
                         <!-- Combobox-style tag input -->
                         <div class="relative">
                             <Input 
-                                v-model="tagInput"
+                                :model-value="tagInput"
+                                @input="handleTagInput"
                                 @keydown.enter.prevent="handleTagEnter"
                                 @focus="showTagSuggestions = true"
                                 @blur="handleTagBlur"
@@ -493,7 +494,7 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['update:modelValue', 'update:selectedTags']);
+const emit = defineEmits(['update:modelValue', 'update:selectedTags', 'search-tags']);
 
 // Filter available tags based on input and already selected
 const availableTags = computed(() => {
@@ -505,11 +506,17 @@ const availableTags = computed(() => {
 
 // Filter tags based on current input for suggestions
 const filteredTags = computed(() => {
+    // If searching remotely (implied by changing tags prop), we just use availableTags
+    // But we can still do local prefix match highlight or simple filter
     const query = tagInput.value.trim().toLowerCase();
-    if (!query) return availableTags.value.slice(0, 10); // Show first 10 when empty
-    return availableTags.value.filter(tag => 
-        tag.name.toLowerCase().includes(query)
-    ).slice(0, 10);
+    
+    // If no query, show partial list
+    if (!query) return availableTags.value.slice(0, 10);
+    
+    // When searching, the parent updates 'tags' prop. 
+    // We can just return availableTags because the parent should have filtered them.
+    // However, for smoother UX (if network delay), we can still filter locally what we have.
+    return availableTags.value.slice(0, 10);
 });
 
 const updateField = (field, value) => {
@@ -541,11 +548,26 @@ const handleTagEnter = () => {
     showTagSuggestions.value = false;
 };
 
+const timer = ref(null);
+
+const handleTagInput = (e) => {
+    const val = e.target.value;
+    tagInput.value = val;
+    
+    if (timer.value) clearTimeout(timer.value);
+    
+    timer.value = setTimeout(() => {
+        emit('search-tags', val);
+    }, 300);
+    
+    showTagSuggestions.value = true;
+};
+
 // Handle blur to close suggestions with delay (allow click on suggestion)
 const handleTagBlur = () => {
     setTimeout(() => {
         showTagSuggestions.value = false;
-    }, 150);
+    }, 200);
 };
 
 // Select tag from suggestions

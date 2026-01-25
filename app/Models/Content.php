@@ -12,6 +12,27 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Content extends Model
 {
     use HasFactory, SoftDeletes;
+    
+    protected static function booted()
+    {
+        static::deleting(function ($content) {
+            // When soft deleting, rename the slug to free it up for reuse
+            if ($content->isForceDeleting()) {
+                return;
+            }
+            
+            $timestamp = now()->timestamp;
+            $newSlug = $content->slug . '__trashed__' . $timestamp;
+            
+            // Ensure even the trashed slug is unique (rare but possible collision)
+            while (\App\Models\Content::withTrashed()->where('slug', $newSlug)->exists()) {
+                $newSlug = $content->slug . '__trashed__' . $timestamp . '_' . rand(100, 999);
+            }
+            
+            $content->slug = $newSlug;
+            $content->save();
+        });
+    }
 
     protected $fillable = [
         'title',
