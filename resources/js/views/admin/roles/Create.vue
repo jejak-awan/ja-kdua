@@ -43,46 +43,55 @@
                             <Loader2 class="w-4 h-4 animate-spin text-primary" />
                             {{ $t('common.messages.loading.default') }}
                         </div>
-                        <div v-else class="grid grid-cols-1 gap-4">
-                            <div v-for="(perms, category) in groupedPermissions" :key="category" class="bg-muted/30 border border-border/60 rounded-xl overflow-hidden">
-                                <div class="px-4 py-3 bg-muted/50 border-b border-border/40 flex items-center justify-between">
-                                    <h5 class="text-xs font-bold text-foreground uppercase tracking-widest flex items-center gap-2">
-                                        {{ category }}
-                                        <Badge variant="secondary" class="h-4.5 text-[10px] px-1.5 font-bold bg-background/50">
-                                            {{ perms.length }}
-                                        </Badge>
-                                    </h5>
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        @click="toggleCategory(category as string)"
-                                        class="h-7 text-[10px] font-bold uppercase tracking-wider hover:bg-background/50"
-                                    >
-                                        {{ isCategorySelected(category as string) ? $t('features.roles.form.deselectAll') : $t('features.roles.form.selectAll') }}
-                                    </Button>
-                                </div>
-                                <div class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    <div
-                                        v-for="permission in perms"
-                                        :key="permission.id"
-                                        class="flex items-start space-x-2 p-2 rounded-md hover:bg-muted/50 transition-colors"
-                                    >
-                                        <Checkbox
-                                            :id="`perm-${permission.id}`"
-                                            :checked="form.permissions.includes(permission.name)"
-                                            @update:checked="(checked: boolean) => togglePermission(checked, permission.name)"
-                                        />
-                                        <label
-                                            :for="`perm-${permission.id}`"
-                                            class="text-xs font-medium leading-none text-muted-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer pt-0.5"
+                        <Accordion v-else type="multiple" class="w-full space-y-4" :default-value="Object.keys(groupedPermissions)">
+                            <AccordionItem 
+                                v-for="(perms, category) in groupedPermissions" 
+                                :key="category" 
+                                :value="category as string"
+                                class="bg-muted/30 border border-border/60 rounded-xl overflow-hidden"
+                            >
+                                <AccordionTrigger class="px-4 py-3 bg-muted/50 hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/40 transition-colors group/trigger">
+                                    <div class="flex items-center justify-between w-full pr-4">
+                                        <h5 class="text-xs font-bold text-foreground uppercase tracking-widest flex items-center gap-2">
+                                            {{ category }}
+                                            <Badge variant="secondary" class="h-4.5 text-[10px] px-1.5 font-bold bg-background/50">
+                                                {{ perms.length }}
+                                            </Badge>
+                                        </h5>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            @click.stop="toggleCategory(category as string)"
+                                            class="h-7 text-[10px] font-bold uppercase tracking-wider hover:bg-background/80"
                                         >
-                                            {{ formatPermissionName(permission.name, category as string) }}
-                                        </label>
+                                            {{ isCategorySelected(category as string) ? $t('features.roles.form.deselectAll') : $t('features.roles.form.selectAll') }}
+                                        </Button>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 bg-card/50">
+                                        <div
+                                            v-for="permission in perms"
+                                            :key="permission.id"
+                                            class="flex items-start space-x-2 p-2 rounded-md hover:bg-muted/50 transition-colors"
+                                        >
+                                            <Checkbox
+                                                :id="`perm-${permission.id}`"
+                                                :checked="form.permissions.includes(permission.name)"
+                                                @update:checked="(checked: boolean) => togglePermission(checked, permission.name)"
+                                            />
+                                            <label
+                                                :for="`perm-${permission.id}`"
+                                                class="text-xs font-medium leading-none text-muted-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer pt-0.5"
+                                            >
+                                                {{ formatPermissionName(permission.name, category as string) }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
                     </div>
                 </CardContent>
             </Card>
@@ -132,8 +141,16 @@ import CardHeader from '@/components/ui/card-header.vue';
 import CardTitle from '@/components/ui/card-title.vue';
 // @ts-ignore
 import CardContent from '@/components/ui/card-content.vue';
-import { ArrowLeft, Check, Loader2 } from 'lucide-vue-next';
+import { ArrowLeft, Check, Loader2, ChevronDown } from 'lucide-vue-next';
 import { cn } from '@/lib/utils';
+// @ts-ignore
+import Accordion from '@/components/ui/accordion.vue';
+// @ts-ignore
+import AccordionItem from '@/components/ui/accordion-item.vue';
+// @ts-ignore
+import AccordionTrigger from '@/components/ui/accordion-trigger.vue';
+// @ts-ignore
+import AccordionContent from '@/components/ui/accordion-content.vue';
 import type { Permission } from '@/types/auth';
 
 const router = useRouter();

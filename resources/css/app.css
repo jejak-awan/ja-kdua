@@ -68,7 +68,7 @@
     /* Global Form Resets for Anti-Flash & Consistency */
     [data-slot="input"],
     [data-slot="select-trigger"],
-    [data-slot="checkbox"]:not([data-state="checked"]),
+    [data-slot="checkbox"],
     [data-slot="search-trigger"],
     [data-slot="search-input"],
     [data-slot="field"],
