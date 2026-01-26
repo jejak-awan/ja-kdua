@@ -140,13 +140,13 @@
                     v-for="role in roles"
                     :key="role.id"
                     class="bg-card border border-border rounded-lg overflow-hidden flex flex-col hover:border-primary/50 group relative"
-                    :class="cn(selectedRoles.includes(role.id) && 'ring-2 ring-primary ring-offset-2 ring-offset-background border-primary')"
+                    :class="cn(isSelected(role.id) && 'ring-2 ring-primary ring-offset-2 ring-offset-background border-primary')"
                 >
                     <!-- Selection Checkbox (Grid) -->
                     <div class="absolute top-3 left-3 z-10" v-if="!isProtectedRole(role.name)">
                         <Checkbox 
-                            :checked="selectedRoles.includes(role.id)"
-                            @update:checked="(checked: boolean) => toggleSelection(role.id)"
+                            :checked="isSelected(role.id)"
+                            @update:checked="() => toggleSelection(role.id)"
                             class="bg-card/80 backdrop-blur-sm data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground border-muted-foreground/30"
                         />
                     </div>
@@ -240,8 +240,7 @@
                         <TableRow class="bg-muted/50 border-b hover:bg-muted/50">
                             <TableHead class="w-10 px-6 py-3">
                                 <Checkbox 
-                                    :checked="isAllSelected"
-                                    @update:checked="toggleSelectAll"
+                                    v-model:checked="isAllSelected"
                                 />
                             </TableHead>
                             <TableHead class="px-6 py-3 text-xs text-muted-foreground/70 font-medium">{{ $t('features.roles.form.name') }}</TableHead>
@@ -254,13 +253,13 @@
                             v-for="role in roles" 
                             :key="role.id" 
                             class="hover:bg-muted/50 group border-b border-border/40"
-                            :class="cn(selectedRoles.includes(role.id) && 'bg-muted/30')"
+                            :class="cn(isSelected(role.id) && 'bg-muted/30')"
                         >
                             <TableCell class="px-6 py-4">
                                 <Checkbox 
                                     v-if="!isProtectedRole(role.name)"
-                                    :checked="selectedRoles.includes(role.id)"
-                                    @update:checked="(checked: boolean) => toggleSelection(role.id)"
+                                    :checked="isSelected(role.id)"
+                                    @update:checked="() => toggleSelection(role.id)"
                                 />
                                 <div v-else class="w-4 h-4"></div>
                             </TableCell>
@@ -433,10 +432,19 @@ watch(viewMode, (newMode) => {
     localStorage.setItem('rolesViewMode', newMode);
 });
 
+const isSelected = (id: string | number) => {
+    return selectedRoles.value.some(roleId => String(roleId) === String(id));
+};
+
 // Computed property for "Select All" state
-const isAllSelected = computed(() => {
-    const selectableRoles = roles.value.filter(r => !isProtectedRole(r.name));
-    return selectableRoles.length > 0 && selectedRoles.value.length === selectableRoles.length;
+const isAllSelected = computed({
+    get: () => {
+        const selectableRoles = roles.value.filter(r => !isProtectedRole(r.name));
+        return selectableRoles.length > 0 && selectedRoles.value.length === selectableRoles.length;
+    },
+    set: (value) => {
+        toggleSelectAll(value);
+    }
 });
 
 const fetchRoles = async (page = 1) => {
@@ -491,20 +499,21 @@ const changePage = (page: number) => {
     fetchRoles(page);
 };
 
-const toggleSelection = (id: number) => {
-    if (selectedRoles.value.includes(id)) {
-        selectedRoles.value = selectedRoles.value.filter(roleId => roleId !== id);
+const toggleSelection = (id: string | number) => {
+    const stringId = String(id);
+    if (isSelected(id)) {
+        selectedRoles.value = selectedRoles.value.filter(roleId => String(roleId) !== stringId);
     } else {
-        selectedRoles.value.push(id);
+        selectedRoles.value.push(id as number);
     }
 };
 
 const toggleSelectAll = (checked: boolean) => {
     if (checked) {
-        // Select all non-protected roles
+        // Select all non-protected roles, ensuring we handle both strings and numbers consistently
         selectedRoles.value = roles.value
             .filter(r => !isProtectedRole(r.name))
-            .map(r => r.id);
+            .map(r => r.id as number);
     } else {
         selectedRoles.value = [];
     }
