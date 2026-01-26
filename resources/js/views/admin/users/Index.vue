@@ -75,271 +75,282 @@
             </Card>
         </div>
 
-        <!-- Filters -->
-        <Card class="p-4 mb-4">
-            <div class="flex flex-wrap items-center gap-4">
-                <div class="relative flex-1 max-w-xs">
-                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                        v-model="search"
-                        type="text"
-                        :placeholder="$t('features.users.search')"
-                        class="pl-9"
-                    />
-                </div>
-                <Select v-model="roleFilter">
-                    <SelectTrigger class="w-[180px]">
-                        <SelectValue :placeholder="$t('features.users.allRoles')" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">{{ $t('features.users.allRoles') }}</SelectItem>
-                        <SelectItem
-                            v-for="role in roles"
-                            :key="role.id"
-                            :value="role.name"
-                        >
-                            {{ role.name }}
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
-                <Select v-model="verificationFilter">
-                    <SelectTrigger class="w-[180px]">
-                        <SelectValue :placeholder="$t('features.users.filters.all')" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">{{ $t('features.users.filters.all') }}</SelectItem>
-                        <SelectItem value="verified">{{ $t('features.users.filters.verifiedOnly') }}</SelectItem>
-                        <SelectItem value="unverified">{{ $t('features.users.filters.unverifiedOnly') }}</SelectItem>
-                    </SelectContent>
-                </Select>
-                <Select v-model="trashedFilter">
-                    <SelectTrigger class="w-[180px]">
-                        <SelectValue :placeholder="$t('common.labels.status')" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="without">{{ $t('common.labels.activeOnly') }}</SelectItem>
-                        <SelectItem value="with">{{ $t('common.labels.includesTrashed') }}</SelectItem>
-                        <SelectItem value="only">{{ $t('common.labels.trashedOnly') }}</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-            
-            
-            <!-- Bulk Actions -->
-            <div v-if="selectedIds.length > 0" class="mt-4 pt-4 border-t flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <span class="text-sm text-muted-foreground">{{ selectedIds.length }} selected</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <Select
-                        v-model="bulkActionSelection"
-                        @update:model-value="handleBulkAction"
-                    >
-                        <SelectTrigger class="w-[160px] h-8 border-primary/20">
-                            <SelectValue :placeholder="$t('features.content.list.bulkActions')" />
-                        </SelectTrigger>
-                        <SelectContent>
-                             <SelectItem value="force_logout" class="text-warning focus:text-warning">{{ $t('features.users.actions.forceLogout') }}</SelectItem>
-                             <SelectItem value="verify" class="text-primary focus:text-primary">{{ $t('features.users.actions.verify') }}</SelectItem>
-                             <SelectItem v-if="trashedFilter !== 'only'" value="delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.delete') }}</SelectItem>
-                             <SelectItem v-if="trashedFilter === 'only'" value="restore" class="text-success focus:text-success">{{ $t('common.actions.restore') }}</SelectItem>
-                             <SelectItem v-if="trashedFilter === 'only'" value="force_delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.forceDelete') }}</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
-        </Card>
-
-        <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
-            <Loader2 class="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
-            <p class="mt-2 text-muted-foreground">{{ $t('features.users.loading') }}</p>
-        </div>
-
-        <div v-else-if="users.length === 0" class="bg-card border border-border rounded-lg p-12 text-center">
-            <Users class="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-            <p class="mt-4 text-muted-foreground">{{ $t('features.users.empty') }}</p>
-        </div>
-
-        <div v-else class="bg-card border border-border rounded-lg overflow-hidden">
-            <table class="min-w-full divide-y divide-border">
-                <thead class="bg-muted/50">
-                    <tr>
-                        <th class="px-6 py-3 w-[50px]">
-                            <Checkbox 
-                                :checked="isAllSelected"
-                                @update:checked="toggleSelectAll"
+        <!-- content -->
+        <Card class="overflow-hidden">
+            <!-- Filters & Actions -->
+            <div class="px-6 py-4 border-b border-border/40">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <!-- Left: Search / Filters -->
+                    <div class="flex items-center gap-3 w-full md:w-auto flex-wrap">
+                        <div class="relative w-full md:w-72">
+                            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input
+                                v-model="search"
+                                type="text"
+                                :placeholder="$t('features.users.search')"
+                                class="pl-9"
                             />
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
-                            {{ $t('features.users.table.user') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
-                            {{ $t('features.users.table.email') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
-                            {{ $t('features.users.table.roles') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
-                            {{ $t('features.users.table.lastLogin') }}
-                        </th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-muted-foreground">
-                            {{ $t('features.users.table.actions') }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-card divide-y divide-border">
-                    <tr v-for="user in users" :key="user.id" class="hover:bg-muted">
-                        <td class="px-6 py-4">
-                            <Checkbox 
-                                :checked="selectedIds.includes(user.id)"
-                                @update:checked="toggleSelection(user.id)"
-                            />
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-10 w-10">
-                                    <img
-                                        v-if="user.avatar"
-                                        :src="user.avatar"
-                                        :alt="user.name"
-                                        class="h-10 w-10 rounded-full object-cover"
-                                    >
-                                    <div
-                                        v-else
-                                        class="h-10 w-10 rounded-full bg-muted flex items-center justify-center border border-border"
-                                    >
-                                        <span class="text-muted-foreground font-medium text-sm">
-                                            {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-medium text-foreground">
-                                        {{ user.name }}
-                                        <span v-if="user.deleted_at" class="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-destructive/10 text-destructive uppercase tracking-wide">
-                                            {{ $t('common.labels.deleted') }}
-                                        </span>
-                                    </div>
-                                    <div v-if="user.phone" class="text-sm text-muted-foreground">{{ user.phone }}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-foreground">{{ user.email }}</div>
-                            <div v-if="user.email_verified_at" class="text-xs text-primary font-medium">
-                                {{ $t('features.users.status.verified') }}
-                            </div>
-                            <div v-else class="text-xs text-muted-foreground italic">
-                                {{ $t('features.users.status.unverified') }}
-                            </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex flex-wrap gap-1">
-                                <span
-                                    v-for="role in (user.roles || [])"
+                        </div>
+                        <Select v-model="roleFilter">
+                            <SelectTrigger class="w-[160px]">
+                                <SelectValue :placeholder="$t('features.users.allRoles')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">{{ $t('features.users.allRoles') }}</SelectItem>
+                                <SelectItem
+                                    v-for="role in roles"
                                     :key="role.id"
-                                    class="px-2 py-1 text-xs font-semibold rounded-full bg-secondary text-secondary-foreground border border-secondary"
+                                    :value="role.name"
                                 >
                                     {{ role.name }}
-                                </span>
-                                <span v-if="!user.roles || user.roles.length === 0" class="text-xs text-muted-foreground">
-                                    {{ $t('features.users.status.noRoles') }}
-                                </span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                            <div v-if="user.last_login_at">
-                                {{ formatDate(user.last_login_at) }}
-                            </div>
-                            <div v-else class="text-muted-foreground">
-                                {{ $t('features.users.status.never') }}
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex justify-center items-center space-x-1">
-                                <Button
-                                    v-if="!user.email_verified_at && authStore.hasPermission('edit users')"
-                                    variant="ghost"
-                                    size="icon"
-                                    @click="verifyUser(user)"
-                                    class="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
-                                    :title="$t('features.users.actions.verify')"
-                                    :disabled="!canManage(user)"
-                                >
-                                    <CheckCheck class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
-                                </Button>
-                                <Button
-                                    v-if="authStore.hasPermission('edit users')"
-                                    variant="ghost"
-                                    size="icon"
-                                    @click="forceLogoutUser(user)"
-                                    class="h-8 w-8 text-warning hover:bg-warning/10"
-                                    :title="$t('features.users.actions.forceLogout')"
-                                    :disabled="!canManage(user)"
-                                >
-                                    <LogOut class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
-                                </Button>
-                                <Button
-                                    v-if="authStore.hasPermission('edit users')"
-                                    variant="ghost"
-                                    size="icon"
-                                    @click="editUser(user)"
-                                    class="h-8 w-8 text-primary hover:bg-primary/10"
-                                    :title="$t('common.actions.edit')"
-                                    :disabled="!canManage(user)"
-                                >
-                                    <Pencil class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
-                                </Button>
-                                <Button
-                                    v-if="authStore.hasPermission('delete users')"
-                                    variant="ghost"
-                                    size="icon"
-                                    @click="deleteUser(user)"
-                                    class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    :title="$t('common.actions.delete')"
-                                    :disabled="!canDelete(user)"
-                                >
-                                    <Trash2 class="w-4 h-4" :class="{ 'opacity-50': !canDelete(user) }" />
-                                </Button>
-                                
-                                <Button
-                                    v-if="user.deleted_at && authStore.hasPermission('delete users')"
-                                    variant="ghost"
-                                    size="icon"
-                                    @click="restoreUser(user)"
-                                    class="h-8 w-8 text-success hover:bg-success/10"
-                                    :title="$t('common.actions.restore')"
-                                >
-                                    <RotateCcw class="w-4 h-4" />
-                                </Button>
-                                <Button
-                                    v-if="user.deleted_at && authStore.hasPermission('delete users')"
-                                    variant="ghost"
-                                    size="icon"
-                                    @click="forceDeleteUser(user)"
-                                    class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    :title="$t('common.actions.forceDelete')"
-                                >
-                                    <Trash2 class="w-4 h-4" />
-                                </Button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select v-model="verificationFilter">
+                            <SelectTrigger class="w-[160px]">
+                                <SelectValue :placeholder="$t('features.users.filters.all')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">{{ $t('features.users.filters.all') }}</SelectItem>
+                                <SelectItem value="verified">{{ $t('features.users.filters.verifiedOnly') }}</SelectItem>
+                                <SelectItem value="unverified">{{ $t('features.users.filters.unverifiedOnly') }}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select v-model="trashedFilter">
+                            <SelectTrigger class="w-[160px]">
+                                <SelectValue :placeholder="$t('common.labels.status')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="without">{{ $t('common.labels.activeOnly') }}</SelectItem>
+                                <SelectItem value="with">{{ $t('common.labels.includesTrashed') }}</SelectItem>
+                                <SelectItem value="only">{{ $t('common.labels.trashedOnly') }}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
 
-            <!-- Pagination -->
-            <Pagination
-                v-if="pagination && pagination.total > 0"
-                :current-page="pagination.current_page"
-                :total-items="pagination.total"
-                :per-page="Number(pagination.per_page || 10)"
-                :show-page-numbers="true"
-                @page-change="changePage"
-                @update:per-page="changePerPage"
-                class="mt-4"
-            />
-        </div>
+                    <!-- Right: Actions -->
+                    <div class="flex items-center gap-2">
+                        <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 animate-in fade-in slide-in-from-top-1 mr-2">
+                            <span class="text-xs font-semibold text-primary uppercase tracking-wider">
+                                {{ selectedIds.length }} selected
+                            </span>
+                            <div class="h-4 w-px bg-primary/20"></div>
+                            <Select
+                                v-model="bulkActionSelection"
+                                @update:model-value="handleBulkAction"
+                            >
+                                <SelectTrigger class="w-[140px] h-7 border-primary/20 text-xs shadow-none">
+                                    <SelectValue :placeholder="$t('features.content.list.bulkActions')" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="force_logout" class="text-warning focus:text-warning">{{ $t('features.users.actions.forceLogout') }}</SelectItem>
+                                    <SelectItem value="verify" class="text-primary focus:text-primary">{{ $t('features.users.actions.verify') }}</SelectItem>
+                                    <SelectItem v-if="trashedFilter !== 'only'" value="delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.delete') }}</SelectItem>
+                                    <SelectItem v-if="trashedFilter === 'only'" value="restore" class="text-success focus:text-success">{{ $t('common.actions.restore') }}</SelectItem>
+                                    <SelectItem v-if="trashedFilter === 'only'" value="force_delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.forceDelete') }}</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <CardContent class="p-0">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead class="w-[50px] px-6">
+                                <Checkbox 
+                                    :checked="isAllSelected"
+                                    @update:checked="toggleSelectAll"
+                                />
+                            </TableHead>
+                            <TableHead class="px-6 text-[10px] text-muted-foreground/70 uppercase">
+                                {{ $t('features.users.table.user') }}
+                            </TableHead>
+                            <TableHead class="px-6 text-[10px] text-muted-foreground/70 uppercase">
+                                {{ $t('features.users.table.email') }}
+                            </TableHead>
+                            <TableHead class="px-6 text-[10px] text-muted-foreground/70 uppercase">
+                                {{ $t('features.users.table.roles') }}
+                            </TableHead>
+                            <TableHead class="px-6 text-[10px] text-muted-foreground/70 uppercase">
+                                {{ $t('features.users.table.lastLogin') }}
+                            </TableHead>
+                            <TableHead class="px-6 text-center text-[10px] text-muted-foreground/70 uppercase">
+                                {{ $t('features.users.table.actions') }}
+                            </TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow v-if="loading">
+                            <TableCell colspan="6" class="h-24 text-center">
+                                <Loader2 class="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+                            </TableCell>
+                        </TableRow>
+
+                        <TableRow v-else-if="users.length === 0">
+                            <TableCell colspan="6" class="h-32 text-center text-muted-foreground">
+                                <div class="flex flex-col items-center justify-center space-y-2">
+                                    <Users class="h-8 w-8 text-muted-foreground/20" />
+                                    <p>{{ $t('features.users.empty') }}</p>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+
+                        <TableRow v-else v-for="user in users" :key="user.id" class="group">
+                            <TableCell class="px-6">
+                                <Checkbox 
+                                    :checked="selectedIds.includes(user.id)"
+                                    @update:checked="toggleSelection(user.id)"
+                                />
+                            </TableCell>
+                            <TableCell class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-9 w-9">
+                                        <img
+                                            v-if="user.avatar"
+                                            :src="user.avatar"
+                                            :alt="user.name"
+                                            class="h-9 w-9 rounded-full object-cover"
+                                        >
+                                        <div
+                                            v-else
+                                            class="h-9 w-9 rounded-full bg-muted flex items-center justify-center border border-border/40"
+                                        >
+                                            <span class="text-muted-foreground font-medium text-xs">
+                                                {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-foreground">
+                                            {{ user.name }}
+                                            <span v-if="user.deleted_at" class="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-destructive/10 text-destructive uppercase tracking-wide">
+                                                {{ $t('common.labels.deleted') }}
+                                            </span>
+                                        </div>
+                                        <div v-if="user.phone" class="text-[10px] text-muted-foreground font-mono uppercase tracking-tight">{{ user.phone }}</div>
+                                    </div>
+                                </div>
+                            </TableCell>
+                            <TableCell class="px-6 py-4">
+                                <div class="text-sm text-foreground">{{ user.email }}</div>
+                                <div v-if="user.email_verified_at" class="text-[10px] text-primary font-bold uppercase tracking-wider">
+                                    {{ $t('features.users.status.verified') }}
+                                </div>
+                                <div v-else class="text-[10px] text-muted-foreground italic uppercase tracking-wider">
+                                    {{ $t('features.users.status.unverified') }}
+                                </div>
+                            </TableCell>
+                            <TableCell class="px-6 py-4">
+                                <div class="flex flex-wrap gap-1.5">
+                                    <Badge
+                                        v-for="role in (user.roles || [])"
+                                        :key="role.id"
+                                        variant="secondary"
+                                        class="h-5 text-[10px] px-2 font-semibold uppercase tracking-wider"
+                                    >
+                                        {{ role.name }}
+                                    </Badge>
+                                    <span v-if="!user.roles || user.roles.length === 0" class="text-xs text-muted-foreground italic">
+                                        {{ $t('features.users.status.noRoles') }}
+                                    </span>
+                                </div>
+                            </TableCell>
+                            <TableCell class="px-6 py-4 text-sm text-muted-foreground">
+                                <div v-if="user.last_login_at" class="text-xs">
+                                    {{ formatDate(user.last_login_at) }}
+                                </div>
+                                <div v-else class="text-xs text-muted-foreground/50">
+                                    {{ $t('features.users.status.never') }}
+                                </div>
+                            </TableCell>
+                            <TableCell class="px-6 py-4">
+                                <div class="flex justify-center items-center gap-1">
+                                    <Button
+                                        v-if="!user.email_verified_at && authStore.hasPermission('edit users')"
+                                        variant="ghost"
+                                        size="icon"
+                                        @click="verifyUser(user)"
+                                        class="h-8 w-8 text-primary hover:bg-primary/10"
+                                        :title="$t('features.users.actions.verify')"
+                                        :disabled="!canManage(user)"
+                                    >
+                                        <CheckCheck class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
+                                    </Button>
+                                    <Button
+                                        v-if="authStore.hasPermission('edit users')"
+                                        variant="ghost"
+                                        size="icon"
+                                        @click="forceLogoutUser(user)"
+                                        class="h-8 w-8 text-warning hover:bg-warning/10"
+                                        :title="$t('features.users.actions.forceLogout')"
+                                        :disabled="!canManage(user)"
+                                    >
+                                        <LogOut class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
+                                    </Button>
+                                    <Button
+                                        v-if="authStore.hasPermission('edit users')"
+                                        variant="ghost"
+                                        size="icon"
+                                        @click="editUser(user)"
+                                        class="h-8 w-8 text-primary hover:bg-primary/10"
+                                        :title="$t('common.actions.edit')"
+                                        :disabled="!canManage(user)"
+                                    >
+                                        <Pencil class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
+                                    </Button>
+                                    <Button
+                                        v-if="authStore.hasPermission('delete users') && !user.deleted_at"
+                                        variant="ghost"
+                                        size="icon"
+                                        @click="deleteUser(user)"
+                                        class="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                        :title="$t('common.actions.delete')"
+                                        :disabled="!canDelete(user)"
+                                    >
+                                        <Trash2 class="w-4 h-4" :class="{ 'opacity-50': !canDelete(user) }" />
+                                    </Button>
+                                    
+                                    <Button
+                                        v-if="user.deleted_at && authStore.hasPermission('delete users')"
+                                        variant="ghost"
+                                        size="icon"
+                                        @click="restoreUser(user)"
+                                        class="h-8 w-8 text-success hover:bg-success/10"
+                                        :title="$t('common.actions.restore')"
+                                    >
+                                        <RotateCcw class="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                        v-if="user.deleted_at && authStore.hasPermission('delete users')"
+                                        variant="ghost"
+                                        size="icon"
+                                        @click="forceDeleteUser(user)"
+                                        class="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                        :title="$t('common.actions.forceDelete')"
+                                    >
+                                        <Trash2 class="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+
+                <!-- Pagination -->
+                <Pagination
+                    v-if="pagination && pagination.total > 0"
+                    :current-page="pagination.current_page"
+                    :total-items="pagination.total"
+                    :per-page="Number(pagination.per_page || 10)"
+                    @page-change="changePage"
+                    @update:per-page="changePerPage"
+                    class="border-none shadow-none mt-4 px-6 py-4"
+                />
+            </CardContent>
+        </Card>
 
         <!-- Create/Edit Modal Removed -->
     </div>
@@ -373,7 +384,21 @@ import SelectContent from '@/components/ui/select-content.vue';
 import SelectItem from '@/components/ui/select-item.vue';
 // @ts-ignore
 import Checkbox from '@/components/ui/checkbox.vue';
-import { Plus, Search, Loader2, Users, LogOut, Pencil, Trash2, CheckCheck, CheckCircle, AlertCircle, UserPlus, Activity, RotateCcw } from 'lucide-vue-next';
+// @ts-ignore
+import Badge from '@/components/ui/badge.vue';
+// @ts-ignore
+import Table from '@/components/ui/table.vue';
+// @ts-ignore
+import TableHeader from '@/components/ui/table-header.vue';
+// @ts-ignore
+import TableBody from '@/components/ui/table-body.vue';
+// @ts-ignore
+import TableRow from '@/components/ui/table-row.vue';
+// @ts-ignore
+import TableCell from '@/components/ui/table-cell.vue';
+// @ts-ignore
+import TableHead from '@/components/ui/table-head.vue';
+import { Plus, Search, Loader2, Users, LogOut, Pencil, Trash2, CheckCheck, CheckCircle, AlertCircle, UserPlus, Activity, RotateCcw, Tag } from 'lucide-vue-next';
 import { useAuthStore } from '@/stores/auth';
 import { useConfirm } from '@/composables/useConfirm';
 import type { User, Role } from '@/types/auth';
