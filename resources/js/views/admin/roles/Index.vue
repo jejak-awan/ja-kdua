@@ -1,28 +1,16 @@
 <template>
     <div class="h-[calc(100vh-140px)] flex flex-col">
         <!-- Header -->
-        <div class="mb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
-            <div>
-                <h1 class="text-2xl font-bold text-foreground">{{ $t('features.roles.title') }}</h1>
-                <p class="mt-1 text-sm text-muted-foreground">{{ $t('features.roles.subtitle') }}</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <Button variant="outline" size="sm" @click="fetchRoles" :disabled="loading" class="h-9">
-                    <RefreshCw :class="cn('w-4 h-4 mr-2', loading && 'animate-spin')" />
-                    {{ $t('common.actions.refresh') }}
-                </Button>
-                <Button variant="default" v-if="authStore.hasPermission('create roles')" @click="createNewRole" class="h-9">
-                    <Plus class="w-4 h-4 mr-2" />
-                    {{ $t('features.roles.create') }}
-                </Button>
-            </div>
+        <div class="mb-4 shrink-0">
+            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.roles.title') }}</h1>
+            <p class="mt-1 text-sm text-muted-foreground">{{ $t('features.roles.subtitle') }}</p>
         </div>
 
         <!-- Main Workspace -->
-        <div class="flex-1 flex overflow-hidden border border-border rounded-xl bg-card shadow-sm">
+        <div class="flex-1 flex overflow-hidden border border-border rounded-xl bg-transparent">
             <!-- Left Sidebar: Role List -->
-            <div class="w-72 border-r border-border bg-muted/20 flex flex-col shrink-0">
-                <div class="p-4 border-b border-border space-y-3 bg-background/50">
+            <div class="w-72 border-r border-border bg-transparent flex flex-col shrink-0">
+                <div class="h-14 flex items-center px-4 border-b border-border bg-transparent">
                     <div class="relative">
                         <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -38,15 +26,15 @@
                         <div v-for="i in 5" :key="i" class="h-10 w-full bg-muted animate-pulse rounded-lg"></div>
                     </div>
                     <div v-else-if="filteredRoles.length === 0" class="p-8 text-center text-muted-foreground text-sm italic">
-                        No roles found
+                        {{ $t('features.roles.list.empty') }}
                     </div>
                     <div
                         v-for="role in filteredRoles"
                         :key="role.id"
                         class="group flex items-center gap-3 p-2.5 rounded-lg transition-all cursor-pointer relative"
                         :class="[
-                            isSelected(role.id) ? 'bg-primary/5 border-primary/20' : 'hover:bg-muted/50 border-transparent',
-                            activeRoleId === role.id ? 'ring-1 ring-primary/50 bg-primary/5 shadow-sm' : ''
+                            isSelected(role.id) ? 'bg-primary/5 border-primary/20' : 'hover:bg-muted/5' ,
+                            activeRoleId === role.id ? 'ring-1 ring-primary/50 bg-primary/5' : ''
                         ]"
                         @click="setActiveRole(role)"
                     >
@@ -64,15 +52,15 @@
                         <div class="flex-1 overflow-hidden">
                             <div class="flex items-center justify-between gap-2">
                                 <span class="text-sm font-semibold truncate text-foreground group-hover:text-primary transition-colors">
-                                    {{ role.name }}
+                                    {{ role?.name || 'Unknown Role' }}
                                 </span>
-                                <Badge v-if="isProtectedRole(role.name)" variant="outline" class="text-[9px] h-3.5 px-1 py-0 border-muted-foreground/30 text-muted-foreground">
+                                <Badge v-if="role && isProtectedRole(role.name)" variant="outline" class="text-[9px] h-3.5 px-1 py-0 border-muted-foreground/30 text-muted-foreground">
                                     System
                                 </Badge>
                             </div>
-                            <div class="text-[10px] text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                            <div class="text-[10px] text-muted-foreground flex items-center gap-1.5 mt-0.5" v-if="role">
                                 <Users class="w-3 h-3" />
-                                {{ role.users_count || 0 }} Users
+                                {{ $t('features.roles.list.usersCount', { count: role.users_count || 0 }) }}
                             </div>
                         </div>
 
@@ -86,61 +74,76 @@
                             >
                                 <Trash2 class="w-3.5 h-3.5" />
                             </Button>
+                             <Button
+                                v-if="authStore.hasPermission('create roles')"
+                                variant="ghost"
+                                size="icon"
+                                @click.stop="duplicateRole(role)"
+                                class="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                :title="$t('features.roles.workspace.duplicate')"
+                            >
+                                <Copy class="w-3.5 h-3.5" />
+                            </Button>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Footer / Bulk Actions -->
-                <div v-if="selectedRoleIds.length > 0" class="p-3 border-t border-border bg-primary/5">
-                    <div class="flex items-center justify-between mb-2 px-1">
-                        <span class="text-[10px] uppercase font-bold text-primary tracking-wider">Comparison Mode</span>
-                        <span class="text-[10px] font-bold text-primary">{{ selectedRoleIds.length }} selected</span>
+                <div v-if="selectedRoleIds.length > 0" class="p-4 border-t border-border bg-transparent">
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <span class="text-[10px] font-bold text-muted-foreground">{{ $t('features.roles.workspace.comparison.mode') }}</span>
+                        <span class="text-[10px] font-bold text-primary">{{ $t('features.roles.workspace.comparison.syncing', { count: selectedRoleIds.length }) }}</span>
                     </div>
-                    <Button variant="ghost" size="xs" @click="selectedRoleIds = []" class="w-full h-7 text-[10px] font-bold uppercase hover:bg-primary/10">
-                        Clear Selection
+                    <Button variant="outline" size="xs" @click="selectedRoleIds = []" class="w-full h-8 text-[10px] font-bold border-primary/20 text-primary hover:bg-primary/5 transition-all">
+                        {{ $t('features.roles.workspace.clearSelection') }}
                     </Button>
                 </div>
             </div>
 
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col bg-background overflow-hidden relative">
+            <div class="flex-1 flex flex-col bg-transparent overflow-hidden relative">
                 <!-- Workspace Header -->
-                <div class="h-14 border-b border-border flex items-center justify-between px-6 bg-card shrink-0 shadow-sm z-10">
+                <div class="h-14 border-b border-border flex items-center justify-between px-6 bg-transparent shrink-0 z-10">
                     <div class="flex items-center gap-3">
                         <div v-if="workspaceMode === 'comparison'" class="flex items-center gap-2">
                             <div class="p-1.5 bg-primary/10 rounded-lg">
                                 <Columns class="w-4 h-4 text-primary" />
                             </div>
-                            <h2 class="font-bold text-sm">Role Comparison Matrix</h2>
+                            <h2 class="font-bold text-sm">{{ $t('features.roles.workspace.comparison.title') }}</h2>
                         </div>
                         <div v-else-if="workspaceMode === 'edit'" class="flex items-center gap-2">
                             <div class="p-1.5 bg-primary/10 rounded-lg">
                                 <Edit3 class="w-4 h-4 text-primary" />
                             </div>
                             <h2 class="font-bold text-sm">{{ activeRole?.name }}</h2>
-                            <Badge variant="outline" class="text-[10px] border-primary/30 text-primary bg-primary/5">Edit Mode</Badge>
+                            <Badge variant="outline" class="text-[10px] border-primary/30 text-primary bg-primary/5">{{ $t('features.roles.workspace.edit.mode') }}</Badge>
                         </div>
                          <div v-else-if="workspaceMode === 'create'" class="flex items-center gap-2">
                             <div class="p-1.5 bg-success/10 rounded-lg">
                                 <Plus class="w-4 h-4 text-success" />
                             </div>
-                            <h2 class="font-bold text-sm">Create New Role</h2>
+                            <h2 class="font-bold text-sm">{{ $t('features.roles.workspace.create.title') }}</h2>
                         </div>
-                        <div v-else class="flex items-center gap-2 text-muted-foreground">
-                            <Shield class="w-4 h-4" />
-                            <span class="text-sm">Select a role to start managing permissions</span>
+                        <div v-else class="flex items-center gap-2 text-muted-foreground mr-2">
+                            <Button variant="outline" size="xs" @click="fetchRoles" :disabled="loading" class="h-8 border-primary/20 text-primary hover:bg-primary/5 font-bold">
+                                <RefreshCw :class="cn('w-3.5 h-3.5 mr-2', loading && 'animate-spin')" />
+                                {{ $t('common.actions.refresh') }}
+                            </Button>
+                             <Button variant="default" v-if="authStore.hasPermission('create roles')" @click="createNewRole" class="h-8">
+                                <Plus class="w-3.5 h-3.5 mr-2" />
+                                {{ $t('features.roles.create') }}
+                            </Button>
                         </div>
                     </div>
 
                     <div class="flex items-center gap-2" v-if="workspaceMode !== 'welcome'">
                         <Button
-                            v-if="isDirty"
                             variant="ghost"
                             size="sm"
-                            @click="resetForm"
+                            @click="cancelAction"
                             class="h-8 text-xs"
                         >
-                            Reset Changes
+                            {{ isDirty ? $t('features.roles.workspace.reset') : $t('common.actions.cancel') }}
                         </Button>
                         <Button
                             variant="default"
@@ -150,7 +153,7 @@
                             class="h-8 text-xs font-bold"
                         >
                             <Loader2 v-if="saving" class="w-3 h-3 mr-2 animate-spin" />
-                            Save Configuration
+                            {{ $t('features.roles.workspace.save') }}
                         </Button>
                     </div>
                 </div>
@@ -159,20 +162,20 @@
                 <div class="flex-1 overflow-y-auto custom-scrollbar relative p-6">
                     <!-- Welcome Screen -->
                     <div v-if="workspaceMode === 'welcome'" class="h-full flex flex-col items-center justify-center text-center p-12">
-                        <div class="p-6 rounded-full bg-muted mb-6 flex items-center justify-center">
-                            <Shield class="w-12 h-12 text-muted-foreground/40" />
+                        <div class="p-6 rounded-full bg-primary/5 border border-primary/10 mb-6 flex items-center justify-center">
+                            <Shield class="w-12 h-12 text-primary/30" />
                         </div>
-                        <h3 class="text-lg font-bold mb-2">Role Management Workspace</h3>
+                        <h3 class="text-lg font-bold mb-2">{{ $t('features.roles.workspace.welcome.title') }}</h3>
                         <p class="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
-                            Click on a role in the sidebar to edit its permissions, or select multiple roles use the checkbox to compare them side-by-side.
+                            {{ $t('features.roles.workspace.welcome.description') }}
                         </p>
                     </div>
 
                     <!-- Single Role Edit / Create Mode -->
-                    <div v-else-if="workspaceMode === 'edit' || workspaceMode === 'create'" class="max-w-4xl space-y-8 animate-fade-in mx-auto">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-muted/20 border border-border/40 rounded-xl">
+                    <div v-else-if="workspaceMode === 'edit' || workspaceMode === 'create'" class="max-w-4xl space-y-10 animate-fade-in mx-auto">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-transparent rounded-xl">
                             <div>
-                                <label class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">Role Identity</label>
+                                <label class="text-[10px] font-bold text-muted-foreground mb-1.5 block">{{ $t('features.roles.workspace.identity') }}</label>
                                 <Input
                                     v-model="form.name"
                                     :placeholder="$t('features.roles.form.namePlaceholder')"
@@ -185,12 +188,12 @@
                                 <div class="flex items-center gap-4 text-xs text-muted-foreground opacity-70">
                                     <div class="flex items-center gap-1.5">
                                         <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-                                        Live Editing
+                                        {{ $t('features.roles.workspace.liveEditing') }}
                                     </div>
                                     <div class="flex items-center gap-1.5">
                                         <CheckCircle2 class="w-3.5 h-3.5 text-success" v-if="isDirty" />
                                         <Circle class="w-3.5 h-3.5" v-else />
-                                        {{ isDirty ? 'Unsaved changes detected' : 'Configuration synced' }}
+                                        {{ isDirty ? $t('features.roles.workspace.unsavedChanges') : $t('features.roles.workspace.synced') }}
                                     </div>
                                 </div>
                             </div>
@@ -198,29 +201,29 @@
 
                         <div class="space-y-4">
                             <div class="flex items-center justify-between pb-2 border-b">
-                                <h4 class="text-sm font-bold border-l-2 border-primary pl-3">Permissions Matrix</h4>
+                                <h4 class="text-sm font-bold border-l-2 border-primary pl-3">{{ $t('features.roles.workspace.matrix.title') }}</h4>
                                 <div class="flex items-center gap-2">
-                                    <Button variant="ghost" size="xs" @click="expandAll" class="h-7 text-[10px] font-bold uppercase">Expand All</Button>
-                                    <Button variant="ghost" size="xs" @click="collapseAll" class="h-7 text-[10px] font-bold uppercase">Collapse All</Button>
+                                    <Button variant="outline" size="xs" @click="expandAll" class="h-7 text-[10px] border-primary/20 text-primary hover:bg-primary/5 font-bold">{{ $t('features.roles.workspace.matrix.expandAll') }}</Button>
+                                    <Button variant="outline" size="xs" @click="collapseAll" class="h-7 text-[10px] border-primary/20 text-primary hover:bg-primary/5 font-bold">{{ $t('features.roles.workspace.matrix.collapseAll') }}</Button>
                                 </div>
                             </div>
 
-                            <Accordion type="multiple" class="space-y-4" v-model:modelValue="expandedCategories">
+                            <Accordion type="multiple" class="space-y-0 border-t border-border" v-model:modelValue="expandedCategories">
                                 <AccordionItem 
                                     v-for="(perms, category) in groupedPermissions" 
                                     :key="category" 
                                     :value="String(category)"
-                                    class="bg-card border border-border rounded-xl overflow-hidden shadow-sm"
+                                    class="bg-transparent border-b border-border overflow-hidden"
                                 >
-                                    <AccordionTrigger class="px-5 py-3.5 bg-muted/30 hover:bg-muted/50 hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/40 transition-all">
+                                    <AccordionTrigger class="px-2 py-5 bg-transparent hover:bg-muted/10 hover:no-underline transition-all">
                                         <div class="flex items-center justify-between w-full pr-4">
                                             <div class="flex items-center gap-3">
-                                                <div class="p-1.5 bg-background border border-border/50 rounded-lg group-data-[state=open]:bg-primary/5 transition-colors">
-                                                    <FolderOpen class="w-4 h-4 text-muted-foreground group-data-[state=open]:text-primary" />
+                                                <div class="p-1.5 bg-primary/5 border border-primary/10 rounded-lg group-data-[state=open]:bg-primary/20 transition-colors">
+                                                    <FolderOpen class="w-4 h-4 text-primary group-data-[state=open]:text-primary" />
                                                 </div>
                                                 <div class="text-left">
-                                                    <h5 class="text-xs font-black uppercase tracking-widest text-foreground">{{ category }}</h5>
-                                                    <p class="text-[10px] text-muted-foreground mt-0.5">{{ perms.length }} permissions available</p>
+                                                    <h5 class="text-xs font-bold text-foreground">{{ category }}</h5>
+                                                    <p class="text-[10px] text-muted-foreground mt-0.5">{{ $t('features.roles.workspace.matrix.available', { count: perms.length }) }}</p>
                                                 </div>
                                             </div>
                                             <Button
@@ -228,14 +231,14 @@
                                                 variant="outline"
                                                 size="xs"
                                                 @click.stop="toggleCategory(String(category))"
-                                                class="h-7 text-[9px] font-black uppercase tracking-tighter bg-background hover:bg-primary hover:text-primary-foreground transition-all"
+                                                class="h-7 text-[9px] font-bold border-primary/20 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
                                             >
-                                                {{ isCategorySelected(String(category)) ? 'Deselect Category' : 'Select Category' }}
+                                                {{ isCategorySelected(String(category)) ? $t('features.roles.workspace.matrix.deselectCategory') : $t('features.roles.workspace.matrix.selectCategory') }}
                                             </Button>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent>
-                                        <div class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 bg-background/50">
+                                        <div class="px-2 py-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
                                             <div
                                                 v-for="permission in perms"
                                                 :key="permission.id"
@@ -243,11 +246,11 @@
                                                 @click="togglePermission(permission.name)"
                                             >
                                                 <Checkbox
-                                                    :checked="isSelectedPermission(permission.name)"
-                                                    @update:checked="() => togglePermission(permission.name)"
+                                                    :checked="isSelectedPermission(permission?.name || '')"
+                                                    @update:checked="() => togglePermission(permission?.name || '')"
                                                 />
                                                 <span class="text-xs font-medium text-muted-foreground group-hover/perm:text-foreground transition-colors pt-0.5">
-                                                    {{ formatPermissionName(permission.name, String(category)) }}
+                                                    {{ formatPermissionName(permission?.name || '', String(category)) }}
                                                 </span>
                                             </div>
                                         </div>
@@ -262,58 +265,59 @@
                          <div class="mb-6 rounded-xl border border-primary/20 bg-primary/5 p-4 flex items-center justify-between">
                             <div class="flex items-center gap-4">
                                 <div class="flex -space-x-3">
-                                    <div v-for="rId in selectedRoleIds.slice(0, 5)" :key="rId" class="w-10 h-10 rounded-full border-2 border-background bg-primary/10 flex items-center justify-center text-primary text-[10px] font-black uppercase shadow-sm">
-                                        {{ getRole(rId)?.name.substring(0, 2) }}
+                                    <div v-for="rId in selectedRoleIds.slice(0, 5)" :key="rId" class="w-10 h-10 rounded-full border-2 border-background bg-primary/10 flex items-center justify-center text-primary text-[10px] font-black">
+                                        {{ getRole(rId)?.name?.substring(0, 2) || '??' }}
                                     </div>
-                                    <div v-if="selectedRoleIds.length > 5" class="w-10 h-10 rounded-full border-2 border-background bg-muted flex items-center justify-center text-muted-foreground text-[10px] font-bold shadow-sm">
+                                    <div v-if="selectedRoleIds.length > 5" class="w-10 h-10 rounded-full border-2 border-background bg-muted flex items-center justify-center text-muted-foreground text-[10px] font-bold">
                                         +{{ selectedRoleIds.length - 5 }}
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-bold">Syncing {{ selectedRoleIds.length }} Roles</h4>
-                                    <p class="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-0.5">Permission Comparison Matrix</p>
+                                    <h4 class="text-sm font-bold">{{ $t('features.roles.workspace.comparison.syncing', { count: selectedRoleIds.length }) }}</h4>
+                                    <p class="text-[10px] text-muted-foreground font-bold mt-0.5">{{ $t('features.roles.workspace.comparison.subtitle') }}</p>
                                 </div>
                             </div>
-                            <Button variant="outline" size="sm" @click="selectedRoleIds = []" class="h-8 text-xs">Exit Comparison</Button>
+                            <Button variant="outline" size="sm" @click="selectedRoleIds = []" class="h-8 text-xs">{{ $t('features.roles.workspace.comparison.exit') }}</Button>
                         </div>
 
                         <div class="space-y-6">
-                            <Accordion type="multiple" class="space-y-4" v-model:modelValue="expandedCategories">
+                            <Accordion type="multiple" class="space-y-0 border-t border-border" v-model:modelValue="expandedCategories">
                                 <AccordionItem 
                                     v-for="(perms, category) in groupedPermissions" 
                                     :key="category" 
                                     :value="String(category)"
-                                    class="bg-card border border-border rounded-xl overflow-hidden shadow-sm"
+                                    class="bg-transparent border-b border-border overflow-hidden"
                                 >
-                                    <AccordionTrigger class="px-5 py-3.5 bg-muted/30 hover:bg-muted/50 hover:no-underline transition-all">
+                                    <AccordionTrigger class="px-2 py-5 bg-transparent hover:bg-muted/10 hover:no-underline transition-all">
                                         <div class="flex items-center gap-3">
                                             <div class="p-1.5 bg-background border border-border/50 rounded-lg">
                                                 <FolderOpen class="w-4 h-4 text-muted-foreground" />
                                             </div>
-                                            <h5 class="text-xs font-black uppercase tracking-widest text-foreground">{{ category }}</h5>
+                                            <h5 class="text-xs font-bold text-foreground">{{ category }}</h5>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent>
                                         <div class="overflow-x-auto pb-4 custom-scrollbar">
                                             <Table>
                                                 <TableHeader>
-                                                    <TableRow class="bg-muted/20 hover:bg-muted/20 border-b border-border/40">
-                                                        <TableHead class="min-w-[200px] sticky left-0 bg-card z-20 shadow-sm border-r px-4 py-3">Permission</TableHead>
+                                                    <TableRow class="bg-transparent hover:bg-transparent border-b border-border">
+                                                        <TableHead class="min-w-[200px] sticky left-0 bg-background z-20 border-r px-4 py-3 text-[10px] font-bold h-12">{{ $t('features.roles.permissions') }}</TableHead>
                                                         <TableHead 
                                                             v-for="rId in selectedRoleIds" 
                                                             :key="rId" 
-                                                            class="min-w-[120px] text-center px-4 py-3"
+                                                            class="min-w-[140px] text-center px-4 py-3 h-12"
                                                         >
-                                                            <div class="flex flex-col items-center gap-1.5">
-                                                                <span class="text-[10px] font-black uppercase tracking-tighter truncate max-w-[100px]" :title="getRole(rId)?.name">
+                                                            <div class="flex flex-col items-center gap-1">
+                                                                <span class="text-[10px] font-bold truncate max-w-[120px] text-primary" :title="getRole(rId)?.name">
                                                                     {{ getRole(rId)?.name }}
                                                                 </span>
                                                                 <Button 
                                                                     variant="ghost" 
                                                                     size="icon" 
-                                                                    class="h-5 w-5 hover:bg-primary/20 hover:text-primary transition-colors"
+                                                                    class="h-5 w-5 hover:bg-primary/20 hover:text-primary transition-colors rounded-md"
                                                                     @click.stop="toggleCategoryForRole(String(category), rId)"
-                                                                    :title="'Toggle category for ' + getRole(rId)?.name"
+                                                                    :title="$t('features.roles.form.selectAll') + ': ' + getRole(rId)?.name"
+                                                                    :disabled="isProtectedRole(getRole(rId)?.name || '')"
                                                                 >
                                                                     <CheckSquare class="w-3 h-3" />
                                                                 </Button>
@@ -325,9 +329,9 @@
                                                     <TableRow 
                                                         v-for="permission in perms" 
                                                         :key="permission.id"
-                                                        class="border-b border-border/40 hover:bg-muted/10 transition-colors"
+                                                        class="border-b border-border/40 hover:bg-muted/5 transition-colors"
                                                     >
-                                                        <TableCell class="sticky left-0 bg-card z-20 shadow-sm border-r font-medium text-xs px-4 py-3">
+                                                        <TableCell class="sticky left-0 bg-background z-20 border-r font-medium text-xs px-4 py-3">
                                                             {{ formatPermissionName(permission.name, String(category)) }}
                                                         </TableCell>
                                                         <TableCell 
@@ -339,6 +343,7 @@
                                                                 :checked="isRoleHasPermission(roleIdToNum(rId), permission.name)"
                                                                 @update:checked="() => togglePermissionForRole(roleIdToNum(rId), permission.name)"
                                                                 class="mx-auto"
+                                                                :disabled="isProtectedRole(getRole(rId)?.name || '')"
                                                             />
                                                         </TableCell>
                                                     </TableRow>
@@ -360,8 +365,8 @@
                             <Shield class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 text-primary" />
                         </div>
                         <div class="text-center">
-                            <h4 class="font-bold text-sm">Saving Security Configuration</h4>
-                            <p class="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Applying permissions across roles...</p>
+                            <h4 class="font-bold text-sm">{{ $t('features.roles.workspace.saving.title') }}</h4>
+                            <p class="text-[10px] text-muted-foreground mt-1">{{ $t('features.roles.workspace.saving.subtitle') }}</p>
                         </div>
                     </div>
                 </div>
@@ -426,7 +431,8 @@ import {
     CheckCircle2,
     Circle,
     FolderOpen,
-    CheckSquare
+    CheckSquare,
+    Copy
 } from 'lucide-vue-next';
 
 import type { Role, Permission } from '@/types/auth';
@@ -468,10 +474,10 @@ const isProtectedRole = (name: string) => protectedRoles.includes(name);
 const filteredRoles = computed(() => {
     if (!search.value) return roles.value;
     const s = search.value.toLowerCase();
-    return roles.value.filter(r => r.name.toLowerCase().includes(s));
+    return roles.value.filter(r => r?.name?.toLowerCase().includes(s));
 });
 
-const activeRole = computed(() => roles.value.find(r => r.id === activeRoleId.value) || null);
+const activeRole = computed(() => roles.value.find(r => r?.id === activeRoleId.value) || null);
 
 const workspaceMode = computed(() => {
     if (selectedRoleIds.value.length > 1) return 'comparison';
@@ -487,15 +493,15 @@ const isDirty = computed(() => {
     
     if (workspaceMode.value === 'create') return !!form.value.name || form.value.permissions.length > 0;
     
-    if (workspaceMode.value === 'edit') {
+    if (workspaceMode.value === 'edit' && initialData.value) {
         const nameChanged = form.value.name !== initialData.value.name;
         const currentPerms = [...form.value.permissions].sort().join(',');
-        const prevPerms = [...initialData.value.permissions].sort().join(',');
+        const prevPerms = [...(initialData.value.permissions || [])].sort().join(',');
         return nameChanged || currentPerms !== prevPerms;
     }
     
-    if (workspaceMode.value === 'comparison') {
-        return JSON.stringify(form.value.matrixPermissions) !== JSON.stringify(initialData.value.matrixPermissions);
+    if (workspaceMode.value === 'comparison' && initialData.value) {
+        return JSON.stringify(form.value.matrixPermissions) !== JSON.stringify(initialData.value.matrixPermissions || {});
     }
     
     return false;
@@ -506,7 +512,10 @@ const fetchRoles = async () => {
     loading.value = true;
     try {
         const response: any = await api.get('/admin/ja/roles?limit=100');
-        roles.value = response.data?.data || response.data || [];
+        // Handle Laravel paginated response structure: 
+        // response.data (axios) -> .data (Common Response) -> .data (Paginator collection)
+        const rawRoles = response.data?.data?.data || response.data?.data || response.data || [];
+        roles.value = Array.isArray(rawRoles) ? rawRoles.filter(Boolean) : [];
         if (workspaceMode.value === 'comparison') syncMatrixFromRoles();
     } catch (error) {
         toast.error.load(error);
@@ -518,8 +527,18 @@ const fetchRoles = async () => {
 const fetchPermissions = async () => {
     try {
         const response: any = await api.get('/admin/ja/roles/permissions');
-        permissions.value = response.data?.data || response.data || {};
-        expandedCategories.value = Object.keys(permissions.value).slice(0, 2);
+        const rawPerms = response.data?.data || response.data || {};
+        
+        // Sanitize permissions
+        const sanitized: Record<string, Permission[]> = {};
+        Object.keys(rawPerms).forEach(cat => {
+            if (Array.isArray(rawPerms[cat])) {
+                sanitized[cat] = rawPerms[cat].filter(Boolean);
+            }
+        });
+        
+        permissions.value = sanitized;
+        expandedCategories.value = Object.keys(sanitized).slice(0, 2);
     } catch (error) {
         console.error('Failed to fetch permissions:', error);
     }
@@ -540,7 +559,8 @@ const internalSetActiveRole = (role: Role) => {
     form.value.permissions = (role.permissions || []).map(p => p.name);
     initialData.value = {
         name: form.value.name,
-        permissions: [...form.value.permissions]
+        permissions: [...form.value.permissions],
+        matrixPermissions: {}
     };
     clearErrors();
 };
@@ -550,10 +570,28 @@ const internalCreateNewRole = () => {
     selectedRoleIds.value = [];
     form.value.name = '';
     form.value.permissions = [];
-    initialData.value = { name: '', permissions: [] };
+    initialData.value = { 
+        name: '', 
+        permissions: [],
+        matrixPermissions: {}
+    };
     clearErrors();
 };
-
+ 
+const duplicateRole = (role: Role) => {
+    activeRoleId.value = -1;
+    selectedRoleIds.value = [];
+    form.value.name = `${role.name} (Copy)`;
+    form.value.permissions = (role.permissions || []).map(p => p.name);
+    initialData.value = { 
+        name: '', // Set to empty to make it dirty immediately
+        permissions: [],
+        matrixPermissions: {}
+    };
+    clearErrors();
+    router.push({ name: 'roles.create' });
+};
+ 
 const isSelected = (id: number) => selectedRoleIds.value.includes(id);
 
 const toggleSelection = (id: number) => {
@@ -564,6 +602,11 @@ const toggleSelection = (id: number) => {
         selectedRoleIds.value.push(id);
         activeRoleId.value = null; // Exit edit mode
     }
+    
+    // Automatically sync matrix if we are in comparison mode
+    if (selectedRoleIds.value.length > 1) {
+        syncMatrixFromRoles();
+    }
 };
 
 const syncMatrixFromRoles = () => {
@@ -571,14 +614,23 @@ const syncMatrixFromRoles = () => {
     selectedRoleIds.value.forEach(rId => {
         const role = getRole(rId);
         if (role) {
-            matrix[rId] = (role.permissions || []).map(p => p.name);
+            matrix[rId] = (role.permissions || []).filter(Boolean).map(p => p.name);
         }
     });
     form.value.matrixPermissions = matrix;
-    initialData.value = { matrixPermissions: JSON.parse(JSON.stringify(matrix)) };
+    
+    // Safety check for initialData
+    if (!initialData.value) {
+        initialData.value = {
+            name: '',
+            permissions: [],
+            matrixPermissions: {}
+        };
+    }
+    initialData.value.matrixPermissions = JSON.parse(JSON.stringify(matrix));
 };
 
-const getRole = (id: number | string) => roles.value.find(r => String(r.id) === String(id));
+const getRole = (id: number | string) => roles.value.find(r => r && String(r.id) === String(id));
 const roleIdToNum = (id: any) => Number(id);
 
 // Permission Handlers
@@ -594,13 +646,13 @@ const isSelectedPermission = (name: string) => form.value.permissions.includes(n
 const isCategorySelected = (category: string) => {
     const categoryPerms = permissions.value[category] || [];
     if (categoryPerms.length === 0) return false;
-    return categoryPerms.every(p => form.value.permissions.includes(p.name));
+    return categoryPerms.every(p => p && form.value.permissions.includes(p.name));
 };
 
 const toggleCategory = (category: string) => {
     if (isProtectedRole(activeRole.value?.name || '')) return;
     const categoryPerms = permissions.value[category] || [];
-    const categoryNames = categoryPerms.map(p => p.name);
+    const categoryNames = categoryPerms.filter(Boolean).map(p => p.name);
     if (isCategorySelected(category)) {
         form.value.permissions = form.value.permissions.filter(p => !categoryNames.includes(p));
     } else {
@@ -627,7 +679,7 @@ const toggleCategoryForRole = (category: string, roleId: number) => {
     if (role && isProtectedRole(role.name)) return;
 
     const categoryPerms = permissions.value[category] || [];
-    const categoryNames = categoryPerms.map(p => p.name);
+    const categoryNames = categoryPerms.filter(Boolean).map(p => p.name);
     const currentRolePerms = form.value.matrixPermissions[roleId] || [];
     const allSelected = categoryNames.every(name => currentRolePerms.includes(name));
 
@@ -674,11 +726,12 @@ const resetForm = () => {
     if (workspaceMode.value === 'edit' && initialData.value) {
         form.value.name = initialData.value.name;
         form.value.permissions = [...initialData.value.permissions];
-    } else if (workspaceMode.value === 'comparison' && initialData.value) {
+    } else if (workspaceMode.value === 'comparison' && initialData.value?.matrixPermissions) {
         form.value.matrixPermissions = JSON.parse(JSON.stringify(initialData.value.matrixPermissions));
     } else if (workspaceMode.value === 'create') {
         form.value.name = '';
         form.value.permissions = [];
+        form.value.matrixPermissions = {};
     }
     clearErrors();
 };
@@ -706,20 +759,41 @@ const formatPermissionName = (name: string, category: string) => {
     if (!formatted) return name;
     return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 };
-
+ 
+const cancelAction = () => {
+    if (isDirty.value) {
+        resetForm();
+    } else {
+        router.push({ name: 'roles' });
+    }
+};
+ 
 const handleRouteParams = () => {
     const { name, params } = route;
     
+    // Only handle if roles are loaded
+    if (roles.value.length === 0 && !loading.value) return;
+
     if (name === 'roles.create') {
         if (activeRoleId.value !== -1) internalCreateNewRole();
     } else if (name === 'roles.edit' && params.id) {
         const id = Number(params.id);
         if (activeRoleId.value !== id) {
-            const role = roles.value.find(r => r.id === id);
-            if (role) internalSetActiveRole(role);
+            const role = roles.value.find(r => r && r.id === id);
+            if (role) {
+                internalSetActiveRole(role);
+            } else if (roles.value.length > 0) {
+                // If role not found and we HAVE roles, go back to index
+                router.push({ name: 'roles' });
+            }
         }
     } else if (name === 'roles') {
         activeRoleId.value = null;
+        if (selectedRoleIds.value.length === 0) {
+           // Reset form to clear any stale data
+           form.value.name = '';
+           form.value.permissions = [];
+        }
     }
 };
 
@@ -733,10 +807,15 @@ watch(() => route.path, () => {
 
 onMounted(async () => {
     loading.value = true;
-    await fetchPermissions();
-    await fetchRoles();
-    loading.value = false;
-    handleRouteParams();
+    try {
+        await Promise.all([
+            fetchPermissions(),
+            fetchRoles()
+        ]);
+    } finally {
+        loading.value = false;
+        handleRouteParams();
+    }
 });
 </script>
 

@@ -407,18 +407,18 @@ onMounted(() => {
             <Card 
                 @click="statusFilter = 'all'"
                 :class="cn(
-                    'cursor-pointer transition-shadow duration-300 hover:shadow-md border',
-                    statusFilter === 'all' ? 'border-primary' : 'border-border'
+                    'cursor-pointer transition-colors hover:shadow-sm border',
+                    statusFilter === 'all' ? 'border-primary bg-primary/5' : 'border-border bg-transparent'
                 )"
             >
-                <CardContent class="p-6">
+                <CardContent class="p-3">
                     <div class="flex items-center justify-between">
-                        <div class="space-y-1">
-                            <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.dashboard.stats.totalContents') }}</p>
-                            <p class="text-2xl font-bold text-foreground">{{ stats.total || 0 }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-[10px] font-bold text-muted-foreground">{{ $t('features.dashboard.stats.totalContents') }}</p>
+                            <p class="text-xl font-black text-foreground">{{ stats.total || 0 }}</p>
                         </div>
-                        <div class="p-2.5 bg-primary/10 rounded-xl text-primary">
-                            <FileText class="w-5 h-5" />
+                        <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                            <FileText class="w-4 h-4" />
                         </div>
                     </div>
                 </CardContent>
@@ -427,17 +427,17 @@ onMounted(() => {
             <!-- Published -->
             <Card 
                 @click="statusFilter = 'published'"
-                :class="cn('px-6 py-4 cursor-pointer hover:shadow-md',
-                    statusFilter === 'published' ? 'border-success' : 'border-border')"
+                :class="cn('cursor-pointer hover:shadow-sm border transition-colors',
+                    statusFilter === 'published' ? 'border-success bg-success/5' : 'border-border bg-transparent')"
             >
-                <CardContent class="p-6">
+                <CardContent class="p-3">
                     <div class="flex items-center justify-between">
-                        <div class="space-y-1">
-                            <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.published') }}</p>
-                            <p class="text-2xl font-bold text-success">{{ stats.published || 0 }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-[10px] font-bold text-muted-foreground">{{ $t('features.content.status.published') }}</p>
+                            <p class="text-xl font-black text-success">{{ stats.published || 0 }}</p>
                         </div>
-                        <div class="p-2.5 bg-success/10 rounded-xl text-success">
-                            <CheckCircle2 class="w-5 h-5" />
+                        <div class="p-2 bg-success/10 rounded-lg text-success">
+                            <CheckCircle2 class="w-4 h-4" />
                         </div>
                     </div>
                 </CardContent>
@@ -446,17 +446,17 @@ onMounted(() => {
             <!-- Draft -->
             <Card 
                 @click="statusFilter = 'draft'"
-                :class="cn('px-6 py-4 cursor-pointer hover:shadow-md',
-                    statusFilter === 'draft' ? 'border-primary' : 'border-border')"
+                :class="cn('cursor-pointer hover:shadow-sm border transition-colors',
+                    statusFilter === 'draft' ? 'border-primary bg-primary/5' : 'border-border bg-transparent')"
             >
-                <CardContent class="p-6">
+                <CardContent class="p-3">
                     <div class="flex items-center justify-between">
-                        <div class="space-y-1">
-                            <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.draft') }}</p>
-                            <p class="text-2xl font-bold text-primary">{{ stats.draft || 0 }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-[10px] font-bold text-muted-foreground">{{ $t('features.content.status.draft') }}</p>
+                            <p class="text-xl font-black text-primary">{{ stats.draft || 0 }}</p>
                         </div>
-                        <div class="p-2.5 bg-primary/10 rounded-xl text-primary">
-                            <FileEdit class="w-5 h-5" />
+                        <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                            <FileEdit class="w-4 h-4" />
                         </div>
                     </div>
                 </CardContent>
@@ -465,17 +465,17 @@ onMounted(() => {
             <!-- Pending -->
             <Card 
                 @click="statusFilter = 'pending'"
-                :class="cn('px-6 py-4 cursor-pointer hover:shadow-md',
-                    statusFilter === 'pending' ? 'border-warning' : 'border-border')"
+                :class="cn('cursor-pointer hover:shadow-sm border transition-colors',
+                    statusFilter === 'pending' ? 'border-warning bg-warning/5' : 'border-border bg-transparent')"
             >
-                <CardContent class="p-6">
+                <CardContent class="p-3">
                     <div class="flex items-center justify-between">
-                        <div class="space-y-1">
-                            <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.pending') }}</p>
-                            <p class="text-2xl font-bold text-warning">{{ stats.pending || 0 }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-[10px] font-bold text-muted-foreground">{{ $t('features.content.status.pending') }}</p>
+                            <p class="text-xl font-black text-warning">{{ stats.pending || 0 }}</p>
                         </div>
-                        <div class="p-2.5 bg-warning/10 rounded-xl text-warning">
-                            <Clock3 class="w-5 h-5" />
+                        <div class="p-2 bg-warning/10 rounded-lg text-warning">
+                            <Clock3 class="w-4 h-4" />
                         </div>
                     </div>
                 </CardContent>
@@ -484,17 +484,17 @@ onMounted(() => {
             <!-- Archived -->
             <Card 
                 @click="statusFilter = 'archived'"
-                :class="cn('px-6 py-4 cursor-pointer hover:shadow-md',
-                    statusFilter === 'archived' ? 'border-primary' : 'border-border')"
+                :class="cn('cursor-pointer hover:shadow-sm border transition-colors',
+                    statusFilter === 'archived' ? 'border-primary bg-primary/5' : 'border-border bg-transparent')"
             >
-                <CardContent class="p-6">
+                <CardContent class="p-3">
                     <div class="flex items-center justify-between">
-                        <div class="space-y-1">
-                            <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.archived') }}</p>
-                            <p class="text-2xl font-bold text-primary">{{ stats.archived || 0 }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-[10px] font-bold text-muted-foreground">{{ $t('features.content.status.archived') }}</p>
+                            <p class="text-xl font-black text-primary">{{ stats.archived || 0 }}</p>
                         </div>
-                        <div class="p-2.5 bg-primary/10 rounded-xl text-primary">
-                            <Archive class="w-5 h-5" />
+                        <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                            <Archive class="w-4 h-4" />
                         </div>
                     </div>
                 </CardContent>
@@ -503,17 +503,17 @@ onMounted(() => {
             <!-- Trashed -->
             <Card 
                 @click="statusFilter = 'trashed'"
-                :class="cn('px-6 py-4 cursor-pointer hover:shadow-md',
-                    statusFilter === 'trashed' ? 'border-destructive' : 'border-border')"
+                :class="cn('cursor-pointer hover:shadow-sm border transition-colors',
+                    statusFilter === 'trashed' ? 'border-destructive bg-destructive/5' : 'border-border bg-transparent')"
             >
-                <CardContent class="p-6">
+                <CardContent class="p-3">
                     <div class="flex items-center justify-between">
-                        <div class="space-y-1">
-                            <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.trashed') }}</p>
-                            <p class="text-2xl font-bold text-destructive">{{ stats.trashed || 0 }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-[10px] font-bold text-muted-foreground">{{ $t('features.content.status.trashed') }}</p>
+                            <p class="text-xl font-black text-destructive">{{ stats.trashed || 0 }}</p>
                         </div>
-                        <div class="p-2.5 bg-destructive/10 rounded-xl text-destructive">
-                            <Trash2 class="w-5 h-5" />
+                        <div class="p-2 bg-destructive/10 rounded-lg text-destructive">
+                            <Trash2 class="w-4 h-4" />
                         </div>
                     </div>
                 </CardContent>

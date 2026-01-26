@@ -35,5 +35,45 @@
         "deleteFailed": "Failed to delete role",
         "duplicateFailed": "Failed to duplicate role",
         "fetchFailed": "Failed to fetch roles"
+    },
+    "workspace": {
+        "welcome": {
+            "title": "Role Management Workspace",
+            "description": "Click on a role in the sidebar to edit its permissions, or select multiple roles use the checkbox to compare them side-by-side."
+        },
+        "comparison": {
+            "title": "Role Comparison Matrix",
+            "subtitle": "Permission Comparison Matrix",
+            "syncing": "Syncing {count} Roles",
+            "exit": "Exit Comparison",
+            "mode": "Comparison Mode"
+        },
+        "edit": {
+            "mode": "Edit Mode"
+        },
+        "create": {
+            "title": "Create New Role"
+        },
+        "matrix": {
+            "title": "Permissions Matrix",
+            "expandAll": "Expand All",
+            "collapseAll": "Collapse All",
+            "available": "{count} permissions available",
+            "selectCategory": "Select Category",
+            "deselectCategory": "Deselect Category"
+        },
+        "identity": "Role Identity",
+        "liveEditing": "Live Editing",
+        "unsavedChanges": "Unsaved changes detected",
+        "synced": "Configuration synced",
+        "reset": "Reset Changes",
+        "save": "Save Configuration",
+        "placeholder": "Select a role to start managing permissions",
+        "clearSelection": "Clear Selection",
+        "duplicate": "Duplicate role",
+        "saving": {
+            "title": "Saving Security Configuration",
+            "subtitle": "Applying permissions across roles..."
+        }
     }
 }

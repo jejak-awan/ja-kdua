@@ -145,7 +145,7 @@ const routes: Array<RouteRecordRaw> = [
                 path: 'roles',
                 name: 'roles',
                 component: () => import('../views/admin/roles/Index.vue'),
-                meta: { permission: 'manage roles' },
+                meta: { permission: 'view roles' },
             },
             {
                 path: 'roles/create',

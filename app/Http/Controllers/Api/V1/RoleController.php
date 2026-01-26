@@ -20,14 +20,17 @@ class RoleController extends BaseApiController
         }
 
         $roles = $query->paginate($limit);
+ 
+        // Optimized: Batch fetch users count in one query to avoid N+1 issues
+        $roleIds = $roles->getCollection()->pluck('id')->toArray();
+        $userCounts = \DB::table(config('permission.table_names.model_has_roles'))
+            ->whereIn(config('permission.column_names.role_pivot_key') ?? 'role_id', $roleIds)
+            ->selectRaw((config('permission.column_names.role_pivot_key') ?? 'role_id') . ' as role_id, count(*) as total')
+            ->groupBy('role_id')
+            ->pluck('total', 'role_id');
 
-        // Safely add users_count manually since Spatie's users() relation
-        // sometimes fails to resolve the model in this environment
-        $roles->getCollection()->transform(function ($role) {
-            $role->users_count = \DB::table(config('permission.table_names.model_has_roles'))
-                ->where(config('permission.column_names.role_pivot_key') ?? 'role_id', $role->id)
-                ->count();
-
+        $roles->getCollection()->transform(function ($role) use ($userCounts) {
+            $role->users_count = $userCounts[$role->id] ?? 0;
             return $role;
         });
 

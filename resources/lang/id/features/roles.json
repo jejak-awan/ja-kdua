@@ -35,5 +35,45 @@
         "deleteFailed": "Gagal menghapus peran",
         "duplicateFailed": "Gagal menduplikasi peran",
         "fetchFailed": "Gagal memuat peran"
+    },
+    "workspace": {
+        "welcome": {
+            "title": "Ruang Kerja Manajemen Peran",
+            "description": "Klik pada peran di sidebar untuk mengedit izinnya, atau pilih beberapa peran menggunakan kotak centang untuk membandingkannya secara berdampingan."
+        },
+        "comparison": {
+            "title": "Matriks Perbandingan Peran",
+            "subtitle": "Matriks Perbandingan Izin",
+            "syncing": "Menyinkronkan {count} Peran",
+            "exit": "Keluar Perbandingan",
+            "mode": "Mode Perbandingan"
+        },
+        "edit": {
+            "mode": "Mode Edit"
+        },
+        "create": {
+            "title": "Buat Peran Baru"
+        },
+        "matrix": {
+            "title": "Matriks Izin",
+            "expandAll": "Buka Semua",
+            "collapseAll": "Tutup Semua",
+            "available": "{count} izin tersedia",
+            "selectCategory": "Pilih Kategori",
+            "deselectCategory": "Batalkan Kategori"
+        },
+        "identity": "Identitas Peran",
+        "liveEditing": "Penyuntingan Langsung",
+        "unsavedChanges": "Deteksi perubahan belum disimpan",
+        "synced": "Konfigurasi sinkron",
+        "reset": "Reset Perubahan",
+        "save": "Simpan Konfigurasi",
+        "placeholder": "Pilih peran untuk mulai mengelola izin",
+        "clearSelection": "Bersihkan Pilihan",
+        "duplicate": "Duplikat peran",
+        "saving": {
+            "title": "Menyimpan Konfigurasi Keamanan",
+            "subtitle": "Menerapkan izin di seluruh peran..."
+        }
     }
 }
