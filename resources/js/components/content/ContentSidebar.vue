@@ -15,7 +15,7 @@
                     class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
                 >
                     <div class="flex items-center gap-2">
-                        <div class="p-1.5 rounded-md bg-emerald-500/10 text-emerald-500">
+                        <div class="p-1.5 rounded-md bg-success/10 text-success">
                             <FileCheck class="w-3.5 h-3.5" />
                         </div>
                         <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.publishing') }}</span>
@@ -104,19 +104,21 @@
                     class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
                 >
                     <div class="flex items-center gap-2">
-                        <div class="p-1.5 rounded-md bg-indigo-500/10 text-indigo-500">
+                        <div class="p-1.5 rounded-md bg-primary/10 text-primary">
                             <MenuSquare class="w-3.5 h-3.5" />
                         </div>
-                        <span class="text-sm font-semibold text-foreground">{{ $t('features.menus.title') }}</span>
+                        <div class="flex-1">
+                         <div class="flex items-center justify-between">
+                         <span class="text-xs font-semibold text-foreground">{{ t('features.contents.form.sidebar.addToMenu') }}</span>
+                         <Badge v-if="modelValue.menu_item?.add_to_menu" variant="secondary" class="h-5 text-[10px] px-1.5 bg-primary/10 text-primary border-primary/20">
+                             {{ t('common.status.enabled') }}
+                         </Badge>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                         <Badge v-if="modelValue.menu_item?.add_to_menu" variant="secondary" class="h-5 text-[10px] px-1.5 bg-indigo-500/10 text-indigo-500 border-indigo-500/20">
-                            Active
-                        </Badge>
-                        <ChevronDown 
-                            class="w-4 h-4 text-muted-foreground transition-transform duration-200"
-                            :class="{ 'rotate-180': sections.menu }"
-                        />
+                    <ChevronDown 
+                        class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+                        :class="{ 'rotate-180': sections.menu }"
+                    />
                     </div>
                 </button>
                 <div v-show="sections.menu" class="border-t border-border/5 p-5 space-y-5">
@@ -189,7 +191,7 @@
                     class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
                 >
                     <div class="flex items-center gap-2">
-                        <div class="p-1.5 rounded-md bg-blue-500/10 text-blue-500">
+                        <div class="p-1.5 rounded-md bg-info/10 text-info">
                             <Tags class="w-3.5 h-3.5" />
                         </div>
                         <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.taxonomy') }}</span>
@@ -273,7 +275,7 @@
                     class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
                 >
                     <div class="flex items-center gap-2">
-                        <div class="p-1.5 rounded-md bg-purple-500/10 text-purple-500">
+                        <div class="p-1.5 rounded-md bg-primary/10 text-primary">
                             <ImageIcon class="w-3.5 h-3.5" />
                         </div>
                         <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.featuredImage') }}</span>
@@ -301,7 +303,7 @@
                     class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
                 >
                     <div class="flex items-center gap-2">
-                        <div class="p-1.5 rounded-md bg-amber-500/10 text-amber-500">
+                        <div class="p-1.5 rounded-md bg-warning/10 text-warning">
                             <FileText class="w-3.5 h-3.5" />
                         </div>
                         <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.excerpt') }}</span>
@@ -330,19 +332,21 @@
                     class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
                 >
                     <div class="flex items-center gap-2">
-                        <div class="p-1.5 rounded-md bg-orange-500/10 text-orange-500">
+                        <div class="p-1.5 rounded-md bg-warning/10 text-warning">
                             <MessageSquare class="w-3.5 h-3.5" />
                         </div>
-                        <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.discussion') }}</span>
+                        <div class="flex-1">
+                         <div class="flex items-center justify-between">
+                         <span class="text-xs font-semibold text-foreground">{{ t('features.contents.form.sidebar.comments') }}</span>
+                         <Badge v-if="!modelValue.comment_status" variant="secondary" class="h-5 text-[10px] px-1.5 bg-warning/10 text-warning border-warning/20">
+                             {{ t('common.status.disabled') }}
+                         </Badge>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                         <Badge v-if="!modelValue.comment_status" variant="secondary" class="h-5 text-[10px] px-1.5 bg-orange-500/10 text-orange-500 border-orange-500/20">
-                            Disabled
-                        </Badge>
-                        <ChevronDown 
-                            class="w-4 h-4 text-muted-foreground transition-transform duration-200"
-                            :class="{ 'rotate-180': sections.discussion }"
-                        />
+                    <ChevronDown 
+                        class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+                        :class="{ 'rotate-180': sections.discussion }"
+                    />
                     </div>
                 </button>
                 <div v-show="sections.discussion" class="border-t border-border/5 p-5">
@@ -367,7 +371,7 @@
                     class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
                 >
                     <div class="flex items-center gap-2">
-                        <div class="p-1.5 rounded-md bg-red-500/10 text-red-500">
+                        <div class="p-1.5 rounded-md bg-destructive/10 text-destructive">
                             <Search class="w-3.5 h-3.5" />
                         </div>
                         <span class="text-sm font-semibold text-foreground">SEO</span>

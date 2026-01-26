@@ -25,6 +25,7 @@ const initDarkMode = () => {
 };
 
 // Run before anything else
+document.documentElement.classList.add('no-transitions');
 initDarkMode();
 
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';

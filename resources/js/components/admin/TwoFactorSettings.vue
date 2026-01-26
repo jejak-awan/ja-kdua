@@ -26,7 +26,7 @@
                     </p>
                 </div>
 
-                <Alert v-if="status.required" variant="warning" class="bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400">
+                <Alert v-if="status.required" variant="warning" class="bg-warning/10 border-warning/20 text-warning">
                     <ShieldAlert class="h-4 w-4" />
                     <AlertTitle>{{ $t('features.auth.twoFactor.requiredTitle') || 'Setup Required' }}</AlertTitle>
                     <AlertDescription>
@@ -96,7 +96,7 @@
                     <div class="space-y-1">
                         <div class="flex items-center gap-2">
                             <h3 class="text-lg font-medium">{{ $t('features.auth.twoFactor.enabledTitle') || '2FA is Enabled' }}</h3>
-                            <Badge variant="success" class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+                            <Badge variant="success" class="bg-success/10 text-success border-success/20">
                                 {{ $t('common.status.active') }}
                             </Badge>
                         </div>
@@ -141,7 +141,7 @@
                             </div>
                         </div>
                         <div class="flex items-center justify-between gap-4">
-                            <p class="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                            <p class="text-xs text-warning font-medium">
                                 <AlertTriangle class="h-3 w-3 inline mr-1" />
                                 {{ $t('features.auth.twoFactor.saveWarning') || 'Save these codes now. They will not be shown again.' }}
                             </p>

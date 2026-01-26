@@ -181,12 +181,12 @@ const toggleFeatured = async (content: Content) => {
 
 const getStatusBadgeClass = (status: string) => {
     switch (status) {
-        case 'published': return 'bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/20';
-        case 'draft': return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
-        case 'pending': return 'bg-amber-500/10 text-amber-600 border-amber-200 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/20';
-        case 'archived': return 'bg-rose-500/10 text-rose-600 border-rose-200 dark:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/20';
-        case 'trashed': return 'bg-destructive/10 text-destructive border-destructive/20 dark:bg-destructive/20 dark:text-red-400';
-        default: return 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
+        case 'published': return 'bg-success/10 text-success border-success/20';
+        case 'draft': return 'bg-muted text-muted-foreground border-border/40';
+        case 'pending': return 'bg-warning/10 text-warning border-warning/20';
+        case 'archived': return 'bg-primary/10 text-primary border-primary/20';
+        case 'trashed': return 'bg-destructive/10 text-destructive border-destructive/20';
+        default: return 'bg-muted text-muted-foreground border-border/40';
     }
 };
 
@@ -427,18 +427,16 @@ onMounted(() => {
             <!-- Published -->
             <Card 
                 @click="statusFilter = 'published'"
-                :class="cn(
-                    'cursor-pointer transition-shadow duration-300 hover:shadow-md border',
-                    statusFilter === 'published' ? 'border-emerald-500' : 'border-border'
-                )"
+                :class="cn('px-6 py-4 cursor-pointer hover:shadow-md',
+                    statusFilter === 'published' ? 'border-success' : 'border-border')"
             >
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
                             <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.published') }}</p>
-                            <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ stats.published || 0 }}</p>
+                            <p class="text-2xl font-bold text-success">{{ stats.published || 0 }}</p>
                         </div>
-                        <div class="p-2.5 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl text-emerald-600 dark:text-emerald-400">
+                        <div class="p-2.5 bg-success/10 rounded-xl text-success">
                             <CheckCircle2 class="w-5 h-5" />
                         </div>
                     </div>
@@ -448,18 +446,16 @@ onMounted(() => {
             <!-- Draft -->
             <Card 
                 @click="statusFilter = 'draft'"
-                :class="cn(
-                    'cursor-pointer transition-shadow duration-300 hover:shadow-md border',
-                    statusFilter === 'draft' ? 'border-slate-500' : 'border-border'
-                )"
+                :class="cn('px-6 py-4 cursor-pointer hover:shadow-md',
+                    statusFilter === 'draft' ? 'border-primary' : 'border-border')"
             >
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
                             <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.draft') }}</p>
-                            <p class="text-2xl font-bold text-slate-600 dark:text-slate-400">{{ stats.draft || 0 }}</p>
+                            <p class="text-2xl font-bold text-primary">{{ stats.draft || 0 }}</p>
                         </div>
-                        <div class="p-2.5 bg-slate-500/10 dark:bg-slate-500/20 rounded-xl text-slate-600 dark:text-slate-400">
+                        <div class="p-2.5 bg-primary/10 rounded-xl text-primary">
                             <FileEdit class="w-5 h-5" />
                         </div>
                     </div>
@@ -469,18 +465,16 @@ onMounted(() => {
             <!-- Pending -->
             <Card 
                 @click="statusFilter = 'pending'"
-                :class="cn(
-                    'cursor-pointer transition-shadow duration-300 hover:shadow-md border',
-                    statusFilter === 'pending' ? 'border-amber-500' : 'border-border'
-                )"
+                :class="cn('px-6 py-4 cursor-pointer hover:shadow-md',
+                    statusFilter === 'pending' ? 'border-warning' : 'border-border')"
             >
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
                             <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.pending') }}</p>
-                            <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ stats.pending || 0 }}</p>
+                            <p class="text-2xl font-bold text-warning">{{ stats.pending || 0 }}</p>
                         </div>
-                        <div class="p-2.5 bg-amber-500/10 dark:bg-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400">
+                        <div class="p-2.5 bg-warning/10 rounded-xl text-warning">
                             <Clock3 class="w-5 h-5" />
                         </div>
                     </div>
@@ -490,18 +484,16 @@ onMounted(() => {
             <!-- Archived -->
             <Card 
                 @click="statusFilter = 'archived'"
-                :class="cn(
-                    'cursor-pointer transition-shadow duration-300 hover:shadow-md border',
-                    statusFilter === 'archived' ? 'border-rose-500' : 'border-border'
-                )"
+                :class="cn('px-6 py-4 cursor-pointer hover:shadow-md',
+                    statusFilter === 'archived' ? 'border-primary' : 'border-border')"
             >
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
                             <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.archived') }}</p>
-                            <p class="text-2xl font-bold text-rose-600 dark:text-rose-400">{{ stats.archived || 0 }}</p>
+                            <p class="text-2xl font-bold text-primary">{{ stats.archived || 0 }}</p>
                         </div>
-                        <div class="p-2.5 bg-rose-500/10 dark:bg-rose-500/20 rounded-xl text-rose-600 dark:text-rose-400">
+                        <div class="p-2.5 bg-primary/10 rounded-xl text-primary">
                             <Archive class="w-5 h-5" />
                         </div>
                     </div>
@@ -511,18 +503,16 @@ onMounted(() => {
             <!-- Trashed -->
             <Card 
                 @click="statusFilter = 'trashed'"
-                :class="cn(
-                    'cursor-pointer transition-shadow duration-300 hover:shadow-md border',
-                    statusFilter === 'trashed' ? 'border-red-500' : 'border-border'
-                )"
+                :class="cn('px-6 py-4 cursor-pointer hover:shadow-md',
+                    statusFilter === 'trashed' ? 'border-destructive' : 'border-border')"
             >
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
                             <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.trashed') }}</p>
-                            <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ stats.trashed || 0 }}</p>
+                            <p class="text-2xl font-bold text-destructive">{{ stats.trashed || 0 }}</p>
                         </div>
-                        <div class="p-2.5 bg-red-500/10 dark:bg-red-500/20 rounded-xl text-red-600 dark:text-red-400">
+                        <div class="p-2.5 bg-destructive/10 rounded-xl text-destructive">
                             <Trash2 class="w-5 h-5" />
                         </div>
                     </div>
@@ -590,10 +580,10 @@ onMounted(() => {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <template v-if="statusFilter !== 'trashed'">
-                                            <SelectItem value="approve" class="text-emerald-600 focus:text-emerald-600" v-if="authStore.hasPermission('approve content')">
+                                            <SelectItem value="approve" class="text-success focus:text-success" v-if="authStore.hasPermission('approve content')">
                                                 {{ $t('features.content.actions.approve') }}
                                             </SelectItem>
-                                            <SelectItem value="reject" class="text-rose-600 focus:text-rose-600" v-if="authStore.hasPermission('approve content')">
+                                            <SelectItem value="reject" class="text-destructive focus:text-destructive" v-if="authStore.hasPermission('approve content')">
                                                 {{ $t('features.content.actions.reject') }}
                                             </SelectItem>
                                             <SelectItem value="delete" class="text-destructive focus:text-destructive" v-if="authStore.hasPermission('delete content')">
@@ -601,7 +591,7 @@ onMounted(() => {
                                             </SelectItem>
                                         </template>
                                         <template v-else>
-                                            <SelectItem value="restore" class="text-emerald-600 focus:text-emerald-600" v-if="authStore.hasPermission('delete content')">
+                                            <SelectItem value="restore" class="text-success focus:text-success" v-if="authStore.hasPermission('delete content')">
                                                 {{ $t('common.actions.restore') }}
                                             </SelectItem>
                                             <SelectItem value="force_delete" class="text-destructive focus:text-destructive" v-if="authStore.hasPermission('delete content')">
@@ -695,7 +685,7 @@ onMounted(() => {
                             <TableCell class="px-6 py-4 text-right">
                                 <div class="flex justify-end items-center gap-1">
                                     <template v-if="content.deleted_at">
-                                        <Button variant="ghost" size="icon" class="h-8 w-8 text-emerald-600" @click="handleRestore(content)" v-if="authStore.hasPermission('delete content')" :title="t('common.actions.restore')">
+                                        <Button variant="ghost" size="icon" class="h-8 w-8 text-success" @click="handleRestore(content)" v-if="authStore.hasPermission('delete content')" :title="t('common.actions.restore')">
                                             <RotateCcw class="w-4 h-4" />
                                         </Button>
                                         <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive" @click="handleForceDelete(content)" v-if="authStore.hasPermission('delete content')" :title="t('common.actions.deletePermanently')">

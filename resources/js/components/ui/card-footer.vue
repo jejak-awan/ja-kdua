@@ -1,5 +1,8 @@
 <template>
-  <div :class="cn('flex items-center p-6 pt-0', props.class)">
+  <div 
+    data-slot="card-footer"
+    :class="cn('bg-muted/50 rounded-b-xl border-t border-border/60 p-4 group-data-[size=sm]/card:p-3 flex items-center', props.class)"
+  >
     <slot />
   </div>
 </template>

@@ -293,7 +293,7 @@ const handleStopMigration = () => {
                         <span v-else>Test Connection</span>
                     </Button>
                     
-                    <div v-if="testResult" :class="['text-sm', testResult.success ? 'text-green-600' : 'text-red-500']">
+                    <div v-if="testResult" :class="['text-sm', testResult.success ? 'text-success' : 'text-destructive']">
                         {{ testResult.message }}
                     </div>
                 </div>
@@ -334,9 +334,9 @@ const handleStopMigration = () => {
             <!-- Logs -->
             <div v-if="migrationLogs.length > 0" class="mt-4 p-3 bg-muted rounded-md text-xs max-h-40 overflow-y-auto font-mono">
                 <div v-for="(log, index) in migrationLogs" :key="index" :class="{
-                    'text-green-600': log.type === 'success',
-                    'text-red-500': log.type === 'error',
-                    'text-yellow-600': log.type === 'warning',
+                    'text-success': log.type === 'success',
+                    'text-destructive': log.type === 'error',
+                    'text-warning': log.type === 'warning',
                     'text-foreground': log.type === 'info'
                 }">
                     [{{ log.type.toUpperCase() }}] {{ log.message }}

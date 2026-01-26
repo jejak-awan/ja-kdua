@@ -1,5 +1,8 @@
 <template>
-  <div :class="cn('flex flex-col space-y-1.5 p-6', props.class)">
+  <div 
+    data-slot="card-header"
+    :class="cn('gap-1.5 rounded-t-xl px-4 group-data-[size=sm]/card:px-3 grid auto-rows-min items-start', props.class)"
+  >
     <slot />
   </div>
 </template>

@@ -92,8 +92,7 @@ const navClasses = computed(() => {
   }
 
   const classes = [
-    'py-3 px-4 mb-4 bg-card/95', // Removed border-b, added /95 for transparency
-    'transition-all duration-300'
+    'py-3 px-4 mb-4 bg-card/95'
   ];
 
   if (isSticky.value) {

@@ -1,5 +1,5 @@
 <template>
-  <Card class="system-health-widget h-full flex flex-col overflow-hidden duration-300">
+  <Card class="system-health-widget h-full flex flex-col overflow-hidden border-border/40">
     <CardHeader class="flex flex-row items-center justify-between pb-2 space-y-0">
       <CardTitle class="text-xl font-bold flex items-center gap-2">
         <Activity class="w-5 h-5" :class="overallStatusClass" />
@@ -113,7 +113,7 @@
         <!-- Redis -->
         <div class="p-3 rounded-xl bg-muted/20 border border-border/40 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="p-2 rounded-lg bg-orange-500/10 text-orange-500">
+                <div class="p-2 rounded-lg bg-warning/10 text-warning">
                     <Zap class="w-4 h-4" />
                 </div>
                 <div>
@@ -191,31 +191,31 @@ const overallStatusText = computed(() => {
 
 const overallStatusClass = computed(() => {
   const status = overallStatus.value;
-  if (status === 'healthy') return 'text-emerald-500';
-  if (status === 'warning') return 'text-amber-500';
-  if (status === 'critical') return 'text-rose-500';
+  if (status === 'healthy') return 'text-success';
+  if (status === 'warning') return 'text-warning';
+  if (status === 'critical') return 'text-destructive';
   return 'text-muted-foreground';
 });
 
 const overallStatusBadgeClass = computed(() => {
   const status = overallStatus.value;
-  if (status === 'healthy') return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
-  if (status === 'warning') return 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
-  if (status === 'critical') return 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+  if (status === 'healthy') return 'bg-success/10 text-success';
+  if (status === 'warning') return 'bg-warning/10 text-warning';
+  if (status === 'critical') return 'bg-destructive/10 text-destructive';
   return 'bg-muted text-muted-foreground';
 });
 
 const getStatusClass = (status) => {
-  if (status === 'ok') return 'text-emerald-600 dark:text-emerald-400';
-  if (status === 'warning') return 'text-amber-600 dark:text-amber-400';
-  if (status === 'critical' || status === 'error') return 'text-rose-600 dark:text-rose-400';
+  if (status === 'ok') return 'text-success';
+  if (status === 'warning') return 'text-warning';
+  if (status === 'critical' || status === 'error') return 'text-destructive';
   return 'text-muted-foreground';
 };
 
 const getProgressBarClass = (status) => {
-  if (status === 'ok') return 'bg-emerald-500';
-  if (status === 'warning') return 'bg-amber-500';
-  if (status === 'critical' || status === 'error') return 'bg-rose-500';
+  if (status === 'ok') return 'bg-success';
+  if (status === 'warning') return 'bg-warning';
+  if (status === 'critical' || status === 'error') return 'bg-destructive';
   return 'bg-muted-foreground/30';
 };
 

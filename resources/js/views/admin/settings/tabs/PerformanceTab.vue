@@ -109,7 +109,7 @@
                                     <label class="flex items-center cursor-pointer">
                                         <div class="relative">
                                             <input v-model="formData[setting.key]" type="checkbox" class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-emerald-500"></div>
+                                            <div class="w-11 h-6 bg-muted rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:shadow-md peer-checked:bg-success"></div>
                                         </div>
                                         <span class="ml-3 text-sm text-foreground">
                                             {{ formData[setting.key] ? $t('features.settings.enabled') : $t('features.settings.disabled') }}
@@ -157,7 +157,7 @@
                 class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
             >
                 <div class="flex items-center gap-3">
-                    <div class="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                    <div class="p-2 rounded-lg bg-info/10 text-info">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                     </div>
                     <div>
@@ -166,7 +166,7 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span v-if="formData.enable_cdn" class="px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-500/10 text-emerald-500">Aktif</span>
+                    <span v-if="formData.enable_cdn" class="px-2 py-0.5 text-xs font-medium rounded-full bg-success/10 text-success">Aktif</span>
                     <span v-else class="px-2 py-0.5 text-xs font-medium rounded-full bg-muted text-muted-foreground">Nonaktif</span>
                     <svg 
                         xmlns="http://www.w3.org/2000/svg" 
@@ -196,7 +196,7 @@
                         <label class="flex items-center cursor-pointer">
                             <div class="relative">
                                 <input v-model="formData[cdnEnabledSetting.key]" type="checkbox" class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-emerald-500"></div>
+                                <div class="w-11 h-6 bg-muted rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:shadow-md peer-checked:bg-success"></div>
                             </div>
                             <span class="ml-3 text-sm text-foreground">
                                 {{ formData[cdnEnabledSetting.key] ? $t('features.settings.enabled') : $t('features.settings.disabled') }}
@@ -293,7 +293,7 @@
                 class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
             >
                 <div class="flex items-center gap-3">
-                    <div class="p-2 rounded-lg bg-amber-500/10 text-amber-500">
+                    <div class="p-2 rounded-lg bg-warning/10 text-warning">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     </div>
                     <div>
@@ -344,7 +344,7 @@
                                 <label class="flex items-center cursor-pointer">
                                     <div class="relative">
                                         <input v-model="formData[setting.key]" type="checkbox" class="sr-only peer">
-                                        <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-emerald-500"></div>
+                                        <div class="w-11 h-6 bg-muted rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:shadow-md peer-checked:bg-success"></div>
                                     </div>
                                     <span class="ml-3 text-sm text-foreground">
                                         {{ formData[setting.key] ? $t('features.settings.enabled') : $t('features.settings.disabled') }}

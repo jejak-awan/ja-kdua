@@ -24,9 +24,11 @@ const emit = defineEmits(['update:modelValue']);
   <input
     :value="modelValue"
     @input="emit('update:modelValue', $event.target.value)"
+    data-slot="input"
     :class="cn(
-      'flex h-10 w-full rounded-xl border border-border/40 bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50',
+      'flex h-8 w-full rounded-lg border border-border/50 bg-transparent px-2.5 py-1 text-base file:h-6 file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm placeholder:text-muted-foreground outline-none file:inline-flex file:border-0 file:bg-transparent',
       props.class
     )"
+    v-bind="$attrs"
   />
 </template>

@@ -29,7 +29,7 @@
                         >
                             <svg
                                 v-if="entry.status === 'success'"
-                                class="w-5 h-5 text-green-600 dark:text-green-400"
+                                class="w-5 h-5 text-success"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -43,7 +43,7 @@
                             </svg>
                             <svg
                                 v-else
-                                class="w-5 h-5 text-red-600 dark:text-red-400"
+                                class="w-5 h-5 text-destructive"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -64,8 +64,8 @@
                                     :class="[
                                         'text-sm font-medium',
                                         entry.status === 'success'
-                                            ? 'text-green-700 dark:text-green-400'
-                                            : 'text-red-700 dark:text-red-400',
+                                            ? 'text-success'
+                                            : 'text-destructive',
                                     ]"
                                 >
                                     {{ entry.status === 'success' ? 'Successful Login' : 'Failed Login' }}

@@ -20,7 +20,7 @@
                 <CardContent class="p-6">
                     <div class="flex items-center">
                         <div class="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-lg">
-                            <Tag class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                            <Tag class="h-5 w-5 text-primary" />
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-muted-foreground">{{ $t('features.tags.stats.total') }}</p>
@@ -33,7 +33,7 @@
                 <CardContent class="p-6">
                     <div class="flex items-center">
                         <div class="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg">
-                            <BarChart3 class="h-5 w-5 text-green-600 dark:text-green-400" />
+                            <BarChart3 class="h-5 w-5 text-success" />
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-muted-foreground">{{ $t('features.tags.stats.used') }}</p>
@@ -46,7 +46,7 @@
                 <CardContent class="p-6">
                     <div class="flex items-center">
                         <div class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg">
-                            <MousePointer2 class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            <MousePointer2 class="h-5 w-5 text-info" />
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-muted-foreground">{{ $t('features.tags.stats.usage') }}</p>

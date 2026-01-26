@@ -65,7 +65,7 @@
                         <button
                             @click="viewMode = 'grid'"
                             :class="[
-                                'p-1.5 rounded-md transition-all h-7 w-7 flex items-center justify-center',
+                                'p-1.5 rounded-md transition-colors h-7 w-7 flex items-center justify-center',
                                 viewMode === 'grid' 
                                     ? 'bg-background shadow-sm text-foreground' 
                                     : 'text-muted-foreground hover:text-foreground'
@@ -77,7 +77,7 @@
                         <button
                             @click="viewMode = 'list'"
                             :class="[
-                                'p-1.5 rounded-md transition-all h-7 w-7 flex items-center justify-center',
+                                'p-1.5 rounded-md transition-colors h-7 w-7 flex items-center justify-center',
                                 viewMode === 'list' 
                                     ? 'bg-background shadow-sm text-foreground' 
                                     : 'text-muted-foreground hover:text-foreground'
@@ -139,7 +139,7 @@
                 <div
                     v-for="role in roles"
                     :key="role.id"
-                    class="bg-card border border-border rounded-lg overflow-hidden flex flex-col hover:border-primary/50 transition-all duration-200 group relative"
+                    class="bg-card border border-border rounded-lg overflow-hidden flex flex-col hover:border-primary/50 group relative"
                     :class="{ 'ring-2 ring-primary ring-offset-2 ring-offset-background border-primary': selectedRoles.includes(role.id) }"
                 >
                     <!-- Selection Checkbox (Grid) -->
@@ -255,7 +255,7 @@
                             <tr 
                                 v-for="role in roles" 
                                 :key="role.id" 
-                                class="hover:bg-muted/50 transition-colors group"
+                                class="hover:bg-muted/50 group"
                                 :class="{ 'bg-muted/30': selectedRoles.includes(role.id) }"
                             >
                                 <td class="px-6 py-4">

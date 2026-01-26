@@ -1,9 +1,10 @@
+```
 <template>
     <draggable
         :list="items"
         :group="{ name: 'menu' }"
         :item-key="getItemKey"
-        class="transition-all"
+        class="ml-6 pl-2 pr-2 transition-transform"
         :class="items.length === 0 ? 'min-h-[12px]' : 'space-y-2 min-h-[40px]'"
         handle=".drag-handle"
         ghost-class="ghost"

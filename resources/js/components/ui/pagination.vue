@@ -39,7 +39,7 @@
         size="sm"
         :disabled="currentPage === 1"
         @click="goToPage(1)"
-        class="h-8 w-8 p-0"
+        class="h-8 w-8 p-0 transition-none"
       >
         <ChevronsLeft class="w-4 h-4" />
       </Button>
@@ -50,6 +50,7 @@
         size="sm"
         :disabled="currentPage === 1"
         @click="goToPage(currentPage - 1)"
+        class="transition-none"
       >
         <ChevronLeft class="w-4 h-4 mr-1" />
         {{ $t('common.pagination.previous') }}
@@ -62,7 +63,7 @@
             v-if="page !== '...'"
             :variant="page === currentPage ? 'default' : 'outline'"
             size="sm"
-            class="h-8 w-8 p-0"
+            class="h-8 w-8 p-0 transition-none"
             @click="goToPage(page)"
           >
             {{ page }}
@@ -77,6 +78,7 @@
         size="sm"
         :disabled="currentPage === totalPages"
         @click="goToPage(currentPage + 1)"
+        class="transition-none"
       >
         {{ $t('common.pagination.next') }}
         <ChevronRight class="w-4 h-4 ml-1" />
@@ -89,7 +91,7 @@
         size="sm"
         :disabled="currentPage === totalPages"
         @click="goToPage(totalPages)"
-        class="h-8 w-8 p-0"
+        class="h-8 w-8 p-0 transition-none"
       >
         <ChevronsRight class="w-4 h-4" />
       </Button>

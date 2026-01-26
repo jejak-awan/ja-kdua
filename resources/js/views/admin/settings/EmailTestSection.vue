@@ -47,7 +47,7 @@
                                 >
                                     {{ sendingTestEmail ? $t('features.settings.emailTest.sending') : $t('features.settings.emailTest.sendTest') }}
                                 </Button>
-                                <div v-if="testEmailResult" class="text-sm" :class="testEmailResult.success ? 'text-green-600' : 'text-red-600'">
+                                <div v-if="testEmailResult" class="text-sm" :class="testEmailResult.success ? 'text-success' : 'text-destructive'">
                                     {{ testEmailResult.message }}
                                 </div>
                             </div>
@@ -80,7 +80,7 @@
                                     </div>
                                     <div class="flex justify-between">
                                         <span>{{ $t('features.settings.emailTest.failedJobs') }}:</span>
-                                        <span class="font-medium" :class="queueStatus.failed_jobs > 0 ? 'text-red-500' : 'text-foreground'">{{ queueStatus.failed_jobs }}</span>
+                                        <span class="font-medium" :class="queueStatus.failed_jobs > 0 ? 'text-destructive' : 'text-foreground'">{{ queueStatus.failed_jobs }}</span>
                                     </div>
                                 </div>
                                 <div v-else class="text-sm text-muted-foreground">

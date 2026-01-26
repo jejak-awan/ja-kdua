@@ -2,11 +2,11 @@
     <div v-if="alerts.length > 0" class="bg-card border border-border rounded-lg mb-6">
         <div class="px-6 py-4 border-b border-border flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 <h3 class="font-semibold text-foreground">{{ t('features.security_alerts.title') }}</h3>
-                <span class="bg-red-500/20 text-red-500 text-xs px-2 py-0.5 rounded-full">
+                <span class="bg-destructive/20 text-destructive text-xs px-2 py-0.5 rounded-full">
                     {{ alerts.length }}
                 </span>
             </div>
@@ -28,8 +28,8 @@
                     <span
                         :class="[
                             'w-2 h-2 rounded-full flex-shrink-0',
-                            alert.severity === 'critical' ? 'bg-red-500' :
-                            alert.severity === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+                            alert.severity === 'critical' ? 'bg-destructive' :
+                            alert.severity === 'warning' ? 'bg-warning' : 'bg-info'
                         ]"
                     ></span>
                     <div>
@@ -41,8 +41,8 @@
                     <span
                         :class="[
                             'text-xs px-2 py-1 rounded-full',
-                            alert.severity === 'critical' ? 'bg-red-500/20 text-red-500' :
-                            alert.severity === 'warning' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-blue-500/20 text-blue-500'
+                            alert.severity === 'critical' ? 'bg-destructive/20 text-destructive' :
+                            alert.severity === 'warning' ? 'bg-warning/20 text-warning' : 'bg-info/20 text-info'
                         ]"
                     >
                         {{ getSeverityLabel(alert.severity) }}

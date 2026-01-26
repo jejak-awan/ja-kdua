@@ -1,17 +1,17 @@
 <template>
-    <Card class="flex flex-col h-full overflow-hidden duration-300">
+    <Card class="flex flex-col h-full overflow-hidden border-border/40">
         <CardHeader class="flex flex-row items-center justify-between pb-4 space-y-0">
             <div class="space-y-1">
                 <CardTitle class="text-xl font-bold flex items-center gap-2">
-                    <History class="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+                    <History class="w-5 h-5 text-primary" />
                     {{ $t('features.dashboard.widgets.recentActivity.title') }}
                 </CardTitle>
                 <CardDescription v-if="activities.length > 0">
                     {{ $t('features.dashboard.widgets.recentActivity.description') || 'Latest system events' }}
                 </CardDescription>
             </div>
-            <div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
-                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></div>
+            <div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-success/10 text-success">
+                <div class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
                 <span class="text-xs font-medium">{{ $t('features.dashboard.widgets.recentActivity.live') }}</span>
             </div>
         </CardHeader>
@@ -66,7 +66,7 @@
         </CardContent>
         
         <div class="p-3 bg-muted/10 border-t border-border/40">
-            <Button variant="ghost" size="sm" class="w-full text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-500/10 group" asChild>
+            <Button variant="ghost" size="sm" class="w-full text-primary hover:bg-primary/5 group" asChild>
                 <router-link :to="{ name: 'activity-logs' }" class="flex items-center justify-center">
                     {{ $t('features.dashboard.widgets.recentActivity.viewAll') }}
                     <ArrowRight class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
@@ -148,23 +148,21 @@ const getUserInitials = (name) => {
 const getUserAvatarClass = (activity) => {
     const id = activity.user_id || 0;
     const colors = [
-        'bg-indigo-500/10 text-indigo-500',
-        'bg-emerald-500/10 text-emerald-500',
-        'bg-blue-500/10 text-blue-500',
-        'bg-amber-500/10 text-amber-500',
-        'bg-purple-500/10 text-purple-500',
-        'bg-rose-500/10 text-rose-500',
-        'bg-cyan-500/10 text-cyan-500',
+        'bg-primary/10 text-primary',
+        'bg-success/10 text-success',
+        'bg-info/10 text-info',
+        'bg-warning/10 text-warning',
+        'bg-destructive/10 text-destructive',
     ];
     return colors[id % colors.length];
 };
 
 const getActionBadgeClass = (action) => {
     const a = (action || '').toLowerCase();
-    if (a.includes('create')) return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
-    if (a.includes('update')) return 'bg-blue-500/10 text-blue-600 dark:text-blue-400';
-    if (a.includes('delete')) return 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
-    if (a.includes('login') || a.includes('logout')) return 'bg-purple-500/10 text-purple-600 dark:text-purple-400';
+    if (a.includes('create')) return 'bg-success/10 text-success';
+    if (a.includes('update')) return 'bg-info/10 text-info';
+    if (a.includes('delete')) return 'bg-destructive/10 text-destructive';
+    if (a.includes('login') || a.includes('logout')) return 'bg-primary/10 text-primary';
     return 'bg-muted text-muted-foreground';
 };
 

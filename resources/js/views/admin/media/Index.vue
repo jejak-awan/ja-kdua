@@ -417,7 +417,7 @@
                                 v-for="folder in currentFolders"
                                 :key="'folder-' + folder.id"
                                 @click="selectFolder(folder.id)"
-                                class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-all hover:border-primary/50 shadow-none hover:bg-accent/5"
+                                class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-[border-color,background-color] duration-200 hover:border-primary/50 shadow-none hover:bg-accent/5"
                             >
                                 <div class="aspect-square bg-blue-50/20 dark:bg-blue-900/5 flex flex-col items-center justify-center p-4">
                                     <div class="relative">
@@ -447,7 +447,7 @@
                                 v-for="media in mediaList"
                                 :key="media.id"
                                 @click="toggleMediaSelection(media)"
-                                class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-all hover:border-primary/50 shadow-none hover:bg-accent/5"
+                                class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-[border-color,background-color] duration-200 hover:border-primary/50 shadow-none hover:bg-accent/5"
                                 :class="isMediaSelected(media.id) ? 'ring-2 ring-indigo-500 border-indigo-500' : ''"
                             >
                                 <!-- Checkbox -->

@@ -61,19 +61,19 @@
                     <div class="p-4 space-y-4 bg-background">
                         <!-- Presets -->
                          <div class="grid grid-cols-2 gap-3">
-                            <Button variant="outline" class="justify-start gap-2.5 h-auto py-2.5 px-3 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 dark:hover:bg-indigo-900/20 dark:hover:border-indigo-500/30 transition-all group" @click="handleCommand('Fix grammar and spelling')">
+                            <Button variant="outline" class="justify-start gap-2.5 h-auto py-2.5 px-3 hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-colors group" @click="handleCommand('Fix grammar and spelling')">
                                 <CheckCircle2 class="w-4 h-4 text-muted-foreground group-hover:text-indigo-500" />
                                 <span class="font-normal truncate">Fix Grammar</span>
                             </Button>
-                            <Button variant="outline" class="justify-start gap-2.5 h-auto py-2.5 px-3 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-900/20 dark:hover:border-blue-500/30 transition-all group" @click="handleCommand('Paraphrase this text to be more engaging')">
+                            <Button variant="outline" class="justify-start gap-2.5 h-auto py-2.5 px-3 hover:bg-info/5 hover:text-info hover:border-info/20 transition-colors group" @click="handleCommand('Paraphrase this text to be more engaging')">
                                 <RefreshCw class="w-4 h-4 text-muted-foreground group-hover:text-blue-500" />
                                 <span class="font-normal truncate">Re-write</span>
                             </Button>
-                            <Button variant="outline" class="justify-start gap-2.5 h-auto py-2.5 px-3 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 dark:hover:bg-orange-900/20 dark:hover:border-orange-500/30 transition-all group" @click="handleCommand('Summarize this text in 1 sentence')">
+                            <Button variant="outline" class="justify-start gap-2.5 h-auto py-2.5 px-3 hover:bg-warning/5 hover:text-warning hover:border-warning/20 transition-colors group" @click="handleCommand('Summarize this text in 1 sentence')">
                                 <FileText class="w-4 h-4 text-muted-foreground group-hover:text-orange-500" />
                                 <span class="font-normal truncate">Summarize</span>
                             </Button>
-                            <Button variant="outline" class="justify-start gap-2.5 h-auto py-2.5 px-3 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200 dark:hover:bg-purple-900/20 dark:hover:border-purple-500/30 transition-all group" @click="handleCommand('Expand this text with more details')">
+                            <Button variant="outline" class="justify-start gap-2.5 h-auto py-2.5 px-3 hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-colors group" @click="handleCommand('Expand this text with more details')">
                                 <Maximize2 class="w-4 h-4 text-muted-foreground group-hover:text-purple-500" />
                                 <span class="font-normal truncate">Expand</span>
                             </Button>

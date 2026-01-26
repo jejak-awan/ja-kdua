@@ -5,9 +5,9 @@
             class="fixed inset-0 z-50 overflow-hidden"
             @click.self="handleClose"
         >
-            <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+            <div class="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
             <div class="absolute inset-0 flex items-center justify-center p-4">
-                <div class="bg-card rounded-lg w-full h-full max-w-7xl flex flex-col">
+                <div class="bg-background border border-border/40 rounded-xl w-full h-full max-w-7xl flex flex-col shadow-2xl overflow-hidden">
                     <!-- Header -->
                     <div class="flex items-center justify-between p-4 border-b">
                         <div class="flex items-center space-x-4">

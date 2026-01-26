@@ -1,7 +1,8 @@
 <template>
   <SelectTrigger
+    data-slot="select-trigger"
     :class="cn(
-      'flex h-10 w-full items-center justify-between rounded-xl border border-border/40 bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50',
+      'flex h-8 w-full items-center justify-between rounded-lg border border-border/50 bg-transparent px-2.5 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50 placeholder:text-muted-foreground',
       props.class
     )"
   >

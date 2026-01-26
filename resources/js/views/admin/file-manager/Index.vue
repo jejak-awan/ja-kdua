@@ -452,7 +452,7 @@
                             <div
                                 v-for="folder in paginatedFolders"
                                 :key="folder.path"
-                                class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-all hover:border-primary/50 shadow-none hover:bg-accent/5"
+                                class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-[border-color,background-color] duration-200 hover:border-primary/50 shadow-none hover:bg-accent/5"
                                 :class="{ 
                                     'ring-2 ring-primary border-primary': isSelected(folder.path),
                                     'ring-2 ring-green-500 border-green-500 bg-green-500/10': dropTarget === folder.path

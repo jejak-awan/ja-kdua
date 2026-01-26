@@ -10,7 +10,7 @@
                     <div v-if="lockStatus" class="flex flex-wrap items-center gap-2">
                         <Badge
                             variant="outline"
-                            :class="lockStatus.is_locked ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'"
+                            :class="lockStatus.is_locked ? 'bg-warning/10 text-warning border-warning/20' : 'bg-success/10 text-success border-success/20'"
                             class="gap-1.5 h-5 text-[10px]"
                         >
                             <Lock v-if="lockStatus.is_locked" class="w-3 h-3" />
@@ -40,7 +40,7 @@
         </div>
  
         <!-- Pending Review Notice -->
-        <Alert v-if="form.status === 'pending'" class="mb-6 bg-amber-500/10 border-amber-500/20 text-amber-600">
+        <Alert v-if="form.status === 'pending'" class="mb-6 bg-warning/10 border-warning/20 text-warning">
             <Clock3 class="w-4 h-4" />
             <AlertTitle>{{ $t('features.content.status.pending') }}</AlertTitle>
             <AlertDescription>

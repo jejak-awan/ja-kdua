@@ -1,21 +1,12 @@
 <template>
-    <div class="fixed inset-0 bg-background/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50" @click.self="close">
-        <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl rounded-md bg-card max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-foreground">
+    <Dialog :open="true" @update:open="close">
+        <DialogContent class="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+                <DialogTitle>
                     {{ field ? $t('features.forms.fieldModal.editTitle') : $t('features.forms.fieldModal.createTitle') }}
-                </h2>
-                <button
-                    @click="close"
-                    class="text-muted-foreground hover:text-foreground"
-                >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <form @submit.prevent="saveField" class="space-y-4">
+                </DialogTitle>
+            </DialogHeader>
+            <form @submit.prevent="saveField" class="space-y-4 py-4">
                 <!-- Field Type -->
                 <div>
                     <label class="block text-sm font-medium text-foreground mb-1">
@@ -150,25 +141,17 @@
                     </label>
                 </div>
 
-                <!-- Actions -->
-                <div class="flex justify-end space-x-3 pt-4 border-t border-border">
-                    <button
-                        type="button"
-                        @click="close"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-sm font-medium hover:bg-muted"
-                    >
+                <DialogFooter>
+                    <Button type="button" variant="outline" @click="close">
                         {{ $t('common.actions.cancel') }}
-                    </button>
-                    <button
-                        type="submit"
-                        class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/80"
-                    >
+                    </Button>
+                    <Button type="submit">
                         {{ field ? $t('features.forms.fieldModal.updateField') : $t('features.forms.fieldModal.addField') }}
-                    </button>
-                </div>
+                    </Button>
+                </DialogFooter>
             </form>
-        </div>
-    </div>
+        </DialogContent>
+    </Dialog>
 </template>
 
 <script setup>
@@ -176,6 +159,12 @@ import { ref, reactive, computed, watch } from 'vue';
 
 import { useI18n } from 'vue-i18n';
 import toast from '../../services/toast';
+import Dialog from '../ui/dialog.vue';
+import DialogContent from '../ui/dialog-content.vue';
+import DialogHeader from '../ui/dialog-header.vue';
+import DialogTitle from '../ui/dialog-title.vue';
+import DialogFooter from '../ui/dialog-footer.vue';
+import Button from '../ui/button.vue';
 
 const { t } = useI18n();
 

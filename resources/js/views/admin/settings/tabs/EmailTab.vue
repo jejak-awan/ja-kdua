@@ -37,7 +37,7 @@
                                 {{ validatingConfig ? $t('features.settings.emailTest.validating') : $t('features.settings.emailTest.validate') }}
                             </Button>
                             <div v-if="configValidation" class="text-sm">
-                                <span v-if="configValidation.valid" class="text-green-600 dark:text-green-500">✓ {{ $t('features.settings.emailTest.valid') }}</span>
+                                <span v-if="configValidation.valid" class="text-success">✓ {{ $t('features.settings.emailTest.valid') }}</span>
                                 <span v-else class="text-destructive">✗ {{ $t('features.settings.emailTest.invalid') }}</span>
                             </div>
                         </div>
@@ -54,7 +54,7 @@
                                 {{ testingConnection ? $t('features.settings.emailTest.testing') : $t('features.settings.emailTest.testConnection') }}
                             </Button>
                             <div v-if="connectionResult" class="text-sm">
-                                <span v-if="connectionResult.connected" class="text-green-600 dark:text-green-500">✓ {{ $t('features.settings.emailTest.connected', { host: connectionResult.host, port: connectionResult.port }) }}</span>
+                                <span v-if="connectionResult.connected" class="text-success">✓ {{ $t('features.settings.emailTest.connected', { host: connectionResult.host, port: connectionResult.port }) }}</span>
                                 <span v-else class="text-destructive">✗ {{ $t('features.settings.emailTest.failed') }}</span>
                             </div>
                         </div>
@@ -69,8 +69,8 @@
                             </ul>
                         </div>
                         <div v-if="configValidation.warnings && configValidation.warnings.length > 0">
-                            <p class="text-xs font-medium text-yellow-600 dark:text-yellow-500 mb-1">{{ $t('features.settings.emailTest.warnings') }}</p>
-                            <ul class="text-xs text-yellow-600 dark:text-yellow-500 list-disc list-inside">
+                            <p class="text-xs font-medium text-warning mb-1">{{ $t('features.settings.emailTest.warnings') }}</p>
+                            <ul class="text-xs text-warning list-disc list-inside">
                                 <li v-for="warning in configValidation.warnings" :key="warning">{{ warning }}</li>
                             </ul>
                         </div>

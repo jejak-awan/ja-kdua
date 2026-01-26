@@ -14,8 +14,7 @@
         <!-- Stats Cards -->
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
             <Card
-                class="p-4 cursor-pointer transition-shadow hover:shadow-md hover:border-primary/50"
-                :class="{ 'border-primary ring-2 ring-primary/20': verificationFilter === 'all' && !activeStatFilter }"
+                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-primary/50', { 'border-primary ring-2 ring-primary/20': verificationFilter === 'all' && !activeStatFilter })"
                 @click="clearFilters"
             >
                 <div class="flex items-center justify-between">
@@ -27,8 +26,7 @@
                 </div>
             </Card>
             <Card
-                class="p-4 cursor-pointer transition-shadow hover:shadow-md hover:border-primary/50"
-                :class="{ 'border-primary ring-2 ring-primary/20': verificationFilter === 'verified' }"
+                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-primary/50', { 'border-primary ring-2 ring-primary/20': verificationFilter === 'verified' })"
                 @click="setVerificationFilter('verified')"
             >
                 <div class="flex items-center justify-between">
@@ -40,42 +38,39 @@
                 </div>
             </Card>
             <Card
-                class="p-4 cursor-pointer transition-shadow hover:shadow-md hover:border-amber-500/50 dark:hover:border-amber-500/30"
-                :class="{ 'border-amber-500 dark:border-amber-500/50 ring-2 ring-amber-500/20': verificationFilter === 'unverified' }"
+                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-warning/50', { 'border-warning ring-2 ring-warning/20': verificationFilter === 'unverified' })"
                 @click="setVerificationFilter('unverified')"
             >
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground">{{ $t('features.users.stats.unverified') }}</p>
-                        <p class="text-2xl font-bold text-amber-500 dark:text-amber-400">{{ stats.unverified }}</p>
+                        <p class="text-2xl font-bold text-warning">{{ stats.unverified }}</p>
                     </div>
-                    <AlertCircle class="w-8 h-8 text-amber-500 dark:text-amber-400 opacity-80" />
+                    <AlertCircle class="w-8 h-8 text-warning opacity-80" />
                 </div>
             </Card>
             <Card
-                class="p-4 cursor-pointer transition-shadow hover:shadow-md hover:border-emerald-500/50 dark:hover:border-emerald-500/30"
-                :class="{ 'border-emerald-500 dark:border-emerald-500/50 ring-2 ring-emerald-500/20': activeStatFilter === 'recent' }"
+                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-success/50', { 'border-success ring-2 ring-success/20': activeStatFilter === 'recent' })"
                 @click="setStatFilter('recent')"
             >
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground">{{ $t('features.users.stats.recent') }}</p>
-                        <p class="text-2xl font-bold text-emerald-500 dark:text-emerald-400">{{ stats.recent }}</p>
+                        <p class="text-2xl font-bold text-success">{{ stats.recent }}</p>
                     </div>
-                    <UserPlus class="w-8 h-8 text-emerald-500 dark:text-emerald-400 opacity-80" />
+                    <UserPlus class="w-8 h-8 text-success opacity-80" />
                 </div>
             </Card>
             <Card
-                class="p-4 cursor-pointer transition-shadow hover:shadow-md hover:border-blue-500/50 dark:hover:border-blue-500/30"
-                :class="{ 'border-blue-500 dark:border-blue-500/50 ring-2 ring-blue-500/20': activeStatFilter === 'active' }"
+                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-info/50', { 'border-info ring-2 ring-info/20': activeStatFilter === 'active' })"
                 @click="setStatFilter('active')"
             >
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground">{{ $t('features.users.stats.active') }}</p>
-                        <p class="text-2xl font-bold text-blue-500 dark:text-blue-400">{{ stats.active }}</p>
+                        <p class="text-2xl font-bold text-info">{{ stats.active }}</p>
                     </div>
-                    <Activity class="w-8 h-8 text-blue-500 dark:text-blue-400 opacity-80" />
+                    <Activity class="w-8 h-8 text-info opacity-80" />
                 </div>
             </Card>
         </div>
@@ -144,10 +139,10 @@
                             <SelectValue :placeholder="$t('features.content.list.bulkActions')" />
                         </SelectTrigger>
                         <SelectContent>
-                             <SelectItem value="force_logout" class="text-amber-600 focus:text-amber-600">{{ $t('features.users.actions.forceLogout') }}</SelectItem>
+                             <SelectItem value="force_logout" class="text-warning focus:text-warning">{{ $t('features.users.actions.forceLogout') }}</SelectItem>
                              <SelectItem value="verify" class="text-primary focus:text-primary">{{ $t('features.users.actions.verify') }}</SelectItem>
                              <SelectItem v-if="trashedFilter !== 'only'" value="delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.delete') }}</SelectItem>
-                             <SelectItem v-if="trashedFilter === 'only'" value="restore" class="text-emerald-600 focus:text-emerald-600">{{ $t('common.actions.restore') }}</SelectItem>
+                             <SelectItem v-if="trashedFilter === 'only'" value="restore" class="text-success focus:text-success">{{ $t('common.actions.restore') }}</SelectItem>
                              <SelectItem v-if="trashedFilter === 'only'" value="force_delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.forceDelete') }}</SelectItem>
                         </SelectContent>
                     </Select>
@@ -278,7 +273,7 @@
                                     variant="ghost"
                                     size="icon"
                                     @click="forceLogoutUser(user)"
-                                    class="h-8 w-8 text-amber-500 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 hover:bg-amber-500/10"
+                                    class="h-8 w-8 text-warning hover:bg-warning/10"
                                     :title="$t('features.users.actions.forceLogout')"
                                     :disabled="!canManage(user)"
                                 >
@@ -289,7 +284,7 @@
                                     variant="ghost"
                                     size="icon"
                                     @click="editUser(user)"
-                                    class="h-8 w-8 text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 hover:bg-indigo-500/10"
+                                    class="h-8 w-8 text-primary hover:bg-primary/10"
                                     :title="$t('common.actions.edit')"
                                     :disabled="!canManage(user)"
                                 >
@@ -312,7 +307,7 @@
                                     variant="ghost"
                                     size="icon"
                                     @click="restoreUser(user)"
-                                    class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                                    class="h-8 w-8 text-success hover:bg-success/10"
                                     :title="$t('common.actions.restore')"
                                 >
                                     <RotateCcw class="w-4 h-4" />
@@ -355,6 +350,7 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import api from '@/services/api';
+import { cn } from '@/lib/utils';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
 import { useToast } from '@/composables/useToast';
 // @ts-ignore
@@ -732,7 +728,7 @@ const bulkAction = async (action: string) => {
     const confirmed = await confirm({
         title: confirmTitle,
         message: confirmMessage,
-        variant: confirmVariant,
+        variant: confirmVariant as any,
         confirmText: t('common.actions.confirm') || 'Confirm',
     });
 

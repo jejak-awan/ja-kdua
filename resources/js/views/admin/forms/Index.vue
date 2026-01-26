@@ -68,7 +68,7 @@
                 </div>
 
                 <!-- Bulk Actions -->
-                <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 transition-all animate-in fade-in slide-in-from-top-1 ml-auto">
+                <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 transition-opacity animate-in fade-in slide-in-from-top-1 ml-auto">
                     <span class="text-sm font-medium text-primary">
                         {{ selectedIds.length }} selected
                     </span>
@@ -112,7 +112,7 @@
             <Card
                 v-for="form in filteredForms"
                 :key="form.id"
-                class="overflow-hidden hover:shadow-md transition-shadow"
+                class="overflow-hidden hover:shadow-md"
             >
                 <div class="p-6">
                     <div class="flex items-start justify-between mb-4">
@@ -158,7 +158,7 @@
                     </div>
 
                     <div class="flex items-center space-x-2 pt-4 border-t border-border">
-                        <Button @click="editForm(form)" size="sm" class="flex-1">
+                        <Button @click="editForm(form)" size="sm" class="flex-1 transition-colors">
                             <Pencil class="w-4 h-4 mr-1" />
                             {{ $t('features.forms.actions.edit') }}
                         </Button>

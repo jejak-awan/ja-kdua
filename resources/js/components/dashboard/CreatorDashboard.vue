@@ -16,18 +16,18 @@
         <!-- Row 1: Personal Stats -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <!-- My Contents -->
-            <Card class="hover:shadow-md transition-all duration-300">
+            <Card class="border-border/40 bg-card shadow-none">
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
                             <p class="text-sm font-medium text-muted-foreground">{{ $t('features.dashboard.stats.creator.myContent') }}</p>
                             <p class="text-3xl font-bold text-foreground">{{ stats.myContents?.total || 0 }}</p>
-                            <div class="flex items-center gap-1.5 text-xs text-indigo-500 font-medium">
+                            <div class="flex items-center gap-1.5 text-xs text-primary font-medium">
                                 <FileText class="w-3 h-3" />
                                 <span>{{ stats.myContents?.published || 0 }} {{ $t('features.dashboard.stats.creator.published') }}</span>
                             </div>
                         </div>
-                        <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500">
+                        <div class="p-2.5 rounded-xl bg-primary/10 text-primary">
                             <PenTool class="w-5 h-5" />
                         </div>
                     </div>
@@ -35,37 +35,37 @@
             </Card>
 
             <!-- Pending Review -->
-            <Card class="hover:shadow-md transition-all duration-300">
+            <Card class="border-border/40 bg-card shadow-none">
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
                             <p class="text-sm font-medium text-muted-foreground">{{ $t('features.dashboard.stats.creator.pendingReview') }}</p>
                             <p class="text-3xl font-bold text-foreground">{{ stats.myContents?.pending || 0 }}</p>
-                            <div class="flex items-center gap-1.5 text-xs text-amber-500 font-medium">
+                            <div class="flex items-center gap-1.5 text-xs text-warning font-medium">
                                 <Clock3 class="w-3 h-3" />
                                 <span>{{ $t('features.dashboard.stats.creator.awaitingApproval') }}</span>
                             </div>
                         </div>
-                        <div class="p-2.5 rounded-xl bg-amber-500/10 text-amber-500">
-                            <AlertCircle class="w-5 h-5" />
+                        <div class="p-2.5 rounded-xl bg-warning/10 text-warning">
+                            <Clock class="w-5 h-5" />
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
             <!-- My Media -->
-            <Card class="hover:shadow-md transition-all duration-300">
+            <Card class="border-border/40 bg-card shadow-none">
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
                             <p class="text-sm font-medium text-muted-foreground">{{ $t('features.dashboard.stats.creator.myMedia') }}</p>
                             <p class="text-3xl font-bold text-foreground">{{ stats.myMedia?.total || 0 }}</p>
-                            <div class="flex items-center gap-1.5 text-xs text-emerald-500 font-medium">
+                            <div class="flex items-center gap-1.5 text-xs text-info font-medium">
                                 <Image class="w-3 h-3" />
                                 <span>{{ $t('features.dashboard.stats.creator.uploadedFiles') }}</span>
                             </div>
                         </div>
-                        <div class="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500">
+                        <div class="p-2.5 rounded-xl bg-info/10 text-info">
                             <FolderOpen class="w-5 h-5" />
                         </div>
                     </div>
@@ -73,18 +73,18 @@
             </Card>
             
             <!-- Drafts -->
-            <Card class="hover:shadow-md transition-all duration-300">
+            <Card class="border-border/40 bg-card shadow-none">
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
                             <p class="text-sm font-medium text-muted-foreground">{{ $t('features.dashboard.stats.creator.drafts') }}</p>
                             <p class="text-3xl font-bold text-foreground">{{ stats.myContents?.draft || 0 }}</p>
-                            <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                            <div class="flex items-center gap-1.5 text-xs text-success font-medium">
                                 <FileText class="w-3 h-3" />
                                 <span>{{ $t('features.dashboard.stats.creator.workInProgress') }}</span>
                             </div>
                         </div>
-                        <div class="p-2.5 rounded-xl bg-slate-500/10 text-slate-500">
+                        <div class="p-2.5 rounded-xl bg-primary/10 text-primary">
                             <Edit3 class="w-5 h-5" />
                         </div>
                     </div>
@@ -152,7 +152,7 @@
             <Card class="col-span-1 lg:col-span-2">
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2">
-                        <Trophy class="w-5 h-5 text-amber-500" />
+                        <Trophy class="w-5 h-5 text-warning" />
                         {{ $t('features.dashboard.stats.creator.topContent') }}
                     </CardTitle>
                 </CardHeader>
@@ -261,10 +261,10 @@ const mapStatusToLabel = (status) => {
 
 const getStatusColor = (status) => {
     switch (status) {
-        case 'published': return 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-0';
-        case 'pending': return 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-0';
-        case 'draft': return 'bg-slate-500/15 text-slate-600 dark:text-slate-400 border-0';
-        default: return 'bg-slate-500/15 text-slate-600 dark:text-slate-400 border-0';
+        case 'published': return 'bg-success/15 text-success border-0';
+        case 'pending': return 'bg-warning/15 text-warning border-0';
+        case 'draft': return 'bg-primary/15 text-primary border-0';
+        default: return 'bg-muted text-muted-foreground border-0';
     }
 };
 

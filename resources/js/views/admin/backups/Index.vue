@@ -174,7 +174,7 @@
                                             :type="visiblePasswords[backup.id] ? 'text' : 'password'" 
                                             :value="backup.password || '****************'" 
                                             readonly
-                                            class="w-full h-8 px-2 pr-8 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+                                            class="w-full h-8 px-2 pr-8 text-sm bg-background border border-border/60 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
                                         />
                                         <button 
                                             v-if="backup.password"

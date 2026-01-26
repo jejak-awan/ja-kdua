@@ -1,20 +1,11 @@
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card rounded-lg max-w-2xl w-full">
-                <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">
-                        {{ webhook ? t('features.developer.webhooks.modal.title_edit') : t('features.developer.webhooks.modal.title_create') }}
-                    </h3>
-                    <button
-                        @click="$emit('close')"
-                        class="text-muted-foreground hover:text-muted-foreground"
-                    >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+    <Dialog :open="true" @update:open="$emit('close')">
+        <DialogContent class="sm:max-w-[600px]">
+            <DialogHeader>
+                <DialogTitle>
+                    {{ webhook ? t('features.developer.webhooks.modal.title_edit') : t('features.developer.webhooks.modal.title_create') }}
+                </DialogTitle>
+            </DialogHeader>
 
                 <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
                     <div>
@@ -25,7 +16,7 @@
                             v-model="form.name"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                             :placeholder="t('features.developer.webhooks.modal.name_placeholder')"
                         >
                     </div>
@@ -38,7 +29,7 @@
                             v-model="form.url"
                             type="url"
                             required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
                             :placeholder="t('features.developer.webhooks.modal.url_placeholder')"
                         >
                     </div>
@@ -57,7 +48,7 @@
                                     type="checkbox"
                                     :value="event"
                                     v-model="form.events"
-                                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
+                                    class="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                                 >
                                 <span class="ml-2 text-sm text-foreground">{{ t('features.developer.webhooks.events.' + event) }}</span>
                             </label>
@@ -71,7 +62,7 @@
                         <input
                             v-model="form.secret"
                             type="text"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
                             :placeholder="t('features.developer.webhooks.modal.secret_placeholder')"
                         >
                     </div>
@@ -81,7 +72,7 @@
                             v-model="form.is_active"
                             type="checkbox"
                             id="is_active"
-                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
+                            class="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                         >
                         <label for="is_active" class="ml-2 block text-sm text-foreground">
                             {{ t('features.developer.webhooks.modal.active_label') }}
@@ -89,24 +80,20 @@
                     </div>
                 </form>
 
-                <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <button
-                        @click="$emit('close')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
-                    >
+                <DialogFooter>
+                    <Button variant="outline" @click="$emit('close')">
                         {{ t('features.developer.webhooks.modal.cancel') }}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         @click="handleSubmit"
                         :disabled="saving || !isValid || (webhook && !isDirty)"
-                        class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                     >
+                        <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                         {{ saving ? t('features.developer.webhooks.modal.saving') : (webhook ? t('features.developer.webhooks.modal.update') : t('features.developer.webhooks.modal.create')) }}
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+                    </Button>
+                </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>
 
 <script setup>
@@ -114,6 +101,13 @@ import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import { useToast } from '../../composables/useToast';
+import Dialog from '../ui/dialog.vue';
+import DialogContent from '../ui/dialog-content.vue';
+import DialogHeader from '../ui/dialog-header.vue';
+import DialogTitle from '../ui/dialog-title.vue';
+import DialogFooter from '../ui/dialog-footer.vue';
+import Button from '../ui/button.vue';
+import { Loader2 } from 'lucide-vue-next';
 
 const { t } = useI18n();
 

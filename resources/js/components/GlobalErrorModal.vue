@@ -41,7 +41,7 @@
                     <button
                         v-if="state.code === 401 || state.code === 419"
                         @click="handleLogin"
-                        class="w-full inline-flex items-center justify-center px-6 py-4 border border-transparent text-sm font-semibold rounded-2xl text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 shadow-[0_8px_16px_-4px_rgba(234,88,12,0.4)] transition-all active:scale-95"
+                        class="w-full inline-flex items-center justify-center px-6 py-4 border border-transparent text-sm font-semibold rounded-2xl text-warning-foreground bg-warning hover:bg-warning/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-warning transition-colors active:scale-[0.98]"
                     >
                         <LogIn class="w-5 h-5 mr-2" />
                         {{ t('features.errors.419.login') }}

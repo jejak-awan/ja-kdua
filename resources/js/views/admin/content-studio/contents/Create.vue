@@ -75,7 +75,7 @@
         <Dialog :open="!!slugConflict" @update:open="slugConflict = null">
             <DialogContent class="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle class="text-amber-600 flex items-center gap-2">
+                    <DialogTitle class="text-warning flex items-center gap-2">
                         <span>⚠️</span> {{ $t('common.messages.slugConflict.title') }}
                     </DialogTitle>
                     <DialogDescription class="pt-2 space-y-2">

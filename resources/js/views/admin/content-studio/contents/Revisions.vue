@@ -49,7 +49,7 @@
                                 <Badge
                                     v-if="revision.is_current"
                                     variant="outline"
-                                    class="bg-emerald-500/10 text-emerald-600 border-none px-2 py-0.5"
+                                    class="bg-success/10 text-success border-none px-2 py-0.5"
                                 >
                                     Current
                                 </Badge>
@@ -87,7 +87,7 @@
                                     v-if="!revision.is_current"
                                     variant="outline"
                                     size="sm"
-                                    class="text-emerald-600 hover:bg-emerald-500/10 border-emerald-500/20"
+                                    class="text-success hover:bg-success/10 border-success/20"
                                     @click="restoreRevision(revision)"
                                 >
                                     <RotateCcw class="w-4 h-4 mr-2" />
@@ -164,7 +164,7 @@
                     <Button
                         v-if="!viewingRevision.is_current"
                         variant="default"
-                        class="bg-emerald-600 hover:bg-emerald-700 shadow-sm px-6"
+                        class="bg-success hover:bg-success/90 shadow-sm px-6"
                         @click="restoreRevision(viewingRevision)"
                     >
                         <RotateCcw class="w-4 h-4 mr-2" />

@@ -149,5 +149,10 @@ onMounted(async () => {
     if (authStore.isAuthenticated && !window.__isSessionTerminated) {
         authStore.fetchUser();
     }
+
+    // Drop the anti-flash shield after everything is likely rendered
+    setTimeout(() => {
+        document.documentElement.classList.remove('no-transitions');
+    }, 150);
 });
 </script>

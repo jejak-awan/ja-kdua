@@ -24,7 +24,8 @@
                     <!-- Global Search Trigger -->
                     <button
                         @click="showGlobalSearch = true"
-                        class="hidden md:flex items-center w-64 px-3 py-2 text-sm text-muted-foreground bg-muted/40 border border-border/40 rounded-xl hover:bg-muted/60 hover:text-foreground transition-all duration-200"
+                        data-slot="search-trigger"
+                        class="hidden md:flex items-center w-64 px-3 py-2 text-sm text-muted-foreground bg-transparent border border-border/40 rounded-lg hover:bg-muted/5 hover:text-foreground transition-colors duration-200"
                     >
                         <Search class="w-4 h-4 mr-2 opacity-50" />
                         <span>{{ t('common.actions.search') }}...</span>
@@ -95,7 +96,7 @@
                                     v-for="notification in recentNotifications"
                                     :key="notification.id"
                                     class="p-4 hover:bg-muted cursor-pointer"
-                                    :class="{ 'bg-blue-500/10': !notification.read_at }"
+                                    :class="{ 'bg-primary/10': !notification.read_at }"
                                     @click="handleNotificationClick(notification)"
                                 >
                                     <div class="flex items-start">
@@ -124,7 +125,7 @@
                 <div class="relative">
                     <button
                         @click="toggleUserMenu"
-                        class="flex items-center space-x-3 px-3 py-2 rounded-xl hover:bg-accent transition-colors"
+                        class="flex items-center space-x-3 px-3 py-2 rounded-xl hover:bg-accent"
                     >
                         <img
                             v-if="userAvatar"
@@ -143,7 +144,7 @@
                             <p class="text-sm font-medium text-foreground">{{ user?.name || t('common.labels.user') }}</p>
                             <p class="text-xs text-muted-foreground">{{ user?.email || '' }}</p>
                         </div>
-                        <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-muted-foreground transition-transform" :class="{ 'rotate-180': showUserMenu }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
@@ -151,7 +152,7 @@
                     <!-- User Dropdown -->
                     <div
                         v-if="showUserMenu"
-                        class="absolute right-0 mt-2 w-56 bg-popover text-popover-foreground rounded-xl z-50 border border-border/40"
+                        class="absolute right-0 mt-2 w-56 bg-background text-foreground rounded-xl z-50 border border-border/60 shadow-lg"
                         @click.stop
                     >
                         <div class="p-3 border-b border-border">

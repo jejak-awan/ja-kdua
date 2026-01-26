@@ -63,6 +63,6 @@ const siteLogo = computed(() => cmsStore.siteSettings?.site_logo || '');
 <style scoped>
 .group:hover .bg-primary {
   filter: brightness(1.1);
-  transition: all 300ms ease-in-out;
+  transition: background-color 300ms ease-in-out, border-color 300ms ease-in-out;
 }
 </style>

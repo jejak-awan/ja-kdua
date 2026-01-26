@@ -23,7 +23,7 @@
                     />
                 </div>
                 <div class="flex justify-end">
-                    <p class="text-[10px] font-medium transition-colors" :class="(modelValue.meta_title?.length || 0) > 60 ? 'text-amber-500' : 'text-muted-foreground/60'">
+                    <p class="text-[10px] font-medium transition-colors" :class="(modelValue.meta_title?.length || 0) > 60 ? 'text-warning' : 'text-muted-foreground/60'">
                         {{ modelValue.meta_title?.length || 0 }}/255 characters
                     </p>
                 </div>
@@ -42,7 +42,7 @@
                     placeholder="SEO description (defaults to excerpt)"
                 />
                 <div class="flex justify-end">
-                    <p class="text-[10px] font-medium transition-colors" :class="(modelValue.meta_description?.length || 0) > 160 ? 'text-amber-500' : 'text-muted-foreground/60'">
+                    <p class="text-[10px] font-medium transition-colors" :class="(modelValue.meta_description?.length || 0) > 160 ? 'text-warning' : 'text-muted-foreground/60'">
                         {{ modelValue.meta_description?.length || 0 }}/500 characters
                     </p>
                 </div>
