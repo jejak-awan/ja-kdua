@@ -1,16 +1,16 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card border border-border shadow-lg rounded-lg max-w-5xl w-full max-h-[90vh] flex flex-col">
+            <div class="bg-card border border-border/40 shadow-none rounded-xl max-w-5xl w-full max-h-[90vh] flex flex-col">
                 <!-- Header -->
-                <div class="flex items-center justify-between px-5 py-3 border-b shrink-0">
+                <div class="flex items-center justify-between px-5 py-3 border-b border-border/40 shrink-0">
                     <h3 class="text-base font-semibold truncate">{{ media.name }}</h3>
                     <Button
                         variant="ghost"
                         size="icon"
                         @click="$emit('close')"
                     >
-                        <X class="w-5 h-5" />
+                        <X class="w-5 h-5" stroke-width="1.5" />
                     </Button>
                 </div>
 
@@ -24,7 +24,7 @@
                                 <!-- Display Mode Selector -->
                                 <div class="flex items-center justify-between mb-2">
                                     <span class="text-xs font-medium text-muted-foreground">{{ $t('features.media.modals.view.preview') }}</span>
-                                    <div class="flex items-center gap-0.5 bg-muted p-0.5 rounded">
+                                    <div class="flex items-center gap-0.5 bg-muted p-0.5 rounded-xl">
                                         <Button
                                             v-for="mode in displayModes"
                                             :key="mode.value"
@@ -44,7 +44,7 @@
 
                                 <!-- Preview Container -->
                                 <div 
-                                    class="relative rounded-lg bg-secondary border border-border h-72"
+                                    class="relative rounded-xl bg-secondary border border-border/40 h-72"
                                     :class="displayMode === 'actual' ? 'overflow-auto' : 'overflow-hidden'"
                                     :style="displayMode === 'actual' ? { cursor: isDragging ? 'grabbing' : 'grab' } : {}"
                                     ref="previewContainer"
@@ -86,7 +86,7 @@
 
                                 <!-- Pan Hint -->
                                 <p v-if="displayMode === 'actual' || displayMode === 'stretch'" class="text-xs text-muted-foreground mt-1.5 text-center">
-                                    <Move class="w-3 h-3 inline-block mr-1" />
+                                    <Move class="w-3 h-3 inline-block mr-1" stroke-width="1.5" />
                                     {{ $t('features.media.modals.view.dragToPan') }}
                                 </p>
                             </div>
@@ -96,7 +96,7 @@
                                 <div class="flex items-center justify-between mb-2">
                                     <span class="text-xs font-medium text-muted-foreground">{{ $t('features.media.modals.view.preview') }}</span>
                                 </div>
-                                <div class="relative rounded-lg bg-secondary border border-border h-72 overflow-hidden">
+                                <div class="relative rounded-xl bg-secondary border border-border/40 h-72 overflow-hidden">
                                     <video 
                                         :src="media.url" 
                                         controls 
@@ -109,8 +109,8 @@
                             </div>
                             
                             <!-- Other File Types -->
-                            <div v-else class="bg-secondary rounded-lg flex items-center justify-center h-72">
-                                <FileText class="w-16 h-16 text-muted-foreground opacity-50" />
+                            <div v-else class="bg-secondary border border-border/40 rounded-xl flex items-center justify-center h-72">
+                                <FileText class="w-16 h-16 text-muted-foreground opacity-50" stroke-width="1.5" />
                             </div>
 
                             <!-- Quick Actions for Images -->
@@ -121,7 +121,7 @@
                                     variant="secondary"
                                     class="bg-purple-600 text-white hover:bg-purple-700"
                                 >
-                                    <Edit class="w-3.5 h-3.5 mr-1.5" />
+                                    <Edit class="w-3.5 h-3.5 mr-1.5" stroke-width="1.5" />
                                     {{ $t('features.media.modals.view.edit') }}
                                 </Button>
                                 <Button
@@ -129,7 +129,7 @@
                                     size="sm"
                                     variant="outline"
                                 >
-                                    <Scissors class="w-3.5 h-3.5 mr-1.5" />
+                                    <Scissors class="w-3.5 h-3.5 mr-1.5" stroke-width="1.5" />
                                     {{ $t('features.media.modals.view.resize') }}
                                 </Button>
                                 <Button
@@ -138,7 +138,7 @@
                                     variant="outline"
                                     :disabled="generatingThumbnail"
                                 >
-                                    <RefreshCw :class="['w-3.5 h-3.5 mr-1.5', generatingThumbnail ? 'animate-spin' : '']" />
+                                    <RefreshCw :class="['w-3.5 h-3.5 mr-1.5', generatingThumbnail ? 'animate-spin' : '']" stroke-width="1.5" />
                                     {{ generatingThumbnail ? $t('features.media.modals.view.generating') : $t('features.media.modals.view.thumbnail') }}
                                 </Button>
                             </div>
@@ -147,7 +147,7 @@
                         <!-- Right: Details -->
                         <div class="space-y-4">
                             <!-- Media Details -->
-                            <div class="bg-muted/50 rounded-lg p-3">
+                            <div class="bg-muted/50 border border-border/40 rounded-xl p-3">
                                 <h4 class="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{{ $t('features.media.modals.view.details') }}</h4>
                                 <dl class="space-y-2 text-sm">
                                     <div class="flex justify-between">
@@ -174,22 +174,22 @@
                             </div>
 
                             <!-- URL Copy -->
-                            <div class="bg-muted/50 rounded-lg p-3">
+                            <div class="bg-muted/50 border border-border/40 rounded-xl p-3">
                                 <h4 class="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{{ $t('features.media.modals.view.url') }}</h4>
                                 <div class="flex items-center gap-2">
                                     <input
                                         :value="media.url"
                                         readonly
-                                        class="flex-1 px-2 py-1.5 border border-input bg-card text-foreground rounded text-xs font-mono"
+                                        class="flex-1 px-2 py-1.5 border border-border/40 bg-card text-foreground rounded-lg text-xs font-mono"
                                     >
                                     <Button @click="copyUrl" size="sm" variant="outline">
-                                        <Copy class="w-3.5 h-3.5" />
+                                        <Copy class="w-3.5 h-3.5" stroke-width="1.5" />
                                     </Button>
                                 </div>
                             </div>
 
                             <!-- Usage -->
-                            <div class="bg-muted/50 rounded-lg p-3">
+                            <div class="bg-muted/50 border border-border/40 rounded-xl p-3">
                                 <h4 class="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{{ $t('features.media.modals.view.usage') }}</h4>
                                 <div v-if="loadingUsage" class="text-xs text-muted-foreground">
                                     {{ $t('features.media.modals.view.loadingUsage') }}
@@ -198,7 +198,7 @@
                                     <div
                                         v-for="usage in usageDetail"
                                         :key="usage.id"
-                                        class="text-xs text-foreground p-1.5 bg-background rounded"
+                                        class="text-xs text-foreground p-1.5 bg-background border border-border/40 rounded-lg"
                                     >
                                         <span class="font-medium">{{ usage.type }}</span>
                                         <span v-if="usage.title" class="text-muted-foreground"> · {{ usage.title }}</span>
@@ -213,7 +213,7 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="flex items-center justify-end px-5 py-3 border-t shrink-0">
+                <div class="flex items-center justify-end px-5 py-3 border-t border-border/40 shrink-0">
                     <Button
                         variant="outline"
                         @click="$emit('close')"

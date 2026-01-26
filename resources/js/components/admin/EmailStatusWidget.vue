@@ -1,5 +1,5 @@
 <template>
-  <Card class="email-status-widget h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-300">
+  <Card class="email-status-widget h-full flex flex-col overflow-hidden duration-300">
     <CardHeader class="flex flex-row items-center justify-between pb-2 space-y-0">
       <CardTitle class="text-xl font-bold flex items-center gap-2">
         <Mail class="w-5 h-5 text-primary" />

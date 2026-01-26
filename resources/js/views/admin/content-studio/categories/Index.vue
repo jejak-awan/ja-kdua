@@ -19,7 +19,7 @@
 
         <!-- content -->
         <Card>
-            <CardHeader class="pb-3 border-b border-border">
+            <CardHeader class="pb-3 border-b border-border/40">
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <!-- Left: Search / Filter -->
                     <div class="flex items-center gap-2 flex-1 flex-wrap">
@@ -105,7 +105,7 @@
                             <TableRow 
                                 v-for="category in flatCategories" 
                                 :key="category.id"
-                                class="group hover:bg-muted/50"
+                                class="group hover:bg-muted/30 border-b border-border/40"
                             >
                                 <TableCell class="text-center">
                                     <Checkbox 
@@ -202,6 +202,7 @@ import {
     Filter
 } from 'lucide-vue-next';
 import { debounce } from '@/utils/debounce';
+import { cn } from '@/lib/utils';
 import CategoryFormModal from './CategoryFormModal.vue';
 
 // Shadcn UI

@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-background text-foreground">
+    <div class="min-h-screen bg-sidebar text-foreground">
         <!-- Sidebar -->
         <AdminSidebar
             :sidebar-minimized="sidebarMinimized"

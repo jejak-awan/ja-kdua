@@ -24,21 +24,20 @@
                     <!-- Global Search Trigger -->
                     <button
                         @click="showGlobalSearch = true"
-                        class="hidden md:flex items-center w-64 px-3 py-2 text-sm text-muted-foreground bg-muted/50 border border-input rounded-md hover:bg-muted hover:text-foreground transition-colors"
+                        class="hidden md:flex items-center w-64 px-3 py-2 text-sm text-muted-foreground bg-muted/40 border border-border/40 rounded-xl hover:bg-muted/60 hover:text-foreground transition-all duration-200"
                     >
-                        <svg class="w-4 h-4 mr-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+                        <Search class="w-4 h-4 mr-2 opacity-50" />
                         <span>{{ t('common.actions.search') }}...</span>
-                        <kbd class="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                            <span class="text-xs">⌘K</span>
+                        <kbd class="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded-md border-border/40 bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 uppercase">
+                            <span class="text-[10px]">Ctrl</span>
+                            <span class="text-[10px]">K</span>
                         </kbd>
                     </button>
 
                     <!-- Mobile Search Trigger -->
                     <button
                         @click="showGlobalSearch = true"
-                        class="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-md hover:bg-accent transition-colors"
+                        class="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-xl hover:bg-accent transition-colors"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -71,7 +70,7 @@
                     <!-- Notifications Dropdown -->
                     <div
                         v-if="showNotificationsDropdown"
-                        class="fixed inset-x-4 top-[64px] md:absolute md:inset-x-auto md:top-auto md:right-0 mt-2 md:w-80 bg-popover text-popover-foreground rounded-lg z-50 border border-border shadow-lg"
+                        class="fixed inset-x-4 top-[64px] md:absolute md:inset-x-auto md:top-auto md:right-0 mt-2 md:w-80 bg-popover text-popover-foreground rounded-lg z-50 border border-border"
                         @click.stop
                     >
                         <div class="p-4 border-b border-border flex items-center justify-between">
@@ -125,7 +124,7 @@
                 <div class="relative">
                     <button
                         @click="toggleUserMenu"
-                        class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-accent transition-colors"
+                        class="flex items-center space-x-3 px-3 py-2 rounded-xl hover:bg-accent transition-colors"
                     >
                         <img
                             v-if="userAvatar"
@@ -152,7 +151,7 @@
                     <!-- User Dropdown -->
                     <div
                         v-if="showUserMenu"
-                        class="absolute right-0 mt-2 w-56 bg-popover text-popover-foreground rounded-lg z-50 border border-border"
+                        class="absolute right-0 mt-2 w-56 bg-popover text-popover-foreground rounded-xl z-50 border border-border/40"
                         @click.stop
                     >
                         <div class="p-3 border-b border-border">

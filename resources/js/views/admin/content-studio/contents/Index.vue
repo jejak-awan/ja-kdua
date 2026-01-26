@@ -24,6 +24,7 @@ import { useConfirm } from '@/composables/useConfirm';
 import { useToast } from '@/composables/useToast';
 import api from '@/services/api';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
+import { cn } from '@/lib/utils';
 import type { Content } from '@/types/cms';
 
 // Shadcn Components
@@ -403,7 +404,13 @@ onMounted(() => {
         <!-- Stats Cards -->
         <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
             <!-- Total Contents -->
-            <Card class="hover:shadow-md transition-shadow duration-300">
+            <Card 
+                @click="statusFilter = 'all'"
+                :class="cn(
+                    'cursor-pointer transition-shadow duration-300 hover:shadow-md border',
+                    statusFilter === 'all' ? 'border-primary' : 'border-border'
+                )"
+            >
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
@@ -418,7 +425,13 @@ onMounted(() => {
             </Card>
 
             <!-- Published -->
-            <Card class="hover:shadow-md transition-shadow duration-300">
+            <Card 
+                @click="statusFilter = 'published'"
+                :class="cn(
+                    'cursor-pointer transition-shadow duration-300 hover:shadow-md border',
+                    statusFilter === 'published' ? 'border-emerald-500' : 'border-border'
+                )"
+            >
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
@@ -433,7 +446,13 @@ onMounted(() => {
             </Card>
 
             <!-- Draft -->
-            <Card class="hover:shadow-md transition-shadow duration-300">
+            <Card 
+                @click="statusFilter = 'draft'"
+                :class="cn(
+                    'cursor-pointer transition-shadow duration-300 hover:shadow-md border',
+                    statusFilter === 'draft' ? 'border-slate-500' : 'border-border'
+                )"
+            >
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
@@ -448,7 +467,13 @@ onMounted(() => {
             </Card>
 
             <!-- Pending -->
-            <Card class="hover:shadow-md transition-shadow duration-300">
+            <Card 
+                @click="statusFilter = 'pending'"
+                :class="cn(
+                    'cursor-pointer transition-shadow duration-300 hover:shadow-md border',
+                    statusFilter === 'pending' ? 'border-amber-500' : 'border-border'
+                )"
+            >
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
@@ -463,7 +488,13 @@ onMounted(() => {
             </Card>
 
             <!-- Archived -->
-            <Card class="hover:shadow-md transition-shadow duration-300">
+            <Card 
+                @click="statusFilter = 'archived'"
+                :class="cn(
+                    'cursor-pointer transition-shadow duration-300 hover:shadow-md border',
+                    statusFilter === 'archived' ? 'border-rose-500' : 'border-border'
+                )"
+            >
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
@@ -478,7 +509,13 @@ onMounted(() => {
             </Card>
 
             <!-- Trashed -->
-            <Card class="hover:shadow-md transition-shadow duration-300">
+            <Card 
+                @click="statusFilter = 'trashed'"
+                :class="cn(
+                    'cursor-pointer transition-shadow duration-300 hover:shadow-md border',
+                    statusFilter === 'trashed' ? 'border-red-500' : 'border-border'
+                )"
+            >
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
@@ -589,7 +626,7 @@ onMounted(() => {
             <div class="relative overflow-x-auto">
                 <Table>
                     <TableHeader>
-                        <TableRow class="hover:bg-muted/50 border-b border-border">
+                        <TableRow class="hover:bg-muted/30 border-b border-border/40">
                             <TableHead class="w-12 px-6">
                                 <Checkbox
                                     :checked="allSelected"
@@ -606,7 +643,7 @@ onMounted(() => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="content in contents" :key="content.id" class="group hover:bg-muted/50 border-b border-border">
+                        <TableRow v-for="content in contents" :key="content.id" class="group hover:bg-muted/30 border-b border-border/40">
                             <TableCell class="px-6">
                                 <Checkbox
                                     :checked="selectedContents.includes(content.id)"
@@ -685,7 +722,7 @@ onMounted(() => {
                     :total-items="pagination.total || 0"
                     :per-page="parseInt(perPage)"
                     :current-page="pagination.current_page || 1"
-                    @update:page="fetchContents"
+                    @page-change="fetchContents"
                     @update:per-page="(val) => { perPage = String(val); fetchContents(1); }"
                 />
             </div>

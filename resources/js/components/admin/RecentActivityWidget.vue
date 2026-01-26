@@ -1,5 +1,5 @@
 <template>
-    <Card class="flex flex-col h-full overflow-hidden hover:shadow-md transition-shadow duration-300">
+    <Card class="flex flex-col h-full overflow-hidden duration-300">
         <CardHeader class="flex flex-row items-center justify-between pb-4 space-y-0">
             <div class="space-y-1">
                 <CardTitle class="text-xl font-bold flex items-center gap-2">

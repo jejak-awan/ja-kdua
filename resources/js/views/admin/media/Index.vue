@@ -88,7 +88,7 @@
             <!-- Sidebar: Folders (Collapsible) -->
             <div
                 :class="[
-                    'bg-card border border-border rounded-lg h-fit',
+                    'bg-card border border-border/40 rounded-xl h-fit',
                     isReady ? 'transition-[width,padding] duration-300 ease-in-out' : '',
                     sidebarCollapsed ? 'w-12 p-2' : 'w-64 p-4'
                 ]"
@@ -114,12 +114,12 @@
                         <button
                             @click="selectFolder(null)"
                             :class="[
-                                'w-full flex items-center gap-2 text-sm h-9 px-3 rounded-md transition-colors',
+                                'w-full flex items-center gap-2 text-sm h-9 px-3 rounded-xl transition-colors',
                                 (selectedFolder === null && !isTrashMode) ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent'
                             ]"
                         >
-                            <FolderOpen v-if="selectedFolder === null && !isTrashMode" class="w-4 h-4 flex-shrink-0 text-primary" />
-                            <Folder v-else class="w-4 h-4 flex-shrink-0" />
+                            <FolderOpen v-if="selectedFolder === null && !isTrashMode" class="w-4 h-4 flex-shrink-0 text-primary" stroke-width="1.5" />
+                            <Folder v-else class="w-4 h-4 flex-shrink-0" stroke-width="1.5" />
                             <span class="truncate font-medium">{{ $t('features.media.allMedia') }}</span>
                         </button>
 
@@ -129,7 +129,7 @@
                                 <div 
                                     v-if="!folder.is_trashed"
                                     :class="[
-                                        'group w-full flex items-center gap-1 text-sm h-9 px-2 rounded-md transition-colors cursor-pointer',
+                                        'group w-full flex items-center gap-1 text-sm h-9 px-2 rounded-xl transition-colors cursor-pointer',
                                         selectedFolder === folder.id ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent'
                                     ]"
                                     @click="selectFolder(folder.id)"
@@ -137,15 +137,15 @@
                                     <button 
                                         v-if="(folder.children?.length || 0) > 0"
                                         @click.stop="toggleFolder(folder.id)"
-                                        class="h-6 w-6 flex items-center justify-center rounded-sm hover:bg-accent/50 text-muted-foreground/50 hover:text-foreground transition-colors"
+                                        class="h-6 w-6 flex items-center justify-center rounded-md hover:bg-accent/50 text-muted-foreground/50 hover:text-foreground transition-colors"
                                     >
-                                        <ChevronDown v-if="expandedFolders.has(folder.id)" class="w-3 h-3" />
-                                        <ChevronRight v-else class="w-3 h-3" />
+                                        <ChevronDown v-if="expandedFolders.has(folder.id)" class="w-3 h-3" stroke-width="1.5" />
+                                        <ChevronRight v-else class="w-3 h-3" stroke-width="1.5" />
                                     </button>
                                     <div v-else class="w-6"></div>
                                     
-                                    <FolderOpen v-if="selectedFolder === folder.id" class="w-4 h-4 flex-shrink-0 text-primary -ml-1" />
-                                    <Folder v-else class="w-4 h-4 flex-shrink-0 -ml-1" />
+                                    <FolderOpen v-if="selectedFolder === folder.id" class="w-4 h-4 flex-shrink-0 text-primary -ml-1" stroke-width="1.5" />
+                                    <Folder v-else class="w-4 h-4 flex-shrink-0 -ml-1" stroke-width="1.5" />
                                     <span class="truncate ml-1 flex-1" :class="{ 'line-through text-muted-foreground/50': folder.is_trashed }">{{ folder.name }}</span>
                                     
                                     <!-- Folder Actions -->
@@ -161,12 +161,12 @@
                                 </div>
 
                                 <!-- Sub folders -->
-                                <div v-if="expandedFolders.has(folder.id) && (folder.children?.length || 0) > 0" class="ml-4 border-l border-border pl-1 mt-0.5 space-y-0.5">
+                                <div v-if="expandedFolders.has(folder.id) && (folder.children?.length || 0) > 0" class="ml-4 border-l border-border/40 pl-1 mt-0.5 space-y-0.5">
                                     <template v-for="child in folder.children" :key="child.id">
                                         <div 
                                             v-if="!child.is_trashed"
                                             :class="[
-                                                'group w-full flex items-center gap-1 text-sm h-9 px-2 rounded-md transition-colors cursor-pointer',
+                                                'group w-full flex items-center gap-1 text-sm h-9 px-2 rounded-xl transition-colors cursor-pointer',
                                                 selectedFolder === child.id ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent'
                                             ]"
                                             @click="selectFolder(child.id)"
@@ -174,15 +174,15 @@
                                             <button 
                                                 v-if="(child.children?.length || 0) > 0"
                                                 @click.stop="toggleFolder(child.id)"
-                                                class="h-6 w-6 flex items-center justify-center rounded-sm hover:bg-accent/50 text-muted-foreground/50 hover:text-foreground transition-colors"
+                                                class="h-6 w-6 flex items-center justify-center rounded-md hover:bg-accent/50 text-muted-foreground/50 hover:text-foreground transition-colors"
                                             >
-                                                <ChevronDown v-if="expandedFolders.has(child.id)" class="w-3 h-3" />
-                                                <ChevronRight v-else class="w-3 h-3" />
+                                                <ChevronDown v-if="expandedFolders.has(child.id)" class="w-3 h-3" stroke-width="1.5" />
+                                                <ChevronRight v-else class="w-3 h-3" stroke-width="1.5" />
                                             </button>
                                             <div v-else class="w-6"></div>
                                             
-                                            <FolderOpen v-if="selectedFolder === child.id" class="w-4 h-4 flex-shrink-0 text-primary -ml-1" />
-                                            <Folder v-else class="w-4 h-4 flex-shrink-0 -ml-1" />
+                                            <FolderOpen v-if="selectedFolder === child.id" class="w-4 h-4 flex-shrink-0 text-primary -ml-1" stroke-width="1.5" />
+                                            <Folder v-else class="w-4 h-4 flex-shrink-0 -ml-1" stroke-width="1.5" />
                                             <span class="truncate ml-1 flex-1" :class="{ 'line-through text-muted-foreground/50': child.is_trashed }">{{ child.name }}</span>
 
                                             <!-- Folder Actions -->
@@ -198,20 +198,20 @@
                                         </div>
                                         
                                         <!-- Level 3 -->
-                                        <div v-if="expandedFolders.has(child.id) && (child.children?.length || 0) > 0" class="ml-4 border-l border-border pl-1 mt-0.5 space-y-0.5">
+                                        <div v-if="expandedFolders.has(child.id) && (child.children?.length || 0) > 0" class="ml-4 border-l border-border/40 pl-1 mt-0.5 space-y-0.5">
                                             <div 
                                                 v-for="subChild in child.children" 
                                                 :key="subChild.id"
                                                 v-show="!subChild.is_trashed"
                                                 :class="[
-                                                    'group w-full flex items-center gap-1 text-sm h-9 px-2 rounded-md transition-colors cursor-pointer',
+                                                    'group w-full flex items-center gap-1 text-sm h-9 px-2 rounded-xl transition-colors cursor-pointer',
                                                     selectedFolder === subChild.id ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent'
                                                 ]"
                                                 @click="selectFolder(subChild.id)"
                                             >
                                                 <div class="w-6"></div>
-                                                <FolderOpen v-if="selectedFolder === subChild.id" class="w-4 h-4 flex-shrink-0 text-primary -ml-1" />
-                                                <Folder v-else class="w-4 h-4 flex-shrink-0 -ml-1" />
+                                                <FolderOpen v-if="selectedFolder === subChild.id" class="w-4 h-4 flex-shrink-0 text-primary -ml-1" stroke-width="1.5" />
+                                                <Folder v-else class="w-4 h-4 flex-shrink-0 -ml-1" stroke-width="1.5" />
                                                 <span class="truncate ml-1 flex-1">{{ subChild.name }}</span>
 
                                                 <!-- Folder Actions -->
@@ -233,15 +233,15 @@
                     </div>
 
                     <!-- Sidebar Bottom: Trash -->
-                    <div class="pt-4 mt-2 border-t border-border">
+                    <div class="pt-4 mt-2 border-t border-border/40">
                         <button
                             @click="toggleTrashMode"
                             :class="[
-                                'w-full flex items-center gap-2 text-sm h-9 px-3 rounded-md transition-colors',
+                                'w-full flex items-center gap-2 text-sm h-9 px-3 rounded-xl transition-colors',
                                 isTrashMode ? 'bg-destructive/10 text-destructive' : 'text-muted-foreground hover:bg-accent'
                             ]"
                         >
-                            <Trash2 class="w-4 h-4 flex-shrink-0" :class="isTrashMode ? 'text-destructive' : ''" />
+                            <Trash2 class="w-4 h-4 flex-shrink-0" :class="isTrashMode ? 'text-destructive' : ''" stroke-width="1.5" />
                             <span class="truncate font-medium">{{ $t('features.media.trash') }}</span>
                             <Badge v-if="statistics?.trash_count > 0" variant="secondary" class="ml-auto text-[10px] h-4 px-1 min-w-[16px] justify-center">
                                 {{ statistics.trash_count }}
@@ -254,11 +254,12 @@
             <!-- Main Content -->
             <div class="flex-1">
                 <!-- Breadcrumbs -->
-                <div v-if="selectedFolder !== null || isTrashMode" class="flex items-center gap-1 text-sm mb-4 bg-card border border-border rounded-lg p-2 px-4 shadow-sm">
+                <!-- Breadcrumbs -->
+                <div class="flex items-center gap-1 text-sm mb-5 px-1">
                     <Button variant="ghost" size="sm" class="h-6 px-1.5 text-muted-foreground hover:text-foreground" @click="selectFolder(null)">
-                        <Folder class="w-3.5 h-3.5" />
+                        <Folder class="w-3.5 h-3.5" stroke-width="1.5" />
                     </Button>
-                    <span class="text-muted-foreground">/</span>
+                    <span v-if="breadcrumbs.length > 0 || isTrashMode" class="text-muted-foreground">/</span>
                     <template v-if="isTrashMode">
                         <span class="text-destructive font-semibold h-6 flex items-center px-1.5">{{ $t('features.media.trash') }}</span>
                     </template>
@@ -275,7 +276,7 @@
                 </div>
 
                 <!-- Filters & Toolbar -->
-                <div class="bg-card border border-border rounded-lg p-4 mb-6">
+                <div class="bg-card border border-border/40 rounded-xl p-4 mb-6 shadow-none">
                     <div class="flex flex-col md:flex-row md:items-center gap-4">
                         <!-- Search (Left) -->
                         <div class="relative flex-1 max-w-xs">
@@ -314,22 +315,22 @@
                             </Select>
 
                             <!-- View Toggle -->
-                            <div class="flex items-center border border-input rounded-md bg-background p-1 shadow-sm">
+                            <div class="flex items-center border border-border/40 rounded-xl bg-background p-1 shadow-none">
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     @click="viewMode = 'grid'"
-                                    :class="`h-8 w-8 p-0 rounded-sm transition-all ${viewMode === 'grid' ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'}`"
+                                    :class="`h-8 w-8 p-0 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-secondary text-secondary-foreground' : 'text-muted-foreground hover:bg-muted'}`"
                                 >
-                                    <LayoutGrid class="w-4 h-4" />
+                                    <LayoutGrid class="w-4 h-4" stroke-width="1.5" />
                                 </Button>
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     @click="viewMode = 'list'"
-                                    :class="`h-8 w-8 p-0 rounded-sm transition-all ${viewMode === 'list' ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'}`"
+                                    :class="`h-8 w-8 p-0 rounded-lg transition-all ${viewMode === 'list' ? 'bg-secondary text-secondary-foreground' : 'text-muted-foreground hover:bg-muted'}`"
                                 >
-                                    <List class="w-4 h-4" />
+                                    <List class="w-4 h-4" stroke-width="1.5" />
                                 </Button>
                             </div>
 
@@ -397,7 +398,7 @@
                 </div>
 
                 <!-- Content Area -->
-                <div class="bg-card border border-border rounded-lg min-h-[400px]">
+                <div class="bg-card border border-border/40 rounded-xl min-h-[400px] shadow-none">
                     <div v-if="loading" class="p-12 text-center h-full flex flex-col items-center justify-center">
                         <Loader2 class="w-8 h-8 animate-spin text-primary mb-4" />
                         <p class="text-muted-foreground">{{ $t('features.media.loading') }}</p>
@@ -416,11 +417,11 @@
                                 v-for="folder in currentFolders"
                                 :key="'folder-' + folder.id"
                                 @click="selectFolder(folder.id)"
-                                class="group relative bg-background border border-border rounded-lg overflow-hidden cursor-pointer transition-shadow hover:border-primary/50 shadow-sm"
+                                class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-all hover:border-primary/50 shadow-none hover:bg-accent/5"
                             >
-                                <div class="aspect-square bg-blue-50/30 dark:bg-blue-900/10 flex flex-col items-center justify-center p-4">
+                                <div class="aspect-square bg-blue-50/20 dark:bg-blue-900/5 flex flex-col items-center justify-center p-4">
                                     <div class="relative">
-                                        <Folder class="w-16 h-16 text-blue-400 fill-blue-400/10 transition-transform group-hover:scale-110" />
+                                        <Folder class="w-16 h-16 text-blue-400 fill-blue-400/5 transition-transform group-hover:scale-110" stroke-width="1.5" />
                                         <div v-if="(folder.children_count || 0) > 0" class="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border border-white">
                                             {{ folder.children_count }}
                                         </div>
@@ -435,8 +436,8 @@
                                 </div>
                                 <!-- Folder Actions Overlay -->
                                 <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Button variant="ghost" size="icon" @click.stop="deleteFolder(folder)" class="h-8 w-8 text-destructive hover:bg-destructive/10">
-                                        <Trash2 class="w-4 h-4" />
+                                    <Button variant="ghost" size="icon" @click.stop="deleteFolder(folder)" class="h-8 w-8 text-destructive hover:bg-destructive/10 rounded-lg">
+                                        <Trash2 class="w-4 h-4" stroke-width="1.5" />
                                     </Button>
                                 </div>
                             </div>
@@ -446,7 +447,7 @@
                                 v-for="media in mediaList"
                                 :key="media.id"
                                 @click="toggleMediaSelection(media)"
-                                class="group relative bg-background border border-border rounded-lg overflow-hidden cursor-pointer transition-shadow hover:border-primary/50 shadow-sm"
+                                class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-all hover:border-primary/50 shadow-none hover:bg-accent/5"
                                 :class="isMediaSelected(media.id) ? 'ring-2 ring-indigo-500 border-indigo-500' : ''"
                             >
                                 <!-- Checkbox -->
@@ -466,13 +467,13 @@
                                         @error="handleImageError($event)"
                                     />
                                     <div v-else-if="media.mime_type?.startsWith('video/')" class="relative w-full h-full flex items-center justify-center bg-muted/50">
-                                        <VideoIcon class="w-12 h-12 text-muted-foreground" />
+                                        <VideoIcon class="w-12 h-12 text-muted-foreground" stroke-width="1.5" />
                                         <div class="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
                                             {{ media.mime_type.split('/')[1]?.toUpperCase() }}
                                         </div>
                                     </div>
                                     <div v-else class="text-muted-foreground">
-                                        <FileIcon class="w-12 h-12" />
+                                        <FileIcon class="w-12 h-12" stroke-width="1.5" />
                                     </div>
                                     <!-- Quick Actions Overlay -->
                                     <div class="absolute inset-0 bg-background/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
@@ -481,19 +482,19 @@
                                                 variant="secondary"
                                                 size="icon"
                                                 @click.stop="restoreMedia(media)"
-                                                class="h-9 w-9 bg-background/90 hover:bg-background text-foreground"
+                                                class="h-9 w-9 bg-background/90 hover:bg-background text-foreground rounded-lg"
                                                 :title="t('features.media.actions.restore')"
                                             >
-                                                <RefreshCw class="w-4 h-4" />
+                                                <RefreshCw class="w-4 h-4" stroke-width="1.5" />
                                             </Button>
                                             <Button
                                                 variant="destructive"
                                                 size="icon"
                                                 @click.stop="deleteMedia(media)"
-                                                class="h-9 w-9 opacity-90 hover:opacity-100"
+                                                class="h-9 w-9 opacity-90 hover:opacity-100 rounded-lg"
                                                 :title="t('features.media.actions.deletePermanent')"
                                             >
-                                                <Trash2 class="w-4 h-4" />
+                                                <Trash2 class="w-4 h-4" stroke-width="1.5" />
                                             </Button>
                                         </template>
                                         <template v-else>
@@ -501,25 +502,25 @@
                                                 variant="secondary"
                                                 size="icon"
                                                 @click.stop="viewMedia(media)"
-                                                class="h-9 w-9 bg-background/90 hover:bg-background text-foreground"
+                                                class="h-9 w-9 bg-background/90 hover:bg-background text-foreground rounded-lg"
                                             >
-                                                <Eye class="w-4 h-4" />
+                                                <Eye class="w-4 h-4" stroke-width="1.5" />
                                             </Button>
                                             <Button
                                                 variant="secondary"
                                                 size="icon"
                                                 @click.stop="editMedia(media)"
-                                                class="h-9 w-9 bg-background/90 hover:bg-background text-foreground"
+                                                class="h-9 w-9 bg-background/90 hover:bg-background text-foreground rounded-lg"
                                             >
-                                                <Edit class="w-4 h-4" />
+                                                <Edit class="w-4 h-4" stroke-width="1.5" />
                                             </Button>
                                             <Button
                                                 variant="destructive"
                                                 size="icon"
                                                 @click.stop="deleteMedia(media)"
-                                                class="h-9 w-9 opacity-90 hover:opacity-100"
+                                                class="h-9 w-9 opacity-90 hover:opacity-100 rounded-lg"
                                             >
-                                                <Trash2 class="w-4 h-4" />
+                                                <Trash2 class="w-4 h-4" stroke-width="1.5" />
                                             </Button>
                                         </template>
                                     </div>
@@ -537,10 +538,9 @@
                             </div>
                         </div>
 
-                        <!-- List View -->
                         <div v-else class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-border">
-                                <thead class="bg-muted">
+                            <table class="min-w-full divide-y divide-border/40">
+                                <thead class="bg-muted/30">
                                     <tr>
                                         <th class="px-6 py-3 text-left w-12">
                                             <Checkbox
@@ -569,7 +569,7 @@
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-card divide-y divide-border">
+                                <tbody class="bg-card divide-y divide-border/40">
                                     <!-- Folders -->
                                     <tr 
                                         v-for="folder in currentFolders" 
@@ -581,9 +581,7 @@
                                             <!-- Folders cannot be selected for bulk media actions for now -->
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="w-16 h-16 bg-blue-50/50 dark:bg-blue-900/10 rounded flex items-center justify-center p-1">
-                                                <Folder class="w-8 h-8 text-blue-400" />
-                                            </div>
+                                            <Folder class="w-5 h-5 text-muted-foreground/60" stroke-width="1.5" />
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-2">
@@ -607,8 +605,8 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex items-center justify-end gap-2">
-                                                <Button variant="ghost" size="icon" @click.stop="deleteFolder(folder)" class="h-8 w-8 text-destructive">
-                                                    <Trash2 class="w-4 h-4" />
+                                                <Button variant="ghost" size="icon" @click.stop="deleteFolder(folder)" class="h-8 w-8 text-destructive rounded-lg">
+                                                    <Trash2 class="w-4 h-4" stroke-width="1.5" />
                                                 </Button>
                                             </div>
                                         </td>
@@ -628,16 +626,16 @@
                                             />
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="w-16 h-16 bg-muted/50 rounded flex items-center justify-center p-1" :data-media-id="media.id">
+                                            <div class="w-10 h-10 bg-muted/20 rounded-xl flex items-center justify-center p-0.5" :data-media-id="media.id">
                                                 <LazyImage
                                                     v-if="media.mime_type?.startsWith('image/')"
                                                     :src="media.thumbnail_url || media.url"
                                                     :alt="media.alt || media.name"
-                                                    image-class="w-full h-full object-cover rounded shadow-sm"
+                                                    image-class="w-full h-full object-cover rounded-lg shadow-none"
                                                     @error="handleImageError($event)"
                                                 />
-                                                <VideoIcon v-else-if="media.mime_type?.startsWith('video/')" class="w-8 h-8 text-muted-foreground/50" />
-                                                <FileIcon v-else class="w-8 h-8 text-muted-foreground/50" />
+                                                <VideoIcon v-else-if="media.mime_type?.startsWith('video/')" class="w-5 h-5 text-muted-foreground/40" stroke-width="1.5" />
+                                                <FileIcon v-else class="w-5 h-5 text-muted-foreground/40" stroke-width="1.5" />
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
@@ -663,22 +661,22 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex items-center justify-end gap-2">
                                                 <template v-if="isTrashMode">
-                                                    <Button variant="ghost" size="icon" @click.stop="restoreMedia(media)" class="h-8 w-8 text-primary">
-                                                        <RefreshCw class="w-4 h-4" />
+                                                    <Button variant="ghost" size="icon" @click.stop="restoreMedia(media)" class="h-8 w-8 text-primary rounded-lg">
+                                                        <RefreshCw class="w-4 h-4" stroke-width="1.5" />
                                                     </Button>
-                                                    <Button variant="ghost" size="icon" @click.stop="deleteMedia(media)" class="h-8 w-8 text-destructive">
-                                                        <Trash2 class="w-4 h-4" />
+                                                    <Button variant="ghost" size="icon" @click.stop="deleteMedia(media)" class="h-8 w-8 text-destructive rounded-lg">
+                                                        <Trash2 class="w-4 h-4" stroke-width="1.5" />
                                                     </Button>
                                                 </template>
                                                 <template v-else>
-                                                    <Button variant="ghost" size="icon" @click.stop="viewMedia(media)" class="h-8 w-8">
-                                                        <Eye class="w-4 h-4" />
+                                                    <Button variant="ghost" size="icon" @click.stop="viewMedia(media)" class="h-8 w-8 rounded-lg">
+                                                        <Eye class="w-4 h-4" stroke-width="1.5" />
                                                     </Button>
-                                                    <Button variant="ghost" size="icon" @click.stop="editMedia(media)" class="h-8 w-8">
-                                                        <Edit class="w-4 h-4" />
+                                                    <Button variant="ghost" size="icon" @click.stop="editMedia(media)" class="h-8 w-8 rounded-lg">
+                                                        <Edit class="w-4 h-4" stroke-width="1.5" />
                                                     </Button>
-                                                    <Button variant="ghost" size="icon" @click.stop="deleteMedia(media)" class="h-8 w-8 text-destructive">
-                                                        <Trash2 class="w-4 h-4" />
+                                                    <Button variant="ghost" size="icon" @click.stop="deleteMedia(media)" class="h-8 w-8 text-destructive rounded-lg">
+                                                        <Trash2 class="w-4 h-4" stroke-width="1.5" />
                                                     </Button>
                                                 </template>
                                             </div>
@@ -746,9 +744,8 @@
         <div
             v-if="showUpdateAltModal"
             class="fixed inset-0 bg-background/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4"
-            @click.self="showUpdateAltModal = false"
-        >
-            <div class="relative w-full max-w-md p-6 border rounded-md bg-card">
+            >
+            <div class="relative w-full max-w-md p-6 border border-border/40 rounded-xl bg-card shadow-none">
                 <div class="mt-3">
                     <h3 class="text-lg font-medium text-foreground mb-4">{{ t('features.media.modals.updateAlt.title') }}</h3>
                     <p class="text-sm text-muted-foreground mb-4">
@@ -782,10 +779,9 @@
             </div>
         </div>
 
-        <!-- Bulk Processing Progress -->
         <div
             v-if="bulkProcessing"
-            class="fixed bottom-4 right-4 bg-card rounded-lg p-4 w-80 z-50"
+            class="fixed bottom-4 right-4 bg-card border border-border/40 rounded-xl p-4 w-80 z-50 shadow-none"
         >
             <div class="flex items-center justify-between mb-2">
                 <span class="text-sm font-medium text-foreground">{{ t('features.media.modals.bulk.processing') }}</span>

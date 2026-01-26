@@ -97,7 +97,7 @@ const navClasses = computed(() => {
   ];
 
   if (isSticky.value) {
-    classes.push('sticky z-20 backdrop-blur-sm shadow-sm'); // Added shadow-sm for subtle separation & z-20 (below header z-40 usually)
+    classes.push('sticky z-20 backdrop-blur-sm border-b border-border/40'); // Replaced shadow-sm with subtle border-b for separation
     
     // Adjust top position based on header
     if (isHeaderSticky.value) {

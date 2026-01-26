@@ -1,7 +1,7 @@
 <template>
     <div class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-sm" @click.self="$emit('close')">
         <!-- Main Container -->
-        <div class="relative flex flex-col w-full h-full max-w-5xl max-h-[90vh] bg-zinc-950 md:rounded-xl overflow-hidden shadow-2xl border border-white/10"
+        <div class="relative flex flex-col w-full h-full max-w-5xl max-h-[90vh] bg-zinc-950 md:rounded-xl overflow-hidden shadow-none border border-white/5"
              @keydown.enter="handleEnterKey" tabindex="0" autofocus>
             
             <!-- Header -->
@@ -25,11 +25,11 @@
                     </div>
 
                     <Button variant="ghost" size="sm" @click="$emit('close')" class="text-white/60 hover:text-white hover:bg-white/10">
-                        <X class="w-4 h-4 mr-2" />
+                        <X class="w-4 h-4 mr-2" stroke-width="1.5" />
                         {{ t('common.actions.cancel') }}
                     </Button>
                     <Button size="sm" @click="saveImage" :disabled="saving || !hasChanges" class="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[100px]">
-                        <Save class="w-4 h-4 mr-2" v-if="!saving" />
+                        <Save class="w-4 h-4 mr-2" v-if="!saving" stroke-width="1.5" />
                         <span v-else class="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
                         {{ t('common.actions.save') }}
                     </Button>
@@ -47,7 +47,7 @@
                     <img 
                         ref="imageElement"
                         :src="currentImageSrc" 
-                        class="max-w-full max-h-[calc(80vh-180px)] object-contain shadow-2xl transition-all duration-300"
+                        class="max-w-full max-h-[calc(80vh-180px)] object-contain shadow-none transition-all duration-300 rounded-xl"
                         :style="activeMode === 'adjust' ? filterStyle : ''"
                         @load="onImageLoad"
                         crossorigin="anonymous"
@@ -60,7 +60,7 @@
                 
                 <!-- Crop Tools -->
                 <div v-if="activeMode === 'crop'" class="flex items-center gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <div class="flex items-center gap-1 bg-black/40 p-1 rounded-lg border border-white/5">
+                    <div class="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
                         <Button 
                             v-for="preset in cropPresets" 
                             :key="preset.label"
@@ -77,14 +77,14 @@
                     <div class="w-px h-8 bg-white/10"></div>
                     
                     <div class="flex items-center gap-1">
-                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10" @click="rotate(90)" title="Rotate">
-                            <RotateCw class="w-4 h-4" />
+                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 rounded-lg" @click="rotate(90)" title="Rotate">
+                            <RotateCw class="w-4 h-4" stroke-width="1.5" />
                         </Button>
-                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10" @click="flip('horizontal')" title="Flip Horizontal">
-                            <FlipHorizontal class="w-4 h-4" />
+                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 rounded-lg" @click="flip('horizontal')" title="Flip Horizontal">
+                            <FlipHorizontal class="w-4 h-4" stroke-width="1.5" />
                         </Button>
-                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10" @click="flip('vertical')" title="Flip Vertical">
-                            <FlipVertical class="w-4 h-4" />
+                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 rounded-lg" @click="flip('vertical')" title="Flip Vertical">
+                            <FlipVertical class="w-4 h-4" stroke-width="1.5" />
                         </Button>
                     </div>
 
@@ -106,8 +106,8 @@
                             @click="applyPreset(preset)"
                             class="flex flex-col items-center justify-center min-w-[60px] gap-1 group"
                         >
-                            <div class="w-10 h-10 rounded-full border border-white/10 bg-black/40 group-hover:bg-white/10 flex items-center justify-center transition-colors">
-                                <component :is="preset.icon" class="w-4 h-4 text-white/60 group-hover:text-white" />
+                            <div class="w-10 h-10 rounded-xl border border-white/5 bg-black/40 group-hover:bg-white/10 flex items-center justify-center transition-colors">
+                                <component :is="preset.icon" class="w-4 h-4 text-white/60 group-hover:text-white" stroke-width="1.5" />
                             </div>
                             <span class="text-[10px] text-white/40 group-hover:text-white/80">{{ preset.name }}</span>
                         </button>
@@ -119,7 +119,7 @@
                             <span class="text-xs font-medium w-20 text-white/60">Brightness</span>
                             <div class="flex-1 relative h-5 flex items-center">
                                 <input type="range" v-model="filters.brightness" min="0" max="200" 
-                                    class="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-white" />
+                                    class="w-full h-1 bg-white/10 rounded-xl appearance-none cursor-pointer accent-white hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-white" />
                             </div>
                             <span class="text-xs w-8 text-right text-white/80 tabular-nums">{{ filters.brightness }}%</span>
                         </div>
@@ -127,7 +127,7 @@
                             <span class="text-xs font-medium w-20 text-white/60">Contrast</span>
                             <div class="flex-1 relative h-5 flex items-center">
                                 <input type="range" v-model="filters.contrast" min="0" max="200" 
-                                    class="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-white" />
+                                    class="w-full h-1 bg-white/10 rounded-xl appearance-none cursor-pointer accent-white hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-white" />
                             </div>
                             <span class="text-xs w-8 text-right text-white/80 tabular-nums">{{ filters.contrast }}%</span>
                         </div>
@@ -136,7 +136,7 @@
                             <span class="text-xs font-medium w-20 text-white/60">Saturation</span>
                             <div class="flex-1 relative h-5 flex items-center">
                                 <input type="range" v-model="filters.saturation" min="0" max="200" 
-                                    class="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-white" />
+                                    class="w-full h-1 bg-white/10 rounded-xl appearance-none cursor-pointer accent-white hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-white" />
                             </div>
                             <span class="text-xs w-8 text-right text-white/80 tabular-nums">{{ filters.saturation }}%</span>
                         </div>
@@ -156,7 +156,7 @@
                             <input 
                                 type="number" 
                                 v-model="resizeConfig.width" 
-                                class="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white w-28 focus:outline-none focus:border-white/40 focus:ring-1 focus:ring-white/40 transition-all placeholder-white/20"
+                                class="bg-black/40 border border-white/5 rounded-xl px-3 py-1.5 text-sm text-white w-28 focus:outline-none focus:border-white/40 focus:ring-1 focus:ring-white/40 transition-all placeholder-white/20"
                                 placeholder="Width"
                             />
                         </div>
@@ -166,19 +166,19 @@
                             <input 
                                 type="number" 
                                 v-model="resizeConfig.height" 
-                                class="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white w-28 focus:outline-none focus:border-white/40 focus:ring-1 focus:ring-white/40 transition-all placeholder-white/20"
+                                class="bg-black/40 border border-white/5 rounded-xl px-3 py-1.5 text-sm text-white w-28 focus:outline-none focus:border-white/40 focus:ring-1 focus:ring-white/40 transition-all placeholder-white/20"
                                 placeholder="Height"
                             />
                         </div>
                         <div class="flex items-end h-full pb-1 ml-2">
                             <button 
                                 @click="resizeConfig.maintainAspectRatio = !resizeConfig.maintainAspectRatio"
-                                class="p-2 rounded-lg transition-colors border"
+                                class="p-2 rounded-xl transition-colors border"
                                 :class="resizeConfig.maintainAspectRatio ? 'bg-primary/20 text-primary border-primary/30' : 'bg-transparent text-white/20 border-transparent hover:text-white/60'"
                                 title="Lock Aspect Ratio"
                             >
-                                <Lock v-if="resizeConfig.maintainAspectRatio" class="w-4 h-4" />
-                                <Unlock v-else class="w-4 h-4" />
+                                <Lock v-if="resizeConfig.maintainAspectRatio" class="w-4 h-4" stroke-width="1.5" />
+                                <Unlock v-else class="w-4 h-4" stroke-width="1.5" />
                             </button>
                         </div>
                     </div>
@@ -201,10 +201,10 @@
                     :disabled="!imageLoaded"
                 >
                     <div 
-                        class="p-2.5 rounded-full transition-all duration-300 relative"
-                        :class="activeMode === mode.id ? 'bg-white text-black scale-110 shadow-lg shadow-white/10' : 'text-zinc-500 group-hover:text-zinc-300 group-hover:bg-white/5'"
+                        class="p-2.5 rounded-xl transition-all duration-300 relative"
+                        :class="activeMode === mode.id ? 'bg-white text-black scale-110 shadow-none' : 'text-zinc-500 group-hover:text-zinc-300 group-hover:bg-white/5'"
                     >
-                        <component :is="mode.icon" class="w-5 h-5" />
+                        <component :is="mode.icon" class="w-5 h-5" stroke-width="1.5" />
                         <div v-if="activeMode === mode.id" class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white opacity-0"></div>
                     </div>
                     <span 

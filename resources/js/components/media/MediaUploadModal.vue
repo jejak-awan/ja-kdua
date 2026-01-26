@@ -16,7 +16,7 @@
                     @dragenter.prevent="isDragging = true"
                     @dragleave.prevent="isDragging = false"
                     :class="[
-                        'border-2 border-dashed rounded-lg p-12 text-center transition-colors',
+                        'border-2 border-dashed rounded-xl p-12 text-center transition-colors',
                         isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/25 hover:border-primary/50'
                     ]"
                 >
@@ -27,7 +27,7 @@
                         @change="handleFileSelect"
                         class="hidden"
                     >
-                    <CloudUpload class="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
+                    <CloudUpload class="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" stroke-width="1.5" />
                     <div class="text-sm text-muted-foreground">
                         <Button
                             variant="link"
@@ -46,7 +46,7 @@
                     <h4 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
                         {{ $t('features.media.modals.upload.selectedFiles') }}
                     </h4>
-                    <div v-for="(file, index) in selectedFiles" :key="index" class="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border">
+                    <div v-for="(file, index) in selectedFiles" :key="index" class="flex items-center justify-between p-3 bg-muted/50 rounded-xl border border-border/40">
                         <div class="flex-1 min-w-0 mr-4">
                             <p class="text-sm font-medium text-foreground truncate">{{ file.name }}</p>
                             <p class="text-xs text-muted-foreground">{{ formatFileSize(file.size) }}</p>
@@ -57,7 +57,7 @@
                             @click="removeFile(index)"
                             class="text-muted-foreground hover:text-destructive h-8 w-8"
                         >
-                            <Trash2 class="w-4 h-4" />
+                            <Trash2 class="w-4 h-4" stroke-width="1.5" />
                         </Button>
                     </div>
                 </div>

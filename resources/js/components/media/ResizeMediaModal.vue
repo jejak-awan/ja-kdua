@@ -1,15 +1,15 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card border border-border shadow-lg rounded-lg max-w-2xl w-full">
-                <div class="flex items-center justify-between p-6 border-b">
+            <div class="bg-card border border-border/40 shadow-none rounded-xl max-w-2xl w-full">
+                <div class="flex items-center justify-between p-6 border-b border-border/40">
                     <h3 class="text-lg font-semibold">{{ $t('features.media.modals.resize.title') }}</h3>
                     <Button
                         variant="ghost"
                         size="icon"
                         @click="$emit('close')"
                     >
-                        <X class="w-5 h-5" />
+                        <X class="w-5 h-5" stroke-width="1.5" />
                     </Button>
                 </div>
 
@@ -23,7 +23,7 @@
                                 v-model.number="width"
                                 type="number"
                                 min="1"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-3 py-2 border border-border/40 bg-card text-foreground rounded-xl focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             >
                         </div>
                         <div>
@@ -34,7 +34,7 @@
                                 v-model.number="height"
                                 type="number"
                                 min="1"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-3 py-2 border border-border/40 bg-card text-foreground rounded-xl focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             >
                         </div>
                     </div>
@@ -44,7 +44,7 @@
                             v-model="maintainAspectRatio"
                             type="checkbox"
                             id="aspect-ratio"
-                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
+                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-border/40 rounded-lg"
                         >
                         <label for="aspect-ratio" class="ml-2 block text-sm text-foreground">
                             {{ $t('features.media.modals.resize.maintainAspectRatio') }}
@@ -53,7 +53,7 @@
 
                     <div v-if="media.mime_type?.startsWith('image/')" class="mt-4">
                         <label class="block text-sm font-medium text-foreground mb-2">{{ $t('features.media.modals.resize.preview') }}</label>
-                        <div class="border border-input rounded-lg p-4 bg-muted">
+                        <div class="border border-border/40 rounded-xl p-4 bg-muted/30">
                             <img
                                 :src="media.url"
                                 :alt="media.name"
@@ -65,7 +65,7 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end space-x-3 p-6 border-t">
+                <div class="flex items-center justify-end space-x-3 p-6 border-t border-border/40">
                     <Button
                         variant="outline"
                         @click="$emit('close')"

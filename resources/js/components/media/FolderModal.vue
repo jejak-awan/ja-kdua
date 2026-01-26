@@ -1,15 +1,15 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card border border-border shadow-lg rounded-lg max-w-md w-full">
-                <div class="flex items-center justify-between p-6 border-b">
+            <div class="bg-card border border-border/40 shadow-none rounded-xl max-w-md w-full">
+                <div class="flex items-center justify-between p-6 border-b border-border/40">
                     <h3 class="text-lg font-semibold">{{ $t('features.media.modals.folder.title') }}</h3>
                     <Button
                         variant="ghost"
                         size="icon"
                         @click="$emit('close')"
                     >
-                        <X class="w-5 h-5" />
+                        <X class="w-5 h-5" stroke-width="1.5" />
                     </Button>
                 </div>
 
@@ -50,7 +50,7 @@
                         </div>
 
                         <!-- Shared Status (Admin Only) -->
-                        <div v-if="canManageMedia" class="flex items-start space-x-2 p-3 bg-blue-50/50 border border-blue-200 rounded-lg">
+                        <div v-if="canManageMedia" class="flex items-start space-x-2 p-3 bg-blue-50/20 border border-blue-200/40 rounded-xl">
                             <Checkbox 
                                 id="folder_is_shared" 
                                 v-model:checked="form.is_shared"
@@ -69,7 +69,7 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="flex items-center justify-end space-x-3 p-6 border-t">
+                <div class="flex items-center justify-end space-x-3 p-6 border-t border-border/40">
                     <Button
                         variant="outline"
                         @click="$emit('close')"

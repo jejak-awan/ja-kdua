@@ -6,7 +6,7 @@
                 <p class="text-muted-foreground">{{ $t('features.dashboard.welcome', { name: authStore.user?.name }) }}</p>
             </div>
             <div class="flex items-center gap-2">
-                <Button variant="outline" size="sm" @click="refreshDashboard" :disabled="loadingVisits">
+                <Button variant="ghost" size="sm" @click="refreshDashboard" :disabled="loadingVisits" class="bg-muted/40 border border-border/40 hover:bg-muted/60 transition-all duration-300">
                     <RefreshCw class="w-4 h-4 mr-2" :class="{ 'animate-spin': loadingVisits }" />
                     {{ $t('common.actions.refresh') }}
                 </Button>
@@ -16,7 +16,7 @@
         <!-- Row 1: Statistics Cards -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" v-if="authStore.hasPermission('view content')">
             <!-- Contents Card -->
-            <Card class="hover:shadow-md transition-shadow duration-300">
+            <Card class="transition-all duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
@@ -35,7 +35,7 @@
             </Card>
 
             <!-- Media Card -->
-            <Card class="hover:shadow-md transition-shadow duration-300">
+            <Card class="transition-all duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
@@ -54,7 +54,7 @@
             </Card>
 
             <!-- Users Card -->
-            <Card class="hover:shadow-md transition-shadow duration-300" v-if="authStore.hasPermission('manage users')">
+            <Card class="transition-all duration-300" v-if="authStore.hasPermission('manage users')">
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
@@ -73,7 +73,7 @@
             </Card>
 
             <!-- Pending Card -->
-            <Card class="hover:shadow-md transition-shadow duration-300" v-if="authStore.hasPermission('approve content')">
+            <Card class="transition-all duration-300" v-if="authStore.hasPermission('approve content')">
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">

@@ -44,7 +44,7 @@
                     </SelectContent>
                 </Select>
                 <!-- View Toggle -->
-                <div class="flex items-center gap-1 p-1 border border-border rounded-md bg-muted/30">
+                <div class="flex items-center gap-1 p-1 border border-border/40 rounded-xl bg-muted/30">
                     <Button
                         variant="ghost"
                         size="icon"

@@ -1,7 +1,7 @@
 <template>
     <aside
         :class="[
-            'fixed inset-y-0 left-0 z-50 bg-sidebar text-sidebar-foreground border-r border-border shadow-sm transition-transform duration-300',
+            'fixed inset-y-0 left-0 z-50 bg-sidebar text-sidebar-foreground border-r border-border transition-transform duration-300',
             sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
             sidebarMinimized ? 'w-[68px]' : 'w-64'
         ]"
@@ -9,7 +9,7 @@
         <!-- Floating Toggle Button (Desktop) -->
         <button
             @click="$emit('toggle-minimize')"
-            class="hidden lg:flex absolute -right-3 top-5 items-center justify-center h-6 w-6 rounded-full border border-border bg-sidebar text-muted-foreground hover:text-foreground shadow-sm z-[51] transition-colors"
+            class="hidden lg:flex absolute -right-3 top-5 items-center justify-center h-6 w-6 rounded-full border border-border bg-sidebar text-muted-foreground hover:text-foreground shadow-sm z-[51] transition-all duration-300"
             :title="sidebarMinimized ? t('common.navigation.sidebar.expand') : t('common.navigation.sidebar.minimize')"
         >
             <ChevronLeft v-if="!sidebarMinimized" class="w-3 h-3" />
@@ -48,7 +48,7 @@
                 <router-link
                     :to="'/admin'"
                     @click="$emit('close')"
-                    class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 group"
+                    class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 group"
                     :class="[
                         $route.name === 'dashboard'
                             ? 'bg-accent text-foreground'
@@ -69,7 +69,7 @@
                             <!-- Section Header -->
                             <button
                                 @click="toggleSection(section.key)"
-                                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground tracking-wide transition-colors rounded-md hover:bg-muted/50"
+                                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground tracking-wide transition-all duration-200 rounded-xl hover:bg-accent"
                             >
                                 <div class="flex items-center gap-2">
                                     <component :is="section.icon" class="w-4 h-4" />
@@ -91,7 +91,7 @@
                                     :key="item.name"
                                     :to="item.to"
                                     @click="$emit('close')"
-                                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 group pl-9"
+                                    class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200 group pl-9"
                                     :class="[
                                         $route.name === item.name
                                             ? 'bg-accent text-foreground'
@@ -113,7 +113,7 @@
                         >
                             <button
                                 @click="togglePopup(section.key, $event)"
-                                class="w-full flex items-center justify-center p-2.5 rounded-lg transition-colors duration-200 cursor-pointer"
+                                class="w-full flex items-center justify-center p-2.5 rounded-xl transition-colors duration-200 cursor-pointer"
                                 :class="[
                                     isSectionActive(section.key) || activePopup === section.key
                                         ? 'bg-accent text-foreground'
@@ -136,7 +136,7 @@
                                     <div 
                                         v-if="activePopup === section.key"
                                         ref="popups"
-                                        class="fixed z-[9999] w-56 bg-sidebar border border-border rounded-lg shadow-lg py-2 ml-2 max-h-[90vh] overflow-y-auto"
+                                        class="fixed z-[9999] w-56 bg-sidebar border border-border/40 rounded-xl py-2 ml-2 max-h-[90vh] overflow-y-auto"
                                         :style="{ top: popupTop + 'px', left: popupLeft + 'px' }"
                                         @mouseenter="openPopup(section.key)"
                                         @mouseleave="scheduleClosePopup(section.key)"
@@ -152,7 +152,7 @@
                                             :key="item.name"
                                             :to="item.to"
                                             @click="activePopup = null; $emit('close')"
-                                            class="flex items-center px-3 py-2 text-sm font-medium transition-colors duration-200 hover:bg-accent mx-1 rounded-md"
+                                            class="flex items-center px-3 py-2 text-sm font-medium transition-colors duration-200 hover:bg-accent mx-1 rounded-xl"
                                             :class="[
                                                 $route.name === item.name
                                                     ? 'text-foreground bg-accent'

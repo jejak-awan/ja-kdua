@@ -9,7 +9,7 @@
           v-model="searchQuery"
           @input="handleSearch"
           @keydown="handleKeydown"
-          class="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          class="flex h-11 w-full rounded-xl bg-muted/20 px-3 py-3 text-sm outline-none border border-transparent focus:border-border/40 focus:ring-1 focus:ring-primary/10 placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
           :placeholder="t('common.actions.search') + '...'"
           autocomplete="off" 
           autocorrect="off" 
@@ -17,8 +17,8 @@
         />
         <div class="flex items-center gap-1">
             <span v-if="loading" class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></span>
-            <kbd class="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                <span class="text-xs">ESC</span>
+            <kbd class="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded-md border border-border/40 bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <span class="text-xs uppercase">Esc</span>
             </kbd>
         </div>
       </div>

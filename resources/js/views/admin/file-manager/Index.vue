@@ -76,7 +76,7 @@
         </Dialog>
 
         <!-- Filters & Toolbar -->
-        <div class="bg-card border border-border rounded-lg p-4 mb-4">
+        <div class="bg-card border border-border/40 rounded-xl p-4 mb-4 shadow-none">
             <div class="flex flex-col md:flex-row md:items-center gap-4">
                 <!-- Search (Left) -->
                 <div class="relative flex-1 max-w-xs">
@@ -120,28 +120,28 @@
                     </Select>
 
                     <!-- View Toggle -->
-                    <div class="flex items-center border border-input rounded-md bg-background p-1 shadow-sm">
+                    <div class="flex items-center border border-border/40 rounded-xl bg-background p-1 shadow-none">
                         <Button
                             variant="ghost"
                             size="sm"
                             @click="viewMode = 'grid'"
                             :class="[
-                                'h-8 w-8 p-0 rounded-sm transition-colors',
-                                viewMode === 'grid' ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'
+                                'h-8 w-8 p-0 rounded-lg transition-colors',
+                                viewMode === 'grid' ? 'bg-secondary text-secondary-foreground shadow-none' : 'text-muted-foreground hover:bg-muted'
                             ]"
                         >
-                            <LayoutGrid class="w-4 h-4" />
+                            <LayoutGrid class="w-4 h-4" stroke-width="1.5" />
                         </Button>
                         <Button
                             variant="ghost"
                             size="sm"
                             @click="viewMode = 'list'"
                             :class="[
-                                'h-8 w-8 p-0 rounded-sm transition-colors',
-                                viewMode === 'list' ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'
+                                'h-8 w-8 p-0 rounded-lg transition-colors',
+                                viewMode === 'list' ? 'bg-secondary text-secondary-foreground shadow-none' : 'text-muted-foreground hover:bg-muted'
                             ]"
                         >
-                            <List class="w-4 h-4" />
+                            <List class="w-4 h-4" stroke-width="1.5" />
                         </Button>
                     </div>
                 </div>
@@ -410,22 +410,22 @@
             <!-- Main Content -->
             <div class="flex-1 min-w-0">
                 <!-- Breadcrumbs -->
-                <div class="flex items-center gap-1 text-sm mb-4 bg-card border border-border rounded-lg p-2 px-4 shadow-sm">
+                <div class="flex items-center gap-1 text-sm mb-5 px-1">
                     <Button 
                         variant="ghost" 
                         size="sm" 
                         class="h-6 px-1.5 text-muted-foreground hover:text-foreground"
                         @click="navigateToPath('/')"
                     >
-                        <Folder class="w-3.5 h-3.5" />
+                        <Folder class="w-3.5 h-3.5" stroke-width="1.5" />
                     </Button>
                     <template v-for="(part, index) in pathParts" :key="index">
-                        <span class="text-muted-foreground">/</span>
-                        <Button
-                            variant="ghost"
-                            size="sm"
+                        <ChevronRight class="w-3 h-3 text-muted-foreground" />
+                        <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            class="h-6 px-1.5 text-muted-foreground hover:text-foreground font-medium"
                             @click="navigateToPath(part.path)"
-                            class="h-6 px-1.5 font-medium"
                             :class="index === pathParts.length - 1 ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'"
                         >
                             {{ part.name }}
@@ -434,7 +434,7 @@
                 </div>
 
                 <!-- Content Area -->
-                <div class="bg-card border border-border rounded-lg min-h-[400px]">
+                <div class="bg-card border border-border/40 rounded-xl min-h-[400px]">
                     <div v-if="loading" class="flex flex-col items-center justify-center p-12 text-muted-foreground h-full">
                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
                         <p>{{ $t('features.file_manager.messages.loading') }}</p>
@@ -452,7 +452,7 @@
                             <div
                                 v-for="folder in paginatedFolders"
                                 :key="folder.path"
-                                class="group relative bg-background border border-border rounded-lg hover:border-primary/50 transition-shadow cursor-pointer overflow-hidden shadow-sm"
+                                class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-all hover:border-primary/50 shadow-none hover:bg-accent/5"
                                 :class="{ 
                                     'ring-2 ring-primary border-primary': isSelected(folder.path),
                                     'ring-2 ring-green-500 border-green-500 bg-green-500/10': dropTarget === folder.path
@@ -473,10 +473,10 @@
                                         @click.stop
                                     />
                                 </div>
-                                <div class="aspect-square flex flex-col items-center justify-center p-4 bg-muted/30 group-hover:bg-muted/50">
-                                    <Folder class="w-12 h-12 text-primary/80 mb-2 transition-transform group-hover:scale-110" />
+                                <div class="aspect-square flex flex-col items-center justify-center p-4 bg-muted/10 group-hover:bg-muted/20">
+                                    <Folder class="w-12 h-12 text-blue-500 transition-transform group-hover:scale-110" stroke-width="1.5" />
                                 </div>
-                                <div class="p-3 border-t border-border bg-card">
+                                <div class="p-3 border-t border-border/40 bg-card">
                                     <p class="text-sm font-medium truncate text-center" :title="folder.name">{{ folder.name }}</p>
                                     <p class="text-xs text-muted-foreground text-center mt-0.5">{{ $t('features.file_manager.labels.folders') }}</p>
                                 </div>
@@ -517,7 +517,7 @@
                                     </div>
                                     <FileText v-else class="w-12 h-12 text-muted-foreground/50" />
                                 </div>
-                                <div class="p-3 border-t border-border bg-card">
+                                <div class="p-3 border-t border-border/40 bg-card">
                                     <p class="text-sm font-medium truncate" :title="file.name">{{ file.name }}</p>
                                     <p class="text-xs text-muted-foreground mt-0.5 flex justify-between">
                                         <span>{{ file.extension?.toUpperCase() }}</span>
@@ -529,8 +529,8 @@
 
                         <!-- List View -->
                         <div v-else class="min-w-full" @contextmenu.prevent="showBackgroundContextMenu">
-                            <table class="w-full text-sm item-center">
-                                <thead class="bg-muted/50 text-muted-foreground font-medium border-b border-border">
+                            <table class="w-full text-sm item-center divide-y divide-border/40">
+                                <thead class="bg-transparent text-muted-foreground font-medium border-b border-border/40">
                                     <tr>
                                         <th class="px-4 py-3 text-left w-12">
                                             <Checkbox
@@ -545,7 +545,7 @@
                                         <th class="px-4 py-3 text-right w-24">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-border">
+                                <tbody class="divide-y divide-border/40">
                                     <tr 
                                         v-for="folder in paginatedFolders" 
                                         :key="folder.path"
@@ -561,7 +561,7 @@
                                             />
                                         </td>
                                         <td class="px-4 py-3">
-                                            <Folder class="w-5 h-5 text-primary fill-primary/20" />
+                                            <Folder class="w-5 h-5 text-muted-foreground/60" stroke-width="1.5" />
                                         </td>
                                         <td class="px-4 py-3 font-medium">{{ folder.name }}</td>
                                         <td class="px-4 py-3 text-muted-foreground">-</td>

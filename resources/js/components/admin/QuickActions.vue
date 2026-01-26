@@ -1,5 +1,5 @@
 <template>
-  <Card class="quick-actions h-full hover:shadow-md transition-shadow duration-300">
+  <Card class="quick-actions h-full transition-all duration-300">
     <CardHeader class="pb-3">
       <CardTitle class="text-xl font-bold flex items-center gap-2">
         <Zap class="w-5 h-5 text-amber-500 fill-amber-500" />
