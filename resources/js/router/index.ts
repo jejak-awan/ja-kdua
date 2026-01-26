@@ -150,12 +150,12 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: 'roles/create',
                 name: 'roles.create',
-                component: () => import('../views/admin/roles/Create.vue'),
+                component: () => import('../views/admin/roles/Index.vue'),
             },
             {
                 path: 'roles/:id/edit',
                 name: 'roles.edit',
-                component: () => import('../views/admin/roles/Edit.vue'),
+                component: () => import('../views/admin/roles/Index.vue'),
             },
             {
                 path: 'settings',
