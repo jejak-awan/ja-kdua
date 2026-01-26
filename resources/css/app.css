@@ -70,6 +70,7 @@
     [data-slot="select-trigger"],
     [data-slot="checkbox"],
     [data-slot="search-trigger"],
+    [data-slot="search-input"],
     [data-slot="field"],
     [data-slot="field-group"],
     [data-slot="field-content"],
@@ -87,6 +88,11 @@
     [data-slot="checkbox"],
     [data-slot="search-trigger"] {
         border-color: hsl(var(--border) / 0.4) !important;
+    }
+
+    /* Search input specifically has no border */
+    [data-slot="search-input"] {
+        border: none !important;
     }
 
     .dark [data-slot="input"],

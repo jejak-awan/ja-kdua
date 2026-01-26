@@ -1,16 +1,16 @@
 <template>
   <Dialog :open="open" @update:open="setOpen">
-    <DialogContent class="p-0 gap-0 max-w-2xl overflow-hidden bg-background text-foreground">
+    <DialogContent class="p-0 gap-0 max-w-2xl overflow-hidden bg-background text-foreground rounded-xl border border-border/50 shadow-2xl">
       <!-- Search Input Header -->
-      <div class="flex items-center border-b border-border px-4 py-3" cmdk-input-wrapper>
-        <Search class="mr-2 h-5 w-5 shrink-0 opacity-50" />
+      <div class="flex items-center border-b border-border/40 px-4 py-2" cmdk-input-wrapper>
+        <Search class="ml-1 h-5 w-5 shrink-0 opacity-50" />
         <input
           ref="inputRef"
           v-model="searchQuery"
           @input="handleSearch"
           @keydown="handleKeydown"
-          data-slot="input"
-          class="flex h-11 w-full rounded-lg bg-transparent px-3 py-3 text-sm outline-none border border-border/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
+          data-slot="search-input"
+          class="flex h-12 w-full bg-transparent px-3 text-base outline-none border-none focus:ring-0 placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
           :placeholder="t('common.actions.search') + '...'"
           autocomplete="off" 
           autocorrect="off" 
