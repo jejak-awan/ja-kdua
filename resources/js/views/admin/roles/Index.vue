@@ -139,8 +139,8 @@
                 <div
                     v-for="role in roles"
                     :key="role.id"
-                    class="bg-card border border-border rounded-lg overflow-hidden flex flex-col hover:border-primary/50 group relative"
-                    :class="cn(isSelected(role.id) && 'ring-2 ring-primary ring-offset-2 ring-offset-background border-primary')"
+                    class="bg-card border border-border rounded-lg overflow-hidden flex flex-col hover:border-primary/50 group relative transition-all duration-200 shadow-sm"
+                    :class="cn(isSelected(role.id) && 'border-primary bg-primary/[0.03] ring-1 ring-primary/20')"
                 >
                     <!-- Selection Checkbox (Grid) -->
                     <div class="absolute top-3 left-3 z-10" v-if="!isProtectedRole(role.name)">
