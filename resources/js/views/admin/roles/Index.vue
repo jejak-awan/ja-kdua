@@ -372,6 +372,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
@@ -431,6 +432,8 @@ import {
 import type { Role, Permission } from '@/types/auth';
 
 const { t } = useI18n();
+const router = useRouter();
+const route = useRoute();
 const toast = useToast();
 const { confirm } = useConfirm();
 const authStore = useAuthStore();
@@ -523,8 +526,16 @@ const fetchPermissions = async () => {
 };
 
 const setActiveRole = (role: Role) => {
+    router.push({ name: 'roles.edit', params: { id: role.id } });
+};
+
+const createNewRole = () => {
+    router.push({ name: 'roles.create' });
+};
+
+const internalSetActiveRole = (role: Role) => {
     activeRoleId.value = role.id;
-    selectedRoleIds.value = []; // Clear matrix selection when editing single role
+    selectedRoleIds.value = []; 
     form.value.name = role.name;
     form.value.permissions = (role.permissions || []).map(p => p.name);
     initialData.value = {
@@ -534,7 +545,7 @@ const setActiveRole = (role: Role) => {
     clearErrors();
 };
 
-const createNewRole = () => {
+const internalCreateNewRole = () => {
     activeRoleId.value = -1;
     selectedRoleIds.value = [];
     form.value.name = '';
@@ -636,7 +647,7 @@ const saveChanges = async () => {
             if (!validateWithZod({ name: form.value.name, permissions: form.value.permissions })) return;
             await api.post('/admin/ja/roles', { name: form.value.name, permissions: form.value.permissions });
             toast.success.create('Role');
-            activeRoleId.value = null;
+            router.push({ name: 'roles' }); // Back to index
         } else if (workspaceMode.value === 'edit') {
             if (!activeRoleId.value) return;
             if (!validateWithZod({ name: form.value.name, permissions: form.value.permissions })) return;
@@ -678,7 +689,7 @@ const deleteRole = async (role: Role) => {
     try {
         await api.delete(`/admin/ja/roles/${role.id}`);
         toast.success.delete('Role');
-        if (activeRoleId.value === role.id) activeRoleId.value = null;
+        if (activeRoleId.value === role.id) router.push({ name: 'roles' });
         selectedRoleIds.value = selectedRoleIds.value.filter(id => id !== role.id);
         fetchRoles();
     } catch (error) {
@@ -697,23 +708,26 @@ const formatPermissionName = (name: string, category: string) => {
 };
 
 const handleRouteParams = () => {
-    const { name, params } = router.currentRoute.value;
+    const { name, params } = route;
+    
     if (name === 'roles.create') {
-        createNewRole();
+        if (activeRoleId.value !== -1) internalCreateNewRole();
     } else if (name === 'roles.edit' && params.id) {
-        const role = roles.value.find(r => String(r.id) === String(params.id));
-        if (role) setActiveRole(role);
-        else {
-            // If roles not loaded yet, fetchRoles handles it via watch
+        const id = Number(params.id);
+        if (activeRoleId.value !== id) {
+            const role = roles.value.find(r => r.id === id);
+            if (role) internalSetActiveRole(role);
         }
+    } else if (name === 'roles') {
+        activeRoleId.value = null;
     }
 };
 
 watch(() => roles.value, (newRoles) => {
     if (newRoles.length > 0) handleRouteParams();
-}, { once: true });
+}, { immediate: true });
 
-watch(() => router.currentRoute.value, () => {
+watch(() => route.path, () => {
     handleRouteParams();
 });
 
