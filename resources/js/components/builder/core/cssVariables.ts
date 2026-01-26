@@ -3,7 +3,7 @@ export const themeVariables = [
     '--builder-bg-primary',
     '--builder-bg-secondary',
     '--builder-bg-tertiary',
-    '--builder-bg-popover',
+    '--builder-bg-background',
     '--builder-bg-overlay',
 
     // Text

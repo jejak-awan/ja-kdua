@@ -452,7 +452,7 @@ div.preview-image {
     top: 100%;
     left: 0;
     width: 120px;
-    background: var(--builder-bg-popover);
+    background: var(--builder-bg-background);
     border: 1px solid var(--builder-border);
     border-radius: 4px;
     margin-top: 4px;
@@ -497,7 +497,7 @@ div.preview-image {
   top: 100%; 
   left: 0; 
   width: 100%;
-  background-color: var(--builder-bg-popover, #1f2937);
+  background-color: var(--builder-bg-background, #1f2937);
   border: 1px solid var(--builder-border);
   border-radius: 4px;
   max-height: 200px;

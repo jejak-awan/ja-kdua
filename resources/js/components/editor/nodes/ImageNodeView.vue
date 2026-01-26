@@ -55,7 +55,7 @@
             </div>
             
              <!-- URL Input Popover (Simple version for quick edits) -->
-             <div v-if="selected && showUrlInput" @mousedown.stop class="absolute top-full right-0 mt-2 p-2 bg-popover border rounded-md shadow-lg z-50 flex items-center gap-2 w-60">
+             <div v-if="selected && showUrlInput" @mousedown.stop class="absolute top-full right-0 mt-2 p-2 bg-background border rounded-md shadow-lg z-50 flex items-center gap-2 w-60">
                 <input 
                     v-model="tempSrc" 
                     @keydown.enter="applySrc"

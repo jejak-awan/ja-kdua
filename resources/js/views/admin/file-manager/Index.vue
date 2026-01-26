@@ -681,7 +681,7 @@
             <div
                 v-if="contextMenu.show"
                 ref="contextMenuRef"
-                class="fixed z-50 min-w-[180px] bg-popover border border-border rounded-lg shadow-lg py-1 animate-in fade-in zoom-in-95 max-h-[calc(100vh-20px)] overflow-y-auto"
+                class="fixed z-50 min-w-[180px] bg-background border border-border rounded-lg shadow-lg py-1 animate-in fade-in zoom-in-95 max-h-[calc(100vh-20px)] overflow-y-auto"
                 :class="{ 'invisible': contextMenu.invisible }"
                 :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
                 @click.stop

@@ -9,7 +9,7 @@
                 <!-- Draggable Window -->
                 <div 
                     ref="popoverRef"
-                    class="bg-popover border border-border shadow-2xl rounded-xl w-[480px] overflow-hidden pointer-events-auto flex flex-col transition-opacity duration-200"
+                    class="bg-background border border-border shadow-2xl rounded-xl w-[480px] overflow-hidden pointer-events-auto flex flex-col transition-opacity duration-200"
                     :style="windowStyle"
                 >
                     <!-- Header (Draggable) -->

@@ -807,7 +807,7 @@ watch(currentDevice, (newId) => {
 <!-- Non-scoped styles for teleported dropdown content -->
 <style>
 .dropdown-preview-container {
-    background: var(--builder-bg-popover);
+    background: var(--builder-bg-background);
     width: 220px;
     padding: 2px !important;
     box-sizing: border-box;

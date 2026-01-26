@@ -9,19 +9,25 @@
             <p class="text-muted-foreground">{{ $t('features.settings.loading') }}</p>
         </div>
 
-        <div v-else class="bg-card border border-border rounded-lg">
+        <div v-else class="w-full p-6">
             <!-- Shadcn Tabs -->
             <Tabs v-model="activeTab" class="w-full">
-                <div class="p-4 border-b border-border">
-                    <TabsList class="flex-wrap">
-                        <TabsTrigger v-for="tab in tabs" :key="tab.id" :value="tab.id">
+                <div class="mb-8">
+                    <TabsList class="bg-transparent p-0 h-auto gap-0 flex-wrap">
+                        <TabsTrigger 
+                            v-for="tab in tabs" 
+                            :key="tab.id" 
+                            :value="tab.id"
+                            class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all"
+                        >
+                            <component :is="getTabIcon(tab.id)" class="w-4 h-4 mr-2" />
                             {{ $t('features.settings.tabs.' + tab.id) }}
                         </TabsTrigger>
                     </TabsList>
                 </div>
 
                 <!-- Tab Content -->
-                <div class="p-6">
+                <div class="px-6">
                     <form @submit.prevent="handleSubmit" class="space-y-6">
                     <div v-if="currentSettings.length === 0" class="text-center py-8">
                         <p class="text-muted-foreground">{{ $t('features.settings.noSettings') }}</p>
@@ -136,7 +142,7 @@
                         </Button>
                     </div>
                 </form>
-            </div>
+                </div>
             </Tabs>
         </div>
     </div>
@@ -155,6 +161,16 @@ import Button from '../../../components/ui/button.vue';
 import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
 import { useCmsStore } from '@/stores/cms';
+import { 
+    Settings, 
+    Mail, 
+    MessageSquare, 
+    Search, 
+    Shield, 
+    Activity, 
+    HardDrive, 
+    Sparkles 
+} from 'lucide-vue-next';
 
 // Import tab components
 import GeneralTab from './tabs/GeneralTab.vue';
@@ -228,6 +244,20 @@ const tabs = [
     { id: 'media', label: 'Media' },
     { id: 'ai', label: 'AI Assistance' },
 ];
+
+const getTabIcon = (tabId) => {
+    switch (tabId) {
+        case 'general': return Settings;
+        case 'email': return Mail;
+        case 'comments': return MessageSquare;
+        case 'seo': return Search;
+        case 'security': return Shield;
+        case 'performance': return Activity;
+        case 'media': return HardDrive;
+        case 'ai': return Sparkles;
+        default: return Settings;
+    }
+};
 
 const currentSettings = computed(() => {
     if (!settings.value || !Array.isArray(settings.value)) {

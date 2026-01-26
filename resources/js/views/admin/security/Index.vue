@@ -30,17 +30,37 @@
 
         <!-- Shadcn Tabs -->
         <Tabs v-model="activeTab" class="w-full">
-            <TabsList class="mb-6">
-                <TabsTrigger value="overview">{{ $t('features.security.tabs.overview') }}</TabsTrigger>
-                <TabsTrigger value="blocklist">{{ $t('features.security.tabs.blocklist') }}</TabsTrigger>
-                <TabsTrigger value="whitelist">{{ $t('features.security.tabs.whitelist') }}</TabsTrigger>
-                <TabsTrigger value="csp-reports">{{ $t('features.security.tabs.cspReports') }}</TabsTrigger>
-                <TabsTrigger value="slow-queries">{{ $t('features.security.tabs.slowQueries') }}</TabsTrigger>
-                <TabsTrigger value="vulnerabilities">{{ $t('features.security.tabs.vulnerabilities') }}</TabsTrigger>
-            </TabsList>
+            <div class="mb-10">
+                <TabsList class="bg-transparent p-0 h-auto gap-0">
+                    <TabsTrigger value="overview" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <BarChart3 class="w-4 h-4 mr-2" />
+                        {{ $t('features.security.tabs.overview') }}
+                    </TabsTrigger>
+                    <TabsTrigger value="blocklist" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <ShieldX class="w-4 h-4 mr-2" />
+                        {{ $t('features.security.tabs.blocklist') }}
+                    </TabsTrigger>
+                    <TabsTrigger value="whitelist" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <ShieldCheck class="w-4 h-4 mr-2" />
+                        {{ $t('features.security.tabs.whitelist') }}
+                    </TabsTrigger>
+                    <TabsTrigger value="csp-reports" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <FileWarning class="w-4 h-4 mr-2" />
+                        {{ $t('features.security.tabs.cspReports') }}
+                    </TabsTrigger>
+                    <TabsTrigger value="slow-queries" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <Timer class="w-4 h-4 mr-2" />
+                        {{ $t('features.security.tabs.slowQueries') }}
+                    </TabsTrigger>
+                    <TabsTrigger value="vulnerabilities" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <ShieldAlert class="w-4 h-4 mr-2" />
+                        {{ $t('features.security.tabs.vulnerabilities') }}
+                    </TabsTrigger>
+                </TabsList>
+            </div>
 
             <!-- Overview Tab -->
-            <TabsContent value="overview">
+            <TabsContent value="overview" class="px-6">
             <!-- Statistics -->
             <div v-if="statistics" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <Card>
@@ -283,7 +303,7 @@
             </TabsContent>
 
             <!-- Blocklist Tab -->
-            <TabsContent value="blocklist">
+            <TabsContent value="blocklist" class="px-6">
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between pb-4">
                         <div>
@@ -393,7 +413,7 @@
             </TabsContent>
 
             <!-- Whitelist Tab -->
-            <TabsContent value="whitelist">
+            <TabsContent value="whitelist" class="px-6">
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between pb-4">
                         <div>
@@ -512,7 +532,7 @@
             </TabsContent>
 
             <!-- CSP Reports Tab -->
-            <TabsContent value="csp-reports">
+            <TabsContent value="csp-reports" class="px-6">
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between pb-4">
                         <div>
@@ -661,7 +681,7 @@
             </TabsContent>
 
             <!-- Slow Queries Tab -->
-            <TabsContent value="slow-queries">
+            <TabsContent value="slow-queries" class="px-6">
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between pb-4">
                         <div>
@@ -774,7 +794,7 @@
             </TabsContent>
 
             <!-- Dependency Vulnerabilities Tab -->
-            <TabsContent value="vulnerabilities">
+            <TabsContent value="vulnerabilities" class="px-6">
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between pb-4">
                         <div>
@@ -994,7 +1014,10 @@ import {
     Search, 
     Loader2, 
     ArrowLeft,
-    Plus
+    Plus,
+    BarChart3,
+    FileWarning,
+    Timer
 } from 'lucide-vue-next';
 
 const { t } = useI18n();

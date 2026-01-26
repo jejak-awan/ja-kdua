@@ -4,7 +4,7 @@
         :editor="editor" 
         :tippy-options="{ duration: 100 }" 
         :should-show="shouldShow"
-        class="flex items-center gap-1 p-1 bg-popover border border-border rounded-md shadow-md"
+        class="flex items-center gap-1 p-1 bg-background border border-border rounded-md shadow-md"
     >
         <Button variant="ghost" size="sm" @click="editor.chain().focus().toggleBold().run()" :class="{ 'bg-muted': editor.isActive('bold') }">
             <Bold class="w-3 h-3" />

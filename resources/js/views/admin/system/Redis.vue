@@ -9,14 +9,25 @@
 
     <!-- Shadcn Tabs -->
     <Tabs v-model="activeTab" class="w-full">
-      <TabsList class="mb-6">
-        <TabsTrigger v-for="tab in tabs" :key="tab.id" :value="tab.id">
-          {{ $t(`features.redis.tabs.${tab.id}`) }}
-        </TabsTrigger>
-      </TabsList>
+      <div class="mb-10">
+        <TabsList class="bg-transparent p-0 h-auto gap-0">
+          <TabsTrigger value="statistics" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+            <BarChart3 class="w-4 h-4 mr-2" />
+            {{ $t('features.redis.tabs.statistics') }}
+          </TabsTrigger>
+          <TabsTrigger value="settings" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+            <Settings class="w-4 h-4 mr-2" />
+            {{ $t('features.redis.tabs.settings') }}
+          </TabsTrigger>
+          <TabsTrigger value="cache" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+            <Database class="w-4 h-4 mr-2" />
+            {{ $t('features.redis.tabs.cache') }}
+          </TabsTrigger>
+        </TabsList>
+      </div>
 
       <!-- Statistics Tab -->
-      <TabsContent value="statistics" class="space-y-6">
+      <TabsContent value="statistics" class="px-6 space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card class="border-none bg-muted/20 shadow-none">
             <CardContent class="pt-6">
@@ -170,7 +181,7 @@
       </TabsContent>
 
       <!-- Settings Tab -->
-      <TabsContent value="settings" class="space-y-6">
+      <TabsContent value="settings" class="px-6 space-y-6">
         <!-- Global Driver Warning -->
         <Card v-if="cacheDriver !== 'redis' && cacheDriver !== 'redis_failover'" class="border-amber-500/40 bg-amber-500/5">
           <CardContent class="pt-6">
@@ -298,7 +309,7 @@
       </TabsContent>
 
       <!-- Cache Tab -->
-      <TabsContent value="cache" class="space-y-6">
+      <TabsContent value="cache" class="px-6 space-y-6">
         <!-- 1. Cache Stats Cards (Top) -->
         <div v-if="cacheStats" class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card class="bg-muted/20 border-none shadow-none">

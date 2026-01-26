@@ -57,7 +57,7 @@
     --builder-bg-tertiary: #2d323b;
     --builder-bg-sidebar: #1a1e25;
     --builder-bg-canvas: #ffffff;
-    --builder-bg-popover: #242830;
+    --builder-bg-background: #242830;
     --builder-bg-topbar: #0a0a0a;
 
     --builder-accent: #2059ea;
@@ -122,7 +122,7 @@
     --builder-bg-tertiary: #f1f5f9;
     --builder-bg-sidebar: #f8fafc;
     --builder-bg-canvas: #ffffff;
-    --builder-bg-popover: #ffffff;
+    --builder-bg-background: #ffffff;
     --builder-bg-topbar: #1a1e25;
 
     --builder-accent: #2059ea;

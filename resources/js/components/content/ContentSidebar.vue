@@ -250,7 +250,7 @@
                             <!-- Suggestions dropdown -->
                             <div 
                                 v-if="showTagSuggestions && filteredTags.length > 0"
-                                class="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-[200px] overflow-y-auto"
+                                class="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-[200px] overflow-y-auto"
                             >
                                 <div
                                     v-for="tag in filteredTags"

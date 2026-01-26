@@ -756,7 +756,7 @@ const endDrag = () => {
     right: 0;
     position: absolute;
     top: 100%;
-    background: var(--builder-bg-popover);
+    background: var(--builder-bg-background);
     border: 1px solid var(--builder-border);
     border-radius: 4px;
     margin-top: 1px;

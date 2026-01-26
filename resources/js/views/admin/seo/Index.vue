@@ -5,31 +5,32 @@
         </div>
 
         <!-- Shadcn Tabs -->
-            <Card>
-                <Tabs v-model="activeTab" class="w-full">
-                    <div class="p-4 border-b">
-                        <TabsList>
-                            <TabsTrigger value="sitemap" class="flex items-center gap-2">
-                                <Globe class="w-4 h-4" />
-                                {{ $t('features.seo.tabs.sitemap') }}
-                            </TabsTrigger>
-                            <TabsTrigger value="robots" class="flex items-center gap-2">
-                                <FileText class="w-4 h-4" />
-                                {{ $t('features.seo.tabs.robots') }}
-                            </TabsTrigger>
-                            <TabsTrigger value="analysis" class="flex items-center gap-2">
-                                <Search class="w-4 h-4" />
-                                {{ $t('features.seo.tabs.analysis') }}
-                            </TabsTrigger>
-                            <TabsTrigger value="schema" class="flex items-center gap-2">
-                                <FileJson class="w-4 h-4" />
-                                {{ $t('features.seo.tabs.schema') }}
-                            </TabsTrigger>
-                        </TabsList>
-                    </div>
+        <Card>
+            <Tabs v-model="activeTab" class="w-full">
+                <div class="mb-10 px-6 pt-6">
+                    <TabsList class="bg-transparent p-0 h-auto gap-0">
+                        <TabsTrigger value="sitemap" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                            <Globe class="w-4 h-4 mr-2" />
+                            {{ $t('features.seo.tabs.sitemap') }}
+                        </TabsTrigger>
+                        <TabsTrigger value="robots" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                            <FileText class="w-4 h-4 mr-2" />
+                            {{ $t('features.seo.tabs.robots') }}
+                        </TabsTrigger>
+                        <TabsTrigger value="analysis" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                            <Search class="w-4 h-4 mr-2" />
+                            {{ $t('features.seo.tabs.analysis') }}
+                        </TabsTrigger>
+                        <TabsTrigger value="schema" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                            <FileJson class="w-4 h-4 mr-2" />
+                            {{ $t('features.seo.tabs.schema') }}
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
 
-                    <!-- Sitemap Tab -->
-                    <TabsContent value="sitemap" class="p-6 space-y-6">
+                <!-- Sitemap Tab -->
+                <TabsContent value="sitemap" class="p-6 space-y-6">
+                    <!-- ... rest of content ... -->
                         <div>
                             <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.sitemap.title') }}</h3>
                             <Card class="bg-muted/50 border-none">
@@ -223,8 +224,8 @@
                             </CardContent>
                         </Card>
                     </TabsContent>
-                </Tabs>
-            </Card>
+            </Tabs>
+        </Card>
     </div>
 </template>
 

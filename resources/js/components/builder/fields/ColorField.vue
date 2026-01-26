@@ -629,7 +629,7 @@ defineExpose({ openPicker })
     top: 100%;
     left: 0;
     width: 100%; /* Match parent width */
-    background: var(--builder-bg-popover);
+    background: var(--builder-bg-background);
     border: 1px solid var(--builder-border);
     border-radius: 4px;
     margin-top: 4px;
@@ -726,7 +726,7 @@ defineExpose({ openPicker })
   left: 0; 
   width: 100%; /* Match input width */
   min-width: 200px;
-  background-color: var(--builder-bg-popover, #1f2937);
+  background-color: var(--builder-bg-background, #1f2937);
   border: 1px solid var(--builder-border);
   border-radius: 4px;
   max-height: 160px;

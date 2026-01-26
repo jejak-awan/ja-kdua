@@ -17,14 +17,21 @@
             </div>
         </div>
 
-        <Tabs v-model="currentTab" class="space-y-6">
-            <TabsList>
-                <TabsTrigger v-for="tab in tabs" :key="tab.name" :value="tab.name">
-                    {{ tab.label }}
-                </TabsTrigger>
-            </TabsList>
+        <Tabs v-model="currentTab" class="w-full">
+            <div class="mb-10">
+                <TabsList class="bg-transparent p-0 h-auto gap-0">
+                    <TabsTrigger value="groups" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <Layout class="w-4 h-4 mr-2" />
+                        {{ t('features.developer.custom_fields.tabs.groups') }}
+                    </TabsTrigger>
+                    <TabsTrigger value="fields" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <FileCode class="w-4 h-4 mr-2" />
+                        {{ t('features.developer.custom_fields.tabs.fields') }}
+                    </TabsTrigger>
+                </TabsList>
+            </div>
 
-            <TabsContent value="groups">
+            <TabsContent value="groups" class="px-6">
                 <Card>
                     <CardContent class="p-0">
                         <div v-if="loadingGroups" class="p-12 text-center">
@@ -77,7 +84,7 @@
                 </Card>
             </TabsContent>
 
-            <TabsContent value="fields">
+            <TabsContent value="fields" class="px-6">
                 <Card>
                     <CardHeader class="pb-0 border-b-0 space-y-4">
                         <div class="flex items-center gap-4">

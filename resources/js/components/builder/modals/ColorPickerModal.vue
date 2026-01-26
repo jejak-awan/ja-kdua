@@ -1173,7 +1173,7 @@ onUnmounted(() => {
     top: 100%;
     left: 0;
     width: 100%;
-    background: var(--builder-bg-popover);
+    background: var(--builder-bg-background);
     border: 1px solid var(--builder-border);
     border-radius: 4px;
     margin-top: 4px;
@@ -1247,7 +1247,7 @@ onUnmounted(() => {
   min-width: 240px; /* Ensure wide enough */
   width: max-content;
   max-width: 280px;
-  background-color: var(--builder-bg-popover, #1f2937); /* Fallback to dark */
+  background-color: var(--builder-bg-background, #1f2937); /* Fallback to dark */
   border: 1px solid var(--builder-border);
   border-radius: 4px;
   max-height: 200px;

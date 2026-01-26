@@ -1,6 +1,6 @@
 <template>
     <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="$emit('update:open', false)">
-        <div class="bg-popover border border-border rounded-lg shadow-xl p-6 w-[300px] space-y-4">
+        <div class="bg-background border border-border rounded-lg shadow-xl p-6 w-[300px] space-y-4">
             <h3 class="text-lg font-semibold text-foreground">Insert Table</h3>
             <div class="space-y-3">
                 <div class="flex items-center justify-between">

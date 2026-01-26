@@ -176,7 +176,7 @@ watch(() => props.value, (newVal) => {
   max-height: 250px;
   overflow-y: auto;
   padding: 4px;
-  background: var(--builder-bg-popover);
+  background: var(--builder-bg-background);
 }
 
 .dropdown-item {

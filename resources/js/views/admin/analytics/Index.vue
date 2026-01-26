@@ -33,7 +33,7 @@
                         <Loader2 v-else class="w-4 h-4 mr-2 animate-spin" />
                         {{ exporting ? $t('features.analytics.export.exporting') : $t('features.analytics.export.button') }}
                     </Button>
-                    <div v-if="showExportMenu" class="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-md shadow-lg z-50 py-1">
+                    <div v-if="showExportMenu" class="absolute right-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg z-50 py-1">
                         <button @click="exportData('visits')" class="w-full px-4 py-2 text-left text-sm text-popover-foreground hover:bg-accent transition-colors">
                             {{ $t('features.analytics.export.visits') }}
                         </button>

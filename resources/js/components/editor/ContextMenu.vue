@@ -1,7 +1,7 @@
 <template>
     <div 
         v-if="show"
-        class="fixed z-[100] min-w-[160px] bg-popover border border-border rounded-md shadow-xl p-1 animate-in fade-in zoom-in-95 duration-100"
+        class="fixed z-[100] min-w-[160px] bg-background border border-border rounded-md shadow-xl p-1 animate-in fade-in zoom-in-95 duration-100"
         :style="{ top: `${adjustedPosition.y}px`, left: `${adjustedPosition.x}px` }"
         @mousedown.stop
         @contextmenu.prevent

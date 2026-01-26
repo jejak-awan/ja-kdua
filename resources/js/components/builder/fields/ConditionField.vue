@@ -310,7 +310,7 @@ watch(() => props.value, (newVal) => {
   flex: 1;
   overflow-y: auto;
   padding: 4px;
-  background: var(--builder-bg-popover);
+  background: var(--builder-bg-background);
 }
 
 .data-group {

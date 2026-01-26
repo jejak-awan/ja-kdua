@@ -4,7 +4,7 @@
         :editor="editor" 
         :tippy-options="{ duration: 100, placement: 'top', offset: [0, 10] }" 
         :should-show="shouldShow"
-        class="flex items-center gap-1 p-1 bg-popover border border-border rounded-md shadow-md z-40"
+        class="flex items-center gap-1 p-1 bg-background border border-border rounded-md shadow-md z-40"
     >
         <div class="flex items-center gap-1 border-r pr-1 mr-1 border-border/50">
             <Button size="icon" variant="ghost" class="h-7 w-7" @click="updateAlign('left')" :class="{ 'bg-muted': currentAlign === 'left' }">

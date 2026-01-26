@@ -7,15 +7,29 @@
             </p>
         </div>
 
-        <Tabs v-model="activeTab" class="space-y-4">
-            <TabsList>
-                <TabsTrigger value="profile">{{ $t('features.profile.tabs.profile') }}</TabsTrigger>
-                <TabsTrigger value="password">{{ $t('features.profile.tabs.password') }}</TabsTrigger>
-                <TabsTrigger value="two-factor">{{ $t('features.profile.tabs.two-factor') }}</TabsTrigger>
-                <TabsTrigger value="history">{{ $t('features.profile.tabs.history') }}</TabsTrigger>
-            </TabsList>
+        <Tabs v-model="activeTab" class="w-full">
+            <div class="mb-8">
+                <TabsList class="bg-transparent p-0 h-auto gap-0">
+                    <TabsTrigger value="profile" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <User class="w-4 h-4 mr-2" />
+                        {{ $t('features.profile.tabs.profile') }}
+                    </TabsTrigger>
+                    <TabsTrigger value="password" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <KeyRound class="w-4 h-4 mr-2" />
+                        {{ $t('features.profile.tabs.password') }}
+                    </TabsTrigger>
+                    <TabsTrigger value="two-factor" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <ShieldCheck class="w-4 h-4 mr-2" />
+                        {{ $t('features.profile.tabs.two-factor') }}
+                    </TabsTrigger>
+                    <TabsTrigger value="history" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <History class="w-4 h-4 mr-2" />
+                        {{ $t('features.profile.tabs.history') }}
+                    </TabsTrigger>
+                </TabsList>
+            </div>
 
-            <TabsContent value="profile" class="space-y-4">
+            <TabsContent value="profile" class="px-6 space-y-4">
                 <Card>
                     <CardHeader>
                         <CardTitle>{{ $t('features.profile.tabs.profile') }}</CardTitle>
@@ -91,7 +105,7 @@
                 </Card>
             </TabsContent>
 
-            <TabsContent value="password" class="space-y-4">
+            <TabsContent value="password" class="px-6 space-y-4">
                 <Card>
                     <CardHeader>
                         <CardTitle>{{ $t('features.profile.tabs.password') }}</CardTitle>
@@ -125,7 +139,7 @@
                 </Card>
             </TabsContent>
 
-            <TabsContent value="two-factor" class="space-y-4">
+            <TabsContent value="two-factor" class="px-6 space-y-4">
                 <Card>
                     <CardHeader>
                         <CardTitle>{{ $t('features.profile.tabs.twoFactor') }}</CardTitle>
@@ -139,7 +153,7 @@
                 </Card>
             </TabsContent>
 
-            <TabsContent value="history" class="space-y-4">
+            <TabsContent value="history" class="px-6 space-y-4">
                 <Card>
                     <CardHeader>
                         <CardTitle>{{ $t('features.profile.tabs.history') }}</CardTitle>
@@ -203,7 +217,14 @@ import AvatarImage from '../../components/ui/avatar-image.vue';
 // @ts-ignore
 import AvatarFallback from '../../components/ui/avatar-fallback.vue';
 
-import { Loader2, X } from 'lucide-vue-next';
+import { 
+    Loader2, 
+    X, 
+    User, 
+    KeyRound, 
+    ShieldCheck, 
+    History 
+} from 'lucide-vue-next';
 
 // Simple Separator Component (Functional)
 const Separator = { // Minimal local component or just use div
