@@ -140,7 +140,7 @@
                     v-for="role in roles"
                     :key="role.id"
                     class="bg-card border border-border rounded-lg overflow-hidden flex flex-col hover:border-primary/50 group relative"
-                    :class="{ 'ring-2 ring-primary ring-offset-2 ring-offset-background border-primary': selectedRoles.includes(role.id) }"
+                    :class="cn(selectedRoles.includes(role.id) && 'ring-2 ring-primary ring-offset-2 ring-offset-background border-primary')"
                 >
                     <!-- Selection Checkbox (Grid) -->
                     <div class="absolute top-3 left-3 z-10" v-if="!isProtectedRole(role.name)">
@@ -254,7 +254,7 @@
                             v-for="role in roles" 
                             :key="role.id" 
                             class="hover:bg-muted/50 group border-b border-border/40"
-                            :class="{ 'bg-muted/30': selectedRoles.includes(role.id) }"
+                            :class="cn(selectedRoles.includes(role.id) && 'bg-muted/30')"
                         >
                             <TableCell class="px-6 py-4">
                                 <Checkbox 
@@ -399,6 +399,7 @@ import {
     Search,
     CheckSquare
 } from 'lucide-vue-next';
+import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth';
 import { useConfirm } from '@/composables/useConfirm';
 import type { Role } from '@/types/auth';
