@@ -1,7 +1,8 @@
 <template>
-    <div>
-        <Card>
-            <CardHeader class="pb-10 border-b-0 space-y-4">
+    <div class="space-y-6">
+        <Card class="overflow-hidden">
+            <!-- Filters & Actions -->
+            <div class="px-6 py-4 border-b border-border/40">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <!-- Left: Search / Filters -->
                     <div class="flex items-center gap-3 w-full md:w-auto flex-wrap">
@@ -46,7 +47,7 @@
                     <!-- Right: Actions -->
                     <div class="flex items-center gap-2">
                         <div v-if="selectedTemplates.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 animate-in fade-in slide-in-from-top-1 mr-2">
-                            <span class="text-sm font-medium text-primary">
+                            <span class="text-xs font-semibold text-primary uppercase tracking-wider">
                                 {{ selectedTemplates.length }} selected
                             </span>
                             <div class="h-4 w-px bg-primary/20"></div>
@@ -54,7 +55,7 @@
                                 v-model="bulkAction"
                                 @update:model-value="handleBulkAction"
                             >
-                                <SelectTrigger class="w-[140px] h-8 border-primary/20">
+                                <SelectTrigger class="w-[130px] h-7 border-primary/20 text-xs shadow-none">
                                     <SelectValue placeholder="Bulk Action" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -66,7 +67,7 @@
                         </div>
 
                         <!-- Create Button -->
-                        <Button v-if="isEmbedded && authStore.hasPermission('manage content templates')" as-child size="sm" class="shadow-sm">
+                        <Button v-if="isEmbedded && authStore.hasPermission('manage content templates')" as-child size="sm">
                             <router-link :to="{ name: 'content-templates.create' }" class="flex items-center">
                                 <Plus class="w-4 h-4 mr-1" />
                                 {{ t('features.content_templates.create') }}
@@ -74,7 +75,7 @@
                         </Button>
                     </div>
                 </div>
-            </CardHeader>
+            </div>
             <CardContent class="p-0">
                 <div v-if="loading && templates.length === 0" class="p-12 text-center">
                     <Loader2 class="w-8 h-8 animate-spin mx-auto text-muted-foreground mb-4" />

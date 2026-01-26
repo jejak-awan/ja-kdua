@@ -18,13 +18,14 @@
         </div>
 
         <!-- content -->
-        <Card>
-            <CardHeader class="pb-3 border-b border-border/40">
-                <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <Card class="overflow-hidden">
+            <!-- Filters -->
+            <div class="px-6 py-4 border-b border-border/40">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <!-- Left: Search / Filter -->
                     <div class="flex items-center gap-2 flex-1 flex-wrap">
                         <div class="relative w-full sm:w-72">
-                            <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                                 v-model="search"
                                 :placeholder="$t('features.categories.search')"
@@ -48,15 +49,15 @@
                     <!-- Right: Actions -->
                     <div class="flex items-center gap-2">
                         <!-- Bulk Actions -->
-                        <div v-if="selectedIds.length > 0" class="flex items-center gap-2 animate-in fade-in slide-in-from-right-2 mr-2">
-                             <span class="text-sm text-muted-foreground whitespace-nowrap">
+                        <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 animate-in fade-in slide-in-from-right-2 mr-2">
+                             <span class="text-xs font-semibold text-primary whitespace-nowrap uppercase tracking-wider">
                                 {{ selectedIds.length }} {{ $t('common.labels.selected') }}
                              </span>
-                             <Button variant="destructive" size="sm" @click="confirmBulkDelete">
-                                <Trash2 class="w-4 h-4 mr-2" />
+                             <div class="h-4 w-px bg-primary/20"></div>
+                             <Button variant="ghost" size="sm" class="h-7 px-2 text-destructive hover:bg-destructive/10" @click="confirmBulkDelete">
+                                <Trash2 class="w-4 h-4 mr-1.5" />
                                 {{ $t('common.actions.delete') }}
                             </Button>
-                            <div class="h-6 w-px bg-border mx-1"></div>
                         </div>
 
                         <!-- Create Button -->
@@ -70,7 +71,7 @@
                         </Button>
                     </div>
                 </div>
-            </CardHeader>
+            </div>
             <CardContent class="p-0">
                 <div class="rounded-md border-0">
                     <Table>

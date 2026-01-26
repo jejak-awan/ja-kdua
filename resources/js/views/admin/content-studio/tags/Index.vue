@@ -57,18 +57,19 @@
             </Card>
         </div>
 
-        <!-- Filters & Bulk Actions -->
-        <Card class="mb-6">
-            <CardContent class="p-4">
+        <!-- content -->
+        <Card class="overflow-hidden">
+            <!-- Filters & Bulk Actions -->
+            <div class="px-6 py-4 border-b border-border/40">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex flex-1 items-center gap-2 max-w-sm">
+                    <div class="flex flex-1 items-center gap-2 max-w-sm flex-wrap md:flex-nowrap">
                         <div class="relative w-full">
-                            <SearchIcon class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                                 v-model="search"
                                 type="text"
                                 :placeholder="$t('features.tags.search')"
-                                class="pl-8"
+                                class="pl-9"
                                 @input="onSearchInput"
                             />
                         </div>
@@ -85,13 +86,13 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <div v-if="selectedIds.length > 0" class="flex items-center gap-2 mr-2 animate-in fade-in slide-in-from-right-2">
-                            <span class="text-sm text-muted-foreground">{{ selectedIds.length }} {{ $t('common.labels.selected') }}</span>
-                            <Button variant="destructive" size="sm" @click="bulkDelete">
-                                <Trash2 class="w-4 h-4 mr-2" />
+                        <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 animate-in fade-in slide-in-from-right-2 mr-2">
+                            <span class="text-xs font-semibold text-primary whitespace-nowrap uppercase tracking-wider">{{ selectedIds.length }} {{ $t('common.labels.selected') }}</span>
+                            <div class="h-4 w-px bg-primary/20"></div>
+                            <Button variant="ghost" size="sm" class="h-7 px-2 text-destructive hover:bg-destructive/10" @click="bulkDelete">
+                                <Trash2 class="w-4 h-4 mr-1.5" />
                                 {{ $t('common.actions.delete') }}
                             </Button>
-                            <div class="h-6 w-px bg-border mx-1"></div>
                         </div>
 
                         <!-- Add Create Button here when embedded -->
@@ -105,22 +106,8 @@
                         </Button>
                     </div>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
 
-        <!-- Tags List -->
-        <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
-            <p class="text-muted-foreground">{{ $t('features.tags.loading') }}</p>
-        </div>
-
-        <div v-else-if="tags.length === 0" class="bg-card border border-border rounded-lg p-12 text-center">
-            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-            </svg>
-            <p class="mt-4 text-muted-foreground">{{ $t('features.tags.empty') }}</p>
-        </div>
-
-        <Card v-else>
             <CardContent class="p-0">
                 <Table>
                     <TableHeader>
@@ -140,7 +127,22 @@
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="tag in tags" :key="tag.id" :class="cn('group', selectedIds.includes(tag.id) ? 'bg-muted/50' : '')">
+                        <TableRow v-if="loading">
+                            <TableCell colspan="6" class="h-24 text-center">
+                                <Loader2 class="h-6 w-6 animate-spin mx-auto" />
+                            </TableCell>
+                        </TableRow>
+                        
+                        <TableRow v-else-if="tags.length === 0">
+                            <TableCell colspan="6" class="h-32 text-center">
+                                <div class="flex flex-col items-center justify-center space-y-2">
+                                    <TagIcon class="h-8 w-8 text-muted-foreground/20" />
+                                    <p class="text-sm text-muted-foreground">{{ $t('features.tags.empty') }}</p>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+
+                        <TableRow v-else v-for="tag in tags" :key="tag.id" :class="cn('group', selectedIds.includes(tag.id) ? 'bg-muted/50' : '')">
                             <TableCell>
                                 <Checkbox 
                                     v-if="authStore.hasPermission('delete tags')"
