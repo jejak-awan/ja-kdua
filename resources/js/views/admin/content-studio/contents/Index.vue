@@ -616,24 +616,24 @@ onMounted(() => {
             <div class="relative overflow-x-auto">
                 <Table>
                     <TableHeader>
-                        <TableRow class="hover:bg-muted/30 border-b border-border/40">
+                        <TableRow>
                             <TableHead class="w-12 px-6">
                                 <Checkbox
                                     :checked="allSelected"
                                     @update:checked="toggleSelectAll"
                                 />
                             </TableHead>
-                            <TableHead class="px-6 py-4 text-[10px] font-bold text-muted-foreground/70 tracking-wider">{{ t('common.labels.title') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-[10px] font-bold text-muted-foreground/70 tracking-wider">{{ t('common.labels.author') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-[10px] font-bold text-muted-foreground/70 tracking-wider">{{ t('common.labels.status') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-[10px] font-bold text-muted-foreground/70 tracking-wider">{{ t('features.content.form.featured') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-[10px] font-bold text-muted-foreground/70 tracking-wider">{{ t('common.labels.date') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-[10px] font-bold text-muted-foreground/70 tracking-wider">{{ t('common.labels.type') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-center text-[10px] font-bold text-muted-foreground/70 tracking-wider">{{ t('common.actions.title') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-[10px] text-muted-foreground/70 uppercase">{{ t('common.labels.title') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-[10px] text-muted-foreground/70 uppercase">{{ t('common.labels.author') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-[10px] text-muted-foreground/70 uppercase">{{ t('common.labels.status') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-[10px] text-muted-foreground/70 uppercase">{{ t('features.content.form.featured') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-[10px] text-muted-foreground/70 uppercase">{{ t('common.labels.date') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-[10px] text-muted-foreground/70 uppercase">{{ t('common.labels.type') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-center text-[10px] text-muted-foreground/70 uppercase">{{ t('common.actions.title') }}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="content in contents" :key="content.id" class="group hover:bg-muted/30 border-b border-border/40">
+                        <TableRow v-for="content in contents" :key="content.id" class="group">
                             <TableCell class="px-6">
                                 <Checkbox
                                     :checked="selectedContents.includes(content.id)"

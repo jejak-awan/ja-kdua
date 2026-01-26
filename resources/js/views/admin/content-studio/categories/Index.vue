@@ -101,11 +101,11 @@
                                     {{ $t('features.categories.empty') }}
                                 </TableCell>
                             </TableRow>
-
+ 
                             <TableRow 
                                 v-for="category in flatCategories" 
                                 :key="category.id"
-                                class="group hover:bg-muted/30 border-b border-border/40"
+                                class="group"
                             >
                                 <TableCell class="text-center">
                                     <Checkbox 

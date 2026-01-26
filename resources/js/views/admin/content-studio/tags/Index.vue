@@ -124,7 +124,7 @@
             <CardContent class="p-0">
                 <Table>
                     <TableHeader>
-                        <TableRow class="border-b border-border/40">
+                        <TableRow>
                             <TableHead class="w-[50px]">
                                 <Checkbox 
                                     v-if="authStore.hasPermission('delete tags')"
@@ -140,7 +140,7 @@
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="tag in tags" :key="tag.id" :class="cn('hover:bg-muted/30 border-b border-border/40', selectedIds.includes(tag.id) ? 'bg-muted/50' : '')">
+                        <TableRow v-for="tag in tags" :key="tag.id" :class="cn('group', selectedIds.includes(tag.id) ? 'bg-muted/50' : '')">
                             <TableCell>
                                 <Checkbox 
                                     v-if="authStore.hasPermission('delete tags')"

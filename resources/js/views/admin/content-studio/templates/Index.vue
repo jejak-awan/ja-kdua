@@ -88,23 +88,23 @@
 
                 <div v-else class="relative overflow-x-auto">
                     <Table>
-                        <TableHeader class="[&_tr]:border-b-0">
-                            <TableRow class="bg-muted/50 hover:bg-muted/50 border-b-0 !border-b-0 [&>th]:border-b-0">
+                        <TableHeader>
+                            <TableRow>
                                 <TableHead class="w-12 px-6">
                                     <Checkbox
                                         :checked="allSelected"
                                         @update:checked="toggleSelectAll"
                                     />
                                 </TableHead>
-                                <TableHead class="font-semibold text-foreground">{{ t('features.content_templates.table.name') }}</TableHead>
-                                <TableHead class="font-semibold text-foreground">{{ t('features.content_templates.table.type') }}</TableHead>
-                                <TableHead class="font-semibold text-foreground">{{ t('features.content_templates.table.description') }}</TableHead>
-                                <TableHead class="font-semibold text-foreground">{{ t('features.content_templates.table.updated') }}</TableHead>
-                                <TableHead class="text-center font-semibold text-foreground">{{ t('features.content_templates.table.actions') }}</TableHead>
+                                <TableHead class="text-[10px] text-muted-foreground/70 uppercase">{{ t('features.content_templates.table.name') }}</TableHead>
+                                <TableHead class="text-[10px] text-muted-foreground/70 uppercase">{{ t('features.content_templates.table.type') }}</TableHead>
+                                <TableHead class="text-[10px] text-muted-foreground/70 uppercase">{{ t('features.content_templates.table.description') }}</TableHead>
+                                <TableHead class="text-[10px] text-muted-foreground/70 uppercase">{{ t('features.content_templates.table.updated') }}</TableHead>
+                                <TableHead class="text-center text-[10px] text-muted-foreground/70 uppercase">{{ t('features.content_templates.table.actions') }}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow v-for="template in templates" :key="template.id" class="hover:bg-muted/50 group border-b-0 [&>td]:border-b-0 text-muted-foreground">
+                            <TableRow v-for="template in templates" :key="template.id" class="group">
                                 <TableCell class="px-6">
                                     <Checkbox
                                         :checked="selectedTemplates.includes(template.id)"

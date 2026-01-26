@@ -1,5 +1,8 @@
 <template>
-  <tr :class="cn('border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted', props.class)">
+  <tr 
+    data-slot="table-row"
+    :class="cn('border-b border-border/40 transition-colors hover:bg-muted/30 data-[state=selected]:bg-muted', props.class)"
+  >
     <slot />
   </tr>
 </template>

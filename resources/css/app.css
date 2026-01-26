@@ -76,7 +76,11 @@
     [data-slot="field-content"],
     [data-slot="field-label"],
     [data-slot="field-description"],
-    [data-slot="field-title"] {
+    [data-slot="field-title"],
+    [data-slot="table"],
+    [data-slot="table-row"],
+    [data-slot="table-head"],
+    [data-slot="table-cell"] {
         background-color: transparent !important;
         border-color: transparent !important;
         transition: none !important;
@@ -87,6 +91,11 @@
     [data-slot="select-trigger"],
     [data-slot="checkbox"],
     [data-slot="search-trigger"] {
+        border-color: hsl(var(--border) / 0.4) !important;
+    }
+
+    [data-slot="table-row"],
+    [data-slot="table-head"] {
         border-color: hsl(var(--border) / 0.4) !important;
     }
 
