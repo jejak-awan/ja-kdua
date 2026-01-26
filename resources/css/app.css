@@ -66,6 +66,9 @@
     }
 
     /* Global Form Resets for Anti-Flash & Consistency */
+    [data-slot="input"],
+    [data-slot="select-trigger"],
+    [data-slot="checkbox"]:not([data-state="checked"]),
     [data-slot="search-trigger"],
     [data-slot="search-input"],
     [data-slot="field"],
@@ -90,6 +93,12 @@
     [data-slot="checkbox"],
     [data-slot="search-trigger"] {
         border-color: hsl(var(--border) / 0.5) !important;
+    }
+
+    /* Specifically allow checked checkbox to have its background */
+    [data-slot="checkbox"][data-state="checked"] {
+        background-color: hsl(var(--primary)) !important;
+        border-color: hsl(var(--primary)) !important;
     }
 
     [data-slot="table-row"],
