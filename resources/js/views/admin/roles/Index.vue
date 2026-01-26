@@ -171,7 +171,7 @@
                         </div>
                         
                         <div class="space-y-2.5">
-                            <div class="text-[10px] font-semibold text-muted-foreground">
+                            <div class="text-xs font-medium text-muted-foreground/70">
                                 {{ $t('features.roles.permissions') }}
                             </div>
                             <div class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
@@ -234,108 +234,105 @@
                 </div>
             </div>
 
-            <!-- List View -->
             <div v-else class="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-muted-foreground bg-muted/50 border-b">
-                            <tr>
-                                <th class="w-10 px-6 py-3">
-                                    <Checkbox 
-                                        :checked="isAllSelected"
-                                        @update:checked="toggleSelectAll"
-                                    />
-                                </th>
-                                <th class="px-6 py-3 font-medium">{{ $t('features.roles.form.name') }}</th>
-                                <th class="px-6 py-3 font-medium">{{ $t('features.roles.permissions') }}</th>
-                                <th class="px-6 py-3 font-medium text-right">{{ $t('common.actions.title') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-border">
-                            <tr 
-                                v-for="role in roles" 
-                                :key="role.id" 
-                                class="hover:bg-muted/50 group"
-                                :class="{ 'bg-muted/30': selectedRoles.includes(role.id) }"
-                            >
-                                <td class="px-6 py-4">
-                                     <Checkbox 
-                                        v-if="!isProtectedRole(role.name)"
-                                        :checked="selectedRoles.includes(role.id)"
-                                        @update:checked="(checked: boolean) => toggleSelection(role.id)"
-                                    />
-                                     <div v-else class="w-4 h-4"></div> <!-- Spacer for protected roles -->
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="p-2 bg-primary/10 rounded-md group-hover:bg-primary/20 transition-colors">
-                                            <Shield class="w-4 h-4 text-primary" />
-                                        </div>
-                                        <div>
-                                            <div class="font-medium text-foreground capitalize">{{ role.name }}</div>
-                                            <div class="text-xs text-muted-foreground">
-                                                {{ $t('features.roles.list.usersCount', { count: role.users_count || 0 }) }}
-                                            </div>
+                <Table>
+                    <TableHeader>
+                        <TableRow class="bg-muted/50 border-b hover:bg-muted/50">
+                            <TableHead class="w-10 px-6 py-3">
+                                <Checkbox 
+                                    :checked="isAllSelected"
+                                    @update:checked="toggleSelectAll"
+                                />
+                            </TableHead>
+                            <TableHead class="px-6 py-3 text-xs text-muted-foreground/70 font-medium">{{ $t('features.roles.form.name') }}</TableHead>
+                            <TableHead class="px-6 py-3 text-xs text-muted-foreground/70 font-medium">{{ $t('features.roles.permissions') }}</TableHead>
+                            <TableHead class="px-6 py-3 text-xs text-muted-foreground/70 font-medium text-right">{{ $t('common.actions.title') }}</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow 
+                            v-for="role in roles" 
+                            :key="role.id" 
+                            class="hover:bg-muted/50 group border-b border-border/40"
+                            :class="{ 'bg-muted/30': selectedRoles.includes(role.id) }"
+                        >
+                            <TableCell class="px-6 py-4">
+                                <Checkbox 
+                                    v-if="!isProtectedRole(role.name)"
+                                    :checked="selectedRoles.includes(role.id)"
+                                    @update:checked="(checked: boolean) => toggleSelection(role.id)"
+                                />
+                                <div v-else class="w-4 h-4"></div>
+                            </TableCell>
+                            <TableCell class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-primary/10 rounded-md group-hover:bg-primary/20 transition-colors">
+                                        <Shield class="w-4 h-4 text-primary" />
+                                    </div>
+                                    <div>
+                                        <div class="font-medium text-foreground capitalize">{{ role.name }}</div>
+                                        <div class="text-xs text-muted-foreground">
+                                            {{ $t('features.roles.list.usersCount', { count: role.users_count || 0 }) }}
                                         </div>
                                     </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex flex-wrap gap-1.5 max-w-xl">
-                                        <Badge
-                                            v-for="permission in (role.permissions || []).slice(0, 3)"
-                                            :key="permission.id"
-                                            variant="outline"
-                                            class="bg-muted/50 text-xs font-normal"
-                                        >
-                                            {{ permission.name }}
-                                        </Badge>
-                                        <Badge v-if="(role.permissions?.length || 0) > 3" variant="secondary" class="text-xs font-normal">
-                                            +{{ (role.permissions?.length || 0) - 3 }}
-                                        </Badge>
-                                        <span v-if="(role.permissions?.length || 0) === 0" class="text-xs text-muted-foreground italic">
-                                            No permissions
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex justify-end gap-2">
-                                         <Button
-                                            v-if="authStore.hasPermission('edit roles')"
-                                            variant="ghost"
-                                            size="icon"
-                                            @click="editRole(role)"
-                                            :disabled="isProtectedRole(role.name)"
-                                            class="h-8 w-8 text-muted-foreground hover:text-foreground"
-                                            :title="$t('common.actions.edit')"
-                                        >
-                                            <Edit class="w-4 h-4" />
-                                        </Button>
-                                        <Button
-                                            v-if="authStore.hasPermission('create roles')"
-                                            variant="ghost"
-                                            size="icon"
-                                            @click="duplicateRole(role)"
-                                            class="h-8 w-8 text-muted-foreground hover:text-foreground"
-                                            :title="$t('common.actions.duplicate')"
-                                        >
-                                            <Copy class="w-4 h-4" />
-                                        </Button>
-                                        <Button
-                                            v-if="!isProtectedRole(role.name) && authStore.hasPermission('delete roles')"
-                                            variant="ghost"
-                                            size="icon"
-                                            @click="deleteRole(role)"
-                                            class="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                            :title="$t('common.actions.delete')"
-                                        >
-                                            <Trash2 class="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                                </div>
+                            </TableCell>
+                            <TableCell class="px-6 py-4">
+                                <div class="flex flex-wrap gap-1.5 max-w-xl">
+                                    <Badge
+                                        v-for="permission in (role.permissions || []).slice(0, 3)"
+                                        :key="permission.id"
+                                        variant="outline"
+                                        class="bg-muted/50 text-xs font-normal border-border/50"
+                                    >
+                                        {{ permission.name }}
+                                    </Badge>
+                                    <Badge v-if="(role.permissions?.length || 0) > 3" variant="secondary" class="text-xs font-normal">
+                                        +{{ (role.permissions?.length || 0) - 3 }}
+                                    </Badge>
+                                    <span v-if="(role.permissions?.length || 0) === 0" class="text-xs text-muted-foreground italic">
+                                        No permissions
+                                    </span>
+                                </div>
+                            </TableCell>
+                            <TableCell class="px-6 py-4 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <Button
+                                        v-if="authStore.hasPermission('edit roles')"
+                                        variant="ghost"
+                                        size="icon"
+                                        @click="editRole(role)"
+                                        :disabled="isProtectedRole(role.name)"
+                                        class="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                        :title="$t('common.actions.edit')"
+                                    >
+                                        <Edit class="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                        v-if="authStore.hasPermission('create roles')"
+                                        variant="ghost"
+                                        size="icon"
+                                        @click="duplicateRole(role)"
+                                        class="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                        :title="$t('common.actions.duplicate')"
+                                    >
+                                        <Copy class="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                        v-if="!isProtectedRole(role.name) && authStore.hasPermission('delete roles')"
+                                        variant="ghost"
+                                        size="icon"
+                                        @click="deleteRole(role)"
+                                        class="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                        :title="$t('common.actions.delete')"
+                                    >
+                                        <Trash2 class="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
             </div>
 
             <!-- Pagination -->
@@ -379,6 +376,18 @@ import SelectItem from '@/components/ui/select-item.vue';
 import SelectTrigger from '@/components/ui/select-trigger.vue';
 // @ts-ignore
 import SelectValue from '@/components/ui/select-value.vue';
+// @ts-ignore
+import Table from '@/components/ui/table.vue';
+// @ts-ignore
+import TableHeader from '@/components/ui/table-header.vue';
+// @ts-ignore
+import TableRow from '@/components/ui/table-row.vue';
+// @ts-ignore
+import TableHead from '@/components/ui/table-head.vue';
+// @ts-ignore
+import TableBody from '@/components/ui/table-body.vue';
+// @ts-ignore
+import TableCell from '@/components/ui/table-cell.vue';
 import {
     Edit,
     Copy,

@@ -30,9 +30,12 @@
                             type="text"
                             required
                             :disabled="isProtectedRole(form.name)"
-                            :class="{'opacity-50 cursor-not-allowed': isProtectedRole(form.name), 'border-destructive focus-visible:ring-destructive': errors.name}"
-                            :placeholder="$t('features.roles.form.namePlaceholder')"
                             class="max-w-md"
+                            :class="cn(
+                                isProtectedRole(form.name) && 'opacity-50 cursor-not-allowed',
+                                errors.name && 'border-destructive focus-visible:ring-destructive'
+                            )"
+                            :placeholder="$t('features.roles.form.namePlaceholder')"
                         />
                         <p v-if="errors.name" class="text-sm text-destructive mt-1">
                             {{ Array.isArray(errors.name) ? errors.name[0] : errors.name }}
@@ -43,28 +46,30 @@
                     </div>
 
                     <!-- Permissions Matrix -->
-                    <div>
-                        <h4 class="text-lg font-medium text-foreground mb-4">{{ $t('features.roles.permissions') }}</h4>
-                        <div class="space-y-4">
-                            <div v-for="(perms, category) in groupedPermissions" :key="category" class="border rounded-lg p-4">
-                                <div class="flex items-center justify-between mb-3">
-                                    <h5 class="font-medium text-foreground capitalize flex items-center gap-2">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-sm font-semibold text-foreground uppercase tracking-wider">{{ $t('features.roles.permissions') }}</h4>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div v-for="(perms, category) in groupedPermissions" :key="category" class="bg-muted/30 border border-border/60 rounded-xl overflow-hidden">
+                                <div class="px-4 py-3 bg-muted/50 border-b border-border/40 flex items-center justify-between">
+                                    <h5 class="text-xs font-bold text-foreground uppercase tracking-widest flex items-center gap-2">
                                         {{ category }}
-                                        <span class="text-xs font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                                        <Badge variant="secondary" class="h-4.5 text-[10px] px-1.5 font-bold bg-background/50">
                                             {{ perms.length }}
-                                        </span>
+                                        </Badge>
                                     </h5>
                                     <Button
                                         type="button"
                                         variant="ghost"
                                         size="sm"
                                         @click="toggleCategory(category as string)"
-                                        class="h-7 text-xs"
+                                        class="h-7 text-[10px] font-bold uppercase tracking-wider hover:bg-background/50"
                                     >
                                         {{ isCategorySelected(category as string) ? $t('features.roles.form.deselectAll') : $t('features.roles.form.selectAll') }}
                                     </Button>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <div class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                     <div
                                         v-for="permission in perms"
                                         :key="permission.id"
@@ -77,7 +82,7 @@
                                         />
                                         <label
                                             :for="`perm-${permission.id}`"
-                                            class="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer pt-0.5"
+                                            class="text-xs font-medium leading-none text-muted-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer pt-0.5"
                                         >
                                             {{ formatPermissionName(permission.name, category as string) }}
                                         </label>
@@ -135,6 +140,7 @@ import CardTitle from '@/components/ui/card-title.vue';
 // @ts-ignore
 import CardContent from '@/components/ui/card-content.vue';
 import { ArrowLeft, Check, Loader2 } from 'lucide-vue-next';
+import { cn } from '@/lib/utils';
 import type { Permission, Role } from '@/types/auth';
 
 const router = useRouter();
