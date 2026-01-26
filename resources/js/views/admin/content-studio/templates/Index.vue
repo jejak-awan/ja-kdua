@@ -97,11 +97,11 @@
                                         @update:checked="toggleSelectAll"
                                     />
                                 </TableHead>
-                                <TableHead class="text-[10px] text-muted-foreground/70">{{ t('features.content_templates.table.name') }}</TableHead>
-                                <TableHead class="text-[10px] text-muted-foreground/70">{{ t('features.content_templates.table.type') }}</TableHead>
-                                <TableHead class="text-[10px] text-muted-foreground/70">{{ t('features.content_templates.table.description') }}</TableHead>
-                                <TableHead class="text-[10px] text-muted-foreground/70">{{ t('features.content_templates.table.updated') }}</TableHead>
-                                <TableHead class="text-center text-[10px] text-muted-foreground/70">{{ t('features.content_templates.table.actions') }}</TableHead>
+                                <TableHead class="text-xs text-muted-foreground/70">{{ t('features.content_templates.table.name') }}</TableHead>
+                                <TableHead class="text-xs text-muted-foreground/70">{{ t('features.content_templates.table.type') }}</TableHead>
+                                <TableHead class="text-xs text-muted-foreground/70">{{ t('features.content_templates.table.description') }}</TableHead>
+                                <TableHead class="text-xs text-muted-foreground/70">{{ t('features.content_templates.table.updated') }}</TableHead>
+                                <TableHead class="text-center text-xs text-muted-foreground/70">{{ t('features.content_templates.table.actions') }}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>

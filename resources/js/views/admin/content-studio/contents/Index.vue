@@ -623,13 +623,13 @@ onMounted(() => {
                                     @update:checked="toggleSelectAll"
                                 />
                             </TableHead>
-                            <TableHead class="px-6 py-4 text-[10px] text-muted-foreground/70">{{ t('common.labels.title') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-[10px] text-muted-foreground/70">{{ t('common.labels.author') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-[10px] text-muted-foreground/70">{{ t('common.labels.status') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-[10px] text-muted-foreground/70">{{ t('features.content.form.featured') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-[10px] text-muted-foreground/70">{{ t('common.labels.date') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-[10px] text-muted-foreground/70">{{ t('common.labels.type') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-center text-[10px] text-muted-foreground/70">{{ t('common.actions.title') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-xs text-muted-foreground/70">{{ t('common.labels.title') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-xs text-muted-foreground/70">{{ t('common.labels.author') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-xs text-muted-foreground/70">{{ t('common.labels.status') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-xs text-muted-foreground/70">{{ t('features.content.form.featured') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-xs text-muted-foreground/70">{{ t('common.labels.date') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-xs text-muted-foreground/70">{{ t('common.labels.type') }}</TableHead>
+                            <TableHead class="px-6 py-4 text-center text-xs text-muted-foreground/70">{{ t('common.actions.title') }}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>

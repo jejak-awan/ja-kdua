@@ -165,19 +165,19 @@
                                     @update:checked="toggleSelectAll"
                                 />
                             </TableHead>
-                            <TableHead class="px-6 text-[10px] text-muted-foreground/70">
+                            <TableHead class="px-6 text-xs text-muted-foreground/70">
                                 {{ $t('features.users.table.user') }}
                             </TableHead>
-                            <TableHead class="px-6 text-[10px] text-muted-foreground/70">
+                            <TableHead class="px-6 text-xs text-muted-foreground/70">
                                 {{ $t('features.users.table.email') }}
                             </TableHead>
-                            <TableHead class="px-6 text-[10px] text-muted-foreground/70">
+                            <TableHead class="px-6 text-xs text-muted-foreground/70">
                                 {{ $t('features.users.table.roles') }}
                             </TableHead>
-                            <TableHead class="px-6 text-[10px] text-muted-foreground/70">
+                            <TableHead class="px-6 text-xs text-muted-foreground/70">
                                 {{ $t('features.users.table.lastLogin') }}
                             </TableHead>
-                            <TableHead class="px-6 text-center text-[10px] text-muted-foreground/70">
+                            <TableHead class="px-6 text-center text-xs text-muted-foreground/70">
                                 {{ $t('features.users.table.actions') }}
                             </TableHead>
                         </TableRow>
