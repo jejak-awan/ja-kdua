@@ -119,11 +119,11 @@
                                     @update:checked="toggleAll"
                                 />
                             </TableHead>
-                            <TableHead>{{ $t('features.tags.table.name') }}</TableHead>
-                            <TableHead class="hidden md:table-cell">{{ $t('features.tags.table.slug') }}</TableHead>
-                            <TableHead class="hidden lg:table-cell">{{ $t('features.tags.table.description') }}</TableHead>
-                            <TableHead class="text-right">{{ $t('features.tags.table.usage') }}</TableHead>
-                            <TableHead class="w-[100px] text-right">{{ $t('features.tags.table.actions') }}</TableHead>
+                            <TableHead class="text-[10px] text-muted-foreground/70">{{ $t('features.tags.table.name') }}</TableHead>
+                            <TableHead class="hidden md:table-cell text-[10px] text-muted-foreground/70">{{ $t('features.tags.table.slug') }}</TableHead>
+                            <TableHead class="hidden lg:table-cell text-[10px] text-muted-foreground/70">{{ $t('features.tags.table.description') }}</TableHead>
+                            <TableHead class="text-right text-[10px] text-muted-foreground/70">{{ $t('features.tags.table.usage') }}</TableHead>
+                            <TableHead class="w-[100px] text-right text-[10px] text-muted-foreground/70">{{ $t('features.tags.table.actions') }}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>

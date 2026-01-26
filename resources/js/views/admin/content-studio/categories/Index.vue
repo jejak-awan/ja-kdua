@@ -84,10 +84,10 @@
                                         @update:checked="toggleSelectAll"
                                     />
                                 </TableHead>
-                                <TableHead>{{ $t('features.categories.table.name') }}</TableHead>
-                                <TableHead>{{ $t('features.categories.table.slug') }}</TableHead>
-                                <TableHead>{{ $t('features.categories.table.status') }}</TableHead>
-                                <TableHead class="text-center">{{ $t('features.categories.table.actions') }}</TableHead>
+                                <TableHead class="text-[10px] text-muted-foreground/70">{{ $t('features.categories.table.name') }}</TableHead>
+                                <TableHead class="text-[10px] text-muted-foreground/70">{{ $t('features.categories.table.slug') }}</TableHead>
+                                <TableHead class="text-[10px] text-muted-foreground/70">{{ $t('features.categories.table.status') }}</TableHead>
+                                <TableHead class="text-center text-[10px] text-muted-foreground/70">{{ $t('features.categories.table.actions') }}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
