@@ -1,6 +1,9 @@
 <template>
   <Dialog :open="open" @update:open="setOpen">
-    <DialogContent class="p-0 gap-0 max-w-2xl overflow-hidden bg-background text-foreground rounded-xl border border-border/50 shadow-2xl">
+    <DialogContent 
+      hide-close
+      class="p-0 gap-0 max-w-2xl overflow-hidden bg-background text-foreground rounded-xl border border-border/50 shadow-2xl"
+    >
       <!-- Search Input Header -->
       <div class="flex items-center border-b border-border/40 px-4 py-2" cmdk-input-wrapper>
         <Search class="ml-1 h-5 w-5 shrink-0 opacity-50" />
@@ -52,8 +55,8 @@
                     v-for="(item, index) in staticActions" 
                     :key="'static-' + index"
                     :class="[
-                        'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-                        selectedIndex === index ? 'bg-accent text-accent-foreground' : ''
+                        'relative flex cursor-default select-none items-center rounded-md px-3 py-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+                        selectedIndex === index ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-foreground' : 'text-foreground/70 hover:bg-muted/50 hover:text-foreground'
                     ]"
                     @click="handleSelect(item)"
                     @mousemove="selectedIndex = index"
@@ -97,8 +100,8 @@
                     v-for="(item, index) in group"
                     :key="item.type + '-' + item.id"
                     :class="[
-                        'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground',
-                        selectedIndex === (flatResults.indexOf(item) + (searchQuery ? 0 : staticActions.length)) ? 'bg-accent text-accent-foreground' : ''
+                        'relative flex cursor-default select-none items-center rounded-md px-3 py-2 text-sm outline-none transition-colors',
+                        selectedIndex === (groupOffset(groupName) + index) ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-foreground' : 'text-foreground/70 hover:bg-muted/50 hover:text-foreground'
                     ]"
                     @click="handleSelect(item)"
                     @mousemove="updateSelectedIndex(item)"
