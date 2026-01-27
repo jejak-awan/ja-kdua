@@ -1023,6 +1023,7 @@ const fetchMedia = async () => {
     try {
         const params: any = {
             page: pagination.value?.current_page || 1,
+            per_page: pagination.value?.per_page || 15,
             view: viewMode.value,
             trashed: isTrashMode.value ? 'only' : undefined,
         };
@@ -1135,6 +1136,9 @@ const changePage = (page: number) => {
     if (pagination.value) {
         pagination.value.current_page = page;
         fetchMedia();
+        // Scroll to top of results
+        const container = document.querySelector('.overflow-x-auto');
+        if (container) container.scrollTop = 0;
     }
 };
 

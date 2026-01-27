@@ -18,9 +18,12 @@
       <div v-if="showPerPage" class="flex items-center gap-2">
         <span>{{ $t('common.pagination.rowsPerPage') }}</span>
         <Select :model-value="String(perPage)" @update:model-value="handlePerPageChange">
-          <SelectTrigger class="w-[70px] h-8 text-xs !border-border/60 !bg-background">
-            <SelectValue />
-          </SelectTrigger>
+          <RadixSelectTrigger class="flex h-8 w-[70px] items-center justify-between rounded-lg border border-border/60 bg-background px-2.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20">
+            <RadixSelectValue />
+            <RadixSelectIcon as-child>
+              <ChevronDown class="h-3 w-3 opacity-50" />
+            </RadixSelectIcon>
+          </RadixSelectTrigger>
           <SelectContent>
             <SelectItem v-for="option in perPageOptions" :key="option" :value="String(option)">
               {{ option }}
@@ -65,7 +68,7 @@
             size="sm"
             :class="cn(
               'h-8 w-8 p-0 transition-none',
-              page === currentPage && '!text-primary-foreground'
+              page === currentPage ? '!text-white !bg-primary' : 'text-foreground/70'
             )"
             @click="goToPage(page)"
           >
@@ -104,13 +107,16 @@
 
 <script setup>
 import { computed } from 'vue';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-vue-next';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronDown } from 'lucide-vue-next';
+import { 
+  SelectTrigger as RadixSelectTrigger, 
+  SelectValue as RadixSelectValue,
+  SelectIcon as RadixSelectIcon 
+} from 'radix-vue';
 import Button from '@/components/ui/button.vue';
 import Select from '@/components/ui/select.vue';
 import SelectContent from '@/components/ui/select-content.vue';
 import SelectItem from '@/components/ui/select-item.vue';
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-import SelectValue from '@/components/ui/select-value.vue';
 import { cn } from '@/lib/utils';
 
 const props = defineProps({
