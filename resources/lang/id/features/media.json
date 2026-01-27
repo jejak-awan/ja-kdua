@@ -4,6 +4,7 @@
     "upload": "Unggah Media",
     "search": "Cari media...",
     "folders": "Folder",
+    "folder": "Folder",
     "newFolder": "Folder Baru",
     "shared": "Bersama",
     "allMedia": "Semua Media",
@@ -32,11 +33,14 @@
         "downloadZip": "Unduh sebagai ZIP",
         "view": "Lihat",
         "edit": "Ubah",
+        "download": "Unduh",
+        "copyUrl": "Salin URL",
         "select": "Pilih",
         "uploadNew": "Unggah Baru",
         "cancel": "Batal",
         "close": "Tutup",
-        "save": "Simpan Perubahan"
+        "save": "Simpan Perubahan",
+        "open": "Buka"
     },
     "loading": "Memuat media...",
     "empty": "Tidak ada media ditemukan",

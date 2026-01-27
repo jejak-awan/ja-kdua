@@ -411,131 +411,157 @@
 
                     <div v-else>
                         <!-- Grid View -->
-                        <div v-if="viewMode === 'grid'" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-3 p-4">
+                        <div v-if="viewMode === 'grid'" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 p-4">
                             <!-- Folders -->
-                            <div
+                            <ContextMenu
                                 v-for="folder in currentFolders"
                                 :key="'folder-' + folder.id"
-                                @click="selectFolder(folder.id)"
-                                class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-[border-color,background-color] duration-200 hover:border-primary/50 shadow-none hover:bg-accent/5"
                             >
-                                <div class="aspect-square bg-blue-50/20 dark:bg-blue-900/5 flex flex-col items-center justify-center p-2">
-                                    <div class="relative">
-                                        <Folder class="w-10 h-10 text-blue-400 fill-blue-400/5 transition-transform group-hover:scale-110" stroke-width="1.5" />
-                                        <div v-if="(folder.children_count || 0) > 0" class="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border border-white">
-                                            {{ folder.children_count }}
+                                <ContextMenuTrigger>
+                                    <div
+                                        @click="selectFolder(folder.id)"
+                                        :class="[
+                                            'group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-[border-color,background-color] duration-200 hover:border-primary/50 shadow-none hover:bg-accent/5 h-full',
+                                        ]"
+                                    >
+                                        <div class="aspect-square bg-blue-50/20 dark:bg-blue-900/5 flex flex-col items-center justify-center p-2">
+                                            <div class="relative">
+                                                <Folder class="w-10 h-10 text-blue-400 fill-blue-400/5 transition-transform group-hover:scale-110" stroke-width="1.5" />
+                                                <div v-if="(folder.children_count || 0) > 0" class="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border border-white">
+                                                    {{ folder.children_count }}
+                                                </div>
+                                            </div>
+                                            <p class="mt-2 text-[11px] font-medium text-foreground truncate w-full text-center px-1" :title="folder.name">
+                                                {{ folder.name }}
+                                            </p>
+                                            <Badge v-if="folder.is_shared" variant="secondary" class="mt-1 bg-blue-50 text-blue-600 hover:bg-blue-50/80 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800 text-[9px] h-4 px-1">
+                                                <Users class="w-2.5 h-2.5 mr-0.5" />
+                                                {{ $t('features.media.shared') }}
+                                            </Badge>
+                                        </div>
+                                        <!-- Folder Actions Overlay -->
+                                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button variant="ghost" size="icon" @click.stop="deleteFolder(folder)" class="h-8 w-8 text-destructive hover:bg-destructive/10 rounded-lg">
+                                                <Trash2 class="w-4 h-4" stroke-width="1.5" />
+                                            </Button>
                                         </div>
                                     </div>
-                                    <p class="mt-2 text-[11px] font-medium text-foreground truncate w-full text-center px-1" :title="folder.name">
-                                        {{ folder.name }}
-                                    </p>
-                                    <Badge v-if="folder.is_shared" variant="secondary" class="mt-1 bg-blue-100 text-blue-700 hover:bg-blue-100/80 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
-                                        <Users class="w-3 h-3 mr-1" />
-                                        {{ $t('features.media.shared') }}
-                                    </Badge>
-                                </div>
-                                <!-- Folder Actions Overlay -->
-                                <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Button variant="ghost" size="icon" @click.stop="deleteFolder(folder)" class="h-8 w-8 text-destructive hover:bg-destructive/10 rounded-lg">
-                                        <Trash2 class="w-4 h-4" stroke-width="1.5" />
-                                    </Button>
-                                </div>
-                            </div>
+                                </ContextMenuTrigger>
+                                <ContextMenuContent>
+                                    <template v-if="isTrashMode">
+                                        <ContextMenuItem @click="restoreFolder(folder)">
+                                            <RefreshCw class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            {{ t('features.media.actions.restore') }}
+                                        </ContextMenuItem>
+                                        <ContextMenuSeparator />
+                                        <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteFolder(folder)">
+                                            <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                            {{ t('features.media.actions.deletePermanent') }}
+                                        </ContextMenuItem>
+                                    </template>
+                                    <template v-else>
+                                        <ContextMenuItem @click="selectFolder(folder.id)">
+                                            <FolderOpen class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            {{ t('features.media.actions.open') }}
+                                        </ContextMenuItem>
+                                        <ContextMenuSeparator />
+                                        <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteFolder(folder)">
+                                            <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                            {{ t('features.media.actions.delete') }}
+                                        </ContextMenuItem>
+                                    </template>
+                                </ContextMenuContent>
+                            </ContextMenu>
 
                             <!-- Media Items -->
-                            <div
+                            <ContextMenu
                                 v-for="media in mediaList"
                                 :key="media.id"
-                                @click="toggleMediaSelection(media)"
-                                class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-[border-color,background-color] duration-200 hover:border-primary/50 shadow-none hover:bg-accent/5"
-                                :class="isMediaSelected(media.id) ? 'ring-2 ring-indigo-500 border-indigo-500' : ''"
                             >
-                                <!-- Checkbox -->
-                                <div class="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" :class="{ 'opacity-100': isMediaSelected(media.id) }">
-                                    <Checkbox
-                                        :checked="isMediaSelected(media.id)"
-                                        @update:checked="toggleMediaSelection(media)"
-                                        @click.stop
-                                    />
-                                </div>
-                                <div class="aspect-square bg-muted/30 flex items-center justify-center relative group-content" :data-media-id="media.id">
-                                    <LazyImage
-                                        v-if="media.mime_type?.startsWith('image/')"
-                                        :src="media.thumbnail_url || media.url"
-                                        :alt="media.alt || media.name"
-                                        image-class="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                        @error="handleImageError($event)"
-                                    />
-                                    <div v-else-if="media.mime_type?.startsWith('video/')" class="relative w-full h-full flex items-center justify-center bg-muted/50">
-                                        <VideoIcon class="w-12 h-12 text-muted-foreground" stroke-width="1.5" />
-                                        <div class="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
-                                            {{ media.mime_type.split('/')[1]?.toUpperCase() }}
+                                <ContextMenuTrigger>
+                                    <div
+                                        @click="toggleMediaSelection(media)"
+                                        class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-[border-color,background-color] duration-200 hover:border-primary/50 shadow-none hover:bg-accent/5 h-full"
+                                        :class="isMediaSelected(media.id) ? 'ring-2 ring-indigo-500 border-indigo-500' : ''"
+                                    >
+                                        <!-- Checkbox -->
+                                        <div class="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" :class="{ 'opacity-100': isMediaSelected(media.id) }">
+                                            <Checkbox
+                                                :checked="isMediaSelected(media.id)"
+                                                @update:checked="toggleMediaSelection(media)"
+                                                @click.stop
+                                            />
+                                        </div>
+                                        <div class="aspect-square bg-muted/30 flex items-center justify-center relative group-content" :data-media-id="media.id">
+                                            <LazyImage
+                                                v-if="media.mime_type?.startsWith('image/')"
+                                                :src="media.thumbnail_url || media.url"
+                                                :alt="media.alt || media.name"
+                                                image-class="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                                @error="handleImageError($event)"
+                                            />
+                                            <div v-else-if="media.mime_type?.startsWith('video/')" class="relative w-full h-full flex items-center justify-center bg-muted/50">
+                                                <VideoIcon class="w-12 h-12 text-muted-foreground" stroke-width="1.5" />
+                                                <div class="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
+                                                    {{ media.mime_type.split('/')[1]?.toUpperCase() }}
+                                                </div>
+                                            </div>
+                                            <div v-else class="text-muted-foreground">
+                                                <FileIcon class="w-12 h-12" stroke-width="1.5" />
+                                            </div>
+                                        </div>
+                                        <div class="p-1.5 border-t border-border bg-card">
+                                            <p class="text-[11px] font-medium text-foreground truncate mb-1" :title="media.name">{{ media.name }}</p>
+                                            <div class="flex flex-col gap-0.5">
+                                                <p class="text-[10px] text-muted-foreground leading-none">{{ formatFileSize(media.size) }}</p>
+                                                <div v-if="media.is_shared">
+                                                    <Badge variant="secondary" class="text-[9px] h-3.5 px-1 bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800 whitespace-nowrap mt-0.5">
+                                                        <Users class="w-2.5 h-2.5 mr-0.5" />
+                                                        {{ $t('features.media.shared') }}
+                                                    </Badge>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div v-else class="text-muted-foreground">
-                                        <FileIcon class="w-12 h-12" stroke-width="1.5" />
-                                    </div>
-                                    <!-- Quick Actions Overlay -->
-                                    <div class="absolute inset-0 bg-background/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
-                                        <template v-if="isTrashMode">
-                                            <Button
-                                                variant="secondary"
-                                                size="icon"
-                                                @click.stop="restoreMedia(media)"
-                                                class="h-9 w-9 bg-background/90 hover:bg-background text-foreground rounded-lg"
-                                                :title="t('features.media.actions.restore')"
-                                            >
-                                                <RefreshCw class="w-4 h-4" stroke-width="1.5" />
-                                            </Button>
-                                            <Button
-                                                variant="destructive"
-                                                size="icon"
-                                                @click.stop="deleteMedia(media)"
-                                                class="h-9 w-9 opacity-90 hover:opacity-100 rounded-lg"
-                                                :title="t('features.media.actions.deletePermanent')"
-                                            >
-                                                <Trash2 class="w-4 h-4" stroke-width="1.5" />
-                                            </Button>
-                                        </template>
-                                        <template v-else>
-                                            <Button
-                                                variant="secondary"
-                                                size="icon"
-                                                @click.stop="viewMedia(media)"
-                                                class="h-9 w-9 bg-background/90 hover:bg-background text-foreground rounded-lg"
-                                            >
-                                                <Eye class="w-4 h-4" stroke-width="1.5" />
-                                            </Button>
-                                            <Button
-                                                variant="secondary"
-                                                size="icon"
-                                                @click.stop="editMedia(media)"
-                                                class="h-9 w-9 bg-background/90 hover:bg-background text-foreground rounded-lg"
-                                            >
-                                                <Edit class="w-4 h-4" stroke-width="1.5" />
-                                            </Button>
-                                            <Button
-                                                variant="destructive"
-                                                size="icon"
-                                                @click.stop="deleteMedia(media)"
-                                                class="h-9 w-9 opacity-90 hover:opacity-100 rounded-lg"
-                                            >
-                                                <Trash2 class="w-4 h-4" stroke-width="1.5" />
-                                            </Button>
-                                        </template>
-                                    </div>
-                                </div>
-                                <div class="p-1.5 border-t border-border bg-card">
-                                    <p class="text-[11px] font-medium text-foreground truncate" :title="media.name">{{ media.name }}</p>
-                                    <div class="flex items-center justify-between mt-0.5">
-                                        <p class="text-[10px] text-muted-foreground">{{ formatFileSize(media.size) }}</p>
-                                        <Badge v-if="media.is_shared" variant="secondary" class="text-[9px] h-3.5 px-1 bg-blue-50 text-blue-600 hover:bg-blue-50/80 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
-                                            <Users class="w-2.5 h-2.5 mr-0.5" />
-                                            {{ $t('features.media.shared') }}
-                                        </Badge>
-                                    </div>
-                                </div>
-                            </div>
+                                </ContextMenuTrigger>
+                                <ContextMenuContent>
+                                    <template v-if="isTrashMode">
+                                        <ContextMenuItem @click="restoreMedia(media)">
+                                            <RefreshCw class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            {{ t('features.media.actions.restore') }}
+                                        </ContextMenuItem>
+                                        <ContextMenuSeparator />
+                                        <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteMedia(media)">
+                                            <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                            {{ t('features.media.actions.deletePermanent') }}
+                                        </ContextMenuItem>
+                                    </template>
+                                    <template v-else>
+                                        <ContextMenuItem @click="viewMedia(media)">
+                                            <Eye class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            {{ t('features.media.actions.view') }}
+                                        </ContextMenuItem>
+                                        <ContextMenuItem @click="editMedia(media)">
+                                            <Edit class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            {{ t('features.media.actions.edit') }}
+                                        </ContextMenuItem>
+                                        <ContextMenuItem @click="downloadMedia(media)">
+                                            <Download class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            {{ t('features.media.actions.download') }}
+                                        </ContextMenuItem>
+                                        <ContextMenuSeparator />
+                                        <ContextMenuItem @click="copyMediaUrl(media)">
+                                            <Link class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            {{ t('features.media.actions.copyUrl') }}
+                                        </ContextMenuItem>
+                                        <ContextMenuSeparator />
+                                        <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteMedia(media)">
+                                            <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                            {{ t('features.media.actions.delete') }}
+                                        </ContextMenuItem>
+                                    </template>
+                                </ContextMenuContent>
+                            </ContextMenu>
                         </div>
 
                         <div v-else class="overflow-x-auto">
@@ -581,117 +607,189 @@
                                 </thead>
                                 <tbody class="bg-card divide-y divide-border/40">
                                     <!-- Folders -->
-                                    <tr 
+                                    <ContextMenu 
                                         v-for="folder in currentFolders" 
-                                        :key="'folder-list-' + folder.id" 
-                                        class="hover:bg-muted/30 cursor-pointer group"
-                                        @click="selectFolder(folder.id)"
+                                        :key="'folder-list-' + folder.id"
                                     >
-                                        <td class="px-6 py-4 whitespace-nowrap" @click.stop>
-                                            <!-- Folders cannot be selected for bulk media actions for now -->
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <Folder class="w-5 h-5 text-muted-foreground/60" stroke-width="1.5" />
-                                        </td>
-                                        <td class="px-6 py-4" :style="{ width: nameColumnWidth + 'px', maxWidth: nameColumnWidth + 'px' }">
-                                            <div class="flex items-center gap-2 overflow-hidden">
-                                                <div class="text-sm font-medium text-foreground truncate" :title="folder.name">{{ folder.name }}</div>
-                                                <Badge v-if="folder.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
-                                                    {{ $t('features.media.shared') }}
-                                                </Badge>
-                                            </div>
-                                            <div class="text-xs text-muted-foreground">{{ $t('features.media.folder') }}</div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <Badge variant="outline" class="font-normal border-blue-200 text-blue-600 bg-blue-50/50 dark:bg-blue-900/10 dark:text-blue-300 dark:border-blue-800">
-                                                FOLDER
-                                            </Badge>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                            -
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                            {{ folder.parent?.name || '-' }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <div class="flex items-center justify-end gap-2">
-                                                <Button variant="ghost" size="icon" @click.stop="deleteFolder(folder)" class="h-8 w-8 text-destructive rounded-lg">
-                                                    <Trash2 class="w-4 h-4" stroke-width="1.5" />
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                        <ContextMenuTrigger as-child>
+                                            <tr 
+                                                class="hover:bg-muted/30 cursor-pointer group"
+                                                @click="selectFolder(folder.id)"
+                                            >
+                                                <td class="px-6 py-4 whitespace-nowrap" @click.stop>
+                                                    <!-- Folders cannot be selected for bulk media actions for now -->
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <Folder class="w-5 h-5 text-muted-foreground/60" stroke-width="1.5" />
+                                                </td>
+                                                <td class="px-6 py-4" :style="{ width: nameColumnWidth + 'px', maxWidth: nameColumnWidth + 'px' }">
+                                                    <div class="flex items-center gap-2 overflow-hidden">
+                                                        <div class="text-sm font-medium text-foreground truncate" :title="folder.name">{{ folder.name }}</div>
+                                                        <Badge v-if="folder.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
+                                                            {{ $t('features.media.shared') }}
+                                                        </Badge>
+                                                    </div>
+                                                    <div class="text-xs text-muted-foreground">{{ $t('features.media.folder') }}</div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <Badge variant="outline" class="font-normal border-blue-200 text-blue-600 bg-blue-50/50 dark:bg-blue-900/10 dark:text-blue-300 dark:border-blue-800">
+                                                        FOLDER
+                                                    </Badge>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                                                    -
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                                                    {{ folder.parent?.name || '-' }}
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                    <div class="flex items-center justify-end gap-2">
+                                                        <Button variant="ghost" size="icon" @click.stop="deleteFolder(folder)" class="h-8 w-8 text-destructive rounded-lg">
+                                                            <Trash2 class="w-4 h-4" stroke-width="1.5" />
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </ContextMenuTrigger>
+                                        <ContextMenuContent>
+                                            <template v-if="isTrashMode">
+                                                <ContextMenuItem @click="restoreFolder(folder)">
+                                                    <RefreshCw class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                    {{ t('features.media.actions.restore') }}
+                                                </ContextMenuItem>
+                                                <ContextMenuSeparator />
+                                                <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteFolder(folder)">
+                                                    <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                                    {{ t('features.media.actions.deletePermanent') }}
+                                                </ContextMenuItem>
+                                            </template>
+                                            <template v-else>
+                                                <ContextMenuItem @click="selectFolder(folder.id)">
+                                                    <FolderOpen class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                    {{ t('features.media.actions.open') }}
+                                                </ContextMenuItem>
+                                                <ContextMenuSeparator />
+                                                <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteFolder(folder)">
+                                                    <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                                    {{ t('features.media.actions.delete') }}
+                                                </ContextMenuItem>
+                                            </template>
+                                        </ContextMenuContent>
+                                    </ContextMenu>
+
                                     <!-- Media -->
-                                    <tr 
+                                    <ContextMenu 
                                         v-for="media in mediaList" 
-                                        :key="media.id" 
-                                        class="hover:bg-muted/30 cursor-pointer group"
-                                        :class="{ 'bg-primary/5': isMediaSelected(media.id) }"
-                                        @click="viewMedia(media)"
+                                        :key="media.id"
                                     >
-                                        <td class="px-6 py-4 whitespace-nowrap" @click.stop>
-                                            <Checkbox
-                                                :checked="isMediaSelected(media.id)"
-                                                @update:checked="toggleMediaSelection(media)"
-                                            />
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="w-10 h-10 bg-muted/20 rounded-xl flex items-center justify-center p-0.5" :data-media-id="media.id">
-                                                <LazyImage
-                                                    v-if="media.mime_type?.startsWith('image/')"
-                                                    :src="media.thumbnail_url || media.url"
-                                                    :alt="media.alt || media.name"
-                                                    image-class="w-full h-full object-cover rounded-lg shadow-none"
-                                                    @error="handleImageError($event)"
-                                                />
-                                                <VideoIcon v-else-if="media.mime_type?.startsWith('video/')" class="w-5 h-5 text-muted-foreground/40" stroke-width="1.5" />
-                                                <FileIcon v-else class="w-5 h-5 text-muted-foreground/40" stroke-width="1.5" />
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4" :style="{ width: nameColumnWidth + 'px', maxWidth: nameColumnWidth + 'px' }">
-                                            <div class="flex items-center gap-2 overflow-hidden">
-                                                <div class="text-sm font-medium text-foreground truncate" :title="media.name">{{ media.name }}</div>
-                                                <Badge v-if="media.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 border-blue-100">
-                                                    {{ $t('features.media.shared') }}
-                                                </Badge>
-                                            </div>
-                                            <div v-if="media.alt" class="text-sm text-muted-foreground truncate" :title="media.alt">{{ media.alt }}</div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <Badge variant="secondary" class="font-normal">
-                                                {{ media.mime_type.split('/')[1]?.toUpperCase() || media.mime_type }}
-                                            </Badge>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                            {{ formatFileSize(media.size) }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                            {{ media.folder?.name || '-' }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <div class="flex items-center justify-end gap-2">
-                                                <template v-if="isTrashMode">
-                                                    <Button variant="ghost" size="icon" @click.stop="restoreMedia(media)" class="h-8 w-8 text-primary rounded-lg">
-                                                        <RefreshCw class="w-4 h-4" stroke-width="1.5" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="icon" @click.stop="deleteMedia(media)" class="h-8 w-8 text-destructive rounded-lg">
-                                                        <Trash2 class="w-4 h-4" stroke-width="1.5" />
-                                                    </Button>
-                                                </template>
-                                                <template v-else>
-                                                    <Button variant="ghost" size="icon" @click.stop="viewMedia(media)" class="h-8 w-8 rounded-lg">
-                                                        <Eye class="w-4 h-4" stroke-width="1.5" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="icon" @click.stop="editMedia(media)" class="h-8 w-8 rounded-lg">
-                                                        <Edit class="w-4 h-4" stroke-width="1.5" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="icon" @click.stop="deleteMedia(media)" class="h-8 w-8 text-destructive rounded-lg">
-                                                        <Trash2 class="w-4 h-4" stroke-width="1.5" />
-                                                    </Button>
-                                                </template>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                        <ContextMenuTrigger as-child>
+                                            <tr 
+                                                class="hover:bg-muted/30 cursor-pointer group"
+                                                :class="{ 'bg-primary/5': isMediaSelected(media.id) }"
+                                                @click="viewMedia(media)"
+                                            >
+                                                <td class="px-6 py-4 whitespace-nowrap" @click.stop>
+                                                    <Checkbox
+                                                        :checked="isMediaSelected(media.id)"
+                                                        @update:checked="toggleMediaSelection(media)"
+                                                    />
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="w-10 h-10 bg-muted/20 rounded-xl flex items-center justify-center p-0.5" :data-media-id="media.id">
+                                                        <LazyImage
+                                                            v-if="media.mime_type?.startsWith('image/')"
+                                                            :src="media.thumbnail_url || media.url"
+                                                            :alt="media.alt || media.name"
+                                                            image-class="w-full h-full object-cover rounded-lg shadow-none"
+                                                            @error="handleImageError($event)"
+                                                        />
+                                                        <VideoIcon v-else-if="media.mime_type?.startsWith('video/')" class="w-5 h-5 text-muted-foreground/40" stroke-width="1.5" />
+                                                        <FileIcon v-else class="w-5 h-5 text-muted-foreground/40" stroke-width="1.5" />
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4" :style="{ width: nameColumnWidth + 'px', maxWidth: nameColumnWidth + 'px' }">
+                                                    <div class="flex items-center gap-2 overflow-hidden">
+                                                        <div class="text-sm font-medium text-foreground truncate" :title="media.name">{{ media.name }}</div>
+                                                        <Badge v-if="media.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 border-blue-100">
+                                                            {{ $t('features.media.shared') }}
+                                                        </Badge>
+                                                    </div>
+                                                    <div v-if="media.alt" class="text-sm text-muted-foreground truncate" :title="media.alt">{{ media.alt }}</div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <Badge variant="secondary" class="font-normal">
+                                                        {{ media.mime_type.split('/')[1]?.toUpperCase() || media.mime_type }}
+                                                    </Badge>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                                                    {{ formatFileSize(media.size) }}
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                                                    {{ media.folder?.name || '-' }}
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                    <div class="flex items-center justify-end gap-2">
+                                                        <template v-if="isTrashMode">
+                                                            <Button variant="ghost" size="icon" @click.stop="restoreMedia(media)" class="h-8 w-8 text-primary rounded-lg">
+                                                                <RefreshCw class="w-4 h-4" stroke-width="1.5" />
+                                                            </Button>
+                                                            <Button variant="ghost" size="icon" @click.stop="deleteMedia(media)" class="h-8 w-8 text-destructive rounded-lg">
+                                                                <Trash2 class="w-4 h-4" stroke-width="1.5" />
+                                                            </Button>
+                                                        </template>
+                                                        <template v-else>
+                                                            <Button variant="ghost" size="icon" @click.stop="viewMedia(media)" class="h-8 w-8 rounded-lg">
+                                                                <Eye class="w-4 h-4" stroke-width="1.5" />
+                                                            </Button>
+                                                            <Button variant="ghost" size="icon" @click.stop="editMedia(media)" class="h-8 w-8 rounded-lg">
+                                                                <Edit class="w-4 h-4" stroke-width="1.5" />
+                                                            </Button>
+                                                            <Button variant="ghost" size="icon" @click.stop="deleteMedia(media)" class="h-8 w-8 text-destructive rounded-lg">
+                                                                <Trash2 class="w-4 h-4" stroke-width="1.5" />
+                                                            </Button>
+                                                        </template>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </ContextMenuTrigger>
+                                        <ContextMenuContent>
+                                            <template v-if="isTrashMode">
+                                                <ContextMenuItem @click="restoreMedia(media)">
+                                                    <RefreshCw class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                    {{ t('features.media.actions.restore') }}
+                                                </ContextMenuItem>
+                                                <ContextMenuSeparator />
+                                                <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteMedia(media)">
+                                                    <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                                    {{ t('features.media.actions.deletePermanent') }}
+                                                </ContextMenuItem>
+                                            </template>
+                                            <template v-else>
+                                                <ContextMenuItem @click="viewMedia(media)">
+                                                    <Eye class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                    {{ t('features.media.actions.view') }}
+                                                </ContextMenuItem>
+                                                <ContextMenuItem @click="editMedia(media)">
+                                                    <Edit class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                    {{ t('features.media.actions.edit') }}
+                                                </ContextMenuItem>
+                                                <ContextMenuItem @click="downloadMedia(media)">
+                                                    <Download class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                    {{ t('features.media.actions.download') }}
+                                                </ContextMenuItem>
+                                                <ContextMenuSeparator />
+                                                <ContextMenuItem @click="copyMediaUrl(media)">
+                                                    <Link class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                    {{ t('features.media.actions.copyUrl') }}
+                                                </ContextMenuItem>
+                                                <ContextMenuSeparator />
+                                                <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteMedia(media)">
+                                                    <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                                    {{ t('features.media.actions.delete') }}
+                                                </ContextMenuItem>
+                                            </template>
+                                        </ContextMenuContent>
+                                    </ContextMenu>
                                 </tbody>
                             </table>
                         </div>
@@ -804,11 +902,13 @@
                 ></div>
             </div>
         </div>
+
+
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
@@ -839,7 +939,13 @@ import {
     ChevronRight,
     FolderOpen,
     CircleHelp,
-    RefreshCw
+    RefreshCw,
+    Copy,
+    Link,
+    PackageOpen,
+    Archive,
+    Clipboard,
+    ClipboardPaste,
 } from 'lucide-vue-next';
 import Pagination from '@/components/ui/pagination.vue';
 import api from '@/services/api';
@@ -882,9 +988,13 @@ import CardHeader from '@/components/ui/card-header.vue';
 // @ts-ignore
 import CardTitle from '@/components/ui/card-title.vue';
 // @ts-ignore
-import CardDescription from '@/components/ui/card-description.vue';
-
 import type { Media, MediaFolder } from '@/types/cms';
+
+import ContextMenu from '@/components/ui/context-menu.vue';
+import ContextMenuTrigger from '@/components/ui/context-menu-trigger.vue';
+import ContextMenuContent from '@/components/ui/context-menu-content.vue';
+import ContextMenuItem from '@/components/ui/context-menu-item.vue';
+import ContextMenuSeparator from '@/components/ui/context-menu-separator.vue';
 
 const { t } = useI18n();
 const toast = useToast();
@@ -968,10 +1078,10 @@ const startResizing = (e: MouseEvent) => {
     isResizing.value = true;
     startX.value = e.pageX;
     startWidth.value = nameColumnWidth.value;
-    
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', stopResizing);
-    
+
     // Prevent text selection while resizing
     document.body.style.userSelect = 'none';
 };
@@ -990,14 +1100,33 @@ const stopResizing = () => {
     document.body.style.userSelect = '';
 };
 
-onUnmounted(() => {
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', stopResizing);
-});
+// onUnmounted(() => { // Removed as per instruction, but might be needed for cleanup
+//     document.removeEventListener('mousemove', handleMouseMove);
+//     document.removeEventListener('mouseup', stopResizing);
+// });
 
 const toggleSidebar = () => {
     sidebarCollapsed.value = !sidebarCollapsed.value;
 };
+
+const downloadMedia = (media: Media) => {
+    if (media.url) {
+        const link = document.createElement('a');
+        link.href = media.url;
+        link.setAttribute('download', media.name);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }
+};
+
+const copyMediaUrl = (media: Media) => {
+    if (media.url) {
+        navigator.clipboard.writeText(media.url);
+        toast.success.urlCopied();
+    }
+};
+
 
 const toggleFolder = (folderId: number) => {
     if (expandedFolders.value.has(folderId)) {
@@ -1105,6 +1234,16 @@ const restoreMedia = async (media: Media) => {
         fetchStatistics();
     } catch (error) {
         // console.error('Failed to restore media:', error);
+    }
+};
+
+const restoreFolder = async (folder: MediaFolder) => {
+    try {
+        await api.post(`/admin/ja/media-folders/${folder.id}/restore`);
+        await fetchFolders();
+        fetchStatistics();
+    } catch (error) {
+        // console.error('Failed to restore folder:', error);
     }
 };
 

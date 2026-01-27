@@ -4,6 +4,7 @@
     "upload": "Upload Media",
     "search": "Search media...",
     "folders": "Folders",
+    "folder": "Folder",
     "newFolder": "New Folder",
     "shared": "Shared",
     "allMedia": "All Media",
@@ -37,11 +38,14 @@
         "downloadZip": "Download as ZIP",
         "view": "View",
         "edit": "Edit",
+        "download": "Download",
+        "copyUrl": "Copy URL",
         "select": "Select",
         "uploadNew": "Upload New",
         "cancel": "Cancel",
         "close": "Close",
-        "save": "Save Changes"
+        "save": "Save Changes",
+        "open": "Open"
     },
     "loading": "Loading media...",
     "empty": "No media found",

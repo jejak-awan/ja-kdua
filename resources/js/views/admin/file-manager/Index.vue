@@ -210,45 +210,56 @@
             </div>
             
             <div v-else class="space-y-2">
-                <div 
-                    v-for="item in trashItems" 
-                    :key="item.id"
-                    class="flex items-center justify-between p-4 bg-background rounded-lg border border-border hover:border-primary/30 transition-colors"
-                >
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded flex items-center justify-center bg-muted">
-                            <Folder v-if="item.type === 'folder'" class="w-5 h-5 text-primary" />
-                            <FileText v-else class="w-5 h-5 text-muted-foreground" />
-                        </div>
-                        <div>
-                            <p class="font-medium">{{ item.name }}</p>
-                            <p class="text-xs text-muted-foreground">
-                                {{ item.original_path }} • 
-                                {{ item.formatted_size || '-' }} • 
-                                Deleted {{ new Date(item.deleted_at).toLocaleDateString() }}
-                            </p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            @click="restoreItem(item)"
-                            title="Restore"
-                        >
-                            <RotateCcw class="w-4 h-4 mr-1" />
-                            Restore
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            @click="deleteFromTrash(item)"
-                            title="Delete Permanently"
-                        >
-                            <Trash2 class="w-4 h-4" />
-                        </Button>
-                    </div>
-                </div>
+                    <ContextMenu>
+                        <ContextMenuTrigger as-child>
+                            <div class="flex items-center justify-between p-4 bg-background rounded-lg border border-border hover:border-primary/30 transition-colors cursor-pointer" @click="restoreItem(item)">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded flex items-center justify-center bg-muted">
+                                        <Folder v-if="item.type === 'folder'" class="w-5 h-5 text-primary" />
+                                        <FileText v-else class="w-5 h-5 text-muted-foreground" />
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">{{ item.name }}</p>
+                                        <p class="text-xs text-muted-foreground">
+                                            {{ item.original_path }} • 
+                                            {{ item.formatted_size || '-' }} • 
+                                            Deleted {{ new Date(item.deleted_at).toLocaleDateString() }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        @click.stop="restoreItem(item)"
+                                        title="Restore"
+                                    >
+                                        <RotateCcw class="w-4 h-4 mr-1" />
+                                        Restore
+                                    </Button>
+                                    <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        @click.stop="deleteFromTrash(item)"
+                                        title="Delete Permanently"
+                                    >
+                                        <Trash2 class="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        </ContextMenuTrigger>
+                        <ContextMenuContent>
+                            <ContextMenuItem @click="restoreItem(item)">
+                                <RotateCcw class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                {{ t('features.file_manager.actions.restore') || 'Restore' }}
+                            </ContextMenuItem>
+                            <ContextMenuSeparator />
+                            <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteFromTrash(item)">
+                                <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                {{ t('features.file_manager.actions.delete_permanent') || 'Delete Permanently' }}
+                            </ContextMenuItem>
+                        </ContextMenuContent>
+                    </ContextMenu>
             </div>
         </div>
 
@@ -256,8 +267,7 @@
             <!-- Sidebar: Folders (Collapsible) -->
             <div 
                 :class="[
-                    'bg-card border border-border rounded-lg h-fit',
-                    isReady ? 'transition-[width,padding] duration-300 ease-in-out' : '',
+                    'bg-card border border-border rounded-lg h-fit transition-[width,padding] duration-300 ease-in-out',
                     sidebarCollapsed ? 'w-12 p-2' : 'w-64 p-4'
                 ]"
             >
@@ -284,23 +294,38 @@
                         @dragleave="onDragLeave"
                         @drop="(e) => onDrop(e, { path: '/' })"
                     >
-                        <button
-                            @click="navigateToPath('/')"
-                            :class="[
-                                'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-colors',
-                                currentPath === '/' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
-                                dropTarget === '/' ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
-                            ]"
-                        >
-                            <ChevronDown 
-                                v-if="folderTree.length > 0" 
-                                class="w-4 h-4 flex-shrink-0" 
-                            />
-                            <span v-else class="w-4"></span>
-                            <FolderOpen v-if="currentPath === '/'" class="w-4 h-4 flex-shrink-0 text-primary" />
-                            <Folder v-else class="w-4 h-4 flex-shrink-0" />
-                            <span class="truncate font-medium">{{ $t('features.file_manager.nav.root') }}</span>
-                        </button>
+                                <ContextMenu>
+                                    <ContextMenuTrigger as-child>
+                                        <button
+                                            @click="navigateToPath('/')"
+                                            :class="[
+                                                'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-colors',
+                                                currentPath === '/' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
+                                                dropTarget === '/' ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
+                                            ]"
+                                        >
+                                            <ChevronDown 
+                                                v-if="folderTree.length > 0" 
+                                                class="w-4 h-4 flex-shrink-0" 
+                                            />
+                                            <span v-else class="w-4"></span>
+                                            <FolderOpen v-if="currentPath === '/'" class="w-4 h-4 flex-shrink-0 text-primary" />
+                                            <Folder v-else class="w-4 h-4 flex-shrink-0" />
+                                            <span class="truncate font-medium">{{ $t('features.file_manager.nav.root') }}</span>
+                                        </button>
+                                    </ContextMenuTrigger>
+                                    <ContextMenuContent>
+                                        <ContextMenuItem @click="navigateToPath('/')">
+                                            <FolderOpen class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            {{ t('features.file_manager.actions.open') || 'Open Root' }}
+                                        </ContextMenuItem>
+                                        <ContextMenuSeparator v-if="clipboardCount > 0" />
+                                        <ContextMenuItem v-if="clipboardCount > 0" @click="pasteFromClipboard('/')">
+                                            <ClipboardPaste class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            {{ t('features.file_manager.actions.paste') || 'Paste' }}
+                                        </ContextMenuItem>
+                                    </ContextMenuContent>
+                                </ContextMenu>
                     </div>
                     
                     <!-- Tree level 1 -->
@@ -311,31 +336,63 @@
                             @dragleave="onDragLeave"
                             @drop="(e) => onDrop(e, folder)"
                         >
-                            <button
-                                @click="navigateToFolder(folder.path)"
-                                @contextmenu.prevent="(e) => showContextMenu(e, folder, 'folder')"
-                                :class="[
-                                    'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-colors',
-                                    currentPath === folder.path ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
-                                    dropTarget === folder.path ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
-                                ]"
-                                :title="folder.name"
-                            >
-                                <ChevronDown 
-                                    v-if="folder.children?.length > 0 && isFolderExpanded(folder.path)" 
-                                    class="w-4 h-4 flex-shrink-0 cursor-pointer" 
-                                    @click.stop="toggleFolderExpanded(folder.path)"
-                                />
-                                <ChevronRight 
-                                    v-else-if="folder.children?.length > 0" 
-                                    class="w-4 h-4 flex-shrink-0 cursor-pointer" 
-                                    @click.stop="toggleFolderExpanded(folder.path)"
-                                />
-                                <span v-else class="w-4"></span>
-                                <FolderOpen v-if="currentPath === folder.path || currentPath.startsWith(folder.path + '/')" class="w-4 h-4 flex-shrink-0 text-primary" />
-                                <Folder v-else class="w-4 h-4 flex-shrink-0" />
-                                <span class="truncate">{{ folder.name }}</span>
-                            </button>
+                                <ContextMenu>
+                                    <ContextMenuTrigger as-child>
+                                        <button
+                                            @click="navigateToFolder(folder.path)"
+                                            :class="[
+                                                'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-colors',
+                                                currentPath === folder.path ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
+                                                dropTarget === folder.path ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
+                                            ]"
+                                            :title="folder.name"
+                                        >
+                                            <ChevronDown 
+                                                v-if="folder.children?.length > 0 && isFolderExpanded(folder.path)" 
+                                                class="w-4 h-4 flex-shrink-0 cursor-pointer" 
+                                                @click.stop="toggleFolderExpanded(folder.path)"
+                                            />
+                                            <ChevronRight 
+                                                v-else-if="folder.children?.length > 0" 
+                                                class="w-4 h-4 flex-shrink-0 cursor-pointer" 
+                                                @click.stop="toggleFolderExpanded(folder.path)"
+                                            />
+                                            <span v-else class="w-4"></span>
+                                            <FolderOpen v-if="currentPath === folder.path || currentPath.startsWith(folder.path + '/')" class="w-4 h-4 flex-shrink-0 text-primary" />
+                                            <Folder v-else class="w-4 h-4 flex-shrink-0" />
+                                            <span class="truncate">{{ folder.name }}</span>
+                                        </button>
+                                    </ContextMenuTrigger>
+                                    <ContextMenuContent>
+                                        <ContextMenuItem @click="navigateToFolder(folder.path)">
+                                            <FolderOpen class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            {{ t('features.file_manager.actions.open') || 'Open Folder' }}
+                                        </ContextMenuItem>
+                                        <ContextMenuSeparator />
+                                        <ContextMenuItem @click="copyPath(folder)">
+                                            <Link class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            {{ t('features.file_manager.actions.copyPath') || 'Copy Path' }}
+                                        </ContextMenuItem>
+                                        <ContextMenuItem @click="compressItems([folder.path])">
+                                            <Archive class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            {{ t('features.file_manager.actions.compress') || 'Compress to ZIP' }}
+                                        </ContextMenuItem>
+                                        <ContextMenuSeparator />
+                                        <ContextMenuItem @click="copyToClipboard([folder], 'copy')">
+                                            <Clipboard class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            {{ t('features.file_manager.actions.copy') || 'Copy' }}
+                                        </ContextMenuItem>
+                                        <ContextMenuItem v-if="clipboardCount > 0" @click="pasteFromClipboard(folder.path)">
+                                            <ClipboardPaste class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            {{ t('features.file_manager.actions.paste') || 'Paste' }}
+                                        </ContextMenuItem>
+                                        <ContextMenuSeparator />
+                                        <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteFolderAction(folder)">
+                                            <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                            {{ t('features.file_manager.actions.delete') || 'Delete' }}
+                                        </ContextMenuItem>
+                                    </ContextMenuContent>
+                                </ContextMenu>
                         </div>
                         
                         <!-- Tree level 2 (children) -->
@@ -347,31 +404,63 @@
                                     @dragleave="onDragLeave"
                                     @drop="(e) => onDrop(e, child)"
                                 >
-                                    <button
-                                        @click="navigateToFolder(child.path)"
-                                        @contextmenu.prevent="(e) => showContextMenu(e, child, 'folder')"
-                                        :class="[
-                                            'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-colors',
-                                            currentPath === child.path ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
-                                            dropTarget === child.path ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
-                                        ]"
-                                        :title="child.name"
-                                    >
-                                        <ChevronDown 
-                                            v-if="child.children?.length > 0 && isFolderExpanded(child.path)" 
-                                            class="w-4 h-4 flex-shrink-0 cursor-pointer" 
-                                            @click.stop="toggleFolderExpanded(child.path)"
-                                        />
-                                        <ChevronRight 
-                                            v-else-if="child.children?.length > 0" 
-                                            class="w-4 h-4 flex-shrink-0 cursor-pointer" 
-                                            @click.stop="toggleFolderExpanded(child.path)"
-                                        />
-                                        <span v-else class="w-4"></span>
-                                        <FolderOpen v-if="currentPath === child.path || currentPath.startsWith(child.path + '/')" class="w-4 h-4 flex-shrink-0 text-primary" />
-                                        <Folder v-else class="w-4 h-4 flex-shrink-0" />
-                                        <span class="truncate">{{ child.name }}</span>
-                                    </button>
+                                    <ContextMenu>
+                                        <ContextMenuTrigger as-child>
+                                            <button
+                                                @click="navigateToFolder(child.path)"
+                                                :class="[
+                                                    'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-colors',
+                                                    currentPath === child.path ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
+                                                    dropTarget === child.path ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
+                                                ]"
+                                                :title="child.name"
+                                            >
+                                                <ChevronDown 
+                                                    v-if="child.children?.length > 0 && isFolderExpanded(child.path)" 
+                                                    class="w-4 h-4 flex-shrink-0 cursor-pointer" 
+                                                    @click.stop="toggleFolderExpanded(child.path)"
+                                                />
+                                                <ChevronRight 
+                                                    v-else-if="child.children?.length > 0" 
+                                                    class="w-4 h-4 flex-shrink-0 cursor-pointer" 
+                                                    @click.stop="toggleFolderExpanded(child.path)"
+                                                />
+                                                <span v-else class="w-4"></span>
+                                                <FolderOpen v-if="currentPath === child.path || currentPath.startsWith(child.path + '/')" class="w-4 h-4 flex-shrink-0 text-primary" />
+                                                <Folder v-else class="w-4 h-4 flex-shrink-0" />
+                                                <span class="truncate">{{ child.name }}</span>
+                                            </button>
+                                        </ContextMenuTrigger>
+                                        <ContextMenuContent>
+                                            <ContextMenuItem @click="navigateToFolder(child.path)">
+                                                <FolderOpen class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.open') || 'Open Folder' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem @click="copyPath(child)">
+                                                <Link class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.copyPath') || 'Copy Path' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuItem @click="compressItems([child.path])">
+                                                <Archive class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.compress') || 'Compress to ZIP' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem @click="copyToClipboard([child], 'copy')">
+                                                <Clipboard class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.copy') || 'Copy' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuItem v-if="clipboardCount > 0" @click="pasteFromClipboard(child.path)">
+                                                <ClipboardPaste class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.paste') || 'Paste' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteFolderAction(child)">
+                                                <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                                {{ t('features.file_manager.actions.delete') || 'Delete' }}
+                                            </ContextMenuItem>
+                                        </ContextMenuContent>
+                                    </ContextMenu>
                                 </div>
                                 
                                 <!-- Tree level 3 (grandchildren) -->
@@ -384,21 +473,53 @@
                                         @dragleave="onDragLeave"
                                         @drop="(e) => onDrop(e, grandChild)"
                                     >
-                                        <button
-                                            @click="navigateToFolder(grandChild.path)"
-                                            @contextmenu.prevent="(e) => showContextMenu(e, grandChild, 'folder')"
-                                            :class="[
-                                                'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-colors',
-                                                currentPath === grandChild.path ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
-                                                dropTarget === grandChild.path ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
-                                            ]"
-                                            :title="grandChild.name"
-                                        >
-                                            <span class="w-4"></span>
-                                            <FolderOpen v-if="currentPath === grandChild.path" class="w-4 h-4 flex-shrink-0 text-primary" />
-                                            <Folder v-else class="w-4 h-4 flex-shrink-0" />
-                                            <span class="truncate">{{ grandChild.name }}</span>
-                                        </button>
+                                        <ContextMenu>
+                                            <ContextMenuTrigger as-child>
+                                                <button
+                                                    @click="navigateToFolder(grandChild.path)"
+                                                    :class="[
+                                                        'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-colors',
+                                                        currentPath === grandChild.path ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
+                                                        dropTarget === grandChild.path ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
+                                                    ]"
+                                                    :title="grandChild.name"
+                                                >
+                                                    <span class="w-4"></span>
+                                                    <FolderOpen v-if="currentPath === grandChild.path" class="w-4 h-4 flex-shrink-0 text-primary" />
+                                                    <Folder v-else class="w-4 h-4 flex-shrink-0" />
+                                                    <span class="truncate">{{ grandChild.name }}</span>
+                                                </button>
+                                            </ContextMenuTrigger>
+                                            <ContextMenuContent>
+                                                <ContextMenuItem @click="navigateToFolder(grandChild.path)">
+                                                    <FolderOpen class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                    {{ t('features.file_manager.actions.open') || 'Open Folder' }}
+                                                </ContextMenuItem>
+                                                <ContextMenuSeparator />
+                                                <ContextMenuItem @click="copyPath(grandChild)">
+                                                    <Link class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                    {{ t('features.file_manager.actions.copyPath') || 'Copy Path' }}
+                                                </ContextMenuItem>
+                                                <ContextMenuItem @click="compressItems([grandChild.path])">
+                                                    <Archive class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                    {{ t('features.file_manager.actions.compress') || 'Compress to ZIP' }}
+                                                </ContextMenuItem>
+                                                <ContextMenuSeparator />
+                                                <ContextMenuItem @click="copyToClipboard([grandChild], 'copy')">
+                                                    <Clipboard class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                    {{ t('features.file_manager.actions.copy') || 'Copy' }}
+                                                </ContextMenuItem>
+                                                <ContextMenuItem v-if="clipboardCount > 0" @click="pasteFromClipboard(grandChild.path)">
+                                                    <ClipboardPaste class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                    {{ t('features.file_manager.actions.paste') || 'Paste' }}
+                                                </ContextMenuItem>
+                                                <ContextMenuSeparator />
+                                                <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteFolderAction(grandChild)">
+                                                    <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                                    {{ t('features.file_manager.actions.delete') || 'Delete' }}
+                                                </ContextMenuItem>
+                                            </ContextMenuContent>
+                                        </ContextMenu>
                                     </div>
                                 </template>
                             </template>
@@ -434,179 +555,351 @@
                 </div>
 
                 <!-- Content Area -->
-                <div class="bg-card border border-border/40 rounded-xl min-h-[400px]">
-                    <div v-if="loading" class="flex flex-col items-center justify-center p-12 text-muted-foreground h-full">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
-                        <p>{{ $t('features.file_manager.messages.loading') }}</p>
-                    </div>
-
-                    <div v-else-if="filteredFolders.length === 0 && filteredFiles.length === 0" class="flex flex-col items-center justify-center p-12 text-muted-foreground h-full" @contextmenu.prevent="showBackgroundContextMenu">
-                        <FolderPlus class="w-12 h-12 mb-4 opacity-20" />
-                        <p>{{ $t('features.file_manager.messages.noFiles') }}</p>
-                    </div>
-
-                    <div v-else>
-                        <!-- Grid View -->
-                        <div v-if="viewMode === 'grid'" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4" @contextmenu.prevent="showBackgroundContextMenu">
-                            <!-- Folders -->
-                            <div
-                                v-for="folder in paginatedFolders"
-                                :key="folder.path"
-                                class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-[border-color,background-color] duration-200 hover:border-primary/50 shadow-none hover:bg-accent/5"
-                                :class="{ 
-                                    'ring-2 ring-primary border-primary': isSelected(folder.path),
-                                    'ring-2 ring-green-500 border-green-500 bg-green-500/10': dropTarget === folder.path
-                                }"
-                                draggable="true"
-                                @click="navigateToFolder(folder.path)"
-                                @contextmenu.prevent.stop="(e) => showContextMenu(e, folder, 'folder')"
-                                @dragstart="(e) => onDragStart(e, folder, 'folder')"
-                                @dragend="onDragEnd"
-                                @dragover.prevent="(e) => onDragOver(e, folder)"
-                                @dragleave="onDragLeave"
-                                @drop="(e) => onDrop(e, folder)"
-                            >
-                                <div class="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" :class="{ 'opacity-100': isSelected(folder.path) }">
-                                    <Checkbox
-                                        :checked="isSelected(folder.path)"
-                                        @update:checked="(v) => toggleSelection(folder.path)"
-                                        @click.stop
-                                    />
-                                </div>
-                                <div class="aspect-square flex flex-col items-center justify-center p-4 bg-muted/10 group-hover:bg-muted/20">
-                                    <Folder class="w-12 h-12 text-blue-500 transition-transform group-hover:scale-110" stroke-width="1.5" />
-                                </div>
-                                <div class="p-3 border-t border-border/40 bg-card">
-                                    <p class="text-sm font-medium truncate text-center" :title="folder.name">{{ folder.name }}</p>
-                                    <p class="text-xs text-muted-foreground text-center mt-0.5">{{ $t('features.file_manager.labels.folders') }}</p>
-                                </div>
+                <ContextMenu>
+                    <ContextMenuTrigger as-child>
+                        <div class="bg-card border border-border/40 rounded-xl min-h-[400px]">
+                            <div v-if="loading" class="flex flex-col items-center justify-center p-12 text-muted-foreground h-full">
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+                                <p>{{ $t('features.file_manager.messages.loading') }}</p>
                             </div>
 
-                            <!-- Files -->
-                            <div
-                                v-for="file in paginatedFiles"
-                                :key="file.path"
-                                class="group relative bg-background border border-border rounded-lg hover:border-primary/50 transition-shadow cursor-pointer overflow-hidden shadow-sm"
-                                :class="{ 'ring-2 ring-primary border-primary': isSelected(file.path) }"
-                                draggable="true"
-                                @click="viewFile(file)"
-                                @contextmenu.prevent.stop="(e) => showContextMenu(e, file, 'file')"
-                                @dragstart="(e) => onDragStart(e, file, 'file')"
-                                @dragend="onDragEnd"
-                            >
-                                <div class="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" :class="{ 'opacity-100': isSelected(file.path) }">
-                                    <Checkbox
-                                        :checked="isSelected(file.path)"
-                                        @update:checked="(v) => toggleSelection(file.path)"
-                                        @click.stop
-                                    />
-                                </div>
-                                <div class="aspect-square flex items-center justify-center bg-muted/30 group-hover:bg-muted/50 overflow-hidden relative">
-                                    <img 
-                                        v-if="isImage(file)" 
-                                        :src="file.url" 
-                                        :alt="file.name"
-                                        class="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                        loading="lazy"
-                                    />
-                                    <div v-else-if="isVideo(file)" class="relative w-full h-full flex items-center justify-center bg-muted/50">
-                                        <Video class="w-12 h-12 text-muted-foreground/50" />
-                                        <div class="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
-                                            {{ file.extension?.toUpperCase() }}
-                                        </div>
-                                    </div>
-                                    <FileText v-else class="w-12 h-12 text-muted-foreground/50" />
-                                </div>
-                                <div class="p-3 border-t border-border/40 bg-card">
-                                    <p class="text-sm font-medium truncate" :title="file.name">{{ file.name }}</p>
-                                    <p class="text-xs text-muted-foreground mt-0.5 flex justify-between">
-                                        <span>{{ file.extension?.toUpperCase() }}</span>
-                                        <span>{{ formatFileSize(file.size) }}</span>
-                                    </p>
-                                </div>
+                            <div v-else-if="filteredFolders.length === 0 && filteredFiles.length === 0" class="flex flex-col items-center justify-center p-12 text-muted-foreground h-full">
+                                <FolderPlus class="w-12 h-12 mb-4 opacity-20" />
+                                <p>{{ $t('features.file_manager.messages.noFiles') }}</p>
                             </div>
-                        </div>
 
-                        <!-- List View -->
-                        <div v-else class="min-w-full" @contextmenu.prevent="showBackgroundContextMenu">
-                            <table class="w-full text-sm item-center divide-y divide-border/40">
-                                <thead class="bg-transparent text-muted-foreground font-medium border-b border-border/40">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left w-12">
-                                            <Checkbox
-                                                :checked="isAllSelected"
-                                                @update:checked="toggleSelectAll"
-                                            />
-                                        </th>
-                                        <th class="px-4 py-3 text-left w-12"></th> <!-- Icon -->
-                                        <th class="px-4 py-3 text-left">{{ $t('features.file_manager.sort.name') }}</th>
-                                        <th class="px-4 py-3 text-left">{{ $t('features.file_manager.sort.size') }}</th>
-                                        <th class="px-4 py-3 text-left">{{ $t('features.file_manager.sort.date') }}</th>
-                                        <th class="px-4 py-3 text-right w-24">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-border/40">
-                                    <tr 
-                                        v-for="folder in paginatedFolders" 
+                            <div v-else>
+                                <!-- Grid View -->
+                                <div v-if="viewMode === 'grid'" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4">
+                                    <!-- Folders -->
+                                    <ContextMenu 
+                                        v-for="folder in paginatedFolders"
                                         :key="folder.path"
-                                        class="hover:bg-muted/30 cursor-pointer group"
-                                        :class="{ 'bg-primary/5': isSelected(folder.path) }"
-                                        @click="navigateToFolder(folder.path)"
-                                        @contextmenu.prevent.stop="(e) => showContextMenu(e, folder, 'folder')"
                                     >
-                                        <td class="px-4 py-3" @click.stop>
-                                            <Checkbox
-                                                :checked="isSelected(folder.path)"
-                                                @update:checked="(v) => toggleSelection(folder.path)"
-                                            />
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            <Folder class="w-5 h-5 text-muted-foreground/60" stroke-width="1.5" />
-                                        </td>
-                                        <td class="px-4 py-3 font-medium">{{ folder.name }}</td>
-                                        <td class="px-4 py-3 text-muted-foreground">-</td>
-                                        <td class="px-4 py-3 text-muted-foreground">{{ formatDate(folder.updated_at) }}</td>
-                                        <td class="px-4 py-3 text-right">
-                                            <Button variant="ghost" size="icon" class="h-8 w-8 opacity-0 group-hover:opacity-100">
-                                                <MoreVertical class="w-4 h-4" />
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                    <tr 
-                                        v-for="file in paginatedFiles" 
-                                        :key="file.path"
-                                        class="hover:bg-muted/30 cursor-pointer group"
-                                        :class="{ 'bg-primary/5': isSelected(file.path) }"
-                                        @click="viewFile(file)"
-                                        @contextmenu.prevent.stop="(e) => showContextMenu(e, file, 'file')"
-                                    >
-                                        <td class="px-4 py-3" @click.stop>
-                                            <Checkbox
-                                                :checked="isSelected(file.path)"
-                                                @update:checked="(v) => toggleSelection(file.path)"
-                                            />
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            <img v-if="isImage(file)" :src="file.url" class="w-8 h-8 rounded object-cover border border-border" />
-                                            <Video v-else-if="isVideo(file)" class="w-5 h-5 text-muted-foreground" />
-                                            <FileText v-else class="w-5 h-5 text-muted-foreground" />
-                                        </td>
-                                        <td class="px-4 py-3 font-medium">{{ file.name }}</td>
-                                        <td class="px-4 py-3 text-muted-foreground">{{ formatFileSize(file.size) }}</td>
-                                        <td class="px-4 py-3 text-muted-foreground">{{ formatDate(file.uploaded_at || file.updated_at) }}</td>
-                                        <td class="px-4 py-3 text-right">
-                                            <div class="flex justify-end opacity-0 group-hover:opacity-100">
-                                                <Button variant="ghost" size="icon" class="h-8 w-8" @click.stop="deleteFile(file)">
-                                                    <Trash2 class="w-4 h-4 text-destructive" />
-                                                </Button>
+                                        <ContextMenuTrigger as-child>
+                                            <div
+                                                class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-[border-color,background-color] duration-200 hover:border-primary/50 shadow-none hover:bg-accent/5"
+                                                :class="{ 
+                                                    'ring-2 ring-primary border-primary': isSelected(folder.path),
+                                                    'ring-2 ring-green-500 border-green-500 bg-green-500/10': dropTarget === folder.path
+                                                }"
+                                                draggable="true"
+                                                @click="navigateToFolder(folder.path)"
+                                                @dragstart="(e) => onDragStart(e, folder, 'folder')"
+                                                @dragend="onDragEnd"
+                                                @dragover.prevent="(e) => onDragOver(e, folder)"
+                                                @dragleave="onDragLeave"
+                                                @drop="(e) => onDrop(e, folder)"
+                                            >
+                                                <div class="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" :class="{ 'opacity-100': isSelected(folder.path) }">
+                                                    <Checkbox
+                                                        :checked="isSelected(folder.path)"
+                                                        @update:checked="(v) => toggleSelection(folder.path)"
+                                                        @click.stop
+                                                    />
+                                                </div>
+                                                <div class="aspect-square flex flex-col items-center justify-center p-4 bg-muted/10 group-hover:bg-muted/20">
+                                                    <Folder class="w-12 h-12 text-blue-500 transition-transform group-hover:scale-110" stroke-width="1.5" />
+                                                </div>
+                                                <div class="p-3 border-t border-border/40 bg-card">
+                                                    <p class="text-sm font-medium truncate text-center" :title="folder.name">{{ folder.name }}</p>
+                                                    <p class="text-xs text-muted-foreground text-center mt-0.5">{{ $t('features.file_manager.labels.folders') }}</p>
+                                                </div>
                                             </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                        </ContextMenuTrigger>
+                                        <ContextMenuContent>
+                                            <ContextMenuItem @click="navigateToFolder(folder.path)">
+                                                <FolderOpen class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.open') || 'Open Folder' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem @click="copyPath(folder)">
+                                                <Link class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.copyPath') || 'Copy Path' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuItem @click="compressItems([folder.path])">
+                                                <Archive class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.compress') || 'Compress to ZIP' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem @click="copyToClipboard([folder], 'copy')">
+                                                <Clipboard class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.copy') || 'Copy' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuItem v-if="clipboardCount > 0" @click="pasteFromClipboard(folder.path)">
+                                                <ClipboardPaste class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.paste') || 'Paste' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteFolderAction(folder)">
+                                                <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                                {{ t('features.file_manager.actions.delete') || 'Delete' }}
+                                            </ContextMenuItem>
+                                        </ContextMenuContent>
+                                    </ContextMenu>
+
+                                    <!-- Files -->
+                                    <ContextMenu 
+                                        v-for="file in paginatedFiles"
+                                        :key="file.path"
+                                    >
+                                        <ContextMenuTrigger as-child>
+                                            <div
+                                                class="group relative bg-background border border-border rounded-lg hover:border-primary/50 transition-shadow cursor-pointer overflow-hidden shadow-sm"
+                                                :class="{ 'ring-2 ring-primary border-primary': isSelected(file.path) }"
+                                                draggable="true"
+                                                @click="viewFile(file)"
+                                                @dragstart="(e) => onDragStart(e, file, 'file')"
+                                                @dragend="onDragEnd"
+                                            >
+                                                <div class="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" :class="{ 'opacity-100': isSelected(file.path) }">
+                                                    <Checkbox
+                                                        :checked="isSelected(file.path)"
+                                                        @update:checked="(v) => toggleSelection(file.path)"
+                                                        @click.stop
+                                                    />
+                                                </div>
+                                                <div class="aspect-square flex items-center justify-center bg-muted/30 group-hover:bg-muted/50 overflow-hidden relative">
+                                                    <img 
+                                                        v-if="isImage(file)" 
+                                                        :src="file.url" 
+                                                        :alt="file.name"
+                                                        class="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                                        loading="lazy"
+                                                    />
+                                                    <div v-else-if="isVideo(file)" class="relative w-full h-full flex items-center justify-center bg-muted/50">
+                                                        <Video class="w-12 h-12 text-muted-foreground/50" />
+                                                        <div class="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
+                                                            {{ file.extension?.toUpperCase() }}
+                                                        </div>
+                                                    </div>
+                                                    <FileText v-else class="w-12 h-12 text-muted-foreground/50" />
+                                                </div>
+                                                <div class="p-3 border-t border-border/40 bg-card">
+                                                    <p class="text-sm font-medium truncate" :title="file.name">{{ file.name }}</p>
+                                                    <p class="text-xs text-muted-foreground mt-0.5 flex justify-between">
+                                                        <span>{{ file.extension?.toUpperCase() }}</span>
+                                                        <span>{{ formatFileSize(file.size) }}</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </ContextMenuTrigger>
+                                        <ContextMenuContent>
+                                            <ContextMenuItem @click="viewFile(file)">
+                                                <Eye class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.open') || 'Open / Preview' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuItem @click="downloadFile(file)">
+                                                <Download class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.download') || 'Download' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem @click="copyPath(file)">
+                                                <Link class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.copyPath') || 'Copy Path' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuItem @click="copyUrl(file)">
+                                                <Copy class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.copyUrl') || 'Copy URL' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem v-if="isArchive(file)" @click="extractFile(file)">
+                                                <PackageOpen class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.extract') || 'Extract Here' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuItem @click="compressItems([file.path])">
+                                                <Archive class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.compress') || 'Compress to ZIP' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem @click="copyToClipboard([file], 'copy')">
+                                                <Clipboard class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                {{ t('features.file_manager.actions.copy') || 'Copy' }}
+                                            </ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteFileAction(file)">
+                                                <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                                {{ t('features.file_manager.actions.delete') || 'Delete' }}
+                                            </ContextMenuItem>
+                                        </ContextMenuContent>
+                                    </ContextMenu>
+                                </div>
+
+                                <!-- List View -->
+                                <div v-else class="min-w-full">
+                                    <table class="w-full text-sm item-center divide-y divide-border/40">
+                                        <thead class="bg-transparent text-muted-foreground font-medium border-b border-border/40">
+                                            <tr>
+                                                <th class="px-4 py-3 text-left w-12">
+                                                    <Checkbox
+                                                        :checked="isAllSelected"
+                                                        @update:checked="toggleSelectAll"
+                                                    />
+                                                </th>
+                                                <th class="px-4 py-3 text-left w-12"></th> <!-- Icon -->
+                                                <th class="px-4 py-3 text-left">{{ $t('features.file_manager.sort.name') }}</th>
+                                                <th class="px-4 py-3 text-left">{{ $t('features.file_manager.sort.size') }}</th>
+                                                <th class="px-4 py-3 text-left">{{ $t('features.file_manager.sort.date') }}</th>
+                                                <th class="px-4 py-3 text-right w-24">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-border/40">
+                                            <ContextMenu 
+                                                v-for="folder in paginatedFolders" 
+                                                :key="folder.path"
+                                            >
+                                                <ContextMenuTrigger as-child>
+                                                    <tr 
+                                                        class="hover:bg-muted/30 cursor-pointer group"
+                                                        :class="{ 'bg-primary/5': isSelected(folder.path) }"
+                                                        @click="navigateToFolder(folder.path)"
+                                                    >
+                                                        <td class="px-4 py-3" @click.stop>
+                                                            <Checkbox
+                                                                :checked="isSelected(folder.path)"
+                                                                @update:checked="(v) => toggleSelection(folder.path)"
+                                                            />
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            <Folder class="w-5 h-5 text-muted-foreground/60" stroke-width="1.5" />
+                                                        </td>
+                                                        <td class="px-4 py-3 font-medium">{{ folder.name }}</td>
+                                                        <td class="px-4 py-3 text-muted-foreground">-</td>
+                                                        <td class="px-4 py-3 text-muted-foreground">{{ formatDate(folder.updated_at) }}</td>
+                                                        <td class="px-4 py-3 text-right">
+                                                            <Button variant="ghost" size="icon" class="h-8 w-8 opacity-0 group-hover:opacity-100">
+                                                                <MoreVertical class="w-4 h-4" />
+                                                            </Button>
+                                                        </td>
+                                                    </tr>
+                                                </ContextMenuTrigger>
+                                                <ContextMenuContent>
+                                                    <ContextMenuItem @click="navigateToFolder(folder.path)">
+                                                        <FolderOpen class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                        {{ t('features.file_manager.actions.open') || 'Open Folder' }}
+                                                    </ContextMenuItem>
+                                                    <ContextMenuSeparator />
+                                                    <ContextMenuItem @click="copyPath(folder)">
+                                                        <Link class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                        {{ t('features.file_manager.actions.copyPath') || 'Copy Path' }}
+                                                    </ContextMenuItem>
+                                                    <ContextMenuItem @click="compressItems([folder.path])">
+                                                        <Archive class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                        {{ t('features.file_manager.actions.compress') || 'Compress to ZIP' }}
+                                                    </ContextMenuItem>
+                                                    <ContextMenuSeparator />
+                                                    <ContextMenuItem @click="copyToClipboard([folder], 'copy')">
+                                                        <Clipboard class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                        {{ t('features.file_manager.actions.copy') || 'Copy' }}
+                                                    </ContextMenuItem>
+                                                    <ContextMenuItem v-if="clipboardCount > 0" @click="pasteFromClipboard(folder.path)">
+                                                        <ClipboardPaste class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                        {{ t('features.file_manager.actions.paste') || 'Paste' }}
+                                                    </ContextMenuItem>
+                                                    <ContextMenuSeparator />
+                                                    <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteFolderAction(folder)">
+                                                        <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                                        {{ t('features.file_manager.actions.delete') || 'Delete' }}
+                                                    </ContextMenuItem>
+                                                </ContextMenuContent>
+                                            </ContextMenu>
+
+                                            <ContextMenu 
+                                                v-for="file in paginatedFiles" 
+                                                :key="file.path"
+                                            >
+                                                <ContextMenuTrigger as-child>
+                                                    <tr 
+                                                        class="hover:bg-muted/30 cursor-pointer group"
+                                                        :class="{ 'bg-primary/5': isSelected(file.path) }"
+                                                        @click="viewFile(file)"
+                                                    >
+                                                        <td class="px-4 py-3" @click.stop>
+                                                            <Checkbox
+                                                                :checked="isSelected(file.path)"
+                                                                @update:checked="(v) => toggleSelection(file.path)"
+                                                            />
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            <img v-if="isImage(file)" :src="file.url" class="w-8 h-8 rounded object-cover border border-border" />
+                                                            <Video v-else-if="isVideo(file)" class="w-5 h-5 text-muted-foreground" />
+                                                            <FileText v-else class="w-5 h-5 text-muted-foreground" />
+                                                        </td>
+                                                        <td class="px-4 py-3 font-medium">{{ file.name }}</td>
+                                                        <td class="px-4 py-3 text-muted-foreground">{{ formatFileSize(file.size) }}</td>
+                                                        <td class="px-4 py-3 text-muted-foreground">{{ formatDate(file.uploaded_at || file.updated_at) }}</td>
+                                                        <td class="px-4 py-3 text-right">
+                                                            <div class="flex justify-end opacity-0 group-hover:opacity-100">
+                                                                <Button variant="ghost" size="icon" class="h-8 w-8" @click.stop="deleteFileAction(file)">
+                                                                    <Trash2 class="w-4 h-4 text-destructive" />
+                                                                </Button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </ContextMenuTrigger>
+                                                <ContextMenuContent>
+                                                    <ContextMenuItem @click="viewFile(file)">
+                                                        <Eye class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                        {{ t('features.file_manager.actions.open') || 'Open / Preview' }}
+                                                    </ContextMenuItem>
+                                                    <ContextMenuItem @click="downloadFile(file)">
+                                                        <Download class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                        {{ t('features.file_manager.actions.download') || 'Download' }}
+                                                    </ContextMenuItem>
+                                                    <ContextMenuSeparator />
+                                                    <ContextMenuItem @click="copyPath(file)">
+                                                        <Link class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                        {{ t('features.file_manager.actions.copyPath') || 'Copy Path' }}
+                                                    </ContextMenuItem>
+                                                    <ContextMenuItem @click="copyUrl(file)">
+                                                        <Copy class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                        {{ t('features.file_manager.actions.copyUrl') || 'Copy URL' }}
+                                                    </ContextMenuItem>
+                                                    <ContextMenuSeparator />
+                                                    <ContextMenuItem v-if="isArchive(file)" @click="extractFile(file)">
+                                                        <PackageOpen class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                        {{ t('features.file_manager.actions.extract') || 'Extract Here' }}
+                                                    </ContextMenuItem>
+                                                    <ContextMenuItem @click="compressItems([file.path])">
+                                                        <Archive class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                        {{ t('features.file_manager.actions.compress') || 'Compress to ZIP' }}
+                                                    </ContextMenuItem>
+                                                    <ContextMenuSeparator />
+                                                    <ContextMenuItem @click="copyToClipboard([file], 'copy')">
+                                                        <Clipboard class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                        {{ t('features.file_manager.actions.copy') || 'Copy' }}
+                                                    </ContextMenuItem>
+                                                    <ContextMenuSeparator />
+                                                    <ContextMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive" @click="deleteFileAction(file)">
+                                                        <Trash2 class="w-4 h-4 text-destructive/70 transition-colors" />
+                                                        {{ t('features.file_manager.actions.delete') || 'Delete' }}
+                                                    </ContextMenuItem>
+                                                </ContextMenuContent>
+                                            </ContextMenu>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                        <ContextMenuLabel>{{ $t('features.file_manager.actions.quickActions') || 'Quick Actions' }}</ContextMenuLabel>
+                        <ContextMenuSeparator />
+                        <ContextMenuItem @click="showUploadModal = true">
+                            <Upload class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                            {{ t('features.file_manager.actions.upload') || 'Upload Files' }}
+                        </ContextMenuItem>
+                        <ContextMenuItem @click="showCreateFolderModal = true">
+                            <FolderPlus class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                            {{ t('features.file_manager.actions.newFolder') || 'New Folder' }}
+                        </ContextMenuItem>
+                        <ContextMenuSeparator v-if="clipboardCount > 0" />
+                        <ContextMenuItem v-if="clipboardCount > 0" @click="pasteFromClipboard(currentPath)">
+                            <ClipboardPaste class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                            {{ t('features.file_manager.actions.paste') || 'Paste Here' }} ({{ clipboardCount }})
+                        </ContextMenuItem>
+                    </ContextMenuContent>
+                </ContextMenu>
 
                 <!-- Pagination -->
                 <Pagination
@@ -676,139 +969,6 @@
             :path="currentPath"
         />
 
-        <!-- Context Menu -->
-        <Teleport to="body">
-            <div
-                v-if="contextMenu.show"
-                ref="contextMenuRef"
-                class="fixed z-50 min-w-[180px] bg-background border border-border rounded-lg shadow-lg py-1 animate-in fade-in zoom-in-95 max-h-[calc(100vh-20px)] overflow-y-auto"
-                :class="{ 'invisible': contextMenu.invisible }"
-                :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
-                @click.stop
-            >
-                <!-- Trash specific options -->
-                <template v-if="showTrashView">
-                    <button
-                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                        @click="contextMenuAction('restore')"
-                    >
-                        <RotateCcw class="w-4 h-4" />
-                        Restore
-                    </button>
-                    <div class="h-px bg-border my-1"></div>
-                    <button
-                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-destructive"
-                        @click="contextMenuAction('delete')"
-                    >
-                        <Trash2 class="w-4 h-4" />
-                        Delete Permanently
-                    </button>
-                </template>
-
-                <template v-else>
-                    <!-- Normal options -->
-                    <!-- File-specific options -->
-                    <template v-if="contextMenu.type === 'file'">
-                        <button
-                            class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                            @click="contextMenuAction('open')"
-                        >
-                            <Eye class="w-4 h-4" />
-                            Open / Preview
-                        </button>
-                        <button
-                            class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                            @click="contextMenuAction('download')"
-                        >
-                            <Download class="w-4 h-4" />
-                            Download
-                        </button>
-                        <div class="h-px bg-border my-1"></div>
-                    </template>
-    
-                    <!-- Folder-specific options -->
-                    <template v-if="contextMenu.type === 'folder'">
-                        <button
-                            class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                            @click="contextMenuAction('openFolder')"
-                        >
-                            <Folder class="w-4 h-4" />
-                            Open Folder
-                        </button>
-                        <div class="h-px bg-border my-1"></div>
-                    </template>
-    
-                    <!-- Common options -->
-                    <button
-                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                        @click="contextMenuAction('copyPath')"
-                    >
-                        <Link class="w-4 h-4" />
-                        Copy Path
-                    </button>
-                    <button
-                        v-if="contextMenu.type === 'file'"
-                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                        @click="contextMenuAction('copyUrl')"
-                    >
-                        <Copy class="w-4 h-4" />
-                        Copy URL
-                    </button>
-                    
-                    <!-- Extract option for archive files -->
-                    <button
-                        v-if="contextMenu.type === 'file' && isArchive(contextMenu.item)"
-                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                        @click="contextMenuAction('extract')"
-                    >
-                        <PackageOpen class="w-4 h-4" />
-                        Extract Here
-                    </button>
-                    
-                    <!-- Compress option for files and folders -->
-                    <button
-                        v-if="contextMenu.type !== 'background'"
-                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                        @click="contextMenuAction('compress')"
-                    >
-                        <Archive class="w-4 h-4" />
-                        Compress to ZIP
-                    </button>
-                    
-                    <div class="h-px bg-border my-1"></div>
-    
-                    <!-- Copy option -->
-                    <button
-                        v-if="contextMenu.type !== 'background'"
-                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                        @click="contextMenuAction('copy')"
-                    >
-                        <Clipboard class="w-4 h-4" />
-                        Copy
-                    </button>
-    
-                    <!-- Paste option (only for folders or background) -->
-                    <button
-                        v-if="(contextMenu.type === 'folder' || contextMenu.type === 'background') && clipboardCount > 0"
-                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                        @click="contextMenuAction('paste')"
-                    >
-                        <ClipboardPaste class="w-4 h-4" />
-                        Paste ({{ clipboardCount }})
-                    </button>
-    
-                    <div class="h-px bg-border my-1"></div>
-                    <button
-                        v-if="contextMenu.type !== 'background'"
-                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-destructive"
-                        @click="contextMenuAction('delete')"
-                    >
-                        <Trash2 class="w-4 h-4" />
-                        Delete
-                    </button>
-                </template>
-            </div>
-        </Teleport>
     </div>
 </template>
 
@@ -880,10 +1040,16 @@ import DialogTitle from '@/components/ui/dialog-title.vue';
 import DialogDescription from '@/components/ui/dialog-description.vue';
 import Pagination from '@/components/ui/pagination.vue';
 
+import ContextMenu from '@/components/ui/context-menu.vue';
+import ContextMenuTrigger from '@/components/ui/context-menu-trigger.vue';
+import ContextMenuContent from '@/components/ui/context-menu-content.vue';
+import ContextMenuItem from '@/components/ui/context-menu-item.vue';
+import ContextMenuSeparator from '@/components/ui/context-menu-separator.vue';
+import ContextMenuLabel from '@/components/ui/context-menu-label.vue';
+
 
 
 const files = ref([]);
-const isReady = ref(false);
 const folders = ref([]);
 const allFolders = ref([]); // Cache all folders
 const filesCache = ref(new Map()); // Cache files per path
@@ -907,13 +1073,7 @@ const clipboard = ref({
 });
 const clipboardCount = computed(() => clipboard.value.items.length);
 const sidebarCollapsed = ref(localStorage.getItem('fileManagerSidebarCollapsed') === 'true');
-const contextMenu = ref({
-    show: false,
-    x: 0,
-    y: 0,
-    item: null,
-    type: null // 'file' or 'folder'
-});
+// Context Menu state is now handled by radix-vue components
 
 // Drag & Drop state
 const draggedItem = ref(null);
@@ -1270,158 +1430,34 @@ const closeImagePreview = () => {
     previewImage.value = null;
 };
 
-const contextMenuRef = ref(null);
-
-const setContextMenuPosition = async (event, item, type) => {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    // Initial position (hidden for measurement)
-    contextMenu.value = {
-        show: true,
-        x: event.clientX,
-        y: event.clientY,
-        item: item,
-        type: type,
-        invisible: true // Add this flag
-    };
-
-    await nextTick();
-
-    if (contextMenuRef.value) {
-        const menuEl = contextMenuRef.value;
-        const rect = menuEl.getBoundingClientRect();
-        const winWidth = document.documentElement.clientWidth;
-        const winHeight = document.documentElement.clientHeight;
-        const buffer = 10;
-
-        let x = event.clientX;
-        let y = event.clientY;
-
-        // Check right edge
-        if (x + rect.width + buffer > winWidth) {
-            // Flip to left of cursor
-            x -= rect.width;
-        }
-
-        // Check bottom edge
-        if (y + rect.height + buffer > winHeight) {
-            // Flip to above cursor
-            y -= rect.height;
-        }
-
-        // Ensure not going off top-left
-        if (x < buffer) x = buffer;
-        if (y < buffer) y = buffer;
-
-        contextMenu.value.x = x;
-        contextMenu.value.y = y;
-        contextMenu.value.invisible = false;
+const downloadFile = (file) => {
+    if (file.url) {
+        const link = document.createElement('a');
+        link.href = file.url;
+        link.download = file.name;
+        link.target = '_blank';
+        link.click();
     }
 };
 
-const showFolderContextMenu = (event, folder) => {
-    setContextMenuPosition(event, folder, 'folder');
-};
-
-const showFileContextMenu = (event, file) => {
-    setContextMenuPosition(event, file, 'file');
-};
-
-const closeContextMenu = () => {
-    contextMenu.value.show = false;
-};
-
-// Toggle sidebar collapse state
-const toggleSidebar = () => {
-    sidebarCollapsed.value = !sidebarCollapsed.value;
-    localStorage.setItem('fileManagerSidebarCollapsed', sidebarCollapsed.value.toString());
-};
-
-// Show context menu at position
-const showContextMenu = (event, item, type) => {
-    setContextMenuPosition(event, item, type);
-};
-
-// Handle context menu action
-const contextMenuAction = async (action) => {
-    const { item, type } = contextMenu.value;
-    
-    switch (action) {
-        case 'open':
-            if (type === 'file') {
-                viewFile(item);
-            }
-            break;
-        case 'openFolder':
-            if (type === 'folder') {
-                navigateToFolder(item.path);
-            }
-            break;
-        case 'download':
-            if (type === 'file' && item.url) {
-                const link = document.createElement('a');
-                link.href = item.url;
-                link.download = item.name;
-                link.target = '_blank';
-                link.click();
-            }
-            break;
-        case 'copyPath':
-            try {
-                await navigator.clipboard.writeText(item.path);
-                // Could show a toast notification here
-            } catch (err) {
-                console.error('Failed to copy path:', err);
-            }
-            break;
-        case 'copyUrl':
-            if (type === 'file' && item.url) {
-                try {
-                    await navigator.clipboard.writeText(item.url);
-                } catch (err) {
-                    console.error('Failed to copy URL:', err);
-                }
-            }
-            break;
-        case 'extract':
-            if (type === 'file') {
-                await extractFile(item);
-            }
-            break;
-        case 'compress':
-            await compressItems([item.path]);
-            break;
-        case 'copy':
-            copyToClipboard([item], 'copy');
-            break;
-        case 'paste':
-            // Paste into the target folder
-            if (type === 'folder') {
-                await pasteFromClipboard(item.path);
-            } else if (type === 'background') {
-                await pasteFromClipboard(currentPath.value);
-            }
-            break;
-        case 'delete':
-            if (showTrashView.value) {
-                deleteFromTrash(item);
-            } else if (type === 'folder') {
-                deleteFolderAction(item);
-            } else {
-                deleteFileAction(item);
-            }
-            break;
-        case 'restore':
-            restoreItem(item);
-            break;
+const copyPath = async (item) => {
+    try {
+        await navigator.clipboard.writeText(item.path);
+        toast.success('Success', t('features.file_manager.messages.pathCopied') || 'Path copied to clipboard');
+    } catch (err) {
+        console.error('Failed to copy path:', err);
     }
-    
-    closeContextMenu();
 };
 
-const showBackgroundContextMenu = (event) => {
-    setContextMenuPosition(event, null, 'background');
+const copyUrl = async (file) => {
+    if (file.url) {
+        try {
+            await navigator.clipboard.writeText(file.url);
+            toast.success('Success', t('features.file_manager.messages.urlCopied') || 'URL copied to clipboard');
+        } catch (err) {
+            console.error('Failed to copy URL:', err);
+        }
+    }
 };
 
 const extractFile = async (file) => {
@@ -1513,10 +1549,7 @@ const pasteFromClipboard = async (destinationPath) => {
     }
 };
 
-// Legacy handler (keeping for compatibility)
-const handleContextMenuAction = (action) => {
-    contextMenuAction(action);
-};
+// Legacy handler removed
 
 // Drag & Drop handlers
 const onDragStart = (event, item, type) => {
@@ -1856,21 +1889,9 @@ watch(showTrashView, (newVal) => {
     }
 });
 
-// Close context menu when clicking outside
-const handleClickOutside = () => {
-    if (contextMenu.value.show) {
-        closeContextMenu();
-    }
-};
 
 onMounted(() => {
     fetchFiles(); // Initial load - recursively fetch all
-    document.addEventListener('click', handleClickOutside);
-    setTimeout(() => { isReady.value = true; }, 100);
-});
-
-onUnmounted(() => {
-    document.removeEventListener('click', handleClickOutside);
 });
 </script>
 
