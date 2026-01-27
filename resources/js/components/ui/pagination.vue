@@ -18,7 +18,7 @@
       <div v-if="showPerPage" class="flex items-center gap-2">
         <span>{{ $t('common.pagination.rowsPerPage') }}</span>
         <Select :model-value="String(perPage)" @update:model-value="handlePerPageChange">
-          <RadixSelectTrigger class="flex h-8 w-[70px] items-center justify-between rounded-lg border border-border/60 bg-background px-2.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20">
+          <RadixSelectTrigger class="flex h-8 w-[60px] items-center justify-between rounded-md bg-transparent px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-primary/20 hover:bg-muted/50 transition-colors">
             <RadixSelectValue />
             <RadixSelectIcon as-child>
               <ChevronDown class="h-3 w-3 opacity-50" />
