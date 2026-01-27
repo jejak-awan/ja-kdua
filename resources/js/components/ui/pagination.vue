@@ -63,7 +63,10 @@
             v-if="page !== '...'"
             :variant="page === currentPage ? 'default' : 'outline'"
             size="sm"
-            class="h-8 w-8 p-0 transition-none"
+            :class="cn(
+              'h-8 w-8 p-0 transition-none',
+              page === currentPage && '!text-primary-foreground'
+            )"
             @click="goToPage(page)"
           >
             {{ page }}

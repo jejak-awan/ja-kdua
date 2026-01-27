@@ -549,11 +549,21 @@
                                             />
                                         </th>
 
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
+                                        <th class="px-6 py-3 text-left w-16">
                                             {{ $t('features.media.table.media') }}
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                                            {{ $t('features.media.table.name') }}
+                                        <th 
+                                            class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider relative group/header whitespace-nowrap"
+                                            :style="{ width: nameColumnWidth + 'px', minWidth: nameColumnWidth + 'px' }"
+                                        >
+                                            <div class="flex items-center gap-2">
+                                                {{ $t('features.media.table.name') }}
+                                            </div>
+                                            <!-- Resize Handle -->
+                                            <div 
+                                                class="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-primary/30 active:bg-primary group-hover/header:bg-border/50 transition-colors z-10"
+                                                @mousedown="startResizing"
+                                            ></div>
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                             {{ $t('features.media.table.type') }}
@@ -583,9 +593,9 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <Folder class="w-5 h-5 text-muted-foreground/60" stroke-width="1.5" />
                                         </td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center gap-2">
-                                                <div class="text-sm font-medium text-foreground max-w-[200px] sm:max-w-[300px] truncate" :title="folder.name">{{ folder.name }}</div>
+                                        <td class="px-6 py-4" :style="{ width: nameColumnWidth + 'px', maxWidth: nameColumnWidth + 'px' }">
+                                            <div class="flex items-center gap-2 overflow-hidden">
+                                                <div class="text-sm font-medium text-foreground truncate" :title="folder.name">{{ folder.name }}</div>
                                                 <Badge v-if="folder.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
                                                     {{ $t('features.media.shared') }}
                                                 </Badge>
@@ -638,14 +648,14 @@
                                                 <FileIcon v-else class="w-5 h-5 text-muted-foreground/40" stroke-width="1.5" />
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center gap-2">
-                                                <div class="text-sm font-medium text-foreground max-w-[200px] sm:max-w-[300px] truncate" :title="media.name">{{ media.name }}</div>
+                                        <td class="px-6 py-4" :style="{ width: nameColumnWidth + 'px', maxWidth: nameColumnWidth + 'px' }">
+                                            <div class="flex items-center gap-2 overflow-hidden">
+                                                <div class="text-sm font-medium text-foreground truncate" :title="media.name">{{ media.name }}</div>
                                                 <Badge v-if="media.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 border-blue-100">
                                                     {{ $t('features.media.shared') }}
                                                 </Badge>
                                             </div>
-                                            <div v-if="media.alt" class="text-sm text-muted-foreground max-w-[200px] sm:max-w-[300px] truncate" :title="media.alt">{{ media.alt }}</div>
+                                            <div v-if="media.alt" class="text-sm text-muted-foreground truncate" :title="media.alt">{{ media.alt }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <Badge variant="secondary" class="font-normal">
@@ -798,7 +808,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
@@ -947,6 +957,43 @@ const bulkProgress = ref(0);
 const sidebarCollapsed = ref(false);
 const expandedFolders = ref(new Set<number>());
 const bulkAltText = ref('');
+
+// Column Resizing Logic
+const nameColumnWidth = ref(300);
+const isResizing = ref(false);
+const startX = ref(0);
+const startWidth = ref(0);
+
+const startResizing = (e: MouseEvent) => {
+    isResizing.value = true;
+    startX.value = e.pageX;
+    startWidth.value = nameColumnWidth.value;
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', stopResizing);
+    
+    // Prevent text selection while resizing
+    document.body.style.userSelect = 'none';
+};
+
+const handleMouseMove = (e: MouseEvent) => {
+    if (!isResizing.value) return;
+    const diff = e.pageX - startX.value;
+    const newWidth = Math.max(150, Math.min(800, startWidth.value + diff));
+    nameColumnWidth.value = newWidth;
+};
+
+const stopResizing = () => {
+    isResizing.value = false;
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', stopResizing);
+    document.body.style.userSelect = '';
+};
+
+onUnmounted(() => {
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', stopResizing);
+});
 
 const toggleSidebar = () => {
     sidebarCollapsed.value = !sidebarCollapsed.value;
