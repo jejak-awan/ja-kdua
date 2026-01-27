@@ -9,7 +9,7 @@
             <p class="text-muted-foreground">{{ $t('features.settings.loading') }}</p>
         </div>
 
-        <div v-else class="w-full p-6">
+        <div v-else class="w-full">
             <!-- Shadcn Tabs -->
             <Tabs v-model="activeTab" class="w-full">
                 <div class="mb-8">
@@ -27,7 +27,7 @@
                 </div>
 
                 <!-- Tab Content -->
-                <div class="px-6">
+                <div>
                     <form @submit.prevent="handleSubmit" class="space-y-6">
                     <div v-if="currentSettings.length === 0" class="text-center py-8">
                         <p class="text-muted-foreground">{{ $t('features.settings.noSettings') }}</p>
