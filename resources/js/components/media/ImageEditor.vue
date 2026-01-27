@@ -1,30 +1,30 @@
 <template>
-    <div class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-sm" @click.self="$emit('close')">
+    <div class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/95 backdrop-blur-sm" @click.self="$emit('close')">
         <!-- Main Container -->
-        <div class="relative flex flex-col w-full h-full max-w-5xl max-h-[90vh] bg-zinc-950 md:rounded-xl overflow-hidden shadow-none border border-white/5"
+        <div class="relative flex flex-col w-full h-full max-w-5xl max-h-[90vh] bg-card md:rounded-xl overflow-hidden shadow-2xl border border-border"
              @keydown.enter="handleEnterKey" tabindex="0" autofocus>
             
             <!-- Header -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-zinc-950/50 backdrop-blur-md z-10">
-                <div class="text-sm font-medium text-white/80">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-border bg-card/50 backdrop-blur-md z-10">
+                <div class="text-sm font-medium text-foreground/80">
                     {{ t('features.media.modals.editor.title') }}
                 </div>
                 <div class="flex items-center gap-3">
                     <div class="flex items-center gap-2 mr-2">
-                         <input type="checkbox" id="saveAsNew" v-model="saveAsNew" class="rounded border-white/20 bg-white/5 text-primary focus:ring-primary/50" />
-                         <label for="saveAsNew" class="text-xs text-white/60 cursor-pointer select-none">Save copy</label>
+                         <input type="checkbox" id="saveAsNew" v-model="saveAsNew" class="rounded border-border bg-muted text-primary focus:ring-primary/50" />
+                         <label for="saveAsNew" class="text-xs text-muted-foreground cursor-pointer select-none">Save copy</label>
                     </div>
                     
                     <div v-if="saveAsNew" class="animate-in fade-in slide-in-from-right-2 duration-300">
                         <input 
                             type="text" 
                             v-model="customFilename" 
-                            class="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-white w-32 focus:outline-none focus:border-white/40 focus:bg-white/10 transition-colors placeholder-white/20"
+                            class="bg-muted border border-border rounded px-2 py-1 text-xs text-foreground w-32 focus:outline-none focus:border-primary/40 focus:bg-accent transition-colors placeholder-muted-foreground/40"
                             placeholder="File name"
                         />
                     </div>
 
-                    <Button variant="ghost" size="sm" @click="$emit('close')" class="text-white/60 hover:text-white hover:bg-white/10">
+                    <Button variant="ghost" size="sm" @click="$emit('close')" class="text-muted-foreground hover:text-foreground">
                         <X class="w-4 h-4 mr-2" stroke-width="1.5" />
                         {{ t('common.actions.cancel') }}
                     </Button>
@@ -37,8 +37,8 @@
             </div>
 
             <!-- Canvas Area -->
-            <div class="flex-1 relative flex items-center justify-center bg-[#0a0a0a] overflow-hidden p-8 user-select-none">
-                <div v-if="!imageLoaded" class="absolute inset-0 flex items-center justify-center text-white/40">
+            <div class="flex-1 relative flex items-center justify-center bg-black/95 overflow-hidden p-8 user-select-none">
+                <div v-if="!imageLoaded" class="absolute inset-0 flex items-center justify-center text-muted-foreground/40">
                     <span class="animate-pulse">Loading image...</span>
                 </div>
                 
@@ -56,95 +56,95 @@
             </div>
 
             <!-- Sub Toolbar (Active Mode Tools) -->
-            <div class="h-24 border-t border-white/10 bg-zinc-900/90 backdrop-blur-md flex items-center justify-center px-6 transition-all relative z-10">
+            <div class="h-24 border-t border-border bg-card/90 backdrop-blur-md flex items-center justify-center px-6 transition-all relative z-10">
                 
                 <!-- Crop Tools -->
                 <div v-if="activeMode === 'crop'" class="flex items-center gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <div class="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
+                    <div class="flex items-center gap-1 bg-muted/50 p-1 rounded-xl border border-border">
                         <Button 
                             v-for="preset in cropPresets" 
                             :key="preset.label"
                             variant="ghost" 
                             size="sm"
                             class="text-xs h-7 px-3"
-                            :class="currentAspectRatio === preset.value ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white hover:bg-white/10'"
+                            :class="currentAspectRatio === preset.value ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-accent'"
                             @click="setAspectRatio(preset.value)"
                         >
                             {{ preset.label }}
                         </Button>
                     </div>
                     
-                    <div class="w-px h-8 bg-white/10"></div>
+                    <div class="w-px h-8 bg-border"></div>
                     
                     <div class="flex items-center gap-1">
-                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 rounded-lg" @click="rotate(90)" title="Rotate">
+                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg" @click="rotate(90)" title="Rotate">
                             <RotateCw class="w-4 h-4" stroke-width="1.5" />
                         </Button>
-                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 rounded-lg" @click="flip('horizontal')" title="Flip Horizontal">
+                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg" @click="flip('horizontal')" title="Flip Horizontal">
                             <FlipHorizontal class="w-4 h-4" stroke-width="1.5" />
                         </Button>
-                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 rounded-lg" @click="flip('vertical')" title="Flip Vertical">
+                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg" @click="flip('vertical')" title="Flip Vertical">
                             <FlipVertical class="w-4 h-4" stroke-width="1.5" />
                         </Button>
                     </div>
 
-                    <div class="w-px h-8 bg-white/10"></div>
+                    <div class="w-px h-8 bg-border"></div>
 
                     <div class="flex gap-2">
-                        <Button size="sm" variant="ghost" class="text-white/60 hover:text-white hover:bg-white/10" @click="cancelCrop">Cancel</Button>
-                        <Button size="sm" @click="applyCrop" class="bg-white text-black hover:bg-white/90">Apply Crop</Button>
+                        <Button size="sm" variant="ghost" class="text-muted-foreground hover:text-foreground" @click="cancelCrop">Cancel</Button>
+                        <Button size="sm" @click="applyCrop" class="bg-primary text-primary-foreground hover:bg-primary/90">Apply Crop</Button>
                     </div>
                 </div>
 
                 <!-- Adjust Tools -->
                 <div v-if="activeMode === 'adjust'" class="flex flex-col md:flex-row items-center gap-6 w-full max-w-4xl animate-in fade-in slide-in-from-bottom-2 duration-300">
                      <!-- Presets -->
-                    <div class="flex items-center gap-2 overflow-x-auto max-w-[200px] md:max-w-none no-scrollbar pr-4 border-r border-white/10 mr-2">
+                    <div class="flex items-center gap-2 overflow-x-auto max-w-[200px] md:max-w-none no-scrollbar pr-4 border-r border-border mr-2">
                         <button 
                             v-for="preset in filterPresets" 
                             :key="preset.name"
                             @click="applyPreset(preset)"
                             class="flex flex-col items-center justify-center min-w-[60px] gap-1 group"
                         >
-                            <div class="w-10 h-10 rounded-xl border border-white/5 bg-black/40 group-hover:bg-white/10 flex items-center justify-center transition-colors">
-                                <component :is="preset.icon" class="w-4 h-4 text-white/60 group-hover:text-white" stroke-width="1.5" />
+                            <div class="w-10 h-10 rounded-xl border border-border bg-muted/30 group-hover:bg-accent flex items-center justify-center transition-colors">
+                                <component :is="preset.icon" class="w-4 h-4 text-muted-foreground group-hover:text-foreground" stroke-width="1.5" />
                             </div>
-                            <span class="text-[10px] text-white/40 group-hover:text-white/80">{{ preset.name }}</span>
+                            <span class="text-[10px] text-muted-foreground group-hover:text-foreground">{{ preset.name }}</span>
                         </button>
                     </div>
 
                     <!-- Sliders -->
                     <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 w-full">
                         <div class="flex items-center gap-3">
-                            <span class="text-xs font-medium w-20 text-white/60">Brightness</span>
+                            <span class="text-xs font-medium w-20 text-muted-foreground">Brightness</span>
                             <div class="flex-1 relative h-5 flex items-center">
                                 <input type="range" v-model="filters.brightness" min="0" max="200" 
-                                    class="w-full h-1 bg-white/10 rounded-xl appearance-none cursor-pointer accent-white hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-white" />
+                                    class="w-full h-1 bg-muted rounded-xl appearance-none cursor-pointer accent-primary hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground" />
                             </div>
-                            <span class="text-xs w-8 text-right text-white/80 tabular-nums">{{ filters.brightness }}%</span>
+                            <span class="text-xs w-8 text-right text-foreground tabular-nums">{{ filters.brightness }}%</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <span class="text-xs font-medium w-20 text-white/60">Contrast</span>
+                            <span class="text-xs font-medium w-20 text-muted-foreground">Contrast</span>
                             <div class="flex-1 relative h-5 flex items-center">
                                 <input type="range" v-model="filters.contrast" min="0" max="200" 
-                                    class="w-full h-1 bg-white/10 rounded-xl appearance-none cursor-pointer accent-white hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-white" />
+                                    class="w-full h-1 bg-muted rounded-xl appearance-none cursor-pointer accent-primary hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground" />
                             </div>
-                            <span class="text-xs w-8 text-right text-white/80 tabular-nums">{{ filters.contrast }}%</span>
+                            <span class="text-xs w-8 text-right text-foreground tabular-nums">{{ filters.contrast }}%</span>
                         </div>
                         <!-- Saturation -->
                          <div class="flex items-center gap-3">
-                            <span class="text-xs font-medium w-20 text-white/60">Saturation</span>
+                            <span class="text-xs font-medium w-20 text-muted-foreground">Saturation</span>
                             <div class="flex-1 relative h-5 flex items-center">
                                 <input type="range" v-model="filters.saturation" min="0" max="200" 
-                                    class="w-full h-1 bg-white/10 rounded-xl appearance-none cursor-pointer accent-white hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-white" />
+                                    class="w-full h-1 bg-muted rounded-xl appearance-none cursor-pointer accent-primary hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground" />
                             </div>
-                            <span class="text-xs w-8 text-right text-white/80 tabular-nums">{{ filters.saturation }}%</span>
+                            <span class="text-xs w-8 text-right text-foreground tabular-nums">{{ filters.saturation }}%</span>
                         </div>
                     </div>
 
-                    <div class="pl-4 border-l border-white/10 flex flex-col gap-2">
-                        <Button size="sm" variant="ghost" class="text-white/40 hover:text-white h-7 text-xs" @click="resetFilters">Reset</Button>
-                        <Button size="sm" @click="applyFilters" class="bg-white text-black hover:bg-white/90">Apply</Button>
+                    <div class="pl-4 border-l border-border flex flex-col gap-2">
+                        <Button size="sm" variant="ghost" class="text-muted-foreground hover:text-foreground h-7 text-xs" @click="resetFilters">Reset</Button>
+                        <Button size="sm" @click="applyFilters" class="bg-primary text-primary-foreground hover:bg-primary/90">Apply</Button>
                     </div>
                 </div>
 
@@ -152,21 +152,21 @@
                 <div v-if="activeMode === 'resize'" class="flex items-center gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                      <div class="flex items-center gap-3">
                         <div class="flex flex-col gap-1">
-                            <label class="text-[10px] text-white/40 uppercase font-bold tracking-wider px-1">Width</label>
+                            <label class="text-[10px] text-muted-foreground uppercase font-bold tracking-wider px-1">Width</label>
                             <input 
                                 type="number" 
                                 v-model="resizeConfig.width" 
-                                class="bg-black/40 border border-white/5 rounded-xl px-3 py-1.5 text-sm text-white w-28 focus:outline-none focus:border-white/40 focus:ring-1 focus:ring-white/40 transition-all placeholder-white/20"
+                                class="bg-muted/50 border border-border rounded-xl px-3 py-1.5 text-sm text-foreground w-28 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/40 transition-all placeholder-muted-foreground/30"
                                 placeholder="Width"
                             />
                         </div>
-                        <span class="text-white/20 mt-5">×</span>
+                        <span class="text-muted-foreground/30 mt-5">×</span>
                         <div class="flex flex-col gap-1">
-                            <label class="text-[10px] text-white/40 uppercase font-bold tracking-wider px-1">Height</label>
+                            <label class="text-[10px] text-muted-foreground uppercase font-bold tracking-wider px-1">Height</label>
                             <input 
                                 type="number" 
                                 v-model="resizeConfig.height" 
-                                class="bg-black/40 border border-white/5 rounded-xl px-3 py-1.5 text-sm text-white w-28 focus:outline-none focus:border-white/40 focus:ring-1 focus:ring-white/40 transition-all placeholder-white/20"
+                                class="bg-muted/50 border border-border rounded-xl px-3 py-1.5 text-sm text-foreground w-28 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/40 transition-all placeholder-muted-foreground/30"
                                 placeholder="Height"
                             />
                         </div>
@@ -174,7 +174,7 @@
                             <button 
                                 @click="resizeConfig.maintainAspectRatio = !resizeConfig.maintainAspectRatio"
                                 class="p-2 rounded-xl transition-colors border"
-                                :class="resizeConfig.maintainAspectRatio ? 'bg-primary/20 text-primary border-primary/30' : 'bg-transparent text-white/20 border-transparent hover:text-white/60'"
+                                :class="resizeConfig.maintainAspectRatio ? 'bg-primary/10 text-primary border-primary/30' : 'bg-transparent text-muted-foreground/30 border-transparent hover:text-muted-foreground'"
                                 title="Lock Aspect Ratio"
                             >
                                 <Lock v-if="resizeConfig.maintainAspectRatio" class="w-4 h-4" stroke-width="1.5" />
@@ -182,17 +182,17 @@
                             </button>
                         </div>
                     </div>
-                    <div class="w-px h-10 bg-white/10 mx-2"></div>
-                    <Button @click="applyResize" class="bg-white text-black hover:bg-white/90">Apply Resize</Button>
+                    <div class="w-px h-10 bg-border mx-2"></div>
+                    <Button @click="applyResize" class="bg-primary text-primary-foreground hover:bg-primary/90">Apply Resize</Button>
                 </div>
                 
-                <div v-if="activeMode === 'view'" class="text-sm text-white/40 animate-in fade-in duration-300">
+                <div v-if="activeMode === 'view'" class="text-sm text-muted-foreground/60 animate-in fade-in duration-300">
                     Select a tool below to start editing
                 </div>
             </div>
 
             <!-- Main Toolbar (Bottom) -->
-            <div class="h-20 bg-zinc-950 flex items-center justify-center gap-8 md:gap-16 pb-safe border-t border-white/10 z-20">
+            <div class="h-20 bg-card flex items-center justify-center gap-8 md:gap-16 pb-safe border-t border-border z-20">
                 <button 
                     v-for="mode in modes" 
                     :key="mode.id"
@@ -202,14 +202,14 @@
                 >
                     <div 
                         class="p-2.5 rounded-xl transition-all duration-300 relative"
-                        :class="activeMode === mode.id ? 'bg-white text-black scale-110 shadow-none' : 'text-zinc-500 group-hover:text-zinc-300 group-hover:bg-white/5'"
+                        :class="activeMode === mode.id ? 'bg-primary text-primary-foreground scale-110 shadow-lg' : 'text-muted-foreground hover:text-foreground hover:bg-accent'"
                     >
                         <component :is="mode.icon" class="w-5 h-5" stroke-width="1.5" />
-                        <div v-if="activeMode === mode.id" class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white opacity-0"></div>
+                        <div v-if="activeMode === mode.id" class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary opacity-0"></div>
                     </div>
                     <span 
                         class="text-[10px] font-medium tracking-wide transition-colors duration-300 uppercase"
-                        :class="activeMode === mode.id ? 'text-white' : 'text-zinc-600 group-hover:text-zinc-500'"
+                        :class="activeMode === mode.id ? 'text-primary' : 'text-muted-foreground/60 group-hover:text-muted-foreground'"
                     >
                         {{ mode.label }}
                     </span>
