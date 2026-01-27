@@ -24,14 +24,14 @@
         <!-- Statistics -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <Card>
-                <CardContent class="p-6">
-                    <div class="flex items-center justify-between space-y-0 pb-2">
-                        <p class="text-sm font-medium">{{ $t('features.media.stats.total') }}</p>
-                        <ImageIcon class="h-4 w-4 text-muted-foreground" />
+                <CardContent class="p-4">
+                    <div class="flex items-center justify-between space-y-0 pb-1">
+                        <p class="text-xs font-medium text-muted-foreground">{{ $t('features.media.stats.total') }}</p>
+                        <ImageIcon class="h-3.5 w-3.5 text-muted-foreground/50" />
                     </div>
                     <div>
-                        <div class="text-2xl font-bold">{{ statistics?.total_count || 0 }}</div>
-                        <p class="text-xs text-muted-foreground">
+                        <div class="text-xl font-bold">{{ statistics?.total_count || 0 }}</div>
+                        <p class="text-[10px] text-muted-foreground/70">
                             {{ $t('features.media.allMedia') }}
                         </p>
                     </div>
@@ -39,14 +39,14 @@
             </Card>
 
             <Card>
-                <CardContent class="p-6">
-                    <div class="flex items-center justify-between space-y-0 pb-2">
-                        <p class="text-sm font-medium">{{ $t('features.media.stats.storage') }}</p>
-                        <HardDrive class="h-4 w-4 text-muted-foreground" />
+                <CardContent class="p-4">
+                    <div class="flex items-center justify-between space-y-0 pb-1">
+                        <p class="text-xs font-medium text-muted-foreground">{{ $t('features.media.stats.storage') }}</p>
+                        <HardDrive class="h-3.5 w-3.5 text-muted-foreground/50" />
                     </div>
                     <div>
-                        <div class="text-2xl font-bold">{{ formatFileSize(statistics?.total_size || 0) }}</div>
-                        <p class="text-xs text-muted-foreground">
+                        <div class="text-xl font-bold">{{ formatFileSize(statistics?.total_size || 0) }}</div>
+                        <p class="text-[10px] text-muted-foreground/70">
                             {{ $t('features.media.stats.storage') }}
                         </p>
                     </div>
@@ -54,14 +54,14 @@
             </Card>
 
             <Card>
-                <CardContent class="p-6">
-                    <div class="flex items-center justify-between space-y-0 pb-2">
-                        <p class="text-sm font-medium">{{ $t('features.media.stats.images') }}</p>
-                        <ImageIcon class="h-4 w-4 text-muted-foreground" />
+                <CardContent class="p-4">
+                    <div class="flex items-center justify-between space-y-0 pb-1">
+                        <p class="text-xs font-medium text-muted-foreground">{{ $t('features.media.stats.images') }}</p>
+                        <ImageIcon class="h-3.5 w-3.5 text-muted-foreground/50" />
                     </div>
                     <div>
-                        <div class="text-2xl font-bold">{{ statistics?.types?.find((t: any) => t.type === 'image')?.count || 0 }}</div>
-                        <p class="text-xs text-muted-foreground">
+                        <div class="text-xl font-bold">{{ statistics?.types?.find((t: any) => t.type === 'image')?.count || 0 }}</div>
+                        <p class="text-[10px] text-muted-foreground/70">
                             {{ $t('features.media.stats.images') }}
                         </p>
                     </div>
@@ -69,14 +69,14 @@
             </Card>
 
             <Card>
-                <CardContent class="p-6">
-                    <div class="flex items-center justify-between space-y-0 pb-2">
-                        <p class="text-sm font-medium">{{ $t('features.media.stats.videos') }}</p>
-                        <VideoIcon class="h-4 w-4 text-muted-foreground" />
+                <CardContent class="p-4">
+                    <div class="flex items-center justify-between space-y-0 pb-1">
+                        <p class="text-xs font-medium text-muted-foreground">{{ $t('features.media.stats.videos') }}</p>
+                        <VideoIcon class="h-3.5 w-3.5 text-muted-foreground/50" />
                     </div>
                     <div>
-                        <div class="text-2xl font-bold">{{ statistics?.types?.find((t: any) => t.type === 'video')?.count || 0 }}</div>
-                        <p class="text-xs text-muted-foreground">
+                        <div class="text-xl font-bold">{{ statistics?.types?.find((t: any) => t.type === 'video')?.count || 0 }}</div>
+                        <p class="text-[10px] text-muted-foreground/70">
                             {{ $t('features.media.stats.videos') }}
                         </p>
                     </div>
@@ -252,7 +252,7 @@
             </div>
 
             <!-- Main Content -->
-            <div class="flex-1">
+            <div class="flex-1 min-w-0">
                 <!-- Breadcrumbs -->
                 <!-- Breadcrumbs -->
                 <div class="flex items-center gap-1 text-sm mb-5 px-1">
