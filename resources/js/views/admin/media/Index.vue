@@ -411,7 +411,7 @@
 
                     <div v-else>
                         <!-- Grid View -->
-                        <div v-if="viewMode === 'grid'" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4">
+                        <div v-if="viewMode === 'grid'" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-3 p-4">
                             <!-- Folders -->
                             <div
                                 v-for="folder in currentFolders"
@@ -419,14 +419,14 @@
                                 @click="selectFolder(folder.id)"
                                 class="group relative bg-background border border-border/40 rounded-xl overflow-hidden cursor-pointer transition-[border-color,background-color] duration-200 hover:border-primary/50 shadow-none hover:bg-accent/5"
                             >
-                                <div class="aspect-square bg-blue-50/20 dark:bg-blue-900/5 flex flex-col items-center justify-center p-4">
+                                <div class="aspect-square bg-blue-50/20 dark:bg-blue-900/5 flex flex-col items-center justify-center p-2">
                                     <div class="relative">
-                                        <Folder class="w-16 h-16 text-blue-400 fill-blue-400/5 transition-transform group-hover:scale-110" stroke-width="1.5" />
+                                        <Folder class="w-10 h-10 text-blue-400 fill-blue-400/5 transition-transform group-hover:scale-110" stroke-width="1.5" />
                                         <div v-if="(folder.children_count || 0) > 0" class="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border border-white">
                                             {{ folder.children_count }}
                                         </div>
                                     </div>
-                                    <p class="mt-3 text-sm font-medium text-foreground truncate w-full text-center px-2" :title="folder.name">
+                                    <p class="mt-2 text-[11px] font-medium text-foreground truncate w-full text-center px-1" :title="folder.name">
                                         {{ folder.name }}
                                     </p>
                                     <Badge v-if="folder.is_shared" variant="secondary" class="mt-1 bg-blue-100 text-blue-700 hover:bg-blue-100/80 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
@@ -525,11 +525,11 @@
                                         </template>
                                     </div>
                                 </div>
-                                <div class="p-3 border-t border-border bg-card">
-                                    <p class="text-sm font-medium text-foreground truncate" :title="media.name">{{ media.name }}</p>
-                                    <div class="flex items-center justify-between mt-1">
-                                        <p class="text-xs text-muted-foreground">{{ formatFileSize(media.size) }}</p>
-                                        <Badge v-if="media.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 hover:bg-blue-50/80 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
+                                <div class="p-1.5 border-t border-border bg-card">
+                                    <p class="text-[11px] font-medium text-foreground truncate" :title="media.name">{{ media.name }}</p>
+                                    <div class="flex items-center justify-between mt-0.5">
+                                        <p class="text-[10px] text-muted-foreground">{{ formatFileSize(media.size) }}</p>
+                                        <Badge v-if="media.is_shared" variant="secondary" class="text-[9px] h-3.5 px-1 bg-blue-50 text-blue-600 hover:bg-blue-50/80 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
                                             <Users class="w-2.5 h-2.5 mr-0.5" />
                                             {{ $t('features.media.shared') }}
                                         </Badge>
