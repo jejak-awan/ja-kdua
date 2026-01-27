@@ -7,7 +7,7 @@
     )"
   >
     <!-- Left: Showing info and rows per page -->
-    <div class="flex items-center gap-4 text-xs text-muted-foreground">
+    <div class="flex items-center gap-4 text-xs text-foreground/80">
       <p>
         {{ $t('common.pagination.showing', { 
           from: from, 
@@ -18,7 +18,7 @@
       <div v-if="showPerPage" class="flex items-center gap-2">
         <span>{{ $t('common.pagination.rowsPerPage') }}</span>
         <Select :model-value="String(perPage)" @update:model-value="handlePerPageChange">
-          <SelectTrigger class="w-[70px] h-8 text-xs">
+          <SelectTrigger class="w-[70px] h-8 text-xs !border-border/60 !bg-background">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -68,7 +68,7 @@
           >
             {{ page }}
           </Button>
-          <span v-else class="px-2 text-muted-foreground">...</span>
+          <span v-else class="px-2 text-foreground/60">...</span>
         </template>
       </div>
       

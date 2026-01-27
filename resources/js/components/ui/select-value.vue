@@ -1,9 +1,9 @@
 <template>
-  <SelectValue :placeholder="placeholder" />
+  <RadixSelectValue :placeholder="placeholder" />
 </template>
 
 <script setup>
-import { SelectValue } from 'radix-vue';
+import { SelectValue as RadixSelectValue } from 'radix-vue';
 
 const props = defineProps({
   placeholder: {
