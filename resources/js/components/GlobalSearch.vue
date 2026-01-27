@@ -1,11 +1,10 @@
 <template>
   <Dialog :open="open" @update:open="setOpen">
     <DialogContent 
-      hide-close
       class="p-0 gap-0 max-w-2xl overflow-hidden bg-background text-foreground rounded-xl border border-border/50 shadow-2xl"
     >
       <!-- Search Input Header -->
-      <div class="flex items-center border-b border-border/40 px-4 py-2" cmdk-input-wrapper>
+      <div class="flex items-center border-b border-border/40 pl-4 pr-12 py-2" cmdk-input-wrapper>
         <Search class="ml-1 h-5 w-5 shrink-0 opacity-50" />
         <input
           ref="inputRef"
