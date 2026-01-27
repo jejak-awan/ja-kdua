@@ -54,7 +54,7 @@
                     v-for="(item, index) in staticActions" 
                     :key="'static-' + index"
                     :class="[
-                        'relative flex cursor-default select-none items-center rounded-md px-3 py-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+                        'relative flex cursor-default select-none items-center rounded-md px-3 py-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
                         selectedIndex === index ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-foreground' : 'text-foreground/70 hover:bg-muted/50 hover:text-foreground'
                     ]"
                     @click="handleSelect(item)"
@@ -99,7 +99,7 @@
                     v-for="(item, index) in group"
                     :key="item.type + '-' + item.id"
                     :class="[
-                        'relative flex cursor-default select-none items-center rounded-md px-3 py-2 text-sm outline-none transition-colors',
+                        'relative flex cursor-default select-none items-center rounded-md px-3 py-2 text-sm outline-none',
                         selectedIndex === (groupOffset(groupName) + index) ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-foreground' : 'text-foreground/70 hover:bg-muted/50 hover:text-foreground'
                     ]"
                     @click="handleSelect(item)"

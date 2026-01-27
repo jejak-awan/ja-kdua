@@ -1,7 +1,7 @@
 <template>
   <AccordionContent
     :class="cn(
-      'overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down',
+      'overflow-hidden text-sm',
       props.class
     )"
   >

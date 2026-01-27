@@ -1,6 +1,6 @@
 <template>
     <div v-if="state.isSystemDown" class="fixed inset-0 z-[9999] bg-background/95 backdrop-blur-md flex flex-col items-center justify-center p-4 text-center">
-        <div class="max-w-md w-full space-y-8 animate-in fade-in zoom-in duration-300">
+        <div class="max-w-md w-full space-y-8">
             <!-- Icon based on reason -->
             <div class="flex justify-center">
                 <div class="relative">

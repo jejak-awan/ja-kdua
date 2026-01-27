@@ -37,7 +37,7 @@ const props = defineProps({
     },
     loadingClass: {
         type: String,
-        default: 'opacity-0 transition-opacity duration-300',
+        default: 'opacity-0',
     },
     loadedClass: {
         type: String,
@@ -134,8 +134,5 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.lazy-image {
-    will-change: opacity;
-}
 </style>
 
