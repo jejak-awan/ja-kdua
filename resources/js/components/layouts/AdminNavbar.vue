@@ -152,7 +152,7 @@
                     <!-- User Dropdown -->
                     <div
                         v-if="showUserMenu"
-                        class="absolute right-0 mt-2 w-56 bg-background text-foreground rounded-xl z-50 border border-border/60 shadow-lg"
+                        class="absolute right-0 mt-2 w-56 bg-popover text-foreground rounded-xl z-50 border border-border/60 shadow-lg"
                         @click.stop
                     >
                         <div class="p-3 border-b border-border">

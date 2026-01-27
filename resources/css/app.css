@@ -178,7 +178,7 @@
         /* Near-black Neutral */
         --sidebar: 240 10% 2%;
         --card: 240 10% 4%;
-        --popover: 240 10% 2%;
+        --popover: var(--background);
 
         --foreground: 210 40% 98%;
         --card-foreground: 210 40% 98%;

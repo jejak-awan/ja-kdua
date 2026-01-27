@@ -136,7 +136,7 @@
                                     <div 
                                         v-if="activePopup === section.key"
                                         ref="popups"
-                                        class="fixed z-[9999] w-56 bg-sidebar border border-border/40 rounded-xl py-2 ml-2 max-h-[90vh] overflow-y-auto"
+                                        class="fixed z-[9999] w-56 bg-popover border border-border/40 rounded-xl py-2 ml-2 max-h-[90vh] overflow-y-auto"
                                         :style="{ top: popupTop + 'px', left: popupLeft + 'px' }"
                                         @mouseenter="openPopup(section.key)"
                                         @mouseleave="scheduleClosePopup(section.key)"

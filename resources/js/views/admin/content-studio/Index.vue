@@ -1,5 +1,5 @@
 <template>
-    <div class="container mx-auto p-6 space-y-8">
+    <div class="space-y-6">
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-foreground">
                 {{ $t('features.content_studio.title') }}
@@ -106,10 +106,4 @@ const handleCreateTag = () => {
 };
 </script>
 
-<style scoped>
-/* Ensure consistent padding when embedded */
-:deep(.container) {
-    padding: 0;
-    max-width: 100%;
-}
-</style>
+
