@@ -15,11 +15,11 @@
                          <label for="saveAsNew" class="text-xs text-muted-foreground cursor-pointer select-none">Save copy</label>
                     </div>
                     
-                    <div v-if="saveAsNew" class="animate-in fade-in slide-in-from-right-2 duration-300">
+                    <div v-if="saveAsNew" class="">
                         <input 
                             type="text" 
                             v-model="customFilename" 
-                            class="bg-muted border border-border rounded px-2 py-1 text-xs text-foreground w-32 focus:outline-none focus:border-primary/40 focus:bg-accent transition-colors placeholder-muted-foreground/40"
+                            class="bg-muted border border-border rounded px-2 py-1 text-xs text-foreground w-32 focus:outline-none focus:border-primary/40 focus:bg-accent placeholder-muted-foreground/40"
                             placeholder="File name"
                         />
                     </div>
@@ -43,11 +43,11 @@
                 </div>
                 
                 <!-- Main Image Display -->
-                <div class="relative max-w-full max-h-full transition-all duration-300">
+                <div class="relative max-w-full max-h-full">
                     <img 
                         ref="imageElement"
                         :src="currentImageSrc" 
-                        class="max-w-full max-h-[calc(80vh-180px)] object-contain shadow-none transition-all duration-300 rounded-xl"
+                        class="max-w-full max-h-[calc(80vh-180px)] object-contain shadow-none rounded-xl"
                         :style="activeMode === 'adjust' ? filterStyle : ''"
                         @load="onImageLoad"
                         crossorigin="anonymous"
@@ -56,10 +56,10 @@
             </div>
 
             <!-- Sub Toolbar (Active Mode Tools) -->
-            <div class="h-24 border-t border-border bg-card/90 backdrop-blur-md flex items-center justify-center px-6 transition-all relative z-10">
+            <div class="h-24 border-t border-border bg-card/90 backdrop-blur-md flex items-center justify-center px-6 relative z-10">
                 
                 <!-- Crop Tools -->
-                <div v-if="activeMode === 'crop'" class="flex items-center gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div v-if="activeMode === 'crop'" class="flex items-center gap-4">
                     <div class="flex items-center gap-1 bg-muted/50 p-1 rounded-xl border border-border">
                         <Button 
                             v-for="preset in cropPresets" 
@@ -97,7 +97,7 @@
                 </div>
 
                 <!-- Adjust Tools -->
-                <div v-if="activeMode === 'adjust'" class="flex flex-col md:flex-row items-center gap-6 w-full max-w-4xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div v-if="activeMode === 'adjust'" class="flex flex-col md:flex-row items-center gap-6 w-full max-w-4xl">
                      <!-- Presets -->
                     <div class="flex items-center gap-2 overflow-x-auto max-w-[200px] md:max-w-none no-scrollbar pr-4 border-r border-border mr-2">
                         <button 
@@ -106,7 +106,7 @@
                             @click="applyPreset(preset)"
                             class="flex flex-col items-center justify-center min-w-[60px] gap-1 group"
                         >
-                            <div class="w-10 h-10 rounded-xl border border-border bg-muted/30 group-hover:bg-accent flex items-center justify-center transition-colors">
+                            <div class="w-10 h-10 rounded-xl border border-border bg-muted/30 group-hover:bg-accent flex items-center justify-center">
                                 <component :is="preset.icon" class="w-4 h-4 text-muted-foreground group-hover:text-foreground" stroke-width="1.5" />
                             </div>
                             <span class="text-[10px] text-muted-foreground group-hover:text-foreground">{{ preset.name }}</span>
@@ -149,14 +149,14 @@
                 </div>
 
                 <!-- Resize Tools -->
-                <div v-if="activeMode === 'resize'" class="flex items-center gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div v-if="activeMode === 'resize'" class="flex items-center gap-6">
                      <div class="flex items-center gap-3">
                         <div class="flex flex-col gap-1">
                             <label class="text-[10px] text-muted-foreground uppercase font-bold tracking-wider px-1">Width</label>
                             <input 
                                 type="number" 
                                 v-model="resizeConfig.width" 
-                                class="bg-muted/50 border border-border rounded-xl px-3 py-1.5 text-sm text-foreground w-28 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/40 transition-all placeholder-muted-foreground/30"
+                                class="bg-muted/50 border border-border rounded-xl px-3 py-1.5 text-sm text-foreground w-28 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/40 placeholder-muted-foreground/30"
                                 placeholder="Width"
                             />
                         </div>
@@ -166,14 +166,14 @@
                             <input 
                                 type="number" 
                                 v-model="resizeConfig.height" 
-                                class="bg-muted/50 border border-border rounded-xl px-3 py-1.5 text-sm text-foreground w-28 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/40 transition-all placeholder-muted-foreground/30"
+                                class="bg-muted/50 border border-border rounded-xl px-3 py-1.5 text-sm text-foreground w-28 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/40 placeholder-muted-foreground/30"
                                 placeholder="Height"
                             />
                         </div>
                         <div class="flex items-end h-full pb-1 ml-2">
                             <button 
                                 @click="resizeConfig.maintainAspectRatio = !resizeConfig.maintainAspectRatio"
-                                class="p-2 rounded-xl transition-colors border"
+                                class="p-2 rounded-xl border"
                                 :class="resizeConfig.maintainAspectRatio ? 'bg-primary/10 text-primary border-primary/30' : 'bg-transparent text-muted-foreground/30 border-transparent hover:text-muted-foreground'"
                                 title="Lock Aspect Ratio"
                             >
@@ -186,7 +186,7 @@
                     <Button @click="applyResize" class="bg-primary text-primary-foreground hover:bg-primary/90">Apply Resize</Button>
                 </div>
                 
-                <div v-if="activeMode === 'view'" class="text-sm text-muted-foreground/60 animate-in fade-in duration-300">
+                <div v-if="activeMode === 'view'" class="text-sm text-muted-foreground/60">
                     Select a tool below to start editing
                 </div>
             </div>
@@ -201,14 +201,14 @@
                     :disabled="!imageLoaded"
                 >
                     <div 
-                        class="p-2.5 rounded-xl transition-all duration-300 relative"
+                        class="p-2.5 rounded-xl relative"
                         :class="activeMode === mode.id ? 'bg-primary text-primary-foreground scale-110 shadow-lg' : 'text-muted-foreground hover:text-foreground hover:bg-accent'"
                     >
                         <component :is="mode.icon" class="w-5 h-5" stroke-width="1.5" />
                         <div v-if="activeMode === mode.id" class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary opacity-0"></div>
                     </div>
                     <span 
-                        class="text-[10px] font-medium tracking-wide transition-colors duration-300 uppercase"
+                        class="text-[10px] font-medium tracking-wide transition-colors uppercase"
                         :class="activeMode === mode.id ? 'text-primary' : 'text-muted-foreground/60 group-hover:text-muted-foreground'"
                     >
                         {{ mode.label }}

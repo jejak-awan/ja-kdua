@@ -25,7 +25,7 @@
                     <button
                         @click="showGlobalSearch = true"
                         data-slot="search-trigger"
-                        class="hidden md:flex items-center w-64 px-3 py-2 text-sm text-muted-foreground bg-transparent border border-border/40 rounded-lg hover:bg-muted/5 hover:text-foreground transition-colors duration-200"
+                        class="hidden md:flex items-center w-64 px-3 py-2 text-sm text-muted-foreground bg-transparent border border-border/40 rounded-lg hover:bg-muted/5 hover:text-foreground"
                     >
                         <Search class="w-4 h-4 mr-2 opacity-50" />
                         <span>{{ t('common.actions.search') }}...</span>
@@ -38,7 +38,7 @@
                     <!-- Mobile Search Trigger -->
                     <button
                         @click="showGlobalSearch = true"
-                        class="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-xl hover:bg-accent transition-colors"
+                        class="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-xl hover:bg-accent"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -144,7 +144,7 @@
                             <p class="text-sm font-medium text-foreground">{{ user?.name || t('common.labels.user') }}</p>
                             <p class="text-xs text-muted-foreground">{{ user?.email || '' }}</p>
                         </div>
-                        <svg class="w-4 h-4 text-muted-foreground transition-transform" :class="{ 'rotate-180': showUserMenu }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-muted-foreground" :class="{ 'rotate-180': showUserMenu }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
@@ -191,7 +191,7 @@
                                 v-for="lang in languages"
                                 :key="lang.id"
                                 @click="selectLanguage(lang)"
-                                class="flex items-center w-full px-4 py-2 text-sm transition-colors hover:bg-accent"
+                                class="flex items-center w-full px-4 py-2 text-sm hover:bg-accent"
                                 :class="currentLanguage?.code === lang.code ? 'text-primary font-medium' : 'text-foreground'"
                             >
                                 <span class="mr-3 text-base leading-none">{{ getLanguageFlag(lang) }}</span>

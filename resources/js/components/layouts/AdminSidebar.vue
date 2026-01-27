@@ -1,7 +1,7 @@
 <template>
     <aside
         :class="[
-            'fixed inset-y-0 left-0 z-50 bg-sidebar text-sidebar-foreground border-r border-border transition-transform lg:transition-[width,transform] duration-300',
+            'fixed inset-y-0 left-0 z-50 bg-sidebar text-sidebar-foreground border-r border-border',
             sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
             sidebarMinimized ? 'w-[68px]' : 'w-64'
         ]"
@@ -22,7 +22,7 @@
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger as-child>
-                            <a href="/" target="_blank" class="block transition-opacity hover:opacity-80 focus:outline-none">
+                            <a href="/" target="_blank" class="block hover:opacity-80 focus:outline-none">
                                 <AdminLogo :minimized="sidebarMinimized" />
                             </a>
                         </TooltipTrigger>
@@ -76,7 +76,7 @@
                                     <span>{{ t(section.labelKey) }}</span>
                                 </div>
                                 <ChevronDown 
-                                    class="w-3.5 h-3.5 transition-transform duration-200" 
+                                    class="w-3.5 h-3.5" 
                                     :class="{ 'rotate-180': expandedSections[section.key] }"
                                 />
                             </button>
@@ -125,14 +125,6 @@
 
                             <!-- Floating Submenu (Teleported to body) -->
                             <Teleport to="body">
-                                <Transition
-                                    enter-active-class="transition ease-out duration-100"
-                                    enter-from-class="opacity-0 translate-x-1"
-                                    enter-to-class="opacity-100 translate-x-0"
-                                    leave-active-class="transition ease-in duration-75"
-                                    leave-from-class="opacity-100 translate-x-0"
-                                    leave-to-class="opacity-0 translate-x-1"
-                                >
                                     <div 
                                         v-if="activePopup === section.key"
                                         ref="popups"
@@ -152,7 +144,7 @@
                                             :key="item.name"
                                             :to="item.to"
                                             @click="activePopup = null; $emit('close')"
-                                            class="flex items-center px-3 py-2 text-sm font-medium transition-colors duration-200 hover:bg-accent mx-1 rounded-xl"
+                                            class="flex items-center px-3 py-2 text-sm font-medium hover:bg-accent mx-1 rounded-xl"
                                             :class="[
                                                 $route.name === item.name
                                                     ? 'text-foreground bg-accent'
@@ -163,7 +155,6 @@
                                             <span class="truncate">{{ getNavigationLabel(item) }}</span>
                                         </router-link>
                                     </div>
-                                </Transition>
                             </Teleport>
                         </div>
 
