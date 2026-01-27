@@ -13,7 +13,7 @@ export interface NavItem {
 export const navigationGroups: Record<string, NavItem[]> = {
     // Content Management (5 items)
     content: [
-        { name: 'content-studio', to: '/admin/content-studio', label: 'Content Studio', permission: 'view content' },
+        { name: 'content-studio', to: '/admin/content-studio', label: 'Contents', permission: 'view content' },
         { name: 'forms', to: '/admin/forms', label: 'Forms', permission: 'view forms' },
         { name: 'media', to: '/admin/media', label: 'Media Library', permission: 'view media' },
         { name: 'file-manager', to: '/admin/file-manager', label: 'File Manager', permission: 'view files' },

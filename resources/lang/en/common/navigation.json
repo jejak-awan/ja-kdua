@@ -3,7 +3,7 @@
         "dashboard": "Dashboard",
         "content": "Content",
         "contents": "Contents",
-        "contentStudio": "Content Studio",
+        "contentStudio": "Contents",
         "categories": "Categories",
         "tags": "Tags",
         "media": "Media",
@@ -42,7 +42,7 @@
         "logout": "Logout"
     },
     "sections": {
-        "content": "Content",
+        "content": "Content Manager",
         "media": "Media",
         "engagement": "Engagement",
         "usersAccess": "Users & Access",

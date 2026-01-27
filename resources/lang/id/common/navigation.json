@@ -3,7 +3,7 @@
         "dashboard": "Dasbor",
         "content": "Konten",
         "contents": "Konten",
-        "contentStudio": "Studio Konten",
+        "contentStudio": "Konten",
         "categories": "Kategori",
         "tags": "Tag",
         "media": "Media",
@@ -42,7 +42,7 @@
         "logout": "Keluar"
     },
     "sections": {
-        "content": "Konten",
+        "content": "Manajer Konten",
         "media": "Media",
         "engagement": "Keterlibatan",
         "usersAccess": "Pengguna & Akses",
