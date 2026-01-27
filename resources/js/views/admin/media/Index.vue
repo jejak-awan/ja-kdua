@@ -585,7 +585,7 @@
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-2">
-                                                <div class="text-sm font-medium text-foreground">{{ folder.name }}</div>
+                                                <div class="text-sm font-medium text-foreground max-w-[200px] sm:max-w-[300px] truncate" :title="folder.name">{{ folder.name }}</div>
                                                 <Badge v-if="folder.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
                                                     {{ $t('features.media.shared') }}
                                                 </Badge>
@@ -640,12 +640,12 @@
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-2">
-                                                <div class="text-sm font-medium text-foreground">{{ media.name }}</div>
+                                                <div class="text-sm font-medium text-foreground max-w-[200px] sm:max-w-[300px] truncate" :title="media.name">{{ media.name }}</div>
                                                 <Badge v-if="media.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 border-blue-100">
                                                     {{ $t('features.media.shared') }}
                                                 </Badge>
                                             </div>
-                                            <div v-if="media.alt" class="text-sm text-muted-foreground line-clamp-1">{{ media.alt }}</div>
+                                            <div v-if="media.alt" class="text-sm text-muted-foreground max-w-[200px] sm:max-w-[300px] truncate" :title="media.alt">{{ media.alt }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <Badge variant="secondary" class="font-normal">
