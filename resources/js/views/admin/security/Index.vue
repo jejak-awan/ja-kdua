@@ -60,7 +60,7 @@
             </div>
 
             <!-- Overview Tab -->
-            <TabsContent value="overview" class="px-6">
+            <TabsContent value="overview">
             <!-- Statistics -->
             <div v-if="statistics" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <Card>
@@ -303,7 +303,7 @@
             </TabsContent>
 
             <!-- Blocklist Tab -->
-            <TabsContent value="blocklist" class="px-6">
+            <TabsContent value="blocklist">
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between pb-4">
                         <div>
@@ -413,7 +413,7 @@
             </TabsContent>
 
             <!-- Whitelist Tab -->
-            <TabsContent value="whitelist" class="px-6">
+            <TabsContent value="whitelist">
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between pb-4">
                         <div>
@@ -532,7 +532,7 @@
             </TabsContent>
 
             <!-- CSP Reports Tab -->
-            <TabsContent value="csp-reports" class="px-6">
+            <TabsContent value="csp-reports">
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between pb-4">
                         <div>
@@ -681,7 +681,7 @@
             </TabsContent>
 
             <!-- Slow Queries Tab -->
-            <TabsContent value="slow-queries" class="px-6">
+            <TabsContent value="slow-queries">
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between pb-4">
                         <div>
@@ -794,7 +794,7 @@
             </TabsContent>
 
             <!-- Dependency Vulnerabilities Tab -->
-            <TabsContent value="vulnerabilities" class="px-6">
+            <TabsContent value="vulnerabilities">
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between pb-4">
                         <div>
