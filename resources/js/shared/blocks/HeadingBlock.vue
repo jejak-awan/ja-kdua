@@ -4,7 +4,7 @@
         <component 
           :is="tag(settings)"
           :id="getVal(settings, 'html_id') || undefined"
-          class="heading-block transition-all duration-300"
+          class="heading-block transition-colors duration-300"
           :style="headingStyles(settings, blockDevice)"
           :class="[sizeClass(settings)]"
           :aria-label="getVal(settings, 'aria_label') || undefined"
@@ -75,13 +75,9 @@ import {
     generateGradientCSS,
     getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance, BuilderInstance } from '../../types/builder'
+import type { BlockInstance, BuilderInstance, BlockProps } from '../../types/builder'
 
-const props = withDefaults(defineProps<{
-  module: BlockInstance;
-  mode: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile' | null;
-}>(), {
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })

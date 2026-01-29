@@ -4,13 +4,13 @@
     :mode="mode"
     :device="device"
     tag="figure" 
-    class="featured-image-block transition-all duration-500"
+    class="featured-image-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Featured Image'"
     :style="cardStyles"
   >
     <div 
-        class="image-container relative overflow-hidden rounded-[2.5rem] shadow-2xl transition-all duration-700 group" 
+        class="image-container relative overflow-hidden rounded-[2.5rem] shadow-2xl transition-colors duration-700 group" 
         :style="containerStyles"
     >
       <img 
@@ -41,8 +41,7 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Image as ImageIcon } from 'lucide-vue-next'
-import { 
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';import { 
   getVal,
   getLayoutStyles,
   getTypographyStyles

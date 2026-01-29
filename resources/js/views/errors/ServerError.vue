@@ -22,7 +22,7 @@
             <button
                 @click="retry"
                 :disabled="retrying"
-                class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-2xl text-white bg-destructive hover:bg-destructive/90 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-destructive shadow-lg shadow-destructive/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed active:scale-95"
+                class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-2xl text-white bg-destructive hover:bg-destructive/90 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-destructive shadow-lg shadow-destructive/20 transition-colors disabled:opacity-70 disabled:cursor-not-allowed active:scale-95"
             >
                 <RefreshCw class="w-4 h-4 mr-2" :class="{ 'animate-spin': retrying }" />
                 {{ retrying ? t('features.errors.500.retrying') : t('features.errors.500.retry') }}
@@ -30,7 +30,7 @@
             
             <router-link
                 to="/"
-                class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-border text-sm font-medium rounded-2xl text-foreground bg-muted hover:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-destructive transition-all active:scale-95"
+                class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-border text-sm font-medium rounded-2xl text-foreground bg-muted hover:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-destructive transition-[background-color,transform] active:scale-95"
             >
                 <Home class="w-4 h-4 mr-2 text-muted-foreground" />
                 {{ t('features.errors.404.home') }}
@@ -47,11 +47,13 @@
     </ErrorLayout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ErrorLayout from '@/layouts/ErrorLayout.vue';
-import { ServerCrash, RefreshCw, Home } from 'lucide-vue-next';
+import ServerCrash from 'lucide-vue-next/dist/esm/icons/server-crash.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import Home from 'lucide-vue-next/dist/esm/icons/house.js';
 
 const { t } = useI18n();
 const retrying = ref(false);

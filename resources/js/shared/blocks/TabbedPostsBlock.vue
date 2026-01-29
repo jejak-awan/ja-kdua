@@ -1,5 +1,5 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="tabbed-posts-block">
+  <BaseBlock :module="module" :mode="mode" :settings="settings" class="tabbed-posts-block">
     <div class="container mx-auto">
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
             <h2 v-if="settings.title" class="text-2xl md:text-3xl font-bold tracking-tight" :style="titleStyles">{{ settings.title }}</h2>
@@ -10,7 +10,7 @@
                         v-for="tab in tabs" 
                         :key="tab.id" 
                         :value="tab.id"
-                        class="pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent shadow-none font-bold text-slate-500 hover:text-slate-900 transition-all"
+                        class="pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent shadow-none font-bold text-slate-500 hover:text-slate-900 transition-colors"
                     >
                         {{ tab.label }}
                     </TabsTrigger>
@@ -28,7 +28,7 @@
                  <Card 
                     v-for="post in currentPosts" 
                     :key="post.id"
-                    class="group overflow-hidden hover:shadow-2xl transition-all duration-500 border-none rounded-[24px] bg-white dark:bg-slate-900 shadow-lg"
+                    class="group overflow-hidden hover:shadow-2xl transition-[width] duration-500 border-none rounded-[24px] bg-white dark:bg-slate-900 shadow-lg"
                 >
                     <div class="aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-slate-800 relative">
                         <img 
@@ -56,35 +56,35 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, watch, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Tabs, TabsList, TabsTrigger, Card, CardContent, CardTitle, CardDescription } from '../ui'
-import { Loader2, Image as ImageIcon } from 'lucide-vue-next'
-import { 
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';import { 
   getTypographyStyles,
   getResponsiveValue
 } from '../utils/styleUtils'
+import type { BlockProps, BuilderInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<BlockProps>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || props.device)
+const builder = inject<BuilderInstance>('builder', null as any)
+const settings = computed(() => props.settings || props.module?.settings || {})
+const currentDevice = computed(() => props.device || builder?.device?.value || 'desktop')
 
-const activeTab = ref('')
-const tabs = ref([])
-const posts = ref({})
+const activeTab = ref<string>('')
+const tabs = ref<{ id: string; label: string }[]>([])
+const posts = ref<Record<string, any[]>>({})
 const loading = ref(false)
 
 const parseCategories = () => {
     let cats = settings.value.categories
     if (typeof cats === 'string') {
-        cats = cats.split(',').map(c => c.trim()).filter(Boolean)
+        cats = cats.split(',').map((c: string) => c.trim()).filter(Boolean)
     }
     
     if (!cats || cats.length === 0) {
@@ -94,7 +94,7 @@ const parseCategories = () => {
              { id: 'news', label: 'News' }
          ]
     } else {
-        tabs.value = cats.map(cat => ({
+        tabs.value = (cats as any[]).map(cat => ({
             id: typeof cat === 'object' ? cat.id : cat,
             label: typeof cat === 'object' ? cat.name : cat
         }))
@@ -110,7 +110,8 @@ watch(() => settings.value.categories, parseCategories)
 
 const currentPosts = computed(() => {
     const catId = activeTab.value
-    return Array.from({ length: getResponsiveValue(settings.value, 'limit', device.value) || 4 }, (_, i) => ({
+    const limit = getResponsiveValue(settings.value, 'limit', currentDevice.value) || 4
+    return Array.from({ length: Number(limit) }, (_, i) => ({
         id: `${catId}-${i}`,
         title: `${tabs.value.find(t => t.id === catId)?.label || 'Latest'} Article: Breaking the Boundaries of Design`,
         excerpt: 'Explore the future of web design and content management with our latest deep-dive articles.',
@@ -119,13 +120,13 @@ const currentPosts = computed(() => {
 })
 
 const gridClass = computed(() => {
-    const cols = getResponsiveValue(settings.value, 'columns', device.value) || 3
+    const cols = getResponsiveValue(settings.value, 'columns', currentDevice.value) || 3
     if (cols == 2) return 'grid-cols-1 md:grid-cols-2'
     if (cols == 4) return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
     return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
 })
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, '', device.value))
+const titleStyles = computed(() => getTypographyStyles(settings.value, '', currentDevice.value))
 </script>
 
 <style scoped>

@@ -1,7 +1,7 @@
 <template>
   <BaseModal
     :is-open="true"
-    :title="$t('builder.insertSectionModal.title')"
+    :title="t('builder.insertSectionModal.title')"
     :width="650"
     draggable
     placement="center"
@@ -16,7 +16,7 @@
           :class="{ 'modal-tab--active': activeTab === tab.id }"
           @click="handleTabChange(tab.id)"
         >
-          {{ te('builder.insertModal.tabs.' + tab.id) ? $t('builder.insertModal.tabs.' + tab.id) : (te('builder.insertSectionModal.tabs.' + tab.id) ? $t('builder.insertSectionModal.tabs.' + tab.id) : tab.label) }}
+          {{ te('builder.insertModal.tabs.' + tab.id) ? t('builder.insertModal.tabs.' + tab.id) : (te('builder.insertSectionModal.tabs.' + tab.id) ? t('builder.insertSectionModal.tabs.' + tab.id) : tab.label) }}
         </button>
       </div>
     </template>
@@ -26,7 +26,7 @@
       <div v-if="activeTab === 'presets'" class="modal-search-wrapper" style="padding-bottom: 16px;">
         <BaseInput 
           v-model="searchQuery"
-          :placeholder="$t('builder.insertModal.searchPlaceholder')"
+          :placeholder="t('builder.insertModal.searchPlaceholder')"
           autofocus
         >
           <template #prefix>
@@ -37,13 +37,12 @@
 
       <div class="modal-content">
         <div v-if="activeTab === 'section'" class="layout-wrapper">
-          
-          <div v-for="group in allGroups" :key="group.id" class="layout-group">
+<div v-for="group in allGroups" :key="group.id" class="layout-group">
             <h4 class="group-title">
               <span :class="['category-badge', `category-badge--${group.type}`]">
                 {{ group.type === 'flex' ? t('builder.fields.layoutTypes.flex') : t('builder.fields.layoutTypes.grid') }}
               </span>
-              {{ te('builder.insertModal.layoutGroups.' + group.id) ? $t('builder.insertModal.layoutGroups.' + group.id) : group.title }}
+              {{ te('builder.insertModal.layoutGroups.' + group.id) ? t('builder.insertModal.layoutGroups.' + group.id) : group.title }}
             </h4>
             
             <div class="layout-grid">
@@ -90,16 +89,15 @@
               </button>
             </div>
           </div>
-
-        </div>
+</div>
         
         <div v-if="activeTab === 'presets'" class="library-content">
           <div v-if="loadingPresets" class="no-results">
             <div class="loading-spinner"></div>
-            <p>{{ $t('builder.messages.loading') }}</p>
+            <p>{{ t('builder.messages.loading') }}</p>
           </div>
           <div v-else-if="filteredPresets.length === 0" class="no-results">
-            {{ $t('builder.insertModal.noResults', { query: searchQuery }) }}
+            {{ t('builder.insertModal.noResults', { query: searchQuery }) }}
           </div>
           <div v-else class="module-content">
             <div v-for="(typePresets, type) in groupedPresets" :key="type" class="module-group">
@@ -157,12 +155,12 @@
   </BaseModal>
 </template>
 
-<script setup>
-import { ref, computed, inject } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { BaseModal, BaseInput } from '../ui'
-import { Search } from 'lucide-vue-next'
-import ModuleRegistry from '../core/ModuleRegistry'
+<script setup lang="ts">
+import { ref, computed, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { BaseModal, BaseInput } from '../ui';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import ModuleRegistry from '../core/ModuleRegistry';
 import { 
     equalLayouts, 
     offsetLayouts, 
@@ -171,62 +169,74 @@ import {
     gridMultiRowPresets,
     masonryPresets,
     sidebarPresets
-} from '../constants/layouts.js'
-import { sectionTemplates } from '../templates/SectionTemplates.js'
-import { pageTemplates } from '../templates/PageTemplates.js'
-import { Sparkles, Layout, Users, MessageSquare, FileText, Megaphone, LayoutTemplate } from 'lucide-vue-next'
+} from '../constants/layouts.js';
+import { sectionTemplates } from '../templates/SectionTemplates.js';
+import { pageTemplates } from '../templates/PageTemplates.js';
+import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import Users from 'lucide-vue-next/dist/esm/icons/users.js';
+import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Megaphone from 'lucide-vue-next/dist/esm/icons/megaphone.js';
+import LayoutTemplate from 'lucide-vue-next/dist/esm/icons/layout-template.js';
+import type { BuilderInstance, BlockInstance } from '../../../types/builder';
 
-const props = defineProps({
-  targetIndex: {
-    type: Number,
-    default: -1
-  }
-})
+interface Props {
+  targetIndex?: number;
+}
 
-const emit = defineEmits(['close', 'inserted'])
-const builder = inject('builder')
-const activeTab = ref('section')
-const { t, te } = useI18n()
+const props = withDefaults(defineProps<Props>(), {
+  targetIndex: -1
+});
+
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'inserted', type?: string, payload?: any): void;
+}>();
+
+const builder = inject<BuilderInstance>('builder');
+const activeTab = ref('section');
+const { t, te } = useI18n();
 
 const tabs = [
   { id: 'section', label: 'New Section' },
   { id: 'presets', label: 'Design Presets' },
   { id: 'library', label: 'Add From Library' }
-]
+];
 
 // Search/Filter logic
-const searchQuery = ref('')
-const loadingPresets = computed(() => builder?.loadingPresets?.value || false)
-const presets = computed(() => builder?.presets?.value || [])
+const searchQuery = ref('');
+const loadingPresets = computed(() => builder?.loadingPresets?.value || false);
+const presets = computed(() => builder?.presets?.value || []);
 
 const filteredPresets = computed(() => {
-  const allPresets = presets.value.filter(p => p.type === 'section')
-  if (!searchQuery.value) return allPresets
-  const query = searchQuery.value.toLowerCase()
-  return allPresets.filter(p => p.name.toLowerCase().includes(query))
-})
+  const allPresets = presets.value.filter(p => p.type === 'section');
+  if (!searchQuery.value) return allPresets;
+  const query = searchQuery.value.toLowerCase();
+  return allPresets.filter(p => p.name.toLowerCase().includes(query));
+});
 
 const groupedPresets = computed(() => {
-  const groups = {}
+  const groups: Record<string, any[]> = {};
   filteredPresets.value.forEach(preset => {
-    const type = preset.type.charAt(0).toUpperCase() + preset.type.slice(1)
-    if (!groups[type]) groups[type] = []
-    groups[type].push(preset)
-  })
-  return groups
-})
+    const type = preset.type.charAt(0).toUpperCase() + preset.type.slice(1);
+    if (!groups[type]) groups[type] = [];
+    groups[type].push(preset);
+  });
+  return groups;
+});
 
-const selectPreset = (preset) => {
-  emit('inserted', 'preset', preset)
-  emit('close')
-}
+const selectPreset = (preset: any) => {
+  emit('inserted', 'preset', preset);
+  emit('close');
+};
 
-const handleTabChange = (tabId) => {
-  activeTab.value = tabId
+const handleTabChange = (tabId: string) => {
+  activeTab.value = tabId;
   if (tabId === 'presets' && presets.value.length === 0) {
-    builder?.fetchPresets()
+    builder?.fetchPresets();
   }
-}
+};
 
 const allGroups = computed(() => [
   { id: 'equal', type: 'flex', title: 'Equal Columns', items: equalLayouts },
@@ -236,17 +246,17 @@ const allGroups = computed(() => [
   { id: 'grid-multi-row', type: 'grid', title: 'Multi-Row', items: gridMultiRowPresets },
   { id: 'masonry', type: 'grid', title: 'Masonry', items: masonryPresets },
   { id: 'sidebar', type: 'grid', title: 'Sidebar', items: sidebarPresets }
-])
+]);
 
 // Extract unique categories including Pages
 const categories = computed(() => {
-    const cats = new Set(sectionTemplates.map(t => t.category).filter(Boolean))
-    return ['all', 'pages', ...Array.from(cats).sort()]
-})
+    const cats = new Set(sectionTemplates.map(t => t.category).filter(Boolean));
+    return ['all', 'pages', ...Array.from(cats).sort()];
+});
 
 // Template groups for library tab
 const templateGroups = computed(() => {
-    const categoriesMap = {
+    const categoriesMap: Record<string, any> = {
         pages: { id: 'pages', title: 'Full Pages', icon: '📄', templates: [] },
         hero: { id: 'hero', title: 'Hero Sections', icon: '🚀', templates: [] },
         features: { id: 'features', title: 'Features', icon: '✨', templates: [] },
@@ -254,45 +264,26 @@ const templateGroups = computed(() => {
         cta: { id: 'cta', title: 'Call to Action', icon: '📢', templates: [] },
         team: { id: 'team', title: 'Team', icon: '👥', templates: [] },
         contact: { id: 'contact', title: 'Contact', icon: '📞', templates: [] }
-    }
+    };
     
     // Add sections
     sectionTemplates.forEach(tpl => {
-        const cat = categoriesMap[tpl.category] || categoriesMap.content
-        cat.templates.push({ ...tpl, templateType: 'section' })
-    })
+        const cat = categoriesMap[tpl.category] || categoriesMap.content;
+        cat.templates.push({ ...tpl, templateType: 'section' });
+    });
 
     // Add pages
     pageTemplates.forEach(tpl => {
-        categoriesMap.pages.templates.push({ ...tpl, category: 'pages', templateType: 'page' })
-    })
+        categoriesMap.pages.templates.push({ ...tpl, category: 'pages', templateType: 'page' });
+    });
     
-    return Object.values(categoriesMap).filter(c => c.templates.length > 0)
-})
+    return Object.values(categoriesMap).filter(c => c.templates.length > 0);
+});
 
-// Combined and filtered templates
-const filteredTemplates = computed(() => {
-    let all = []
+const getPreviewIcon = (template: any) => {
+    if (template.templateType === 'page') return LayoutTemplate;
     
-    // Add sections
-    sectionTemplates.forEach(s => all.push({ ...s, templateType: 'section' }))
-    
-    // Add pages
-    pageTemplates.forEach(p => all.push({ ...p, category: 'pages', templateType: 'page' }))
-
-    return all.filter(template => {
-        const matchesSearch = template.name.toLowerCase().includes(searchTerm.value.toLowerCase()) || 
-                              (template.description && template.description.toLowerCase().includes(searchTerm.value.toLowerCase()))
-        const matchesCategory = activeCategory.value === 'all' || template.category === activeCategory.value
-        
-        return matchesSearch && matchesCategory
-    })
-})
-
-const getPreviewIcon = (template) => {
-    if (template.templateType === 'page') return LayoutTemplate
-    
-    const iconMap = {
+    const iconMap: Record<string, any> = {
         hero: Sparkles,
         features: Layout,
         content: FileText,
@@ -300,12 +291,12 @@ const getPreviewIcon = (template) => {
         team: Users,
         header: FileText,
         contact: MessageSquare
-    }
-    return iconMap[template.category] || Layout
-}
+    };
+    return iconMap[template.category] || Layout;
+};
 
-const insertTemplate = async (template) => {
-    if (!builder || !template.factory) return
+const insertTemplate = async (template: any) => {
+    if (!builder || !template.factory) return;
     
     // Handle Page Templates (Full Content Replacement)
     if (template.templateType === 'page') {
@@ -315,99 +306,107 @@ const insertTemplate = async (template) => {
             confirmText: t('builder.modals.confirm.confirm'),
             cancelText: t('builder.modals.confirm.cancel'),
             type: 'warning'
-        })
+        });
         if (confirmed) {
-            const blocks = template.factory()
+            const blocks = template.factory();
             
             // Regenerate all IDs for safety
-            const regenerateAll = (nodes) => {
+            const regenerateAll = (nodes: BlockInstance[]) => {
                 nodes.forEach(node => {
-                    node.id = ModuleRegistry.generateId()
-                    if (node.children) regenerateAll(node.children)
-                })
-            }
-            regenerateAll(blocks)
+                    node.id = ModuleRegistry.generateId();
+                    if (node.children) regenerateAll(node.children);
+                });
+            };
+            regenerateAll(blocks);
             
-            builder.blocks.value = blocks
-            builder.takeSnapshot()
-            emit('inserted')
-            emit('close')
+            builder.blocks.value = blocks;
+            builder.takeSnapshot();
+            emit('inserted');
+            emit('close');
         }
-        return
+        return;
     }
 
     // Handle Section Templates
-    const clonedSection = template.factory()
-    const regenerateIds = (node) => {
-        node.id = ModuleRegistry.generateId()
+    const clonedSection = template.factory();
+    const regenerateIds = (node: BlockInstance) => {
+        node.id = ModuleRegistry.generateId();
         if (node.children) {
-            node.children.forEach(regenerateIds)
+            node.children.forEach(regenerateIds);
         }
-    }
-    regenerateIds(clonedSection)
+    };
+    regenerateIds(clonedSection);
     
-    if (!builder.blocks.value) builder.blocks.value = []
+    if (!builder.blocks.value) builder.blocks.value = [];
     
-    const targetIndex = props.targetIndex !== -1 ? props.targetIndex : builder.blocks.value.length
+    const targetIndex = props.targetIndex !== -1 ? props.targetIndex : builder.blocks.value.length;
     
-    builder.blocks.value.splice(targetIndex, 0, clonedSection)
-    builder.takeSnapshot()
-    builder.selectModule(clonedSection.id)
+    builder.blocks.value.splice(targetIndex, 0, clonedSection);
+    builder.takeSnapshot();
+    builder.selectModule(clonedSection.id);
     
-    emit('inserted')
-    emit('close')
-}
+    emit('inserted');
+    emit('close');
+};
 
-const selectLayout = (layout) => {
+const selectLayout = (layout: any) => {
+    if (!builder) return;
+    
     // 1. Create Section
-    const section = builder.insertModule('section', null, props.targetIndex)
-    if (!section) return
+    const section = builder.insertModule('section', null, props.targetIndex);
+    if (!section) return;
 
     // Helper to create row
-    const createRow = (config, parent = section) => {
-        const row = ModuleRegistry.createInstance('row')
-        row.id = ModuleRegistry.generateId()
-        if (!parent.children) parent.children = []
-        parent.children.push(row)
+    const createRow = (config: any, parent: BlockInstance = section) => {
+        const row = ModuleRegistry.createInstance('row');
+        if (!row) return;
+
+        row.id = ModuleRegistry.generateId();
+        if (!parent.children) parent.children = [];
+        parent.children.push(row);
         
-        if (!row.children) row.children = []
+        if (!row.children) row.children = [];
         
         if (config.cols) {
-            config.cols.forEach(colConfig => {
-                const col = ModuleRegistry.createInstance('column')
-                col.id = ModuleRegistry.generateId()
-                col.settings.flexGrow = colConfig.width
-                row.children.push(col)
+            config.cols.forEach((colConfig: any) => {
+                const col = ModuleRegistry.createInstance('column');
+                if (!col) return;
+                
+                col.id = ModuleRegistry.generateId();
+                col.settings.flexGrow = colConfig.width;
+                row.children!.push(col);
                 
                 if (colConfig.rows) {
-                    colConfig.rows.forEach(nestedRowConfig => {
-                        createRow(nestedRowConfig, col)
-                    })
+                    colConfig.rows.forEach((nestedRowConfig: any) => {
+                        createRow(nestedRowConfig, col);
+                    });
                 }
-            })
+            });
         } else {
-            const widths = config.widths || [1]
-            widths.forEach(width => {
-                const col = ModuleRegistry.createInstance('column')
-                col.id = ModuleRegistry.generateId()
-                col.settings.flexGrow = width
-                row.children.push(col)
-            })
+            const widths = config.widths || [1];
+            widths.forEach((width: number) => {
+                const col = ModuleRegistry.createInstance('column');
+                if (!col) return;
+
+                col.id = ModuleRegistry.generateId();
+                col.settings.flexGrow = width;
+                row.children!.push(col);
+            });
         }
-    }
+    };
 
     if (layout.rows) {
-        layout.rows.forEach(rowConfig => createRow(rowConfig))
+        layout.rows.forEach((rowConfig: any) => createRow(rowConfig));
     } else {
-        createRow(layout)
+        createRow(layout);
     }
     
-    builder.takeSnapshot()
-    builder.selectModule(section.id)
+    builder.takeSnapshot();
+    builder.selectModule(section.id);
     
-    emit('inserted')
-    emit('close')
-}
+    emit('inserted');
+    emit('close');
+};
 </script>
 
 <style scoped>

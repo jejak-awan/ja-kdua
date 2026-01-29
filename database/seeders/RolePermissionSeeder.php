@@ -24,7 +24,7 @@ class RolePermissionSeeder extends Seeder
 
             // Media
             'view media', 'upload media', 'edit media', 'delete media', // 'manage media' as fallback/alias
-            'view files', 'upload files', 'edit files', 'delete files',
+            'view files', 'upload files', 'edit files', 'delete files', 'manage files',
 
             // Engagement
             'view comments', 'create comments', 'edit comments', 'delete comments', 'approve comments', 'manage comments',

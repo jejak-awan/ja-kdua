@@ -81,7 +81,7 @@
                     <div
                         v-for="notification in filteredNotifications"
                         :key="notification.id"
-                        class="group flex flex-col sm:flex-row gap-4 p-4 rounded-lg border transition-all hover:bg-muted/50"
+                        class="group flex flex-col sm:flex-row gap-4 p-4 rounded-lg border transition-colors hover:bg-muted/50"
                         :class="notification.read_at ? 'bg-card border-border' : 'bg-primary/5 border-primary/20'"
                     >
                         <div class="flex-shrink-0 mt-1">
@@ -142,20 +142,18 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
+import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
-import { 
-    Check, 
-    CheckCheck, 
-    Search, 
-    Trash2, 
-    BellOff,
-    Loader2 
-} from 'lucide-vue-next';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import CheckCheck from 'lucide-vue-next/dist/esm/icons/check-check.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import BellOff from 'lucide-vue-next/dist/esm/icons/bell-off.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 
 // UI Components
 import Card from '../../../components/ui/card.vue';
@@ -173,13 +171,14 @@ import SelectItem from '../../../components/ui/select-item.vue';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
+const toast = useToast();
 
-const notifications = ref([]);
+const notifications = ref<any[]>([]);
 const loading = ref(false);
 const search = ref('');
 const typeFilter = ref('all');
 const readFilter = ref('all');
-const pollingInterval = ref(null);
+const pollingInterval = ref<any>(null);
 
 const unreadCount = computed(() => {
     if (!Array.isArray(notifications.value)) return 0;
@@ -212,11 +211,11 @@ const filteredNotifications = computed(() => {
     return filtered;
 });
 
-const getBadgeVariant = (type) => {
+const getBadgeVariant = (type: any) => {
     switch (type) {
         case 'error': return 'destructive';
-        case 'warning': return 'warning'; // Assuming warning variant exists, fallback to secondary if not
-        case 'success': return 'default'; // Or custom success variant
+        case 'warning': return 'secondary'; // Fallback to secondary if warning is not a standard variant
+        case 'success': return 'default';
         case 'info': return 'secondary';
         default: return 'outline';
     }
@@ -250,17 +249,17 @@ const fetchNotifications = async () => {
         }
         
         notifications.value = data;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch notifications:', error);
     } finally {
         loading.value = false;
     }
 };
 
-const markAsRead = async (notification) => {
+const markAsRead = async (notification: any) => {
     try {
         await api.put(`/admin/ja/notifications/${notification.id}/read`);
-        toast.success(t('features.notifications.messages.markReadSuccess'));
+        toast.success.default(t('features.notifications.messages.markReadSuccess'));
         
         // Optimistic update
         const index = notifications.value.findIndex(n => n.id === notification.id);
@@ -268,28 +267,28 @@ const markAsRead = async (notification) => {
             notifications.value[index].read_at = new Date().toISOString();
         }
         
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to mark notification as read:', error);
-        toast.error('Error', t('features.notifications.messages.markReadFailed'));
+        toast.error.default(t('features.notifications.messages.markReadFailed'));
     }
 };
 
 const markAllAsRead = async () => {
     try {
         await api.put('/admin/ja/notifications/read-all');
-        toast.success(t('features.notifications.messages.markAllReadSuccess'));
+        toast.success.default(t('features.notifications.messages.markAllReadSuccess'));
         fetchNotifications();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to mark all notifications as read:', error);
-        toast.error('Error', t('features.notifications.messages.markAllReadFailed'));
+        toast.error.default(t('features.notifications.messages.markAllReadFailed'));
     }
 };
 
-const deleteNotification = async (notification) => {
+const deleteNotification = async (notification: any) => {
     const confirmed = await confirm({
         title: t('features.notifications.actions.delete'),
         message: t('features.notifications.confirm.delete'),
-        variant: 'destructive',
+        variant: 'danger',
         confirmText: t('features.notifications.actions.delete'),
     });
 
@@ -297,18 +296,18 @@ const deleteNotification = async (notification) => {
 
     try {
         await api.delete(`/admin/ja/notifications/${notification.id}`);
-        toast.success(t('features.notifications.messages.deleteSuccess'));
+        toast.success.default(t('features.notifications.messages.deleteSuccess'));
         
         // Optimistic update
         notifications.value = notifications.value.filter(n => n.id !== notification.id);
         
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete notification:', error);
-        toast.error('Error', t('features.notifications.messages.deleteFailed'));
+        toast.error.default(t('features.notifications.messages.deleteFailed'));
     }
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string) => {
     if (!date) return '-';
     // Use Intl.DateTimeFormat for consistent formatting
     return new Intl.DateTimeFormat(undefined, {

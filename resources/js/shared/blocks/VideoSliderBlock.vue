@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="video-slider-block transition-all duration-500"
+    class="video-slider-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Premium Video Slider'"
     :style="cardStyles"
@@ -22,7 +22,7 @@
                     :class="slideBasisClass"
                 >
                     <Card 
-                        class="video-card group bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-50 dark:border-slate-800 transition-all duration-700 hover:-translate-y-3 hover:shadow-primary/20 cursor-pointer h-full flex flex-col"
+                        class="video-card group bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-50 dark:border-slate-800 transition-colors duration-700 hover:-translate-y-3 hover:shadow-primary/20 cursor-pointer h-full flex flex-col"
                         @click="handlePlay(video)"
                     >
                         <div class="video-thumbnail relative overflow-hidden aspect-video bg-slate-900">
@@ -32,7 +32,7 @@
                              </div>
                              
                              <!-- Play Icon Overlay -->
-                             <div class="absolute inset-0 z-10 flex items-center justify-center bg-primary/20 opacity-0 group-hover:opacity-100 transition-all duration-700 backdrop-blur-sm">
+                             <div class="absolute inset-0 z-10 flex items-center justify-center bg-primary/20 opacity-0 group-hover:opacity-100 transition-colors duration-700 backdrop-blur-sm">
                                 <div class="w-24 h-24 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform duration-700 shadow-2xl group/btn">
                                     <Play class="w-10 h-10 fill-current translate-x-1 transition-transform duration-500 group-hover/btn:scale-110" />
                                 </div>
@@ -53,7 +53,7 @@
                                 {{ video.description }}
                              </CardDescription>
                              
-                             <div class="mt-auto pt-8 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                             <div class="mt-auto pt-8 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-[width] duration-500 translate-y-4 group-hover:translate-y-0">
                                 <span class="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Watch Journey</span>
                                 <div class="h-px flex-1 bg-primary/20"></div>
                              </div>
@@ -65,8 +65,8 @@
             <!-- Navigation -->
             <template v-if="items.length > slidesPerView">
                 <div class="carousel-nav-wrapper absolute -inset-x-12 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-30">
-                    <CarouselPrevious v-if="showArrows" class="pointer-events-auto w-14 h-14 rounded-full bg-white dark:bg-slate-900 shadow-2xl border-slate-100 dark:border-slate-800 transition-all duration-500 opacity-0 group-hover:opacity-100 -translate-x-8 group-hover:translate-x-0 hover:bg-primary hover:text-white" />
-                    <CarouselNext v-if="showArrows" class="pointer-events-auto w-14 h-14 rounded-full bg-white dark:bg-slate-900 shadow-2xl border-slate-100 dark:border-slate-800 transition-all duration-500 opacity-0 group-hover:opacity-100 translate-x-8 group-hover:translate-x-0 hover:bg-primary hover:text-white" />
+                    <CarouselPrevious v-if="showArrows" class="pointer-events-auto w-14 h-14 rounded-full bg-white dark:bg-slate-900 shadow-2xl border-slate-100 dark:border-slate-800 transition-[width] duration-500 opacity-0 group-hover:opacity-100 -translate-x-8 group-hover:translate-x-0 hover:bg-primary hover:text-white" />
+                    <CarouselNext v-if="showArrows" class="pointer-events-auto w-14 h-14 rounded-full bg-white dark:bg-slate-900 shadow-2xl border-slate-100 dark:border-slate-800 transition-[width] duration-500 opacity-0 group-hover:opacity-100 translate-x-8 group-hover:translate-x-0 hover:bg-primary hover:text-white" />
                 </div>
             </template>
         </Carousel>
@@ -84,26 +84,22 @@ import CarouselNext from '../ui/CarouselNext.vue'
 import CarouselPrevious from '../ui/CarouselPrevious.vue'
 import { Card, CardContent, CardTitle, CardDescription, Badge } from '../ui'
 import Autoplay from 'embla-carousel-autoplay'
-import { Film, Play } from 'lucide-vue-next'
-import { 
+import Film from 'lucide-vue-next/dist/esm/icons/film.js';
+import Play from 'lucide-vue-next/dist/esm/icons/play.js';import { 
     getVal,
     getTypographyStyles,
     getLayoutStyles,
     getResponsiveValue 
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BlockProps } from '@/types/builder'
 
-const props = withDefaults(defineProps<{
-  module: BlockInstance;
-  mode?: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile';
-}>(), {
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })
 
 const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.settings || props.module.settings || {}) as Record<string, any>)
 
 const items = computed(() => settings.value.items || [
     { title: 'Designing the Future of CMS', description: 'Take a deep dive into modern component architecture and user experience design.', type: 'YouTube', videoId: 'aqz-KE-bpKQ' },

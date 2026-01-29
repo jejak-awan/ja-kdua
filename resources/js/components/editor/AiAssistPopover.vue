@@ -113,27 +113,65 @@
     </div>
 </template>
 
-<script setup>
-import { ref, onMounted, computed, nextTick, onUnmounted } from 'vue';
-import { Sparkles, CheckCircle2, RefreshCw, FileText, Maximize2, ArrowRight, X, Loader2 } from 'lucide-vue-next';
-import Button from '@/components/ui/button.vue';
-import Input from '@/components/ui/input.vue';
-import Textarea from '@/components/ui/textarea.vue';
-import Select from '@/components/ui/select.vue';
-import SelectContent from '@/components/ui/select-content.vue';
-import SelectItem from '@/components/ui/select-item.vue';
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-import SelectValue from '@/components/ui/select-value.vue';
-import axios from 'axios';
+<script setup lang="ts">
+import { ref, onMounted, computed, nextTick } from 'vue';
+import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
+import CheckCircle2 from 'lucide-vue-next/dist/esm/icons/circle-check-big.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Maximize2 from 'lucide-vue-next/dist/esm/icons/maximize.js';
+import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import { 
+    Button, 
+    Textarea, 
+    Select, 
+    SelectContent, 
+    SelectItem, 
+    SelectTrigger, 
+    SelectValue 
+} from '@/components/ui';
+import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { useCmsStore } from '@/stores/cms';
+import type { AxiosResponse } from 'axios';
 
-const props = defineProps({
-    context: String,
-    disabled: { type: Boolean, default: false }
-});
+interface AiProvider {
+    id: string;
+    name: string;
+    logo?: string;
+}
 
-const emit = defineEmits(['result']);
+interface AiModel {
+    id: string;
+    name: string;
+}
+
+interface AiProvidersResponse {
+    data: AiProvider[];
+}
+
+interface AiModelsResponse {
+    data: AiModel[];
+}
+
+interface AiGenerateResponse {
+    success: boolean;
+    data: {
+        content: string;
+    };
+}
+
+const props = defineProps<{
+    context?: string;
+    disabled?: boolean;
+}>();
+
+const emit = defineEmits<{
+    (e: 'result', content: string): void;
+}>();
+
 const toast = useToast();
 const cmsStore = useCmsStore();
 
@@ -141,10 +179,10 @@ const isOpen = ref(false);
 const customPrompt = ref('');
 const loading = ref(false);
 
-const providers = ref([]);
+const providers = ref<AiProvider[]>([]);
 const selectedProvider = ref('gemini');
 const selectedModel = ref('');
-const models = ref({}); // Cache models: { provider: [models] }
+const models = ref<Record<string, AiModel[]>>({}); // Cache models: { provider: [models] }
 const loadingModels = ref(false);
 
 const activeProviders = computed(() => {
@@ -162,21 +200,17 @@ const selectedProviderName = computed(() => {
 });
 
 // Dragging Logic
-const popoverRef = ref(null);
+const popoverRef = ref<HTMLElement | null>(null);
 const position = ref({ x: 0, y: 0 });
 const isDragging = ref(false);
 const dragOffset = ref({ x: 0, y: 0 });
 
 const windowStyle = computed(() => {
-    // If dragging or moved, use absolute position. 
-    // Wait, initially we want center. 
-    // We can use transform.
     return {
-        position: 'absolute',
+        position: 'absolute' as const,
         top: `${position.value.y}px`,
         left: `${position.value.x}px`,
         margin: 0,
-        // Remove transform if we are setting top/left directly
     };
 });
 
@@ -205,8 +239,9 @@ const centerPopover = () => {
     }
 };
 
-const startDrag = (e) => {
+const startDrag = (e: MouseEvent) => {
     isDragging.value = true;
+    if (!popoverRef.value) return;
     const rect = popoverRef.value.getBoundingClientRect();
     dragOffset.value = {
         x: e.clientX - rect.left,
@@ -217,7 +252,7 @@ const startDrag = (e) => {
     window.addEventListener('mouseup', stopDrag);
 };
 
-const onDrag = (e) => {
+const onDrag = (e: MouseEvent) => {
     if (!isDragging.value) return;
     position.value = {
         x: e.clientX - dragOffset.value.x,
@@ -233,7 +268,7 @@ const stopDrag = () => {
 
 const fetchProviders = async () => {
     try {
-        const response = await axios.get('/api/v1/admin/ja/ai/providers');
+        const response = await api.get<AiProvidersResponse>('/admin/ja/ai/providers');
         providers.value = response.data.data;
         
         // Ensure selected provider is valid/active
@@ -242,7 +277,7 @@ const fetchProviders = async () => {
             toast.service.warning('No active AI providers found. Please configure them in settings.');
         } else {
              // Use default provider from settings if available & active
-            const defaultProvider = cmsStore.settings?.ai_default_provider;
+            const defaultProvider = cmsStore.settings?.ai_default_provider as string;
             const isDefaultActive = activeProviders.value.find(p => p.id === defaultProvider);
            
             if (isDefaultActive) {
@@ -271,7 +306,7 @@ const fetchModels = async () => {
     
     loadingModels.value = true;
     try {
-        const response = await axios.get(`/api/v1/admin/ja/ai/models/${provider}`);
+        const response = await api.get<AiModelsResponse>(`/admin/ja/ai/models/${provider}`);
         models.value[provider] = response.data.data;
         
         if (models.value[provider].length > 0) {
@@ -284,12 +319,12 @@ const fetchModels = async () => {
     }
 };
 
-const handleCommand = async (prompt) => {
+const handleCommand = async (prompt: string) => {
     if (!prompt) return;
     
     loading.value = true;
     try {
-        const response = await axios.post('/api/v1/admin/ja/ai/generate', {
+        const response = await api.post<AiGenerateResponse>('/admin/ja/ai/generate', {
             prompt: prompt,
             context: props.context,
             provider: selectedProvider.value,
@@ -298,10 +333,10 @@ const handleCommand = async (prompt) => {
 
         if (response.data.success) {
             emit('result', response.data.data.content);
-            close(); // Close on success? User might want to try again? User said "popover" so maybe keeps open. But usually modals close on action. Keeping close() for now.
+            close();
             customPrompt.value = '';
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('AI Ops Error:', error);
         toast.service.error('AI Error', error.response?.data?.message || 'Failed to generate content.');
     } finally {

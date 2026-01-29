@@ -1,19 +1,21 @@
 <template>
   <RadixDialogDescription
+    v-bind="delegatedProps"
     :class="cn('text-sm text-muted-foreground', props.class)"
   >
     <slot />
   </RadixDialogDescription>
 </template>
 
-<script setup>
-import { DialogDescription as RadixDialogDescription } from 'radix-vue';
+<script setup lang="ts">
+import { DialogDescription as RadixDialogDescription, type DialogDescriptionProps } from 'radix-vue';
 import { cn } from '@/lib/utils';
+import { computed, type HTMLAttributes } from 'vue';
 
-const props = defineProps({
-  class: {
-    type: String,
-    default: '',
-  },
+const props = defineProps<DialogDescriptionProps & { class?: HTMLAttributes['class'] }>();
+
+const delegatedProps = computed(() => {
+  const { class: _, ...delegated } = props;
+  return delegated;
 });
 </script>

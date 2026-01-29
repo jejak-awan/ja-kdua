@@ -1,7 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router'
 
 // Theme Page Resolver
-const ThemePageResolver = () => import('@/components/ThemePageResolver.vue')
+const ThemePageResolver = () => import('@/components/shared/ThemePageResolver.vue')
 
 // Frontend theme routes
 const frontendRoutes: RouteRecordRaw[] = [

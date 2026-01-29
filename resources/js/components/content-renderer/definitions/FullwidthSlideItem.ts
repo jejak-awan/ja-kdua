@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Square } from 'lucide-vue-next';
+import Square from 'lucide-vue-next/dist/esm/icons/square.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

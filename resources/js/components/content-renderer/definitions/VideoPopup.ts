@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { PlayCircle } from 'lucide-vue-next';
+import PlayCircle from 'lucide-vue-next/dist/esm/icons/circle-play.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

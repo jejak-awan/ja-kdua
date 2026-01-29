@@ -5,7 +5,13 @@ import type { BlockDefinition } from '@/types/builder';
  * Used as child of ColumnsBlock
  */
 
-import { Columns3, AlignHorizontalJustifyStart, AlignHorizontalJustifyCenter, AlignHorizontalJustifyEnd, AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd } from 'lucide-vue-next';
+import Columns3 from 'lucide-vue-next/dist/esm/icons/columns-3.js';
+import AlignHorizontalJustifyStart from 'lucide-vue-next/dist/esm/icons/align-horizontal-justify-start.js';
+import AlignHorizontalJustifyCenter from 'lucide-vue-next/dist/esm/icons/align-horizontal-justify-center.js';
+import AlignHorizontalJustifyEnd from 'lucide-vue-next/dist/esm/icons/align-horizontal-justify-end.js';
+import AlignVerticalJustifyStart from 'lucide-vue-next/dist/esm/icons/align-vertical-justify-start.js';
+import AlignVerticalJustifyCenter from 'lucide-vue-next/dist/esm/icons/align-vertical-justify-center.js';
+import AlignVerticalJustifyEnd from 'lucide-vue-next/dist/esm/icons/align-vertical-justify-end.js';
 import { defineAsyncComponent } from 'vue';
 
 // Import Presets

@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Timer } from 'lucide-vue-next';
+import Timer from 'lucide-vue-next/dist/esm/icons/timer.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

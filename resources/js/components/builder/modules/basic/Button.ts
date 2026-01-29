@@ -127,7 +127,7 @@ const ButtonModule: ModuleDefinition = {
             {
                 id: 'text',
                 label: 'Text',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: f.name === 'text_align' ? 'button_text_align' : f.name
                 }))

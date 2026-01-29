@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Mail } from 'lucide-vue-next';
+import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

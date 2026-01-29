@@ -46,8 +46,9 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import { Layout, MoreVertical, Plus } from 'lucide-vue-next'
-import { useI18n } from 'vue-i18n'
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import MoreVertical from 'lucide-vue-next/dist/esm/icons/ellipsis-vertical.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';import { useI18n } from 'vue-i18n'
 import type { BuilderInstance, Canvas } from '../../../types/builder'
 
 const builder = inject<BuilderInstance>('builder')

@@ -137,7 +137,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -145,21 +145,24 @@ import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { useFormValidation } from '../../../composables/useFormValidation';
 import { emailTemplateSchema } from '../../../schemas';
-import { ArrowLeft, Loader2 } from 'lucide-vue-next';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 
-import Button from '@/components/ui/button.vue';
-import Input from '@/components/ui/input.vue';
-import Label from '@/components/ui/label.vue';
-import Textarea from '@/components/ui/textarea.vue';
-import Select from '@/components/ui/select.vue';
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-import SelectValue from '@/components/ui/select-value.vue';
-import SelectContent from '@/components/ui/select-content.vue';
-import SelectItem from '@/components/ui/select-item.vue';
-import Card from '@/components/ui/card.vue';
-import CardHeader from '@/components/ui/card-header.vue';
-import CardTitle from '@/components/ui/card-title.vue';
-import CardContent from '@/components/ui/card-content.vue';
+import {
+    Button,
+    Input,
+    Label,
+    Textarea,
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent
+} from '@/components/ui';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -197,7 +200,7 @@ const previewTemplate = async () => {
         if (previewWindow) {
             previewWindow.document.write(response.data.html);
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to preview template:', error);
         toast.error.default(t('features.email_templates.form.previewFailed'));
     }
@@ -214,7 +217,7 @@ const handleSubmit = async () => {
         await api.post('/admin/ja/email-templates', form.value);
         toast.success.create('Email Template');
         router.push({ name: 'email-templates' });
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {

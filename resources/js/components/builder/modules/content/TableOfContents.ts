@@ -85,7 +85,7 @@ const TableOfContentsModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -94,7 +94,7 @@ const TableOfContentsModule: ModuleDefinition = {
             {
                 id: 'linkTypography',
                 label: 'Link Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `link_${f.name}`,
                     label: `Link ${f.label}`

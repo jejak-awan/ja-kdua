@@ -172,7 +172,7 @@ const FullwidthPostSliderModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -181,7 +181,7 @@ const FullwidthPostSliderModule: ModuleDefinition = {
             {
                 id: 'excerptTypography',
                 label: 'Excerpt Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `excerpt_${f.name}`,
                     label: `Excerpt ${f.label}`
@@ -190,7 +190,7 @@ const FullwidthPostSliderModule: ModuleDefinition = {
             {
                 id: 'metaTypography',
                 label: 'Meta Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `meta_${f.name}`,
                     label: `Meta ${f.label}`
@@ -199,7 +199,7 @@ const FullwidthPostSliderModule: ModuleDefinition = {
             {
                 id: 'buttonTypography',
                 label: 'Button Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `button_${f.name}`,
                     label: `Button ${f.label}`

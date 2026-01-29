@@ -3,14 +3,14 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="audio-block transition-all duration-300"
+    class="audio-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Audio Player'"
     :style="cardStyles"
   >
     <template #default="{ settings: blockSettings }">
       <Card 
-        class="audio-player-card group w-full border-none shadow-xl rounded-[32px] overflow-hidden bg-white dark:bg-slate-900 px-8 py-6 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1"
+        class="audio-player-card group w-full border-none shadow-xl rounded-[32px] overflow-hidden bg-white dark:bg-slate-900 px-8 py-6 transition-[width] duration-500 hover:shadow-2xl hover:-translate-y-1"
         :style="containerStyles"
       >
         <div class="audio-player flex items-center gap-6">
@@ -18,7 +18,7 @@
           <div class="relative shrink-0">
               <div v-if="isPlaying" class="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
               <Button 
-                class="play-button w-14 h-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center p-0 border-none" 
+                class="play-button w-14 h-14 rounded-full shadow-lg transition-colors duration-300 hover:scale-110 active:scale-95 flex items-center justify-center p-0 border-none" 
                 :style="playButtonStyles" 
                 @click="togglePlay"
               >
@@ -45,7 +45,7 @@
               
               <!-- Progress -->
               <div class="audio-progress relative w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div class="progress-fill absolute inset-y-0 left-0 transition-all duration-500 rounded-full" :style="progressFillStyles" />
+                <div class="progress-fill absolute inset-y-0 left-0 transition-[width] duration-500 rounded-full" :style="progressFillStyles" />
               </div>
           </div>
           
@@ -56,7 +56,7 @@
             :href="blockSettings.url" 
             download 
             variant="ghost" 
-            class="download-button w-10 h-10 p-0 rounded-full opacity-40 hover:opacity-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            class="download-button w-10 h-10 p-0 rounded-full opacity-40 hover:opacity-100 hover:bg-slate-100 dark:hover:bg-muted transition-colors"
           >
             <Download class="w-5 h-5" />
           </Button>
@@ -68,8 +68,9 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Play, Pause, Download } from 'lucide-vue-next'
-import BaseBlock from '../components/BaseBlock.vue'
+import Play from 'lucide-vue-next/dist/esm/icons/play.js';
+import Pause from 'lucide-vue-next/dist/esm/icons/pause.js';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';import BaseBlock from '../components/BaseBlock.vue'
 import { Card, Button } from '../ui'
 import { 
     getVal, 

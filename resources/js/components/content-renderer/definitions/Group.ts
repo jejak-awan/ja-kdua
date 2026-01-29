@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Boxes } from 'lucide-vue-next';
+import Boxes from 'lucide-vue-next/dist/esm/icons/boxes.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

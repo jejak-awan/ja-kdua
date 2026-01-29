@@ -75,7 +75,7 @@ import SelectTrigger from '../ui/select-trigger.vue';
 import SelectValue from '../ui/select-value.vue';
 import SelectContent from '../ui/select-content.vue';
 import SelectItem from '../ui/select-item.vue';
-import { Loader2 } from 'lucide-vue-next';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import { useToast } from '../../composables/useToast';
 import { useFormValidation } from '../../composables/useFormValidation';
 import { menuSchema } from '../../schemas';

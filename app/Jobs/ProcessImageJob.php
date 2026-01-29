@@ -10,6 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Setting;
 
 class ProcessImageJob implements ShouldQueue
 {
@@ -204,15 +205,37 @@ class ProcessImageJob implements ShouldQueue
                 $manager = new \Intervention\Image\ImageManager($driver);
                 $image = $manager->read($fullPath);
 
-                // Resize if too large (max 1920px width)
-                if ($image->width() > 1920) {
-                    $image->scale(width: 1920);
+                $autoConvert = Setting::get('media_auto_convert_webp', true);
+                $quality = $this->quality ?? (int) Setting::get('media_optimization_quality', 85);
+                $maxWidth = (int) Setting::get('media_max_width', 1920);
+
+                // Resize if too large
+                if ($image->width() > $maxWidth) {
+                    $image->scale(width: $maxWidth);
                 }
 
-                $image->save($fullPath, quality: $this->quality ?? 85);
+                if ($autoConvert && $media->mime_type !== 'image/webp') {
+                    $pathInfo = pathinfo($media->path);
+                    $newFileName = $pathInfo['filename'].'.webp';
+                    $newPath = $pathInfo['dirname'].'/'.$newFileName;
+                    $newFullPath = Storage::disk($media->disk)->path($newPath);
 
-                // Update file size
-                $media->update(['size' => filesize($fullPath)]);
+                    $image->toWebp($quality)->save($newFullPath);
+
+                    if ($fullPath !== $newFullPath) {
+                        unlink($fullPath);
+                    }
+
+                    $media->update([
+                        'file_name' => $newFileName,
+                        'path' => $newPath,
+                        'mime_type' => 'image/webp',
+                        'size' => filesize($newFullPath),
+                    ]);
+                } else {
+                    $image->save($fullPath, quality: $quality);
+                    $media->update(['size' => filesize($fullPath)]);
+                }
 
                 Log::channel('media')->info("ProcessImageJob: Image optimized for media {$media->id}");
             }

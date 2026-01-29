@@ -60,32 +60,61 @@
     </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../services/api';
-import Dialog from '../ui/dialog.vue';
-import DialogContent from '../ui/dialog-content.vue';
-import DialogHeader from '../ui/dialog-header.vue';
-import DialogTitle from '../ui/dialog-title.vue';
-import DialogFooter from '../ui/dialog-footer.vue';
-import Button from '../ui/button.vue';
-import Input from '../ui/input.vue';
-import Label from '../ui/label.vue';
-import Textarea from '../ui/textarea.vue';
-import Checkbox from '../ui/checkbox.vue';
-import Select from '../ui/select.vue';
-import SelectTrigger from '../ui/select-trigger.vue';
-import SelectValue from '../ui/select-value.vue';
-import SelectContent from '../ui/select-content.vue';
-import SelectItem from '../ui/select-item.vue';
-import { Loader2 } from 'lucide-vue-next';
-import { useToast } from '../../composables/useToast';
-import { useFormValidation } from '../../composables/useFormValidation';
-import { widgetSchema } from '../../schemas/common';
+import api from '@/services/api';
+import { 
+    Dialog, 
+    DialogContent, 
+    DialogHeader, 
+    DialogTitle, 
+    DialogFooter, 
+    Button, 
+    Input, 
+    Label, 
+    Textarea, 
+    Checkbox, 
+    Select, 
+    SelectTrigger, 
+    SelectValue, 
+    SelectContent, 
+    SelectItem 
+} from '@/components/ui';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import { useToast } from '@/composables/useToast';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { widgetSchema } from '@/schemas/common';
 
-const props = defineProps({ widget: { type: Object, default: null } });
-const emit = defineEmits(['close', 'saved']);
+type WidgetType = 'html' | 'text' | 'recent_posts' | 'categories' | 'custom';
+
+interface Widget {
+    id: number;
+    title: string;
+    type: string;
+    location?: string;
+    content?: string;
+    is_active?: boolean | number;
+}
+
+interface WidgetForm {
+    title: string;
+    type: WidgetType;
+    location: string;
+    content: string;
+    is_active: boolean;
+}
+
+const props = withDefaults(defineProps<{
+    widget?: Widget | null;
+}>(), {
+    widget: null
+});
+
+const emit = defineEmits<{
+    (e: 'close'): void;
+    (e: 'saved'): void;
+}>();
 
 const { t } = useI18n();
 const toast = useToast();
@@ -93,7 +122,7 @@ const isSubmitting = ref(false);
 
 const { errors, validateWithZod, setErrors } = useFormValidation(widgetSchema);
 
-const form = ref({
+const form = ref<WidgetForm>({
     title: '',
     type: 'text',
     location: '',
@@ -101,7 +130,7 @@ const form = ref({
     is_active: true
 });
 
-const initialForm = ref(null);
+const initialForm = ref<WidgetForm | null>(null);
 
 const isDirty = computed(() => {
     if (!props.widget || !initialForm.value) return true;
@@ -114,7 +143,13 @@ const isValid = computed(() => {
 
 const loadWidget = () => {
     if (props.widget) {
-        form.value = { ...props.widget, is_active: !!props.widget.is_active };
+        form.value = { 
+            title: props.widget.title || '',
+            type: (props.widget.type as WidgetType) || 'text',
+            location: props.widget.location || '',
+            content: props.widget.content || '',
+            is_active: !!props.widget.is_active 
+        };
         initialForm.value = JSON.parse(JSON.stringify(form.value));
     }
 };
@@ -132,7 +167,7 @@ const handleSubmit = async () => {
             toast.success.create(t('features.widgets.title'));
         }
         emit('saved');
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors);
         } else {

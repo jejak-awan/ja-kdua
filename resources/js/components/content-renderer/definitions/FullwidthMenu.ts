@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Menu } from 'lucide-vue-next';
+import Menu from 'lucide-vue-next/dist/esm/icons/menu.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

@@ -83,25 +83,21 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
 import { useFormValidation } from '../../composables/useFormValidation';
 import { resetPasswordSchema } from '../../schemas/auth';
-import { Loader2, ArrowLeft } from 'lucide-vue-next';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
 
 // Shadcn Components
-// @ts-ignore
-import Card from '../../components/ui/card.vue';
-// @ts-ignore
-import CardHeader from '../../components/ui/card-header.vue';
-// @ts-ignore
-import CardTitle from '../../components/ui/card-title.vue';
-// @ts-ignore
-import CardDescription from '../../components/ui/card-description.vue';
-// @ts-ignore
-import CardContent from '../../components/ui/card-content.vue';
-// @ts-ignore
-import Button from '../../components/ui/button.vue';
-// @ts-ignore
-import Input from '../../components/ui/input.vue';
-// @ts-ignore
-import Label from '../../components/ui/label.vue';
+// Shadcn Components
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+    CardContent,
+    Button,
+    Input,
+    Label
+} from '../../components/ui';
 
 const router = useRouter();
 const route = useRoute();

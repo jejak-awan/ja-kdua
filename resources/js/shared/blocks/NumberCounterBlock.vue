@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode"
     :settings="settings"
-    class="number-counter-block transition-all duration-300"
+    class="number-counter-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Number Counter'"
     :style="cardStyles"
@@ -13,13 +13,13 @@
         :style="containerStyles"
     >
       <div 
-          class="counter-wrapper flex transition-all duration-300 w-full" 
+          class="counter-wrapper flex transition-colors duration-300 w-full" 
           :class="[
               layout === 'horizontal' ? 'flex-row items-center gap-12' : 'flex-col items-center gap-8',
               alignment === 'left' ? 'text-left items-start' : (alignment === 'right' ? 'text-right items-end' : 'text-center items-center')
           ]"
       >
-        <div class="number-display flex items-baseline font-black tracking-tighter bg-primary/5 px-8 py-6 rounded-[24px] transition-all" :style="wrapperStyles">
+        <div class="number-display flex items-baseline font-black tracking-tighter bg-primary/5 px-8 py-6 rounded-[24px] transition-colors" :style="wrapperStyles">
           <span v-if="settings.prefix" class="number-prefix opacity-40 mr-2 text-2xl" :style="prefixStyles">{{ settings.prefix }}</span>
           <span class="number-value bg-clip-text text-5xl lg:text-6xl tabular-nums" :style="numberStyles">{{ displayNumber }}</span>
           <span v-if="settings.suffix" class="number-suffix opacity-40 ml-2 text-2xl" :style="suffixStyles">{{ settings.suffix || '%' }}</span>

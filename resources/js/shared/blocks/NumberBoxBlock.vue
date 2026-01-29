@@ -3,12 +3,12 @@
     :module="module" 
     :mode="mode"
     :settings="settings"
-    class="number-box-block transition-all duration-300"
+    class="number-box-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Number Box'"
   >
     <div 
-        class="number-box-inner flex p-6 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 transition-all duration-300 hover:scale-[1.02] hover:shadow-md" 
+        class="number-box-inner flex p-6 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 transition-colors duration-300 hover:scale-[1.02] hover:shadow-md" 
         :class="[
             layout === 'vertical' ? 'flex-col text-center' : 'flex-row',
             alignment === 'center' ? 'items-center text-center' : (alignment === 'right' ? 'items-end text-right' : 'items-start text-left')

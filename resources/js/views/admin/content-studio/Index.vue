@@ -55,18 +55,24 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useHead } from '@vueuse/head';
 import { useCmsStore } from '@/stores/cms';
-import Tabs from '@/components/ui/tabs.vue';
-import TabsList from '@/components/ui/tabs-list.vue';
-import TabsTrigger from '@/components/ui/tabs-trigger.vue';
-import TabsContent from '@/components/ui/tabs-content.vue';
-import Button from '@/components/ui/button.vue';
-import { Plus, FileText, Layers, Tag, LayoutTemplate } from 'lucide-vue-next';
+import {
+    Tabs,
+    TabsList,
+    TabsTrigger,
+    TabsContent,
+    Button
+} from '@/components/ui';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import Tag from 'lucide-vue-next/dist/esm/icons/tag.js';
+import LayoutTemplate from 'lucide-vue-next/dist/esm/icons/layout-template.js';
 import { useAuthStore } from '@/stores/auth';
 
 // Lazy load actual index components
@@ -85,7 +91,7 @@ useHead({
     title: computed(() => `${cmsStore.siteSettings?.site_name || 'JA CMS'} | ${t('features.content_studio.title')}`)
 });
 
-const activeTab = ref(route.query.tab || 'contents');
+const activeTab = ref((route.query.tab as string) || 'contents');
 
 watch(activeTab, (newTab) => {
     router.replace({ 

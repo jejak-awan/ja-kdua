@@ -126,34 +126,41 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMenuContext } from '../../../composables/useMenu';
+import { useMenuContext } from '@/composables/useMenu';
 import { menuItemRegistry } from '../registry';
-import type { MenuItem, MenuItemSetting } from '../../../types/menu';
+import type { MenuItem, MenuItemSetting } from '@/types/menu';
 
 // UI Components
-import Card from '../../ui/card.vue';
-import CardHeader from '../../ui/card-header.vue';
-import CardTitle from '../../ui/card-title.vue';
-import CardContent from '../../ui/card-content.vue';
-import Badge from '../../ui/badge.vue';
-import Button from '../../ui/button.vue';
-import Accordion from '../../ui/accordion.vue';
-import AccordionContent from '../../ui/accordion-content.vue';
-import AccordionItem from '../../ui/accordion-item.vue';
-import AccordionTrigger from '../../ui/accordion-trigger.vue';
-import Select from '../../ui/select.vue';
-import SelectTrigger from '../../ui/select-trigger.vue';
-import SelectValue from '../../ui/select-value.vue';
-import SelectContent from '../../ui/select-content.vue';
-import SelectItem from '../../ui/select-item.vue';
-import Label from '../../ui/label.vue';
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+    Badge,
+    Button,
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+    Label
+} from '@/components/ui';
 import ItemPropertyField from './ItemPropertyField.vue';
 
-import { 
-    X, MousePointer, Copy, Trash2,
-    FileText, File, Tag, Link as LinkIcon, Columns,
-    PanelRightClose
-} from 'lucide-vue-next';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import MousePointer from 'lucide-vue-next/dist/esm/icons/mouse-pointer.js';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import File from 'lucide-vue-next/dist/esm/icons/file.js';
+import Tag from 'lucide-vue-next/dist/esm/icons/tag.js';
+import LinkIcon from 'lucide-vue-next/dist/esm/icons/link.js';
+import Columns from 'lucide-vue-next/dist/esm/icons/columns-2.js';
+import PanelRightClose from 'lucide-vue-next/dist/esm/icons/panel-right-close.js';
 
 defineEmits<{
     (e: 'collapse'): void;
@@ -212,7 +219,7 @@ const handleParentChange = (val: string) => {
 
 const typeDefinition = computed(() => {
     if (!selectedItem.value) return null;
-    return menuItemRegistry.get(selectedItem.value.type);
+    return menuItemRegistry.get(selectedItem.value.type || '');
 });
 
 const typeLabel = computed(() => {

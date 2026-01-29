@@ -61,8 +61,8 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { ChevronUp, ChevronDown } from 'lucide-vue-next'
-import { BaseSlider, BaseDropdown } from '../ui'
+import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';import { BaseSlider, BaseDropdown } from '../ui'
 
 const props = defineProps({
   field: { type: Object as () => any, default: () => ({}) },

@@ -11,7 +11,9 @@
           class="text-block-title"
           :contenteditable="blockMode === 'edit'"
           @blur="updateTitle($event, settings)"
-        >{{ getVal(settings, 'title') }}</component>
+        >
+{{ getVal(settings, 'title') }}
+</component>
         
         <template v-if="blockMode === 'edit'">
           <InlineRichtext
@@ -33,13 +35,9 @@ import { inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { getTypographyStyles, getVal, getLayoutStyles } from '../utils/styleUtils'
 import InlineRichtext from '../../components/builder/canvas/InlineRichtext.vue'
-import type { BlockInstance, BuilderInstance } from '../../types/builder'
+import type { BlockInstance, BuilderInstance, BlockProps } from '../../types/builder'
 
-const props = withDefaults(defineProps<{
-  module: BlockInstance;
-  mode: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile' | null;
-}>(), {
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })

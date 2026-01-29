@@ -4,7 +4,10 @@ import type { BlockDefinition } from '@/types/builder';
  * Display images with comprehensive effects, sizing, and styling
  */
 
-import { Image as ImageIcon, AlignLeft, AlignCenter, AlignRight } from 'lucide-vue-next';
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
+import AlignLeft from 'lucide-vue-next/dist/esm/icons/align-start-horizontal.js';
+import AlignCenter from 'lucide-vue-next/dist/esm/icons/align-center-horizontal.js';
+import AlignRight from 'lucide-vue-next/dist/esm/icons/align-end-horizontal.js';
 import { defineAsyncComponent } from 'vue';
 import { borderRadiusPresets } from './presets/border';
 import { shadowOptions } from './presets/effects';

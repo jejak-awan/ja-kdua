@@ -2,7 +2,7 @@
     <Popover :open="open" @update:open="$emit('update:open', $event)">
         <!-- Anchor the popover to the actual media node -->
         <PopoverAnchor :element="anchor" v-if="anchor" />
-        <PopoverTrigger asChild v-else>
+        <PopoverTrigger as-child v-else>
             <div class="sr-only">Properties Trigger</div>
         </PopoverTrigger>
         
@@ -10,7 +10,7 @@
             class="w-80 p-0 z-[100] outline-none bg-transparent border-none shadow-none" 
             align="center" 
             side="right" 
-            :sideOffset="10"
+            :side-offset="10"
         >
             <div 
                 class="flex flex-col h-full w-full bg-card border border-border shadow-2xl rounded-lg overflow-hidden"
@@ -280,84 +280,122 @@
     </Popover>
 </template>
 
-<script setup>
-import { ref, watch, reactive, computed } from 'vue'
-import { X, GripHorizontal, Link as LinkIcon, Unlink as UnlinkIcon, Palette } from 'lucide-vue-next'
-import Button from '@/components/ui/button.vue'
-import Input from '@/components/ui/input.vue'
-import Popover from '@/components/ui/popover.vue'
-import PopoverTrigger from '@/components/ui/popover-trigger.vue'
-import PopoverContent from '@/components/ui/popover-content.vue'
-import { PopoverAnchor } from 'radix-vue'
-import Accordion from '@/components/ui/accordion.vue'
-import AccordionItem from '@/components/ui/accordion-item.vue'
-import AccordionTrigger from '@/components/ui/accordion-trigger.vue'
-import AccordionContent from '@/components/ui/accordion-content.vue'
-import ColorPicker from '@/components/ui/color-picker.vue'
-import Switch from '@/components/ui/switch.vue'
-import Select from '@/components/ui/select.vue'
-import SelectContent from '@/components/ui/select-content.vue'
-import SelectItem from '@/components/ui/select-item.vue'
-import SelectTrigger from '@/components/ui/select-trigger.vue'
-import SelectValue from '@/components/ui/select-value.vue'
-import { useI18n } from 'vue-i18n'
+<script setup lang="ts">
+import { ref, watch, reactive, computed } from 'vue';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import GripHorizontal from 'lucide-vue-next/dist/esm/icons/grip-horizontal.js';
+import LinkIcon from 'lucide-vue-next/dist/esm/icons/link.js';
+import UnlinkIcon from 'lucide-vue-next/dist/esm/icons/unlink.js';
+import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
+import { 
+    Button, 
+    Input, 
+    Popover, 
+    PopoverTrigger, 
+    PopoverContent, 
+    Accordion, 
+    AccordionItem, 
+    AccordionTrigger, 
+    AccordionContent, 
+    ColorPicker, 
+    Switch, 
+    Select, 
+    SelectContent, 
+    SelectItem, 
+    SelectTrigger, 
+    SelectValue 
+} from '@/components/ui';
+import { PopoverAnchor } from 'radix-vue';
+import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n()
-
-const props = defineProps({
-    open: Boolean,
-    node: Object,
-    anchor: [Object, HTMLElement]
-})
-
-const emit = defineEmits(['update:open', 'save'])
-
-
-
-const constrainProportions = ref(true)
-
-
-// Dragging Logic (unchanged)
-const dragOffset = reactive({ x: 0, y: 0 })
-let isDragging = false
-let startX = 0
-let startY = 0
-
-const startDrag = (e) => {
-    isDragging = true
-    startX = e.clientX - dragOffset.x
-    startY = e.clientY - dragOffset.y
-    document.addEventListener('pointermove', onDrag)
-    document.addEventListener('pointerup', stopDrag)
-    document.body.style.userSelect = 'none'
+interface PropertiesForm {
+    src?: string;
+    width: string | number;
+    height: string | number;
+    alt: string;
+    title: string;
+    className: string;
+    // Icon specific
+    name: string;
+    size: string;
+    color: string;
+    strokeWidth: number;
+    rotate: number;
+    backgroundColor: string;
+    opacity: number;
+    // Video specific
+    autoplay: boolean;
+    controls: boolean;
+    loop: boolean;
+    muted: boolean;
+    // HTML Embed specific
+    html: string;
+    // Common
+    borderRadius: string | number;
+    borderWidth: string | number;
+    borderColor: string;
+    borderStyle: string;
+    margin: string | number;
+    padding: string | number;
+    align?: string;
+    displayMode?: string;
 }
 
-const onDrag = (e) => {
-    if (!isDragging) return
-    dragOffset.x = e.clientX - startX
-    dragOffset.y = e.clientY - startY
-}
+const { t } = useI18n();
+
+const props = defineProps<{
+    open: boolean;
+    node: any;
+    anchor: HTMLElement | null;
+}>();
+
+const emit = defineEmits<{
+    (e: 'update:open', value: boolean): void;
+    (e: 'save', attrs: any): void;
+}>();
+
+const constrainProportions = ref(true);
+
+// Dragging Logic
+const dragOffset = reactive({ x: 0, y: 0 });
+let isDragging = false;
+let startX = 0;
+let startY = 0;
+
+const startDrag = (e: PointerEvent) => {
+    isDragging = true;
+    startX = e.clientX - dragOffset.x;
+    startY = e.clientY - dragOffset.y;
+    document.addEventListener('pointermove', onDrag);
+    document.addEventListener('pointerup', stopDrag);
+    document.body.style.userSelect = 'none';
+};
+
+const onDrag = (e: PointerEvent) => {
+    if (!isDragging) return;
+    dragOffset.x = e.clientX - startX;
+    dragOffset.y = e.clientY - startY;
+};
 
 const stopDrag = () => {
-    isDragging = false
-    document.removeEventListener('pointermove', onDrag)
-    document.removeEventListener('pointerup', stopDrag)
-    document.body.style.userSelect = ''
-}
+    isDragging = false;
+    document.removeEventListener('pointermove', onDrag);
+    document.removeEventListener('pointerup', stopDrag);
+    document.body.style.userSelect = '';
+};
 
-const isVideoNode = computed(() => props.node?.type === 'video')
-const isHtmlEmbedNode = computed(() => props.node?.type === 'htmlEmbed')
-const isIconNode = computed(() => props.node?.type === 'icon')
+const isVideoNode = computed(() => props.node?.type === 'video');
+const isHtmlEmbedNode = computed(() => props.node?.type === 'htmlEmbed');
+const isIconNode = computed(() => props.node?.type === 'icon');
 
 // Initialize form
-const form = ref({
-    // Image/Video props
+const form = ref<PropertiesForm>({
+    src: '',
     width: '',
     height: '',
     alt: '',
     title: '',
     className: '',
-    // Icon specific
     name: '',
     size: '1em',
     color: 'currentColor',
@@ -365,35 +403,33 @@ const form = ref({
     rotate: 0,
     backgroundColor: '',
     opacity: 1,
-    // Video specific
     autoplay: false,
     controls: true,
     loop: false,
     muted: false,
-    // HTML Embed specific
-    htmlContent: '',
-    isInteractMode: false,
-    // Common
+    html: '',
     borderRadius: '4px',
     borderWidth: '0',
-    borderColor: null,
+    borderColor: '',
     borderStyle: 'none',
     margin: '0',
-    padding: '0'
-})
+    padding: '0',
+    align: 'center',
+    displayMode: 'block'
+});
 
 // Helper to detect YouTube
 const isYoutubeEmbed = computed(() => {
-    return isHtmlEmbedNode.value && form.value.html && (form.value.html.includes('youtube.com/embed') || form.value.html.includes('youtu.be'))
-})
+    return isHtmlEmbedNode.value && form.value.html && (form.value.html.includes('youtube.com/embed') || form.value.html.includes('youtu.be'));
+});
 
 watch(() => props.open, (isOpen) => {
     if (isOpen) {
-        dragOffset.x = 0
-        dragOffset.y = 0
+        dragOffset.x = 0;
+        dragOffset.y = 0;
         
         if (props.node) {
-            const attrs = props.node.attrs
+            const attrs = props.node.attrs;
             form.value = {
                 src: attrs.src || '',
                 width: attrs.width || '',
@@ -408,9 +444,9 @@ watch(() => props.open, (isOpen) => {
                 strokeWidth: attrs.strokeWidth || 2,
                 rotate: attrs.rotate || 0,
                 backgroundColor: attrs.backgroundColor || '',
-                opacity: attrs.opacity !== undefined ? attrs.opacity : 1, // Default 1
+                opacity: attrs.opacity !== undefined ? attrs.opacity : 1,
                 
-                borderRadius: attrs.borderRadius || '0', // Can be string for icons '50%'
+                borderRadius: attrs.borderRadius || '0',
                 borderWidth: parseInt(attrs.borderWidth) || 0,
                 borderColor: attrs.borderColor || '',
                 padding: attrs.padding || '0',
@@ -418,48 +454,47 @@ watch(() => props.open, (isOpen) => {
                 alt: attrs.alt || '',
                 displayMode: attrs.displayMode || 'block',
                 margin: attrs.margin ? parseInt(attrs.margin) : 16,
-                // Video attrs (with fallbacks)
+                // Video attrs
                 autoplay: attrs.autoplay !== undefined ? attrs.autoplay : false,
                 controls: attrs.controls !== undefined ? attrs.controls : true,
                 loop: attrs.loop !== undefined ? attrs.loop : false,
+                muted: attrs.muted !== undefined ? attrs.muted : false,
                 // Embed specific
-                html: attrs.html || ''
-            }
+                html: attrs.html || '',
+                borderStyle: attrs.borderStyle || 'none'
+            };
 
             // Sync controls state from YouTube URL if applicable
             if (isYoutubeEmbed.value) {
-                const srcMatch = form.value.html.match(/src=["']([^"']+)["']/)
+                const srcMatch = form.value.html.match(/src=["']([^"']+)["']/);
                 if (srcMatch && srcMatch[1]) {
-                    const url = srcMatch[1]
-                    form.value.autoplay = url.includes('autoplay=1')
-                    form.value.controls = !url.includes('controls=0') // YouTube default is 1 (show)
-                    form.value.loop = url.includes('loop=1')
+                    const url = srcMatch[1];
+                    form.value.autoplay = url.includes('autoplay=1');
+                    form.value.controls = !url.includes('controls=0');
+                    form.value.loop = url.includes('loop=1');
                 }
             }
         }
     }
-})
+});
 
-function onDimensionChange(changedField) {
-    if (!constrainProportions.value) return
+function onDimensionChange(changedField: 'width' | 'height') {
+    if (!constrainProportions.value) return;
     
-    // If one field changes to a value (not empty), set the other to 'auto' to maintain aspect ratio
-    // If setting to empty, leave other as is.
     if (changedField === 'width' && form.value.width) {
-        form.value.height = 'auto'
+        form.value.height = 'auto';
     } else if (changedField === 'height' && form.value.height) {
-        form.value.width = 'auto'
+        form.value.width = 'auto';
     }
 }
 
 // Live update watcher
 watch(form, () => {
-   emitChanges()
-}, { deep: true })
+   emitChanges();
+}, { deep: true });
 
 const emitChanges = () => {
-    // Only include video attrs if it is a video node
-    const baseAttrs = {
+    const baseAttrs: any = {
         ...form.value,
         borderRadius: form.value.borderRadius ? ensureUnit(form.value.borderRadius) : null,
         borderWidth: form.value.borderWidth ? `${form.value.borderWidth}px` : '0px',
@@ -467,110 +502,98 @@ const emitChanges = () => {
         borderStyle: form.value.borderStyle || 'none',
         margin: form.value.margin ? `${form.value.margin}px` : '0px',
         padding: form.value.padding ? ensureUnit(form.value.padding) : '0px'
-    }
+    };
     
-    // Ensure units for CSS properties helper
-    function ensureUnit(val) {
-        return (val && !isNaN(val) && String(val).trim() !== '') ? `${val}px` : val
+    function ensureUnit(val: string | number) {
+        if (!val && val !== 0) return val;
+        const sVal = String(val).trim();
+        return (sVal !== '' && !isNaN(Number(sVal))) ? `${sVal}px` : sVal;
     }
 
     if (isVideoNode.value) {
-        baseAttrs.autoplay = form.value.autoplay
-        baseAttrs.controls = form.value.controls
-        baseAttrs.loop = form.value.loop
+        baseAttrs.autoplay = form.value.autoplay;
+        baseAttrs.controls = form.value.controls;
+        baseAttrs.loop = form.value.loop;
     } else if (isHtmlEmbedNode.value) {
-        let html = form.value.html
+        let html = form.value.html;
 
-        // Intelligent YouTube Param Injection
         if (isYoutubeEmbed.value) {
-           const srcMatch = html.match(/src=["']([^"']+)["']/)
+           const srcMatch = html.match(/src=["']([^"']+)["']/);
            if (srcMatch && srcMatch[1]) {
-                let url = srcMatch[1]
-                let params = []
+                let url = srcMatch[1];
+                let params = [];
 
-                // Autoplay (Note: often requires mute=1 for browser policies)
                 if (form.value.autoplay) {
-                    if (!url.includes('autoplay=1')) params.push('autoplay=1')
-                    if (!url.includes('mute=1')) params.push('mute=1') 
+                    if (!url.includes('autoplay=1')) params.push('autoplay=1');
+                    if (!url.includes('mute=1')) params.push('mute=1'); 
                 } else {
-                     url = url.replace(/autoplay=1/g, '').replace(/mute=1/g, '')
+                     url = url.replace(/autoplay=1/g, '').replace(/mute=1/g, '');
                 }
 
-                // Controls
                 if (!form.value.controls) {
-                    if (!url.includes('controls=0')) params.push('controls=0')
+                    if (!url.includes('controls=0')) params.push('controls=0');
                 } else {
-                    url = url.replace(/controls=0/g, '')
+                    url = url.replace(/controls=0/g, '');
                 }
 
-                // Loop (Requires playlist=VIDEO_ID for single video loop)
                 if (form.value.loop) {
-                    if (!url.includes('loop=1')) params.push('loop=1')
-                    
-                    // Extract Video ID for playlist param
-                    // Supports: embed/ID, v=ID, youtu.be/ID
-                    const idMatch = url.match(/(?:embed\/|v=|youtu\.be\/)([^?&"']{11})/)
+                    if (!url.includes('loop=1')) params.push('loop=1');
+                    const idMatch = url.match(/(?:embed\/|v=|youtu\.be\/)([^?&"']{11})/);
                     if (idMatch && idMatch[1]) {
-                        const videoId = idMatch[1]
+                        const videoId = idMatch[1];
                         if (!url.includes(`playlist=${videoId}`)) {
-                            params.push(`playlist=${videoId}`)
+                            params.push(`playlist=${videoId}`);
                         }
                     }
                 } else {
-                    url = url.replace(/loop=1/g, '').replace(/playlist=[^&]*/g, '')
+                    url = url.replace(/loop=1/g, '').replace(/playlist=[^&]*/g, '');
                 }
                 
-                // Clean up any double && or ?? from naive replace
-                url = url.replace(/&+/g, '&').replace(/\?&/g, '?')
-                if (url.endsWith('&') || url.endsWith('?')) url = url.slice(0, -1)
+                url = url.replace(/&+/g, '&').replace(/\?&/g, '?');
+                if (url.endsWith('&') || url.endsWith('?')) url = url.slice(0, -1);
 
-                // Append new params
                 if (params.length > 0) {
-                    const separator = url.includes('?') ? '&' : '?'
-                    url = `${url}${separator}${params.join('&')}`
+                    const separator = url.includes('?') ? '&' : '?';
+                    url = `${url}${separator}${params.join('&')}`;
                 }
                 
-                // Replace in HTML
-               html = html.replace(srcMatch[1], url)
+               html = html.replace(srcMatch[1], url);
            }
         }
 
-        baseAttrs.html = html
+        baseAttrs.html = html;
         
-        // Auto-extract dimensions from HTML if it contains iframe/embed
-        // Only if width/height are currently empty or auto
         if (baseAttrs.html && (!baseAttrs.width || baseAttrs.width === 'auto' || !baseAttrs.height || baseAttrs.height === 'auto')) {
-            const widthMatch = baseAttrs.html.match(/(?:width|WIDTH)=["']?(\d+)(?:px)?["']?/)
-            const heightMatch = baseAttrs.html.match(/(?:height|HEIGHT)=["']?(\d+)(?:px)?["']?/)
+            const widthMatch = baseAttrs.html.match(/(?:width|WIDTH)=["']?(\d+)(?:px)?["']?/);
+            const heightMatch = baseAttrs.html.match(/(?:height|HEIGHT)=["']?(\d+)(?:px)?["']?/);
             
             if (widthMatch && widthMatch[1]) {
-                baseAttrs.width = `${widthMatch[1]}px`
+                baseAttrs.width = `${widthMatch[1]}px`;
             }
             if (heightMatch && heightMatch[1]) {
-                baseAttrs.height = `${heightMatch[1]}px`
+                baseAttrs.height = `${heightMatch[1]}px`;
             }
         }
     } else if (isIconNode.value) {
-        baseAttrs.name = form.value.name
-        baseAttrs.size = form.value.size
-        baseAttrs.color = form.value.color
-        baseAttrs.strokeWidth = form.value.strokeWidth
-        baseAttrs.rotate = form.value.rotate
-        baseAttrs.backgroundColor = form.value.backgroundColor
-        baseAttrs.borderRadius = ensureUnit(form.value.borderRadius)
-        baseAttrs.padding = ensureUnit(form.value.padding)
-        baseAttrs.opacity = form.value.opacity
+        baseAttrs.name = form.value.name;
+        baseAttrs.size = form.value.size;
+        baseAttrs.color = form.value.color;
+        baseAttrs.strokeWidth = form.value.strokeWidth;
+        baseAttrs.rotate = form.value.rotate;
+        baseAttrs.backgroundColor = form.value.backgroundColor;
+        baseAttrs.borderRadius = ensureUnit(form.value.borderRadius);
+        baseAttrs.padding = ensureUnit(form.value.padding);
+        baseAttrs.opacity = form.value.opacity;
     } else {
-        // Clean up video attrs if not video
-        delete baseAttrs.autoplay
-        delete baseAttrs.controls
-        delete baseAttrs.loop
+        delete baseAttrs.autoplay;
+        delete baseAttrs.controls;
+        delete baseAttrs.loop;
     }
 
-    emit('save', baseAttrs)
-}
+    emit('save', baseAttrs);
+};
 
 const save = () => {
-    emit('update:open', false)
-}
+    emit('update:open', false);
+};
 </script>

@@ -110,22 +110,31 @@
     </div>
 </template>
 
-<script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
-import { useToast } from '../../../composables/useToast';
-import { useConfirm } from '../../../composables/useConfirm';
-import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
+import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
+import { useConfirm } from '@/composables/useConfirm';
+import { parseResponse, ensureArray, parseSingleResponse } from '@/utils/responseParser';
+import { Button, Input } from '@/components/ui';
+
+interface LogFile {
+    name: string;
+    size: number;
+    modified_at?: string;
+}
+
+interface LogResponse {
+    content: string;
+}
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 
-const logFiles = ref([]);
-const selectedLogFile = ref(null);
+const logFiles = ref<LogFile[]>([]);
+const selectedLogFile = ref<LogFile | null>(null);
 const logContent = ref('');
 const loadingLog = ref(false);
 const clearing = ref(false);
@@ -150,27 +159,27 @@ const highlightedLogContent = computed(() => {
     return content;
 });
 
-const fetchLogFiles = async () => {
+const fetchLogFiles = async () : Promise<void> => {
     try {
         const response = await api.get('admin/ja/logs');
-        const { data } = parseResponse(response);
+        const { data } = parseResponse<LogFile[]>(response);
         logFiles.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch log files:', error);
         logFiles.value = [];
     }
 };
 
-const selectLogFile = async (logFile) => {
+const selectLogFile = async (logFile: LogFile) : Promise<void> => {
     selectedLogFile.value = logFile;
     loadingLog.value = true;
     try {
         const response = await api.get(`admin/ja/logs/${logFile.name}`);
-        const data = parseSingleResponse(response) || {};
+        const data = parseSingleResponse<LogResponse>(response) || { content: '' };
         logContent.value = data.content || '';
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch log content:', error);
-        logContent.value = t('features.system.logs.failed_load');
+        logContent.value = t('features.system.logs.failed_load') || 'Failed to load log content';
     } finally {
         loadingLog.value = false;
     }
@@ -182,7 +191,7 @@ const refreshLog = () => {
     }
 };
 
-const downloadLog = async (logFile) => {
+const downloadLog = async (logFile: LogFile) : Promise<void> => {
     try {
         const response = await api.get(`admin/ja/logs/${logFile.name}/download`, {
             responseType: 'blob',
@@ -190,20 +199,21 @@ const downloadLog = async (logFile) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', 'system.log');
+        link.setAttribute('download', logFile.name || 'system.log');
         document.body.appendChild(link);
         link.click();
         link.remove();
-    } catch (error) {
-        console.error('Failed to download logs:', error);
+        window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+        console.error('Failed to download logs:', error.message);
         toast.error.fromResponse(error);
     }
 };
 
-const clearLogs = async () => {
+const clearLogs = async () : Promise<void> => {
     const confirmed = await confirm({
         title: t('features.system.logs.actions.clear'),
-        message: t('features.system.logs.confirm.clear'),
+        message: t('features.system.logs.confirm.clear') || 'Are you sure you want to clear all logs?',
         variant: 'danger',
         confirmText: t('common.actions.clear'),
     });
@@ -216,15 +226,15 @@ const clearLogs = async () => {
         toast.success.action(t('features.system.logs.messages.cleared'));
         logContent.value = '';
         fetchLogFiles();
-    } catch (error) {
-        console.error('Failed to clear logs:', error);
+    } catch (error: any) {
+        console.error('Failed to clear logs:', error.message);
         toast.error.fromResponse(error);
     } finally {
         clearing.value = false;
     }
 };
 
-const formatFileSize = (bytes) => {
+const formatFileSize = (bytes?: number) => {
     if (!bytes) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];

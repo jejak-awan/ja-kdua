@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { computed, type HTMLAttributes } from 'vue';
 import { SelectTrigger, type SelectTriggerProps, SelectIcon } from 'radix-vue';
-import { ChevronDown } from 'lucide-vue-next';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import { cn } from '../../lib/utils';
 
 const props = defineProps<SelectTriggerProps & { class?: HTMLAttributes['class'] }>();

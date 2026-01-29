@@ -13,7 +13,9 @@ return new class extends Migration
     public function up(): void
     {
         // Use raw SQL to alter enum as Blueprint->change() is limited for enums
-        DB::statement("ALTER TABLE contents MODIFY COLUMN type ENUM('post', 'page', 'custom', 'layout') DEFAULT 'post'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE contents MODIFY COLUMN type ENUM('post', 'page', 'custom', 'layout') DEFAULT 'post'");
+        }
     }
 
     /**
@@ -21,6 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE contents MODIFY COLUMN type ENUM('post', 'page', 'custom') DEFAULT 'post'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE contents MODIFY COLUMN type ENUM('post', 'page', 'custom') DEFAULT 'post'");
+        }
     }
 };

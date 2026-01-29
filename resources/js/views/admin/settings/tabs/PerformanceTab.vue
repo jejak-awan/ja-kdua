@@ -9,7 +9,7 @@
             >
                 <div class="flex items-center gap-3">
                     <div class="p-2 rounded-lg bg-primary/10 text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-6.219-8.56" /></svg>
                     </div>
                     <div>
                         <h3 class="text-sm font-semibold text-foreground">{{ $t('features.settings.cache.status') }}</h3>
@@ -27,7 +27,7 @@
                     stroke-linejoin="round"
                     class="text-muted-foreground transition-transform duration-200"
                     :class="{ 'rotate-180': sections.cache }"
-                ><path d="m6 9 6 6 6-6"/></svg>
+                ><path d="m6 9 6 6 6-6" /></svg>
             </button>
             
             <div v-show="sections.cache" class="border-t border-border">
@@ -65,7 +65,7 @@
                                     class="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium border border-destructive/30 bg-destructive/10 text-destructive rounded-lg hover:bg-destructive/20 disabled:opacity-50 transition-colors"
                                 >
                                     <svg v-if="clearingCache" class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                    <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                    <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
                                     {{ clearingCache ? $t('features.settings.cache.clearing') : $t('features.settings.cache.clear') }}
                                 </button>
                                 <button
@@ -75,7 +75,7 @@
                                     class="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium border border-border bg-card text-foreground rounded-lg hover:bg-muted disabled:opacity-50 transition-colors"
                                 >
                                     <svg v-if="warmingCache" class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                    <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.1.24-2.14.7-3.09C7.07 13.1 8 13.9 8.5 14.5z"/></svg>
+                                    <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.1.24-2.14.7-3.09C7.07 13.1 8 13.9 8.5 14.5z" /></svg>
                                     {{ warmingCache ? $t('features.settings.cache.warming') : $t('features.settings.cache.warm') }}
                                 </button>
                             </div>
@@ -97,7 +97,7 @@
                                     v-if="setting.key === 'cache_driver'"
                                     v-model="formData[setting.key]"
                                     class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
-                                    :class="{ 'border-destructive': errors[setting.key] }"
+                                    :class="{ 'border-destructive': errors?.[setting.key] }"
                                 >
                                     <option value="file">File (Development)</option>
                                     <option value="database">Database</option>
@@ -122,9 +122,9 @@
                                     v-model.number="formData[setting.key]"
                                     type="number"
                                     class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
-                                    :class="{ 'border-destructive': errors[setting.key] }"
+                                    :class="{ 'border-destructive': errors?.[setting.key] }"
                                 >
-                                <p v-if="errors[setting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[setting.key]) ? errors[setting.key][0] : errors[setting.key] }}</p>
+                                <p v-if="errors?.[setting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors?.[setting.key]) ? errors?.[setting.key][0] : errors?.[setting.key] }}</p>
                             </div>
                         </template>
                     </div>
@@ -134,14 +134,14 @@
                 <div v-if="formData.cache_driver === 'redis' || formData.cache_driver === 'redis_failover'" class="mx-6 mb-6 p-4 rounded-lg border border-primary/20 bg-primary/5">
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
                         </div>
                         <div>
                             <h4 class="font-semibold text-sm text-foreground mb-1">{{ $t('features.settings.cache.redisInfo.title') }}</h4>
                             <p class="text-xs text-muted-foreground mb-3 leading-relaxed">{{ $t('features.settings.cache.redisInfo.description') }}</p>
                             <router-link to="/admin/redis" class="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors">
                                 {{ $t('features.settings.cache.redisInfo.linkText') }}
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" x2="21" y1="14" y2="3" /></svg>
                             </router-link>
                         </div>
                     </div>
@@ -158,7 +158,7 @@
             >
                 <div class="flex items-center gap-3">
                     <div class="p-2 rounded-lg bg-info/10 text-info">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="M2 12h20" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>
                     </div>
                     <div>
                         <h3 class="text-sm font-semibold text-foreground">CDN Configuration</h3>
@@ -179,7 +179,7 @@
                         stroke-linejoin="round"
                         class="text-muted-foreground transition-transform duration-200"
                         :class="{ 'rotate-180': sections.cdn }"
-                    ><path d="m6 9 6 6 6-6"/></svg>
+                    ><path d="m6 9 6 6 6-6" /></svg>
                 </div>
             </button>
             
@@ -238,9 +238,9 @@
                             :disabled="!formData.enable_cdn"
                             class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             :placeholder="!formData.enable_cdn ? 'Enable CDN to configure URL' : 'https://cdn.example.com'"
-                            :class="{ 'border-destructive': errors[cdnUrlSetting.key] }"
+                            :class="{ 'border-destructive': errors?.[cdnUrlSetting.key] }"
                         >
-                        <p v-if="errors[cdnUrlSetting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[cdnUrlSetting.key]) ? errors[cdnUrlSetting.key][0] : errors[cdnUrlSetting.key] }}</p>
+                        <p v-if="errors?.[cdnUrlSetting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors?.[cdnUrlSetting.key]) ? errors?.[cdnUrlSetting.key][0] : errors?.[cdnUrlSetting.key] }}</p>
                         <p v-if="formData.cdn_preset === 'bunny'" class="text-xs text-primary mt-1">
                             Tip: Use your BunnyCDN Pull Zone URL (e.g. https://my-zone.b-cdn.net)
                         </p>
@@ -259,9 +259,9 @@
                             type="text"
                             :disabled="!formData.enable_cdn"
                             class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            :class="{ 'border-destructive': errors[cdnIncludedDirsSetting.key] }"
+                            :class="{ 'border-destructive': errors?.[cdnIncludedDirsSetting.key] }"
                         >
-                        <p v-if="errors[cdnIncludedDirsSetting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[cdnIncludedDirsSetting.key]) ? errors[cdnIncludedDirsSetting.key][0] : errors[cdnIncludedDirsSetting.key] }}</p>
+                        <p v-if="errors?.[cdnIncludedDirsSetting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors?.[cdnIncludedDirsSetting.key]) ? errors?.[cdnIncludedDirsSetting.key][0] : errors?.[cdnIncludedDirsSetting.key] }}</p>
                     </div>
 
                     <!-- Excluded Extensions -->
@@ -277,9 +277,9 @@
                             type="text"
                             :disabled="!formData.enable_cdn"
                             class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            :class="{ 'border-destructive': errors[cdnExcludedExtsSetting.key] }"
+                            :class="{ 'border-destructive': errors?.[cdnExcludedExtsSetting.key] }"
                         >
-                        <p v-if="errors[cdnExcludedExtsSetting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[cdnExcludedExtsSetting.key]) ? errors[cdnExcludedExtsSetting.key][0] : errors[cdnExcludedExtsSetting.key] }}</p>
+                        <p v-if="errors?.[cdnExcludedExtsSetting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors?.[cdnExcludedExtsSetting.key]) ? errors?.[cdnExcludedExtsSetting.key][0] : errors?.[cdnExcludedExtsSetting.key] }}</p>
                     </div>
                 </div>
             </div>
@@ -294,7 +294,7 @@
             >
                 <div class="flex items-center gap-3">
                     <div class="p-2 rounded-lg bg-warning/10 text-warning">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
                     </div>
                     <div>
                         <h3 class="text-sm font-semibold text-foreground">{{ $t('features.settings.tabs.performance') }} Settings</h3>
@@ -312,7 +312,7 @@
                     stroke-linejoin="round"
                     class="text-muted-foreground transition-transform duration-200"
                     :class="{ 'rotate-180': sections.other }"
-                ><path d="m6 9 6 6 6-6"/></svg>
+                ><path d="m6 9 6 6 6-6" /></svg>
             </button>
             
             <div v-show="sections.other" class="border-t border-border p-6">
@@ -330,15 +330,15 @@
                                 v-if="setting.type === 'string'"
                                 v-model="formData[setting.key]"
                                 type="text"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
-                               :class="{ 'border-destructive': errors[setting.key] }"
+                                 class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                                :class="{ 'border-destructive': errors?.[setting.key] }"
                             >
                             <input
                                 v-else-if="setting.type === 'integer'"
                                 v-model.number="formData[setting.key]"
                                 type="number"
                                 class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
-                                :class="{ 'border-destructive': errors[setting.key] }"
+                                :class="{ 'border-destructive': errors?.[setting.key] }"
                             >
                             <div v-else-if="setting.type === 'boolean'">
                                 <label class="flex items-center cursor-pointer">
@@ -351,7 +351,7 @@
                                     </span>
                                 </label>
                             </div>
-                            <p v-if="errors[setting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[setting.key]) ? errors[setting.key][0] : errors[setting.key] }}</p>
+                            <p v-if="errors?.[setting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors?.[setting.key]) ? errors?.[setting.key][0] : errors?.[setting.key] }}</p>
                         </div>
                     </template>
                 </div>
@@ -360,40 +360,51 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 
-const props = defineProps({
-    settings: {
-        type: Array,
-        required: true
-    },
-    formData: {
-        type: Object,
-        required: true
-    },
-    cacheStatus: {
-        type: Object,
-        default: null
-    },
-    clearingCache: {
-        type: Boolean,
-        default: false
-    },
-    warmingCache: {
-        type: Boolean,
-        default: false
-    },
-    errors: {
-        type: Object,
-        default: () => ({})
-    }
-})
+interface Setting {
+    id: number | string;
+    key: string;
+    value: any;
+    type: string;
+    group: string;
+    description?: string;
+}
+
+interface CacheStatus {
+    driver: string;
+    enabled: boolean;
+    keys: number | string;
+    size: string;
+}
+
+interface SectionState {
+    cache: boolean;
+    cdn: boolean;
+    other: boolean;
+}
+
+interface Props {
+    settings: Setting[];
+    formData: Record<string, any>;
+    cacheStatus?: CacheStatus | null;
+    clearingCache?: boolean;
+    warmingCache?: boolean;
+    errors?: Record<string, string[] | string>;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    cacheStatus: null,
+    clearingCache: false,
+    warmingCache: false,
+    errors: () => ({})
+});
 
 defineEmits(['clear-cache', 'warm-cache'])
 
 // Collapsible section states
-const sections = ref({
+const sections = ref<SectionState>({
     cache: true,
     cdn: false,
     other: false

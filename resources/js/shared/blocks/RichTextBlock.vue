@@ -21,25 +21,25 @@
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed, inject } from 'vue'
+<script setup lang="ts">
+import { inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { getTypographyStyles, getVal } from '../utils/styleUtils'
-import TiptapEditor from '../../components/TiptapEditor.vue'
+import TiptapEditor from '../../components/editor/TiptapEditor.vue'
+import type { BlockProps, BuilderInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<BlockProps>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
+const builder = inject<BuilderInstance>('builder', null as any)
 
-const textStyles = (settings, device) => {
+const textStyles = (settings: any, device: string) => {
   return getTypographyStyles(settings, '', device)
 }
 
-const onContentUpdate = (newContent, settings) => {
+const onContentUpdate = (newContent: string, settings: any) => {
   if (props.mode !== 'edit' || !builder) return
   builder.updateModule(props.module.id, {
     settings: { ...settings, content: newContent }

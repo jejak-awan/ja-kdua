@@ -142,7 +142,7 @@ const CodeModule: ModuleDefinition = {
             {
                 id: 'typography',
                 label: 'Code Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `code_${f.name}`,
                     label: `Code ${f.label}`

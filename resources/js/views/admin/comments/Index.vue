@@ -13,7 +13,7 @@
             <Card 
                 class="p-4 cursor-pointer hover:shadow-md transition-shadow" 
                 @click="statusFilter = 'all'"
-                :class="{ 'ring-2 ring-primary/50': statusFilter === 'all' }"
+                :class="statusFilter === 'all' ? 'ring-2 ring-primary/50' : ''"
             >
                 <p class="text-2xl font-bold">{{ statistics.total }}</p>
                 <p class="text-xs text-muted-foreground">{{ $t('features.comments.stats.total') }}</p>
@@ -21,7 +21,7 @@
             <Card 
                 class="p-4 cursor-pointer hover:shadow-md transition-shadow border-yellow-500/20 dark:border-yellow-500/10" 
                 @click="statusFilter = 'pending'"
-                :class="{ 'ring-2 ring-yellow-500/50': statusFilter === 'pending' }"
+                :class="statusFilter === 'pending' ? 'ring-2 ring-yellow-500/50' : ''"
             >
                 <p class="text-2xl font-bold text-yellow-500 dark:text-yellow-400">{{ statistics.pending }}</p>
                 <p class="text-xs text-yellow-500/70 dark:text-yellow-400/70">{{ $t('features.comments.stats.pending') }}</p>
@@ -29,7 +29,7 @@
             <Card 
                 class="p-4 cursor-pointer hover:shadow-md transition-shadow border-green-500/20 dark:border-green-500/10" 
                 @click="statusFilter = 'approved'"
-                :class="{ 'ring-2 ring-green-500/50': statusFilter === 'approved' }"
+                :class="statusFilter === 'approved' ? 'ring-2 ring-green-500/50' : ''"
             >
                 <p class="text-2xl font-bold text-green-500 dark:text-green-400">{{ statistics.approved }}</p>
                 <p class="text-xs text-green-500/70 dark:text-green-400/70">{{ $t('features.comments.stats.approved') }}</p>
@@ -37,7 +37,7 @@
             <Card 
                 class="p-4 cursor-pointer hover:shadow-md transition-shadow border-red-500/20 dark:border-red-500/10" 
                 @click="statusFilter = 'rejected'"
-                :class="{ 'ring-2 ring-red-500/50': statusFilter === 'rejected' }"
+                :class="statusFilter === 'rejected' ? 'ring-2 ring-red-500/50' : ''"
             >
                 <p class="text-2xl font-bold text-red-500 dark:text-red-400">{{ statistics.rejected }}</p>
                 <p class="text-xs text-red-500/70 dark:text-red-400/70">{{ $t('features.comments.stats.rejected') }}</p>
@@ -45,7 +45,7 @@
             <Card 
                 class="p-4 cursor-pointer hover:shadow-md transition-shadow" 
                 @click="statusFilter = 'spam'"
-                :class="{ 'ring-2 ring-muted-foreground/50': statusFilter === 'spam' }"
+                :class="statusFilter === 'spam' ? 'ring-2 ring-muted-foreground/50' : ''"
             >
                 <p class="text-2xl font-bold text-muted-foreground">{{ statistics.spam }}</p>
                 <p class="text-xs text-muted-foreground">{{ $t('features.comments.stats.spam') }}</p>
@@ -154,12 +154,12 @@
                                     </p>
                                     <Badge
                                         variant="outline"
-                                        :class="{
-                                            'bg-yellow-500/10 text-yellow-500 border-yellow-500/20': comment.status === 'pending',
-                                            'bg-green-500/10 text-green-500 border-green-500/20': comment.status === 'approved',
-                                            'bg-red-500/10 text-red-500 border-red-500/20': comment.status === 'rejected',
-                                            'bg-muted text-muted-foreground': comment.status === 'spam',
-                                        }"
+                                        :class="
+                                            statusFilter === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
+                                            statusFilter === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                            statusFilter === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                            statusFilter === 'spam' ? 'bg-muted text-muted-foreground' : ''
+                                        "
                                     >
                                         {{ $t('features.comments.status.' + comment.status) }}
                                     </Badge>
@@ -240,7 +240,7 @@
                             </span>
                         </div>
                         <div class="font-medium">
-                            <span v-if="comment.replies_count > 0">
+                            <span v-if="(comment.replies_count || 0) > 0">
                                 {{ comment.replies_count }} {{ comment.replies_count === 1 ? 'reply' : 'replies' }}
                             </span>
                         </div>
@@ -270,11 +270,11 @@
                                     <Badge
                                         variant="outline"
                                         class="text-[10px] h-4 px-1"
-                                        :class="{
-                                            'bg-yellow-500/10 text-yellow-500 border-yellow-500/20': reply.status === 'pending',
-                                            'bg-green-500/10 text-green-500 border-green-500/20': reply.status === 'approved',
-                                            'bg-red-500/10 text-red-500 border-red-500/20': reply.status === 'rejected',
-                                        }"
+                                        :class="
+                                            reply.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
+                                            reply.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                            reply.status === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' : ''
+                                        "
                                     >
                                         {{ $t('features.comments.status.' + reply.status) }}
                                     </Badge>
@@ -323,14 +323,14 @@
                 :per-page="Number(pagination.per_page || 10)"
                 :show-page-numbers="true"
                 @page-change="changePage"
-                @update:per-page="(val) => { if(pagination) { pagination.per_page = val; pagination.current_page = 1; fetchComments(); } }"
+                @update:per-page="(val) => { if(pagination) { pagination.per_page = String(val); pagination.current_page = 1; fetchComments(); } }"
                 class="border-none shadow-none mt-4"
             />
         </div>
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -348,42 +348,50 @@ import SelectContent from '../../../components/ui/select-content.vue';
 import SelectItem from '../../../components/ui/select-item.vue';
 import Badge from '../../../components/ui/badge.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
-import { 
-    MessageSquare, Check, X, AlertTriangle, 
-    Trash2, Search, ArrowUpRight, Reply,
-    Clock, ChevronLeft, ChevronRight 
-} from 'lucide-vue-next';
+import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import ArrowUpRight from 'lucide-vue-next/dist/esm/icons/arrow-up-right.js';
+import Reply from 'lucide-vue-next/dist/esm/icons/reply.js';
+import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
+import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
+
+import type { Comment, CommentStatus, CommentStatistics } from '@/types/comments';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 
 const loading = ref(false);
-const comments = ref([]);
+const comments = ref<Comment[]>([]);
 const search = ref('');
-const statusFilter = ref('pending');
-const pagination = ref(null);
-const statistics = ref(null);
-const selectedIds = ref([]);
+const statusFilter = ref<CommentStatus | 'all'>('pending');
+const pagination = ref<any>(null);
+const statistics = ref<CommentStatistics | null>(null);
+const selectedIds = ref<number[]>([]);
 
 const fetchStatistics = async () => {
     try {
         const response = await api.get('/admin/ja/comments/statistics');
-        statistics.value = response.data?.data || response.data;
-    } catch (error) {
+        statistics.value = (response.data?.data || response.data) as CommentStatistics;
+    } catch (error: any) {
         console.error('Failed to fetch statistics:', error);
     }
 };
 
 const bulkActionSelection = ref('');
 
-const handleBulkAction = async (value) => {
+const handleBulkAction = async (value: string) => {
     if (!value) return;
     await bulkAction(value);
     bulkActionSelection.value = '';
 };
 
-const bulkAction = async (action) => {
+const bulkAction = async (action: string) => {
     if (selectedIds.value.length === 0) return;
     
     const count = selectedIds.value.length;
@@ -425,7 +433,7 @@ const bulkAction = async (action) => {
         await fetchComments();
         await fetchStatistics();
         toast.success.update('Action');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Bulk action failed:', error);
         toast.error.action(error);
     }
@@ -434,7 +442,7 @@ const bulkAction = async (action) => {
 const fetchComments = async () => {
     loading.value = true;
     try {
-        const params = {
+        const params: any = {
             page: pagination.value?.current_page || 1,
             per_page: pagination.value?.per_page || 10,
         };
@@ -444,61 +452,61 @@ const fetchComments = async () => {
         }
 
         const response = await api.get('/admin/ja/comments', { params });
-        const { data, pagination: paginationData } = parseResponse(response);
-        comments.value = ensureArray(data);
+        const { data, pagination: paginationData } = parseResponse<Comment>(response);
+        comments.value = ensureArray<Comment>(data);
         if (paginationData) {
             pagination.value = paginationData;
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch comments:', error);
     } finally {
         loading.value = false;
     }
 };
 
-const changePage = (page) => {
+const changePage = (page: number) => {
     if (pagination.value) {
         pagination.value.current_page = page;
         fetchComments();
     }
 };
 
-const approveComment = async (comment) => {
+const approveComment = async (comment: Comment) => {
     try {
         await api.put(`/admin/ja/comments/${comment.id}/approve`);
         await fetchComments();
         toast.success.approve('Comment');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to approve comment:', error);
         toast.error.update(error, 'Comment');
     }
 };
 
-const rejectComment = async (comment) => {
+const rejectComment = async (comment: Comment) => {
     try {
         await api.put(`/admin/ja/comments/${comment.id}/reject`);
         await fetchComments();
         await fetchStatistics();
         toast.success.reject('Comment');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to reject comment:', error);
         toast.error.update(error, 'Comment');
     }
 };
 
-const markAsSpam = async (comment) => {
+const markAsSpam = async (comment: Comment) => {
     try {
         await api.put(`/admin/ja/comments/${comment.id}/spam`);
         await fetchComments();
         await fetchStatistics();
         toast.success.markSpam('Comment');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to mark as spam:', error);
         toast.error.update(error, 'Comment');
     }
 };
 
-const toggleSelection = (commentId) => {
+const toggleSelection = (commentId: number) => {
     const index = selectedIds.value.indexOf(commentId);
     if (index > -1) {
         selectedIds.value.splice(index, 1);
@@ -507,7 +515,7 @@ const toggleSelection = (commentId) => {
     }
 };
 
-const deleteComment = async (comment) => {
+const deleteComment = async (comment: Comment) => {
     const confirmed = await confirm({
         title: t('features.comments.actions.delete'),
         message: t('features.comments.messages.deleteConfirm'),
@@ -521,13 +529,13 @@ const deleteComment = async (comment) => {
         await api.delete(`/admin/ja/comments/${comment.id}`);
         await fetchComments();
         toast.success.delete('Comment');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete comment:', error);
         toast.error.delete(error, 'Comment');
     }
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
@@ -548,7 +556,7 @@ const isAllSelected = computed(() => {
     return comments.value.length > 0 && selectedIds.value.length === comments.value.length;
 });
 
-const toggleSelectAll = (checked) => {
+const toggleSelectAll = (checked: boolean) => {
     if (checked) {
         selectedIds.value = comments.value.map(c => c.id);
     } else {

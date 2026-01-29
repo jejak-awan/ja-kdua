@@ -94,105 +94,106 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject, onMounted, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ChevronRight, ChevronDown } from 'lucide-vue-next'
-import type { BuilderInstance } from '../../../../types/builder'
+import { ref, computed, inject, onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import type { BuilderInstance } from '../../../../types/builder';
 
-const { t } = useI18n()
-const builder = inject<BuilderInstance>('builder') as any
+const { t } = useI18n();
+const builder = inject<BuilderInstance>('builder');
 
-const activeTheme = computed(() => builder?.themeData?.value)
-const loading = computed(() => builder?.loadingThemes?.value)
-const saving = ref(false)
-const isDirty = ref(false)
-const formValues = ref<Record<string, any>>({})
-const expandedSections = ref<string[]>(['General', 'Colors'])
+const activeTheme = computed(() => builder?.themeData?.value);
+const loading = computed(() => builder?.loadingThemes?.value);
+const saving = ref(false);
+const isDirty = ref(false);
+const formValues = ref<Record<string, any>>({});
+const expandedSections = ref<string[]>(['General', 'Colors']);
 
 const settingsSections = computed(() => {
-  if (!activeTheme.value?.manifest?.settings_schema) return []
+  if (!activeTheme.value?.manifest?.settings_schema) return [];
   
-  const schema = activeTheme.value.manifest.settings_schema
-  const sectionsMap: Record<string, any> = {}
+  const schema = activeTheme.value.manifest.settings_schema;
+  const sectionsMap: Record<string, any> = {};
 
   Object.keys(schema).forEach(key => {
-    const setting = schema[key]
-    const category = setting.category || 'General'
+    const setting = schema[key];
+    const category = setting.category || 'General';
     
     if (!sectionsMap[category]) {
       sectionsMap[category] = {
         id: category,
         label: category,
         settings: [],
-      }
+      };
     }
     
-    sectionsMap[category].settings.push({ key, ...setting })
-  })
+    sectionsMap[category].settings.push({ key, ...setting });
+  });
 
-  return Object.values(sectionsMap)
-})
+  return Object.values(sectionsMap);
+});
 
 const loadSettings = () => {
-    if (!activeTheme.value) return
+    if (!activeTheme.value) return;
     
-    const defaults: Record<string, any> = {}
-    const schema = activeTheme.value.manifest?.settings_schema || {}
+    const defaults: Record<string, any> = {};
+    const schema = activeTheme.value.manifest?.settings_schema || {};
     
     Object.keys(schema).forEach(key => {
-        defaults[key] = schema[key].default ?? ''
-    })
+        defaults[key] = schema[key].default ?? '';
+    });
 
-    formValues.value = { ...defaults, ...(activeTheme.value.settings || {}) }
-    isDirty.value = false
-}
+    formValues.value = { ...defaults, ...(activeTheme.value.settings || {}) };
+    isDirty.value = false;
+};
 
 const handleInput = (key: string) => {
-    isDirty.value = true
+    isDirty.value = true;
     // Live update builder theme settings for preview
     if (builder?.themeSettings) {
-        builder.themeSettings.value = { ...formValues.value }
+        builder.themeSettings.value = { ...formValues.value };
         // Potentially call applyThemeStyles if useTheme is available in builder
         if (builder.applyThemeStyles) {
-            builder.applyThemeStyles()
+            builder.applyThemeStyles();
         }
     }
-}
+};
 
 const toggleSection = (id: string) => {
-    const idx = expandedSections.value.indexOf(id)
+    const idx = expandedSections.value.indexOf(id);
     if (idx > -1) {
-        expandedSections.value.splice(idx, 1)
+        expandedSections.value.splice(idx, 1);
     } else {
-        expandedSections.value.push(id)
+        expandedSections.value.push(id);
     }
-}
+};
 
 const saveSettings = async () => {
-  if (!isDirty.value || !activeTheme.value) return
+  if (!isDirty.value || !activeTheme.value || !builder) return;
   
-  saving.value = true
+  saving.value = true;
   try {
-    await builder.updateThemeSettings(activeTheme.value.slug, formValues.value)
-    isDirty.value = false
+    await builder.updateThemeSettings(activeTheme.value.slug, formValues.value);
+    isDirty.value = false;
   } catch (error) {
-    console.error('Failed to save theme settings:', error)
+    console.error('Failed to save theme settings:', error);
   } finally {
-    saving.value = false
+    saving.value = false;
   }
-}
+};
 
 watch(activeTheme, () => {
-    loadSettings()
-}, { immediate: true })
+    loadSettings();
+}, { immediate: true });
 
 onMounted(() => {
     if (!activeTheme.value) {
-        builder?.loadTheme()
+        builder?.loadTheme(null);
     } else {
-        loadSettings()
+        loadSettings();
     }
-})
+});
 </script>
 
 <style scoped>

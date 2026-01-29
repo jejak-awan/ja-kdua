@@ -221,7 +221,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -251,11 +251,13 @@ import TableRow from '../../../components/ui/table-row.vue';
 import TableHead from '../../../components/ui/table-head.vue';
 import TableBody from '../../../components/ui/table-body.vue';
 import TableCell from '../../../components/ui/table-cell.vue';
-import { 
-    Plus, Upload, Download, 
-    Trash2, CheckCircle2, 
-    Loader2, Languages as LanguagesIcon 
-} from 'lucide-vue-next';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Upload from 'lucide-vue-next/dist/esm/icons/upload.js';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import CheckCircle2 from 'lucide-vue-next/dist/esm/icons/circle-check-big.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import LanguagesIcon from 'lucide-vue-next/dist/esm/icons/languages.js';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import { getLocale, getAvailableLocales, getBrowserLocale } from '../../../i18n';
 
@@ -263,14 +265,14 @@ const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 
-const languages = ref([]);
+const languages = ref<any[]>([]);
 const loading = ref(false);
 const showCreateModal = ref(false);
 const showImportModal = ref(false);
 const creating = ref(false);
 const importing = ref(false);
-const exporting = ref(null);
-const selectedFile = ref(null);
+const exporting = ref<number | null>(null);
+const selectedFile = ref<File | null>(null);
 
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(languageSchema);
 
@@ -295,7 +297,7 @@ const fetchLanguages = async () => {
         const response = await api.get('/admin/ja/languages');
         const { data } = parseResponse(response);
         languages.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch languages:', error);
         languages.value = [];
     } finally {
@@ -303,17 +305,17 @@ const fetchLanguages = async () => {
     }
 };
 
-const setDefault = async (lang) => {
+const setDefault = async (lang: any) => {
     try {
         await api.post(`/admin/ja/languages/${lang.id}/set-default`);
         await fetchLanguages();
         toast.success.action(t('features.languages.messages.set_default_success') || 'Default language updated');
-    } catch (error) {
+    } catch (error: any) {
         toast.error.fromResponse(error);
     }
 };
 
-const deleteLanguage = async (lang) => {
+const deleteLanguage = async (lang: any) => {
     const confirmed = await confirm({
         title: t('features.languages.actions.delete'),
         message: t('features.languages.actions.confirmDelete', { name: lang.name }),
@@ -327,8 +329,8 @@ const deleteLanguage = async (lang) => {
         await api.delete(`/admin/ja/languages/${lang.id}`);
         await fetchLanguages();
         toast.success.delete('Language');
-    } catch (error) {
-        toast.error.delete(error, 'Language');
+    } catch (error: any) {
+        toast.error.fromResponse(error);
     }
 };
 
@@ -348,18 +350,19 @@ const createLanguage = async () => {
         form.value = { code: '', name: '', create_from_template: true };
         await fetchLanguages();
         toast.success.create(t('features.languages.title'));
-    } catch (error) {
+    } catch (err: any) {
+        const error = err as any;
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors);
         } else {
-            toast.error.fromResponse(error);
+            toast.error.action(error);
         }
     } finally {
         creating.value = false;
     }
 };
 
-const exportPack = async (lang) => {
+const exportPack = async (lang: any) => {
     exporting.value = lang.id;
     try {
         const response = await api.get(`/admin/ja/languages/${lang.id}/export-pack`, {
@@ -377,15 +380,18 @@ const exportPack = async (lang) => {
         link.remove();
         window.URL.revokeObjectURL(url);
         toast.success.action(t('features.languages.messages.export_success') || 'Language pack exported successfully');
-    } catch (error) {
+    } catch (error: any) {
         toast.error.fromResponse(error);
     } finally {
         exporting.value = null;
     }
 };
 
-const handleFileSelect = (event) => {
-    selectedFile.value = event.target.files[0];
+const handleFileSelect = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files) {
+        selectedFile.value = target.files[0];
+    }
 };
 
 const importPack = async () => {
@@ -404,15 +410,15 @@ const importPack = async () => {
         selectedFile.value = null;
         await fetchLanguages();
         toast.success.action(t('features.languages.messages.importSuccess'));
-    } catch (error) {
+    } catch (error: any) {
         toast.error.fromResponse(error);
     } finally {
         importing.value = false;
     }
 };
 
-const getLanguageFlag = (code) => {
-    const flagMap = {
+const getLanguageFlag = (code: string) => {
+    const flagMap: Record<string, string> = {
         'en': '🇺🇸',
         'id': '🇮🇩',
         'ar': '🇸🇦',

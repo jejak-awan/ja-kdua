@@ -1,7 +1,7 @@
 <template>
   <div class="base-slider-input">
     <BaseSlider
-      :model-value="modelValue"
+      :model-value="Number(modelValue || 0)"
       :min="min"
       :max="max"
       :step="step"
@@ -17,44 +17,43 @@
         :placeholder="String(placeholderValue ?? 0)"
         :min="min"
         :max="max"
-        @input="$emit('update:modelValue', Number($event.target.value))"
+        @input="handleInput"
       />
       <span v-if="unit" class="unit-label">{{ unit }}</span>
     </div>
   </div>
 </template>
 
-<script setup>
-import BaseSlider from './BaseSlider.vue'
+<script setup lang="ts">
+import BaseSlider from './BaseSlider.vue';
 
-defineProps({
-  modelValue: {
-    type: Number,
-    default: 0
-  },
-  placeholderValue: {
-    type: Number,
-    default: null
-  },
-  min: {
-    type: Number,
-    default: 0
-  },
-  max: {
-    type: Number,
-    default: 100
-  },
-  step: {
-    type: Number,
-    default: 1
-  },
-  unit: {
-    type: String,
-    default: ''
-  }
-})
+interface Props {
+  modelValue?: number | string;
+  placeholderValue?: number | null;
+  min?: number;
+  max?: number;
+  step?: number;
+  unit?: string;
+}
 
-defineEmits(['update:modelValue'])
+withDefaults(defineProps<Props>(), {
+  modelValue: 0,
+  placeholderValue: null,
+  min: 0,
+  max: 100,
+  step: 1,
+  unit: ''
+});
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: number): void;
+}>();
+
+const handleInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const val = target.value;
+  emit('update:modelValue', val === '' ? 0 : Number(val));
+};
 </script>
 
 <style scoped>

@@ -10,7 +10,7 @@
         >
             <!-- Progress fill -->
             <div 
-                class="absolute inset-y-0 left-0 bg-primary/20 transition-all duration-75"
+                class="absolute inset-y-0 left-0 bg-primary/20 transition-colors duration-75"
                 :style="{ width: `${progress}%` }"
             />
             
@@ -46,17 +46,20 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { GripVertical, CheckCircle } from 'lucide-vue-next'
-import api from '../../services/api'
+import GripVertical from 'lucide-vue-next/dist/esm/icons/grip-vertical.js';
+import CheckCircle from 'lucide-vue-next/dist/esm/icons/circle-check.js';import api from '../../services/api'
 
 const { t } = useI18n()
 
-const emit = defineEmits(['verified', 'error'])
+const emit = defineEmits<{
+    (e: 'verified', payload: { token: string; answer: string }): void
+    (e: 'error', message: string): void
+}>()
 
-const trackRef = ref(null)
+const trackRef = ref<HTMLElement | null>(null)
 const token = ref('')
 const targetPosition = ref(75)
 const progress = ref(0)
@@ -81,11 +84,11 @@ const generateCaptcha = async () => {
     }
 }
 
-const startDrag = (e) => {
+const startDrag = (e: MouseEvent | TouchEvent) => {
     if (verified.value) return
     
     dragging.value = true
-    const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX
+    const clientX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX
     startX.value = clientX - (progress.value / 100) * trackWidth.value
     trackWidth.value = trackRef.value?.offsetWidth || 300
     
@@ -95,10 +98,10 @@ const startDrag = (e) => {
     document.addEventListener('touchend', endDrag)
 }
 
-const onDrag = (e) => {
+const onDrag = (e: MouseEvent | TouchEvent) => {
     if (!dragging.value) return
     
-    const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX
+    const clientX = e instanceof MouseEvent ? e.clientX : (e as TouchEvent).touches[0].clientX
     // Handle is w-12 (3rem = 48px). We must ensure left + 48px <= trackWidth
     const handleWidth = 48 
     const maxLeft = trackWidth.value - handleWidth
@@ -114,14 +117,14 @@ const onDrag = (e) => {
     progress.value = newProgress
 }
 
-const endDrag = async () => {
+const endDrag = async (e?: MouseEvent | TouchEvent) => {
     if (!dragging.value) return
     
     dragging.value = false
-    document.removeEventListener('mousemove', onDrag)
-    document.removeEventListener('mouseup', endDrag)
-    document.removeEventListener('touchmove', onDrag)
-    document.removeEventListener('touchend', endDrag)
+    document.removeEventListener('mousemove', onDrag as any)
+    document.removeEventListener('mouseup', endDrag as any)
+    document.removeEventListener('touchmove', onDrag as any)
+    document.removeEventListener('touchend', endDrag as any)
     
     // Server-side verification
     try {
@@ -132,7 +135,7 @@ const endDrag = async () => {
         
         verified.value = true
         emit('verified', { token: token.value, answer: String(Math.round(progress.value)) })
-    } catch (e) {
+    } catch (e: any) {
         // Just like MathCaptcha, we catch 422 as expected verification failure
         error.value = t('features.auth.captcha.tryAgain')
         progress.value = 0
@@ -151,9 +154,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-    document.removeEventListener('mousemove', onDrag)
-    document.removeEventListener('mouseup', endDrag)
-    document.removeEventListener('touchmove', onDrag)
-    document.removeEventListener('touchend', endDrag)
+    document.removeEventListener('mousemove', onDrag as any)
+    document.removeEventListener('mouseup', endDrag as any)
+    document.removeEventListener('touchmove', onDrag as any)
+    document.removeEventListener('touchend', endDrag as any)
 })
 </script>

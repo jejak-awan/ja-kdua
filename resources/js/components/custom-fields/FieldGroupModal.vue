@@ -41,7 +41,7 @@
                             <SelectValue :placeholder="t('features.developer.custom_fields.groups.modal.attach_options.none')" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem :value="null">{{ t('features.developer.custom_fields.groups.modal.attach_options.none') }}</SelectItem>
+                            <SelectItem value="none">{{ t('features.developer.custom_fields.groups.modal.attach_options.none') }}</SelectItem>
                             <SelectItem value="App\\Models\\Content">{{ t('features.developer.custom_fields.groups.modal.attach_options.content') }}</SelectItem>
                             <SelectItem value="App\\Models\\Category">{{ t('features.developer.custom_fields.groups.modal.attach_options.category') }}</SelectItem>
                             <SelectItem value="App\\Models\\Media">{{ t('features.developer.custom_fields.groups.modal.attach_options.media') }}</SelectItem>
@@ -63,47 +63,62 @@
     </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../services/api';
-import { useToast } from '../../composables/useToast';
-import Dialog from '../../components/ui/dialog.vue';
-import DialogContent from '../../components/ui/dialog-content.vue';
-import DialogHeader from '../../components/ui/dialog-header.vue';
-import DialogTitle from '../../components/ui/dialog-title.vue';
-import DialogFooter from '../../components/ui/dialog-footer.vue';
-import Button from '../../components/ui/button.vue';
-import Input from '../../components/ui/input.vue';
-import Label from '../../components/ui/label.vue';
-import Textarea from '../../components/ui/textarea.vue';
-import Select from '../../components/ui/select.vue';
-import SelectTrigger from '../../components/ui/select-trigger.vue';
-import SelectValue from '../../components/ui/select-value.vue';
-import SelectContent from '../../components/ui/select-content.vue';
-import SelectItem from '../../components/ui/select-item.vue';
-import { Loader2 } from 'lucide-vue-next';
+import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    Button,
+    Input,
+    Label,
+    Textarea,
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem
+} from '@/components/ui';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+
+interface FieldGroup {
+    id: number | string;
+    name: string;
+    description?: string;
+    attachable_type?: string | null;
+}
 
 const { t } = useI18n();
 
-const props = defineProps({
-    fieldGroup: {
-        type: Object,
-        default: null,
-    },
-});
+const props = defineProps<{
+    fieldGroup?: FieldGroup | null;
+}>();
 
-const emit = defineEmits(['close', 'saved']);
+const emit = defineEmits<{
+    (e: 'close'): void;
+    (e: 'saved'): void;
+}>();
 
 const saving = ref(false);
 
-const form = ref({
+interface FieldGroupForm {
+    name: string;
+    description: string;
+    attachable_type: string | 'none';
+}
+
+const form = ref<FieldGroupForm>({
     name: '',
     description: '',
-    attachable_type: null,
+    attachable_type: 'none',
 });
 
-const initialForm = ref(null);
+const initialForm = ref<FieldGroupForm | null>(null);
 
 const isValid = computed(() => {
     return !!form.value.name?.trim();
@@ -119,13 +134,13 @@ const loadFieldGroup = () => {
         form.value = {
             name: props.fieldGroup.name || '',
             description: props.fieldGroup.description || '',
-            attachable_type: props.fieldGroup.attachable_type || null,
+            attachable_type: props.fieldGroup.attachable_type || 'none',
         };
     } else {
         form.value = {
             name: '',
             description: '',
-            attachable_type: null,
+            attachable_type: 'none',
         };
     }
     initialForm.value = JSON.parse(JSON.stringify(form.value));
@@ -136,15 +151,19 @@ const toast = useToast();
 const handleSubmit = async () => {
     saving.value = true;
     try {
+        const payload = {
+            ...form.value,
+            attachable_type: form.value.attachable_type === 'none' ? null : form.value.attachable_type
+        };
         if (props.fieldGroup) {
-            await api.put(`/admin/ja/field-groups/${props.fieldGroup.id}`, form.value);
+            await api.put(`/admin/ja/field-groups/${props.fieldGroup.id}`, payload);
             toast.success.update(t('features.developer.custom_fields.tabs.groups'));
         } else {
             await api.post('/admin/ja/field-groups', form.value);
             toast.success.create(t('features.developer.custom_fields.tabs.groups'));
         }
         emit('saved');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to save field group:', error);
         toast.error.fromResponse(error);
     } finally {

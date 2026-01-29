@@ -13,7 +13,7 @@
         :style="containerStyles(settings, blockDevice)"
       >
         <Alert 
-           class="transition-all duration-300 relative overflow-hidden"
+           class="transition-colors duration-300 relative overflow-hidden"
            :class="[
              alertClasses(settings, blockDevice),
              getVal(settings, 'class')
@@ -34,7 +34,7 @@
               v-if="mode === 'edit' || getVal(settings, 'title', blockDevice)"
               :contenteditable="mode === 'edit'"
               @blur="onTitleBlur($event)"
-              class="mb-2 transition-all duration-300"
+              class="mb-2 transition-colors duration-300"
               :style="getTypographyStyles(settings, 'title_', blockDevice)"
               v-html="getVal(settings, 'title', blockDevice) || (mode === 'edit' ? 'Alert Title' : '')"
             />
@@ -42,7 +42,7 @@
             <AlertDescription 
               :contenteditable="mode === 'edit'"
               @blur="onMessageBlur($event)"
-              class="transition-all duration-300"
+              class="transition-colors duration-300"
               :style="getTypographyStyles(settings, 'message_', blockDevice)"
               v-html="getVal(settings, 'message', blockDevice) || (mode === 'edit' ? 'Alert message goes here...' : '')"
             />
@@ -64,21 +64,20 @@
 
 <script setup lang="ts">
 import { ref, inject } from 'vue'
-import { Info, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-vue-next'
-import BaseBlock from '../components/BaseBlock.vue'
+import Info from 'lucide-vue-next/dist/esm/icons/info.js';
+import CheckCircle from 'lucide-vue-next/dist/esm/icons/circle-check.js';
+import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';
+import XCircle from 'lucide-vue-next/dist/esm/icons/circle-x.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';import BaseBlock from '../components/BaseBlock.vue'
 import { Alert, AlertTitle, AlertDescription } from '../ui'
 import { 
     getVal, 
     getTypographyStyles,
     getLayoutStyles 
 } from '../utils/styleUtils'
-import type { BlockInstance, BuilderInstance } from '../../types/builder'
+import type { BlockInstance, BuilderInstance, BlockProps } from '../../types/builder'
 
-const props = withDefaults(defineProps<{
-  module: BlockInstance;
-  mode?: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile' | null;
-}>(), {
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })

@@ -67,52 +67,56 @@
   </BaseModal>
 </template>
 
-<script setup>
-import { reactive, computed, onMounted } from 'vue'
-import { Check, ChevronDown } from 'lucide-vue-next'
-import { BaseModal, BaseInput, BaseToggle, BaseDropdown } from '../ui'
+<script setup lang="ts">
+import { reactive, computed, onMounted } from 'vue';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import { BaseModal, BaseInput, BaseToggle, BaseDropdown } from '../ui';
+import type { Canvas } from '../../../types/builder';
 
-const props = defineProps({
-  canvas: {
-    type: Object,
-    required: true
-  }
-})
+interface Props {
+  canvas: Canvas;
+}
 
-const emit = defineEmits(['close', 'save'])
+const props = defineProps<Props>();
+
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'save', payload: { title: string; isGlobal: boolean; append: string }): void;
+}>();
 
 const form = reactive({
   title: '',
   isGlobal: false,
   append: 'none'
-})
+});
 
 const appendOptions = [
   { label: "Don't Append", value: 'none' },
   { label: 'Append Above', value: 'above' },
   { label: 'Append Below', value: 'below' }
-]
+];
 
 const activeAppendLabel = computed(() => {
-  return appendOptions.find(opt => opt.value === form.append)?.label || "Don't Append"
-})
+  return appendOptions.find(opt => opt.value === form.append)?.label || "Don't Append";
+});
 
 const isChanged = computed(() => {
   return form.title !== props.canvas.title || 
          form.isGlobal !== !!props.canvas.isGlobal ||
-         form.append !== (props.canvas.append || 'none')
-})
+         form.append !== (props.canvas.append ? (props.canvas.append.toString()) : 'none'); // Handle boolean vs string mismatch if exists in legacy
+});
 
 onMounted(() => {
-  form.title = props.canvas.title
-  form.isGlobal = !!props.canvas.isGlobal
-  form.append = props.canvas.append || 'none'
-})
+  form.title = props.canvas.title;
+  form.isGlobal = !!props.canvas.isGlobal;
+  form.append = props.canvas.append ? (props.canvas.append.toString()) : 'none';
+});
 
 const handleSubmit = () => {
-  if (!form.title) return
-  emit('save', { ...form })
-}
+  if (!form.title) return;
+  emit('save', { ...form });
+};
 </script>
 
 <style scoped>

@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="portfolio-block transition-all duration-500"
+    class="portfolio-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Portfolio'"
     :style="cardStyles"
@@ -24,7 +24,7 @@
           v-for="cat in categories" 
           :key="cat" 
           :variant="activeFilter === cat ? 'default' : 'outline'"
-          class="rounded-full px-8 py-6 font-black uppercase tracking-widest text-[10px] transition-all duration-500 shadow-xl hover:shadow-2xl"
+          class="rounded-full px-8 py-6 font-black uppercase tracking-widest text-[10px] transition-[width] duration-500 shadow-xl hover:shadow-2xl"
           :style="activeFilter === cat ? {} : filterTypographyStyles"
           @click="activeFilter = cat"
         >
@@ -33,11 +33,11 @@
       </div>
       
       <!-- Grid -->
-      <div class="portfolio-grid transition-all duration-500" :style="gridStyles">
+      <div class="portfolio-grid transition-[width] duration-500" :style="gridStyles">
         <Card 
           v-for="item in mockItems" 
           :key="item.id" 
-          class="portfolio-item group relative overflow-hidden bg-slate-50 dark:bg-slate-900 rounded-[3.5rem] border-none aspect-square cursor-pointer transition-all duration-700 shadow-2xl hover:-translate-y-4"
+          class="portfolio-item group relative overflow-hidden bg-slate-50 dark:bg-slate-900 rounded-[3.5rem] border-none aspect-square cursor-pointer transition-colors duration-700 shadow-2xl hover:-translate-y-4"
         >
           <!-- Image Area -->
           <div class="absolute inset-0 z-0 bg-slate-100 dark:bg-slate-950 flex items-center justify-center transition-transform duration-1000 group-hover:scale-110">
@@ -47,7 +47,7 @@
 
           <!-- Overlay -->
           <div 
-              class="item-overlay absolute inset-0 z-20 flex flex-col items-center justify-center p-12 opacity-0 group-hover:opacity-100 transition-all duration-700 backdrop-blur-xl bg-primary/80"
+              class="item-overlay absolute inset-0 z-20 flex flex-col items-center justify-center p-12 opacity-0 group-hover:opacity-100 transition-colors duration-700 backdrop-blur-xl bg-primary/80"
               :style="overlayStyles"
           >
             <Badge 
@@ -65,7 +65,7 @@
               {{ item.title }}
             </h4>
             
-            <div class="mt-10 w-16 h-16 rounded-3xl bg-white text-primary flex items-center justify-center transform translate-y-8 group-hover:translate-y-0 transition-all duration-700 delay-150 shadow-2xl hover:scale-110">
+            <div class="mt-10 w-16 h-16 rounded-3xl bg-white text-primary flex items-center justify-center transform translate-y-8 group-hover:translate-y-0 transition-colors duration-700 delay-150 shadow-2xl hover:scale-110">
                <LucideIcon name="ArrowUpRight" class="w-7 h-7" />
             </div>
           </div>

@@ -17,22 +17,22 @@
     
     <!-- Global Confirmation Modal -->
     <ConfirmModal
-        v-model:isOpen="confirmState.isOpen"
-        :title="confirmState.title"
+        v-model:is-open="confirmState.isOpen"
+        :title="confirmState.title || ''"
         :message="confirmState.message"
         :description="confirmState.description"
-        :variant="confirmState.variant"
-        :confirmText="confirmState.confirmText"
-        :cancelText="confirmState.cancelText"
-        @confirm="confirmState.onConfirm"
-        @cancel="confirmState.onCancel"
+        :variant="confirmState.variant || 'warning'"
+        :confirm-text="confirmState.confirmText"
+        :cancel-text="confirmState.cancelText"
+        @confirm="(v) => confirmState.onConfirm?.(v)"
+        @cancel="() => confirmState.onCancel?.()"
     />
     
     <!-- Global Error Modal (Session/Auth/Server Errors) -->
     <GlobalErrorModal />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import { useAuthStore } from './stores/auth';
 import { useCmsStore } from './stores/cms';
@@ -40,12 +40,12 @@ import { useTheme } from './composables/useTheme';
 import { useSessionTimeout } from './composables/useSessionTimeout';
 import { useLanguage } from './composables/useLanguage';
 import { useConfirm } from './composables/useConfirm';
-import SessionTimeoutModal from './components/SessionTimeoutModal.vue';
-import SystemOverlay from './components/SystemOverlay.vue';
+import SessionTimeoutModal from './components/ui/SessionTimeoutModal.vue';
+import SystemOverlay from './components/shared/SystemOverlay.vue';
 import { SystemMonitor } from './services/SystemMonitor';
 import Toast from './components/ui/toast.vue';
-import ConfirmModal from './components/ConfirmModal.vue';
-import GlobalErrorModal from './components/GlobalErrorModal.vue';
+import ConfirmModal from './components/ui/ConfirmModal.vue';
+import GlobalErrorModal from './components/ui/GlobalErrorModal.vue';
 import { setToastInstance } from './services/toast';
 
 const authStore = useAuthStore();
@@ -55,7 +55,7 @@ const { initializeLanguage } = useLanguage();
 const { confirmState } = useConfirm();
 
 // Toast reference
-const toastRef = ref(null);
+const toastRef = ref<any>(null);
 
 // Session timeout management
 const {
@@ -71,9 +71,9 @@ const { themeSettings } = useTheme();
 watch(
     [() => themeSettings.value?.brand_favicon, () => cmsStore.siteSettings?.site_favicon],
     ([themeFav, siteFav]) => {
-        const activeFavicon = themeFav || siteFav || '/favicon.svg';
+        const activeFavicon = (themeFav || siteFav || '/favicon.svg') as string;
         
-        let link = document.querySelector("link[rel~='icon']");
+        let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement | null;
         if (!link) {
             link = document.createElement('link');
             link.rel = 'icon';
@@ -82,7 +82,7 @@ watch(
         link.href = activeFavicon;
         
         // Also update standard favicon.ico if it exists to be safe
-        const icoLink = document.querySelector("link[href$='favicon.ico']");
+        const icoLink = document.querySelector("link[href$='favicon.ico']") as HTMLLinkElement | null;
         if (icoLink) icoLink.href = activeFavicon;
     }, 
     { immediate: true }
@@ -90,7 +90,7 @@ watch(
 
 // Watch for site name changes to update browser tab title dynamically
 watch(() => cmsStore.siteSettings?.site_name, (newName) => {
-    document.title = newName || 'JA CMS';
+    document.title = (newName || 'JA CMS') as string;
 }, { immediate: true });
 
 // Theme initialization is handled by cmsStore.initTheme()
@@ -100,9 +100,9 @@ onMounted(async () => {
     authStore.initAuth();
     
     // Global listener for chunk loading errors (occurs after build/asset change)
-    const handleChunkError = (e) => {
+    const handleChunkError = (e: any) => {
         // If session is already terminated, don't try to recover, just stop.
-        if (window.__isSessionTerminated) {
+        if ((window as any).__isSessionTerminated) {
             return;
         }
 
@@ -115,7 +115,7 @@ onMounted(async () => {
     
     // Listen for promise rejections too (dynamic imports)
     window.addEventListener('error', handleChunkError, true);
-    window.addEventListener('unhandledrejection', (e) => {
+    window.addEventListener('unhandledrejection', (e: PromiseRejectionEvent) => {
         if (e.reason && (e.reason.message?.includes('Loading chunk') || e.reason.message?.includes('CSS chunk'))) {
              console.warn('Unhandled chunk rejection. Triggering Safe Mode.', e.reason);
              SystemMonitor.triggerLockdown('chunk_error');
@@ -146,7 +146,7 @@ onMounted(async () => {
         console.warn('Public settings fetch failed:', err);
     });
     
-    if (authStore.isAuthenticated && !window.__isSessionTerminated) {
+    if (authStore.isAuthenticated && !(window as any).__isSessionTerminated) {
         authStore.fetchUser();
     }
 

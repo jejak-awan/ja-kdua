@@ -4,7 +4,7 @@
     :mode="mode" 
     :device="device"
     tag="header"
-    class="fullwidth-post-title-block transition-all duration-500"
+    class="fullwidth-post-title-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Fullwidth Post Title'"
     :style="cardStyles"
@@ -17,9 +17,9 @@
       <div class="absolute inset-0 z-10 transition-opacity duration-700" :style="overlayStyles" />
       
       <!-- Content Layer -->
-      <div class="relative z-20 w-full max-w-5xl px-10 py-20 flex flex-col transition-all duration-700" :style="contentStyles">
+      <div class="relative z-20 w-full max-w-5xl px-10 py-20 flex flex-col transition-colors duration-700" :style="contentStyles">
         <!-- Post Meta -->
-        <div v-if="settings.showMeta !== false" class="post-meta flex flex-wrap gap-4 mb-6 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4" :style="metaStyles">
+        <div v-if="settings.showMeta !== false" class="post-meta flex flex-wrap gap-4 mb-6 transition-colors duration-300 animate-in fade-in slide-in-from-bottom-4" :style="metaStyles">
           <span v-if="settings.showCategories !== false" class="meta-category bg-white/20 backdrop-blur-sm px-3 py-1 rounded-md text-sm font-medium">{{ postCategory }}</span>
           <span v-if="settings.showDate !== false" class="meta-date opacity-80 text-sm">{{ postDate }}</span>
           <span v-if="settings.showAuthor !== false" class="meta-author opacity-80 text-sm">by {{ postAuthor }}</span>

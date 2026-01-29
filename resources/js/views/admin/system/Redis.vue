@@ -11,15 +11,15 @@
     <Tabs v-model="activeTab" class="w-full">
       <div class="mb-10">
         <TabsList class="bg-transparent p-0 h-auto gap-0">
-          <TabsTrigger value="statistics" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+          <TabsTrigger value="statistics" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
             <BarChart3 class="w-4 h-4 mr-2" />
             {{ $t('features.redis.tabs.statistics') }}
           </TabsTrigger>
-          <TabsTrigger value="settings" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+          <TabsTrigger value="settings" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
             <Settings class="w-4 h-4 mr-2" />
             {{ $t('features.redis.tabs.settings') }}
           </TabsTrigger>
-          <TabsTrigger value="cache" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+          <TabsTrigger value="cache" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
             <Database class="w-4 h-4 mr-2" />
             {{ $t('features.redis.tabs.cache') }}
           </TabsTrigger>
@@ -204,8 +204,7 @@
         </Card>
 
         <form @submit.prevent="saveSettings" :inert="cacheDriver !== 'redis' && cacheDriver !== 'redis_failover'">
-          
-            <Accordion type="multiple" class="w-full space-y-4" :default-value="['Connection', 'Session & Queue']">
+<Accordion type="multiple" class="w-full space-y-4" :default-value="['Connection', 'Session & Queue']">
               <AccordionItem v-for="group in groupedSettings" :key="group.name" :value="group.name" class="border border-border rounded-lg bg-card px-2">
                 <AccordionTrigger class="px-4 hover:no-underline">
                   <div class="flex items-center gap-3 text-left">
@@ -351,8 +350,7 @@
 
         <!-- 2. Main Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          <!-- Top Keys Table (Wide - Left) -->
+<!-- Top Keys Table (Wide - Left) -->
           <Card class="lg:col-span-2 flex flex-col h-full ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
             <CardHeader class="px-6 py-4 border-b border-border/50 bg-muted/20">
               <CardTitle class="text-lg flex items-center gap-2">
@@ -406,7 +404,7 @@
                 <button
                   @click="warmCache"
                   :disabled="warming"
-                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 transition-shadow group relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-primary/10 text-primary group-hover:scale-110 transition-transform">
                      <Loader2 v-if="warming" class="w-5 h-5 animate-spin" />
@@ -421,7 +419,7 @@
                 <button
                   @click="flushCache('all')"
                   :disabled="flushing"
-                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-destructive/50 hover:bg-destructive/5 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-destructive/50 hover:bg-destructive/5 transition-shadow group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-destructive/10 text-destructive group-hover:scale-110 transition-transform">
                     <Trash2 class="w-5 h-5" />
@@ -435,7 +433,7 @@
                 <button
                   @click="flushCache('cache')"
                   :disabled="flushing"
-                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-orange-500/50 hover:bg-orange-500/5 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-orange-500/50 hover:bg-orange-500/5 transition-shadow group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-orange-500/10 text-orange-500 group-hover:scale-110 transition-transform">
                     <HardDrive class="w-5 h-5" />
@@ -449,7 +447,7 @@
                 <button
                   @click="flushCache('config')"
                   :disabled="flushing"
-                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-shadow group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-indigo-500/10 text-indigo-500 group-hover:scale-110 transition-transform">
                     <Settings class="w-5 h-5" />
@@ -463,7 +461,7 @@
                 <button
                   @click="flushCache('route')"
                   :disabled="flushing"
-                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-shadow group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
                     <Route class="w-5 h-5" />
@@ -477,7 +475,7 @@
                 <button
                   @click="flushCache('view')"
                   :disabled="flushing"
-                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-blue-500/50 hover:bg-blue-500/5 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-blue-500/50 hover:bg-blue-500/5 transition-shadow group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div class="w-10 h-10 rounded-full flex items-center justify-center bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
                     <Eye class="w-5 h-5" />
@@ -495,7 +493,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
@@ -504,55 +502,94 @@ import api from '@/services/api'
 import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
 import { cn } from '@/lib/utils'
-import Tabs from '@/components/ui/tabs.vue'
-import TabsList from '@/components/ui/tabs-list.vue'
-import TabsTrigger from '@/components/ui/tabs-trigger.vue'
-import TabsContent from '@/components/ui/tabs-content.vue'
-import Accordion from '@/components/ui/accordion.vue'
-import AccordionContent from '@/components/ui/accordion-content.vue'
-import AccordionItem from '@/components/ui/accordion-item.vue'
-import AccordionTrigger from '@/components/ui/accordion-trigger.vue'
-import Card from '@/components/ui/card.vue'
-import CardHeader from '@/components/ui/card-header.vue'
-import CardTitle from '@/components/ui/card-title.vue'
-import CardDescription from '@/components/ui/card-description.vue'
-import CardContent from '@/components/ui/card-content.vue'
-import Button from '@/components/ui/button.vue'
-import Input from '@/components/ui/input.vue'
-import Label from '@/components/ui/label.vue'
-import Badge from '@/components/ui/badge.vue'
-import Select from '@/components/ui/select.vue'
-import SelectContent from '@/components/ui/select-content.vue'
-import SelectItem from '@/components/ui/select-item.vue'
-import SelectTrigger from '@/components/ui/select-trigger.vue'
-import SelectValue from '@/components/ui/select-value.vue'
-import Table from '@/components/ui/table.vue'
-import TableHeader from '@/components/ui/table-header.vue'
-import TableBody from '@/components/ui/table-body.vue'
-import TableHead from '@/components/ui/table-head.vue'
-import TableRow from '@/components/ui/table-row.vue'
-import TableCell from '@/components/ui/table-cell.vue'
 import {
-  RefreshCw,
-  Activity,
-  Database,
-  Zap,
-  Clock,
-  Save,
-  Trash2,
-  HardDrive,
-  Users,
-  Target,
-  BarChart3,
-  Flame,
-  Eraser,
-  Settings,
-  Route,
-  Eye,
-  ArrowRight,
-  Loader2,
-  AlertTriangle
-} from 'lucide-vue-next'
+    Tabs,
+    TabsList,
+    TabsTrigger,
+    TabsContent,
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+    Button,
+    Input,
+    Label,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+    Table,
+    TableHeader,
+    TableBody,
+    TableHead,
+    TableRow,
+    TableCell
+} from '@/components/ui';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
+import Database from 'lucide-vue-next/dist/esm/icons/database.js';
+import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
+import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import HardDrive from 'lucide-vue-next/dist/esm/icons/hard-drive.js';
+import Users from 'lucide-vue-next/dist/esm/icons/users.js';
+import Target from 'lucide-vue-next/dist/esm/icons/target.js';
+import BarChart3 from 'lucide-vue-next/dist/esm/icons/chart-bar-stacked.js';
+import Flame from 'lucide-vue-next/dist/esm/icons/flame.js';
+import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
+import Route from 'lucide-vue-next/dist/esm/icons/route.js';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';interface RedisStat {
+  version: string;
+  used_memory: string;
+  total_keys: number;
+  uptime_days: string;
+  connected_clients: number;
+  hit_rate: string;
+  operations_per_sec: number;
+  total_commands: number;
+  hits: number;
+  misses: number;
+}
+
+interface CacheKey {
+  key: string;
+  size: string;
+  ttl: string;
+}
+
+interface CacheStats {
+  total_keys: number;
+  cache_size: string;
+  expired_keys: number;
+  top_keys: CacheKey[];
+}
+
+interface SettingItem {
+  key: string;
+  value: any;
+  type: string;
+  description ?: string;
+  is_encrypted ?: boolean;
+}
+
+interface SettingGroup {
+  name: string;
+  items: SettingItem[];
+}
+
+interface ConnectionStatus {
+  type: 'success' | 'error';
+  message: string;
+}
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -560,25 +597,20 @@ const authStore = useAuthStore()
 const { confirm } = useConfirm()
 const toast = useToast()
 const activeTab = ref('statistics')
-const tabs = [
-  { id: 'statistics', label: 'Statistics' },
-  { id: 'settings', label: 'Settings' },
-  { id: 'cache', label: 'Cache Management' },
-]
 
 // Settings
-const settings = ref({})
-const settingsForm = ref({});
-const initialSettingsForm = ref({}); // Track initial state
-const errors = ref({})
-const cacheDriver = ref(null) // Global cache driver status
+const settings = ref<Record<string, SettingItem[]>>({})
+const settingsForm = ref<Record<string, any>>({});
+const initialSettingsForm = ref<Record<string, any>>({}); // Track initial state
+const errors = ref<Record<string, string | string[]>>({})
+const cacheDriver = ref<string | null>(null) // Global cache driver status
 
 const isDirty = computed(() => {
     return JSON.stringify(settingsForm.value) !== JSON.stringify(initialSettingsForm.value);
 });
 
-const groupedSettings = computed(() => {
-  const groups = {}
+const groupedSettings = computed<SettingGroup[]>(() => {
+  const groups: Record<string, SettingGroup> = {}
   
   Object.entries(settings.value).forEach(([groupName, items]) => {
     // Filter out only redis_enabled (which was duplicative).
@@ -607,20 +639,20 @@ const groupedSettings = computed(() => {
 
 const saving = ref(false)
 const testing = ref(false)
-const connectionStatus = ref(null)
+const connectionStatus = ref<ConnectionStatus | null>(null)
 
 // Statistics
-const stats = ref({})
+const stats = ref<Partial<RedisStat>>({})
 const loadingStats = ref(false)
-const statsInterval = ref(null)
+const statsInterval = ref<ReturnType<typeof setInterval> | null>(null)
 
 // Cache
-const cacheStats = ref(null)
+const cacheStats = ref<CacheStats | null>(null)
 const flushing = ref(false)
 const warming = ref(false)
 
 // Methods
-const loadSettings = async () => {
+const loadSettings = async () : Promise<void> => {
   try {
     const response = await api.get('/admin/ja/redis/settings')
     settings.value = response.data.data
@@ -632,12 +664,12 @@ const loadSettings = async () => {
       })
     })
     initialSettingsForm.value = JSON.parse(JSON.stringify(settingsForm.value));
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to load Redis settings:', error)
   }
 }
 
-const saveSettings = async () => {
+const saveSettings = async () : Promise<void> => {
   saving.value = true
   errors.value = {}
   try {
@@ -660,7 +692,7 @@ const saveSettings = async () => {
     setTimeout(() => {
       connectionStatus.value = null
     }, 3000)
-  } catch (error) {
+  } catch (error: any) {
     if (error.response?.status === 422) {
       errors.value = error.response.data.errors || {}
     } else {
@@ -675,7 +707,7 @@ const saveSettings = async () => {
   }
 }
 
-const testConnection = async () => {
+const testConnection = async () : Promise<void> => {
   testing.value = true
   connectionStatus.value = null
 
@@ -691,7 +723,7 @@ const testConnection = async () => {
       connectionStatus.value = null;
     }, 3000);
 
-  } catch (error) {
+  } catch (error: any) {
     connectionStatus.value = {
       type: 'error',
       message: `❌ ${error.response?.data?.message || t('features.redis.messages.testFailed')}`
@@ -701,38 +733,38 @@ const testConnection = async () => {
   }
 }
 
-const loadStats = async () => {
+const loadStats = async () : Promise<void> => {
   loadingStats.value = true
   try {
     const response = await api.get('/admin/ja/redis/info')
     stats.value = response.data.data
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to load Redis stats:', error)
   } finally {
     loadingStats.value = false
   }
 }
 
-const loadCacheStats = async () => {
+const loadCacheStats = async () : Promise<void> => {
   try {
     const response = await api.get('/admin/ja/redis/cache-stats')
     cacheStats.value = response.data.data
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to load cache stats:', error)
   }
 }
 
-const getCacheStatus = async () => {
+const getCacheStatus = async () : Promise<void> => {
     try {
         const response = await api.get('/admin/ja/system/cache-status')
         const data = response.data.data
         cacheDriver.value = data.driver
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to get global cache status:', error)
     }
 }
 
-const flushCache = async (type) => {
+const flushCache = async (type: string) : Promise<void> => {
   const isDestructive = type === 'all'
   
   const confirmed = await confirm({
@@ -740,7 +772,7 @@ const flushCache = async (type) => {
     message: isDestructive 
       ? t('features.redis.messages.flushConfirmLogout', 'Warning: Clearing all cache will also clear user sessions. You will be logged out immediately. Are you sure you want to proceed?')
       : t('features.redis.messages.flushConfirm', { type }),
-    variant: 'destructive',
+    variant: 'danger',
     confirmText: t('features.redis.messages.flushAction', 'Flush'),
   })
 
@@ -767,7 +799,7 @@ const flushCache = async (type) => {
     }
 
     loadCacheStats()
-  } catch (error) {
+  } catch (error: any) {
     // If it's a 401, we know what happened
     if (error.response?.status === 401 && isDestructive) {
        authStore.clearAuth()
@@ -780,11 +812,11 @@ const flushCache = async (type) => {
   }
 }
 
-const warmCache = async () => {
+const warmCache = async () : Promise<void> => {
   const confirmed = await confirm({
     title: t('features.redis.messages.warmTitle', 'Warm Cache'),
     message: t('features.redis.messages.warmConfirmLogout', 'Warning: Warming the cache requires clearing it first, which will clear user sessions. You will be logged out immediately. Are you sure you want to proceed?'),
-    variant: 'destructive',
+    variant: 'danger',
     confirmText: t('features.redis.messages.warmAction', 'Warm Up'),
   })
 
@@ -807,7 +839,7 @@ const warmCache = async () => {
     authStore.clearAuth()
     window.location.href = '/login?message=session_cleared'
     
-  } catch (error) {
+  } catch (error: any) {
      if (error.response?.status === 401) {
        authStore.clearAuth()
        window.location.href = '/login?message=session_cleared'
@@ -820,18 +852,18 @@ const warmCache = async () => {
 }
 
 // Helpers
-const formatLabel = (key) => {
+const formatLabel = (key: string) => {
   return key.split('_').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ')
 }
 
-const formatGroupName = (group) => {
+const formatGroupName = (group: string) => {
   return group.charAt(0).toUpperCase() + group.slice(1)
 }
 
-const getGroupIcon = (groupName) => {
-  const icons = {
+const getGroupIcon = (groupName: string) => {
+  const icons: Record<string, any> = {
     'Connection': Database,
     'Cache': Zap,
     'Session & Queue': Clock
@@ -839,8 +871,8 @@ const getGroupIcon = (groupName) => {
   return icons[groupName] || Database
 }
 
-const getGroupDescription = (groupName) => {
-  const descriptions = {
+const getGroupDescription = (groupName: string) => {
+  const descriptions: Record<string, string> = {
     'Connection': 'Configure Redis server connection details',
     'Cache': 'Manage application cache settings',
     'Session & Queue': 'Configure session and queue driver settings'
@@ -848,7 +880,7 @@ const getGroupDescription = (groupName) => {
   return descriptions[groupName] || ''
 }
 
-const formatNumber = (num) => {
+const formatNumber = (num?: number) => {
   if (!num) return 0
   return new Intl.NumberFormat().format(num)
 }

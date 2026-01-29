@@ -4,7 +4,7 @@
         <div class="space-y-4">
             <input
                 :value="modelValue.title"
-                @input="updateTitle($event.target.value)"
+                @input="updateTitle(($event.target as HTMLInputElement).value)"
                 type="text"
                 :placeholder="$t('features.content.form.titlePlaceholder')"
                 class="w-full bg-transparent text-4xl font-bold tracking-tight border-none outline-none placeholder:text-muted-foreground/40"
@@ -40,7 +40,7 @@
             <div class="flex items-center gap-4">
                 <Button 
                     size="lg" 
-                    class="bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all"
+                    class="bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-colors"
                     @click="confirmInitialMode('builder')"
                 >
                     <Layout class="w-4 h-4 mr-2" />
@@ -61,7 +61,7 @@
         <!-- Classic Editor -->
         <div v-else-if="editorMode === 'classic'" class="animate-in fade-in slide-in-from-top-2 duration-300">
             <TiptapEditor
-                :model-value="modelValue.body"
+                :model-value="modelValue.body || ''"
                 @update:model-value="updateField('body', $event)"
                 class="min-h-[500px]"
             />
@@ -73,40 +73,45 @@
                 :model-value="modelValue.blocks || []"
                 :mode="'page'"
                 @update:model-value="updateField('blocks', $event)"
-                @save="(status) => $emit('save', status)"
-                @update:auto-save="(val) => $emit('toggle-auto-save', val)"
+                @save="handleSave"
+                @update:auto-save="handleAutoSave"
                 @close="handleBuilderClose"
             />
         </div>
     </div>
 </template>
 
-<script setup>
-import { ref, computed, nextTick } from 'vue'; // Added nextTick
+<script setup lang="ts">
+import { ref, computed, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router'; // Added useRouter
-import TiptapEditor from '../TiptapEditor.vue';
-import Builder from '../builder/Builder.vue';
+import TiptapEditor from '@/components/editor/TiptapEditor.vue';
+import Builder from '@/components/builder/Builder.vue';
 import { htmlToBuilder, builderToHtml } from '@/utils/builderTransformer';
-import Button from '@/components/ui/button.vue';
-import { Type, Layout } from 'lucide-vue-next';
+import { Button } from '@/components/ui';
+import Type from 'lucide-vue-next/dist/esm/icons/type.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+
+import type { ContentForm } from '@/types/cms';
+// ... imports
+
+// Remove local Content interface
 
 const { t } = useI18n();
-const router = useRouter();
 
-const props = defineProps({
-    modelValue: {
-        type: Object,
-        required: true
-    }
-});
+const props = defineProps<{
+    modelValue: ContentForm;
+}>();
 
-const emit = defineEmits(['update:modelValue', 'save', 'mode-selected', 'toggle-auto-save', 'cancel']);
-
-// ... (methods)
+const emit = defineEmits<{
+    'update:modelValue': [value: ContentForm];
+    'save': [status?: string];
+    'mode-selected': [mode: string | null];
+    'toggle-auto-save': [value: boolean];
+    'cancel': [];
+}>();
 
 // Determine initial mode: if editor_type exists, use it. Otherwise start with null (Selection Screen)
-const editorMode = ref(props.modelValue.editor_type || null);
+const editorMode = ref<string | null>(props.modelValue.editor_type || null);
 
 // Emit initial mode to parent if it's already set (e.g. for edit)
 if (editorMode.value) {
@@ -126,13 +131,13 @@ const hasBuilderContent = computed(() => {
     return blocks && blocks.length > 0;
 });
 
-const handleModeSwitch = async (newMode) => {
+const handleModeSwitch = async (newMode: string) => {
     if (newMode === editorMode.value) return;
 
     // Transform content based on new mode
     if (newMode === 'builder' && hasClassicContent.value) {
         // Transform HTML to Builder
-        const newBlocks = htmlToBuilder(props.modelValue.body);
+        const newBlocks = htmlToBuilder(props.modelValue.body || '');
         updateField('blocks', newBlocks);
         
         // Wait for parent to update props before switching UI
@@ -140,7 +145,7 @@ const handleModeSwitch = async (newMode) => {
         await nextTick(); // Double tick for safety with Inertia forms
     } else if (newMode === 'classic' && hasBuilderContent.value) {
         // Transform Builder to HTML
-        const newHtml = builderToHtml(props.modelValue.blocks);
+        const newHtml = builderToHtml(props.modelValue.blocks || []);
         updateField('body', newHtml);
         
         await nextTick();
@@ -152,21 +157,29 @@ const handleModeSwitch = async (newMode) => {
     updateField('editor_type', newMode);
 };
 
-const confirmInitialMode = (mode) => {
+const confirmInitialMode = (mode: string) => {
     editorMode.value = mode;
     emit('mode-selected', mode);
     updateField('editor_type', mode);
+};
+
+const handleSave = (status?: any) => {
+    emit('save', typeof status === 'string' ? status : undefined);
+};
+
+const handleAutoSave = (val: boolean) => {
+    emit('toggle-auto-save', val);
 };
 
 const handleBuilderClose = () => {
     emit('cancel');
 };
 
-const updateField = (field, value) => {
+const updateField = (field: string, value: any) => {
     emit('update:modelValue', { ...props.modelValue, [field]: value });
 };
 
-const updateTitle = (newTitle) => {
+const updateTitle = (newTitle: string) => {
     emit('update:modelValue', { ...props.modelValue, title: newTitle });
 };
 </script>

@@ -93,7 +93,7 @@ const CommentsModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -102,7 +102,7 @@ const CommentsModule: ModuleDefinition = {
             {
                 id: 'textTypography',
                 label: 'Text Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `text_${f.name}`,
                     label: `Text ${f.label}`
@@ -111,7 +111,7 @@ const CommentsModule: ModuleDefinition = {
             {
                 id: 'metaTypography',
                 label: 'Meta Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `meta_${f.name}`,
                     label: `Meta ${f.label}`
@@ -120,7 +120,7 @@ const CommentsModule: ModuleDefinition = {
             {
                 id: 'fieldTypography',
                 label: 'Field Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `field_${f.name}`,
                     label: `Field ${f.label}`
@@ -129,7 +129,7 @@ const CommentsModule: ModuleDefinition = {
             {
                 id: 'buttonTypography',
                 label: 'Button Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `button_${f.name}`,
                     label: `Button ${f.label}`

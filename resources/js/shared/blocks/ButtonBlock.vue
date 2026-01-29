@@ -75,14 +75,24 @@ import {
     getTextGradientStyles,
     generateGradientCSS
 } from '../utils/styleUtils'
-import * as LucideIcons from 'lucide-vue-next'
-import type { BlockInstance, BuilderInstance } from '../../types/builder'
+import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import ExternalLink from 'lucide-vue-next/dist/esm/icons/external-link.js';
+import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
+import Play from 'lucide-vue-next/dist/esm/icons/play.js';
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Send from 'lucide-vue-next/dist/esm/icons/send.js';
+import User from 'lucide-vue-next/dist/esm/icons/user.js';import type { Component } from 'vue'
 
-const props = withDefaults(defineProps<{
-  module: BlockInstance;
-  mode: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile' | null;
-}>(), {
+const iconMap: Record<string, Component> = {
+    ArrowRight, ChevronRight, Download, ExternalLink, Mail, Play, Save, Plus, Search, Send, User
+}
+import type { BlockInstance, BuilderInstance, BlockProps } from '../../types/builder'
+
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })
@@ -90,7 +100,7 @@ const props = withDefaults(defineProps<{
 const builder = inject<BuilderInstance>('builder', null as any)
 
 const getIconComponent = (name: string) => {
-    return (LucideIcons as any)[name] || LucideIcons.ArrowRight
+    return iconMap[name] || iconMap.ArrowRight
 }
 
 const alignmentClass = (settings: any, device: string) => {

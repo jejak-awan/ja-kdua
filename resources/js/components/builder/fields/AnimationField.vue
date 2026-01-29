@@ -9,8 +9,7 @@
       </template>
 
       <div class="field-content px-3 pb-2 flex flex-col gap-4">
-        
-        <!-- Animation Effect Selector -->
+<!-- Animation Effect Selector -->
         <div class="control-row">
             <BaseLabel class="mb-2">{{ t('builder.settings.fields.animation_effect') }}</BaseLabel>
             <div class="grid grid-cols-2 gap-2">
@@ -38,8 +37,7 @@
 
         <!-- Controls (Show only if effect is selected) -->
         <template v-if="localValue.effect">
-            
-            <!-- Duration -->
+<!-- Duration -->
             <div class="control-row">
                 <BaseLabel>{{ t('builder.settings.fields.animation_duration') }}</BaseLabel>
                 <BaseSliderInput v-model.number="localValue.duration" :min="0" :max="3000" :step="100" unit="ms" :placeholder-value="1000" />
@@ -71,14 +69,12 @@
                      <option value="linear">Linear</option>
                  </select>
             </div>
-
-        </template>
+</template>
         
         <div v-else class="text-xs text-muted text-center py-2">
             {{ t('builder.settings.groups.animation.empty') || 'Select an animation style to see options.' }}
         </div>
-
-      </div>
+</div>
     </BaseCollapsible>
   </div>
 </template>
@@ -86,8 +82,7 @@
 <script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { PlayCircle } from 'lucide-vue-next'
-import { BaseLabel, BaseSliderInput, BaseCollapsible } from '../ui'
+import PlayCircle from 'lucide-vue-next/dist/esm/icons/circle-play.js';import { BaseLabel, BaseSliderInput, BaseCollapsible } from '../ui'
 
 interface AnimationState {
   effect: string;

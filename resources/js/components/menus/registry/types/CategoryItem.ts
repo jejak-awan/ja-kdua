@@ -1,4 +1,4 @@
-import { Tag } from 'lucide-vue-next';
+import Tag from 'lucide-vue-next/dist/esm/icons/tag.js';
 import type { MenuItemDefinition } from '@/types/menu';
 
 const definition: MenuItemDefinition = {

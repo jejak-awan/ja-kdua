@@ -85,7 +85,7 @@ const BreadcrumbsModule: ModuleDefinition = {
             {
                 id: 'linksTypography',
                 label: 'Links Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `links_${f.name}`,
                     label: `Link ${f.label}`
@@ -94,7 +94,7 @@ const BreadcrumbsModule: ModuleDefinition = {
             {
                 id: 'activeTypography',
                 label: 'Active Item Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `active_${f.name}`,
                     label: `Active ${f.label}`

@@ -19,8 +19,7 @@
         
         <!-- ========== PREMIUM FALLBACK - JA-CMS SHOWCASE ========== -->
         <div v-else class="flex-1 flex flex-col">
-            
-            <!-- HERO SECTION -->
+<!-- HERO SECTION -->
             <section class="relative py-32 lg:py-48 overflow-hidden bg-gradient-to-b from-primary/10 via-background to-background dark:from-primary/20">
                 <!-- Background Decorative Elements -->
                 <div class="absolute inset-0 -z-10 overflow-hidden">
@@ -47,13 +46,13 @@
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <router-link 
                             to="/register" 
-                            class="rounded-full bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground shadow-lg hover:bg-primary/90 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                            class="rounded-full bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors duration-300 hover:scale-105 hover:shadow-xl"
                         >
                             Get Started Free
                         </router-link>
                         <router-link 
                             to="/about"
-                            class="rounded-full border border-border px-8 py-4 text-sm font-semibold text-foreground hover:bg-muted transition-all duration-300 flex items-center gap-2"
+                            class="rounded-full border border-border px-8 py-4 text-sm font-semibold text-foreground hover:bg-muted transition-colors duration-300 flex items-center gap-2"
                         >
                             Learn More <span class="text-primary">→</span>
                         </router-link>
@@ -131,7 +130,7 @@ Content::published()
                         </p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <div v-for="feature in features" :key="feature.title" class="p-8 rounded-2xl bg-card border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+                        <div v-for="feature in features" :key="feature.title" class="p-8 rounded-2xl bg-card border border-border shadow-sm hover:shadow-xl transition-colors duration-300 hover:-translate-y-1 group">
                             <div class="w-14 h-14 rounded-xl bg-primary/20 dark:bg-primary/30 flex items-center justify-center mb-6 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                                 <component :is="feature.icon" class="w-7 h-7" />
                             </div>
@@ -205,16 +204,16 @@ Content::published()
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <router-link 
                             to="/register" 
-                            class="rounded-full bg-white text-slate-900 px-8 py-4 text-sm font-bold shadow-lg hover:bg-white/90 transition-all duration-300 hover:scale-105"
+                            class="rounded-full bg-white text-slate-900 px-8 py-4 text-sm font-bold shadow-lg hover:bg-white/90 transition-colors duration-300 hover:scale-105"
                         >
                             Daftar Sekarang
                         </router-link>
                         <a 
                             href="https://github.com/ja-cms" 
                             target="_blank"
-                            class="rounded-full border-2 border-white/50 px-8 py-4 text-sm font-semibold text-white hover:bg-white/10 transition-all duration-300 flex items-center gap-2"
+                            class="rounded-full border-2 border-white/50 px-8 py-4 text-sm font-semibold text-white hover:bg-white/10 transition-colors duration-300 flex items-center gap-2"
                         >
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.43.372.823 1.102.823 2.222 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.43.372.823 1.102.823 2.222 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>
                             Star on GitHub
                         </a>
                     </div>
@@ -225,20 +224,49 @@ Content::published()
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue'
 import { useTheme } from '@/composables/useTheme'
-import { Zap, Palette, Layers, Shield, Code2, Globe } from 'lucide-vue-next'
+import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
+import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import Shield from 'lucide-vue-next/dist/esm/icons/shield.js';
+import Code2 from 'lucide-vue-next/dist/esm/icons/code-xml.js';
+import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';import type { Component } from 'vue'
+import type { Content } from '@/types/cms'
+
+interface Feature {
+    icon: Component;
+    title: string;
+    description: string;
+}
+
+interface Advantage {
+    title: string;
+    description: string;
+}
+
+interface TeamMember {
+    name: string;
+    initials: string;
+    role: string;
+    image: string;
+}
+
+interface PageData extends Content {
+    title: string;
+    blocks?: any[]; 
+}
 
 const { getSetting } = useTheme()
 
-const pageData = ref(null)
+const pageData = ref<PageData | null>(null)
 const loading = ref(true)
 
 // Features data
-const features = [
+const features: Feature[] = [
     {
         icon: Zap,
         title: 'Blazing Fast',
@@ -272,7 +300,7 @@ const features = [
 ]
 
 // Advantages data
-const advantages = [
+const advantages: Advantage[] = [
     {
         title: 'Modern Tech Stack',
         description: 'Laravel 11 + Vue 3 + Tailwind CSS. The best tools for modern web development.'
@@ -292,7 +320,7 @@ const advantages = [
 ]
 
 // Team members data
-const teamMembers = [
+const teamMembers: TeamMember[] = [
     { name: 'Ari Nurcahya', initials: 'AN', role: 'Lead Developer', image: '/images/fallback/team-1.png' },
     { name: 'Sarah Amira', initials: 'SA', role: 'Frontend Engineer', image: '/images/fallback/team-2.png' },
     { name: 'Budi Santoso', initials: 'BS', role: 'Backend Engineer', image: '/images/fallback/team-3.png' },
@@ -303,7 +331,7 @@ onMounted(async () => {
   try {
     const response = await api.get('/cms/contents/home')
     pageData.value = response.data.data
-  } catch (error) {
+  } catch (error: any) {
     // Gracefully handle - fallback will render
     if (error.response?.status !== 404 && error.response?.status !== 200) {
       console.error('Failed to fetch home page:', error)
@@ -313,3 +341,4 @@ onMounted(async () => {
   }
 })
 </script>
+

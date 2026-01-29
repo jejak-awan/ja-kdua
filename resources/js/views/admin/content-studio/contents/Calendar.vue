@@ -27,7 +27,7 @@
                     </SelectContent>
                 </Select>
                 
-                <Button asChild class="shadow-sm">
+                <Button as-child class="shadow-sm">
                     <router-link :to="{ name: 'contents.create' }">
                         <Plus class="w-4 h-4 mr-2" />
                         {{ $t('features.content.list.createNew') }}
@@ -57,24 +57,18 @@ import interactionPlugin from '@fullcalendar/interaction';
 import api from '@/services/api';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
 import toast from '@/services/toast';
-import { Plus } from 'lucide-vue-next';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import type { Content, Category } from '@/types/cms';
 
-// Shadcn Components
-// @ts-ignore
-import Card from '@/components/ui/card.vue';
-// @ts-ignore
-import Button from '@/components/ui/button.vue';
-// @ts-ignore
-import Select from '@/components/ui/select.vue';
-// @ts-ignore
-import SelectContent from '@/components/ui/select-content.vue';
-// @ts-ignore
-import SelectItem from '@/components/ui/select-item.vue';
-// @ts-ignore
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-// @ts-ignore
-import SelectValue from '@/components/ui/select-value.vue';
+import {
+    Card,
+    Button,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from '@/components/ui';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -188,7 +182,7 @@ const fetchContents = async () => {
         });
         const { data } = parseResponse(response);
         contents.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch contents:', error);
         contents.value = [];
     }
@@ -199,7 +193,7 @@ const fetchCategories = async () => {
         const response = await api.get('/admin/ja/categories');
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch categories:', error);
         categories.value = [];
     }

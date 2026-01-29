@@ -61,12 +61,8 @@
                 <div class="lg:col-span-8">
                     <Card class="p-8 md:p-10">
                         <ContactFormBlock 
-                            :fields="contactFields" 
-                            title="Drop us a line" 
-                            description="Tell us about your project or just say hi!"
-                            customStyle="p-0 border-none shadow-none"
-                            padding="py-0"
-                            width="w-full"
+                            :module="fallbackModule" 
+                            :nested-blocks="fallbackNestedBlocks"
                         />
                     </Card>
                 </div>
@@ -76,33 +72,69 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import api from '@/services/api'
 import { useCmsStore } from '@/stores/cms'
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue'
 import ContactFormBlock from '@/shared/blocks/ContactFormBlock.vue'
-import Card from '@/components/ui/card.vue'
-import { 
-    Mail, 
-    Phone, 
-    MapPin, 
-    Loader2
-} from 'lucide-vue-next'
+import { Card } from '@/components/ui'
+import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
+import Phone from 'lucide-vue-next/dist/esm/icons/phone.js';
+import MapPin from 'lucide-vue-next/dist/esm/icons/map-pin.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';interface ContactField {
+    label: string;
+    type: string;
+    required: boolean;
+    width: string;
+}
+
+import type { Content } from '@/types/cms'
+
+interface PageData extends Content {
+    title: string;
+    blocks?: any[];
+}
 
 const loading = ref(true)
-const pageData = ref(null)
+const pageData = ref<PageData | null>(null)
 const cmsStore = useCmsStore()
 const siteSettings = computed(() => cmsStore.siteSettings)
 
-const contactFields = [
-  { label: 'First Name', type: 'text', required: true, width: 'w-full md:w-[calc(50%_-_0.5rem)]' },
-  { label: 'Last Name', type: 'text', required: true, width: 'w-full md:w-[calc(50%_-_0.5rem)]' },
-  { label: 'Email Address', type: 'email', required: true, width: 'w-full' },
-  { label: 'Message', type: 'textarea', required: true, width: 'w-full' }
-]
+const fallbackModule = computed(() => ({
+    id: 'fallback-contact-form',
+    type: 'contactform',
+    settings: {
+        title: 'Drop us a line',
+        description: 'Tell us about your project or just say hi!'
+    }
+}))
+
+const fallbackNestedBlocks = computed(() => [
+    { 
+        id: 'f1', 
+        type: 'contactfield', 
+        settings: { label: 'First Name', type: 'text', required: true, fullWidth: false } 
+    },
+    { 
+        id: 'f2', 
+        type: 'contactfield', 
+        settings: { label: 'Last Name', type: 'text', required: true, fullWidth: false } 
+    },
+    { 
+        id: 'f3', 
+        type: 'contactfield', 
+        settings: { label: 'Email Address', type: 'email', required: true, fullWidth: true } 
+    },
+    { 
+        id: 'f4', 
+        type: 'contactfield', 
+        settings: { label: 'Message', type: 'textarea', required: true, fullWidth: true } 
+    }
+])
 
 onMounted(async () => {
+
   try {
     // 1. Fetch site settings for global info
     await cmsStore.fetchPublicSettings()
@@ -117,3 +149,4 @@ onMounted(async () => {
   }
 })
 </script>
+

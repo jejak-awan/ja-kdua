@@ -16,8 +16,7 @@
 
     <!-- Tab Content -->
     <div class="bg-tab-content">
-        
-        <!-- Background Color -->
+<!-- Background Color -->
         <div v-if="activeTab === 'color'" class="bg-section">
             <div class="flex items-center justify-between mb-2">
                 <div class="bg-header mb-0">{{ t('builder.fields.background.color.label') }}</div>
@@ -359,7 +358,7 @@
                     <div class="flex flex-col gap-8 relative">
                         <!-- Link Icon -->
                         <div 
-                            class="absolute right-0 top-1/2 -translate-y-1/2 z-10 cursor-pointer p-1.5 rounded-full border border-input shadow-sm transition-all duration-200"
+                            class="absolute right-0 top-1/2 -translate-y-1/2 z-10 cursor-pointer p-1.5 rounded-full border border-input shadow-sm transition-colors duration-200"
                             :class="getResolvedValue('backgroundImageProportional') ? 'bg-blue-600 border-blue-600 text-white hover:bg-blue-700' : 'bg-background hover:text-accent border-input'"
                             @click="updateSetting('backgroundImageProportional', !getResolvedValue('backgroundImageProportional'))"
                             title="Proportional Scaling"
@@ -741,7 +740,7 @@
             <div class="mt-4 flex flex-col gap-8 relative">
                 <!-- Link Icon -->
                 <div 
-                    class="absolute right-0 top-1/2 -translate-y-1/2 z-10 cursor-pointer p-1.5 rounded-full border border-input shadow-sm transition-all duration-200"
+                    class="absolute right-0 top-1/2 -translate-y-1/2 z-10 cursor-pointer p-1.5 rounded-full border border-input shadow-sm transition-colors duration-200"
                     :class="getResolvedValue('backgroundVideoProportional') ? 'bg-blue-600 border-blue-600 text-white hover:bg-blue-700' : 'bg-background hover:text-accent border-input'"
                     @click="updateSetting('backgroundVideoProportional', !getResolvedValue('backgroundVideoProportional'))"
                     title="Proportional Scaling"
@@ -926,8 +925,7 @@
                     @update:value="updateSetting('backgroundVideoOverlayColor', $event)"
                 />
             </div>
-
-            </div> <!-- End of video-sub-settings -->
+</div> <!-- End of video-sub-settings -->
         </div>
 
         <!-- Pattern -->
@@ -1679,8 +1677,7 @@
                 </div>
             </div>
         </div>
-
-    </div>
+</div>
   </div>
 </template>
 
@@ -1688,8 +1685,31 @@
 import { ref, reactive, computed, watch, inject } from 'vue'
 import type { BlockInstance, BuilderInstance } from '../../../types/builder'
 import { useI18n } from 'vue-i18n'
-import { PaintBucket, Image, Video, Grid3X3, Moon, Plus, Component, RotateCcw, Trash2, Maximize2, Settings, FlipHorizontal, FlipVertical, RefreshCw, RotateCw, Lock, Link, Unlink, Square, RectangleHorizontal, RectangleVertical, ChevronDown, Check, Ban, Contrast } from 'lucide-vue-next'
-import ColorField from './ColorField.vue'
+import PaintBucket from 'lucide-vue-next/dist/esm/icons/paint-bucket.js';
+import Image from 'lucide-vue-next/dist/esm/icons/image.js';
+import Video from 'lucide-vue-next/dist/esm/icons/video.js';
+import Grid3X3 from 'lucide-vue-next/dist/esm/icons/grid-3x3.js';
+import Moon from 'lucide-vue-next/dist/esm/icons/moon.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Component from 'lucide-vue-next/dist/esm/icons/component.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Maximize2 from 'lucide-vue-next/dist/esm/icons/maximize.js';
+import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
+import FlipHorizontal from 'lucide-vue-next/dist/esm/icons/flip-horizontal.js';
+import FlipVertical from 'lucide-vue-next/dist/esm/icons/flip-vertical.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import RotateCw from 'lucide-vue-next/dist/esm/icons/rotate-cw.js';
+import Lock from 'lucide-vue-next/dist/esm/icons/lock.js';
+import Link from 'lucide-vue-next/dist/esm/icons/link.js';
+import Unlink from 'lucide-vue-next/dist/esm/icons/unlink.js';
+import Square from 'lucide-vue-next/dist/esm/icons/square.js';
+import RectangleHorizontal from 'lucide-vue-next/dist/esm/icons/rectangle-horizontal.js';
+import RectangleVertical from 'lucide-vue-next/dist/esm/icons/rectangle-vertical.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import Ban from 'lucide-vue-next/dist/esm/icons/ban.js';
+import Contrast from 'lucide-vue-next/dist/esm/icons/contrast.js';import ColorField from './ColorField.vue'
 import GradientField from './GradientField.vue'
 import UploadField from './UploadField.vue'
 import ToggleField from './ToggleField.vue'
@@ -1699,18 +1719,18 @@ import DimensionField from './DimensionField.vue'
 import PatternField from './PatternField.vue'
 import MaskField from './MaskField.vue'
 import { IconButton } from '../ui'
-import MediaPicker from '../../MediaPicker.vue'
+import MediaPicker from '@/components/media/MediaPicker.vue'
 import ResponsiveFieldModal from '../modals/ResponsiveFieldModal.vue'
 import FieldActions from './FieldActions.vue'
 import { BaseDropdown } from '../ui'
 import { getHarmoniousGradientColors, getBackgroundStyles, generateGradientCSS } from '../../../shared/utils/styleUtils'
 import { BackgroundPatterns, BackgroundMasks } from '../../../shared/utils/AssetLibrary'
 
-const props = defineProps({
-  field: { type: Object, required: true },
-  module: { type: Object, required: true },
-  device: { type: String, default: null }
-})
+const props = defineProps<{
+  field: any
+  module: BlockInstance
+  device?: string
+}>()
 
 const { t } = useI18n()
 const builder = inject<BuilderInstance>('builder')
@@ -2331,7 +2351,7 @@ const initDefaultGradient = () => {
     
     if (!baseColor) {
         // 2. Fallback to Global Variables (Primary Color)
-        const colors = builder?.globalVariables?.globalColors || []
+        const colors = builder?.globalVariables?.globalColors.value || []
         baseColor = colors.find((c: any) => (c as any).name.toLowerCase().includes('primary'))?.value
     }
 

@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Columns as ColumnsIcon } from 'lucide-vue-next';
+import ColumnsIcon from 'lucide-vue-next/dist/esm/icons/columns-2.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {
@@ -60,7 +60,7 @@ export default {
                 { label: '↑', value: 'column-reverse' }
             ],
             default: 'column',
-            condition: (settings) => settings.stackOn !== 'never',
+            condition: (settings: any) => settings.stackOn !== 'never',
             tab: 'style'
         },
         {

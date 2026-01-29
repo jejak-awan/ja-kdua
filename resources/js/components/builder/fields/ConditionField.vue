@@ -9,8 +9,14 @@
           </div>
           <div class="condition-actions flex gap-1">
             <IconButton :icon="editingIndex === index ? ChevronUp : Settings2" size="sm" @click="toggleEdit(index)" />
-            <IconButton :icon="Trash2" size="sm" variant="danger" @click="removeCondition(index)" />
-          </div>
+            <IconButton 
+              :icon="Trash2" 
+              size="sm" 
+              variant="ghost" 
+              class="text-red-500 hover:bg-red-500/10"
+              @click="removeCondition(index)" 
+            />
+</div>
         </div>
 
         <!-- Inline Editor for Condition Rules -->
@@ -103,8 +109,11 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import type { BlockInstance } from '../../../types/builder'
-import { Plus, Search, Settings2, Trash2, ChevronUp } from 'lucide-vue-next'
-import { BaseButton, BasePopover, IconButton, BaseLabel } from '../ui'
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Settings2 from 'lucide-vue-next/dist/esm/icons/settings.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';import { BaseButton, BasePopover, IconButton, BaseLabel } from '../ui'
 
 interface ConditionItem {
   type: string;

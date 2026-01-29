@@ -57,18 +57,22 @@
     </Card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import MediaPicker from '../MediaPicker.vue';
-import Card from '@/components/ui/card.vue';
-import CardHeader from '@/components/ui/card-header.vue';
-import CardTitle from '@/components/ui/card-title.vue';
-import CardContent from '@/components/ui/card-content.vue';
-import Button from '@/components/ui/button.vue';
-import { Image, Trash2, Plus } from 'lucide-vue-next';
-import { useCmsStore } from '../../stores/cms';
+import MediaPicker from '@/components/media/MediaPicker.vue';
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+    Button
+} from '@/components/ui';
+import Image from 'lucide-vue-next/dist/esm/icons/image.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import { useCmsStore } from '@/stores/cms';
 
 const { t } = useI18n();
 const cmsStore = useCmsStore();
@@ -76,7 +80,7 @@ const { settings } = storeToRefs(cmsStore);
 
 const maxUploadSizeMB = computed(() => {
     // Setting is in KB, convert to MB
-    const sizeKB = settings.value.max_upload_size || 10240;
+    const sizeKB = (settings.value as any).max_upload_size || 10240;
     return sizeKB / 1024;
 });
 
@@ -85,12 +89,11 @@ onMounted(async () => {
     await cmsStore.fetchSettingsGroup('media');
 });
 
-defineProps({
-    modelValue: {
-        type: [String, null],
-        default: null,
-    },
-});
+defineProps<{
+    modelValue: string | null;
+}>();
 
-defineEmits(['update:modelValue']);
+defineEmits<{
+    (e: 'update:modelValue', value: string | null): void;
+}>();
 </script>

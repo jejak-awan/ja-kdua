@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { ListOrdered } from 'lucide-vue-next';
+import ListOrdered from 'lucide-vue-next/dist/esm/icons/list-ordered.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

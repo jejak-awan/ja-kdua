@@ -77,7 +77,7 @@ const FullwidthPostContentModule: ModuleDefinition = {
             {
                 id: 'typography',
                 label: 'Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `text_${f.name}`,
                     label: `Text ${f.label}`
@@ -86,7 +86,7 @@ const FullwidthPostContentModule: ModuleDefinition = {
             {
                 id: 'headingTypography',
                 label: 'Heading Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `heading_${f.name}`,
                     label: `Heading ${f.label}`
@@ -95,7 +95,7 @@ const FullwidthPostContentModule: ModuleDefinition = {
             {
                 id: 'linkTypography',
                 label: 'Link Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `link_${f.name}`,
                     label: `Link ${f.label}`

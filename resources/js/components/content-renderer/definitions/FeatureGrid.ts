@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Grid } from 'lucide-vue-next';
+import Grid from 'lucide-vue-next/dist/esm/icons/grid-2x2.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

@@ -25,29 +25,37 @@
     </bubble-menu>
 </template>
 
-<script setup>
-import { computed } from 'vue'
-import { BubbleMenu } from '@tiptap/vue-3/menus'
-import Button from '@/components/ui/button.vue'
-import { AlignLeft, AlignCenter, AlignRight, Settings as SettingsIcon } from 'lucide-vue-next'
+<script setup lang="ts">
+import { computed } from 'vue';
+import { BubbleMenu } from '@tiptap/vue-3/menus';
+import { Button } from '@/components/ui';
+import AlignLeft from 'lucide-vue-next/dist/esm/icons/align-start-horizontal.js';
+import AlignCenter from 'lucide-vue-next/dist/esm/icons/align-center-horizontal.js';
+import AlignRight from 'lucide-vue-next/dist/esm/icons/align-end-horizontal.js';
+import SettingsIcon from 'lucide-vue-next/dist/esm/icons/settings.js';
+import type { Editor } from '@tiptap/vue-3';
 
-const props = defineProps({
-    editor: Object
-})
+const props = defineProps<{
+    editor: Editor | undefined;
+}>();
 
-defineEmits(['openProperties'])
+const emit = defineEmits<{
+    (e: 'openProperties'): void;
+}>();
 
-const shouldShow = ({ editor }) => {
-    return editor.isActive('image') || editor.isActive('video')
-}
+const shouldShow = ({ editor }: any) => {
+    return editor.isActive('image') || editor.isActive('video');
+};
 
 const currentAlign = computed(() => {
-    const type = props.editor.isActive('image') ? 'image' : 'video'
-    const attrs = props.editor.getAttributes(type)
-    return attrs.textAlign || attrs.align || 'center'
-})
+    if (!props.editor) return 'center';
+    const type = props.editor.isActive('image') ? 'image' : 'video';
+    const attrs = props.editor.getAttributes(type);
+    return attrs.textAlign || attrs.align || 'center';
+});
 
-function updateAlign(align) {
-    props.editor.chain().focus().setTextAlign(align).run()
+function updateAlign(align: string) {
+    if (!props.editor) return;
+    props.editor.chain().focus().setTextAlign(align).run();
 }
 </script>

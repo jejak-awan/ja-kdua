@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="pricing-feature-item flex items-center py-5 border-b border-slate-50 dark:border-slate-800 last:border-0 group transition-all duration-300"
+    class="pricing-feature-item flex items-center py-5 border-b border-slate-50 dark:border-slate-800 last:border-0 group transition-colors duration-300"
     :class="[
         !isIncluded ? 'opacity-30 line-through grayscale' : '',
         settings.strikeThrough ? 'line-through opacity-40' : ''
@@ -10,7 +10,7 @@
     :style="itemStyles"
   >
       <div 
-        class="feature-icon-wrap w-7 h-7 flex items-center justify-center rounded-xl mr-5 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 shadow-sm border border-slate-100 dark:border-slate-800"
+        class="feature-icon-wrap w-7 h-7 flex items-center justify-center rounded-xl mr-5 transition-[width] duration-500 group-hover:scale-110 group-hover:rotate-6 shadow-sm border border-slate-100 dark:border-slate-800"
         :class="isIncluded ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'"
         :style="iconStyles"
       >
@@ -25,8 +25,8 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import { Check, X } from 'lucide-vue-next'
-import { 
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';import { 
   getVal,
   getLayoutStyles,
   getTypographyStyles

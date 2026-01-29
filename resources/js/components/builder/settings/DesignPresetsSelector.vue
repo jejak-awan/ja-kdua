@@ -67,42 +67,40 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
-import { Library, Check, Save, Plus, Layout } from 'lucide-vue-next'
-import { IconButton, BaseDropdown, BaseDivider } from '../ui'
+import Library from 'lucide-vue-next/dist/esm/icons/library.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';import { IconButton, BaseDropdown, BaseDivider } from '../ui'
+import type { BuilderInstance } from '@/types/builder'
 
-const props = defineProps({
-  type: {
-    type: String,
-    required: true
-  },
-  align: {
-    type: String,
-    default: 'right'
-  },
-  size: {
-    type: String,
-    default: 'md'
-  },
-  basedOnName: {
-    type: String,
-    default: 'Default'
-  }
+const props = withDefaults(defineProps<{
+  type: string;
+  align?: 'left' | 'right' | 'center';
+  size?: 'sm' | 'md' | 'lg';
+  basedOnName?: string;
+}>(), {
+  align: 'right',
+  size: 'md',
+  basedOnName: 'Default'
 })
 
-const emit = defineEmits(['action'])
+const emit = defineEmits<{
+  (e: 'action', payload: { type: string; data: any }): void
+}>()
 
 // Inject builder
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder')
 
 // Computed - builder.presets is a ref, needs .value
 const filteredPresets = computed(() => {
   if (!builder?.presets?.value) return []
-  return builder.presets.value.filter(p => p.type === props.type)
+  return builder.presets.value.filter((p: any) => p.type === props.type)
 })
 
-const handleAction = (type, close, data = null) => {
+const handleAction = (type: string, close: () => void, data: any = null) => {
   emit('action', { type, data })
   close()
 }

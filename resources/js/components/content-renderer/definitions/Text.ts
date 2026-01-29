@@ -4,7 +4,11 @@ import type { BlockDefinition } from '@/types/builder';
  * Rich text with comprehensive typography and styling
  */
 
-import { Type, AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-vue-next';
+import Type from 'lucide-vue-next/dist/esm/icons/type.js';
+import AlignLeft from 'lucide-vue-next/dist/esm/icons/align-start-horizontal.js';
+import AlignCenter from 'lucide-vue-next/dist/esm/icons/align-center-horizontal.js';
+import AlignRight from 'lucide-vue-next/dist/esm/icons/align-end-horizontal.js';
+import AlignJustify from 'lucide-vue-next/dist/esm/icons/align-horizontal-justify-center.js';
 import { defineAsyncComponent } from 'vue';
 import { fontFamilyOptions, fontWeightOptions } from './presets/typography';
 import { borderRadiusPresets } from './presets/border';

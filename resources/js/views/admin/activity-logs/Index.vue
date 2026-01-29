@@ -194,10 +194,10 @@
                             <div class="flex items-center space-x-2">
                                 <Badge
                                     :variant="(log.action || log.type) === 'deleted' ? 'destructive' : 'default'"
-                                    :class="{
-                                        'bg-green-500 hover:bg-green-600': (log.action || log.type) === 'created',
-                                        'bg-blue-500 hover:bg-blue-600': (log.action || log.type) === 'updated',
-                                    }"
+                                    :class="[
+                                        (log.action || log.type) === 'created' ? 'bg-green-500 hover:bg-green-600' : '',
+                                        (log.action || log.type) === 'updated' ? 'bg-blue-500 hover:bg-blue-600' : ''
+                                    ].filter(Boolean).join(' ')"
                                 >
                                     {{ t(`features.activityLogs.filters.types.${log.action || log.type}`) || (log.action || log.type || t('features.activityLogs.messages.unknown')) }}
                                 </Badge>
@@ -233,41 +233,64 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
-import { useToast } from '../../../composables/useToast';
-import { useConfirm } from '../../../composables/useConfirm';
-import { parseResponse, ensureArray } from '../../../utils/responseParser';
-import Button from '../../../components/ui/button.vue';
-import Pagination from '../../../components/ui/pagination.vue';
-import Input from '../../../components/ui/input.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
+import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
+import { useConfirm } from '@/composables/useConfirm';
+import { parseResponse, ensureArray, type PaginationData } from '@/utils/responseParser';
+import {
+    Button,
+    Pagination,
+    Input,
+    Badge,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from '@/components/ui';
+
+interface User {
+    id: number;
+    name: string;
+    email: string;
+}
+
+interface ActivityLog {
+    id: number;
+    action: string;
+    type?: string;
+    description: string;
+    user?: User | null;
+    model_type: string | null;
+    properties?: any;
+    created_at: string;
+}
+
+interface ActivityStatistics {
+    total: number;
+    today: number;
+    active_users: number;
+    this_week: number;
+}
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 
-const logs = ref([]);
-const users = ref([]);
-const statistics = ref(null);
+const logs = ref<ActivityLog[]>([]);
+const users = ref<User[]>([]);
+const statistics = ref<ActivityStatistics | null>(null);
 const loading = ref(false);
 const search = ref('');
 const typeFilter = ref('');
 const userFilter = ref('');
 const dateFrom = ref('');
 const dateTo = ref('');
-const ipFilter = ref('');
 const perPage = ref(25);
-const pagination = ref(null);
-const sortField = ref('created_at');
-const sortOrder = ref('desc');
+const pagination = ref<PaginationData | null>(null);
 const exporting = ref(false);
 
 const filteredLogs = computed(() => {
@@ -290,11 +313,11 @@ const filteredLogs = computed(() => {
     return filtered;
 });
 
-const fetchLogs = async (page = 1) => {
+const fetchLogs = async (page: number = 1) => {
     loading.value = true;
     try {
         // Build query params for server-side filtering
-        const params = {
+        const params: Record<string, any> = {
             page,
             per_page: perPage.value
         };
@@ -306,7 +329,7 @@ const fetchLogs = async (page = 1) => {
         if (search.value) params.search = search.value;
         
         const response = await api.get('/admin/ja/activity-logs', { params });
-        const { data, pagination: pag } = parseResponse(response);
+        const { data, pagination: pag } = parseResponse<ActivityLog[]>(response);
         
         logs.value = ensureArray(data);
         pagination.value = pag;
@@ -315,7 +338,7 @@ const fetchLogs = async (page = 1) => {
         try {
             const statsResponse = await api.get('/admin/ja/activity-logs/statistics');
             statistics.value = statsResponse.data?.data || statsResponse.data;
-        } catch (error) {
+        } catch (error: any) {
             // Fallback stats if endpoint fails
             statistics.value = {
                 total: pagination.value?.total || logs.value.length,
@@ -324,8 +347,9 @@ const fetchLogs = async (page = 1) => {
                 active_users: 0
             };
         }
-    } catch (error) {
-        console.error('Failed to fetch activity logs:', error);
+    } catch (error: any) {
+        console.error('Failed to fetch activity logs:', error.message);
+        toast.error.fromResponse(error);
     } finally {
         loading.value = false;
     }
@@ -351,11 +375,12 @@ const clearLogs = async () => {
         await api.post('/admin/ja/activity-logs/clear');
         toast.success.action(t('features.system.logs.messages.cleared'));
         fetchLogs();
-    } catch (error) {
-        console.error('Failed to clear logs:', error);
+    } catch (error: any) {
+        console.error('Failed to clear logs:', error.message);
         toast.error.fromResponse(error);
     }
 };
+
 const exportLogs = async () => {
     exporting.value = true;
     try {
@@ -379,8 +404,8 @@ const exportLogs = async () => {
         link.remove();
         window.URL.revokeObjectURL(url);
         toast.success.action(t('features.analytics.export.success') || 'Export started');
-    } catch (error) {
-        console.error('Failed to export activity logs:', error);
+    } catch (error: any) {
+        console.error('Failed to export activity logs:', error.message);
         toast.error.fromResponse(error);
     } finally {
         exporting.value = false;
@@ -392,21 +417,20 @@ const fetchUsers = async () => {
         const response = await api.get('/admin/ja/users');
         const data = response.data?.data?.data || response.data?.data || response.data || [];
         users.value = Array.isArray(data) ? data : [];
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch users:', error);
         users.value = [];
     }
 };
 
-const formatDate = (date) => {
+const formatDate = (date?: string) => {
     if (!date) return '-';
     return new Date(date).toLocaleString();
 };
 
 // Watch filters for auto-refresh
-
 watch([typeFilter, userFilter, dateFrom, dateTo], () => {
-    fetchLogs();
+    fetchLogs(1);
 });
 
 onMounted(() => {

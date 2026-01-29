@@ -64,28 +64,40 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useAuthStore } from '../../stores/auth';
-import api from '../../services/api';
-import { parseSingleResponse, ensureArray } from '../../utils/responseParser';
+import { useAuthStore } from '@/stores/auth';
+import api from '@/services/api';
+import { parseSingleResponse, ensureArray } from '@/utils/responseParser';
 import dayjs from 'dayjs';
 
-import Card from '@/components/ui/card.vue';
-import CardHeader from '@/components/ui/card-header.vue';
-import CardTitle from '@/components/ui/card-title.vue';
-import CardContent from '@/components/ui/card-content.vue';
-import { FileText, Newspaper, HelpCircle, Home } from 'lucide-vue-next';
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent
+} from '@/components/ui';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Newspaper from 'lucide-vue-next/dist/esm/icons/newspaper.js';
+import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
+import Home from 'lucide-vue-next/dist/esm/icons/house.js';
+
+interface ContentItem {
+    id: number | string;
+    title: string;
+    created_at: string;
+    [key: string]: any;
+}
 
 const authStore = useAuthStore();
-const recentContent = ref([]);
+const recentContent = ref<ContentItem[]>([]);
 const loading = ref(false);
 
 const fetchDashboard = async () => {
     loading.value = true;
     try {
         const response = await api.get('/dashboard/viewer');
-        const data = parseSingleResponse(response);
+        const data = parseSingleResponse<any>(response);
         if (data) {
              recentContent.value = ensureArray(data.recentContent);
         }
@@ -96,7 +108,7 @@ const fetchDashboard = async () => {
     }
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string) => {
     return dayjs(date).format('MMM D, YYYY');
 };
 

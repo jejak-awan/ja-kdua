@@ -13,7 +13,7 @@ export interface ConfirmOptions {
 
 interface ConfirmState extends ConfirmOptions {
     isOpen: boolean;
-    onConfirm: (() => void) | null;
+    onConfirm: ((val?: string | boolean) => void) | null;
     onCancel: (() => void) | null;
 }
 
@@ -43,7 +43,7 @@ export function useConfirm() {
                 cancelText: options.cancelText || 'Cancel',
                 input: options.input || false,
                 inputPlaceholder: options.inputPlaceholder || '',
-                onConfirm: (val?: string) => {
+                onConfirm: (val?: string | boolean) => {
                     resolve(options.input ? val : true);
                     confirmState.value.isOpen = false;
                 },

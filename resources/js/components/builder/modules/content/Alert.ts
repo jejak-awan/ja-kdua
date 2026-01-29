@@ -128,7 +128,7 @@ const AlertModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -137,7 +137,7 @@ const AlertModule: ModuleDefinition = {
             {
                 id: 'messageTypography',
                 label: 'Message Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `message_${f.name}`,
                     label: `Message ${f.label}`

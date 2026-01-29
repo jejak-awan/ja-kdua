@@ -190,7 +190,7 @@ const TestimonialModule: ModuleDefinition = {
             {
                 id: 'contentTypography',
                 label: 'Content Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `content_${f.name}`,
                     label: `Content ${f.label}`
@@ -199,7 +199,7 @@ const TestimonialModule: ModuleDefinition = {
             {
                 id: 'authorNameTypography',
                 label: 'Author Name Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `author_name_${f.name}`,
                     label: `Author Name ${f.label}`
@@ -208,7 +208,7 @@ const TestimonialModule: ModuleDefinition = {
             {
                 id: 'authorTitleTypography',
                 label: 'Author Title Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `author_title_${f.name}`,
                     label: `Author Title ${f.label}`

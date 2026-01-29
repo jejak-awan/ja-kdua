@@ -27,7 +27,7 @@
                     <div class="flex items-center space-x-4">
                         <div v-if="form.avatar" class="flex-shrink-0">
                             <img
-                                :src="form.avatar"
+                                :src="avatarUrl"
                                 :alt="form.name"
                                 class="h-24 w-24 rounded-full object-cover border border-border"
                             />
@@ -253,16 +253,15 @@ import { parseResponse, ensureArray, parseSingleResponse } from '@/utils/respons
 import { useToast } from '@/composables/useToast';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { editUserSchema } from '@/schemas';
-// @ts-ignore
-import Button from '@/components/ui/button.vue';
-// @ts-ignore
-import Input from '@/components/ui/input.vue';
-// @ts-ignore
-import Textarea from '@/components/ui/textarea.vue';
-// @ts-ignore
-import Checkbox from '@/components/ui/checkbox.vue';
-import MediaPicker from '@/components/MediaPicker.vue';
-import { ArrowLeft, Loader2 } from 'lucide-vue-next';
+import {
+    Button,
+    Input,
+    Textarea,
+    Checkbox
+} from '@/components/ui';
+import MediaPicker from '@/components/media/MediaPicker.vue';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import { useAuthStore, ROLE_RANKS } from '@/stores/auth';
 import type { Role, User } from '@/types/auth';
 
@@ -282,7 +281,7 @@ interface UserForm {
     bio: string;
     website: string;
     location: string;
-    avatar: string | null;
+    avatar: string | { url?: string; path?: string } | null;
     roles: number[];
     is_verified: boolean;
 }
@@ -296,6 +295,7 @@ const form = ref<UserForm>({
     name: '',
     email: '',
     password: '',
+    password_confirmation: '',
     phone: '',
     bio: '',
     website: '',
@@ -303,7 +303,12 @@ const form = ref<UserForm>({
     avatar: null,
     roles: [],
     is_verified: false,
-    password_confirmation: '',
+});
+
+const avatarUrl = computed(() => {
+    if (!form.value.avatar) return '';
+    if (typeof form.value.avatar === 'string') return form.value.avatar;
+    return form.value.avatar.url || '';
 });
 
 const initialForm = ref<UserForm | null>(null);
@@ -331,7 +336,7 @@ const fetchRoles = async () => {
         const response = await api.get('/admin/ja/roles');
         const { data } = parseResponse(response);
         availableRoles.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch roles:', error);
     } finally {
         loadingRoles.value = false;
@@ -343,7 +348,7 @@ const fetchUser = async () => {
     try {
         const userId = route.params.id;
         const response = await api.get(`/admin/ja/users/${userId}`);
-        const data = parseSingleResponse(response);
+        const data = parseSingleResponse(response) as User;
         
         // Guard: hierarchy check
         // Allow if self OR if super-admin (rank >= 100) OR if strictly higher rank
@@ -368,7 +373,7 @@ const fetchUser = async () => {
             password_confirmation: '',
         };
         initialForm.value = JSON.parse(JSON.stringify(form.value));
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch user:', error);
         toast.error.load(error);
         router.push({ name: 'users.index' });
@@ -379,7 +384,12 @@ const fetchUser = async () => {
 
 const handleSubmit = async () => {
     // Client-side validation first
-    if (!validateWithZod(form.value)) {
+    const dataToValidate = {
+        ...form.value,
+        avatar: avatarUrl.value || null
+    };
+
+    if (!validateWithZod(dataToValidate as any)) {
         return;
     }
 
@@ -392,7 +402,9 @@ const handleSubmit = async () => {
     clearErrors();
 
     try {
-        const payload: Partial<UserForm> = { ...form.value };
+        const payload: any = { 
+            ...dataToValidate
+        };
         if (!payload.password) delete payload.password;
         if (!payload.password_confirmation) delete payload.password_confirmation;
         

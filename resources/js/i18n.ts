@@ -1,11 +1,7 @@
 import { createI18n } from 'vue-i18n';
-// @ts-ignore
 import config from '../lang/config';
-// @ts-ignore
 import en from '../lang/en/index.js';
-// @ts-ignore
 import id from '../lang/id/index.js';
-// @ts-ignore
 import builderTranslations from './components/builder/lang/index.js';
 /**
  * Deep merge utility for translation objects

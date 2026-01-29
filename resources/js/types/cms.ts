@@ -1,79 +1,62 @@
-export interface SiteSettings {
-    site_name: string;
-    site_description: string;
-    site_url: string;
-    admin_email: string;
-    site_version: string;
-    site_logo: string;
-    site_favicon: string;
-    [key: string]: any;
-}
+import type { Category, Tag } from './taxonomy';
+import type { Media } from './media';
+import type { Menu, MenuItem } from './menu';
+import type { SiteSettings } from './settings';
 
-export interface Category {
-    id: number;
-    name: string;
-    slug: string;
-    description?: string;
-    parent_id?: number | null;
-    [key: string]: any;
-}
+export * from './taxonomy';
+export * from './media';
+export * from './settings';
+export type { Menu, MenuItem };
 
-export interface Tag {
-    id: number;
-    name: string;
-    slug: string;
-    [key: string]: any;
-}
-
-export interface Media {
-    id: number;
-    name: string;
-    file_name: string;
-    mime_type: string;
-    size: number;
-    url: string;
-    thumbnail_url?: string;
-    folder_id?: number | null;
-    alt?: string;
-    description?: string;
-    is_shared?: boolean;
-    created_at?: string;
-    updated_at?: string;
-    [key: string]: any;
-}
-
-export interface MediaFolder {
-    id: number;
-    name: string;
-    parent_id?: number | null;
-    children?: MediaFolder[];
-    children_count?: number;
-    is_trashed?: boolean;
-    is_shared?: boolean;
-    created_at?: string;
-    updated_at?: string;
-    [key: string]: any;
-}
-
-export interface Content {
-    id: number;
+export interface ContentForm {
     title: string;
     slug: string;
-    content?: string;
+    type: 'post' | 'page' | 'custom' | string;
+    status: 'draft' | 'published' | 'scheduled' | 'archived' | 'pending' | 'trashed' | string;
     excerpt?: string;
-    status?: string;
+    body?: string; // content alias
+    content?: string;
+    featured_image?: string | null;
+    category_id?: number | string | null;
+    published_at?: string;
+    meta_title?: string;
+    meta_description?: string;
+    meta_keywords?: string;
+    og_image?: string | null;
+    comment_status?: boolean;
+    is_featured?: boolean;
+    blocks?: any[]; // Keep any[] for now as blocks are dynamic, but better than any
+    tags?: Tag[];
+    menu_item?: MenuItem;
+    menu_items?: MenuItem[];
+    editor_type?: 'classic' | 'builder' | null;
+}
+
+export interface Content extends ContentForm {
+    id: number;
     author_id?: number;
-    created_at?: string;
-    updated_at?: string;
-    [key: string]: any;
+    author?: {
+        id: number;
+        name: string;
+        email: string;
+    } | null;
+    category?: Category | null;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    lock_status?: {
+        is_locked: boolean;
+        locked_by?: number;
+        locked_at?: string;
+    } | null;
 }
 
 export interface CMSState {
     contents: Content[];
     categories: Category[];
     tags: Tag[];
-    media: any[];
-    settings: Record<string, any>;
+    media: Media[];
+    settings: Record<string, string | number | boolean | null>;
     siteSettings: SiteSettings;
     currentContent: Content | null;
     loading: boolean;
@@ -81,4 +64,17 @@ export interface CMSState {
     settingsPromises: Record<string, Promise<any>>;
     themeMode: 'light' | 'dark' | 'system';
     isDarkMode: boolean;
+}
+
+export interface ContentTemplate {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    type: 'post' | 'page' | 'custom';
+    title_template: string;
+    body_template: string;
+    excerpt_template: string;
+    created_at?: string;
+    updated_at?: string;
 }

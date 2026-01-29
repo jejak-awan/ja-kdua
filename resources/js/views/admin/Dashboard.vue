@@ -17,13 +17,11 @@ const ViewerDashboard = defineAsyncComponent(() => import('@/components/dashboar
 // Determine which dashboard to show based on permissions
 const activeDashboard = computed<Component>(() => {
     // Admin Dashboard: Users who can manage users or settings (Super Admin, Admin)
-    // @ts-ignore - Permissions are string based
     if (authStore.hasPermission('manage users') || authStore.hasPermission('manage settings') || authStore.hasPermission('view analytics')) {
         return AdminDashboard;
     }
     
     // Creator Dashboard: Users who can create or edit content/media (Editor, Author)
-    // @ts-ignore
     if (authStore.hasPermission('create content') || authStore.hasPermission('edit content') || authStore.hasPermission('upload media')) {
         return CreatorDashboard;
     }

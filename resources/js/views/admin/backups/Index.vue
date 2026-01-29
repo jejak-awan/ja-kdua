@@ -298,7 +298,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -330,30 +330,28 @@ import SelectValue from '../../../components/ui/select-value.vue';
 import SelectContent from '../../../components/ui/select-content.vue';
 import SelectItem from '../../../components/ui/select-item.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
-import { 
-    Plus, 
-    Loader2, 
-    Database, 
-    HardDrive, 
-    Clock, 
-    Calendar, 
-    Settings, 
-    Search,
-    FileArchive,
-    Download,
-    RotateCcw,
-    Trash2,
-    Eye,
-    EyeOff,
-    Copy,
-    Check
-} from 'lucide-vue-next';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import Database from 'lucide-vue-next/dist/esm/icons/database.js';
+import HardDrive from 'lucide-vue-next/dist/esm/icons/hard-drive.js';
+import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
+import Calendar from 'lucide-vue-next/dist/esm/icons/calendar.js';
+import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import FileArchive from 'lucide-vue-next/dist/esm/icons/file-archive.js';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import EyeOff from 'lucide-vue-next/dist/esm/icons/eye-off.js';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
-const backups = ref([]);
-const statistics = ref(null);
+const backups = ref<any[]>([]);
+const statistics = ref<any>(null);
 const loading = ref(false);
 const creating = ref(false);
 const search = ref('');
@@ -366,17 +364,17 @@ const scheduleForm = ref({
     backup_retention_days: 30,
     backup_max_count: 10
 });
-const initialScheduleForm = ref(null);
+const initialScheduleForm = ref<any>(null);
 
 // Visibility toggle state for each backup row
-const visiblePasswords = ref({});
-const copiedPasswords = ref({});
+const visiblePasswords = ref<Record<number, boolean>>({});
+const copiedPasswords = ref<Record<number, boolean>>({});
 
-const togglePasswordVisibility = (id) => {
+const togglePasswordVisibility = (id: number) => {
     visiblePasswords.value[id] = !visiblePasswords.value[id];
 };
 
-const copyPassword = async (id, password) => {
+const copyPassword = async (id: number, password: string) => {
     try {
         await navigator.clipboard.writeText(password);
         copiedPasswords.value[id] = true;
@@ -414,7 +412,7 @@ const fetchBackups = async () => {
         try {
             const statsResponse = await api.get('/admin/ja/backups/statistics');
             statistics.value = parseSingleResponse(statsResponse);
-        } catch (error) {
+        } catch (error: any) {
             // Calculate from backups if endpoint doesn't exist
             statistics.value = {
                 total: backups.value.length,
@@ -423,7 +421,7 @@ const fetchBackups = async () => {
                 auto_backup: false,
             };
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch backups:', error);
     } finally {
         loading.value = false;
@@ -436,7 +434,7 @@ const createBackup = async () => {
         await api.post('/admin/ja/backups');
         toast.success.action(t('features.system.backups.messages.created'));
         await fetchBackups();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to create backup:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -444,7 +442,7 @@ const createBackup = async () => {
     }
 };
 
-const downloadBackup = async (backup) => {
+const downloadBackup = async (backup: any) => {
     try {
         const response = await api.get(`/admin/ja/backups/${backup.id}/download`, {
             responseType: 'blob',
@@ -456,13 +454,13 @@ const downloadBackup = async (backup) => {
         document.body.appendChild(link);
         link.click();
         link.remove();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to download backup:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const restoreBackup = async (backup) => {
+const restoreBackup = async (backup: any) => {
     const confirmed = await confirm({
         title: t('features.system.backups.actions.restore'),
         message: t('features.system.backups.confirm.restore', { name: backup.name }),
@@ -475,7 +473,7 @@ const restoreBackup = async (backup) => {
     const doubleConfirmed = await confirm({
         title: t('features.system.backups.actions.restore'),
         message: t('features.system.backups.confirm.restore_warning'),
-        variant: 'destructive',
+        variant: 'danger',
         confirmText: t('common.actions.confirm'),
     });
 
@@ -487,17 +485,17 @@ const restoreBackup = async (backup) => {
         setTimeout(() => {
             window.location.reload();
         }, 1500);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to restore backup:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const deleteBackup = async (backup) => {
+const deleteBackup = async (backup: any) => {
     const confirmed = await confirm({
         title: t('features.system.backups.actions.delete'),
         message: t('features.system.backups.confirm.delete', { name: backup.name }),
-        variant: 'destructive',
+        variant: 'danger',
         confirmText: t('common.actions.delete'),
     });
 
@@ -507,13 +505,13 @@ const deleteBackup = async (backup) => {
         await api.delete(`/admin/ja/backups/${backup.id}`);
         toast.success.delete();
         await fetchBackups();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete backup:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const formatFileSize = (bytes) => {
+const formatFileSize = (bytes: number) => {
     if (!bytes) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -528,7 +526,7 @@ const saveSchedule = async () => {
         showScheduleModal.value = false;
         await fetchBackups(); // Refresh statistics
         toast.success.save();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to save schedule:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -551,7 +549,7 @@ const openScheduleModal = () => {
     showScheduleModal.value = true;
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string) => {
     if (!date) return '-';
     // Use i18n date format or component logic. 
     // Ideally use d() from useI18n if setup, but standard toLocaleString is used here.

@@ -6,7 +6,7 @@
             :title="group.title"
             :description="group.description"
             :icon="group.icon"
-            :color="group.color"
+            :color="group.color as any"
         >
             <SettingField
                 v-for="setting in group.settings"
@@ -18,7 +18,7 @@
                 :type="setting.type"
                 :enabled-text="$t('features.settings.enabled')"
                 :disabled-text="$t('features.settings.disabled')"
-                :error="errors[setting.key]"
+                :error="errors?.[setting.key]"
             />
 
             <!-- SMTP Group Actions -->
@@ -81,32 +81,54 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { MailIcon, UserIcon } from 'lucide-vue-next'
-import SettingGroup from '../../../../components/settings/SettingGroup.vue'
-import SettingField from '../../../../components/settings/SettingField.vue'
-import Button from '../../../../components/ui/button.vue'
+import MailIcon from 'lucide-vue-next/dist/esm/icons/mail.js';import SettingGroup from '@/components/settings/SettingGroup.vue'
+import SettingField from '@/components/settings/SettingField.vue'
+import { Button } from '@/components/ui';
 
-const props = defineProps({
-    settings: {
-        type: Array,
-        required: true
-    },
-    formData: {
-        type: Object,
-        required: true
-    },
-    validatingConfig: Boolean,
-    configValidation: Object,
-    testingConnection: Boolean,
-    connectionResult: Object,
-    errors: {
-        type: Object,
-        default: () => ({})
-    }
-})
+interface Setting {
+    id: number | string;
+    key: string;
+    value: any;
+    type: string;
+    group: string;
+}
+
+interface SettingGroupData {
+    id: string;
+    title: string;
+    description: string;
+    icon: any;
+    color: string;
+    keys: string[];
+    settings: Setting[];
+}
+
+interface ConfigValidation {
+    valid: boolean;
+    errors?: string[];
+    warnings?: string[];
+}
+
+interface ConnectionResult {
+    connected: boolean;
+    host?: string;
+    port?: number | string;
+}
+
+interface Props {
+    settings: Setting[];
+    formData: Record<string, any>;
+    validatingConfig?: boolean;
+    configValidation?: ConfigValidation | null;
+    testingConnection?: boolean;
+    connectionResult?: ConnectionResult | null;
+    errors?: Record<string, string[]>;
+}
+
+const props = defineProps<Props>()
 
 defineEmits(['validate-config', 'test-connection'])
 
@@ -115,7 +137,7 @@ const { t } = useI18n()
 const emailSettingsGrouped = computed(() => {
     const emailSettings = props.settings.filter(s => s && s.group === 'email')
     
-    const groups = [
+    const groups: SettingGroupData[] = [
         {
             id: 'smtp',
             title: t('features.settings.groups.smtp.title'),

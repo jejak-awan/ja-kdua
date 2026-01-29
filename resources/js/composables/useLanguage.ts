@@ -1,12 +1,13 @@
 import { ref, computed } from 'vue';
 import i18n, { setLocale as i18nSetLocale, getLocale as i18nGetLocale } from '../i18n';
 import api from '../services/api';
-// @ts-ignore
 import { parseResponse, ensureArray } from '../utils/responseParser';
 
 export interface Language {
+    id?: number;
     code: string;
     name: string;
+    native_name?: string;
     flag?: string;
     is_default?: boolean;
     is_active?: boolean;

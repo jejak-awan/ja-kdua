@@ -63,7 +63,7 @@
                         <Label>
                             {{ $t('features.categories.form.parent') }}
                         </Label>
-                        <Select v-model="form.parent_id">
+                        <Select :model-value="form.parent_id || 'null_value'" @update:model-value="(val) => form.parent_id = val === 'null_value' ? null : val">
                             <SelectTrigger>
                                 <SelectValue :placeholder="$t('features.categories.form.noParent')" />
                             </SelectTrigger>
@@ -158,38 +158,46 @@ import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { categorySchema } from '@/schemas';
-import MediaPicker from '@/components/MediaPicker.vue';
-import { Loader2, X } from 'lucide-vue-next';
+import MediaPicker from '@/components/media/MediaPicker.vue';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import type { Category } from '@/types/cms';
 
 // Shadcn UI
-// @ts-ignore
-import Button from '@/components/ui/button.vue';
-// @ts-ignore
-import Input from '@/components/ui/input.vue';
-// @ts-ignore
-import Label from '@/components/ui/label.vue';
-// @ts-ignore
-import Textarea from '@/components/ui/textarea.vue';
-// @ts-ignore
-import Checkbox from '@/components/ui/checkbox.vue';
-// @ts-ignore
-import Select from '@/components/ui/select.vue';
-// @ts-ignore
-import SelectContent from '@/components/ui/select-content.vue';
-// @ts-ignore
-import SelectItem from '@/components/ui/select-item.vue';
-// @ts-ignore
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-// @ts-ignore
-import SelectValue from '@/components/ui/select-value.vue';
-// @ts-ignore
-import Dialog from '@/components/ui/dialog.vue';
-import DialogContent from '@/components/ui/dialog-content.vue';
-import DialogDescription from '@/components/ui/dialog-description.vue';
-import DialogFooter from '@/components/ui/dialog-footer.vue';
-import DialogHeader from '@/components/ui/dialog-header.vue';
-import DialogTitle from '@/components/ui/dialog-title.vue';
+import {
+    Button,
+    Input,
+    Label,
+    Textarea,
+    Checkbox,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from '@/components/ui';
+
+interface CategoryForm {
+    name: string;
+    slug: string;
+    description: string;
+    image: string | null;
+    parent_id: string | null;
+    is_active: boolean;
+    sort_order: number;
+}
+
+interface FlattenedCategory {
+    id: number;
+    label: string;
+    raw: Category;
+}
 
 const props = defineProps<{
     open: boolean;
@@ -197,7 +205,10 @@ const props = defineProps<{
     categories?: Category[]; // For parent selection
 }>();
 
-const emit = defineEmits(['update:open', 'success']);
+const emit = defineEmits<{
+    'update:open': [value: boolean];
+    'success': [];
+}>();
 
 const { t } = useI18n();
 const toast = useToast();
@@ -223,9 +234,13 @@ watch(() => props.open, (isOpen) => {
         clearErrors();
         if (props.category) {
             form.value = {
-                ...props.category,
-                parent_id: props.category.parent_id ? props.category.parent_id.toString() : null, // Convert to string for Select
+                name: props.category.name || '',
+                slug: props.category.slug || '',
+                description: props.category.description || '',
                 image: props.category.image || null,
+                parent_id: props.category.parent_id ? props.category.parent_id.toString() : null,
+                is_active: !!props.category.is_active,
+                sort_order: props.category.sort_order || 0
             };
         } else {
             // Reset
@@ -302,7 +317,7 @@ const slugify = (text: string) => {
 };
 
 const handleSubmit = async () => {
-    if (!validateWithZod(form.value)) return;
+    if (!validateWithZod(form.value as any)) return;
 
     saving.value = true;
     clearErrors();

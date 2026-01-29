@@ -38,62 +38,68 @@
   </BaseModal>
 </template>
 
-<script setup>
-import { computed, inject } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { BaseModal } from '../ui'
-import ModuleRegistry from '../core/ModuleRegistry'
-import { pageTemplates } from '../templates/PageTemplates.js'
-import { LayoutTemplate, AlertTriangle } from 'lucide-vue-next'
+<script setup lang="ts">
+import { computed, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { BaseModal } from '../ui';
+import ModuleRegistry from '../core/ModuleRegistry';
+import { pageTemplates } from '../templates/PageTemplates.js';
+import LayoutTemplate from 'lucide-vue-next/dist/esm/icons/layout-template.js';
+import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';
+import type { BuilderInstance, BlockInstance } from '../../../types/builder';
 
-const emit = defineEmits(['close', 'inserted'])
-const builder = inject('builder')
-const { t } = useI18n()
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'inserted'): void;
+}>();
 
-const templates = computed(() => pageTemplates)
+const builder = inject<BuilderInstance>('builder');
+const { t } = useI18n();
+
+const templates = computed(() => pageTemplates);
 
 // Insert a template into the builder (REPLACES CONTENT)
-const insertTemplate = async (template) => {
-  if (!template.factory) return
+const insertTemplate = async (template: any) => {
+  if (!builder || !template.factory) return;
   
-  const confirmed = await builder?.confirm({
+  const confirmed = await builder.confirm({
     title: t('builder.modals.confirm.resetLayout'),
     message: t('builder.modals.confirm.resetLayoutDesc'),
     confirmText: t('builder.modals.confirm.confirm'),
     cancelText: t('builder.modals.confirm.cancel'),
     type: 'warning'
-  })
+  });
   
-  if (!confirmed) return
+  if (!confirmed) return;
   
   // Generate the page data (array of sections)
-  const pageData = template.factory()
+  const pageData = template.factory();
   
   // Deep clone and regenerate IDs
-  const clonedPage = JSON.parse(JSON.stringify(pageData))
+  const clonedPage: BlockInstance[] = JSON.parse(JSON.stringify(pageData));
   
-  const regenerateIds = (block) => {
-    block.id = ModuleRegistry.generateId()
+  const regenerateIds = (block: BlockInstance) => {
+    block.id = ModuleRegistry.generateId();
     if (block.children) {
-      block.children.forEach(regenerateIds)
+      block.children.forEach(regenerateIds);
     }
-  }
+  };
   
-  clonedPage.forEach(section => regenerateIds(section))
+  clonedPage.forEach(section => regenerateIds(section));
   
   // Replace builder content
-  builder.blocks = clonedPage
+  builder.blocks.value = clonedPage;
   
-  builder.takeSnapshot()
+  builder.takeSnapshot();
   
   // Select first section if exists
-  if (builder.blocks.length > 0) {
-      builder.selectModule(builder.blocks[0].id)
+  if (builder.blocks.value && builder.blocks.value.length > 0) {
+      builder.selectModule(builder.blocks.value[0].id);
   }
   
-  emit('inserted')
-  emit('close')
-}
+  emit('inserted');
+  emit('close');
+};
 </script>
 
 <style scoped>

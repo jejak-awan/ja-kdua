@@ -15,10 +15,12 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <!-- Main Content Area (Center) -->
-            <div :class="[
+            <div
+:class="[
                 form.editor_type === 'builder' ? 'lg:col-span-12' : (isSidebarOpen ? 'lg:col-span-8' : 'lg:col-span-11'),
-                'space-y-8 transition-all duration-300 ease-in-out'
-            ]">
+                'space-y-8 transition-colors duration-300 ease-in-out'
+            ]"
+>
                 <ContentMain
                     v-model="form"
                     @save="handleSubmit"
@@ -29,7 +31,7 @@
             </div>
 
             <!-- Sidebar (Right) - Control Tower (Only show for classic editor) -->
-            <div v-if="form.editor_type !== 'builder'" :class="[isSidebarOpen ? 'lg:col-span-4' : 'lg:col-span-1', 'space-y-6 transition-all duration-300 ease-in-out']">
+            <div v-if="form.editor_type !== 'builder'" :class="[isSidebarOpen ? 'lg:col-span-4' : 'lg:col-span-1', 'space-y-6 transition-colors duration-300 ease-in-out']">
                 <ActionToolbar 
                     :is-sidebar-open="isSidebarOpen"
                     :loading="loading"
@@ -116,35 +118,45 @@ import { useI18n } from 'vue-i18n';
 import { useHead } from '@vueuse/head';
 import { useCmsStore } from '@/stores/cms';
 import api from '@/services/api';
-// @ts-ignore
-import Button from '@/components/ui/button.vue';
+
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+
+// UI Components
 import {
-    Save, 
-    Loader2, 
-} from 'lucide-vue-next';
+    Button,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter
+} from '@/components/ui';
 import ActionToolbar from '@/components/content/ActionToolbar.vue';
-// @ts-ignore
-import Dialog from '@/components/ui/dialog.vue';
-// @ts-ignore
-import DialogContent from '@/components/ui/dialog-content.vue';
-// @ts-ignore
-import DialogHeader from '@/components/ui/dialog-header.vue';
-// @ts-ignore
-import DialogTitle from '@/components/ui/dialog-title.vue';
-// @ts-ignore
-import DialogDescription from '@/components/ui/dialog-description.vue';
-// @ts-ignore
-import DialogFooter from '@/components/ui/dialog-footer.vue';
-import { parseResponse, ensureArray } from '@/utils/responseParser';
-import AutoSaveIndicator from '@/components/AutoSaveIndicator.vue';
+import AutoSaveIndicator from '@/components/layout/AutoSaveIndicator.vue';
 import ContentMain from '@/components/content/ContentMain.vue';
 import ContentSidebar from '@/components/content/ContentSidebar.vue';
+
+// Composables & Utils
+import { parseResponse, ensureArray } from '@/utils/responseParser';
 import { useAutoSave } from '@/composables/useAutoSave';
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { contentSchema } from '@/schemas';
-import type { Category, Tag } from '@/types/cms';
+import type { Category, Tag, ContentForm, MenuItem } from '@/types/cms';
+
+interface ConflictDetails {
+    id: number;
+    title: string;
+    is_trashed: boolean;
+    suggested_slug: string;
+}
+
+interface SlugConflict {
+    details: ConflictDetails;
+    originalError: any;
+}
 
 const { t } = useI18n();
 const router = useRouter();
@@ -154,15 +166,14 @@ const cmsStore = useCmsStore();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(contentSchema);
 
 const isSidebarOpen = ref(true);
-
 const loading = ref(false);
 const categories = ref<Category[]>([]);
 const tags = ref<Tag[]>([]);
-const menus = ref<any[]>([]);
+const menus = ref<any[]>([]); // Use flexible type for now or Menu[] if ready
 const selectedTags = ref<Tag[]>([]);
 const contentId = ref<number | null>(null);
 
-const form = ref<any>({
+const form = ref<ContentForm>({
     title: '',
     slug: '',
     excerpt: '',
@@ -171,7 +182,6 @@ const form = ref<any>({
     status: 'draft',
     type: 'post',
     category_id: null,
-    published_at: null,
     meta_title: '',
     meta_description: '',
     meta_keywords: '',
@@ -184,7 +194,8 @@ const form = ref<any>({
     },
     blocks: [],
     comment_status: true,
-    editor_type: 'classic'
+    editor_type: 'classic',
+    is_featured: false
 });
 
 // Auto-generation logic
@@ -209,7 +220,7 @@ watch(() => form.value.excerpt, (newExcerpt) => {
     if (!form.value.meta_description || form.value.meta_description === localStorage.getItem('last_excerpt')) {
         form.value.meta_description = newExcerpt;
     }
-    localStorage.setItem('last_excerpt', newExcerpt);
+    localStorage.setItem('last_excerpt', newExcerpt || '');
 });
 
 // Helper for slugify
@@ -286,7 +297,7 @@ const fetchCategories = async () => {
         const response = await api.get('/admin/ja/categories', { params: { per_page: 100 } });
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch categories:', error);
         categories.value = [];
     }
@@ -294,17 +305,14 @@ const fetchCategories = async () => {
 
 const fetchTags = async (query = '') => {
     try {
-        const params: any = { per_page: 50 }; // Reduced to 50 for lighter load
+        const params: Record<string, any> = { per_page: 50 };
         if (query) {
             params.search = query;
         }
         const response = await api.get('/admin/ja/tags', { params });
         const { data } = parseResponse(response);
-        
-        // If searching, replace. If initial load, ensure we have enough.
-        // Actually, for dropdown, we just want to show what matches.
         tags.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch tags:', error);
     }
 };
@@ -314,13 +322,14 @@ const fetchMenus = async () => {
         const response = await api.get('/admin/ja/menus');
         const { data } = parseResponse(response);
         menus.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch menus:', error);
     }
 };
 
-const handleModeSelected = (mode: string) => {
-    form.value.editor_type = mode;
+const handleModeSelected = (mode: string | null) => {
+    if (!mode) return;
+    form.value.editor_type = mode as 'classic' | 'builder';
     // Only auto-open sidebar if classic is selected
     if (mode === 'classic') {
         isSidebarOpen.value = true;
@@ -331,11 +340,11 @@ const handleModeSelected = (mode: string) => {
 
 const handleSubmit = async (status: string | null = null) => {
     // Update status if provided (from Builder save/publish buttons)
-    if (status && (status === 'draft' || status === 'published')) {
+    if (status && (status === 'draft' || status === 'published' || status === 'archived' || status === 'scheduled')) {
         form.value.status = status;
     }
 
-    if (!validateWithZod(form.value)) return;
+    if (!validateWithZod(form.value as any)) return;
 
     loading.value = true;
     clearErrors();
@@ -383,7 +392,7 @@ const handleSubmit = async (status: string | null = null) => {
         toast.success.create('Content');
         
         // Only redirect if not saving from within the builder
-        if (typeof status !== 'string') {
+        if (status === null) {
             router.push({ name: 'content-studio' });
         } else {
              // If staying, update contentId for future saves (though auto-save handles this too)
@@ -425,7 +434,7 @@ const confirmCancel = () => {
 };
 
 // Slug Conflict Handling
-const slugConflict = ref<any>(null);
+const slugConflict = ref<SlugConflict | null>(null);
 
 const resolveConflict = async (action: 'unique' | 'force_delete') => {
     if (!slugConflict.value) return;
@@ -449,12 +458,8 @@ const resolveConflict = async (action: 'unique' | 'force_delete') => {
             toast.success.action('Conflict resolved: Previous item deleted.');
             // Retry submission
             await handleSubmit(form.value.status);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to force delete conflicting item:', error);
-            // toast.error.action expects an error object usually, but can handle message if we adapt or usage allows. 
-            // Looking at useToast, toast.error.actions takes (error). 
-            // Let's use toast.error.create which is generic for item actions or just pass a mock error object or use generic warning.
-            // Actually useToast has a 'warning' method.
             toast.error.action({ message: 'Failed to remove conflicting item. Please rename your current page.' });
         } finally {
             loading.value = false;

@@ -1,11 +1,11 @@
 
-<script setup>
-import { TooltipProvider } from 'radix-vue'
+<script setup lang="ts">
+import { TooltipProvider, type TooltipProviderProps } from 'radix-vue'
 
-const props = defineProps({
-  delayDuration: { type: Number, required: false, default: 0 },
-  skipDelayDuration: { type: Number, required: false, default: 300 },
-  disableHoverableContent: { type: Boolean, required: false, default: false },
+const props = withDefaults(defineProps<TooltipProviderProps>(), {
+  delayDuration: 0,
+  skipDelayDuration: 300,
+  disableHoverableContent: false,
 })
 </script>
 

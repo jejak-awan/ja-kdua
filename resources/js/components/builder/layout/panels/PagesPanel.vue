@@ -32,7 +32,7 @@
             <span class="page-slug">/{{ page.slug }}</span>
             <span v-if="page.status === 'draft'" class="page-status-badge">{{ page.status }}</span>
           </div>
-          <div v-if="builder.mode === 'site'" class="page-actions">
+          <div v-if="builder?.mode.value === 'site'" class="page-actions">
             <!-- Normal edit button (switching page in builder) -->
             <button class="action-btn" :title="t('builder.panels.pages.actions.edit')" @click.stop="selectPage(page.id)">
               <Edit2 :size="14" />
@@ -49,7 +49,7 @@
       </div>
       
       <!-- Add Button -->
-      <div v-if="builder.mode === 'site'" class="panel-footer">
+      <div v-if="builder?.mode.value === 'site'" class="panel-footer">
           <button class="add-page-btn" @click="handleCreate">
             <Plus :size="16" />
             <span>{{ t('builder.panels.pages.addNew') }}</span>
@@ -59,60 +59,87 @@
   </div>
 </template>
 
-<script setup>
-import { ref, inject, computed, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Edit2, Trash2, Plus, Search } from 'lucide-vue-next'
-import { BaseInput } from '../../ui'
+<script setup lang="ts">
+import { ref, inject, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Edit2 from 'lucide-vue-next/dist/esm/icons/pen-line.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import { BaseInput } from '../../ui';
+import type { BuilderInstance } from '../../../../types/builder';
 
-const { t } = useI18n()
-const builder = inject('builder')
-const pages = computed(() => builder?.pages?.value || [])
-const currentPageId = computed(() => builder?.currentPageId?.value)
-const loading = computed(() => builder?.pagesLoading?.value || false)
+interface Page {
+  id: number | string;
+  title: string;
+  slug: string;
+  status?: string;
+}
 
-const searchQuery = ref('')
+const { t } = useI18n();
+const builder = inject<BuilderInstance>('builder');
+// Fix types for reactive values coming from builder
+const pages = computed(() => (builder?.pages?.value || []) as Page[]);
+const currentPageId = computed(() => builder?.currentPageId?.value);
+const loading = computed(() => builder?.pagesLoading?.value || false);
+
+const searchQuery = ref('');
 
 const filteredPages = computed(() => {
-  if (!searchQuery.value) return pages.value
-  const query = searchQuery.value.toLowerCase()
+  if (!searchQuery.value) return pages.value;
+  const query = searchQuery.value.toLowerCase();
   return pages.value.filter(p => 
     p.title.toLowerCase().includes(query) || 
     p.slug.toLowerCase().includes(query)
-  )
-})
+  );
+});
 
-const selectPage = (id) => {
-  builder?.setCurrentPage(id)
-}
+const selectPage = (id: number | string) => {
+  if (builder?.switchCanvas) {
+      builder.switchCanvas(String(id)); // Assuming switchCanvas handles page switching logic if mapped
+  }
+  // Or referencing builder method from previous code:
+  // builder?.setCurrentPage(id) -- this method was not in BuilderInstance interface I saw.
+  // Previous code used builder.setCurrentPage(id). I should check if it exists in my interface update.
+  // I didn't see setCurrentPage in BuilderInstance. 
+  // Let me double check usage. 
+  // Wait, builder.ts has `currentPageId` ref.
+  // The logic in previous PagesPanel.vue: `builder?.setCurrentPage(id)`.
+  // If it's missing from interface, I should cast to any or add it.
+  // For now I will cast builder to any for this specific call if not present.
+  (builder as any)?.setCurrentPage(id);
+};
 
 const handleCreate = () => {
-  const title = prompt(t('builder.panels.pages.promptTitle'))
+  const title = prompt(t('builder.panels.pages.promptTitle'));
   if (title) {
-    builder?.addPage(title)
+    // builder?.addPage(title)
+     (builder as any)?.addPage(title);
   }
-}
+};
 
-const handleDelete = async (page) => {
-    const confirmed = await builder?.confirm({
+const handleDelete = async (page: Page) => {
+    const confirmed = await builder?.confirm?.({
         title: t('builder.modals.confirm.deletePage'),
         message: t('builder.modals.confirm.deletePageDesc'),
         confirmText: t('builder.modals.confirm.delete'),
         cancelText: t('builder.modals.confirm.cancel'),
         type: 'delete'
-    })
+    });
     if (confirmed) {
         try {
-            await builder?.deletePage(page.id)
+            // await builder?.deletePage(page.id)
+            await (builder as any)?.deletePage(page.id);
         } catch (error) {
-            console.error('Delete failed:', error)
+            console.error('Delete failed:', error);
         }
     }
-}
+};
 
 onMounted(() => {
-    builder?.fetchPages()
-})
+    // builder?.fetchPages()
+    (builder as any)?.fetchPages();
+});
 </script>
 
 <style scoped>

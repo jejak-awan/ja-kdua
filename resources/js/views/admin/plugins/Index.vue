@@ -35,7 +35,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -46,10 +46,10 @@ import { parseResponse, ensureArray } from '../../../utils/responseParser';
 const { t } = useI18n();
 const toast = useToast();
 
-const plugins = ref([]);
+const plugins = ref<any[]>([]);
 const loading = ref(false);
 const showSettingsModal = ref(false);
-const selectedPlugin = ref(null);
+const selectedPlugin = ref<any>(null);
 
 const fetchPlugins = async () => {
     loading.value = true;
@@ -57,15 +57,15 @@ const fetchPlugins = async () => {
         const response = await api.get('/admin/ja/plugins');
         const { data } = parseResponse(response);
         plugins.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch plugins:', error);
-        toast.error(t('features.developer.plugins.messages.failed_fetch')); // Keep generic message or use fromResponse if applicable, but fetch usually generic
+        toast.error.default(t('features.developer.plugins.messages.failed_fetch')); // Keep generic message or use fromResponse if applicable, but fetch usually generic
     } finally {
         loading.value = false;
     }
 };
 
-const togglePlugin = async (plugin) => {
+const togglePlugin = async (plugin: any) => {
     try {
         if (plugin.is_active) {
             await api.post(`/admin/ja/plugins/${plugin.id}/deactivate`);
@@ -76,13 +76,13 @@ const togglePlugin = async (plugin) => {
             plugin.is_active = true;
             toast.success.action(t('features.developer.plugins.messages.activated'));
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to toggle plugin:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const openSettings = (plugin) => {
+const openSettings = (plugin: any) => {
     selectedPlugin.value = plugin;
     showSettingsModal.value = true;
 };

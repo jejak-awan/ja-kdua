@@ -165,9 +165,18 @@ export function useBuilderState(initialData = { blocks: [] as BlockInstance[] },
     // Clipboard State
     const clipboard = ref<any>(null) // { type: 'module' | 'styles', data: any }
 
-    // Dirty State
-    const lastSavedBlocks = ref(JSON.stringify(initialData.blocks || []))
-    const isDirty = computed(() => JSON.stringify(blocks.value) !== lastSavedBlocks.value)
+    // Global Action State
+    const globalAction = ref<any>(null)
+
+    // Versioning & Dirty State (Optimized: No JSON.stringify on interaction)
+    const dataVersion = ref(0)
+    const lastSavedVersion = ref(0)
+
+    const markAsDirty = () => {
+        dataVersion.value++
+    }
+
+    const isDirty = computed(() => dataVersion.value !== lastSavedVersion.value)
 
     return {
         mode,
@@ -208,7 +217,10 @@ export function useBuilderState(initialData = { blocks: [] as BlockInstance[] },
         availableThemes,
         loadingThemes,
         clipboard,
-        lastSavedBlocks,
+        globalAction,
+        dataVersion,
+        lastSavedVersion,
+        markAsDirty,
         isDirty
     }
 }

@@ -1,6 +1,6 @@
 <template>
   <article 
-    class="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col h-full border border-border group"
+    class="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-colors duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col h-full border border-border group"
     @click="navigateToPost"
   >
     <!-- Featured Image -->
@@ -22,7 +22,7 @@
     <div class="p-6 flex flex-col flex-1 gap-4">
       <div class="flex-1 space-y-2">
           <h3 class="text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">
-            {{ post.title }}
+            {{ (post as any).title }}
           </h3>
           <p class="text-muted-foreground text-sm line-clamp-3 leading-relaxed">
             {{ excerpt }}
@@ -46,19 +46,26 @@
   </article>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import type { Content } from '@/types/cms'
 
+interface Article extends Partial<Content> {
+    featured_image?: string | null;
+    category?: any;
+    author?: any;
+    published_at?: string;
+    body?: string;
+}
+
+interface Props {
+  post: Article;
+}
+
+const props = defineProps<Props>()
 const { locale } = useI18n()
-const props = defineProps({
-  post: {
-    type: Object,
-    required: true
-  }
-})
-
 const router = useRouter()
 
 const excerpt = computed(() => {
@@ -67,7 +74,7 @@ const excerpt = computed(() => {
   return ''
 })
 
-const formatDate = (date) => {
+const formatDate = (date?: string) => {
   if (!date) return ''
   return new Date(date).toLocaleDateString(locale.value, {
     year: 'numeric',

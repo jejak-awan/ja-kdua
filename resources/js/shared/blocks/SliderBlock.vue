@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="slider-block relative group transition-all duration-300"
+    class="slider-block relative group transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Slider'"
     :style="cardStyles"
@@ -62,7 +62,7 @@
                     >
                          <a 
                             :href="slide.buttonUrl || '#'" 
-                            class="inline-flex items-center justify-center transition-all hover:-translate-y-1 active:translate-y-0"
+                            class="inline-flex items-center justify-center transition-colors hover:-translate-y-1 active:translate-y-0"
                             :style="buttonStyles" 
                             @click="mode === 'edit' ? ($event: Event) => $event.preventDefault() : undefined"
                         >

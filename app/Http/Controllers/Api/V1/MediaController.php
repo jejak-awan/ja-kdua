@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Models\ActivityLog;
 use App\Models\Media;
+use App\Models\User;
+use App\Models\Tag;
 use App\Services\CacheService;
 use App\Services\MediaService;
 use Illuminate\Http\Request;
@@ -19,7 +22,7 @@ class MediaController extends BaseApiController
 
     public function index(Request $request)
     {
-        $query = Media::with(['folder', 'usages']);
+        $query = Media::with(['folder', 'usages', 'tags']);
 
         // Scope logic - apply BEFORE trash handling
         if ($request->user() && ! $request->user()->can('manage media')) {
@@ -40,6 +43,13 @@ class MediaController extends BaseApiController
 
         if ($request->has('mime_type')) {
             $query->where('mime_type', 'like', $request->mime_type.'%');
+        }
+
+        if ($request->has('tag')) {
+            $tag = $request->tag;
+            $query->whereHas('tags', function ($q) use ($tag) {
+                $q->where('name', $tag)->orWhere('slug', $tag);
+            });
         }
 
         if ($request->has('folder_id')) {
@@ -65,6 +75,26 @@ class MediaController extends BaseApiController
             } elseif ($request->usage === 'unused') {
                 $query->doesntHave('usages');
             }
+        }
+
+        if ($request->has('author_id')) {
+            $query->where('author_id', $request->author_id);
+        }
+
+        if ($request->has('min_size')) {
+            $query->where('size', '>=', $request->min_size);
+        }
+
+        if ($request->has('max_size')) {
+            $query->where('size', '<=', $request->max_size);
+        }
+
+        if ($request->has('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
         }
 
         $perPage = $request->input('per_page', 24);
@@ -125,6 +155,9 @@ class MediaController extends BaseApiController
                 'max_height' => 'nullable|integer|min:1',
                 'author_id' => 'nullable|exists:users,id',
                 'is_shared' => 'sometimes|boolean',
+                'caption' => 'nullable|string',
+                'alt' => 'nullable|string',
+                'tags' => 'nullable|array',
             ]);
 
             // Additional image dimension validation if requested
@@ -164,8 +197,15 @@ class MediaController extends BaseApiController
             $request->input('folder_id'),
             $request->input('optimize', config('media.optimize', true)),
             $authorId,
-            $request->user()->can('manage media') ? $request->boolean('is_shared') : false
+            $request->user()->can('manage media') ? $request->boolean('is_shared') : false,
+            [
+                'caption' => $request->input('caption'),
+                'alt' => $request->input('alt'),
+                'tags' => $request->input('tags') ?? [],
+            ]
         );
+
+        ActivityLog::log('uploaded_media', $media, [], $request->user(), "Uploaded media: {$media->name}");
 
         return $this->success([
             'media' => $media->fresh()->load(['folder', 'usages']),
@@ -212,9 +252,11 @@ class MediaController extends BaseApiController
                     $folderId,
                     $optimize,
                     $authorId,
-                    $request->user()->can('manage media') ? $request->boolean('is_shared') : false
+                    $request->user()->can('manage media') ? $request->boolean('is_shared') : false,
+                    [] // Bulk upload usually doesn't have custom metadata per file yet
                 );
                 $uploadedMedia[] = $media->load(['folder', 'usages']);
+                ActivityLog::log('uploaded_media', $media, [], $request->user(), "Uploaded media: {$media->name} (batch)");
             } catch (\Exception $e) {
                 \Log::error('Bulk upload failed for a file: '.$e->getMessage());
             }
@@ -279,28 +321,44 @@ class MediaController extends BaseApiController
                 'name' => 'sometimes|required|string|max:255',
                 'alt' => 'nullable|string',
                 'description' => 'nullable|string',
+                'caption' => 'nullable|string',
                 'author_id' => 'nullable|exists:users,id',
                 'is_shared' => 'sometimes|boolean',
+                'tags' => 'nullable|array',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
         }
 
-        // Protection for is_shared
-        if (isset($validated['is_shared']) && ! request()->user()->can('manage media')) {
+        // Protection for sensitive fields
+        if (! request()->user()->can('manage media')) {
             unset($validated['is_shared']);
+            unset($validated['author_id']);
         }
 
         $media->update($validated);
 
+        if ($request->has('tags')) {
+            $this->mediaService->syncTags($media, $request->input('tags') ?? []);
+        }
+
+        ActivityLog::log('updated_media', $media, $validated, $request->user());
+
         $cacheService = new CacheService;
         $cacheService->clearMediaCaches();
 
-        return $this->success($media->load(['folder', 'usages']), 'Media updated successfully');
+        return $this->success($media->load(['folder', 'usages', 'tags']), 'Media updated successfully');
     }
 
     public function destroy(Request $request, Media $media)
     {
+        \Illuminate\Support\Facades\Log::info('MediaController::destroy called', [
+            'id' => $media->id,
+            'path' => $media->path,
+            'user' => $request->user()->id,
+            'permanent' => $request->boolean('permanent')
+        ]);
+        
         $user = $request->user();
         $isOwner = $media->author_id && $media->author_id === $user->id;
         $isManager = $user->can('manage media');
@@ -332,6 +390,7 @@ class MediaController extends BaseApiController
         $usageCount = $media->usages()->count();
 
         $this->mediaService->delete($media, false);
+        ActivityLog::log('soft_deleted_media', $media, [], $request->user());
 
         $response = [
             'message' => 'Media moved to trash',
@@ -358,6 +417,11 @@ class MediaController extends BaseApiController
 
     public function restore(Request $request, $id)
     {
+        \Illuminate\Support\Facades\Log::info('MediaController::restore called', [
+            'id' => $id,
+            'user' => $request->user()->id
+        ]);
+
         $user = $request->user();
         $media = Media::onlyTrashed()->findOrFail($id);
 
@@ -381,12 +445,19 @@ class MediaController extends BaseApiController
         }
 
         $this->mediaService->restore($media->id);
+        ActivityLog::log('restored_media', $media, [], $request->user());
 
         return $this->success($media->fresh()->load(['folder', 'usages']), 'Media restored successfully');
     }
 
     public function forceDelete(Request $request, $id)
     {
+        \Illuminate\Support\Facades\Log::info('MediaController::forceDelete called', [
+            'id' => $id,
+            'user' => $request->user()->id,
+            'force' => $request->boolean('force')
+        ]);
+        
         $user = $request->user();
         $media = Media::withTrashed()->findOrFail($id);
 
@@ -444,6 +515,7 @@ class MediaController extends BaseApiController
 
         foreach ($trashedMedia as $media) {
             $this->mediaService->delete($media, true);
+            ActivityLog::log('permanently_deleted_media', $media, [], $request->user(), "Permanently deleted media via empty trash: {$media->name}");
             $deletedCount++;
         }
 
@@ -458,6 +530,7 @@ class MediaController extends BaseApiController
 
         foreach ($trashedFolders as $folder) {
             $folder->forceDelete();
+            ActivityLog::log('permanently_deleted_media_folder', $folder, [], $request->user(), "Permanently deleted media folder via empty trash: {$folder->name}");
             $deletedFoldersCount++;
         }
 
@@ -469,6 +542,11 @@ class MediaController extends BaseApiController
 
     public function bulkAction(Request $request)
     {
+        \Illuminate\Support\Facades\Log::info('MediaController::bulkAction called', [
+            'action' => $request->input('action'),
+            'ids' => $request->input('ids'),
+            'user' => $request->user()->id
+        ]);
         if (! $request->user()->can('manage media') && ! $request->user()->can('edit media') && ! $request->user()->can('delete media')) {
             return $this->forbidden('You do not have permission to perform bulk actions on media');
         }
@@ -480,28 +558,31 @@ class MediaController extends BaseApiController
             $action = 'move_folder';
         }
 
-        if (empty($ids) || ! is_array($ids)) {
-            return $this->validationError(['ids' => ['Media IDs are required.']], 'The selected action is invalid.');
+        $ids = $request->input('ids', []);
+        $folderIds = $request->input('folder_ids', []);
+
+        if (empty($ids) && empty($folderIds)) {
+            return $this->validationError(['ids' => ['Media or Folder IDs are required.']], 'The selected action is invalid.');
         }
 
-        $query = Media::withTrashed()->whereIn('id', $ids);
-
-        // Scope Logic
-        if (! $request->user()->can('manage media')) {
-            // Cannot touch Global items or other users' items
-            // But if I want to "copy" or something? No, this is bulk action (delete, move)
-            // Implicitly restrict to OWN items.
-            $query->where('author_id', $request->user()->id);
+        // Filter Media IDs
+        $existingMediaIds = [];
+        if (!empty($ids)) {
+            $query = Media::withTrashed()->whereIn('id', $ids);
+            if (! $request->user()->can('manage media')) {
+                $query->where('author_id', $request->user()->id);
+            }
+            $existingMediaIds = $query->pluck('id')->toArray();
         }
 
-        $existingIds = $query->pluck('id')->toArray();
-        if (count($existingIds) !== count($ids)) {
-            // Some IDs were filtered out or didn't exist
-            // return error or just proceed with valid ones?
-            // UI might send mixed IDs. Let's just proceed with what we found but maybe warn?
-            // The original code returned error if count mismatch.
-            // If I am not manager, and I try to delete Admin's file, I should get error.
-            return $this->validationError(['ids' => ['Some media IDs do not exist or you do not have permission.']], 'The selected action is invalid.');
+        // Filter Folder IDs
+        $existingFolderIds = [];
+        if (!empty($folderIds)) {
+            $folderQuery = \App\Models\MediaFolder::withTrashed()->whereIn('id', $folderIds);
+            if (! $request->user()->can('manage media')) {
+                $folderQuery->where('author_id', $request->user()->id);
+            }
+            $existingFolderIds = $folderQuery->pluck('id')->toArray();
         }
 
         $folderId = $request->input('folder_id');
@@ -509,20 +590,18 @@ class MediaController extends BaseApiController
             $folderId = null;
         }
 
-        // If moving, check folder permission?
-        if (($action === 'move' || $action === 'move_folder') && $folderId) {
-            // Check if target folder is owned by me or global?
-            // ...
-        }
-
         $affected = $this->mediaService->bulkAction(
             $action,
-            $existingIds, // Use filtered IDs
+            $existingMediaIds,
             $folderId,
-            $request->input('alt_text')
+            $request->input('alt_text'),
+            $existingFolderIds
         );
 
-        return $this->success(['affected' => $affected], 'Bulk action completed successfully');
+        $totalAffected = $affected['media_count'] + $affected['folder_count'];
+        ActivityLog::log('bulk_action_media', null, ['action' => $action, 'media_ids' => $existingMediaIds, 'folder_ids' => $existingFolderIds], $request->user(), "Performed bulk action '{$action}' on {$totalAffected} items");
+
+        return $this->success($affected, 'Bulk action completed successfully');
     }
 
     public function generateThumbnail(Request $request, Media $media)
@@ -623,6 +702,8 @@ class MediaController extends BaseApiController
                     $media->update([
                         'size' => filesize($fullPath),
                     ]);
+
+                    ActivityLog::log('resized_media', $media, ['width' => $width, 'height' => $height], $request->user());
 
                     return $this->success([
                         'media' => $media->fresh()->load(['folder', 'usages']),
@@ -787,6 +868,8 @@ class MediaController extends BaseApiController
                             'author_id' => \Auth::id(), // Corrected from user_id to author_id
                         ]);
 
+                        ActivityLog::log('edited_media', $newMedia, [], $request->user(), "Created new version of media: {$newMedia->name}");
+
                         // Generate thumbnail if needed
                         if (config('media.generate_thumbnails', true)) {
                             try {
@@ -812,6 +895,7 @@ class MediaController extends BaseApiController
                         if (config('media.generate_thumbnails', true) && $media->thumbnail_path) {
                             try {
                                 $thumbnailPath = $this->mediaService->generateThumbnail($media);
+                                ActivityLog::log('regenerated_thumbnail', $media, [], $request->user());
                                 $media->update(['thumbnail_path' => $thumbnailPath]);
                             } catch (\Exception $e) {
                                 \Log::warning('Thumbnail regeneration failed: '.$e->getMessage());
@@ -832,5 +916,21 @@ class MediaController extends BaseApiController
 
             return $this->error('Failed to edit image: '.$e->getMessage(), 500, [], 'IMAGE_EDIT_ERROR');
         }
+    }
+
+    /**
+     * Get available filters for media
+     */
+    public function filters()
+    {
+        $tags = Tag::whereHas('media')->get(['id', 'name', 'slug']);
+        
+        $authors = User::whereHas('media')
+            ->get(['id', 'name', 'avatar']);
+
+        return $this->success([
+            'tags' => $tags,
+            'authors' => $authors,
+        ]);
     }
 }

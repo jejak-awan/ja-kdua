@@ -1,6 +1,6 @@
 <template>
     <div 
-        class="flex items-center gap-3 p-3 text-sm bg-card border border-border rounded-md cursor-move hover:shadow-sm transition-all group"
+        class="flex items-center gap-3 p-3 text-sm bg-card border border-border rounded-md cursor-move hover:shadow-sm transition-shadow group"
         :class="typeColorClass"
     >
         <GripVertical class="w-4 h-4 text-muted-foreground group-hover:text-foreground shrink-0" />
@@ -24,7 +24,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import Button from '../../ui/button.vue';
-import { GripVertical, Plus, FileText, File, Tag, Link as LinkIcon } from 'lucide-vue-next';
+import GripVertical from 'lucide-vue-next/dist/esm/icons/grip-vertical.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import File from 'lucide-vue-next/dist/esm/icons/file.js';
+import Tag from 'lucide-vue-next/dist/esm/icons/tag.js';
+import LinkIcon from 'lucide-vue-next/dist/esm/icons/link.js';
 
 const props = defineProps<{
     item: Record<string, any>;

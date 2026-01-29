@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Info } from 'lucide-vue-next';
+import Info from 'lucide-vue-next/dist/esm/icons/info.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {
@@ -42,7 +42,7 @@ export default {
             key: 'iconName',
             type: 'icon',
             label: 'Icon',
-            condition: (s) => s.mediaType === 'icon',
+            condition: (s: any) => s.mediaType === 'icon',
             default: 'Zap',
             tab: 'content'
         },
@@ -50,7 +50,7 @@ export default {
             key: 'image',
             type: 'image',
             label: 'Image',
-            condition: (s) => s.mediaType === 'image',
+            condition: (s: any) => s.mediaType === 'image',
             tab: 'content'
         },
 

@@ -108,11 +108,11 @@ const HeadingModule: ModuleDefinition = {
                         label: 'Wrap Heading with Link'
                     },
                     {
-                        ...linkSettings.fields![0],
+                        ...((linkSettings.fields as any[])[0]),
                         show_if: { field: 'use_link', value: true }
                     },
                     {
-                        ...linkSettings.fields![1],
+                        ...((linkSettings.fields as any[])[1]),
                         show_if: { field: 'use_link', value: true }
                     },
                     {
@@ -182,7 +182,7 @@ const HeadingModule: ModuleDefinition = {
             {
                 id: 'typography',
                 label: 'Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: f.name === 'text_align' ? 'alignment' : f.name
                 }))

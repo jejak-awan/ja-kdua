@@ -4,18 +4,18 @@
     :mode="mode" 
     :device="device" 
     tag="section"
-    class="section-block transition-all duration-500"
+    class="section-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Section'"
     :style="cardStyles"
   >
-    <div class="section-container relative w-full transition-all duration-500" :style="containerStyles">
+    <div class="section-container relative w-full transition-[width] duration-500" :style="containerStyles">
       <!-- Builder Mode -->
       <template v-if="mode === 'edit'">
         <slot />
         <!-- Empty State -->
-        <div v-if="!module.children?.length" class="section-empty flex justify-center p-12 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-3xl text-gray-400 bg-gray-50/50 dark:bg-gray-900/50 transition-all duration-300 hover:border-emerald-400/50">
-           <button class="add-row-btn w-12 h-12 flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg hover:scale-110 active:scale-95 transition-all duration-300" @click.stop="addRow">
+        <div v-if="!module.children?.length" class="section-empty flex justify-center p-12 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-3xl text-gray-400 bg-gray-50/50 dark:bg-gray-900/50 transition-colors duration-300 hover:border-emerald-400/50">
+           <button class="add-row-btn w-12 h-12 flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg hover:scale-110 active:scale-95 transition-colors duration-300" @click.stop="addRow">
              <PlusIcon class="w-6 h-6" />
            </button>
         </div>
@@ -38,8 +38,7 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Plus as PlusIcon } from 'lucide-vue-next'
-import { 
+import PlusIcon from 'lucide-vue-next/dist/esm/icons/plus.js';import { 
     getVal,
     getLayoutStyles,
     getResponsiveValue 
@@ -60,7 +59,6 @@ const props = withDefaults(defineProps<{
 const builder = inject<BuilderInstance | null>('builder', null)
 const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
-// @ts-ignore
 const BlockRenderer = inject<any>('BlockRenderer', null)
 
 const cardStyles = computed(() => {
@@ -88,9 +86,7 @@ const containerStyles = computed(() => {
 })
 
 const addRow = () => {
-    // @ts-ignore
     if (builder?.openInsertRowModal) {
-        // @ts-ignore
         builder.openInsertRowModal(props.module.id)
     }
 }

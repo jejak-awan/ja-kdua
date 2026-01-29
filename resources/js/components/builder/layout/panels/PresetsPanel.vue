@@ -69,80 +69,86 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, watch, inject, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Star, Check, Trash, ChevronDown, ChevronRight, Plus } from 'lucide-vue-next'
+<script setup lang="ts">
+import { ref, computed, watch, inject, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Star from 'lucide-vue-next/dist/esm/icons/star.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import Trash from 'lucide-vue-next/dist/esm/icons/trash.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import type { BuilderInstance } from '../../../../types/builder';
 
-const { t } = useI18n()
-const builder = inject('builder')
-const icons = { Star, Check, Trash, ChevronDown, ChevronRight, Plus }
+const { t } = useI18n();
+const builder = inject<BuilderInstance>('builder');
+const icons = { Star, Check, Trash, ChevronDown, ChevronRight, Plus };
 
 // builder.presets is already a reactive Proxy, not a ref - don't use .value
-const presets = computed(() => builder?.presets?.value || [])
-const loading = computed(() => builder?.loadingPresets?.value || false)
+const presets = computed(() => (builder?.presets?.value as any[]) || []);
+const loading = computed(() => builder?.loadingPresets?.value || false);
 
 // Accordion state - single open behavior
-const activeType = ref(null)
-const isLoaded = ref(false)
+const activeType = ref<string | null>(null);
+const isLoaded = ref(false);
 
 watch(presets, (newPresets) => {
     if (newPresets.length > 0 && !isLoaded.value) {
-        const types = Array.from(new Set(newPresets.map(p => p.type))).sort()
+        const types = Array.from(new Set(newPresets.map((p: any) => p.type))).sort();
         if (types.length > 0) {
-            activeType.value = types[0] // Open the first category by default
+            activeType.value = types[0]; // Open the first category by default
         }
-        isLoaded.value = true
+        isLoaded.value = true;
     }
-}, { immediate: true })
+}, { immediate: true });
 
-const toggleType = (type) => {
-    activeType.value = activeType.value === type ? null : type
-}
+const toggleType = (type: string) => {
+    activeType.value = activeType.value === type ? null : type;
+};
 
-const isExpanded = (type) => activeType.value === type
+const isExpanded = (type: string) => activeType.value === type;
 
 const groupedTypes = computed(() => {
-    const types = new Set(presets.value.map(p => p.type))
-    return Array.from(types).sort()
-})
+    const types = new Set(presets.value.map((p: any) => p.type));
+    return Array.from(types).sort();
+});
 
-const getPresetsByType = (type) => {
-    return presets.value.filter(p => p.type === type)
-}
+const getPresetsByType = (type: string) => {
+    return presets.value.filter((p: any) => p.type === type);
+};
 
-const canApplyToSelection = (preset) => {
-    if (!builder?.selectedModule) return false
-    return builder.selectedModule.type === preset.type
-}
+const canApplyToSelection = (preset: any) => {
+    if (!builder?.selectedModule?.value) return false;
+    return builder.selectedModule.value.type === preset.type;
+};
 
-const handlePresetClick = (preset) => {
-    if (canApplyToSelection(preset)) {
+const handlePresetClick = (preset: any) => {
+    if (canApplyToSelection(preset) && builder?.selectedModule?.value) {
         // Apply styles to selected module
-        builder.applyPreset(builder.selectedModule.id, preset)
+        builder.applyPreset(builder.selectedModule.value.id, preset);
     } else {
         // Insert as new module
-        builder.insertFromPreset(preset)
+        builder?.insertFromPreset(preset);
     }
-}
+};
 
-const deletePreset = async (id) => {
-    if (!id) return
+const deletePreset = async (id: string | number) => {
+    if (!id) return;
     const confirmed = await builder?.confirm({
         title: t('builder.modals.confirm.deletePreset'),
         message: t('builder.modals.confirm.deletePresetDesc'),
         confirmText: t('builder.modals.confirm.delete'),
         cancelText: t('builder.modals.confirm.cancel'),
         type: 'delete'
-    })
+    });
     if (confirmed) {
-        builder?.deletePreset(id)
+        builder?.deletePreset(id);
     }
-}
+};
 
 onMounted(() => {
-    builder?.fetchPresets()
-})
+    builder?.fetchPresets();
+});
 </script>
 
 <style scoped>

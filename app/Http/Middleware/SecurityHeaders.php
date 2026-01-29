@@ -35,6 +35,9 @@ class SecurityHeaders
 
         // Remove server signature
         $response->headers->remove('X-Powered-By');
+        
+        // Attempt to remove upstream/conflicting Report-Only headers that might be too strict
+        $response->headers->remove('Content-Security-Policy-Report-Only');
 
         return $response;
     }

@@ -21,25 +21,24 @@
     </bubble-menu>
 </template>
 
-<script setup>
-import { BubbleMenu } from '@tiptap/vue-3/menus'
-import Button from '@/components/ui/button.vue'
-import { 
-    Bold, 
-    Italic, 
-    Underline as UnderlineIcon,
-    Strikethrough
-} from 'lucide-vue-next'
+<script setup lang="ts">
+import { BubbleMenu } from '@tiptap/vue-3/menus';
+import { Button } from '@/components/ui';
+import Bold from 'lucide-vue-next/dist/esm/icons/bold.js';
+import Italic from 'lucide-vue-next/dist/esm/icons/italic.js';
+import UnderlineIcon from 'lucide-vue-next/dist/esm/icons/underline.js';
+import Strikethrough from 'lucide-vue-next/dist/esm/icons/strikethrough.js';
+import type { Editor } from '@tiptap/vue-3';
 
-const props = defineProps({
-    editor: Object
-})
+const props = defineProps<{
+    editor: Editor | undefined;
+}>();
 
-const shouldShow = ({ editor }) => {
+const shouldShow = ({ editor }: any) => {
     // Don't show if image or video is selected (we will have a different bubble for that)
     if (editor.isActive('image') || editor.isActive('video') || editor.isActive('htmlEmbed') || editor.isActive('icon')) {
-        return false
+        return false;
     }
-    return editor.isEditable && !editor.state.selection.empty
-}
+    return editor.isEditable && !editor.state.selection.empty;
+};
 </script>

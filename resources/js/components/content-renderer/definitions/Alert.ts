@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Bell } from 'lucide-vue-next';
+import Bell from 'lucide-vue-next/dist/esm/icons/bell.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

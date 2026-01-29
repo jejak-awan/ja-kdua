@@ -8,7 +8,7 @@
       >
         <figure 
           ref="figureRef"
-          class="image-figure relative transition-all duration-500"
+          class="image-figure relative transition-[width] duration-500"
           :class="[
             shadowClass(settings, blockDevice),
             hoverShadowClass(settings, blockDevice),
@@ -35,7 +35,7 @@
               :src="getVal(settings, 'src', blockDevice)"
               :alt="getVal(settings, 'alt') || 'Image'"
               :title="getVal(settings, 'title') || undefined"
-              class="block w-full h-full transition-all duration-700 ease-out image-element"
+              class="block w-full h-full transition-colors duration-700 ease-out image-element"
               :class="[objectFitClass(settings), filterClasses(settings)]"
               :style="imageElementStyles(settings, blockDevice)"
               :loading="getVal(settings, 'lazyLoad') !== false ? 'lazy' : 'eager'"
@@ -70,7 +70,7 @@
           <!-- Caption -->
           <figcaption 
             v-if="getVal(settings, 'showCaption') && getVal(settings, 'caption')" 
-            class="image-caption-container transition-all duration-300"
+            class="image-caption-container transition-colors duration-300"
             :class="captionStaticClass(settings)"
             :style="captionStyles(settings, blockDevice)"
           >
@@ -92,14 +92,10 @@ import {
     getLayoutStyles,
     toCSS
 } from '../utils/styleUtils'
-import { Image as ImageIcon, ZoomIn } from 'lucide-vue-next'
-import type { BlockInstance } from '../../types/builder'
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
+import ZoomIn from 'lucide-vue-next/dist/esm/icons/zoom-in.js';import type { BlockInstance, BlockProps } from '../../types/builder'
 
-const props = withDefaults(defineProps<{
-  module: BlockInstance;
-  mode: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile' | null;
-}>(), {
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })

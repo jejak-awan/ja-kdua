@@ -4,9 +4,8 @@
   </div>
 </template>
 
-<script setup>
-import { computed } from 'vue';
-import { cva } from 'class-variance-authority';
+<script setup lang="ts">
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const badgeVariants = cva(
@@ -16,7 +15,7 @@ const badgeVariants = cva(
       variant: {
         default: 'border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
         secondary: 'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        destructive: 'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
+        destructive: 'border-transparent bg-destructive text-destructive-foreground hover:bg-secondary/80',
         outline: 'text-foreground',
         success: 'border-transparent bg-success/15 text-success',
         warning: 'border-transparent bg-warning/15 text-warning',
@@ -29,14 +28,10 @@ const badgeVariants = cva(
   }
 );
 
-const props = defineProps({
-  variant: {
-    type: String,
-    default: 'default',
-  },
-  class: {
-    type: String,
-    default: '',
-  },
-});
+interface Props {
+  variant?: VariantProps<typeof badgeVariants>['variant'];
+  class?: any;
+}
+
+const props = defineProps<Props>();
 </script>

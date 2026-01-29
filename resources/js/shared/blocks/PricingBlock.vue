@@ -3,19 +3,19 @@
     :module="module" 
     :mode="mode" 
     :settings="settings"
-    class="pricing-block transition-all duration-300"
+    class="pricing-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Pricing Tables'"
   >
     <div 
-        class="pricing-container mx-auto w-full transition-all duration-300" 
+        class="pricing-container mx-auto w-full transition-colors duration-300" 
         :style="containerStyles"
     >
         <div class="pricing-grid grid items-stretch" :style="gridStyles">
           <Card 
             v-for="(item, index) in items" 
             :key="index"
-            class="flex flex-col transition-all duration-500 group rounded-[3rem] p-12 relative overflow-visible border-none shadow-2xl pricing-card"
+            class="flex flex-col transition-[width] duration-500 group rounded-[3rem] p-12 relative overflow-visible border-none shadow-2xl pricing-card"
             :class="[
                 item.isFeatured ? 'z-10' : 'bg-white',
             ]"
@@ -57,7 +57,7 @@
 
             <CardFooter class="p-0 mt-auto">
                 <Button 
-                  class="w-full py-8 rounded-[1.5rem] font-black uppercase tracking-[0.15em] text-xs shadow-2xl transition-all duration-500 hover:scale-[1.02] active:scale-95 border-none"
+                  class="w-full py-8 rounded-[1.5rem] font-black uppercase tracking-[0.15em] text-xs shadow-2xl transition-[width] duration-500 hover:scale-[1.02] active:scale-95 border-none"
                   :variant="item.isFeatured ? 'default' : 'secondary'"
                   :style="item.isFeatured ? { backgroundColor: getVal(settings, 'accentColor', device) || 'var(--primary)', color: '#fff' } : {}"
                 >
@@ -74,8 +74,7 @@
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, Button, Badge } from '../ui'
-import { Check as CheckIcon } from 'lucide-vue-next'
-import { 
+import CheckIcon from 'lucide-vue-next/dist/esm/icons/check.js';import { 
   getVal, 
   getLayoutStyles, 
   getTypographyStyles 

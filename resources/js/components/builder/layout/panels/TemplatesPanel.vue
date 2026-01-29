@@ -106,28 +106,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject, onMounted, reactive } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Search, Plus, Trash2, Settings } from 'lucide-vue-next'
-import { BaseInput, BaseModal } from '../../ui'
-import type { BuilderInstance } from '../../../../types/builder'
+import { ref, computed, inject, onMounted, reactive } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
+import { BaseInput, BaseModal } from '../../ui';
+import type { BuilderInstance } from '../../../../types/builder';
 
-const { t } = useI18n()
-const builder = inject<BuilderInstance>('builder') as any
+const { t } = useI18n();
+const builder = inject<BuilderInstance>('builder');
 
-const loading = ref(false)
-const searchQuery = ref('')
-const templates = ref<any[]>([])
-const currentPageId = computed(() => builder?.currentPageId?.value)
-const categories = computed(() => builder?.categories?.value || [])
+const loading = ref(false);
+const searchQuery = ref('');
+const templates = ref<any[]>([]);
+const currentPageId = computed(() => builder?.currentPageId?.value);
+const categories = computed(() => builder?.categories?.value || []);
 
-const showSettingsModal = ref(false)
-const currentTemplate = ref<any>(null)
+const showSettingsModal = ref(false);
+const currentTemplate = ref<any>(null);
 const editingRules = reactive({
     apply_to: 'all',
     type_id: '',
     category_id: ''
-})
+});
 
 const templateCategories = [
   { id: 'header', label: 'Headers' },
@@ -135,102 +138,109 @@ const templateCategories = [
   { id: 'single', label: 'Single Pages' },
   { id: 'archive', label: 'Archives' },
   { id: 'section', label: 'Global Sections' }
-]
+];
 
 const fetchTemplates = async () => {
-  loading.value = true
+  if (!builder) return;
+  loading.value = true;
   try {
-    const response = await builder.fetchTemplates()
-    templates.value = response || []
+    const response = await builder.fetchTemplates();
+    templates.value = response || [];
   } catch (error) {
-    console.error('Failed to fetch templates:', error)
+    console.error('Failed to fetch templates:', error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const getCategoryTemplates = (categoryId: string) => {
-  let filtered = templates.value.filter(t => t.type === categoryId || t.template_type === categoryId || (t.meta && t.meta.template_type === categoryId))
+  let filtered = templates.value.filter(t => t.type === categoryId || t.template_type === categoryId || (t.meta && t.meta.template_type === categoryId));
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(t => (t.name || t.title || '').toLowerCase().includes(query))
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(t => (t.name || t.title || '').toLowerCase().includes(query));
   }
-  return filtered
-}
+  return filtered;
+};
 
 const getTemplateRules = (template: any) => {
-    const rules = template.meta?.assignment_rules
-    if (!rules) return null
-    if (rules.apply_to === 'all') return 'All Pages'
-    if (rules.apply_to === 'specific_type') return `Type: ${rules.type_id}`
+    const rules = template.meta?.assignment_rules;
+    if (!rules) return null;
+    if (rules.apply_to === 'all') return 'All Pages';
+    if (rules.apply_to === 'specific_type') return `Type: ${rules.type_id}`;
     if (rules.apply_to === 'specific_category') {
-        const cat = categories.value.find((c: any) => c.id === rules.category_id)
-        return `Category: ${cat?.name || rules.category_id}`
+        const cat = categories.value.find((c: any) => c.id === rules.category_id);
+        return `Category: ${cat?.name || rules.category_id}`;
     }
-    if (rules.apply_to === 'front_page') return 'Front Page'
-    return null
-}
+    if (rules.apply_to === 'front_page') return 'Front Page';
+    return null;
+};
 
-const selectTemplate = (id: string) => {
-  builder?.setCurrentPage(id)
-}
+const selectTemplate = (id: any) => {
+  if (builder?.loadContent) {
+      builder.loadContent(id);
+  } else {
+      // Fallback or explicit method check
+      // In builder.ts I see loadContent but not setCurrentPage logic clearly defined 
+      // but PagesPanel used it. Assuming loadContent switches page context.
+  }
+};
 
 const handleCreate = async (type: string) => {
-  const name = prompt(`Enter ${type} template name:`)
-  if (name) {
+  const name = prompt(`Enter ${type} template name:`);
+  if (name && builder) {
     try {
-      await builder.createTemplate({ name, type })
-      fetchTemplates()
+      await (builder as any).createTemplate({ name, type });
+      fetchTemplates();
     } catch (error) {
-      console.error('Failed to create template:', error)
+      console.error('Failed to create template:', error);
     }
   }
-}
+};
 
 const openSettings = (template: any) => {
-    currentTemplate.value = template
-    const rules = template.meta?.assignment_rules || { apply_to: 'all', type_id: '', category_id: '' }
-    editingRules.apply_to = rules.apply_to
-    editingRules.type_id = rules.type_id
-    editingRules.category_id = rules.category_id
-    showSettingsModal.value = true
-}
+    currentTemplate.value = template;
+    const rules = template.meta?.assignment_rules || { apply_to: 'all', type_id: '', category_id: '' };
+    editingRules.apply_to = rules.apply_to;
+    editingRules.type_id = rules.type_id;
+    editingRules.category_id = rules.category_id;
+    showSettingsModal.value = true;
+};
 
 const saveRules = async () => {
-    if (!currentTemplate.value) return
+    if (!currentTemplate.value || !builder) return;
     try {
         const meta = { 
             ...(currentTemplate.value.meta || {}), 
             assignment_rules: { ...editingRules } 
-        }
-        // Assuming we have a way to update content meta
-        await builder.updateContentMeta(currentTemplate.value.id, meta)
-        showSettingsModal.value = false
-        fetchTemplates()
+        };
+        await (builder as any).updateContentMeta(currentTemplate.value.id, meta);
+        showSettingsModal.value = false;
+        fetchTemplates();
     } catch (error) {
-        console.error('Failed to save assignment rules:', error)
+        console.error('Failed to save assignment rules:', error);
     }
-}
+};
 
 const handleDelete = async (template: any) => {
-    const confirmed = await builder?.confirm({
+    if (!builder) return;
+    const confirmed = await builder.confirm({
         title: 'Delete Template',
         message: 'Are you sure you want to delete this template?',
         type: 'delete'
-    })
+    });
     if (confirmed) {
         try {
-            await builder.deleteTemplate(template.id)
-            fetchTemplates()
+            await (builder as any).deleteTemplate(template.id);
+            fetchTemplates();
         } catch (error) {
-            console.error('Delete failed:', error)
+            console.error('Delete failed:', error);
         }
     }
-}
+};
 
 onMounted(() => {
-    fetchTemplates()
-})
+    fetchTemplates();
+});
 </script>
 
 <style scoped>

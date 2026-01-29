@@ -141,7 +141,7 @@ const PricingTablesModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -150,7 +150,7 @@ const PricingTablesModule: ModuleDefinition = {
             {
                 id: 'priceTypography',
                 label: 'Price Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `price_${f.name}`,
                     label: `Price ${f.label}`

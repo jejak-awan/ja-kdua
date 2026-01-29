@@ -3,8 +3,9 @@
     <Checkbox 
       :id="id" 
       :checked="modelValue" 
+      @update:checked="$emit('update:modelValue', $event)"
       :disabled="disabled"
-      class="transition-all duration-200"
+      class="transition-[background-color,border-color] duration-200"
     />
     <Label 
       v-if="label" 
@@ -16,31 +17,30 @@
   </div>
 </template>
 
-<script setup>
-import Checkbox from './Checkbox.vue'
-import Label from './Label.vue'
+<script setup lang="ts">
+import Checkbox from '@/components/ui/checkbox.vue';
+import Label from '@/components/ui/label.vue';
 
-const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    default: false
-  },
-  label: {
-    type: String,
-    default: ''
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  }
-})
+interface Props {
+  modelValue?: boolean;
+  label?: string;
+  disabled?: boolean;
+}
 
-const id = `checkbox-${Math.random().toString(36).substring(2, 9)}`
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: false,
+  label: '',
+  disabled: false
+});
 
-const emit = defineEmits(['update:modelValue'])
+const id = `checkbox-${Math.random().toString(36).substring(2, 9)}`;
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: boolean): void;
+}>();
 
 const toggle = () => {
-    if (props.disabled) return
-    emit('update:modelValue', !props.modelValue)
-}
+    if (props.disabled) return;
+    emit('update:modelValue', !props.modelValue);
+};
 </script>

@@ -128,8 +128,7 @@
     
     <!-- Right Section: Save & Status -->
     <div class="top-toolbar__right">
-
-      <!-- Save Actions -->
+<!-- Save Actions -->
       <div class="save-actions">
         <button 
           class="save-draft-btn" 
@@ -162,19 +161,24 @@
         @click="$emit('close-builder')" 
         :title="t('builder.toolbar.close') || 'Close'" 
       />
-
-    </div>
+</div>
   </header>
 </template>
 
 <script setup lang="ts">
 import { inject, computed } from 'vue'
-import { 
-  Menu, Monitor, Tablet, Smartphone, 
-  Search, Save, X, Maximize, Minimize, ChevronsLeft,
-  Wand2, Layers
-} from 'lucide-vue-next'
-import { useI18n } from 'vue-i18n'
+import Menu from 'lucide-vue-next/dist/esm/icons/menu.js';
+import Monitor from 'lucide-vue-next/dist/esm/icons/monitor.js';
+import Tablet from 'lucide-vue-next/dist/esm/icons/tablet.js';
+import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import Maximize from 'lucide-vue-next/dist/esm/icons/maximize.js';
+import Minimize from 'lucide-vue-next/dist/esm/icons/minimize.js';
+import ChevronsLeft from 'lucide-vue-next/dist/esm/icons/chevrons-left.js';
+import Wand2 from 'lucide-vue-next/dist/esm/icons/wand-sparkles.js';
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';import { useI18n } from 'vue-i18n'
 import { DEVICE_MODES } from '../core/constants'
 import { IconButton, BaseDropdown, BaseDivider } from '../ui'
 import AdminLogo from '../../layouts/AdminLogo.vue'

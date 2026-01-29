@@ -115,7 +115,7 @@ const SidebarModule: ModuleDefinition = {
             {
                 id: 'typography',
                 label: 'Widget Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `widget_${f.name}`,
                     label: `Widget ${f.label}`
@@ -124,7 +124,7 @@ const SidebarModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`

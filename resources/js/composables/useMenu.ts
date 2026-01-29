@@ -3,14 +3,14 @@ import api from '../services/api';
 import { parseResponse, ensureArray, parseSingleResponse } from '../utils/responseParser';
 import type { Menu, MenuItem, MenuItemDTO } from '../types/menu';
 
-interface MenuContext {
+export interface MenuContext {
     menu: Ref<Menu | null>;
     items: Ref<MenuItem[]>;
     selectedItem: Ref<MenuItem | null>;
     selectedItemId: Ref<number | string | null>;
     isLoading: Ref<boolean>;
     isSaving: Ref<boolean>;
-    error: Ref<any>;
+    error: Ref<unknown>;
     isDirty: Ref<boolean>;
     canUndo: Ref<boolean>;
     canRedo: Ref<boolean>;
@@ -62,21 +62,21 @@ const menus = ref<Record<string, Menu>>({});
 const fetchMenuByLocation = async (location: string) => {
     try {
         const response = await api.get(`/cms/menus/location/${location}`);
-        menus.value[location] = parseSingleResponse(response);
+        menus.value[location] = parseSingleResponse(response) as Menu;
     } catch (err) {
         // Silent fail for frontend menus to avoid crashing app
         console.warn(`Failed to fetch menu for location: ${location}`, err);
     }
 };
 
-export function useMenu(menuId: Ref<number | string | null>) {
+export function useMenu(menuId?: Ref<number | string | null>) {
     // ==================== STATE ====================
     const menu = ref<Menu | null>(null);
     const items = ref<MenuItem[]>([]);
     const selectedItemId = ref<number | string | null>(null);
     const isLoading = ref(false);
     const isSaving = ref(false);
-    const error = ref<any>(null);
+    const error = ref<unknown>(null);
 
     // Initial state for dirty tracking
     const initialState = ref<MenuItem[] | null>(null);
@@ -214,13 +214,13 @@ export function useMenu(menuId: Ref<number | string | null>) {
     /**
      * Build nested tree from flat items array
      */
-    const buildTree = (flatItems: MenuItem[], parentId: number | null = null): MenuItem[] => {
+    const buildTree = (flatItems: MenuItem[], parentId: number | string | null = null): MenuItem[] => {
         return flatItems
-            .filter(item => item.parent_id === parentId)
+            .filter(item => item.parent_id == parentId) // Use loose comparison for string/number IDs
             .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
             .map(item => ({
                 ...item,
-                children: buildTree(flatItems, item.id)
+                children: buildTree(flatItems, (item.id as any))
             }));
     };
 
@@ -231,13 +231,13 @@ export function useMenu(menuId: Ref<number | string | null>) {
         let result: MenuItemDTO[] = [];
         treeItems.forEach((item, index) => {
             result.push({
-                id: item.id,
-                parent_id: parentId,
+                id: item.id as any,
+                parent_id: parentId as any,
                 sort_order: index,
-                title: item.title,
-                type: item.type,
-                target_id: item.target_id,
-                url: item.url,
+                title: (item.title as any) || '',
+                type: (item.type as any) || 'custom',
+                target_id: item.target_id as any,
+                url: item.url as any,
                 icon: item.icon || null,
                 css_class: item.css_class || null,
                 description: item.description || null,
@@ -252,11 +252,11 @@ export function useMenu(menuId: Ref<number | string | null>) {
                 hide_label: item.hide_label || false,
                 heading: item.heading || null,
                 show_heading_line: item.show_heading_line || false,
-                menu_id: Number(menuId.value),
+                menu_id: Number(menuId?.value || 0),
                 is_active: item.is_active ? 1 : 0,
             });
             if (item.children && item.children.length > 0) {
-                result = result.concat(flattenTree(item.children, item.id));
+                result = result.concat(flattenTree(item.children, item.id as any));
             }
         });
         return result;
@@ -432,18 +432,18 @@ export function useMenu(menuId: Ref<number | string | null>) {
     // ==================== API INTEGRATION ====================
 
     const fetchMenu = async () => {
-        if (!menuId.value) return;
+        if (!menuId?.value) return;
 
         isLoading.value = true;
         error.value = null;
 
         try {
             // Fetch menu details
-            const menuResponse = await api.get(`/admin/ja/menus/${menuId.value}`);
-            menu.value = parseSingleResponse(menuResponse) || {};
+            const menuResponse = await api.get(`/admin/ja/menus/${menuId?.value}`);
+            menu.value = (parseSingleResponse(menuResponse) || {}) as Menu;
 
             // Fetch menu items
-            const itemsResponse = await api.get(`/admin/ja/menus/${menuId.value}/items`);
+            const itemsResponse = await api.get(`/admin/ja/menus/${menuId?.value}/items`);
             const { data } = parseResponse(itemsResponse);
             const flatItems = ensureArray(data) as MenuItem[];
             items.value = buildTree(flatItems);
@@ -465,7 +465,7 @@ export function useMenu(menuId: Ref<number | string | null>) {
     };
 
     const saveMenu = async (menuData: Partial<Menu> = {}) => {
-        if (!menuId.value) return false;
+        if (!menuId?.value) return false;
 
         isSaving.value = true;
         error.value = null;
@@ -473,7 +473,7 @@ export function useMenu(menuId: Ref<number | string | null>) {
         try {
             // Update menu settings if provided
             if (Object.keys(menuData).length > 0) {
-                await api.put(`/admin/ja/menus/${menuId.value}`, {
+                await api.put(`/admin/ja/menus/${menuId?.value}`, {
                     ...menu.value,
                     ...menuData
                 });
@@ -484,7 +484,7 @@ export function useMenu(menuId: Ref<number | string | null>) {
 
             // Reorder all items
             const flatItems = flattenTree(items.value);
-            await api.post(`/admin/ja/menus/${menuId.value}/reorder`, { items: flatItems });
+            await api.post(`/admin/ja/menus/${menuId?.value}/reorder`, { items: flatItems });
 
             // Refresh to get updated IDs
             await fetchMenu();
@@ -508,10 +508,10 @@ export function useMenu(menuId: Ref<number | string | null>) {
 
             if (!item.id || item.id.toString().startsWith('temp_')) {
                 const payload: MenuItemDTO = {
-                    menu_id: Number(menuId.value),
+                    menu_id: Number(menuId?.value || 0),
                     parent_id: parentId,
-                    title: item.title,
-                    type: item.type,
+                    title: item.title || '',
+                    type: item.type || 'custom',
                     target_id: item.target_id,
                     url: item.url,
                     icon: item.icon || null,
@@ -532,7 +532,7 @@ export function useMenu(menuId: Ref<number | string | null>) {
                     sort_order: i,
                 };
 
-                const response = await api.post(`/admin/ja/menus/${menuId.value}/items`, payload);
+                const response = await api.post(`/admin/ja/menus/${menuId?.value}/items`, payload);
                 const newItem = response.data?.data || response.data;
                 item.id = newItem.id;
                 delete item._temp_id;
@@ -550,7 +550,7 @@ export function useMenu(menuId: Ref<number | string | null>) {
 
         // If item has a real ID, delete from server
         if (item.id && !String(item.id).startsWith('temp_')) {
-            await api.delete(`/admin/ja/menus/${menuId.value}/items/${item.id}`);
+            await api.delete(`/admin/ja/menus/${menuId?.value}/items/${item.id}`);
         }
 
         removeItem(id);
@@ -569,7 +569,7 @@ export function useMenu(menuId: Ref<number | string | null>) {
     }, { deep: true });
 
     // Fetch menu when ID changes
-    watch(menuId, (newId) => {
+    watch(() => menuId?.value, (newId) => {
         if (newId) fetchMenu();
     }, { immediate: true });
 
@@ -623,13 +623,13 @@ export function useMenu(menuId: Ref<number | string | null>) {
         // Frontend / Shared
         menus,
         fetchMenuByLocation
-    };
+    } as MenuContext;
 }
 
 /**
  * Provide menu context for child components
  */
-export function provideMenu(menuState: any) {
+export function provideMenu(menuState: MenuContext) {
     provide(MENU_CONTEXT_KEY, menuState);
 }
 

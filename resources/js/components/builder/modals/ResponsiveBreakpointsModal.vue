@@ -44,23 +44,39 @@
   </BaseModal>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Smartphone, Tablet, Monitor } from 'lucide-vue-next'
-import { BaseModal, BaseToggle, BaseButton, BaseInput } from '../ui'
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
+import Tablet from 'lucide-vue-next/dist/esm/icons/tablet.js';
+import Monitor from 'lucide-vue-next/dist/esm/icons/monitor.js';
+import { BaseModal, BaseToggle, BaseButton, BaseInput } from '../ui';
 
-const props = defineProps({
-  isOpen: {
-    type: Boolean,
-    default: false
-  }
-})
+interface Props {
+  isOpen: boolean;
+}
 
-const emit = defineEmits(['close', 'save'])
-const { t } = useI18n()
+const props = withDefaults(defineProps<Props>(), {
+  isOpen: false
+});
 
-const breakpointsData = ref([
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'save', data: Breakpoint[]): void;
+}>();
+
+const { t } = useI18n();
+
+interface Breakpoint {
+  id: string;
+  operator: string;
+  value: string;
+  enabled: boolean;
+  icon: any;
+  isBase: boolean;
+}
+
+const breakpointsData = ref<Breakpoint[]>([
   { id: 'phone', operator: '<', value: '767px', enabled: true, icon: Smartphone, isBase: false },
   { id: 'phone-wide', operator: '<', value: '860px', enabled: false, icon: Smartphone, isBase: false },
   { id: 'tablet', operator: '<', value: '980px', enabled: true, icon: Tablet, isBase: false },
@@ -68,10 +84,10 @@ const breakpointsData = ref([
   { id: 'desktop', operator: '', value: '', enabled: true, icon: Monitor, isBase: true },
   { id: 'widescreen', operator: '>', value: '1280px', enabled: false, icon: Monitor, isBase: false },
   { id: 'ultra-wide', operator: '>', value: '1440px', enabled: false, icon: Monitor, isBase: false }
-])
+]);
 
-const getBreakpointName = (id) => {
-    const map = {
+const getBreakpointName = (id: string) => {
+    const map: Record<string, string> = {
         'phone': 'mobile',
         'phone-wide': 'phoneWide',
         'tablet': 'tablet',
@@ -79,18 +95,18 @@ const getBreakpointName = (id) => {
         'desktop': 'desktop',
         'widescreen': 'widescreen',
         'ultra-wide': 'ultraWide'
-    }
-    return t(`builder.breakpoints.${map[id] || id}`)
-}
+    };
+    return t(`builder.breakpoints.${map[id] || id}`);
+};
 
 const close = () => {
-  emit('close')
-}
+  emit('close');
+};
 
 const save = () => {
-  emit('save', breakpointsData.value)
-  close()
-}
+  emit('save', breakpointsData.value);
+  close();
+};
 </script>
 
 <style scoped>

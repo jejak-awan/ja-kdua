@@ -88,7 +88,7 @@ const FeaturedImageModule: ModuleDefinition = {
             {
                 id: 'captionTypography',
                 label: 'Caption Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `caption_${f.name}`,
                     label: `Caption ${f.label}`

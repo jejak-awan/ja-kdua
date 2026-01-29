@@ -3,7 +3,14 @@
 namespace App\Services;
 
 use App\Models\Media;
+use App\Models\MediaFolder;
+use App\Models\MediaUsage;
+use App\Models\Tag;
+use App\Models\DeletedFile;
+use App\Models\Setting;
+use App\Services\CacheService;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,7 +26,7 @@ class MediaService
     /**
      * Upload and process a media file
      */
-    public function upload(UploadedFile $file, ?int $folderId = null, bool $optimize = true, ?int $authorId = null, bool $isShared = false): Media
+    public function upload(UploadedFile $file, ?int $folderId = null, bool $optimize = true, ?int $authorId = null, bool $isShared = false, array $metadata = []): Media
     {
         // Check for SVG and sanitize BEFORE optimization or other processing
         if ($file->getMimeType() === 'image/svg+xml' || strtolower($file->getClientOriginalExtension()) === 'svg') {
@@ -33,20 +40,41 @@ class MediaService
         // optimizeImage uses Intervention which might not handle SVGs well depending on driver.
         // Usually we don't optimize SVGs with ImageManager.
         if ($optimize && str_starts_with($file->getMimeType(), 'image/') && $file->getMimeType() !== 'image/svg+xml') {
-            $this->optimizeImage($fullPath);
+            $maxWidth = (int) Setting::get('media_max_width', 1920);
+            $quality = (int) Setting::get('media_optimization_quality', 85);
+            $autoConvert = Setting::get('media_auto_convert_webp', true);
+
+            $this->optimizeImage($fullPath, $maxWidth, $quality);
+
+            if ($autoConvert && $file->getMimeType() !== 'image/webp') {
+                $webpPath = $this->convertToWebP($fullPath, $quality);
+                if ($webpPath) {
+                    $fullPath = $webpPath;
+                    $path = 'media/' . basename($fullPath);
+                    $mimeType = 'image/webp';
+                    $fileName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
+                }
+            }
         }
 
         $media = Media::create([
-            'name' => $file->getClientOriginalName(),
-            'file_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getMimeType(),
+            'name' => $fileName ?? $file->getClientOriginalName(),
+            'file_name' => $fileName ?? $file->getClientOriginalName(),
+            'mime_type' => $mimeType ?? $file->getMimeType(),
             'disk' => 'public',
             'path' => $path,
             'size' => filesize($fullPath),
             'folder_id' => $folderId,
             'author_id' => $authorId,
             'is_shared' => $isShared,
+            'caption' => $metadata['caption'] ?? null,
+            'alt' => $metadata['alt'] ?? $file->getClientOriginalName(),
         ]);
+
+        // Sync tags if provided
+        if (! empty($metadata['tags'])) {
+            $this->syncTags($media, $metadata['tags']);
+        }
 
         // Auto-generate thumbnail for images
         if (str_starts_with($media->mime_type, 'image/')) {
@@ -91,6 +119,44 @@ class MediaService
             Log::channel('media')->warning('Image optimization failed: '.$e->getMessage());
 
             return false;
+        }
+    }
+
+    /**
+     * Convert an image to WebP format
+     */
+    public function convertToWebP(string $fullPath, int $quality = 85): ?string
+    {
+        if (! class_exists(\Intervention\Image\ImageManager::class)) {
+            return null;
+        }
+
+        try {
+            $driver = $this->getImageDriver();
+            if (! $driver) {
+                return null;
+            }
+
+            $manager = new \Intervention\Image\ImageManager($driver);
+            $image = $manager->read($fullPath);
+
+            $pathInfo = pathinfo($fullPath);
+            $newPath = $pathInfo['dirname'].'/'.$pathInfo['filename'].'.webp';
+
+            // Convert and save
+            $image->toWebp($quality)->save($newPath);
+
+            // If new path is different, delete original
+            if ($fullPath !== $newPath && file_exists($newPath)) {
+                unlink($fullPath);
+                return $newPath;
+            }
+
+            return $newPath;
+        } catch (\Exception $e) {
+            Log::channel('media')->warning('WebP conversion failed: '.$e->getMessage());
+
+            return null;
         }
     }
 
@@ -194,7 +260,7 @@ class MediaService
     }
 
     /**
-     * Delete media (soft delete by default, keeps physical files)
+     * Delete media (soft delete by default, keeps physical files in .trash)
      */
     public function delete(Media $media, bool $permanent = false): void
     {
@@ -204,10 +270,49 @@ class MediaService
             return;
         }
 
-        // Soft delete - just mark in DB
-        // We keep physical files and variants for persistence
-        $media->delete();
-        $this->cacheService->clearMediaCaches();
+        // Soft delete - move to physical trash and record in deleted_files
+        $originalPath = $media->path;
+        $disk = $media->disk ?? 'public';
+        $fileName = basename($originalPath);
+        $trashPath = '.trash/'.uniqid().'_'.$fileName;
+
+        try {
+            // Ensure trash directory exists
+            Storage::disk($disk)->makeDirectory('.trash');
+
+            // Move file in storage
+            if (Storage::disk($disk)->exists($originalPath)) {
+                Storage::disk($disk)->move($originalPath, $trashPath);
+            }
+
+            // Also move thumbnails and variants to trash
+            $this->moveVariantsToTrash($media, $trashPath);
+
+            // Create record in deleted_files table for unified trash visibility
+            \App\Models\DeletedFile::create([
+                'original_path' => '/'.ltrim($originalPath, '/'),
+                'trash_path' => $trashPath,
+                'disk' => $disk,
+                'name' => $media->name ?: $fileName,
+                'type' => 'file',
+                'size' => $media->size,
+                'extension' => pathinfo($fileName, PATHINFO_EXTENSION),
+                'mime_type' => $media->mime_type,
+                'deleted_by' => \Illuminate\Support\Facades\Auth::id(),
+                'deleted_at' => now(),
+            ]);
+
+            // Update media path to point to trash and soft delete it
+            $media->path = $trashPath;
+            $media->save();
+            $media->delete();
+
+            $this->cacheService->clearMediaCaches();
+        } catch (\Exception $e) {
+            Log::channel('media')->error('Soft delete move to trash failed: '.$e->getMessage());
+            // Fallback to simple soft delete if move fails
+            $media->delete();
+        }
     }
 
     /**
@@ -217,6 +322,11 @@ class MediaService
     {
         $this->deleteVariants($media);
         Storage::disk($media->disk)->delete($media->path);
+
+        // Delete matching deleted_files record if exists
+        \App\Models\DeletedFile::where('trash_path', $media->path)
+            ->where('disk', $media->disk ?? 'public')
+            ->delete();
 
         // Delete usages
         $media->usages()->delete();
@@ -233,7 +343,55 @@ class MediaService
     {
         $media = Media::onlyTrashed()->find($mediaId);
         if ($media) {
-            $media->restore();
+            $trashPath = $media->path;
+            $disk = $media->disk ?? 'public';
+
+            // Find matching record in deleted_files to get original path
+            $deletedFile = \App\Models\DeletedFile::where('trash_path', $trashPath)
+                ->where('disk', $disk)
+                ->first();
+
+            if ($deletedFile) {
+                $originalPath = ltrim($deletedFile->original_path, '/');
+
+                try {
+                    // Check if original path is taken
+                    $finalPath = $originalPath;
+                    if (Storage::disk($disk)->exists($originalPath)) {
+                        $ext = pathinfo($originalPath, PATHINFO_EXTENSION);
+                        $name = pathinfo($originalPath, PATHINFO_FILENAME);
+                        $dir = pathinfo($originalPath, PATHINFO_DIRNAME);
+                        $dir = ($dir === '.' || $dir === '/') ? '' : $dir.'/';
+                        $finalPath = $dir.$name.'_restored_'.time().($ext ? '.'.$ext : '');
+                    }
+
+                    // Move file back from trash
+                    if (Storage::disk($disk)->exists($trashPath)) {
+                        Storage::disk($disk)->move($trashPath, $finalPath);
+                    }
+
+                    // Move thumbnails back from trash
+                    $this->moveVariantsFromTrash($media, $trashPath, $finalPath);
+
+                    // Update media model with restored path
+                    $media->path = $finalPath;
+                    $media->save();
+
+                    // Restore the model
+                    $media->restore();
+
+                    // Clean up deleted_files record
+                    $deletedFile->delete();
+                } catch (\Exception $e) {
+                    Log::channel('media')->error('Restore move from trash failed: '.$e->getMessage());
+                    // Restore model anyway so it's visible (even if path is still trashed)
+                    $media->restore();
+                }
+            } else {
+                // No deleted_files record found, just restore the model
+                $media->restore();
+            }
+
             $this->cacheService->clearMediaCaches();
 
             return $media;
@@ -272,41 +430,134 @@ class MediaService
     }
 
     /**
-     * Perform bulk action on media
+     * Move variants to trash
      */
-    public function bulkAction(string $action, array $mediaIds, ?int $folderId = null, ?string $altText = null): int
+    public function moveVariantsToTrash(Media $media, string $trashPath): void
     {
-        $query = Media::withTrashed();
-        if ($action === 'restore') {
-            $query->onlyTrashed();
+        $oldFileName = pathinfo($media->path, PATHINFO_FILENAME);
+        $newFileName = pathinfo($trashPath, PATHINFO_FILENAME);
+        $extension = pathinfo($media->path, PATHINFO_EXTENSION);
+        $disk = $media->disk ?? 'public';
+
+        // Move thumbnail
+        $oldThumb = 'media/thumbnails/'.$oldFileName.'_thumb.'.$extension;
+        $newThumb = 'media/thumbnails/'.$newFileName.'_thumb.'.$extension;
+        if (Storage::disk($disk)->exists($oldThumb)) {
+            Storage::disk($disk)->move($oldThumb, $newThumb);
         }
 
-        $media = $query->whereIn('id', $mediaIds)->get();
+        // Handle SVG PNG thumb
+        $oldPngThumb = 'media/thumbnails/'.$oldFileName.'_thumb.png';
+        $newPngThumb = 'media/thumbnails/'.$newFileName.'_thumb.png';
+        if (Storage::disk($disk)->exists($oldPngThumb)) {
+            Storage::disk($disk)->move($oldPngThumb, $newPngThumb);
+        }
+    }
 
-        foreach ($media as $item) {
-            switch ($action) {
-                case 'delete':
-                    $this->delete($item, false);
-                    break;
-                case 'delete_permanent':
-                    $this->delete($item, true);
-                    break;
-                case 'restore':
-                    $item->restore();
-                    break;
-                case 'move_folder':
-                case 'move':
-                    $item->update(['folder_id' => $folderId]);
-                    break;
-                case 'update_alt':
-                    $item->update(['alt' => $altText ?? '']);
-                    break;
+    /**
+     * Move variants back from trash
+     */
+    public function moveVariantsFromTrash(Media $media, string $trashPath, string $newPath): void
+    {
+        $trashFileName = pathinfo($trashPath, PATHINFO_FILENAME);
+        $restoredFileName = pathinfo($newPath, PATHINFO_FILENAME);
+        $extension = pathinfo($newPath, PATHINFO_EXTENSION);
+        $disk = $media->disk ?? 'public';
+
+        // Move thumbnail back
+        $oldThumb = 'media/thumbnails/'.$trashFileName.'_thumb.'.$extension;
+        $newThumb = 'media/thumbnails/'.$restoredFileName.'_thumb.'.$extension;
+        if (Storage::disk($disk)->exists($oldThumb)) {
+            Storage::disk($disk)->move($oldThumb, $newThumb);
+        }
+
+        // Handle SVG PNG thumb
+        $oldPngThumb = 'media/thumbnails/'.$trashFileName.'_thumb.png';
+        $newPngThumb = 'media/thumbnails/'.$restoredFileName.'_thumb.png';
+        if (Storage::disk($disk)->exists($oldPngThumb)) {
+            Storage::disk($disk)->move($oldPngThumb, $newPngThumb);
+        }
+    }
+
+    /**
+     * Perform bulk action on media
+     */
+    public function bulkAction(string $action, array $mediaIds, ?int $folderId = null, ?string $altText = null, array $folderIds = []): array
+    {
+        $affectedMedia = 0;
+        $affectedFolders = 0;
+
+        // Process Media
+        if (!empty($mediaIds)) {
+            $query = Media::withTrashed();
+            if ($action === 'restore') {
+                $query->onlyTrashed();
+            }
+
+            $media = $query->whereIn('id', $mediaIds)->get();
+
+            foreach ($media as $item) {
+                switch ($action) {
+                    case 'delete':
+                        $this->delete($item, false);
+                        break;
+                    case 'delete_permanent':
+                        $this->delete($item, true);
+                        break;
+                    case 'restore':
+                        $this->restore($item->id);
+                        break;
+                    case 'move_folder':
+                    case 'move':
+                        $item->update(['folder_id' => $folderId]);
+                        break;
+                    case 'update_alt':
+                        $item->update(['alt' => $altText ?? '']);
+                        break;
+                    case 'update_caption':
+                        $item->update(['caption' => $altText ?? '']);
+                        break;
+                }
+                $affectedMedia++;
             }
         }
 
-        $this->cacheService->clearMediaCaches();
+        // Process Folders
+        if (!empty($folderIds)) {
+            $folderQuery = \App\Models\MediaFolder::withTrashed();
+            if ($action === 'restore') {
+                $folderQuery->onlyTrashed();
+            }
 
-        return $media->count();
+            $folders = $folderQuery->whereIn('id', $folderIds)->get();
+
+            foreach ($folders as $folder) {
+                switch ($action) {
+                    case 'delete':
+                        $folder->delete();
+                        break;
+                    case 'delete_permanent':
+                        $folder->forceDelete();
+                        break;
+                    case 'restore':
+                        $folder->restore();
+                        break;
+                    case 'move':
+                        $folder->update(['parent_id' => $folderId]);
+                        break;
+                }
+                $affectedFolders++;
+            }
+        }
+
+        if ($affectedMedia > 0 || $affectedFolders > 0) {
+            $this->cacheService->clearMediaCaches();
+        }
+
+        return [
+            'media_count' => $affectedMedia,
+            'folder_count' => $affectedFolders
+        ];
     }
 
     /**
@@ -386,7 +637,7 @@ class MediaService
     /**
      * Edit/replace image
      */
-    public function editImage(Media $media, UploadedFile $imageFile, bool $saveAsNew = false): ?Media
+    public function editImage(Media $media, UploadedFile $imageFile, bool $saveAsNew = false, array $metadata = []): ?Media
     {
         $driver = $this->getImageDriver();
         if (! $driver) {
@@ -397,9 +648,13 @@ class MediaService
             $manager = new \Intervention\Image\ImageManager($driver);
             $image = $manager->read($imageFile->getRealPath());
 
+            $autoConvert = Setting::get('media_auto_convert_webp', true);
+            $quality = (int) Setting::get('media_optimization_quality', 85);
+
             if ($saveAsNew) {
                 $pathInfo = pathinfo($media->path);
-                $newFileName = $pathInfo['filename'].'_edited_'.time().'.'.$pathInfo['extension'];
+                $extension = $autoConvert ? 'webp' : $pathInfo['extension'];
+                $newFileName = $pathInfo['filename'].'_edited_'.time().'.'.$extension;
                 $newPath = $pathInfo['dirname'].'/'.$newFileName;
 
                 $fullPath = Storage::disk($media->disk)->path($newPath);
@@ -408,19 +663,28 @@ class MediaService
                     mkdir($directory, 0755, true);
                 }
 
-                $image->save($fullPath);
+                if ($autoConvert) {
+                    $image->toWebp($quality)->save($fullPath);
+                } else {
+                    $image->save($fullPath);
+                }
 
                 $newMedia = Media::create([
-                    'name' => $pathInfo['filename'].'_edited',
+                    'name' => $metadata['name'] ?? ($pathInfo['filename'].'_edited'.($autoConvert ? '.webp' : '')),
                     'file_name' => $newFileName,
                     'path' => $newPath,
-                    'mime_type' => $media->mime_type,
+                    'mime_type' => $autoConvert ? 'image/webp' : $media->mime_type,
                     'size' => filesize($fullPath),
                     'disk' => $media->disk,
                     'folder_id' => $media->folder_id,
-                    'alt' => $media->alt,
-                    'description' => $media->description,
+                    'alt' => $metadata['alt'] ?? $media->alt,
+                    'description' => $metadata['description'] ?? $media->description,
+                    'caption' => $metadata['caption'] ?? $media->caption,
                 ]);
+
+                if (! empty($metadata['tags'])) {
+                    $this->syncTags($newMedia, $metadata['tags']);
+                }
 
                 try {
                     $this->generateThumbnail($newMedia);
@@ -433,8 +697,31 @@ class MediaService
 
             // Overwrite existing
             $fullPath = Storage::disk($media->disk)->path($media->path);
-            $image->save($fullPath);
-            $media->update(['size' => filesize($fullPath)]);
+            
+            if ($autoConvert && $media->mime_type !== 'image/webp') {
+                // Convert to webp even on overwrite
+                $pathInfo = pathinfo($media->path);
+                $newFileName = $pathInfo['filename'].'.webp';
+                $newPath = $pathInfo['dirname'].'/'.$newFileName;
+                $newFullPath = Storage::disk($media->disk)->path($newPath);
+                
+                $image->toWebp($quality)->save($newFullPath);
+                
+                // Delete old if different
+                if ($fullPath !== $newFullPath) {
+                    unlink($fullPath);
+                }
+                
+                $media->update([
+                    'file_name' => $newFileName,
+                    'path' => $newPath,
+                    'mime_type' => 'image/webp',
+                    'size' => filesize($newFullPath),
+                ]);
+            } else {
+                $image->save($fullPath, quality: $quality);
+                $media->update(['size' => filesize($fullPath)]);
+            }
 
             try {
                 $this->generateThumbnail($media);
@@ -588,5 +875,25 @@ class MediaService
             // We do not stop the upload, but maybe we should?
             // For now, log the error.
         }
+    }
+
+    /**
+     * Sync tags for media
+     */
+    public function syncTags(Media $media, array $tags): void
+    {
+        $tagIds = [];
+        foreach ($tags as $tagName) {
+            $tagName = trim($tagName);
+            if (empty($tagName)) continue;
+
+            $tag = Tag::firstOrCreate([
+                'name' => $tagName,
+            ], [
+                'slug' => \Illuminate\Support\Str::slug($tagName),
+            ]);
+            $tagIds[] = $tag->id;
+        }
+        $media->tags()->sync($tagIds);
     }
 }

@@ -25,7 +25,7 @@
       <div v-else class="min-h-screen flex items-center justify-center bg-background p-4">
         <div class="text-center max-w-md mx-auto">
              <div class="w-24 h-24 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-8">
-                 <svg class="w-10 h-10 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                 <svg class="w-10 h-10 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
              </div>
              <h1 class="text-3xl font-bold mb-4">{{ pageData.title }}</h1>
              <p class="text-muted-foreground leading-relaxed mb-8">
@@ -48,18 +48,26 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/services/api';
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue';
 
+import type { Content } from '@/types/cms'
+
+interface PageData extends Content {
+    title: string;
+    body?: string;
+    blocks?: any[]; 
+}
+
 const route = useRoute();
-const pageData = ref(null);
+const pageData = ref<PageData | null>(null);
 const loading = ref(true);
 
 const fetchPage = async () => {
-  const slug = route.params.slug;
+  const slug = route.params.slug as string;
   
   // Guard: Don't fetch if slug is undefined
   if (!slug) {
@@ -85,3 +93,4 @@ onMounted(fetchPage);
 // Re-fetch when slug changes
 watch(() => route.params.slug, fetchPage);
 </script>
+

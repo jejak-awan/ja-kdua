@@ -2,7 +2,7 @@
     <Doughnut :data="chartData" :options="chartOptions" />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import { Doughnut } from 'vue-chartjs';
 import {
@@ -10,28 +10,27 @@ import {
     ArcElement,
     Tooltip,
     Legend,
+    ChartOptions,
+    ChartData
 } from 'chart.js';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const props = defineProps({
-    data: {
-        type: Array,
-        required: true,
-    },
-    labelKey: {
-        type: String,
-        required: true,
-    },
-    valueKey: {
-        type: String,
-        default: 'count',
-    },
+interface ChartItem {
+    [key: string]: any;
+}
+
+const props = withDefaults(defineProps<{
+    data: ChartItem[];
+    labelKey: string;
+    valueKey?: string;
+}>(), {
+    valueKey: 'count',
 });
 
-const chartData = computed(() => {
+const chartData = computed<ChartData<'doughnut'>>(() => {
     const labels = props.data.map(item => item[props.labelKey] || 'Unknown');
-    const values = props.data.map(item => item[props.valueKey]);
+    const values = props.data.map(item => Number(item[props.valueKey]));
 
     return {
         labels: labels,
@@ -53,7 +52,7 @@ const chartData = computed(() => {
     };
 });
 
-const chartOptions = {
+const chartOptions: ChartOptions<'doughnut'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {

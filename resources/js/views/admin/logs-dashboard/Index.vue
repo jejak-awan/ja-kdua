@@ -151,17 +151,55 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
+import api from '@/services/api';
+
+interface ActivityStats {
+    total?: number;
+}
+
+interface SecurityStats {
+    total?: number;
+}
+
+interface LoginStats {
+    total?: number;
+}
+
+interface SystemStats {
+    files?: number;
+}
+
+interface Stats {
+    activity?: ActivityStats;
+    security?: SecurityStats;
+    login?: LoginStats;
+    system?: SystemStats;
+}
+
+interface ActivityLog {
+    id: number;
+    action: string;
+    description: string;
+    model_type: string;
+    created_at: string;
+}
+
+interface SecurityLog {
+    id: number;
+    event_type: string;
+    ip_address: string;
+    created_at: string;
+}
 
 const { t } = useI18n();
 
 const loading = ref(true);
-const stats = ref({});
-const recentActivity = ref([]);
-const recentSecurity = ref([]);
+const stats = ref<Stats>({});
+const recentActivity = ref<ActivityLog[]>([]);
+const recentSecurity = ref<SecurityLog[]>([]);
 
 const fetchStats = async () => {
     try {
@@ -180,7 +218,7 @@ const fetchStats = async () => {
         // Fetch system logs
         const systemLogs = await api.get('/admin/ja/system/logs').catch(() => ({ data: {} }));
         stats.value.system = { files: (systemLogs.data?.data || []).length };
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch stats:', error);
     }
 };
@@ -195,13 +233,15 @@ const fetchRecentLogs = async () => {
         const securityResponse = await api.get('/admin/ja/security/logs?per_page=10').catch(() => ({ data: {} }));
         const secData = securityResponse.data?.data?.data || securityResponse.data?.data || [];
         recentSecurity.value = Array.isArray(secData) ? secData : [];
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch recent logs:', error);
     }
 };
 
-const getActionBadgeClass = (action) => {
-    const classes = {
+const getActionBadgeClass = (action?: string) => {
+    if (!action) return 'bg-gray-500/20 dark:bg-gray-500/10 text-gray-500 dark:text-gray-400';
+    
+    const classes: Record<string, string> = {
         created: 'bg-green-500/20 dark:bg-green-500/10 text-green-500 dark:text-green-400',
         updated: 'bg-blue-500/20 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400',
         deleted: 'bg-red-500/20 dark:bg-red-500/10 text-red-500 dark:text-red-400',
@@ -211,24 +251,26 @@ const getActionBadgeClass = (action) => {
     return classes[action] || 'bg-gray-500/20 dark:bg-gray-500/10 text-gray-500 dark:text-gray-400';
 };
 
-const getSecurityBadgeClass = (eventType) => {
-    if (eventType?.includes('failed') || eventType?.includes('blocked')) {
+const getSecurityBadgeClass = (eventType?: string) => {
+    if (!eventType) return 'bg-yellow-500/20 dark:bg-yellow-500/10 text-yellow-500 dark:text-yellow-400';
+    
+    if (eventType.includes('failed') || eventType.includes('blocked')) {
         return 'bg-red-500/20 dark:bg-red-500/10 text-red-500 dark:text-red-400';
     }
-    if (eventType?.includes('success')) {
+    if (eventType.includes('success')) {
         return 'bg-green-500/20 dark:bg-green-500/10 text-green-500 dark:text-green-400';
     }
     return 'bg-yellow-500/20 dark:bg-yellow-500/10 text-yellow-500 dark:text-yellow-400';
 };
 
-const getActionLabel = (action) => {
+const getActionLabel = (action?: string) => {
     if (!action) return '-';
     const key = `features.activityLogs.filters.types.${action}`;
     const translated = t(key);
     return translated !== key ? translated : action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 };
 
-const getSecurityEventLabel = (eventType) => {
+const getSecurityEventLabel = (eventType?: string) => {
     if (!eventType) return '-';
     // Use security event types if possible, fallback to activity logs types
     let key = `features.security.logs.eventTypes.${eventType}`;
@@ -242,17 +284,17 @@ const getSecurityEventLabel = (eventType) => {
     return translated !== key ? translated : eventType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 };
 
-const formatDate = (dateString) => {
+const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
     const now = new Date();
-    const diffMs = now - date;
+    const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     
-    if (diffMins < 1) return 'Baru saja';
-    if (diffMins < 60) return `${diffMins} menit lalu`;
-    if (diffHours < 24) return `${diffHours} jam lalu`;
+    if (diffMins < 1) return t('common.time.justNow') || 'Baru saja';
+    if (diffMins < 60) return t('common.time.minsAgo', { count: diffMins }) || `${diffMins} menit lalu`;
+    if (diffHours < 24) return t('common.time.hoursAgo', { count: diffHours }) || `${diffHours} jam lalu`;
     return date.toLocaleDateString();
 };
 

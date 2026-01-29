@@ -1,48 +1,11 @@
-<script setup>
-import { computed } from "vue";
-import { SwitchRoot, SwitchThumb, useForwardPropsEmits } from "radix-vue";
+<script setup lang="ts">
+import { computed, type HTMLAttributes } from "vue";
+import { SwitchRoot, SwitchThumb, useForwardPropsEmits, type SwitchRootEmits, type SwitchRootProps } from "radix-vue";
 import { cn } from "../../lib/utils";
 
-const props = defineProps({
-  checked: {
-    type: Boolean,
-    default: undefined,
-  },
-  defaultChecked: {
-    type: Boolean,
-    default: undefined,
-  },
-  required: {
-    type: Boolean,
-    default: undefined,
-  },
-  name: {
-    type: String,
-    default: undefined,
-  },
-  disabled: {
-    type: Boolean,
-    default: undefined,
-  },
-  value: {
-    type: String,
-    default: undefined,
-  },
-  asChild: {
-    type: Boolean,
-    default: undefined,
-  },
-  as: {
-    type: null,
-    default: undefined,
-  },
-  class: {
-    type: null,
-    default: null,
-  },
-});
+const props = defineProps<SwitchRootProps & { class?: HTMLAttributes['class'] }>();
 
-const emits = defineEmits(['update:checked']);
+const emits = defineEmits<SwitchRootEmits>();
 
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props;

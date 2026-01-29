@@ -37,25 +37,29 @@
   </BaseModal>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import { BaseModal, BaseInput } from '../ui'
+<script setup lang="ts">
+import { ref } from 'vue';
+import { BaseModal, BaseInput } from '../ui';
 
-const props = defineProps({
-    loading: {
-        type: Boolean,
-        default: false
-    }
-})
+interface Props {
+  loading?: boolean;
+}
 
-const emit = defineEmits(['close', 'save'])
+const props = withDefaults(defineProps<Props>(), {
+  loading: false
+});
 
-const presetName = ref('')
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'save', name: string): void;
+}>();
+
+const presetName = ref('');
 
 const handleSave = () => {
-    if (!presetName.value || props.loading) return
-    emit('save', presetName.value)
-}
+    if (!presetName.value || props.loading) return;
+    emit('save', presetName.value);
+};
 </script>
 
 <style scoped>

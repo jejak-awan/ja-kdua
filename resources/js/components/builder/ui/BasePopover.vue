@@ -39,74 +39,58 @@
   </Popover>
 </template>
 
-<script setup>
-import { computed } from 'vue'
-import { X } from 'lucide-vue-next'
+<script setup lang="ts">
+import { computed } from 'vue';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import { 
     Popover, 
     PopoverTrigger, 
     PopoverContent, 
-} from './'
-import { PopoverAnchor, PopoverClose } from 'radix-vue'
-import { cn } from '../../../lib/utils'
+} from '@/components/ui';
+import { PopoverAnchor, PopoverClose } from 'radix-vue';
+import { cn } from '@/lib/utils';
 
-const props = defineProps({
-  isOpen: {
-    type: Boolean,
-    default: false
-  },
-  triggerRect: {
-    type: Object,
-    default: null
-  },
-  title: {
-    type: String,
-    default: ''
-  },
-  showClose: {
-    type: Boolean,
-    default: true
-  },
-  backdrop: {
-    type: Boolean,
-    default: true
-  },
-  width: {
-    type: [String, Number],
-    default: 320
-  },
-  offset: {
-    type: Number,
-    default: 8
-  },
-  noPadding: {
-    type: Boolean,
-    default: false
-  },
-  align: {
-    type: String,
-    default: 'right', // left, right, center
-  },
-  side: {
-    type: String,
-    default: 'bottom'
-  },
-  class: {
-    type: String,
-    default: ''
-  }
-})
-
-const emit = defineEmits(['close', 'update:isOpen'])
-
-const onOpenUpdate = (val) => {
-    if (!val) emit('close')
-    emit('update:isOpen', val)
+interface Props {
+  isOpen?: boolean;
+  triggerRect?: DOMRect | null;
+  title?: string;
+  showClose?: boolean;
+  backdrop?: boolean;
+  width?: string | number;
+  offset?: number;
+  noPadding?: boolean;
+  align?: 'left' | 'right' | 'center';
+  side?: 'top' | 'right' | 'bottom' | 'left';
+  class?: string;
 }
 
+const props = withDefaults(defineProps<Props>(), {
+  isOpen: false,
+  triggerRect: null,
+  title: '',
+  showClose: true,
+  backdrop: true,
+  width: 320,
+  offset: 8,
+  noPadding: false,
+  align: 'right',
+  side: 'bottom',
+  class: ''
+});
+
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'update:isOpen', value: boolean): void;
+}>();
+
+const onOpenUpdate = (val: boolean) => {
+    if (!val) emit('close');
+    emit('update:isOpen', val);
+};
+
 const mappedAlign = computed(() => {
-    if (props.align === 'left') return 'start'
-    if (props.align === 'right') return 'end'
-    return 'center'
-})
+    if (props.align === 'left') return 'start';
+    if (props.align === 'right') return 'end';
+    return 'center';
+});
 </script>

@@ -37,41 +37,34 @@
   </div>
 </template>
 
-<script setup>
-import { cn } from '../../../lib/utils'
-import Input from './Input.vue'
-import Textarea from './Textarea.vue'
+<script setup lang="ts">
+import { cn } from '@/lib/utils';
+import Input from '@/components/ui/input.vue';
+import Textarea from '@/components/ui/textarea.vue';
 
-const props = defineProps({
-  modelValue: {
-    type: [String, Number],
-    default: ''
-  },
-  type: {
-    type: String,
-    default: 'text'
-  },
-  placeholder: {
-    type: String,
-    default: ''
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  },
-  prefix: {
-    type: String,
-    default: ''
-  },
-  suffix: {
-    type: String,
-    default: ''
-  },
-  error: {
-    type: Boolean,
-    default: false
-  }
-})
+interface Props {
+  modelValue?: string | number;
+  type?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  prefix?: string;
+  suffix?: string;
+  error?: boolean;
+}
 
-const emit = defineEmits(['update:modelValue', 'blur', 'focus'])
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: '',
+  type: 'text',
+  placeholder: '',
+  disabled: false,
+  prefix: '',
+  suffix: '',
+  error: false
+});
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string | number): void;
+  (e: 'blur', event: FocusEvent): void;
+  (e: 'focus', event: FocusEvent): void;
+}>();
 </script>

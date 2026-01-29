@@ -149,7 +149,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -158,21 +158,24 @@ import { useToast } from '../../../composables/useToast';
 import { useFormValidation } from '../../../composables/useFormValidation';
 import { emailTemplateSchema } from '../../../schemas';
 import { parseSingleResponse } from '../../../utils/responseParser';
-import { ArrowLeft, Loader2 } from 'lucide-vue-next';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 
-import Button from '@/components/ui/button.vue';
-import Input from '@/components/ui/input.vue';
-import Label from '@/components/ui/label.vue';
-import Textarea from '@/components/ui/textarea.vue';
-import Select from '@/components/ui/select.vue';
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-import SelectValue from '@/components/ui/select-value.vue';
-import SelectContent from '@/components/ui/select-content.vue';
-import SelectItem from '@/components/ui/select-item.vue';
-import Card from '@/components/ui/card.vue';
-import CardHeader from '@/components/ui/card-header.vue';
-import CardTitle from '@/components/ui/card-title.vue';
-import CardContent from '@/components/ui/card-content.vue';
+import {
+    Button,
+    Input,
+    Label,
+    Textarea,
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent
+} from '@/components/ui';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -191,7 +194,7 @@ const form = ref({
     body: '',
 });
 
-const initialForm = ref(null);
+const initialForm = ref<any>(null);
 
 const isDirty = computed(() => {
     if (!initialForm.value) return false;
@@ -211,16 +214,16 @@ const fetchTemplate = async () => {
     loading.value = true;
     try {
         const response = await api.get(`/admin/ja/email-templates/${templateId}`);
-        const template = parseSingleResponse(response) || {};
+        const template = parseSingleResponse(response) || {} as any;
         
         form.value = {
-            name: template.name || '',
-            subject: template.subject || '',
-            type: template.type || 'custom',
-            body: template.body || '',
+            name: (template as any).name || '',
+            subject: (template as any).subject || '',
+            type: (template as any).type || 'custom',
+            body: (template as any).body || '',
         };
         initialForm.value = JSON.parse(JSON.stringify(form.value));
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch template:', error);
         toast.error.load(error);
         router.push({ name: 'email-templates' });
@@ -236,7 +239,7 @@ const previewTemplate = async () => {
         if (previewWindow) {
             previewWindow.document.write(response.data.html);
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to preview template:', error);
         toast.error.default(t('features.email_templates.form.previewFailed'));
     }
@@ -246,15 +249,15 @@ const handleSendTest = async () => {
     try {
         await api.post(`/admin/ja/email-templates/${templateId}/send-test`);
         toast.success.action(t('features.email_templates.form.testSent'));
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to send test email:', error);
         toast.error.default(error.response?.data?.message || t('features.email_templates.form.testFailed'));
     }
 };
 
 const handleSubmit = async () => {
-    const validationData = { name: form.value.name, subject: form.value.subject, content: form.value.body };
-    if (!validateWithZod(validationData)) return;
+    const validationData: Record<string, any> = { name: form.value.name, subject: form.value.subject, content: form.value.body };
+    if (!validateWithZod(validationData as any)) return;
 
     saving.value = true;
     clearErrors();
@@ -263,7 +266,7 @@ const handleSubmit = async () => {
         initialForm.value = JSON.parse(JSON.stringify(form.value));
         toast.success.update('Email Template');
         router.push({ name: 'email-templates' });
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {

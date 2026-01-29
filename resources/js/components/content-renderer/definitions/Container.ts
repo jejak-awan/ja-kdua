@@ -4,7 +4,14 @@ import type { BlockDefinition } from '@/types/builder';
  * Flexible container with Flexbox controls, box styling, and layout options
  */
 
-import { Box, AlignHorizontalJustifyStart, AlignHorizontalJustifyCenter, AlignHorizontalJustifyEnd, AlignHorizontalSpaceBetween, AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd } from 'lucide-vue-next';
+import Box from 'lucide-vue-next/dist/esm/icons/box.js';
+import AlignHorizontalJustifyStart from 'lucide-vue-next/dist/esm/icons/align-horizontal-justify-start.js';
+import AlignHorizontalJustifyCenter from 'lucide-vue-next/dist/esm/icons/align-horizontal-justify-center.js';
+import AlignHorizontalJustifyEnd from 'lucide-vue-next/dist/esm/icons/align-horizontal-justify-end.js';
+import AlignHorizontalSpaceBetween from 'lucide-vue-next/dist/esm/icons/align-horizontal-space-between.js';
+import AlignVerticalJustifyStart from 'lucide-vue-next/dist/esm/icons/align-vertical-justify-start.js';
+import AlignVerticalJustifyCenter from 'lucide-vue-next/dist/esm/icons/align-vertical-justify-center.js';
+import AlignVerticalJustifyEnd from 'lucide-vue-next/dist/esm/icons/align-vertical-justify-end.js';
 import { defineAsyncComponent } from 'vue';
 
 // Import Presets
@@ -48,7 +55,7 @@ export default {
                 { label: 'Row Reverse', value: 'flex-row-reverse' }
             ],
             default: 'flex-col',
-            condition: (settings) => !settings.layout || settings.layout === 'stack' || settings.layout === 'custom',
+            condition: (settings: any) => !settings.layout || settings.layout === 'stack' || settings.layout === 'custom',
             tab: 'style'
         },
         {

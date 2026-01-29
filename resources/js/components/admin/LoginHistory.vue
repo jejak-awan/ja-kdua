@@ -111,17 +111,34 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import api from '../../services/api';
-import Spinner from '../Spinner.vue';
-import Pagination from '../ui/pagination.vue';
+import api from '@/services/api';
+import { Spinner, Pagination } from '@/components/ui';
 
-const history = ref([]);
+interface LoginEntry {
+    id: number;
+    status: 'success' | 'failed';
+    failure_reason: string | null;
+    ip_address: string;
+    user_agent: string;
+    login_at: string;
+    [key: string]: any;
+}
+
+interface PaginatedHistory {
+    data: LoginEntry[];
+    current_page: number;
+    total: number;
+    per_page: number | string;
+    [key: string]: any;
+}
+
+const history = ref<LoginEntry[]>([]);
 const loading = ref(false);
 const currentPage = ref(1);
 const totalItems = ref(0);
-const perPage = ref(10); // Default to 10 as requested
+const perPage = ref(10);
 
 const fetchHistory = async () => {
     loading.value = true;
@@ -134,15 +151,13 @@ const fetchHistory = async () => {
         });
 
         if (response.data?.success) {
-            // Check BaseApiController paginated structure:
-            // response.data.data = { data: [...], current_page: 1, total: 100, ... }
-            const paginatedData = response.data.data;
+            const paginatedData = response.data.data as PaginatedHistory;
             
             if (paginatedData) {
                 history.value = paginatedData.data || [];
                 totalItems.value = paginatedData.total || 0;
                 currentPage.value = paginatedData.current_page || 1;
-                perPage.value = parseInt(paginatedData.per_page) || 10;
+                perPage.value = parseInt(paginatedData.per_page as string) || 10;
             }
         }
     } catch (error) {
@@ -152,18 +167,18 @@ const fetchHistory = async () => {
     }
 };
 
-const handlePageChange = (page) => {
+const handlePageChange = (page: number) => {
     currentPage.value = page;
     fetchHistory();
 };
 
-const handlePerPageChange = (newPerPage) => {
+const handlePerPageChange = (newPerPage: number) => {
     perPage.value = newPerPage;
     currentPage.value = 1;
     fetchHistory();
 };
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-US', {
@@ -175,16 +190,13 @@ const formatDate = (dateString) => {
     }).format(date);
 };
 
-const parseUserAgent = (userAgent) => {
+const parseUserAgent = (userAgent: string) => {
     if (!userAgent) return 'Unknown';
-    
-    // Simple user agent parsing
     if (userAgent.includes('Chrome')) return 'Chrome';
     if (userAgent.includes('Firefox')) return 'Firefox';
     if (userAgent.includes('Safari')) return 'Safari';
     if (userAgent.includes('Edge')) return 'Edge';
     if (userAgent.includes('Opera')) return 'Opera';
-    
     return userAgent.substring(0, 50) + (userAgent.length > 50 ? '...' : '');
 };
 

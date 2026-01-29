@@ -25,8 +25,8 @@
                             {{ post.category.name }}
                         </span>
                         <span class="text-muted-foreground text-sm font-medium flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            {{ new Date(post.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) }}
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            {{ post.published_at ? new Date(post.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '' }}
                         </span>
                     </div>
                     <h1 class="text-4xl md:text-6xl font-bold text-foreground mb-8 leading-tight tracking-tight text-balance">
@@ -35,7 +35,7 @@
                     <div class="flex items-center justify-center gap-4">
                         <div class="w-12 h-12 bg-muted rounded-full overflow-hidden ring-2 ring-background shadow-md">
                              <!-- Author Avatar placeholder -->
-                             <svg class="w-full h-full text-muted-foreground bg-muted" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                             <svg class="w-full h-full text-muted-foreground bg-muted" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
                         </div>
                         <div class="text-left">
                             <p class="text-sm font-bold text-foreground">{{ post.author?.name || 'Janari Team' }}</p>
@@ -53,7 +53,7 @@
             <!-- Content -->
             <div class="container mx-auto px-4 max-w-3xl">
                 <!-- If using Page Builder -->
-                <div v-if="post.blocks?.length > 0" class="space-y-0">
+                <div v-if="post.blocks?.length && post.blocks.length > 0" class="space-y-0">
                     <BlockRenderer :blocks="post.blocks" :is-preview="true" />
                 </div>
                 
@@ -63,7 +63,7 @@
                 <!-- Tags -->
                 <div v-if="post.tags && post.tags.length > 0" class="mt-12 pt-8 border-t border-border">
                     <div class="flex flex-wrap gap-2">
-                        <span v-for="tag in post.tags" :key="tag.id" class="text-sm text-muted-foreground px-3 py-1 bg-muted rounded-lg">
+                        <span v-for="tag in post.tags" :key="tag.id || tag.name" class="text-sm text-muted-foreground px-3 py-1 bg-muted rounded-lg">
                             #{{ tag.name }}
                         </span>
                     </div>
@@ -79,21 +79,23 @@
     </div>
 </template>
 
-<script setup>
-import { ref, onMounted, computed, nextTick, watch } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { useI18n } from 'vue-i18n';
+// import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue';
 import { useIconHydration } from '@/composables/useIconHydration';
 
+import type { Content } from '@/types/cms'
+
 const route = useRoute();
-const { t } = useI18n();
+// const { t } = useI18n();
 const { hydrateIcons } = useIconHydration();
 
-const post = ref(null);
+const post = ref<Content | null>(null);
 const loading = ref(true);
-const contentRef = ref(null);
+const contentRef = ref<HTMLElement | null>(null);
 
 watch(() => post.value, () => {
     nextTick(() => {
@@ -105,7 +107,7 @@ watch(() => post.value, () => {
 
 onMounted(async () => {
     try {
-        const slug = route.params.slug;
+        const slug = route.params.slug as string;
         const response = await api.get(`/cms/contents/${slug}`);
         post.value = response.data.data || response.data;
     } catch (error) {
@@ -120,3 +122,4 @@ onMounted(async () => {
     }
 });
 </script>
+

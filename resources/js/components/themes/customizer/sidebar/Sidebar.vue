@@ -1,10 +1,10 @@
 <template>
     <div 
-        class="flex flex-col bg-card border-r shadow-2xl transition-all duration-300 ease-in-out z-10"
+        class="flex flex-col bg-card border-r shadow-2xl transition-colors duration-300 ease-in-out z-10"
         :class="isCollapsed ? 'w[60px]' : 'w-96'"
     >
         <!-- Header -->
-        <div class="h-16 flex items-center px-4 border-b shrink-0 bg-muted/30 transition-all justify-between">
+        <div class="h-16 flex items-center px-4 border-b shrink-0 bg-muted/30 transition-colors justify-between">
             <div class="flex items-center gap-3 overflow-hidden" :class="{'opacity-0 w-0': isCollapsed}">
                 <div>
                     <h2 class="font-semibold text-lg tracking-tight whitespace-nowrap">Customize</h2>
@@ -70,8 +70,7 @@
 
         <!-- Content -->
         <div v-show="!isCollapsed" class="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar animate-in fade-in slide-in-from-left-4 duration-300">
-            
-            <!-- Loading State -->
+<!-- Loading State -->
             <div v-if="loading" class="flex items-center justify-center py-12">
                 <svg class="w-8 h-8 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -126,10 +125,10 @@
                     <div v-show="showCustomCss" class="animate-in slide-in-from-top-2">
                         <textarea
                             :value="customCss"
-                            @input="$emit('update:customCss', $event.target.value)"
+                            @input="$emit('update:customCss', ($event.target as HTMLTextAreaElement).value)"
                             @change="$emit('change')"
                             rows="8"
-                            class="w-full p-3 bg-background border rounded-lg text-xs font-mono custom-scrollbar focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all leading-relaxed"
+                            class="w-full p-3 bg-background border rounded-lg text-xs font-mono custom-scrollbar focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors leading-relaxed"
                             placeholder="/* Enter custom CSS here... */"
                             spellcheck="false"
                         ></textarea>
@@ -143,7 +142,7 @@
             <button
                 @click="$emit('save')"
                 :disabled="saving || !isDirty"
-                class="w-full h-10 flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                class="w-full h-10 flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-muted transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <svg v-if="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -163,32 +162,50 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import SettingControl from './SettingControl.vue';
-import MediaPicker from '../../../MediaPicker.vue';
+import MediaPicker from '@/components/media/MediaPicker.vue';
+import type { ThemeSection } from '@/types/theme';
 
-const props = defineProps({
-    sections: { type: Array, default: () => [] },
-    formValues: { type: Object, required: true },
-    customCss: { type: String, default: '' },
-    loading: Boolean,
-    saving: Boolean,
-    isDirty: Boolean,
-    themeName: String,
-    canUndo: Boolean,
-    canRedo: Boolean,
+const props = withDefaults(defineProps<{
+    sections?: ThemeSection[];
+    formValues: Record<string, any>;
+    customCss?: string;
+    loading?: boolean;
+    saving?: boolean;
+    isDirty?: boolean;
+    themeName?: string;
+    canUndo?: boolean;
+    canRedo?: boolean;
+}>(), {
+    sections: () => [],
+    customCss: '',
+    loading: false,
+    saving: false,
+    isDirty: false,
+    themeName: '',
+    canUndo: false,
+    canRedo: false
 });
 
-const emit = defineEmits(['update:customCss', 'change', 'undo', 'redo', 'save', 'reset', 'close']);
+const emit = defineEmits<{
+    (e: 'update:customCss', value: string): void;
+    (e: 'change'): void;
+    (e: 'undo'): void;
+    (e: 'redo'): void;
+    (e: 'save'): void;
+    (e: 'reset'): void;
+    (e: 'close'): void;
+}>();
 
 const isCollapsed = ref(false);
 const expandedSections = ref(['General']);
 const showCustomCss = ref(false);
 const showMediaPicker = ref(false);
-const activeMediaField = ref(null);
+const activeMediaField = ref<string | null>(null);
 
-const toggleSection = (id) => {
+const toggleSection = (id: string) => {
     if (expandedSections.value.includes(id)) {
         expandedSections.value = expandedSections.value.filter(s => s !== id);
     } else {
@@ -196,12 +213,12 @@ const toggleSection = (id) => {
     }
 };
 
-const openMediaPicker = (fieldKey) => {
+const openMediaPicker = (fieldKey: string) => {
     activeMediaField.value = fieldKey;
     showMediaPicker.value = true;
 };
 
-const handleMediaSelect = (media) => {
+const handleMediaSelect = (media: any) => {
     if (activeMediaField.value) {
         // Mutate formValues directly as it's a reactive prop object from parent
         props.formValues[activeMediaField.value] = media.url;

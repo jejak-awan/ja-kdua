@@ -107,7 +107,7 @@ const FullwidthImageModule: ModuleDefinition = {
             {
                 id: 'overlayTypography',
                 label: 'Overlay Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `overlay_${f.name}`,
                     label: `Overlay ${f.label}`
@@ -116,7 +116,7 @@ const FullwidthImageModule: ModuleDefinition = {
             {
                 id: 'captionTypography',
                 label: 'Caption Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `caption_${f.name}`,
                     label: `Caption ${f.label}`

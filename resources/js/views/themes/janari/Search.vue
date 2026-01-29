@@ -21,7 +21,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -29,12 +29,16 @@ import api from '@/services/api'
 import PostCard from './components/PostCard.vue'
 import { useAnalytics } from '@/composables/useAnalytics'
 
+import type { Content } from '@/types/cms'
+
+type Result = Content;
+
 const { t } = useI18n()
 const { trackSearch } = useAnalytics()
 
 const route = useRoute()
 const searchQuery = ref('')
-const results = ref([])
+const results = ref<Result[]>([])
 const loading = ref(false)
 
 const search = async () => {
@@ -57,14 +61,15 @@ const search = async () => {
 }
 
 watch(() => route.query.q, (newQuery) => {
-  searchQuery.value = newQuery || ''
+  searchQuery.value = (newQuery as string) || ''
   if (newQuery) search()
 })
 
 onMounted(() => {
-  searchQuery.value = route.query.q || ''
+  searchQuery.value = (route.query.q as string) || ''
   if (searchQuery.value) search()
 })
 </script>
+
 
 

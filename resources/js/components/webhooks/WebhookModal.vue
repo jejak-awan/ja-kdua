@@ -96,29 +96,40 @@
     </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../services/api';
-import { useToast } from '../../composables/useToast';
-import Dialog from '../ui/dialog.vue';
-import DialogContent from '../ui/dialog-content.vue';
-import DialogHeader from '../ui/dialog-header.vue';
-import DialogTitle from '../ui/dialog-title.vue';
-import DialogFooter from '../ui/dialog-footer.vue';
-import Button from '../ui/button.vue';
-import { Loader2 } from 'lucide-vue-next';
+import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    Button
+} from '@/components/ui';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+
+interface Webhook {
+    id: number | string;
+    name: string;
+    url: string;
+    events: string[];
+    secret?: string;
+    is_active: boolean;
+}
 
 const { t } = useI18n();
 
-const props = defineProps({
-    webhook: {
-        type: Object,
-        default: null,
-    },
-});
+const props = defineProps<{
+    webhook?: Webhook | null;
+}>();
 
-const emit = defineEmits(['close', 'saved']);
+const emit = defineEmits<{
+    (e: 'close'): void;
+    (e: 'saved'): void;
+}>();
 
 const saving = ref(false);
 
@@ -132,7 +143,15 @@ const availableEvents = [
     'comment.approved',
 ];
 
-const form = ref({
+interface WebhookForm {
+    name: string;
+    url: string;
+    events: string[];
+    secret: string;
+    is_active: boolean;
+}
+
+const form = ref<WebhookForm>({
     name: '',
     url: '',
     events: [],
@@ -140,7 +159,7 @@ const form = ref({
     is_active: true,
 });
 
-const initialForm = ref(null);
+const initialForm = ref<WebhookForm | null>(null);
 
 const isValid = computed(() => {
     return !!form.value.name?.trim() && !!form.value.url?.trim() && form.value.events.length > 0;
@@ -185,7 +204,7 @@ const handleSubmit = async () => {
             toast.success.create('Webhook');
         }
         emit('saved');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to save webhook:', error);
         toast.error.fromResponse(error);
     } finally {

@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="fullwidth-header-block transition-all duration-300"
+    class="fullwidth-header-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Fullwidth Header'"
     :style="cardStyles"
@@ -16,7 +16,9 @@
           :style="titleStyles"
           :contenteditable="mode === 'edit'"
           @blur="updateText('title', $event)"
-        >{{ blockSettings.title || 'Welcome' }}</h1>
+        >
+{{ blockSettings.title || 'Welcome' }}
+</h1>
         
         <p 
           v-if="blockSettings.subtitle || mode === 'edit'" 
@@ -24,7 +26,9 @@
           :style="subtitleStyles"
           :contenteditable="mode === 'edit'"
           @blur="updateText('subtitle', $event)"
-        >{{ blockSettings.subtitle || 'Your subtitle goes here' }}</p>
+        >
+{{ blockSettings.subtitle || 'Your subtitle goes here' }}
+</p>
         
         <div 
           class="header-buttons flex gap-4 flex-wrap mt-8" 
@@ -32,7 +36,7 @@
         >
           <a 
             :href="blockSettings.buttonUrl || '#'" 
-            class="header-button header-button--primary inline-block py-3.5 px-8 rounded-md transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:opacity-90" 
+            class="header-button header-button--primary inline-block py-3.5 px-8 rounded-md transition-colors duration-200 cursor-pointer hover:-translate-y-0.5 hover:opacity-90" 
             :style="button1Styles"
             :contenteditable="mode === 'edit'"
             @blur="updateText('buttonText', $event)"
@@ -42,7 +46,7 @@
           <a 
             v-if="blockSettings.showButton2 !== false || mode === 'edit'" 
             :href="blockSettings.button2Url || '#'" 
-            class="header-button header-button--secondary inline-block py-3.5 px-8 rounded-md transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:opacity-90" 
+            class="header-button header-button--secondary inline-block py-3.5 px-8 rounded-md transition-colors duration-200 cursor-pointer hover:-translate-y-0.5 hover:opacity-90" 
             :style="button2Styles"
             :contenteditable="mode === 'edit'"
             @blur="updateText('button2Text', $event)"
@@ -80,9 +84,8 @@ const horizontalAlignment = computed(() => getVal(settings.value, 'textAlignment
 
 const updateText = (key: string, event: FocusEvent) => {
     if (props.mode !== 'edit' || !event.target) return
-    const value = (event.target as HTMLElement).innerText
-    // @ts-ignore
-    window.builder?.updateModuleSettings(props.module.id, { [key]: value })
+    const newValue = (event.target as HTMLElement).innerText;
+    (window as any).builder?.updateModuleSettings(props.module.id, { [key]: newValue });
 }
 
 const handleLinkClick = (url: string) => {

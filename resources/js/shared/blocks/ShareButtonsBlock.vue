@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode"
     :settings="settings"
-    class="share-buttons-block transition-all duration-300"
+    class="share-buttons-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Social Share'"
   >
@@ -14,7 +14,7 @@
           <Button 
             v-for="(item, index) in platformList" 
             :key="index" 
-            class="share-button-item group transition-all duration-500 hover:scale-[var(--hover-scale)] active:scale-95 shadow-md hover:shadow-xl rounded-full"
+            class="share-button-item group transition-[width] duration-500 hover:scale-[var(--hover-scale)] active:scale-95 shadow-md hover:shadow-xl rounded-full"
             :class="[
                 showLabels ? 'px-6 h-12' : 'p-0 w-12 h-12',
                 currentSize === 'small' ? 'h-10 w-10' : (currentSize === 'large' ? 'h-16 w-16' : 'h-12 w-12')
@@ -35,8 +35,12 @@
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Button, Badge } from '../ui'
-import { Facebook, Twitter, Linkedin, Mail, MessageCircle, Link2 } from 'lucide-vue-next'
-import { 
+import Facebook from 'lucide-vue-next/dist/esm/icons/facebook.js';
+import Twitter from 'lucide-vue-next/dist/esm/icons/twitter.js';
+import Linkedin from 'lucide-vue-next/dist/esm/icons/linkedin.js';
+import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
+import MessageCircle from 'lucide-vue-next/dist/esm/icons/message-circle.js';
+import Link2 from 'lucide-vue-next/dist/esm/icons/link.js';import { 
   getVal,
   getLayoutStyles,
   getTypographyStyles,
@@ -142,7 +146,7 @@ const iconSizeClass = computed(() => [
 const buttonStyles = (platform: string) => {
   const color = platformColors[platform] || '#666'
   const styles: Record<string, any> = {
-      filter: 'brightness(var(--hover-brightness, 100%)) transition-all duration-300'
+      filter: 'brightness(var(--hover-brightness, 100%)) transition-colors duration-300'
   }
   
   if (currentStyle.value === 'filled') {

@@ -15,7 +15,7 @@
           <button 
             v-for="(preset, key) in presets" 
             :key="key"
-            class="preset-btn aspect-square rounded-md border flex items-center justify-center transition-all bg-white"
+            class="preset-btn aspect-square rounded-md border flex items-center justify-center transition-colors bg-white"
             :class="{ 'is-active': localValue.preset === key, 'is-inactive': localValue.preset !== key }"
             @click="applyPreset(key)"
             :title="preset.label"
@@ -29,8 +29,7 @@
 
         <!-- Manual Controls -->
         <div v-if="localValue.preset !== 'none'" class="manual-controls flex flex-col gap-4 mt-4">
-            
-            <div class="control-row">
+<div class="control-row">
                 <BaseLabel>{{ t('builder.fields.shadow.controls.horizontal') }}</BaseLabel>
                 <BaseSliderInput v-model.number="localValue.horizontal" :min="-100" :max="100" :placeholder-value="placeholderValue?.horizontal" unit="px" />
             </div>
@@ -72,8 +71,8 @@
 <script setup lang="ts">
 import { ref, watch, inject, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Ban, Layers } from 'lucide-vue-next'
-import { BaseLabel, BaseSliderInput, BaseToggle, BaseCollapsible } from '../ui'
+import Ban from 'lucide-vue-next/dist/esm/icons/ban.js';
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';import { BaseLabel, BaseSliderInput, BaseToggle, BaseCollapsible } from '../ui'
 import ColorField from './ColorField.vue'
 
 const props = defineProps<{

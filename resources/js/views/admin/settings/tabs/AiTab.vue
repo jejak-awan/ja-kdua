@@ -9,7 +9,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Enable AI -->
                 <SettingField
-                    fieldKey="ai_enabled"
+                    field-key="ai_enabled"
                     type="boolean"
                     :label="$t('features.settings.ai.enable_ai', 'Enable AI Features')"
                     :description="$t('features.settings.ai.enable_ai_desc', 'Enable or disable AI assistance in the editor.')"
@@ -94,7 +94,7 @@
                                 </button>
                             </div>
                             <p class="text-xs text-muted-foreground" v-if="errors?.[`${provider.id}_api_key`]">
-                                {{ errors[`${provider.id}_api_key`] }}
+                                {{ Array.isArray(errors?.[`${provider.id}_api_key`]) ? errors?.[`${provider.id}_api_key`][0] : errors?.[`${provider.id}_api_key`] }}
                             </p>
                         </div>
 
@@ -155,41 +155,71 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { Sparkles, Info, ChevronDown, CheckCircle2, Loader2, RefreshCw, Bot, Eye, EyeOff, Wifi } from 'lucide-vue-next';
+import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import Bot from 'lucide-vue-next/dist/esm/icons/bot.js';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import EyeOff from 'lucide-vue-next/dist/esm/icons/eye-off.js';
+import Wifi from 'lucide-vue-next/dist/esm/icons/wifi.js';
 import SettingGroup from '@/components/settings/SettingGroup.vue';
 import SettingField from '@/components/settings/SettingField.vue';
-import Select from '@/components/ui/select.vue';
-import SelectContent from '@/components/ui/select-content.vue';
-import SelectItem from '@/components/ui/select-item.vue';
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-import SelectValue from '@/components/ui/select-value.vue';
-import Button from '@/components/ui/button.vue';
-import Input from '@/components/ui/input.vue';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+    Button,
+    Input
+} from '@/components/ui';
 import { useToast } from '@/composables/useToast';
 import axios from 'axios';
 
-const props = defineProps({
-    settings: { type: Array, required: true },
-    formData: { type: Object, required: true },
-    errors: { type: Object, default: () => ({}) }
-});
+interface Setting {
+    id: number | string;
+    key: string;
+    value: any;
+    type: string;
+    group: string;
+}
 
-const { service: toast } = useToast();
-const providers = ref([]);
-const expandedProvider = ref('gemini'); // Default expand
-const availableModels = ref({});
-const loadingModels = ref({});
-const testing = ref({});
-const testSuccess = ref({});
-const showKey = ref({});
+interface Provider {
+    id: string;
+    name: string;
+    logo?: string;
+}
 
-const toggleProvider = (id) => {
+interface Model {
+    id: string;
+    name: string;
+}
+
+interface Props {
+    settings: Setting[];
+    formData: Record<string, any>;
+    errors?: Record<string, string[] | string>;
+}
+
+const props = defineProps<Props>();
+
+const toast = useToast();
+const providers = ref<Provider[]>([]);
+const expandedProvider = ref<string | null>('gemini'); // Default expand
+const availableModels = ref<Record<string, Model[]>>({});
+const loadingModels = ref<Record<string, boolean>>({});
+const testing = ref<Record<string, boolean>>({});
+const testSuccess = ref<Record<string, boolean>>({});
+const showKey = ref<Record<string, boolean>>({});
+
+const toggleProvider = (id: string) => {
     expandedProvider.value = expandedProvider.value === id ? null : id;
 };
 
-const toggleKeyVisibility = (id) => {
+const toggleKeyVisibility = (id: string) => {
     showKey.value[id] = !showKey.value[id];
 };
 
@@ -203,13 +233,13 @@ const fetchProviders = async () => {
         if (!props.formData.ai_default_provider && providers.value.length > 0) {
             props.formData.ai_default_provider = 'gemini';
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch AI providers', error);
     }
 };
 
 // Fetch Models
-const fetchModels = async (providerId, force = false) => {
+const fetchModels = async (providerId: string, force = false) => {
     // Return early if already loaded and not forcing
     if (availableModels.value[providerId] && availableModels.value[providerId].length > 0 && !force) return;
     
@@ -227,9 +257,9 @@ const fetchModels = async (providerId, force = false) => {
         availableModels.value = { ...availableModels.value, [providerId]: response.data.data };
         
         if (force) {
-            toast.success('Success', 'Models fetched successfully');
+            toast.success.action('Models fetched successfully');
         }
-    } catch (error) {
+    } catch (error: any) {
         // If 401/403, might be invalid key
     } finally {
         loadingModels.value = { ...loadingModels.value, [providerId]: false };
@@ -237,7 +267,7 @@ const fetchModels = async (providerId, force = false) => {
 };
 
 // Test Connection
-const testConnection = async (providerId) => {
+const testConnection = async (providerId: string) => {
     testing.value = { ...testing.value, [providerId]: true };
     testSuccess.value = { ...testSuccess.value, [providerId]: false };
     
@@ -246,11 +276,11 @@ const testConnection = async (providerId) => {
             provider: providerId,
             api_key: props.formData[`${providerId}_api_key`]
         });
-        toast.success('Success', 'Connection successful');
+        toast.success.action('Connection successful');
         testSuccess.value = { ...testSuccess.value, [providerId]: true };
         fetchModels(providerId, true); // Auto fetch models on success
-    } catch (error) {
-        toast.error('Connection failed', error.body?.message || error.message);
+    } catch (error: any) {
+        toast.error.fromResponse(error);
     } finally {
         testing.value = { ...testing.value, [providerId]: false };
     }

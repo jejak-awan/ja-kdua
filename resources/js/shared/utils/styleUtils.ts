@@ -160,7 +160,7 @@ export function getTypographyStyles(settings: ModuleSettings, prefix: string = '
     fields.forEach(f => {
         const sep = (prefix && !prefix.endsWith('_')) ? '_' : ''
         const fullKey = prefix ? `${prefix}${sep}${f.key}` : f.key
-        let val = getVal(settings, fullKey, device)
+        const val = getVal(settings, fullKey, device)
         if (val !== undefined && val !== null && val !== '') {
             if (f.key === 'text_shadow') {
                 const shadowStyles = getTextShadowStyles(settings, fullKey, device)

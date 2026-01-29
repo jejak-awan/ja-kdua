@@ -10,22 +10,24 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { Loader2 } from 'lucide-vue-next'
-import api from '../../services/api'
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';import api from '../../services/api'
 import SliderCaptcha from './SliderCaptcha.vue'
 import MathCaptcha from './MathCaptcha.vue'
 import ImageCaptcha from './ImageCaptcha.vue'
 
-const props = defineProps({
-    action: {
-        type: String,
-        default: 'login', // 'login' or 'register'
-    },
+interface Props {
+    action?: 'login' | 'register' | 'comment' | 'contact'
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    action: 'login',
 })
 
-const emit = defineEmits(['verified'])
+const emit = defineEmits<{
+    (e: 'verified', payload: any): void
+}>()
 
 const loading = ref(true)
 const enabled = ref(false)
@@ -57,7 +59,7 @@ const fetchSettings = async () => {
     }
 }
 
-const onVerified = (payload) => {
+const onVerified = (payload: any) => {
     emit('verified', payload)
 }
 

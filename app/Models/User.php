@@ -81,6 +81,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this;
     }
 
+    public function media()
+    {
+        return $this->hasMany(Media::class, 'author_id');
+    }
+
     public function activityLogs()
     {
         return $this->hasMany(ActivityLog::class);

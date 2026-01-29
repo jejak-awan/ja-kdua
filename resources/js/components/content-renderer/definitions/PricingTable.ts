@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { CreditCard } from 'lucide-vue-next';
+import CreditCard from 'lucide-vue-next/dist/esm/icons/credit-card.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

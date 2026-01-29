@@ -180,6 +180,10 @@ export const useCmsStore = defineStore('cms', {
 
         setThemeMode(mode: 'light' | 'dark' | 'system', syncToBackend = true) {
             const THEME_KEY = 'admin-dark-mode';
+
+            // Add no-transitions class to prevent flashing
+            document.documentElement.classList.add('no-transitions');
+
             this.themeMode = mode;
             localStorage.setItem(THEME_KEY, mode);
 
@@ -191,6 +195,11 @@ export const useCmsStore = defineStore('cms', {
             if (syncToBackend) {
                 this.syncThemeWithBackend(mode);
             }
+
+            // Remove no-transitions class after short delay
+            setTimeout(() => {
+                document.documentElement.classList.remove('no-transitions');
+            }, 50);
         },
 
         toggleDarkMode(value?: boolean) {

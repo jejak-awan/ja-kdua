@@ -18,18 +18,14 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowUpDown } from 'lucide-vue-next'
-import BaseBlock from '../components/BaseBlock.vue'
+import ArrowUpDown from 'lucide-vue-next/dist/esm/icons/arrow-up-down.js';import BaseBlock from '../components/BaseBlock.vue'
 import { 
     getVal,
     getLayoutStyles
 } from '../utils/styleUtils'
+import type { BlockProps } from '@/types/builder'
 
-const props = withDefaults(defineProps<{
-  module: any;
-  mode?: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile' | null;
-}>(), {
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })

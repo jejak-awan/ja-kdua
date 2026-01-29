@@ -1,10 +1,11 @@
 <template>
     <div class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/95 backdrop-blur-sm" @click.self="$emit('close')">
         <!-- Main Container -->
-        <div class="relative flex flex-col w-full h-full max-w-5xl max-h-[90vh] bg-card md:rounded-xl overflow-hidden shadow-2xl border border-border"
-             @keydown.enter="handleEnterKey" tabindex="0" autofocus>
-            
-            <!-- Header -->
+        <div
+class="relative flex flex-col w-full h-full max-w-5xl max-h-[90vh] bg-card md:rounded-xl overflow-hidden shadow-2xl border border-border"
+             @keydown.enter="handleEnterKey" tabindex="0" autofocus
+>
+<!-- Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-border bg-card/50 backdrop-blur-md z-10">
                 <div class="text-sm font-medium text-foreground/80">
                     {{ t('features.media.modals.editor.title') }}
@@ -57,8 +58,7 @@
 
             <!-- Sub Toolbar (Active Mode Tools) -->
             <div class="h-24 border-t border-border bg-card/90 backdrop-blur-md flex items-center justify-center px-6 relative z-10">
-                
-                <!-- Crop Tools -->
+<!-- Crop Tools -->
                 <div v-if="activeMode === 'crop'" class="flex items-center gap-4">
                     <div class="flex items-center gap-1 bg-muted/50 p-1 rounded-xl border border-border">
                         <Button 
@@ -118,16 +118,20 @@
                         <div class="flex items-center gap-3">
                             <span class="text-xs font-medium w-20 text-muted-foreground">Brightness</span>
                             <div class="flex-1 relative h-5 flex items-center">
-                                <input type="range" v-model="filters.brightness" min="0" max="200" 
-                                    class="w-full h-1 bg-muted rounded-xl appearance-none cursor-pointer accent-primary hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground" />
+                                <input
+type="range" v-model="filters.brightness" min="0" max="200" 
+                                    class="w-full h-1 bg-muted rounded-xl appearance-none cursor-pointer accent-primary hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground"
+/>
                             </div>
                             <span class="text-xs w-8 text-right text-foreground tabular-nums">{{ filters.brightness }}%</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="text-xs font-medium w-20 text-muted-foreground">Contrast</span>
                             <div class="flex-1 relative h-5 flex items-center">
-                                <input type="range" v-model="filters.contrast" min="0" max="200" 
-                                    class="w-full h-1 bg-muted rounded-xl appearance-none cursor-pointer accent-primary hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground" />
+                                <input
+type="range" v-model="filters.contrast" min="0" max="200" 
+                                    class="w-full h-1 bg-muted rounded-xl appearance-none cursor-pointer accent-primary hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground"
+/>
                             </div>
                             <span class="text-xs w-8 text-right text-foreground tabular-nums">{{ filters.contrast }}%</span>
                         </div>
@@ -135,8 +139,10 @@
                          <div class="flex items-center gap-3">
                             <span class="text-xs font-medium w-20 text-muted-foreground">Saturation</span>
                             <div class="flex-1 relative h-5 flex items-center">
-                                <input type="range" v-model="filters.saturation" min="0" max="200" 
-                                    class="w-full h-1 bg-muted rounded-xl appearance-none cursor-pointer accent-primary hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground" />
+                                <input
+type="range" v-model="filters.saturation" min="0" max="200" 
+                                    class="w-full h-1 bg-muted rounded-xl appearance-none cursor-pointer accent-primary hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground"
+/>
                             </div>
                             <span class="text-xs w-8 text-right text-foreground tabular-nums">{{ filters.saturation }}%</span>
                         </div>
@@ -219,30 +225,62 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, shallowRef, computed, onUnmounted, markRaw, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { 
-    X, Save, Crop, Sliders, Scaling, RotateCw, FlipHorizontal, FlipVertical,
-    Lock, Unlock, Eye, Sparkles, Sun, Moon, Palette
-} from 'lucide-vue-next';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import Crop from 'lucide-vue-next/dist/esm/icons/crop.js';
+import Sliders from 'lucide-vue-next/dist/esm/icons/sliders-horizontal.js';
+import Scaling from 'lucide-vue-next/dist/esm/icons/scaling.js';
+import RotateCw from 'lucide-vue-next/dist/esm/icons/rotate-cw.js';
+import FlipHorizontal from 'lucide-vue-next/dist/esm/icons/flip-horizontal.js';
+import FlipVertical from 'lucide-vue-next/dist/esm/icons/flip-vertical.js';
+import Lock from 'lucide-vue-next/dist/esm/icons/lock.js';
+import Unlock from 'lucide-vue-next/dist/esm/icons/lock-open.js';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
+import Sun from 'lucide-vue-next/dist/esm/icons/sun.js';
+import Moon from 'lucide-vue-next/dist/esm/icons/moon.js';
+import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
-import api from '../../services/api';
-import Button from '../ui/button.vue';
-import toast from '../../services/toast';
+import api from '@/services/api';
+import { Button } from '@/components/ui';
+import { useToast } from '@/composables/useToast';
+import type { Media } from '@/types/cms';
 
-const props = defineProps({
-    media: { type: Object, required: true },
-});
+type EditorMode = 'view' | 'crop' | 'adjust' | 'resize';
 
-const emit = defineEmits(['close', 'updated']);
+interface FilterSettings {
+    brightness: number;
+    contrast: number;
+    saturation: number;
+}
+
+interface ResizeConfig {
+    width: number;
+    height: number;
+    maintainAspectRatio: boolean;
+    originalRatio: number;
+}
+
+const props = defineProps<{
+    media: Media;
+}>();
+
+const emit = defineEmits<{
+    (e: 'close'): void;
+    (e: 'updated'): void;
+}>();
+
 const { t } = useI18n();
+const toast = useToast();
 
 // --- State ---
-const activeMode = ref('view'); 
-const imageElement = ref(null);
-const currentImageSrc = ref(props.media.url);
+const activeMode = ref<EditorMode>('view'); 
+const imageElement = ref<HTMLImageElement | null>(null);
+const currentImageSrc = ref(props.media.url || '');
 const imageLoaded = ref(false);
 const saving = ref(false);
 const saveAsNew = ref(false);
@@ -254,14 +292,14 @@ watch(() => props.media.name, (newName) => {
 }, { immediate: true });
 
 const modes = [
-    { id: 'view', label: 'View', icon: Eye },
-    { id: 'crop', label: 'Crop', icon: Crop },
-    { id: 'adjust', label: 'Adjust', icon: Sliders },
-    { id: 'resize', label: 'Resize', icon: Scaling },
+    { id: 'view' as EditorMode, label: 'View', icon: Eye },
+    { id: 'crop' as EditorMode, label: 'Crop', icon: Crop },
+    { id: 'adjust' as EditorMode, label: 'Adjust', icon: Sliders },
+    { id: 'resize' as EditorMode, label: 'Resize', icon: Scaling },
 ];
 
 // --- Cropper State ---
-const cropper = shallowRef(null);
+const cropper = shallowRef<Cropper | null>(null);
 const cropperReady = ref(false);
 const currentAspectRatio = ref(NaN);
 const cropPresets = [
@@ -273,7 +311,7 @@ const cropPresets = [
 ];
 
 // --- Adjust State ---
-const filters = ref({
+const filters = ref<FilterSettings>({
     brightness: 100,
     contrast: 100,
     saturation: 100,
@@ -287,7 +325,7 @@ const filterPresets = [
 ];
 
 // --- Resize State ---
-const resizeConfig = ref({
+const resizeConfig = ref<ResizeConfig>({
     width: 0,
     height: 0,
     maintainAspectRatio: true,
@@ -316,9 +354,9 @@ const hasChanges = computed(() => {
 
 // --- Methods ---
 
-const onImageLoad = (e) => {
+const onImageLoad = (e: Event) => {
     imageLoaded.value = true;
-    const img = e.target;
+    const img = e.target as HTMLImageElement;
     if (img.naturalWidth) {
         resizeConfig.value.width = img.naturalWidth;
         resizeConfig.value.height = img.naturalHeight;
@@ -327,39 +365,21 @@ const onImageLoad = (e) => {
 };
 
 const handleEnterKey = () => {
-    // If in crop mode, Apply Crop
     if (activeMode.value === 'crop') {
         applyCrop();
     }
-    // If in adjust mode, Apply Filters
     else if (activeMode.value === 'adjust') {
         applyFilters();
     }
-    // If in resize mode, Apply Resize
     else if (activeMode.value === 'resize') {
         applyResize();
     }
-    // Else if view mode (or generic save), maybe trigger save? 
-    // Usually 'Enter' in modal means save, but here we have distinct 'Apply' vs 'Save' 
-    // Let's stick to mode-specific Apply for safety, or Save for View mode.
     else if (activeMode.value === 'view') {
         saveImage();
     }
 };
 
-const triggerCropUpdate = () => {
-    // Helper to force update crop box if needed
-     if (cropper.value && cropperReady.value) {
-        // Sometimes just setting ratio isn't enough to visually reset the box if it's already drawn
-        // We can reset the crop box to center
-        // cropper.value.reset(); // This might reset everything including rotation
-        // Instead, let's just ensure the box is within bounds
-        cropper.value.clear();
-        cropper.value.crop();
-    }
-};
-
-const setMode = async (mode) => {
+const setMode = async (mode: EditorMode) => {
     if (activeMode.value === mode) return;
 
     if (activeMode.value === 'crop') {
@@ -417,23 +437,21 @@ const destroyCropper = () => {
     cropperReady.value = false;
 };
 
-const setAspectRatio = (ratio) => {
+const setAspectRatio = (ratio: number) => {
     currentAspectRatio.value = ratio;
     if (cropper.value && cropperReady.value) {
         cropper.value.setAspectRatio(ratio);
-        // Force a re-crop to ensure the box respects the new ratio immediately
-        // Some versions of cropperjs might need a nudge
         if (!isNaN(ratio)) {
              cropper.value.setData(cropper.value.getData()); 
         }
     }
 };
 
-const rotate = (deg) => {
+const rotate = (deg: number) => {
     if (cropper.value && cropperReady.value) cropper.value.rotate(deg);
 };
 
-const flip = (dir) => {
+const flip = (dir: 'horizontal' | 'vertical') => {
     if (!cropper.value || !cropperReady.value) return;
     
     const data = cropper.value.getData();
@@ -464,7 +482,7 @@ const cancelCrop = () => {
 };
 
 // --- Adjust Logic ---
-const applyPreset = (preset) => {
+const applyPreset = (preset: any) => {
     filters.value = { ...preset.settings };
 };
 
@@ -478,7 +496,7 @@ const resetFilters = () => {
     filters.value = { brightness: 100, contrast: 100, saturation: 100 };
 };
 
-const applyFilters = async () => {
+const applyFilters = async (): Promise<void> => {
     if (!imageElement.value) return;
 
     return new Promise((resolve) => {
@@ -489,14 +507,16 @@ const applyFilters = async () => {
         img.onload = () => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            
-            ctx.filter = `brightness(${filters.value.brightness}%) contrast(${filters.value.contrast}%) saturate(${filters.value.saturation}%)`;
-            ctx.drawImage(img, 0, 0);
-            
-            currentImageSrc.value = canvas.toDataURL(props.media.mime_type || 'image/png');
-            resetFilters(); 
+            if (ctx) {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                ctx.filter = `brightness(${filters.value.brightness}%) contrast(${filters.value.contrast}%) saturate(${filters.value.saturation}%)`;
+                ctx.drawImage(img, 0, 0);
+                
+                currentImageSrc.value = canvas.toDataURL(props.media.mime_type || 'image/png');
+                resetFilters(); 
+            }
             resolve();
         };
     });
@@ -504,12 +524,12 @@ const applyFilters = async () => {
 
 // --- Resize Logic ---
 watch(() => resizeConfig.value.width, (newWidth) => {
-    if (!activeMode.value === 'resize' || !resizeConfig.value.maintainAspectRatio) return;
+    if (activeMode.value !== 'resize' || !resizeConfig.value.maintainAspectRatio) return;
     resizeConfig.value.height = Math.round(newWidth / resizeConfig.value.originalRatio);
 });
 
 watch(() => resizeConfig.value.height, (newHeight) => {
-    if (!activeMode.value === 'resize' || !resizeConfig.value.maintainAspectRatio) return;
+    if (activeMode.value !== 'resize' || !resizeConfig.value.maintainAspectRatio) return;
     resizeConfig.value.width = Math.round(newHeight * resizeConfig.value.originalRatio);
 });
 
@@ -521,21 +541,23 @@ const applyResize = () => {
     img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = resizeConfig.value.width;
-        canvas.height = resizeConfig.value.height;
-        
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        
-        currentImageSrc.value = canvas.toDataURL(props.media.mime_type || 'image/png');
+        if (ctx) {
+            canvas.width = resizeConfig.value.width;
+            canvas.height = resizeConfig.value.height;
+            
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            currentImageSrc.value = canvas.toDataURL(props.media.mime_type || 'image/png');
+        }
         setMode('view');
     };
 };
 
 // --- Image Helpers ---
 
-function base64ToBlob(base64) {
+function base64ToBlob(base64: string) {
   const parts = base64.split(';base64,');
   const contentType = parts[0].split(':')[1];
   const raw = window.atob(parts[1]);
@@ -556,7 +578,6 @@ const getSecureBlob = async () => {
     }
 
     // Otherwise (HTTP URL), we need to draw it to a canvas to get the data
-    // This requires the image to be loaded and have crossorigin="anonymous"
     if (!imageElement.value) throw new Error("Image element not found");
 
     const canvas = document.createElement('canvas');
@@ -564,12 +585,12 @@ const getSecureBlob = async () => {
     canvas.height = imageElement.value.naturalHeight;
     const ctx = canvas.getContext('2d');
     
-    // Draw the image to the canvas
-    ctx.drawImage(imageElement.value, 0, 0);
-    
-    // Get Data URL
-    const dataLink = canvas.toDataURL(props.media.mime_type || 'image/png');
-    return base64ToBlob(dataLink);
+    if (ctx) {
+        ctx.drawImage(imageElement.value, 0, 0);
+        const dataLink = canvas.toDataURL(props.media.mime_type || 'image/png');
+        return base64ToBlob(dataLink);
+    }
+    throw new Error("Failed to get 2D context");
 };
 
 // --- Save Final ---
@@ -586,7 +607,6 @@ const saveImage = async () => {
         
         const formData = new FormData();
         const fileName = props.media.file_name || 'edited-image.png';
-        // Use blob.type to ensure it matches the actual data (e.g. image/png)
         const file = new File([blob], fileName, { type: blob.type });
         
         formData.append('image', file);
@@ -602,12 +622,11 @@ const saveImage = async () => {
         });
         emit('updated');
         emit('close');
-    } catch (err) {
+    } catch (err: any) {
         console.error("Failed to save", err);
         let msg = t('features.media.modals.editor.failed') || 'Failed to save image';
         if (err.response && err.response.data) {
             if (err.response.data.errors) {
-                // Formatting validation errors
                 const errors = err.response.data.errors;
                 const errorMessages = Object.values(errors).flat().join('\n');
                 msg += '\n' + errorMessages;
@@ -615,7 +634,7 @@ const saveImage = async () => {
                  msg += ': ' + err.response.data.message;
             }
         }
-        toast.error('Error', msg);
+        toast.error.fromResponse(err);
     } finally {
         saving.value = false;
     }

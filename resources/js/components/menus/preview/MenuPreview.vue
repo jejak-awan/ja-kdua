@@ -53,7 +53,7 @@
                                             <ChevronDown class="w-3 h-3" />
                                         </button>
                                         <!-- Dropdown Preview -->
-                                        <div class="absolute top-full left-0 pt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100]">
+                                        <div class="absolute top-full left-0 pt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-[opacity,transform] z-[100]">
                                             <div class="bg-card border border-border rounded-lg shadow-xl p-2 min-w-[200px]">
                                                 <template v-for="child in item.children" :key="child.id || child._temp_id">
                                                     <div class="px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md cursor-pointer flex items-center gap-2">
@@ -167,8 +167,42 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import * as LucideIcons from 'lucide-vue-next';
-import { Eye, ChevronDown, Monitor, Smartphone, Menu, LayoutGrid } from 'lucide-vue-next';
+import Home from 'lucide-vue-next/dist/esm/icons/house.js';
+import User from 'lucide-vue-next/dist/esm/icons/user.js';
+import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
+import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
+import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
+import Info from 'lucide-vue-next/dist/esm/icons/info.js';
+import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
+import Star from 'lucide-vue-next/dist/esm/icons/star.js';
+import Heart from 'lucide-vue-next/dist/esm/icons/heart.js';
+import List from 'lucide-vue-next/dist/esm/icons/list.js';
+import Grid from 'lucide-vue-next/dist/esm/icons/grid-2x2.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import LogOut from 'lucide-vue-next/dist/esm/icons/log-out.js';
+import LogIn from 'lucide-vue-next/dist/esm/icons/log-in.js';
+import UserPlus from 'lucide-vue-next/dist/esm/icons/user-plus.js';
+import ShoppingCart from 'lucide-vue-next/dist/esm/icons/shopping-cart.js';
+import Bell from 'lucide-vue-next/dist/esm/icons/bell.js';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import Monitor from 'lucide-vue-next/dist/esm/icons/monitor.js';
+import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
+import Menu from 'lucide-vue-next/dist/esm/icons/menu.js';
+import LayoutGrid from 'lucide-vue-next/dist/esm/icons/layout-grid.js';
+import Circle from 'lucide-vue-next/dist/esm/icons/circle.js';
+import type { Component } from 'vue';
+
+const iconMap: Record<string, Component> = {
+    Home, User, Mail, Settings, HelpCircle, Info, Globe, FileText, 
+    Layers, Layout, Zap, Star, Heart, List, Grid, Search, 
+    LogOut, LogIn, UserPlus, ShoppingCart, Bell,
+    Eye, ChevronDown, Monitor, Smartphone, Menu, LayoutGrid, Circle
+};
 import type { MenuItem } from '../../../types/menu';
 
 // UI Components
@@ -201,8 +235,7 @@ const previewStyles = [
 ];
 
 const getIcon = (iconName: string) => {
-    // @ts-ignore
-    return LucideIcons[iconName] || LucideIcons.Circle;
+    return iconMap[iconName] || iconMap.Circle;
 };
 
 const toggleMobileItem = (item: MenuItem) => {

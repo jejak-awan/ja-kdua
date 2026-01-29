@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="lottie-block transition-all duration-300"
+    class="lottie-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Lottie Animation'"
     :style="cardStyles"
@@ -46,8 +46,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Film } from 'lucide-vue-next'
-import { 
+import Film from 'lucide-vue-next/dist/esm/icons/film.js';import { 
     getVal,
     getLayoutStyles,
     getResponsiveValue 

@@ -10,8 +10,7 @@
     <div class="modal-body-content">
       <div class="modal-content">
         <div class="layout-wrapper">
-          
-          <!-- Filtered Layout Groups Loop -->
+<!-- Filtered Layout Groups Loop -->
           <div v-for="group in filteredGroups" :key="group.id" class="layout-group">
             <h4 class="group-title">
               <span :class="['category-badge', `category-badge--${group.type}`]">
@@ -67,18 +66,17 @@
 
           <div v-if="filteredGroups.length === 0" class="no-results">
             {{ t('builder.structureTemplateModal.noResults') }}
-
-        </div>
+</div>
       </div>
       </div>
     </div>
   </BaseModal>
 </template>
 
-<script setup>
-import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { BaseModal } from '../ui'
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { BaseModal } from '../ui';
 import { 
     equalLayouts, 
     offsetLayouts, 
@@ -87,17 +85,20 @@ import {
     gridMultiRowPresets,
     masonryPresets,
     sidebarPresets
-} from '../constants/layouts.js'
+} from '../constants/layouts.js';
 
-const props = defineProps({
-  targetType: {
-    type: String,
-    required: true
-  }
-})
+interface Props {
+  targetType: string;
+}
 
-const emit = defineEmits(['close', 'insert'])
-const { t } = useI18n()
+const props = defineProps<Props>();
+
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'insert', layout: any): void;
+}>();
+
+const { t } = useI18n();
 
 // Define all groups
 const allGroups = [
@@ -108,22 +109,22 @@ const allGroups = [
   { id: 'grid-multi-row', type: 'grid', title: 'Multi-Row', items: gridMultiRowPresets },
   { id: 'grid-masonry', type: 'grid', title: 'Masonry', items: masonryPresets },
   { id: 'grid-sidebar', type: 'grid', title: 'Sidebar', items: sidebarPresets }
-]
+];
 
 // Filter groups based on targetType
 // row: show all (Flex + Grid)
 // section/column: show only Grid items
 const filteredGroups = computed(() => {
   if (props.targetType === 'row') {
-    return allGroups
+    return allGroups;
   }
   // For section and column, show ONLY grid typet
-  return allGroups.filter(g => g.type === 'grid')
-})
+  return allGroups.filter(g => g.type === 'grid');
+});
 
-const selectLayout = (layout) => {
-  emit('insert', layout)
-}
+const selectLayout = (layout: any) => {
+  emit('insert', layout);
+};
 </script>
 
 <style scoped>

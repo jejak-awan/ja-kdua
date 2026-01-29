@@ -1,7 +1,6 @@
 <template>
   <div class="field-actions" :class="{ 'is-active': showMenu }">
-    
-    <!-- Reset Field Button -->
+<!-- Reset Field Button -->
     <div v-if="showReset" class="action-icon" :title="$t('builder.fields.actions.reset')" @click="$emit('reset')">
        <RotateCcw :size="14" />
     </div>
@@ -67,15 +66,22 @@
          </Teleport>
     </div>
   </div>
-  
 </template>
 
 <script setup lang="ts">
 import { ref, inject } from 'vue'
 import type { BuilderInstance } from '../../../types/builder'
-import { Smartphone, Database, MoreVertical, Layers, HelpCircle, RotateCcw, Copy, Sparkles, Monitor, Tablet, MousePointer } from 'lucide-vue-next'
-
-const builder = inject<BuilderInstance>('builder')
+import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
+import Database from 'lucide-vue-next/dist/esm/icons/database.js';
+import MoreVertical from 'lucide-vue-next/dist/esm/icons/ellipsis-vertical.js';
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
+import Monitor from 'lucide-vue-next/dist/esm/icons/monitor.js';
+import Tablet from 'lucide-vue-next/dist/esm/icons/tablet.js';
+import MousePointer from 'lucide-vue-next/dist/esm/icons/mouse-pointer.js';const builder = inject<BuilderInstance>('builder')
 
 const props = defineProps<{
   label: string;
@@ -154,8 +160,8 @@ const toggleMenu = (e: Event) => {
 }
 
 const openGlobalVariables = () => {
-    if (builder && builder.activePanel) {
-        builder.activePanel = 'global_variables'
+    if (builder && (builder as any).activePanel) {
+        (builder as any).activePanel = 'global_variables'
     }
 }
 

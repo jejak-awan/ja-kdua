@@ -16,7 +16,7 @@
                                     <label class="block text-xs font-medium text-foreground mb-1">{{ $t('features.settings.emailTest.recipient') }}</label>
                                     <Input
                                         :model-value="testEmail.to"
-                                        @update:model-value="$emit('update:test-email', { ...testEmail, to: $event })"
+                                        @update:model-value="$emit('update:test-email', { ...testEmail, to: String($event) })"
                                         type="email"
                                         :placeholder="$t('features.settings.emailTest.recipientPlaceholder')"
                                     />
@@ -25,7 +25,7 @@
                                     <label class="block text-xs font-medium text-foreground mb-1">{{ $t('features.settings.emailTest.subject') }}</label>
                                     <Input
                                         :model-value="testEmail.subject"
-                                        @update:model-value="$emit('update:test-email', { ...testEmail, subject: $event })"
+                                        @update:model-value="$emit('update:test-email', { ...testEmail, subject: String($event) })"
                                         type="text"
                                         :placeholder="$t('features.settings.emailTest.subjectPlaceholder')"
                                     />
@@ -34,7 +34,7 @@
                                     <label class="block text-xs font-medium text-foreground mb-1">{{ $t('features.settings.emailTest.message') }}</label>
                                     <Textarea
                                         :model-value="testEmail.message"
-                                        @update:model-value="$emit('update:test-email', { ...testEmail, message: $event })"
+                                        @update:model-value="$emit('update:test-email', { ...testEmail, message: String($event) })"
                                         :rows="3"
                                         :placeholder="$t('features.settings.emailTest.messagePlaceholder')"
                                     />
@@ -129,38 +129,70 @@
     </div>
 </template>
 
-<script setup>
-defineProps({
-    sendingTestEmail: Boolean,
-    testEmailResult: Object,
-    testEmail: {
-        type: Object,
-        default: () => ({ to: '', subject: '', message: '' })
-    },
-    queueStatus: Object,
-    loadingQueueStatus: Boolean,
-    emailLogs: Array,
-    loadingLogs: Boolean
+<script setup lang="ts">
+import {
+    Button,
+    Input,
+    Textarea,
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger
+} from '@/components/ui';
+
+interface TestEmail {
+    to: string;
+    subject: string;
+    message: string;
+}
+
+interface TestEmailResult {
+    success: boolean;
+    message: string;
+}
+
+interface QueueStatus {
+    driver: string;
+    pending_jobs: number;
+    failed_jobs: number;
+}
+
+interface EmailLog {
+    to: string;
+    subject: string;
+    sent_at: string;
+}
+
+interface Props {
+    sendingTestEmail?: boolean;
+    testEmailResult?: TestEmailResult | null;
+    testEmail: TestEmail;
+    queueStatus?: QueueStatus | null;
+    loadingQueueStatus?: boolean;
+    emailLogs?: EmailLog[];
+    loadingLogs?: boolean;
+}
+
+withDefaults(defineProps<Props>(), {
+    sendingTestEmail: false,
+    testEmailResult: null,
+    testEmail: () => ({ to: '', subject: '', message: '' }),
+    queueStatus: null,
+    loadingQueueStatus: false,
+    emailLogs: () => [],
+    loadingLogs: false
 })
 
-defineEmits([
-    'send-test-email', 
-    'refresh-queue', 
-    'refresh-logs',
-    'update:test-email'
-])
+defineEmits<{
+    (e: 'send-test-email'): void;
+    (e: 'refresh-queue'): void;
+    (e: 'refresh-logs'): void;
+    (e: 'update:test-email', value: TestEmail): void;
+}>()
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
     if (!dateString) return ''
     const date = new Date(dateString)
     return date.toLocaleString()
 }
-
-import Button from '../../../components/ui/button.vue'
-import Input from '../../../components/ui/input.vue'
-import Textarea from '../../../components/ui/textarea.vue'
-import Accordion from '../../../components/ui/accordion.vue'
-import AccordionContent from '../../../components/ui/accordion-content.vue'
-import AccordionItem from '../../../components/ui/accordion-item.vue'
-import AccordionTrigger from '../../../components/ui/accordion-trigger.vue'
 </script>

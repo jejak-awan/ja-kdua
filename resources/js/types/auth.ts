@@ -15,12 +15,18 @@ export interface User {
     id: number;
     name: string;
     email: string;
+    avatar?: string | { url?: string; path?: string } | null;
     roles?: Role[];
     permissions?: Permission[];
     email_verified_at?: string | null;
+    last_login_at?: string | null;
+    deleted_at?: string | null;
+    phone?: string | null;
+    bio?: string | null;
+    website?: string | null;
+    location?: string | null;
     created_at?: string;
     updated_at?: string;
-    [key: string]: any;
 }
 
 export interface AuthState {
@@ -36,7 +42,10 @@ export interface LoginCredentials {
 
 export interface AuthResponse {
     success: boolean;
-    data?: any;
+    data?: {
+        user: User;
+        token?: string;
+    };
     message?: string;
     errors?: Record<string, string[]>;
     requiresTwoFactor?: boolean;
@@ -44,4 +53,18 @@ export interface AuthResponse {
     rateLimited?: boolean;
     retryAfter?: number;
     userId?: number;
+}
+
+export interface RegisterData {
+    name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+}
+
+export interface ResetPasswordData {
+    email: string;
+    token: string;
+    password: string;
+    password_confirmation: string;
 }

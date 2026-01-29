@@ -31,11 +31,13 @@ class TagController extends BaseApiController
             });
         }
 
-        if ($request->has('usage') && in_array($request->usage, ['used', 'unused'])) {
+        if ($request->has('usage') && in_array($request->usage, ['used', 'unused', 'media'])) {
             if ($request->usage === 'used') {
                 $query->has('contents');
+            } elseif ($request->usage === 'media') {
+                $query->has('media');
             } else {
-                $query->doesntHave('contents');
+                $query->doesntHave('contents')->doesntHave('media');
             }
         }
 

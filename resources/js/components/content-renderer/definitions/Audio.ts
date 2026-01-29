@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Music } from 'lucide-vue-next';
+import Music from 'lucide-vue-next/dist/esm/icons/music.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

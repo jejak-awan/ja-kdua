@@ -1,16 +1,25 @@
 <template>
     <Dialog :open="true" @update:open="$emit('close')">
-        <DialogContent class="sm:max-w-md">
+        <DialogContent class="sm:max-w-xl" @dragover.prevent @drop.prevent>
             <DialogHeader>
                 <DialogTitle>{{ $t('features.file_manager.modals.upload.title') }}</DialogTitle>
+                <DialogDescription>
+                    {{ $t('features.file_manager.modals.upload.placeholder') || 'Drag and drop files here or click to select files to upload.' }}
+                </DialogDescription>
             </DialogHeader>
 
-            <div class="grid gap-4 py-4">
-                <div 
-                    class="border-2 border-dashed border-input rounded-lg p-8 text-center hover:bg-muted/50 transition-colors cursor-pointer"
-                    @click="$refs.fileInput.click()"
-                    @dragover.prevent
+            <div class="py-4">
+                <!-- Drag & Drop Area -->
+                <div
                     @drop.prevent="handleDrop"
+                    @dragover.prevent
+                    @dragenter.prevent="isDragging = true"
+                    @dragleave.prevent="isDragging = false"
+                    @click="triggerFileSelect"
+                    :class="[
+                        'border-2 border-dashed rounded-2xl p-10 text-center transition-colors cursor-pointer group/upload',
+                        isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/5'
+                    ]"
                 >
                     <input
                         ref="fileInput"
@@ -19,32 +28,57 @@
                         @change="handleFileSelect"
                         class="hidden"
                     >
-                    <CloudUpload class="mx-auto h-12 w-12 text-muted-foreground" />
-                    <p class="mt-4 text-sm text-muted-foreground">
-                        <span class="font-semibold text-primary hover:underline">
-                            {{ $t('features.file_manager.labels.clickToUpload') }}
+                    <CloudUpload class="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4 group-hover/upload:text-primary transition-colors" stroke-width="1.5" />
+                    <div class="text-sm text-muted-foreground">
+                        <span class="text-primary font-bold group-hover/upload:underline">
+                            {{ $t('features.file_manager.modals.upload.clickToUpload') }}
                         </span>
-                        {{ $t('features.file_manager.labels.dragAndDrop') }}
+                        {{ $t('features.file_manager.modals.upload.dragAndDrop') }}
+                    </div>
+                    <p class="mt-2 text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">
+                        {{ $t('features.file_manager.modals.upload.formats') }}
                     </p>
-                    <p class="mt-2 text-xs text-muted-foreground">{{ $t('features.file_manager.labels.multipleSupported') }}</p>
                 </div>
 
-                <div v-if="selectedFiles.length > 0" class="space-y-2 max-h-[200px] overflow-y-auto pr-2">
-                    <h4 class="text-sm font-medium text-foreground sticky top-0 bg-background pb-2">{{ $t('features.file_manager.labels.selectedFiles') }}</h4>
-                    <div
-                        v-for="(file, index) in selectedFiles"
-                        :key="index"
-                        class="flex items-center justify-between p-2 bg-muted rounded-md group"
-                    >
-                        <span class="text-sm truncate max-w-[250px]" :title="file.name">{{ file.name }}</span>
+                <!-- Selected Files -->
+                <div v-if="selectedFiles.length > 0" class="mt-6 space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                    <h4 class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center justify-between">
+                        <span>{{ $t('features.file_manager.modals.upload.selectedFiles') }}</span>
+                        <span class="bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-bold">{{ selectedFiles.length }}</span>
+                    </h4>
+                    <div v-for="(file, index) in selectedFiles" :key="index" class="group flex items-center justify-between p-2.5 bg-muted/30 hover:bg-muted/50 rounded-xl border border-border/40 transition-sm">
+                        <div class="flex items-center flex-1 min-w-0 mr-4">
+                            <div class="h-10 w-10 rounded-lg overflow-hidden bg-background border border-border/40 flex-shrink-0 mr-3 flex items-center justify-center">
+                                <img v-if="isImage(file)" :src="getPreview(file)" class="h-full w-full object-cover" />
+                                <component v-else :is="getFileIcon(file)" class="h-5 w-5 text-muted-foreground" />
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-foreground truncate">{{ file.name }}</p>
+                                <p class="text-[10px] text-muted-foreground font-medium">{{ formatFileSize(file.size) }}</p>
+                            </div>
+                        </div>
                         <Button
                             variant="ghost"
                             size="icon"
                             @click="removeFile(index)"
-                            class="h-6 w-6 text-muted-foreground hover:text-destructive"
+                            class="text-muted-foreground hover:text-destructive h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
-                            <X class="w-4 h-4" />
+                            <Trash2 class="w-4 h-4" stroke-width="1.5" />
                         </Button>
+                    </div>
+                </div>
+
+                <!-- Upload Progress -->
+                <div v-if="uploading" class="mt-6 bg-primary/5 p-4 rounded-xl border border-primary/10 animate-in fade-in zoom-in-95">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-primary uppercase tracking-widest">{{ $t('features.file_manager.modals.upload.uploading') }}</span>
+                        <span class="text-xs font-bold text-primary">{{ uploadProgress }}%</span>
+                    </div>
+                    <div class="w-full bg-primary/10 rounded-full h-1.5 overflow-hidden">
+                        <div
+                            class="bg-primary h-full transition-[width] duration-300 ease-out shadow-[0_0_8px_rgba(var(--primary),0.5)]"
+                            :style="{ width: uploadProgress + '%' }"
+                        />
                     </div>
                 </div>
             </div>
@@ -53,69 +87,128 @@
                 <Button
                     variant="outline"
                     @click="$emit('close')"
-                    type="button"
+                    class="rounded-xl h-10 px-5 border-border/60 hover:bg-accent/10 text-foreground font-bold transition-colors"
                 >
-                    {{ $t('features.file_manager.actions.cancel') }}
+                    {{ $t('features.file_manager.modals.upload.cancel') }}
                 </Button>
                 <Button
                     @click="handleUpload"
                     :disabled="uploading || !isValid"
-                    type="submit"
+                    class="rounded-xl h-10 px-5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg shadow-primary/20 transition-[background-color,transform] active:scale-[0.98]"
                 >
                     <Loader2 v-if="uploading" class="mr-2 h-4 w-4 animate-spin" />
-                    {{ uploading ? $t('features.file_manager.actions.uploading') : $t('features.file_manager.actions.upload') }}
+                    {{ uploading ? $t('features.file_manager.modals.upload.uploading') : $t('features.file_manager.modals.upload.uploadAction', { count: selectedFiles.length }) }}
                 </Button>
             </DialogFooter>
         </DialogContent>
     </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../services/api';
-import Button from '../ui/button.vue';
-import Dialog from '../ui/dialog.vue';
-import DialogContent from '../ui/dialog-content.vue';
-import DialogHeader from '../ui/dialog-header.vue';
-import DialogTitle from '../ui/dialog-title.vue';
-import DialogFooter from '../ui/dialog-footer.vue';
-import { CloudUpload, X, Loader2 } from 'lucide-vue-next';
-import { useToast } from '../../composables/useToast';
+import api from '@/services/api';
+import {
+    Button,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    Input
+} from '@/components/ui';
+import CloudUpload from 'lucide-vue-next/dist/esm/icons/cloud-upload.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import FileIcon from 'lucide-vue-next/dist/esm/icons/file.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import FileVideo from 'lucide-vue-next/dist/esm/icons/file-video-camera.js';
+import FileAudio from 'lucide-vue-next/dist/esm/icons/audio-lines.js';
+import FileArchive from 'lucide-vue-next/dist/esm/icons/file-archive.js';
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
+import { useToast } from '@/composables/useToast';
 
 const { t } = useI18n();
 const toast = useToast();
 
-const props = defineProps({
-    path: {
-        type: String,
-        default: '/',
-    },
+const props = withDefaults(defineProps<{
+    path?: string;
+}>(), {
+    path: '/'
 });
 
-const emit = defineEmits(['close', 'uploaded']);
+const emit = defineEmits<{
+    'close': [];
+    'uploaded': [];
+}>();
 
-const fileInput = ref(null);
-const selectedFiles = ref([]);
+const fileInput = ref<HTMLInputElement | null>(null);
+const selectedFiles = ref<File[]>([]);
 const uploading = ref(false);
+const uploadProgress = ref(0);
+const isDragging = ref(false);
+const previews = ref<Map<File, string>>(new Map());
+
+const isImage = (file: File) => file.type.startsWith('image/');
+
+const getFileIcon = (file: File) => {
+    const type = file.type;
+    if (type.startsWith('video/')) return FileVideo;
+    if (type.startsWith('audio/')) return FileAudio;
+    if (type.includes('pdf') || type.includes('word') || type.includes('text')) return FileText;
+    if (type.includes('zip') || type.includes('rar') || type.includes('7z')) return FileArchive;
+    return FileIcon;
+};
+
+const getPreview = (file: File) => {
+    if (previews.value.has(file)) return previews.value.get(file);
+    const url = URL.createObjectURL(file);
+    previews.value.set(file, url);
+    return url;
+};
+
+const cleanupPreviews = () => {
+    previews.value.forEach(url => URL.revokeObjectURL(url));
+    previews.value.clear();
+};
 
 const isValid = computed(() => {
     return selectedFiles.value.length > 0;
 });
 
-const handleFileSelect = (event) => {
-    if (event.target.files) {
-        selectedFiles.value = [...selectedFiles.value, ...Array.from(event.target.files)];
+const triggerFileSelect = () => {
+    fileInput.value?.click();
+};
+
+const handleFileSelect = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files) {
+        addFiles(Array.from(target.files));
     }
 };
 
-const handleDrop = (event) => {
-    if (event.dataTransfer.files) {
-        selectedFiles.value = [...selectedFiles.value, ...Array.from(event.dataTransfer.files)];
+const handleDrop = (event: DragEvent) => {
+    isDragging.value = false;
+    if (event.dataTransfer?.files) {
+        addFiles(Array.from(event.dataTransfer.files));
     }
 };
 
-const removeFile = (index) => {
+const addFiles = (files: File[]) => {
+    files.forEach(file => {
+        if (!selectedFiles.value.find(f => f.name === file.name && f.size === file.size)) {
+            selectedFiles.value.push(file);
+        }
+    });
+};
+
+const removeFile = (index: number) => {
+    const file = selectedFiles.value[index];
+    if (previews.value.has(file)) {
+        URL.revokeObjectURL(previews.value.get(file)!);
+        previews.value.delete(file);
+    }
     selectedFiles.value.splice(index, 1);
 };
 
@@ -123,6 +216,7 @@ const handleUpload = async () => {
     if (selectedFiles.value.length === 0) return;
 
     uploading.value = true;
+    uploadProgress.value = 0;
     try {
         const formData = new FormData();
         selectedFiles.value.forEach(file => {
@@ -134,22 +228,31 @@ const handleUpload = async () => {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
+            onUploadProgress: (progressEvent) => {
+                if (progressEvent.total) {
+                    uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                }
+            },
         });
         
+        toast.success.create('Files');
         emit('uploaded');
         emit('close');
-    } catch (error) {
-        if (error.response?.status === 422) {
-             // Handle checking specifically for file errors if backend returns them in a specific structure
-             // For now standard fromResponse is better than generic message
-             toast.error.fromResponse(error);
-        } else {
-            console.error('Failed to upload files:', error);
-            toast.error.fromResponse(error);
-        }
+        cleanupPreviews();
+    } catch (error: any) {
+        toast.error.fromResponse(error);
+        console.error('Failed to upload files:', error);
     } finally {
         uploading.value = false;
     }
+};
+
+const formatFileSize = (bytes: number) => {
+    if (!bytes) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 };
 </script>
 

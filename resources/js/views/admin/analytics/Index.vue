@@ -275,10 +275,11 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import { useToast } from '../../../composables/useToast';
 import { parseResponse, parseSingleResponse, ensureArray } from '../../../utils/responseParser';
 import LineChart from '../../../components/charts/LineChart.vue';
 import DoughnutChart from '../../../components/charts/DoughnutChart.vue';
@@ -290,40 +291,46 @@ import Card from '../../../components/ui/card.vue';
 import CardHeader from '../../../components/ui/card-header.vue';
 import CardTitle from '../../../components/ui/card-title.vue';
 import CardContent from '../../../components/ui/card-content.vue';
-import { 
-    Eye, 
-    Users, 
-    BarChart3, 
-    TrendingUp, 
-    Loader2, 
-    Monitor, 
-    Globe, 
-    FileText 
-} from 'lucide-vue-next';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import Users from 'lucide-vue-next/dist/esm/icons/users.js';
+import BarChart3 from 'lucide-vue-next/dist/esm/icons/chart-bar-stacked.js';
+import TrendingUp from 'lucide-vue-next/dist/esm/icons/trending-up.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import Monitor from 'lucide-vue-next/dist/esm/icons/monitor.js';
+import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 
 const { t } = useI18n();
+const toast = useToast();
 const loading = ref(false);
 const exporting = ref(false);
 const showExportMenu = ref(false);
-const exportDropdownRef = ref(null);
+const exportDropdownRef = ref<HTMLElement | null>(null);
 const dateFrom = ref(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
 const dateTo = ref(new Date().toISOString().split('T')[0]);
 
-const overview = ref({});
-const visits = ref([]);
-const topPages = ref([]);
-const topContent = ref([]);
-const devices = ref([]);
-const browsers = ref([]);
-const countries = ref([]);
-const referrers = ref([]);
-const realtime = ref({});
-let refreshInterval = null;
+interface AnalyticsOverview {
+    total_visits?: number;
+    unique_visitors?: number;
+    total_sessions?: number;
+    bounce_rate?: number;
+}
+
+const overview = ref<AnalyticsOverview>({});
+const visits = ref<any[]>([]);
+const topPages = ref<any[]>([]);
+const topContent = ref<any[]>([]);
+const devices = ref<any[]>([]);
+const browsers = ref<any[]>([]);
+const countries = ref<any[]>([]);
+const referrers = ref<any[]>([]);
+const realtime = ref<any>({});
+let refreshInterval: ReturnType<typeof setInterval> | null = null;
 
 // Filter out API routes and error pages from top pages
 const filteredTopPages = computed(() => {
     const errorPatterns = ['/403', '/404', '/419', '/500', '/503'];
-    return topPages.value.filter(page => {
+    return topPages.value.filter((page: any) => {
         if (!page.url) return true;
         // Exclude /api/ URLs
         if (page.url.includes('/api/')) return false;
@@ -335,13 +342,13 @@ const filteredTopPages = computed(() => {
 });
 
 // Utility functions
-const formatNumber = (num) => {
+const formatNumber = (num: number) => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
     if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
     return num.toString();
 };
 
-const formatUrl = (url) => {
+const formatUrl = (url: string) => {
     if (!url) return '-';
     try {
         const parsed = new URL(url);
@@ -376,7 +383,7 @@ const fetchAnalytics = async () => {
         countries.value = ensureArray(parseResponse(countriesRes).data);
         referrers.value = ensureArray(parseResponse(referrersRes).data);
         realtime.value = parseSingleResponse(realtimeRes) || {};
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch analytics:', error);
     } finally {
         loading.value = false;
@@ -385,13 +392,13 @@ const fetchAnalytics = async () => {
 
 const toggleExportMenu = () => showExportMenu.value = !showExportMenu.value;
 
-const handleClickOutside = (event) => {
-    if (exportDropdownRef.value && !exportDropdownRef.value.contains(event.target)) {
+const handleClickOutside = (event: Event) => {
+    if (exportDropdownRef.value && !exportDropdownRef.value.contains(event.target as Node)) {
         showExportMenu.value = false;
     }
 };
 
-const exportData = async (type) => {
+const exportData = async (type: string) => {
     showExportMenu.value = false;
     exporting.value = true;
     try {
@@ -409,7 +416,7 @@ const exportData = async (type) => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
         toast.success.action(t('features.analytics.export.success') || 'Export started');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to export:', error);
         toast.error.fromResponse(error);
     } finally {

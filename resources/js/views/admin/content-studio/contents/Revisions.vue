@@ -8,7 +8,7 @@
                     {{ contentTitle }}
                 </p>
             </div>
-            <Button variant="ghost" asChild class="w-fit">
+            <Button variant="ghost" as-child class="w-fit">
                 <router-link :to="{ name: 'contents.edit', params: { id: contentId } }">
                     <ArrowLeft class="w-4 h-4 mr-2" />
                     {{ $t('features.content.form.back') }}
@@ -103,7 +103,7 @@
         <!-- Revision Detail Modal -->
         <div
             v-if="viewingRevision"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in transition-all duration-300"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in transition-colors duration-300"
             @click.self="viewingRevision = null"
         >
             <Card class="max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
@@ -181,41 +181,28 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
-// @ts-ignore
-import Card from '@/components/ui/card.vue';
-// @ts-ignore
-import CardHeader from '@/components/ui/card-header.vue';
-// @ts-ignore
-import CardTitle from '@/components/ui/card-title.vue';
-// @ts-ignore
-import CardContent from '@/components/ui/card-content.vue';
-// @ts-ignore
-import Button from '@/components/ui/button.vue';
-// @ts-ignore
-import Badge from '@/components/ui/badge.vue';
-// @ts-ignore
-import Label from '@/components/ui/label.vue';
-// @ts-ignore
-import Table from '@/components/ui/table.vue';
-// @ts-ignore
-import TableBody from '@/components/ui/table-body.vue';
-// @ts-ignore
-import TableCell from '@/components/ui/table-cell.vue';
-// @ts-ignore
-import TableHead from '@/components/ui/table-head.vue';
-// @ts-ignore
-import TableHeader from '@/components/ui/table-header.vue';
-// @ts-ignore
-import TableRow from '@/components/ui/table-row.vue';
-import { 
-    ArrowLeft, 
-    History, 
-    Loader2, 
-    Eye, 
-    RotateCcw, 
-    X,
-    FileText
-} from 'lucide-vue-next';
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+    Button,
+    Badge,
+    Label,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
+} from '@/components/ui';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
+import History from 'lucide-vue-next/dist/esm/icons/history.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 import { useConfirm } from '@/composables/useConfirm';
 import toast from '@/services/toast';
 
@@ -242,11 +229,11 @@ const fetchRevisions = async () => {
             try {
                 const contentResponse = await api.get(`/admin/ja/contents/${contentId}`);
                 contentTitle.value = contentResponse.data.data?.title || contentResponse.data.title || 'Content';
-            } catch (error) {
+            } catch (error: any) {
                 contentTitle.value = 'Content';
             }
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch revisions:', error);
     } finally {
         loading.value = false;
@@ -257,7 +244,7 @@ const viewRevision = async (revision: any) => {
     try {
         const response = await api.get(`/admin/ja/contents/${contentId}/revisions/${revision.id}`);
         viewingRevision.value = response.data.data || response.data;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch revision detail:', error);
         viewingRevision.value = revision;
     }

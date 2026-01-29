@@ -3,14 +3,14 @@
     :module="module" 
     :mode="mode"
     :settings="settings"
-    class="search-block transition-all duration-300"
+    class="search-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Search'"
   >
     <div class="search-form-wrapper mx-auto w-full" :style="containerStyles">
       <form 
         @submit.prevent="handleSearch" 
-        class="search-form group flex items-stretch bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-800/50 overflow-hidden focus-within:ring-4 focus-within:ring-primary/10 transition-all duration-500 hover:shadow-primary/5"
+        class="search-form group flex items-stretch bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-800/50 overflow-hidden focus-within:ring-4 focus-within:ring-primary/10 transition-[width] duration-500 hover:shadow-primary/5"
         :style="formStyles"
       >
         <label for="search-input" class="sr-only">Search</label>
@@ -33,7 +33,7 @@
         <Button 
             v-if="showButton" 
             type="submit"
-            class="h-auto px-10 font-black uppercase tracking-widest text-[10px] transition-all duration-500 hover:brightness-110 active:scale-95 whitespace-nowrap rounded-none bg-primary text-white border-none shadow-xl group-focus-within:px-12" 
+            class="h-auto px-10 font-black uppercase tracking-widest text-[10px] transition-[width] duration-500 hover:brightness-110 active:scale-95 whitespace-nowrap rounded-none bg-primary text-white border-none shadow-xl group-focus-within:px-12" 
             :style="buttonStyles"
         >
           <LucideIcon v-if="currentButtonStyle !== 'text'" name="Search" class="w-5 h-5" :class="currentButtonStyle === 'both' ? 'mr-3' : ''" />

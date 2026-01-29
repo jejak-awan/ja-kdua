@@ -105,14 +105,17 @@
             </div>
         </div>
     </div>
-
-  </div>
+</div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, inject, onMounted, onUnmounted } from 'vue'
-import { X, Upload, File, Video, Link as LinkIcon, Variable } from 'lucide-vue-next'
-import MediaPicker from '../../MediaPicker.vue'
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import Upload from 'lucide-vue-next/dist/esm/icons/upload.js';
+import File from 'lucide-vue-next/dist/esm/icons/file.js';
+import Video from 'lucide-vue-next/dist/esm/icons/video.js';
+import LinkIcon from 'lucide-vue-next/dist/esm/icons/link.js';
+import Variable from 'lucide-vue-next/dist/esm/icons/variable.js';import MediaPicker from '@/components/media/MediaPicker.vue'
 import { BaseInput, IconButton } from '../ui'
 import { useToast } from '../../../composables/useToast'
 import type { BuilderInstance } from '../../../types/builder'

@@ -186,7 +186,7 @@
                     :current-page="pagination.current_page"
                     :total-items="pagination.total"
                     :per-page="Number(perPage)"
-                    @page-change="fetchTemplates"
+                    @page-change="(p: number) => fetchTemplates(p)"
                     @update:per-page="(val) => { perPage = String(val); fetchTemplates(1); }"
                     class="border-none shadow-none mt-4 px-6 py-4"
                 />
@@ -195,7 +195,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -224,17 +224,24 @@ import SelectTrigger from '../../../../components/ui/select-trigger.vue';
 import SelectValue from '../../../../components/ui/select-value.vue';
 import SelectContent from '../../../../components/ui/select-content.vue';
 import SelectItem from '../../../../components/ui/select-item.vue';
-import {
-    Plus,
-    Search,
-    FileText,
-    Pencil,
-    Trash2,
-    CopyPlus,
-    Loader2,
-    RotateCcw,
-    ChevronLeft
-} from 'lucide-vue-next';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import CopyPlus from 'lucide-vue-next/dist/esm/icons/copy-plus.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js';
+
+interface Template {
+    id: number;
+    name: string;
+    type: string;
+    description?: string;
+    updated_at: string;
+    deleted_at?: string | null;
+}
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
@@ -248,14 +255,14 @@ const props = defineProps({
         default: false
     }
 });
-const templates = ref([]);
+const templates = ref<Template[]>([]);
 const loading = ref(false);
 const search = ref('');
 const typeFilter = ref('all');
 const trashedFilter = ref('without');
-const pagination = ref(null);
+const pagination = ref<any>(null); // Use any for pagination due to complex structure
 const perPage = ref('10');
-const selectedTemplates = ref([]);
+const selectedTemplates = ref<number[]>([]);
 const bulkAction = ref('');
 
 const allSelected = computed(() => {
@@ -266,7 +273,7 @@ const handleSearch = debounce(() => {
     fetchTemplates(1);
 }, 300);
 
-const fetchTemplates = async (page = 1) => {
+const fetchTemplates = async (page: number | string = 1) => {
     loading.value = true;
     try {
         const params = {
@@ -284,7 +291,7 @@ const fetchTemplates = async (page = 1) => {
         templates.value = ensureArray(data);
         pagination.value = pag;
         selectedTemplates.value = []; // Reset selection on page change
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch templates:', error);
         templates.value = [];
     } finally {
@@ -292,21 +299,21 @@ const fetchTemplates = async (page = 1) => {
     }
 };
 
-const createFromTemplate = async (template) => {
+const createFromTemplate = async (template: Template) => {
     try {
         const response = await api.post(`/admin/ja/content-templates/${template.id}/create-content`);
-        const content = parseSingleResponse(response);
+        const content = parseSingleResponse<any>(response);
         if (content && content.id) {
             toast.success.createFromTemplate();
             router.push({ name: 'contents.edit', params: { id: content.id } });
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to create content from template:', error);
         toast.error.templateCreateContent(error);
     }
 };
 
-const handleDelete = async (template) => {
+const handleDelete = async (template: Template) => {
     const isTrashed = !!template.deleted_at;
     const confirmed = await confirm({
         title: isTrashed ? t('common.actions.forceDelete') : t('features.content_templates.actions.delete'),
@@ -328,13 +335,13 @@ const handleDelete = async (template) => {
             toast.success.delete('Template');
         }
         await fetchTemplates(pagination.value?.current_page || 1);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete template:', error);
         toast.error.delete(error, 'Template');
     }
 };
 
-const handleRestore = async (template) => {
+const handleRestore = async (template: Template) => {
     const confirmed = await confirm({
         title: t('common.actions.restore'),
         message: `Restore ${template.name}?`,
@@ -348,13 +355,13 @@ const handleRestore = async (template) => {
         await api.post(`/admin/ja/content-templates/${template.id}/restore`);
         toast.success.restore('Template');
         await fetchTemplates(pagination.value?.current_page || 1);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to restore template:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const toggleSelectAll = (checked) => {
+const toggleSelectAll = (checked: boolean) => {
     if (checked) {
         selectedTemplates.value = templates.value.map(t => t.id);
     } else {
@@ -362,7 +369,7 @@ const toggleSelectAll = (checked) => {
     }
 };
 
-const toggleSelection = (id, checked) => {
+const toggleSelection = (id: number, checked: boolean) => {
     if (checked) {
         selectedTemplates.value.push(id);
     } else {
@@ -400,7 +407,7 @@ const handleBulkAction = async () => {
             await fetchTemplates(pagination.value?.current_page || 1);
             bulkAction.value = '';
             toast.success.delete('Templates');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Bulk action failed:', error);
             toast.error.action(error);
         }
@@ -413,14 +420,14 @@ const handleBulkAction = async () => {
             await fetchTemplates(pagination.value?.current_page || 1);
             bulkAction.value = '';
             toast.success.restore('Templates');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Bulk action failed:', error);
             toast.error.action(error);
         }
     }
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString();
 };
 

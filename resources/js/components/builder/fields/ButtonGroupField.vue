@@ -13,7 +13,35 @@
 import { computed, inject } from 'vue'
 import type { BlockInstance } from '../../../types/builder'
 import { useI18n } from 'vue-i18n'
-import * as LucideIcons from 'lucide-vue-next'
+import AlignLeft from 'lucide-vue-next/dist/esm/icons/align-start-horizontal.js';
+import AlignCenter from 'lucide-vue-next/dist/esm/icons/align-center-horizontal.js';
+import AlignRight from 'lucide-vue-next/dist/esm/icons/align-end-horizontal.js';
+import AlignJustify from 'lucide-vue-next/dist/esm/icons/align-horizontal-justify-center.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import Grid from 'lucide-vue-next/dist/esm/icons/grid-2x2.js';
+import List from 'lucide-vue-next/dist/esm/icons/list.js';
+import Columns from 'lucide-vue-next/dist/esm/icons/columns-2.js';
+import Rows from 'lucide-vue-next/dist/esm/icons/rows-2.js';
+import Square from 'lucide-vue-next/dist/esm/icons/square.js';
+import Type from 'lucide-vue-next/dist/esm/icons/type.js';
+import Image from 'lucide-vue-next/dist/esm/icons/image.js';
+import Video from 'lucide-vue-next/dist/esm/icons/video.js';
+import Link from 'lucide-vue-next/dist/esm/icons/link.js';
+import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
+import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import EyeOff from 'lucide-vue-next/dist/esm/icons/eye-off.js';
+import Lock from 'lucide-vue-next/dist/esm/icons/lock.js';
+import Unlock from 'lucide-vue-next/dist/esm/icons/lock-open.js';
+import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';import type { Component } from 'vue'
+
+const iconMap: Record<string, Component> = {
+  AlignLeft, AlignCenter, AlignRight, AlignJustify, 
+  Layout, Grid, List, Columns, Rows, Square, 
+  Type, Image, Video, Link, Mail, Globe, 
+  Eye, EyeOff, Lock, Unlock, Settings, Trash2
+}
 import { BaseSegmentedControl } from '../ui'
 
 interface FieldOption {
@@ -59,7 +87,7 @@ const mappedOptions = computed(() => {
   return (props.field.options || []).map((opt: FieldOption) => ({
     ...opt,
     label: getOptionLabel(opt),
-    icon: opt.icon ? (LucideIcons as any)[opt.icon] : null,
+    icon: opt.icon ? iconMap[opt.icon] || iconMap.Grid : undefined,
     iconOnly: !!opt.icon
   }))
 })

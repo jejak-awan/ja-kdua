@@ -14,7 +14,7 @@
                     type="color"
                     :value="modelValue"
                     class="absolute inset-0 w-[150%] h-[150%] -top-[25%] -left-[25%] p-0 m-0 opacity-0 cursor-pointer"
-                    @input="$emit('update:modelValue', $event.target.value)"
+                    @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
                     @change="$emit('change')"
                 >
                 <div 
@@ -25,9 +25,9 @@
             <input
                 type="text"
                 :value="modelValue"
-                @input="$emit('update:modelValue', $event.target.value)"
+                @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
                 @change="$emit('change')"
-                class="flex-1 h-10 px-3 py-2 bg-background border rounded-lg text-sm font-mono focus:ring-1 focus:ring-inset focus:ring-primary focus:border-primary outline-none transition-all"
+                class="flex-1 h-10 px-3 py-2 bg-background border rounded-lg text-sm font-mono focus:ring-1 focus:ring-inset focus:ring-primary focus:border-primary outline-none transition-colors"
             >
         </div>
 
@@ -35,10 +35,10 @@
         <div v-else-if="setting.type === 'select'" class="relative">
             <select
                 :value="modelValue"
-                @change="handleInput($event.target.value); $emit('change')"
-                class="w-full h-9 pl-3 pr-8 bg-background border rounded-lg text-sm appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer"
+                @change="handleInput(($event.target as HTMLSelectElement).value); $emit('change')"
+                class="w-full h-9 pl-3 pr-8 bg-background border rounded-lg text-sm appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors cursor-pointer"
             >
-                <option v-for="opt in setting.options" :key="opt.value" :value="opt.value">
+                <option v-for="opt in setting.options" :key="String(opt.value)" :value="opt.value">
                     {{ opt.label }}
                 </option>
             </select>
@@ -55,7 +55,7 @@
                 :max="setting.max || 100"
                 :step="setting.step || 1"
                 :value="modelValue"
-                @input="handleInput($event.target.value)"
+                @input="handleInput(($event.target as HTMLInputElement).value)"
                 @change="$emit('change')"
                 class="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
             >
@@ -68,10 +68,10 @@
         <textarea 
             v-else-if="setting.type === 'textarea'"
             :value="modelValue"
-            @input="handleInput($event.target.value)"
+            @input="handleInput(($event.target as HTMLTextAreaElement).value)"
             @change="$emit('change')"
             rows="3"
-            class="w-full p-3 bg-background border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-y min-h-[80px]"
+            class="w-full p-3 bg-background border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors resize-y min-h-[80px]"
         ></textarea>
 
         <!-- Toggle Switch -->
@@ -81,7 +81,7 @@
                     type="checkbox" 
                     class="sr-only" 
                     :checked="modelValue"
-                    @change="handleInput($event.target.checked); $emit('change')"
+                    @change="handleInput(($event.target as HTMLInputElement).checked); $emit('change')"
                 >
                 <span class="translate-x-1 inline-block h-3 w-3 transform rounded-full bg-background shadow-sm transition-transform" :class="modelValue ? 'translate-x-5' : 'translate-x-1'"></span>
             </div>
@@ -104,7 +104,7 @@
             <button 
                 v-else
                 @click="$emit('pick-media')"
-                class="w-full h-20 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-primary hover:border-primary/50 transition-all bg-muted/10 hover:bg-muted/20"
+                class="w-full h-20 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors bg-muted/10 hover:bg-muted/20"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 <span class="text-[10px] font-medium">Select Media</span>
@@ -116,10 +116,10 @@
             v-else
             :type="setting.type || 'text'"
             :value="modelValue"
-            @input="handleInput($event.target.value)"
+            @input="handleInput(($event.target as HTMLInputElement).value)"
             @change="$emit('change')"
             :placeholder="setting.placeholder"
-            class="w-full h-9 px-3 bg-background border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+            class="w-full h-9 px-3 bg-background border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
         >
         
         <p v-if="setting.description" class="text-[10px] text-muted-foreground leading-snug">
@@ -128,15 +128,21 @@
     </div>
 </template>
 
-<script setup>
-defineProps({
-    setting: { type: Object, required: true },
-    modelValue: { required: true },
-});
+<script setup lang="ts">
+import type { ThemeSetting } from '@/types/theme';
 
-const emit = defineEmits(['update:modelValue', 'change', 'pick-media']);
+const props = defineProps<{
+    setting: ThemeSetting;
+    modelValue: any;
+}>();
 
-const handleInput = (val) => {
+const emit = defineEmits<{
+    (e: 'update:modelValue', value: any): void;
+    (e: 'change'): void;
+    (e: 'pick-media'): void;
+}>();
+
+const handleInput = (val: any) => {
     emit('update:modelValue', val);
 };
 </script>

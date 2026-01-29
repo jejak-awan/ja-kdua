@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="fullwidth-slider-block transition-all duration-300 group"
+    class="fullwidth-slider-block transition-colors duration-300 group"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Fullwidth Slider'"
     :style="cardStyles"
@@ -62,7 +62,7 @@ import {
     getLayoutStyles,
     getResponsiveValue 
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance
@@ -73,8 +73,7 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-// @ts-ignore
-const builder = inject<any>('builder', null)
+const builder = inject<BuilderInstance>('builder')
 const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
 // Fallback currentSlide for provided state (Embla handles this internally)

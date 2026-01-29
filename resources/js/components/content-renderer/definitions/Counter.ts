@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Hash } from 'lucide-vue-next';
+import Hash from 'lucide-vue-next/dist/esm/icons/hash.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

@@ -87,58 +87,60 @@ class SystemService
      */
     public function getStatistics(): array
     {
-        try {
-            // Get page views/visits count (if analytics exists)
-            $totalVisits = 0;
+        return Cache::remember('system_statistics', 300, function () {
             try {
-                if (class_exists(\App\Models\PageView::class)) {
-                    $totalVisits = \App\Models\PageView::count();
-                } elseif (class_exists(\App\Models\Analytics::class)) {
-                    $totalVisits = \App\Models\Analytics::count();
+                // Get page views/visits count (if analytics exists)
+                $totalVisits = 0;
+                try {
+                    if (class_exists(\App\Models\PageView::class)) {
+                        $totalVisits = \App\Models\PageView::count();
+                    } elseif (class_exists(\App\Models\Analytics::class)) {
+                        $totalVisits = \App\Models\Analytics::count();
+                    }
+                } catch (\Exception $e) {
+                    // Visits tracking not available
                 }
+
+                return [
+                    // Flat keys for frontend compatibility
+                    'total_contents' => \App\Models\Content::count(),
+                    'total_users' => \App\Models\User::count(),
+                    'total_media' => \App\Models\Media::count(),
+                    'total_visits' => $totalVisits,
+                    // Detailed nested data (for extended use)
+                    'contents' => [
+                        'total' => \App\Models\Content::count(),
+                        'published' => \App\Models\Content::where('status', 'published')->count(),
+                        'draft' => \App\Models\Content::where('status', 'draft')->count(),
+                        'archived' => \App\Models\Content::where('status', 'archived')->count(),
+                    ],
+                    'users' => [
+                        'total' => \App\Models\User::count(),
+                        'verified' => \App\Models\User::whereNotNull('email_verified_at')->count(),
+                    ],
+                    'media' => [
+                        'total' => \App\Models\Media::count(),
+                        'total_size' => \App\Models\Media::sum('size') ?? 0,
+                    ],
+                    'categories' => \App\Models\Category::count(),
+                    'tags' => \App\Models\Tag::count(),
+                    'comments' => \App\Models\Comment::count(),
+                    'forms' => \App\Models\Form::count(),
+                    'form_submissions' => \App\Models\FormSubmission::count(),
+                    'total_email_templates' => \App\Models\EmailTemplate::count(),
+                    'newsletter_subscribers' => \App\Models\NewsletterSubscriber::count(),
+                    'email' => [
+                        'templates' => \App\Models\EmailTemplate::count(),
+                        'subscribers' => \App\Models\NewsletterSubscriber::count(),
+                        'smtp_status' => Cache::get('email_smtp_status', 'unknown'),
+                    ],
+                ];
             } catch (\Exception $e) {
-                // Visits tracking not available
+                Log::error('System statistics error: '.$e->getMessage());
+
+                return $this->getDefaultStatistics();
             }
-
-            return [
-                // Flat keys for frontend compatibility
-                'total_contents' => \App\Models\Content::count(),
-                'total_users' => \App\Models\User::count(),
-                'total_media' => \App\Models\Media::count(),
-                'total_visits' => $totalVisits,
-                // Detailed nested data (for extended use)
-                'contents' => [
-                    'total' => \App\Models\Content::count(),
-                    'published' => \App\Models\Content::where('status', 'published')->count(),
-                    'draft' => \App\Models\Content::where('status', 'draft')->count(),
-                    'archived' => \App\Models\Content::where('status', 'archived')->count(),
-                ],
-                'users' => [
-                    'total' => \App\Models\User::count(),
-                    'verified' => \App\Models\User::whereNotNull('email_verified_at')->count(),
-                ],
-                'media' => [
-                    'total' => \App\Models\Media::count(),
-                    'total_size' => \App\Models\Media::sum('size') ?? 0,
-                ],
-                'categories' => \App\Models\Category::count(),
-                'tags' => \App\Models\Tag::count(),
-                'comments' => \App\Models\Comment::count(),
-                'forms' => \App\Models\Form::count(),
-                'form_submissions' => \App\Models\FormSubmission::count(),
-                'total_email_templates' => \App\Models\EmailTemplate::count(),
-                'newsletter_subscribers' => \App\Models\NewsletterSubscriber::count(),
-                'email' => [
-                    'templates' => \App\Models\EmailTemplate::count(),
-                    'subscribers' => \App\Models\NewsletterSubscriber::count(),
-                    'smtp_status' => Cache::get('email_smtp_status', 'unknown'),
-                ],
-            ];
-        } catch (\Exception $e) {
-            Log::error('System statistics error: '.$e->getMessage());
-
-            return $this->getDefaultStatistics();
-        }
+        });
     }
 
     /**
@@ -196,26 +198,28 @@ class SystemService
      */
     public function getSystemHealth(): array
     {
-        $health = [
-            'cpu' => $this->getCpuUsage(),
-            'memory' => $this->getMemoryUsage(),
-            'disk' => $this->getDiskUsage(),
-            'database' => $this->checkDatabase(),
-            'redis' => $this->checkRedis(),
-            'overall' => 'healthy',
-        ];
+        return Cache::remember('system_health', 60, function () {
+            $health = [
+                'cpu' => $this->getCpuUsage(),
+                'memory' => $this->getMemoryUsage(),
+                'disk' => $this->getDiskUsage(),
+                'database' => $this->checkDatabase(),
+                'redis' => $this->checkRedis(),
+                'overall' => 'healthy',
+            ];
 
-        // Determine overall status
-        $critical = ($health['cpu']['percent'] > 90 || $health['memory']['percent'] > 90 || $health['disk']['percent'] > 90);
-        $warning = ($health['cpu']['percent'] > 75 || $health['memory']['percent'] > 75 || $health['disk']['percent'] > 75);
+            // Determine overall status
+            $critical = ($health['cpu']['percent'] > 90 || $health['memory']['percent'] > 90 || $health['disk']['percent'] > 90);
+            $warning = ($health['cpu']['percent'] > 75 || $health['memory']['percent'] > 75 || $health['disk']['percent'] > 75);
 
-        if ($health['database']['status'] !== 'ok' || $health['redis']['status'] !== 'ok') {
-            $critical = true;
-        }
+            if ($health['database']['status'] !== 'ok' || $health['redis']['status'] !== 'ok') {
+                $critical = true;
+            }
 
-        $health['overall'] = $critical ? 'critical' : ($warning ? 'warning' : 'healthy');
+            $health['overall'] = $critical ? 'critical' : ($warning ? 'warning' : 'healthy');
 
-        return $health;
+            return $health;
+        });
     }
 
     /**

@@ -1,4 +1,5 @@
 import { ref, computed, onMounted, onUnmounted, inject } from 'vue'
+import { throttle } from './performance'
 
 export function useResponsiveDevice() {
     const builder = inject('builder', null)
@@ -20,13 +21,15 @@ export function useResponsiveDevice() {
         else device.value = 'desktop'
     }
 
+    const throttledCheck = throttle(checkDevice, 150)
+
     onMounted(() => {
         checkDevice()
-        window.addEventListener('resize', checkDevice)
+        window.addEventListener('resize', throttledCheck)
     })
 
     onUnmounted(() => {
-        window.removeEventListener('resize', checkDevice)
+        window.removeEventListener('resize', throttledCheck)
     })
 
     return computed(() => device.value)

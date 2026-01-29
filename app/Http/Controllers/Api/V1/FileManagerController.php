@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Helpers\MediaSettingsHelper;
+use App\Models\ActivityLog;
 use App\Models\DeletedFile;
+use App\Services\MediaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -15,6 +17,13 @@ class FileManagerController extends BaseApiController
      * Allowed disks for file manager operations.
      */
     protected array $allowedDisks = ['public'];
+
+    protected MediaService $mediaService;
+
+    public function __construct(MediaService $mediaService)
+    {
+        $this->mediaService = $mediaService;
+    }
 
     /**
      * Validate the requested disk.
@@ -82,48 +91,110 @@ class FileManagerController extends BaseApiController
         $folders = [];
 
         try {
-            // Normalize path happens in validatePath now
-            $fullPath = Storage::disk($disk)->path($path);
+            if (Storage::disk($disk)->exists($path)) {
+            // Use Storage methods for better compatibility with non-local disks
+            $allDirectories = Storage::disk($disk)->directories($path);
+            $allFiles = Storage::disk($disk)->files($path);
 
-            if (is_dir($fullPath)) {
-                $items = scandir($fullPath);
-
-                foreach ($items as $item) {
-                    if ($item === '.' || $item === '..') {
-                        continue;
-                    }
-
-                    $itemPath = $path ? $path.'/'.$item : $item;
-                    $fullItemPath = $fullPath.'/'.$item;
-
-                    if (is_dir($fullItemPath)) {
-                        $folders[] = [
-                            'name' => $item,
-                            'path' => '/'.$itemPath,
-                            'type' => 'folder',
-                        ];
-                    } else {
-                        $files[] = [
-                            'name' => $item,
-                            'path' => '/'.$itemPath,
-                            'type' => 'file',
-                            'size' => filesize($fullItemPath),
-                            'modified' => date('Y-m-d H:i:s', filemtime($fullItemPath)),
-                            'extension' => pathinfo($item, PATHINFO_EXTENSION),
-                            'url' => Storage::disk($disk)->url($itemPath),
-                        ];
-                    }
+            foreach ($allDirectories as $dirPath) {
+                $dirName = basename($dirPath);
+                
+                // Exclude .trash folder
+                if ($dirName === '.trash') {
+                    continue;
                 }
+
+                $folders[] = [
+                    'name' => $dirName,
+                    'path' => '/'.$dirPath,
+                    'type' => 'folder',
+                ];
             }
+
+            foreach ($allFiles as $filePath) {
+                $fileName = basename($filePath);
+                
+                // Exclude hidden files
+                if (str_starts_with($fileName, '.')) {
+                    continue;
+                }
+
+                $files[] = [
+                    'name' => $fileName,
+                    'path' => '/'.$filePath,
+                    'type' => 'file',
+                    'size' => Storage::disk($disk)->size($filePath),
+                    'modified' => date('Y-m-d H:i:s', Storage::disk($disk)->lastModified($filePath)),
+                    'extension' => pathinfo($fileName, PATHINFO_EXTENSION),
+                    'url' => Storage::disk($disk)->url($filePath),
+                ];
+            }
+        }
         } catch (\Exception $e) {
             return $this->error('Error reading directory: '.$e->getMessage(), 500, [], 'DIRECTORY_READ_ERROR');
         }
 
-        return $this->success([
-            'path' => $path ? '/'.$path : '/',
-            'folders' => $folders,
-            'files' => $files,
-        ], 'Directory contents retrieved successfully');
+
+            // Server-side Filtering
+            $search = $request->input('search');
+            $type = $request->input('type');
+
+            if ($search) {
+                $folders = array_values(array_filter($folders, fn($f) => stripos($f['name'], $search) !== false));
+                $files = array_values(array_filter($files, fn($f) => stripos($f['name'], $search) !== false));
+            }
+
+            if ($type && $type !== 'all') {
+                $extensions = [];
+                switch ($type) {
+                    case 'images': $extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico']; break;
+                    case 'documents': $extensions = ['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt', 'xls', 'xlsx', 'ppt', 'pptx']; break;
+                    case 'videos': $extensions = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm']; break;
+                    case 'audio': $extensions = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a']; break;
+                    case 'archives': $extensions = ['zip', 'rar', '7z', 'tar', 'gz', 'bz2']; break;
+                }
+                
+                if (!empty($extensions)) {
+                    $files = array_values(array_filter($files, fn($f) => in_array(strtolower($f['extension']), $extensions)));
+                }
+            }
+
+            // Server-side Sorting
+            $sort = $request->input('sort', 'name');
+            $direction = $request->input('direction', 'asc');
+            
+            $sortFn = function($a, $b) use ($sort, $direction) {
+                $valA = $a[$sort] ?? '';
+                $valB = $b[$sort] ?? '';
+                
+                if ($sort === 'date') {
+                    $valA = strtotime($a['modified'] ?? 0);
+                    $valB = strtotime($b['modified'] ?? 0);
+                    if ($valA == $valB) return 0;
+                    return ($direction === 'asc') ? ($valA - $valB) : ($valB - $valA);
+                }
+                
+                if ($sort === 'size') {
+                    $valA = $a['size'] ?? 0;
+                    $valB = $b['size'] ?? 0;
+                    if ($valA == $valB) return 0;
+                    return ($direction === 'asc') ? ($valA - $valB) : ($valB - $valA);
+                }
+
+                // Default string comparison (name)
+                return ($direction === 'asc') 
+                    ? strcasecmp((string)$valA, (string)$valB) 
+                    : strcasecmp((string)$valB, (string)$valA);
+            };
+
+            usort($folders, $sortFn);
+            usort($files, $sortFn);
+
+            return $this->success([
+                'path' => $path ? '/'.$path : '/',
+                'folders' => $folders,
+                'files' => $files,
+            ], 'Directory contents retrieved successfully');
     }
 
     public function download(Request $request)
@@ -234,6 +305,13 @@ class FileManagerController extends BaseApiController
      */
     public function delete(Request $request)
     {
+        \Illuminate\Support\Facades\Log::info('FileManagerController::delete called', [
+            'method' => $request->method(),
+            'input' => $request->all(),
+            'query' => $request->query(),
+            'user' => $request->user()->id
+        ]);
+
         if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to delete files or folders');
         }
@@ -253,7 +331,17 @@ class FileManagerController extends BaseApiController
         }
 
         if ($permanent) {
-            Storage::disk($disk)->delete($path);
+            // Find media if any
+            $media = \App\Models\Media::where(function($q) use ($path) {
+                $q->where('path', $path)
+                  ->orWhere('path', '/'.$path);
+            })->first();
+
+            if ($media) {
+                $this->mediaService->delete($media, true);
+            } else {
+                Storage::disk($disk)->delete($path);
+            }
 
             return $this->success(null, 'File permanently deleted');
         }
@@ -261,12 +349,18 @@ class FileManagerController extends BaseApiController
         // Move to trash
         $fileName = basename($path);
         $trashPath = '.trash/'.uniqid().'_'.$fileName;
-        $fullPath = Storage::disk($disk)->path($path);
 
-        // Get file info before moving
-        $size = filesize($fullPath);
+        // Get file info before moving - use Storage methods for compatibility
+        try {
+            $size = Storage::disk($disk)->size($path);
+            $mimeType = Storage::disk($disk)->mimeType($path);
+        } catch (\Exception $e) {
+            $size = 0;
+            $mimeType = null;
+        }
         $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-        $mimeType = mime_content_type($fullPath) ?: null;
+
+        ActivityLog::log('soft_deleted_file', null, ['path' => $path, 'disk' => $disk], $request->user(), "Moved file to trash: {$path}");
 
         // Create trash directory if not exists
         Storage::disk($disk)->makeDirectory('.trash');
@@ -284,6 +378,9 @@ class FileManagerController extends BaseApiController
             })->first();
 
             if ($media) {
+                // Move thumbnails and variants for this media item too
+                $this->mediaService->moveVariantsToTrash($media, $trashPath);
+
                 $media->path = $trashPath; // Update path to point to trash
                 $media->save();
                 $media->delete(); // Soft delete
@@ -294,15 +391,16 @@ class FileManagerController extends BaseApiController
         }
 
         // Record in database
-        DeletedFile::create([
+        \App\Models\DeletedFile::create([
             'original_path' => '/'.$path,
             'trash_path' => $trashPath,
+            'disk' => $disk,
             'name' => $fileName,
             'type' => 'file',
             'size' => $size,
             'extension' => $extension,
             'mime_type' => $mimeType,
-            'deleted_by' => Auth::id(),
+            'deleted_by' => \Illuminate\Support\Facades\Auth::id(),
             'deleted_at' => now(),
         ]);
 
@@ -314,6 +412,13 @@ class FileManagerController extends BaseApiController
      */
     public function deleteFolder(Request $request)
     {
+        \Illuminate\Support\Facades\Log::info('FileManagerController::deleteFolder called', [
+            'method' => $request->method(),
+            'input' => $request->all(),
+            'query' => $request->query(),
+            'user' => $request->user()->id
+        ]);
+
         if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to delete folders');
         }
@@ -328,9 +433,8 @@ class FileManagerController extends BaseApiController
         $disk = $request->input('disk', 'public');
         $permanent = $request->input('permanent', false);
 
-        $fullPath = Storage::disk($disk)->path($path);
-
-        if (! is_dir($fullPath)) {
+        // Check if directory exists using Storage for better compatibility
+        if (! Storage::disk($disk)->exists($path)) {
             return $this->notFound('Folder');
         }
 
@@ -348,19 +452,48 @@ class FileManagerController extends BaseApiController
         Storage::disk($disk)->makeDirectory('.trash');
 
         // Move folder to trash
-        $trashFullPath = Storage::disk($disk)->path($trashPath);
-        File::moveDirectory($fullPath, $trashFullPath);
+        // Note: laravel Storage::move() works for both files and directories on most drivers
+        Storage::disk($disk)->move($path, $trashPath);
+
+        ActivityLog::log('soft_deleted_folder', null, ['path' => $path, 'disk' => $disk], $request->user(), "Moved folder to trash: {$path}");
+
+        // Sync with Media Library (Update paths for all files inside the folder)
+        try {
+            // Find all media items starting with this path
+            $searchPath = $path . '/';
+            $mediaItems = \App\Models\Media::where('path', 'like', $searchPath . '%')
+                ->orWhere('path', 'like', '/' . $searchPath . '%')
+                ->get();
+
+            foreach ($mediaItems as $media) {
+                $relativePart = str_replace([$path, '/' . $path], '', $media->path);
+                $newMediaPath = $trashPath . $relativePart;
+                
+                // Move thumbnails and variants for this media item too
+                // We need to pass the new path to moveVariantsToTrash logic
+                // But moveVariantsToTrash moves FROM $media->path TO $trashPath
+                // Our $media->path is currently the old path.
+                $this->mediaService->moveVariantsToTrash($media, $newMediaPath);
+
+                $media->path = $newMediaPath;
+                $media->save();
+                $media->delete(); // Soft delete found media too
+            }
+        } catch (\Exception $e) {
+            // ignore
+        }
 
         // Record in database
-        DeletedFile::create([
+        \App\Models\DeletedFile::create([
             'original_path' => '/'.$path,
             'trash_path' => $trashPath,
+            'disk' => $disk,
             'name' => $folderName,
             'type' => 'folder',
             'size' => null,
             'extension' => null,
             'mime_type' => null,
-            'deleted_by' => Auth::id(),
+            'deleted_by' => \Illuminate\Support\Facades\Auth::id(),
             'deleted_at' => now(),
         ]);
 
@@ -642,51 +775,43 @@ class FileManagerController extends BaseApiController
 
         $request->validate([
             'id' => 'required|integer|exists:deleted_files,id',
-            'disk' => 'nullable|string',
+            'disk' => 'nullable|string', // Keep for validation, but actual disk comes from DeletedFile
         ]);
 
-        $disk = $request->input('disk', 'public');
         $deletedFile = DeletedFile::findOrFail($request->input('id'));
 
         $trashPath = $deletedFile->trash_path;
-        $originalPath = trim($deletedFile->original_path, '/');
+        $originalPath = ltrim($deletedFile->original_path, '/');
+        $disk = $deletedFile->disk ?? 'public'; // Use disk from deleted_files table
 
-        // Check if trash file exists
+        if (! Storage::disk($disk)->exists($trashPath) && !is_dir(Storage::disk($disk)->path($trashPath))) {
+            $deletedFile->delete(); // Remove record if file/folder is already gone
+            return $this->error('Trash item no longer exists in storage', 404, [], 'TRASH_ITEM_NOT_FOUND');
+        }
+
+        // Check if original path is available, if not, generate a unique one
+        $finalOriginalPath = $originalPath;
         if ($deletedFile->type === 'folder') {
-            $trashFullPath = Storage::disk($disk)->path($trashPath);
-            if (! is_dir($trashFullPath)) {
-                $deletedFile->delete();
-
-                return $this->error('Trash item no longer exists', 404, [], 'TRASH_ITEM_NOT_FOUND');
+            if (is_dir(Storage::disk($disk)->path($originalPath))) {
+                $finalOriginalPath = $originalPath.'_restored_'.time();
             }
-
-            // Check if original path is available
-            $originalFullPath = Storage::disk($disk)->path($originalPath);
-            if (is_dir($originalFullPath)) {
-                // Generate unique path
-                $originalPath = $originalPath.'_restored_'.time();
-            }
-
-            // Restore folder
-            File::moveDirectory($trashFullPath, Storage::disk($disk)->path($originalPath));
         } else {
-            if (! Storage::disk($disk)->exists($trashPath)) {
-                $deletedFile->delete();
-
-                return $this->error('Trash item no longer exists', 404, [], 'TRASH_ITEM_NOT_FOUND');
-            }
-
-            // Check if original path is available
             if (Storage::disk($disk)->exists($originalPath)) {
                 $ext = pathinfo($originalPath, PATHINFO_EXTENSION);
                 $name = pathinfo($originalPath, PATHINFO_FILENAME);
                 $dir = dirname($originalPath);
                 $dir = $dir === '.' ? '' : $dir.'/';
-                $originalPath = $dir.$name.'_restored_'.time().'.'.$ext;
+                $finalOriginalPath = $dir.$name.'_restored_'.time().($ext ? '.'.$ext : '');
             }
+        }
 
-            // Restore file
-            Storage::disk($disk)->move($trashPath, $originalPath);
+        // Restore to original path
+        if ($deletedFile->type === 'folder') {
+            $fullTrashPath = Storage::disk($disk)->path($trashPath);
+            $fullOriginalPath = Storage::disk($disk)->path($finalOriginalPath);
+            \Illuminate\Support\Facades\File::moveDirectory($fullTrashPath, $fullOriginalPath);
+        } else {
+            Storage::disk($disk)->move($trashPath, $finalOriginalPath);
         }
 
         // Sync with Media Library (Restore)
@@ -700,7 +825,10 @@ class FileManagerController extends BaseApiController
                     ->first();
 
                 if ($media) {
-                    $media->path = $originalPath; // Update to restored path
+                    // Move variants back from trash
+                    $this->mediaService->moveVariantsFromTrash($media, $trashPath, $finalOriginalPath);
+
+                    $media->path = $finalOriginalPath; // Update to restored path
                     $media->save(); // Save path change
                     $media->restore(); // Un-soft-delete
                 }
@@ -708,13 +836,39 @@ class FileManagerController extends BaseApiController
                 // Log but continue
                 \Illuminate\Support\Facades\Log::warning('Failed to sync media restore: '.$e->getMessage());
             }
+        } else {
+            // Sync with Media Library (Restore items inside folder)
+            try {
+                // Find all media items starting with the trash path
+                $mediaItems = \App\Models\Media::withTrashed()
+                    ->where('path', 'like', $trashPath . '%')
+                    ->orWhere('path', 'like', '/' . $trashPath . '%')
+                    ->get();
+
+                foreach ($mediaItems as $media) {
+                    $relativePart = str_replace([$trashPath, '/' . $trashPath], '', $media->path);
+                    $newPath = $finalOriginalPath . $relativePart;
+
+                    // Move variants back from trash
+                    $this->mediaService->moveVariantsFromTrash($media, $media->path, $newPath);
+
+                    $media->path = $newPath;
+                    $media->save();
+                    $media->restore();
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Failed to sync folder media restore: '.$e->getMessage());
+            }
         }
+
 
         // Remove from database
         $deletedFile->delete();
+        
+        ActivityLog::log('restored_file', null, ['path' => $finalOriginalPath, 'disk' => $disk], $request->user(), "Restored item from trash: {$finalOriginalPath}");
 
         return $this->success([
-            'restored_path' => '/'.$originalPath,
+            'restored_path' => '/'.$finalOriginalPath,
         ], 'Item restored successfully');
     }
 
@@ -727,46 +881,70 @@ class FileManagerController extends BaseApiController
             return $this->forbidden('You do not have permission to empty trash');
         }
 
-        $request->validate([
-            'disk' => 'nullable|string',
-        ]);
+        // We'll iterate through all deleted files to handle their specific disks
+        $deletedRecords = \App\Models\DeletedFile::all();
+        $disksToClean = [];
 
-        $disk = $request->input('disk', 'public');
-        try {
-             $disk = $this->validateDisk($disk);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-             return $this->validationError($e->errors());
-        }
+        foreach ($deletedRecords as $record) {
+            $disk = $record->disk ?? 'public';
+            $trashPath = $record->trash_path;
 
-        // Sync with Media Library (Delete All Trashed)
-        $deletedFiles = DeletedFile::where('type', 'file')->get();
-        foreach ($deletedFiles as $file) {
-             try {
-                $media = \App\Models\Media::withTrashed()
-                    ->where(function($q) use ($file) {
-                        $q->where('path', $file->trash_path)
-                          ->orWhere('path', '/'.$file->trash_path);
-                    })
-                    ->first();
+            // Sync with Media Library (Force Delete)
+            if ($record->type === 'file') {
+                 try {
+                    $media = \App\Models\Media::withTrashed()
+                        ->where(function($q) use ($trashPath) {
+                            $q->where('path', $trashPath)
+                              ->orWhere('path', '/'.$trashPath);
+                        })
+                        ->first();
 
-                if ($media) {
-                    $media->forceDelete();
+                    if ($media) {
+                        $this->mediaService->delete($media, true);
+                    }
+                } catch (\Exception $e) {
+                    // ignore
                 }
-            } catch (\Exception $e) {
-                // ignore
+            } else {
+                // For folders, find and force delete all media records inside
+                try {
+                    $searchPath = $record->trash_path;
+                    $mediaItems = \App\Models\Media::withTrashed()
+                        ->where('path', 'like', $searchPath . '%')
+                        ->orWhere('path', 'like', '/' . $searchPath . '%')
+                        ->get();
+
+                    foreach ($mediaItems as $media) {
+                        $this->mediaService->delete($media, true);
+                    }
+                } catch (\Exception $e) {
+                    // ignore
+                }
+            }
+
+            // Track unique disks to clean directories later
+            if (!in_array($disk, $disksToClean)) {
+                $disksToClean[] = $disk;
             }
         }
 
-        // Delete all files from .trash folder
-        $trashPath = Storage::disk($disk)->path('.trash');
-        if (is_dir($trashPath)) {
-            File::deleteDirectory($trashPath);
-            Storage::disk($disk)->makeDirectory('.trash');
+        // Clean up .trash folders on all affected disks
+        foreach ($disksToClean as $diskName) {
+            try {
+                if (Storage::disk($diskName)->exists('.trash')) {
+                    Storage::disk($diskName)->deleteDirectory('.trash');
+                    Storage::disk($diskName)->makeDirectory('.trash');
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to clean trash on disk {$diskName}: " . $e->getMessage());
+            }
         }
 
-        // Clear database records
-        $count = DeletedFile::count();
-        DeletedFile::truncate();
+        // Clear database records - use delete() instead of truncate() for better compatibility with transactions/locks
+        $count = $deletedRecords->count();
+        \App\Models\DeletedFile::query()->delete();
+
+        ActivityLog::log('emptied_trash', null, ['deleted_count' => $count, 'disks' => $disksToClean], $request->user(), "Emptied File Manager trash on disks: " . implode(', ', $disksToClean));
 
         return $this->success([
             'deleted_count' => $count,
@@ -778,23 +956,31 @@ class FileManagerController extends BaseApiController
      */
     public function deletePermanently(Request $request)
     {
+        \Illuminate\Support\Facades\Log::info('FileManagerController::deletePermanently called', [
+            'method' => $request->method(),
+            'input' => $request->all(),
+            'query' => $request->query(),
+            'user' => $request->user()->id
+        ]);
+
         if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to permanently delete files');
         }
 
         $request->validate([
             'id' => 'required|integer|exists:deleted_files,id',
-            'disk' => 'nullable|string',
+            'disk' => 'nullable|string', // Keep for validation, but actual disk comes from DeletedFile
         ]);
 
-        $disk = $request->input('disk', 'public');
+        $deletedFile = DeletedFile::findOrFail($request->input('id'));
+        $disk = $deletedFile->disk ?? 'public'; // Use disk from deleted_files table
+
         try {
              $disk = $this->validateDisk($disk);
         } catch (\Illuminate\Validation\ValidationException $e) {
              return $this->validationError($e->errors());
         }
-        $deletedFile = DeletedFile::findOrFail($request->input('id'));
-
+        
         $trashPath = $deletedFile->trash_path;
 
         // Sync with Media Library (Force Delete)
@@ -808,7 +994,22 @@ class FileManagerController extends BaseApiController
                     ->first();
 
                 if ($media) {
-                    $media->forceDelete();
+                    $this->mediaService->delete($media, true);
+                }
+            } catch (\Exception $e) {
+                // ignore
+            }
+        } else {
+            // For folders, find and force delete all media records inside
+            try {
+                $searchPath = $deletedFile->trash_path;
+                $mediaItems = \App\Models\Media::withTrashed()
+                    ->where('path', 'like', $searchPath . '%')
+                    ->orWhere('path', 'like', '/' . $searchPath . '%')
+                    ->get();
+
+                foreach ($mediaItems as $media) {
+                    $this->mediaService->delete($media, true);
                 }
             } catch (\Exception $e) {
                 // ignore
@@ -817,9 +1018,8 @@ class FileManagerController extends BaseApiController
 
         // Delete from storage
         if ($deletedFile->type === 'folder') {
-            $trashFullPath = Storage::disk($disk)->path($trashPath);
-            if (is_dir($trashFullPath)) {
-                File::deleteDirectory($trashFullPath);
+            if (Storage::disk($disk)->exists($trashPath)) {
+                Storage::disk($disk)->deleteDirectory($trashPath);
             }
         } else {
             if (Storage::disk($disk)->exists($trashPath)) {
@@ -829,6 +1029,8 @@ class FileManagerController extends BaseApiController
 
         // Remove from database
         $deletedFile->delete();
+
+        ActivityLog::log('permanently_deleted_file', null, ['path' => $deletedFile->original_path, 'disk' => $disk], $request->user(), "Permanently deleted item from trash: {$deletedFile->original_path}");
 
         return $this->success(null, 'Item permanently deleted');
     }

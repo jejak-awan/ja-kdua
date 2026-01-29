@@ -59,46 +59,64 @@
     </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
-import { Sparkles, CheckCircle2, RefreshCw, FileText, Maximize2, ArrowRight } from 'lucide-vue-next';
-import Dialog from '@/components/ui/dialog.vue';
-import DialogContent from '@/components/ui/dialog-content.vue';
-import DialogHeader from '@/components/ui/dialog-header.vue';
-import DialogTitle from '@/components/ui/dialog-title.vue';
-import DialogDescription from '@/components/ui/dialog-description.vue';
-import Button from '@/components/ui/button.vue';
-import Input from '@/components/ui/input.vue';
-import axios from 'axios';
+import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
+import CheckCircle2 from 'lucide-vue-next/dist/esm/icons/circle-check-big.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Maximize2 from 'lucide-vue-next/dist/esm/icons/maximize.js';
+import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js';
+import { 
+    Dialog, 
+    DialogContent, 
+    DialogHeader, 
+    DialogTitle, 
+    DialogDescription,
+    Button,
+    Input
+} from '@/components/ui';
+import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 
-const props = defineProps({
-    open: Boolean,
-    context: String
-});
+interface AiGenerateResponse {
+    success: boolean;
+    data: {
+        content: string;
+    };
+}
 
-const emit = defineEmits(['update:open', 'result']);
+const props = defineProps<{
+    open: boolean;
+    context?: string;
+}>();
+
+const emit = defineEmits<{
+    (e: 'update:open', value: boolean): void;
+    (e: 'result', content: string): void;
+}>();
+
 const toast = useToast();
 
 const customPrompt = ref('');
 const loading = ref(false);
 
-const handleCommand = async (prompt) => {
+const handleCommand = async (prompt: string) => {
     if (!prompt) return;
     
     loading.value = true;
     try {
-        const response = await axios.post('/api/admin/ja/ai/generate', {
+        const response = await api.post<AiGenerateResponse>('/admin/ja/ai/generate', {
             prompt: prompt,
             context: props.context
         });
 
         if (response.data.success) {
-            emit('result', response.data.data.content); // Accessed nested content
+            emit('result', response.data.data.content);
             emit('update:open', false);
             customPrompt.value = '';
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('AI Ops Error:', error);
         toast.service.error('AI Error', error.response?.data?.message || 'Failed to generate content.');
     } finally {

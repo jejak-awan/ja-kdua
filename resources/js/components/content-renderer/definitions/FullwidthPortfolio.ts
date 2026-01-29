@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { FolderOpen } from 'lucide-vue-next';
+import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

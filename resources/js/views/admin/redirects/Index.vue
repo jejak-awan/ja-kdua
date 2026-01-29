@@ -148,7 +148,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -166,24 +166,27 @@ import TableRow from '../../../components/ui/table-row.vue';
 import TableHead from '../../../components/ui/table-head.vue';
 import TableBody from '../../../components/ui/table-body.vue';
 import TableCell from '../../../components/ui/table-cell.vue';
-import { 
-    Plus, Search, Pencil, 
-    Trash2, ArrowRightLeft, CheckCircle2, 
-    BarChart3, Loader2 
-} from 'lucide-vue-next';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import ArrowRightLeft from 'lucide-vue-next/dist/esm/icons/arrow-right-left.js';
+import CheckCircle2 from 'lucide-vue-next/dist/esm/icons/circle-check-big.js';
+import BarChart3 from 'lucide-vue-next/dist/esm/icons/chart-bar-stacked.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 
-const redirects = ref([]);
-const statistics = ref(null);
+const redirects = ref<any[]>([]);
+const statistics = ref<any>(null);
 const loading = ref(false);
 const search = ref('');
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
-const editingRedirect = ref(null);
+const editingRedirect = ref<any>(null);
 
 const filteredRedirects = computed(() => {
     if (!search.value) return redirects.value;
@@ -206,7 +209,7 @@ const fetchRedirects = async () => {
         try {
             const statsResponse = await api.get('/admin/ja/redirects/statistics');
             statistics.value = parseSingleResponse(statsResponse);
-        } catch (error) {
+        } catch (error: any) {
             // Calculate from redirects if endpoint doesn't exist
             statistics.value = {
                 total: redirects.value.length,
@@ -214,19 +217,19 @@ const fetchRedirects = async () => {
                 total_hits: redirects.value.reduce((sum, r) => sum + (r.hits || 0), 0),
             };
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch redirects:', error);
     } finally {
         loading.value = false;
     }
 };
 
-const editRedirect = (redirect) => {
+const editRedirect = (redirect: any) => {
     editingRedirect.value = redirect;
     showEditModal.value = true;
 };
 
-const deleteRedirect = async (redirect) => {
+const deleteRedirect = async (redirect: any) => {
     const confirmed = await confirm({
         title: t('features.redirects.actions.delete'),
         message: t('features.redirects.messages.deleteConfirm', { from: redirect.from_url }),
@@ -240,7 +243,7 @@ const deleteRedirect = async (redirect) => {
         await api.delete(`/admin/ja/redirects/${redirect.id}`);
         toast.success.delete(t('features.redirects.title'));
         fetchRedirects();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete redirect:', error);
         toast.error.delete(error, t('features.redirects.title'));
     }

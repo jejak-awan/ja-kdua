@@ -11,6 +11,9 @@ export const blockSchemas = {
 
 export type BlockType = keyof typeof blockSchemas
 
-export function getSchemaForBlock(type: BlockType): ZodObject<ZodRawShape> | null {
-    return blockSchemas[type] || null
+export function getSchemaForBlock(type: string): ZodObject<ZodRawShape> | null {
+    if (Object.prototype.hasOwnProperty.call(blockSchemas, type)) {
+        return blockSchemas[type as BlockType]
+    }
+    return null
 }

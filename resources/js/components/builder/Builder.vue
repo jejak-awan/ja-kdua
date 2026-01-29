@@ -198,6 +198,7 @@ import ContextMenu from './ui/ContextMenu.vue'
 // Core
 import { useBuilder } from './core'
 import { useCmsStore } from '@/stores/cms'
+import { throttle, debounce } from '../../shared/utils/performance'
 import type { BlockInstance, BuilderInstance, Canvas as ICanvas } from '../../types/builder'
 
 // Register Module Definitions (side-effect import)
@@ -291,20 +292,22 @@ watch(() => (builder as any).isFullscreen, (val) => {
   emit('update:fullscreen', val)
 })
 
-watch(builder.blocks, (newBlocks) => {
+watch(builder.blocks, debounce((newBlocks) => {
   emit('update', { blocks: newBlocks })
   emit('update:modelValue', newBlocks)
-}, { deep: true })
+}, 500), { deep: true })
 
 watch(() => (builder as any).autoSave, (val) => {
   emit('update:autoSave', val)
 }, { immediate: true })
 
 watch(() => props.modelValue, (newBlocks) => {
-  if (newBlocks && JSON.stringify(newBlocks) !== JSON.stringify(builder.blocks.value)) {
+  // Only sync if the reference actually changed and it's not the same as what we have
+  // (Using a simple check instead of expensive JSON.stringify on every prop update)
+  if (newBlocks && newBlocks !== builder.blocks.value) {
     builder.blocks.value = newBlocks
   }
-}, { deep: true })
+}, { deep: false }) // deep: false since we only care about top-level array reference changes from parent
 
 const selectedModule = computed(() => builder.selectedModule.value)
 
@@ -508,7 +511,7 @@ onMounted(async () => {
     builder.fetchMetadata()
     
     if (canvasAreaRef.value) {
-        resizeObserver = new ResizeObserver((entries) => {
+        const handleResize = throttle((entries: ResizeObserverEntry[]) => {
             if (builder.deviceModeType.value !== 'auto') return
 
             for (let entry of entries) {
@@ -523,7 +526,9 @@ onMounted(async () => {
                     builder.device.value = newDevice
                 }
             }
-        })
+        }, 150)
+
+        resizeObserver = new ResizeObserver(handleResize)
         resizeObserver.observe(canvasAreaRef.value)
     }
 
@@ -587,11 +592,21 @@ const activeCanvasData = computed(() => {
     return getCanvasById(activeCanvasForModal.value)
 })
 
-const handleContextMenuAction = async (action: string, id: string, mode = 'module') => {
-    if (mode === 'canvas') {
+
+const handleContextMenuAction = async (action: string, id?: string, mode = 'module') => {
+    if (mode === 'canvas' && id) {
         handleCanvasAction(action, id)
         return
     }
+    
+    // If id is missing but required for action, return
+    if (!id && action !== 'paste' && action !== 'paste-style') { // paste might happen without id? No, usually paste to something.
+         // Actually context menu usually has an ID.
+         // But type signature mismatch in ContextMenu.vue prop vs emit handling causes error.
+         // We allow undefined and check.
+         return
+    }
+    if (!id) return;
 
     switch (action) {
         case 'undo': builder.undo(); break
@@ -684,7 +699,7 @@ const handleImportCanvas = (_data: any) => {
     showImportExportModal.value = false
 }
 
-const handleSaveCanvasSettings = (data: { title: string, isGlobal: boolean, append: boolean }) => {
+const handleSaveCanvasSettings = (data: { title: string, isGlobal: boolean, append: string }) => {
     if (activeCanvasForModal.value) {
         builder.renameCanvas(activeCanvasForModal.value, data.title)
         const canvas = getCanvasById(activeCanvasForModal.value)

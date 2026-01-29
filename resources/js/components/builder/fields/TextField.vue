@@ -20,8 +20,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Database, X } from 'lucide-vue-next'
-import { BaseInput } from '../ui'
+import Database from 'lucide-vue-next/dist/esm/icons/database.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';import { BaseInput } from '../ui'
 
 const props = defineProps<{
   field: any;

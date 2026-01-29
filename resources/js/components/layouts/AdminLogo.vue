@@ -35,23 +35,18 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
-import { useCmsStore } from '../../stores/cms';
+import { useCmsStore } from '@/stores/cms';
 
-const props = defineProps({
-  minimized: {
-    type: Boolean,
-    default: false
-  },
-  title: {
-    type: String,
-    default: null
-  },
-  subtitle: {
-    type: String,
-    default: null
-  }
+const props = withDefaults(defineProps<{
+  minimized?: boolean;
+  title?: string | null;
+  subtitle?: string | null;
+}>(), {
+  minimized: false,
+  title: null,
+  subtitle: null
 });
 
 const cmsStore = useCmsStore();

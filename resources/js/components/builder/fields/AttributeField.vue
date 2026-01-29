@@ -9,7 +9,7 @@
           </div>
           <div class="attribute-actions flex gap-1">
             <IconButton :icon="editingIndex === index ? ChevronUp : Settings2" size="sm" @click="toggleEdit(index)" />
-            <IconButton :icon="Trash2" size="sm" variant="danger" @click="removeAttribute(index)" />
+            <IconButton :icon="Trash2" size="sm" variant="ghost" class="text-red-500 hover:bg-red-500/10 hover:text-red-600" @click="removeAttribute(index)" />
           </div>
         </div>
 
@@ -75,8 +75,10 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import type { BlockInstance } from '../../../types/builder'
-import { Plus, Settings2, Trash2, ChevronUp } from 'lucide-vue-next'
-import { BaseButton, IconButton, BaseLabel, BasePopover } from '../ui'
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Settings2 from 'lucide-vue-next/dist/esm/icons/settings.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';import { BaseButton, IconButton, BaseLabel, BasePopover } from '../ui'
 
 interface AttributeItem {
   name: string;

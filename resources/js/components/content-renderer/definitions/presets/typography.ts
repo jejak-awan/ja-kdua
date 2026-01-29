@@ -1,5 +1,8 @@
 import type { SettingOption, SettingDefinition, ModuleSettings } from '@/types/builder';
-import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-vue-next';
+import AlignLeft from 'lucide-vue-next/dist/esm/icons/align-start-horizontal.js';
+import AlignCenter from 'lucide-vue-next/dist/esm/icons/align-center-horizontal.js';
+import AlignRight from 'lucide-vue-next/dist/esm/icons/align-end-horizontal.js';
+import AlignJustify from 'lucide-vue-next/dist/esm/icons/align-horizontal-justify-center.js';
 
 /**
  * Typography Property Presets

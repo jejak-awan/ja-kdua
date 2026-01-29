@@ -133,10 +133,7 @@
                             </div>
                         </div>
                         <Badge
-                            :class="{
-                                'bg-green-500/10 text-green-500 border-green-500/20': form.is_active,
-                                'bg-muted text-muted-foreground': !form.is_active
-                            }"
+                            :variant="form.is_active ? 'success' : 'secondary'"
                         >
                             {{ form.is_active ? $t('features.forms.filters.active') : $t('features.forms.filters.inactive') }}
                         </Badge>
@@ -274,10 +271,7 @@
                             </td>
                             <td class="px-4 py-4 text-center">
                                 <Badge
-                                    :class="{
-                                        'bg-green-500/10 text-green-500 border-green-500/20': form.is_active,
-                                        'bg-muted text-muted-foreground': !form.is_active
-                                    }"
+                                    :variant="form.is_active ? 'success' : 'secondary'"
                                 >
                                     {{ form.is_active ? $t('features.forms.filters.active') : $t('features.forms.filters.inactive') }}
                                 </Badge>
@@ -347,7 +341,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -366,10 +360,21 @@ import SelectItem from '../../../components/ui/select-item.vue';
 import SelectTrigger from '../../../components/ui/select-trigger.vue';
 import SelectValue from '../../../components/ui/select-value.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
-import { 
-    Plus, Search, LayoutGrid, List, Loader2, FileText, Tag, 
-    Pencil, Inbox, Ban, Check, Trash2, RotateCcw
-} from 'lucide-vue-next';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import LayoutGrid from 'lucide-vue-next/dist/esm/icons/layout-grid.js';
+import List from 'lucide-vue-next/dist/esm/icons/list.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Tag from 'lucide-vue-next/dist/esm/icons/tag.js';
+import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
+import Inbox from 'lucide-vue-next/dist/esm/icons/inbox.js';
+import Ban from 'lucide-vue-next/dist/esm/icons/ban.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+
+import type { Form } from '@/types/forms';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
@@ -377,12 +382,12 @@ const toast = useToast();
 
 // State
 const router = useRouter();
-const forms = ref([]);
+const forms = ref<Form[]>([]);
 const loading = ref(true);
 const search = ref('');
 const statusFilter = ref('all');
 const trashedFilter = ref('without');
-const selectedForm = ref(null);
+const selectedForm = ref<Form | null>(null);
 const viewMode = ref('card');
 
 const filteredForms = computed(() => {
@@ -399,7 +404,7 @@ const filteredForms = computed(() => {
 
     if (statusFilter.value && statusFilter.value !== 'all') {
         const isActive = statusFilter.value === 'active';
-        result = result.filter(form => form.is_active === isActive);
+        result = result.filter((form: Form) => form.is_active === isActive);
     }
 
     return result;
@@ -409,15 +414,15 @@ const fetchForms = async () => {
     try {
         loading.value = true;
         
-        const params = {};
+        const params: Record<string, any> = {};
         if (trashedFilter.value !== 'without') {
             params.trashed = trashedFilter.value;
         }
 
         const response = await api.get('/admin/ja/forms', { params });
-        const { data } = parseResponse(response);
-        forms.value = ensureArray(data);
-    } catch (error) {
+        const { data } = parseResponse<Form>(response);
+        forms.value = ensureArray<Form>(data);
+    } catch (error: any) {
         console.error('Error fetching forms:', error);
         forms.value = [];
     } finally {
@@ -425,32 +430,32 @@ const fetchForms = async () => {
     }
 };
 
-const editForm = (form) => {
+const editForm = (form: Form) => {
     router.push({ name: 'forms.edit', params: { id: form.id } });
 };
 
-const viewSubmissions = (form) => {
+const viewSubmissions = (form: Form) => {
     router.push({ name: 'forms.submissions', params: { id: form.id } });
 };
 
-const toggleFormStatus = async (form) => {
+const toggleFormStatus = async (form: Form) => {
     try {
         const response = await api.put(`/admin/ja/forms/${form.id}`, {
             is_active: !form.is_active
         });
-        const updatedForm = response.data?.data || response.data;
-        const index = forms.value.findIndex(f => f.id === form.id);
+        const updatedForm = (response.data?.data || response.data) as Form;
+        const index = forms.value.findIndex((f: Form) => f.id === form.id);
         if (index !== -1) {
             forms.value[index] = updatedForm;
         }
         toast.success.action(t('common.messages.success.updated', { item: 'Form status' }));
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error toggling form status:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const deleteForm = async (form) => {
+const deleteForm = async (form: Form) => {
     const confirmed = await confirm({
         title: t('features.forms.actions.delete'),
         message: t('features.forms.messages.deleteConfirm', { name: form.name }),
@@ -464,7 +469,7 @@ const deleteForm = async (form) => {
         await api.delete(`/admin/ja/forms/${form.id}`);
         toast.success.delete('Form');
         fetchForms();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete form:', error);
         toast.error.fromResponse(error);
     }
@@ -490,24 +495,24 @@ const bulkDelete = async () => {
         toast.success.delete('Forms');
         selectedIds.value = [];
         fetchForms();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to bulk delete forms:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const duplicateForm = async (form) => {
+const duplicateForm = async (form: Form) => {
     try {
         await api.post(`/admin/ja/forms/${form.id}/duplicate`);
         toast.success.duplicate('Form');
         fetchForms();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to duplicate form:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const restoreForm = async (form) => {
+const restoreForm = async (form: Form) => {
     const confirmed = await confirm({
         title: t('common.actions.restore'),
         message: `Are you sure you want to restore ${form.name}?`,
@@ -521,13 +526,13 @@ const restoreForm = async (form) => {
         await api.post(`/admin/ja/forms/${form.id}/restore`);
         toast.success.restore('Form');
         fetchForms();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to restore form:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const forceDeleteForm = async (form) => {
+const forceDeleteForm = async (form: Form) => {
     const confirmed = await confirm({
         title: t('common.actions.forceDelete'),
         message: `Are you sure you want to PERMANENTLY delete ${form.name}? This cannot be undone.`,
@@ -541,19 +546,19 @@ const forceDeleteForm = async (form) => {
         await api.delete(`/admin/ja/forms/${form.id}/force-delete`);
         toast.success.action(t('common.messages.success.deleted', { item: 'Form' }));
         fetchForms();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to force delete form:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const selectedIds = ref([]);
+const selectedIds = ref<(number | string)[]>([]);
 
 const isAllSelected = computed(() => {
     return filteredForms.value.length > 0 && selectedIds.value.length === filteredForms.value.length;
 });
 
-const toggleSelection = (formId) => {
+const toggleSelection = (formId: number | string) => {
     const index = selectedIds.value.indexOf(formId);
     if (index === -1) {
         selectedIds.value.push(formId);
@@ -562,7 +567,7 @@ const toggleSelection = (formId) => {
     }
 };
 
-const toggleSelectAll = (checked) => {
+const toggleSelectAll = (checked: any) => {
     if (checked) {
         selectedIds.value = filteredForms.value.map(f => f.id);
     } else {
@@ -572,7 +577,7 @@ const toggleSelectAll = (checked) => {
 
 const bulkActionSelection = ref('');
 
-const handleBulkAction = async (value) => {
+const handleBulkAction = async (value: any) => {
     if (!value) return;
     
     if (value === 'delete') {
@@ -604,7 +609,7 @@ const handleBulkAction = async (value) => {
     bulkActionSelection.value = '';
 };
 
-const performBulkAction = async (action) => {
+const performBulkAction = async (action: any) => {
     try {
         await api.post('/admin/ja/forms/bulk-action', { 
             ids: selectedIds.value,
@@ -613,7 +618,7 @@ const performBulkAction = async (action) => {
         toast.success.action(t('common.messages.success.updated', { item: 'Forms' }));
         selectedIds.value = [];
         fetchForms();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to bulk action forms:', error);
         toast.error.fromResponse(error);
     }

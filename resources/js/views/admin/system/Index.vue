@@ -236,16 +236,40 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
-import { parseSingleResponse } from '../../../utils/responseParser';
+import api from '@/services/api';
+import { parseSingleResponse } from '@/utils/responseParser';
+
+interface DiskUsage {
+    used: string;
+    total: string;
+    percent?: number;
+}
+
+interface SystemInfo {
+    uptime: number;
+    php_version: string;
+    laravel_version: string;
+    environment: string;
+    debug_mode: boolean;
+    server_software: string;
+    memory_usage: string | number;
+    memory_usage_percent: number;
+    disk_usage: DiskUsage | string;
+    disk_usage_percent: number;
+    database: string;
+}
+
+interface CacheData {
+    status: string;
+}
 
 const { t } = useI18n();
 
 const loading = ref(true);
-const systemInfo = ref({});
+const systemInfo = ref<Partial<SystemInfo>>({});
 const cacheStatus = ref('Active');
 
 const systemHealth = computed(() => {
@@ -266,7 +290,7 @@ const displayMemory = computed(() => {
     if (typeof systemInfo.value.memory_usage === 'string') {
         return systemInfo.value.memory_usage;
     }
-    return formatBytes(systemInfo.value.memory_usage);
+    return formatBytes(systemInfo.value.memory_usage as number);
 });
 
 const displayDisk = computed(() => {
@@ -279,28 +303,27 @@ const displayDisk = computed(() => {
     return usage;
 });
 
-const fetchSystemInfo = async () => {
+const fetchSystemInfo = async () : Promise<void> => {
     loading.value = true;
     try {
         const response = await api.get('/admin/ja/system/info');
-        systemInfo.value = parseSingleResponse(response) || {};
+        systemInfo.value = parseSingleResponse<SystemInfo>(response) || {};
         
         // Fetch cache status
         try {
             const cacheResponse = await api.get('/admin/ja/system/cache-status');
-            const cacheData = parseSingleResponse(cacheResponse) || {};
-            cacheStatus.value = cacheData.status || 'Active';
-        } catch (error) {
+            cacheStatus.value = parseSingleResponse<CacheData>(cacheResponse)?.status || 'Active';
+        } catch (error: any) {
             cacheStatus.value = 'Active';
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch system info:', error);
     } finally {
         loading.value = false;
     }
 };
 
-const formatUptime = (seconds) => {
+const formatUptime = (seconds?: number) : string => {
     if (!seconds) return '-';
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
@@ -308,7 +331,7 @@ const formatUptime = (seconds) => {
     return `${days}d ${hours}h ${minutes}m`;
 };
 
-const formatBytes = (bytes) => {
+const formatBytes = (bytes: number) : string => {
     if (!bytes || typeof bytes !== 'number') return '-';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];

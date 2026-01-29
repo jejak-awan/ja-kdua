@@ -22,56 +22,56 @@
   </div>
 </template>
 
-<script setup>
-import { ref, watch, onUnmounted } from 'vue'
-import BasePopover from './BasePopover.vue'
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+import BasePopover from './BasePopover.vue';
 
-const props = defineProps({
-  align: {
-    type: String,
-    default: 'left'
-  },
-  width: {
-    type: [String, Number],
-    default: 200
-  },
-  noPadding: {
-    type: Boolean,
-    default: false
-  }
-})
-
-const isOpen = ref(false)
-const wrapperRef = ref(null)
-const triggerRect = ref(null)
-
-const toggle = (e) => {
-  if (e) e.stopPropagation()
-  isOpen.value = !isOpen.value
+interface Props {
+  align?: 'left' | 'right' | 'center';
+  width?: string | number;
+  noPadding?: boolean;
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  align: 'left',
+  width: 200,
+  noPadding: false
+});
+
+const isOpen = ref(false);
+const wrapperRef = ref<HTMLElement | null>(null);
+const triggerRect = ref<DOMRect | null>(null);
+
+const toggle = (e?: Event) => {
+  if (e) e.stopPropagation();
+  isOpen.value = !isOpen.value;
+};
 
 const open = () => {
-  window.dispatchEvent(new CustomEvent('builder:dropdown-open', { detail: { id: wrapperRef.value } }))
-  isOpen.value = true
-}
+  if (wrapperRef.value) {
+    window.dispatchEvent(new CustomEvent('builder:dropdown-open', { detail: { id: wrapperRef.value } }));
+  }
+  isOpen.value = true;
+};
 
 const close = () => {
-  isOpen.value = false
-}
+  isOpen.value = false;
+};
 
-const handleOtherOpen = (e) => {
-    if (isOpen.value && e.detail.id !== wrapperRef.value) {
-        close()
+const handleOtherOpen = (e: Event) => {
+    const customEvent = e as CustomEvent;
+    if (isOpen.value && customEvent.detail.id !== wrapperRef.value) {
+        close();
     }
-}
+};
 
 watch(isOpen, (val) => {
     if (val) {
-        window.addEventListener('builder:dropdown-open', handleOtherOpen)
+        window.addEventListener('builder:dropdown-open', handleOtherOpen);
     } else {
-        window.removeEventListener('builder:dropdown-open', handleOtherOpen)
+        window.removeEventListener('builder:dropdown-open', handleOtherOpen);
     }
-})
+});
 
-defineExpose({ open, close, toggle })
+defineExpose({ open, close, toggle });
 </script>

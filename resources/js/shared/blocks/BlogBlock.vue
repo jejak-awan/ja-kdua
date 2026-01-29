@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="blog-block transition-all duration-500"
+    class="blog-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Blog Posts'"
     :style="cardStyles"
@@ -18,17 +18,17 @@
         v-text="settings.title || 'Insights & Stories'"
       ></h2>
 
-      <div class="blog-grid transition-all duration-500" :style="gridStyles">
+      <div class="blog-grid transition-[width] duration-500" :style="gridStyles">
         <Card 
           v-for="post in mockPosts" 
           :key="post.id"
-          class="blog-post group flex flex-col border-none shadow-2xl overflow-hidden rounded-[3rem] transition-all duration-700 bg-white dark:bg-slate-900 border border-slate-50 dark:border-slate-800 hover:-translate-y-4"
+          class="blog-post group flex flex-col border-none shadow-2xl overflow-hidden rounded-[3rem] transition-colors duration-700 bg-white dark:bg-slate-900 border border-slate-50 dark:border-slate-800 hover:-translate-y-4"
           :style="postStyles"
         >
           <!-- Featured Image -->
           <div 
             v-if="settings.showImage !== false" 
-            class="post-image relative overflow-hidden transition-all duration-500" 
+            class="post-image relative overflow-hidden transition-[width] duration-500" 
             :style="imageWrapperStyles"
           >
             <div class="absolute inset-0 bg-slate-50 dark:bg-slate-950 flex items-center justify-center overflow-hidden">
@@ -39,7 +39,7 @@
             <!-- Category Badge -->
             <Badge 
               v-if="settings.showCategory !== false" 
-              class="absolute top-6 left-6 z-20 rounded-2xl font-black px-5 py-2 text-[10px] uppercase tracking-widest bg-white/90 dark:bg-slate-900/90 text-primary border-none shadow-xl hover:bg-primary hover:text-white transition-all transform -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
+              class="absolute top-6 left-6 z-20 rounded-2xl font-black px-5 py-2 text-[10px] uppercase tracking-widest bg-white/90 dark:bg-slate-900/90 text-primary border-none shadow-xl hover:bg-primary hover:text-white transition-colors transform -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
             >
               {{ post.category }}
             </Badge>

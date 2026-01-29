@@ -54,14 +54,14 @@
         <div v-else-if="results.length > 0" class="space-y-4">
             <!-- Group results by type -->
             <div
-                v-for="type in groupedResults"
+                v-for="(items, type) in groupedResults"
                 :key="type"
                 class="bg-card border border-border rounded-lg p-6"
             >
                 <h2 class="text-lg font-semibold text-foreground mb-4 capitalize">{{ t(`features.search.types.${type}`) }}</h2>
                 <div class="space-y-3">
                     <div
-                        v-for="result in groupedResults[type]"
+                        v-for="result in items"
                         :key="`${result.type}-${result.id}`"
                         @click="handleResultClick(result)"
                         class="p-4 border border-border rounded-lg hover:bg-muted cursor-pointer transition-colors"
@@ -93,7 +93,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -107,14 +107,14 @@ const router = useRouter();
 
 const query = ref(route.query.q || '');
 const searchQuery = ref(route.query.q || '');
-const results = ref([]);
+const results = ref<any[]>([]);
 const loading = ref(false);
-const typeFilters = ref([]);
+const typeFilters = ref<any[]>([]);
 
 const availableTypes = ['content', 'category', 'user', 'media', 'page', 'tag'];
 
 const groupedResults = computed(() => {
-    const grouped = {};
+    const grouped: Record<string, any[]> = {};
     
     let filteredResults = results.value;
     if (typeFilters.value.length > 0) {
@@ -148,7 +148,7 @@ const performSearch = async () => {
         
         // Update URL
         router.replace({ query: { q: query.value } });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to search:', error);
         results.value = [];
     } finally {
@@ -156,7 +156,7 @@ const performSearch = async () => {
     }
 };
 
-const toggleTypeFilter = (type) => {
+const toggleTypeFilter = (type: string) => {
     const index = typeFilters.value.indexOf(type);
     if (index > -1) {
         typeFilters.value.splice(index, 1);
@@ -165,7 +165,7 @@ const toggleTypeFilter = (type) => {
     }
 };
 
-const handleResultClick = (result) => {
+const handleResultClick = (result: any) => {
     // Navigate based on result type
     if (result.type === 'content') {
         router.push({ name: 'contents.edit', params: { id: result.id } });
@@ -180,7 +180,7 @@ const handleResultClick = (result) => {
     }
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string) => {
     if (!date) return '';
     return new Date(date).toLocaleDateString();
 };

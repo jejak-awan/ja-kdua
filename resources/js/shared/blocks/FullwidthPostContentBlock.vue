@@ -4,12 +4,12 @@
     :mode="mode" 
     :device="device"
     tag="article"
-    class="fullwidth-post-content-block transition-all duration-500"
+    class="fullwidth-post-content-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Fullwidth Post Content'"
     :style="cardStyles"
   >
-    <div class="content-inner mx-auto px-6 transition-all duration-500" :style="innerStyles">
+    <div class="content-inner mx-auto px-6 transition-[width] duration-500" :style="innerStyles">
       <div v-if="mode === 'edit'" class="edit-placeholder opacity-70">
           <p :style="paragraphStyles">
             This is where the post content will be rendered. In the builder, we show this placeholder. 

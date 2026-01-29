@@ -1,5 +1,5 @@
 
-import axios from 'axios';
+import api from '@/services/api';
 
 interface ErrorLog {
     message: string;
@@ -12,7 +12,7 @@ interface ErrorLog {
 }
 
 class Logger {
-    private apiUrl = '/api/v1/logs/frontend';
+    private apiUrl = '/logs/frontend';
     private isSending = false;
     private queue: ErrorLog[] = [];
 
@@ -81,7 +81,7 @@ class Logger {
         if (this.queue.length > 10) return;
 
         try {
-            await axios.post(this.apiUrl, log);
+            await api.post(this.apiUrl, log);
         } catch (e) {
             console.error('Failed to send log to backend', e);
             // Fallback: Use Navigator.sendBeacon if axios fails (e.g. unload)

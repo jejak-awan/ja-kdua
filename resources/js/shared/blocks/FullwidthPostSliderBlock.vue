@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="fullwidth-post-slider-block transition-all duration-500"
+    class="fullwidth-post-slider-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Fullwidth Post Slider'"
     :style="cardStyles"
@@ -31,7 +31,7 @@
                       
                       <!-- Content -->
                       <div 
-                        class="relative z-20 h-full w-full flex flex-col items-center justify-center text-center px-8 md:px-24 text-white transition-all duration-700"
+                        class="relative z-20 h-full w-full flex flex-col items-center justify-center text-center px-8 md:px-24 text-white transition-colors duration-700"
                         :class="[
                           settings.contentPosition === 'top' ? 'justify-start pt-24' : 
                           settings.contentPosition === 'bottom' ? 'justify-end pb-24' : 'justify-center'
@@ -73,7 +73,7 @@
                               v-if="settings.showReadMore !== false" 
                               as="a"
                               :href="mode === 'view' ? post.url : undefined" 
-                              class="h-14 px-12 rounded-full font-bold shadow-2xl hover:scale-110 active:scale-95 transition-all text-lg animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300"
+                              class="h-14 px-12 rounded-full font-bold shadow-2xl hover:scale-110 active:scale-95 transition-colors text-lg animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300"
                               :style="buttonDisplayStyles"
                               @click="handleLinkClick"
                           >
@@ -87,8 +87,8 @@
   
           <!-- Controls -->
           <template v-if="settings.showArrows !== false">
-              <CarouselPrevious class="left-10 opacity-0 group-hover/main:opacity-100 transition-all duration-300 bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 hover:scale-110 h-14 w-14 z-30" />
-              <CarouselNext class="right-10 opacity-0 group-hover/main:opacity-100 transition-all duration-300 bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 hover:scale-110 h-14 w-14 z-30" />
+              <CarouselPrevious class="left-10 opacity-0 group-hover/main:opacity-100 transition-colors duration-300 bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 hover:scale-110 h-14 w-14 z-30" />
+              <CarouselNext class="right-10 opacity-0 group-hover/main:opacity-100 transition-colors duration-300 bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 hover:scale-110 h-14 w-14 z-30" />
           </template>
       </Carousel>
     </div>
@@ -105,8 +105,7 @@ import CarouselNext from '../ui/CarouselNext.vue'
 import CarouselPrevious from '../ui/CarouselPrevious.vue'
 import { Badge, Button } from '../ui'
 import Autoplay from 'embla-carousel-autoplay'
-import { ArrowRight } from 'lucide-vue-next'
-import { 
+import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js';import { 
     getVal,
     getTypographyStyles,
     getLayoutStyles,

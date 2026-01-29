@@ -29,7 +29,7 @@
                 :src="node.attrs.src"
                 :alt="node.attrs.alt"
                 :title="node.attrs.title"
-                class="transition-all duration-200 block"
+                class="transition-opacity duration-200 block"
                 :class="{ 
                     'ring-2 ring-primary': selected,
                     'hover:ring-2 hover:ring-primary/50': !selected 
@@ -73,8 +73,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { nodeViewProps, NodeViewWrapper } from '@tiptap/vue-3'
-import { Check } from 'lucide-vue-next'
-import Button from '@/components/ui/button.vue'
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import { Button } from '@/components/ui';
 
 const props = defineProps(nodeViewProps)
 const resolvedAlign = computed(() => props.node.attrs.textAlign || props.node.attrs.align || 'center')

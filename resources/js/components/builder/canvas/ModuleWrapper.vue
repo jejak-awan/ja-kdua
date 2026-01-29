@@ -138,8 +138,8 @@
 
 <script setup lang="ts">
 import { computed, inject, ref, onMounted, onUnmounted } from 'vue'
-import { Plus, Repeat } from 'lucide-vue-next'
-// @ts-ignore
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Repeat from 'lucide-vue-next/dist/esm/icons/repeat.js';
 import draggable from 'vuedraggable'
 import ModuleRegistry from '../core/ModuleRegistry'
 import ModuleRenderer from './ModuleRenderer.vue'

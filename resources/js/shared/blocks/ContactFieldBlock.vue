@@ -54,40 +54,42 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import { Label, Input, Textarea, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Checkbox } from '../ui'
 import { 
   getTypographyStyles,
   getResponsiveValue
 } from '../utils/styleUtils'
+import type { BlockProps, BuilderInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' }
+const props = withDefaults(defineProps<BlockProps>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
+const builder = inject<BuilderInstance>('builder', null as any)
+const settings = computed(() => props.settings || props.module?.settings || {})
+const currentDevice = computed(() => props.device || builder?.device?.value || 'desktop')
 
-const isFullWidth = computed(() => getResponsiveValue(settings.value, 'fullWidth', device.value) === true)
+const isFullWidth = computed(() => getResponsiveValue(settings.value, 'fullWidth', currentDevice.value) === true)
 
-const optionsList = computed(() => {
+const optionsList = computed<string[]>(() => {
     const opts = settings.value.options
     if (!opts) return []
     if (Array.isArray(opts)) return opts
-    return opts.split('\n').filter(Boolean)
+    if (typeof opts === 'string') return opts.split('\n').filter(Boolean)
+    return []
 })
 
 const fieldStyles = computed(() => {
-    const styles = {}
+    const styles: Record<string, any> = {}
     if (isFullWidth.value) styles.gridColumn = '1 / -1'
     return styles
 })
 
-const labelStyles = computed(() => getTypographyStyles(settings.value, 'label_', device.value))
-const inputStyles = computed(() => getTypographyStyles(settings.value, 'input_', device.value))
+const labelStyles = computed(() => getTypographyStyles(settings.value, 'label_', currentDevice.value))
+const inputStyles = computed(() => getTypographyStyles(settings.value, 'input_', currentDevice.value))
 </script>
 
 <style scoped>

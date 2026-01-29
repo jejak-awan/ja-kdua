@@ -9,7 +9,7 @@
         v-for="toast in toasts"
         :key="toast.id"
         :class="[
-          'pointer-events-auto p-4 rounded-lg shadow-lg border backdrop-blur-sm transition-all duration-300',
+          'pointer-events-auto p-4 rounded-lg shadow-lg border backdrop-blur-sm transition-[opacity,transform] duration-300',
           variantClasses[toast.variant || 'default']
         ]"
       >
@@ -44,13 +44,21 @@
   </Teleport>
 </template>
 
-<script setup>
-import { ref, computed, h } from 'vue';
+<script setup lang="ts">
+import { ref, h, type VNode } from 'vue';
 
-const toasts = ref([]);
+interface ToastOptions {
+  id: number;
+  title?: string;
+  description?: string;
+  variant?: 'default' | 'success' | 'error' | 'warning' | 'info';
+  duration?: number;
+}
+
+const toasts = ref<ToastOptions[]>([]);
 let toastId = 0;
 
-const variantClasses = {
+const variantClasses: Record<string, string> = {
   default: 'bg-card/95 border-border text-foreground',
   success: 'bg-green-500/95 border-green-600 text-white',
   error: 'bg-red-500/95 border-red-600 text-white',
@@ -58,8 +66,8 @@ const variantClasses = {
   info: 'bg-blue-500/95 border-blue-600 text-white',
 };
 
-const getIcon = (variant) => {
-  const icons = {
+const getIcon = (variant: string | undefined): VNode => {
+  const icons: Record<string, any> = {
     success: {
       render() {
         return h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
@@ -96,12 +104,12 @@ const getIcon = (variant) => {
       }
     },
   };
-  return icons[variant] || icons.default;
+  return h(icons[variant || 'default']);
 };
 
-const addToast = (options) => {
+const addToast = (options: Partial<Omit<ToastOptions, 'id'>>) => {
   const id = ++toastId;
-  const toast = {
+  const toast: ToastOptions = {
     id,
     title: options.title || '',
     description: options.description || '',
@@ -111,7 +119,7 @@ const addToast = (options) => {
   
   toasts.value.push(toast);
   
-  if (toast.duration > 0) {
+  if (toast.duration && toast.duration > 0) {
     setTimeout(() => {
       removeToast(id);
     }, toast.duration);
@@ -120,7 +128,7 @@ const addToast = (options) => {
   return id;
 };
 
-const removeToast = (id) => {
+const removeToast = (id: number) => {
   const index = toasts.value.findIndex(t => t.id === id);
   if (index > -1) {
     toasts.value.splice(index, 1);
@@ -132,7 +140,7 @@ defineExpose({ addToast, removeToast });
 
 // Make toast available globally via window
 if (typeof window !== 'undefined') {
-  window.__toastInstance = { addToast, removeToast };
+  (window as any).__toastInstance = { addToast, removeToast };
 }
 </script>
 

@@ -63,54 +63,62 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import DialogFooter from '../ui/dialog-footer.vue';
-import { useToast } from '../../composables/useToast';
-import { useFormValidation } from '../../composables/useFormValidation';
-import { moveCategorySchema } from '../../schemas';
+import { DialogFooter } from '@/components/ui';
+import { useToast } from '@/composables/useToast';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { moveCategorySchema } from '@/schemas';
+import api from '@/services/api';
+
+interface Category {
+    id: number | string;
+    name: string;
+    parent_id?: number | string | null;
+    [key: string]: any;
+}
 
 const { t } = useI18n();
 const toast = useToast();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(moveCategorySchema);
 
-const props = defineProps({
-    category: {
-        type: Object,
-        required: true,
-    },
-    categories: {
-        type: Array,
-        default: () => [],
-    },
-});
+const props = defineProps<{
+    category: Category;
+    categories?: Category[];
+}>();
 
-const emit = defineEmits(['close', 'moved']);
+const emit = defineEmits<{
+    (e: 'close'): void;
+    (e: 'moved'): void;
+}>();
 
 const saving = ref(false);
-const selectedParentId = ref(null);
+const selectedParentId = ref<number | string | null>(null);
 
 const availableParents = computed(() => {
+    const cats = props.categories || [];
     // Exclude self and descendants from parent options
-    return props.categories.filter(cat => {
+    return cats.filter(cat => {
         if (cat.id === props.category.id) return false;
         // Check if cat is a descendant of current category
-        let check = cat;
-        while (check.parent_id) {
+        let check: Category | undefined = cat;
+        while (check?.parent_id) {
             if (check.parent_id === props.category.id) return false;
-            check = props.categories.find(c => c.id === check.parent_id);
+            check = cats.find(c => c.id === check!.parent_id);
             if (!check) break;
         }
         return true;
     });
 });
 
-const getCategoryPath = (category) => {
+const getCategoryPath = (category: Category) => {
     let path = category.name;
     let current = category;
+    const cats = props.categories || [];
+    
     while (current.parent_id) {
-        const parent = props.categories.find(c => c.id === current.parent_id);
+        const parent = cats.find(c => c.id === current.parent_id);
         if (parent) {
             path = parent.name + ' > ' + path;
             current = parent;
@@ -122,7 +130,7 @@ const getCategoryPath = (category) => {
 };
 
 const handleSubmit = async () => {
-    if (!validateWithZod({ parent_id: selectedParentId.value })) return;
+    if (!validateWithZod({ parent_id: selectedParentId.value } as any)) return;
 
     saving.value = true;
     clearErrors();
@@ -132,7 +140,7 @@ const handleSubmit = async () => {
         });
         toast.success.action(t('features.categories.messages.moveSuccess'));
         emit('moved');
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {
@@ -144,7 +152,7 @@ const handleSubmit = async () => {
 };
 
 onMounted(() => {
-    selectedParentId.value = props.category.parent_id;
+    selectedParentId.value = props.category.parent_id || null;
 });
 </script>
 

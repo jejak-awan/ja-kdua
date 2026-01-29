@@ -29,7 +29,7 @@
                 :controls="node.attrs.controls"
                 :autoplay="node.attrs.autoplay"
                 :loop="node.attrs.loop"
-                class="transition-all duration-200 block"
+                class="transition-opacity duration-200 block"
                 :class="{ 
                     'ring-2 ring-primary': selected,
                     'hover:ring-2 hover:ring-primary/50': !selected 

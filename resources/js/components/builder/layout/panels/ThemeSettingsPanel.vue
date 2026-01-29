@@ -78,91 +78,92 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject, watch, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Palette } from 'lucide-vue-next'
-import { defineAsyncComponent } from 'vue'
-import type { BuilderInstance } from '../../../../types/builder'
+import { ref, computed, inject, watch, onMounted, defineAsyncComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
+import type { BuilderInstance } from '../../../../types/builder';
 
-const ColorField = defineAsyncComponent(() => import('../../fields/ColorField.vue'))
-const UploadField = defineAsyncComponent(() => import('../../fields/UploadField.vue'))
+const ColorField = defineAsyncComponent(() => import('../../fields/ColorField.vue'));
+const UploadField = defineAsyncComponent(() => import('../../fields/UploadField.vue'));
 
-const { t } = useI18n()
-const builder = inject<BuilderInstance>('builder') as any
+const { t } = useI18n();
+const builder = inject<BuilderInstance>('builder');
 
-const loading = ref(false)
-const saving = ref(false)
-const isDirty = ref(false)
-const formValues = ref<Record<string, any>>({})
+const loading = ref(false);
+const saving = ref(false);
+const isDirty = ref(false);
+const formValues = ref<Record<string, any>>({});
 
-const selectedThemeSlug = computed(() => builder?.selectedThemeSlug?.value)
-const themes = computed(() => builder?.availableThemes?.value || [])
+const selectedThemeSlug = computed(() => builder?.selectedThemeSlug?.value);
+const themes = computed(() => builder?.availableThemes?.value || []);
 
 const currentTheme = computed(() => {
-  return themes.value.find((t: any) => t.slug === selectedThemeSlug.value)
-})
+  return themes.value.find((t: any) => t.slug === selectedThemeSlug.value);
+});
 
 const settingsSections = computed(() => {
-  if (!currentTheme.value?.manifest?.settings_schema) return []
+  if (!currentTheme.value?.manifest?.settings_schema) return [];
   
-  const schema = currentTheme.value.manifest.settings_schema
-  const sections: Record<string, any> = {}
+  const schema = currentTheme.value.manifest.settings_schema;
+  const sections: Record<string, any> = {};
 
   Object.keys(schema).forEach(key => {
-    const setting = schema[key]
-    const category = setting.category || 'General'
+    const setting = schema[key];
+    const category = setting.category || 'General';
     if (!sections[category]) {
-      sections[category] = { id: category, label: category, settings: [] }
+      sections[category] = { id: category, label: category, settings: [] };
     }
-    sections[category].settings.push({ key, ...setting })
-  })
+    sections[category].settings.push({ key, ...setting });
+  });
 
-  return Object.values(sections)
-})
+  return Object.values(sections);
+});
 
 const loadThemeSettings = () => {
-    if (!currentTheme.value) return
-    const theme = currentTheme.value
-    const schema = theme.manifest?.settings_schema || {}
-    const defaults: any = {}
+    if (!currentTheme.value) return;
+    const theme = currentTheme.value;
+    const schema = theme.manifest?.settings_schema || {};
+    const defaults: any = {};
     
     Object.keys(schema).forEach(key => {
-        defaults[key] = schema[key].default ?? ''
-    })
+        defaults[key] = schema[key].default ?? '';
+    });
     
-    formValues.value = { ...defaults, ...(theme.settings || {}) }
-    isDirty.value = false
-}
+    formValues.value = { ...defaults, ...(theme.settings || {}) };
+    isDirty.value = false;
+};
 
 const handleInput = () => {
-  isDirty.value = true
+  isDirty.value = true;
   // Real-time preview if this is the active theme
-  if (selectedThemeSlug.value === builder?.activeTheme?.value) {
-    builder.themeSettings.value = { ...formValues.value }
-    builder.applyThemeStyles()
+  if (selectedThemeSlug.value === builder?.activeTheme?.value && builder?.themeSettings) {
+    builder.themeSettings.value = { ...formValues.value };
+    if (builder.applyThemeStyles) {
+        builder.applyThemeStyles();
+    }
   }
-}
+};
 
 const saveSettings = async () => {
-  if (!selectedThemeSlug.value) return
-  saving.value = true
+  if (!selectedThemeSlug.value || !builder) return;
+  saving.value = true;
   try {
-    await builder.updateThemeSettings(selectedThemeSlug.value, formValues.value)
-    isDirty.value = false
+    await builder.updateThemeSettings(selectedThemeSlug.value, formValues.value);
+    isDirty.value = false;
   } catch (error) {
-    console.error('Failed to save theme settings:', error)
+    console.error('Failed to save theme settings:', error);
   } finally {
-    saving.value = false
+    saving.value = false;
   }
-}
+};
 
 watch(selectedThemeSlug, () => {
-    loadThemeSettings()
-})
+    loadThemeSettings();
+});
 
 onMounted(() => {
-    loadThemeSettings()
-})
+    loadThemeSettings();
+});
 </script>
 
 <style scoped>

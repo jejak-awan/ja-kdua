@@ -4,20 +4,22 @@
       'mt-4 ring-offset-background focus-visible:outline-none',
       props.class
     )"
-    v-bind="$attrs"
+    v-bind="delegatedProps"
   >
     <slot />
   </TabsContent>
 </template>
 
-<script setup>
-import { TabsContent } from 'radix-vue';
+<script setup lang="ts">
+import { computed, type HTMLAttributes } from 'vue'
+import { TabsContent, type TabsContentProps } from 'radix-vue';
 import { cn } from '../../../lib/utils';
 
-const props = defineProps({
-  class: {
-    type: String,
-    default: '',
-  },
-});
+const props = defineProps<TabsContentProps & { class?: HTMLAttributes['class'] }>();
+
+const delegatedProps = computed(() => {
+  const { class: _, ...delegated } = props
+
+  return delegated
+})
 </script>

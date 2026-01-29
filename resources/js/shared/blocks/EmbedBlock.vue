@@ -3,13 +3,13 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="embed-block transition-all duration-300"
+    class="embed-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Third-Party Embed'"
     :style="cardStyles"
   >
     <template #default="{ settings: blockSettings }">
-      <div v-if="hasContent" class="embed-container bg-black rounded-2xl overflow-hidden shadow-2xl transition-all hover:shadow-blue-500/10" :style="containerStyles">
+      <div v-if="hasContent" class="embed-container bg-black rounded-2xl overflow-hidden shadow-2xl transition-colors hover:shadow-blue-500/10" :style="containerStyles">
         <iframe 
           v-if="blockSettings.embedType === 'url' && blockSettings.embedUrl" 
           :src="blockSettings.embedUrl" 
@@ -33,8 +33,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Code2 } from 'lucide-vue-next'
-import { 
+import Code2 from 'lucide-vue-next/dist/esm/icons/code-xml.js';import { 
     getVal,
     getLayoutStyles,
     getResponsiveValue 

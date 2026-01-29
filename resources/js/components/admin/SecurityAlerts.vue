@@ -53,23 +53,31 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../services/api';
+import api from '@/services/api';
+import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';
+
+interface Alert {
+    id: number;
+    title: string;
+    message: string;
+    severity: 'critical' | 'warning' | 'info';
+    [key: string]: any;
+}
 
 const { t } = useI18n();
 
-const alerts = ref([]);
+const alerts = ref<Alert[]>([]);
 const expanded = ref(true);
-let pollInterval = null;
+const pollInterval = ref<ReturnType<typeof setInterval> | null>(null);
 
 const fetchAlerts = async () => {
     try {
         const response = await api.get('/admin/ja/security/alerts');
         alerts.value = response.data?.data?.alerts || [];
     } catch (error) {
-        // Silently fail
         console.debug('Failed to fetch security alerts:', error);
     }
 };
@@ -78,24 +86,23 @@ const toggleExpanded = () => {
     expanded.value = !expanded.value;
 };
 
-const getSeverityLabel = (severity) => {
-    const labels = {
-        critical: 'Kritis',
-        warning: 'Peringatan',
-        info: 'Info',
+const getSeverityLabel = (severity: string) => {
+    const labels: Record<string, string> = {
+        critical: t('common.severity.critical') || 'Kritis',
+        warning: t('common.severity.warning') || 'Peringatan',
+        info: t('common.severity.info') || 'Info',
     };
     return labels[severity] || severity;
 };
 
 onMounted(() => {
     fetchAlerts();
-    // Poll every 60 seconds
-    pollInterval = setInterval(fetchAlerts, 60000);
+    pollInterval.value = setInterval(fetchAlerts, 60000);
 });
 
 onUnmounted(() => {
-    if (pollInterval) {
-        clearInterval(pollInterval);
+    if (pollInterval.value) {
+        clearInterval(pollInterval.value);
     }
 });
 </script>

@@ -10,19 +10,19 @@
         <Tabs v-model="activeTab" class="w-full">
             <div class="mb-8">
                 <TabsList class="bg-transparent p-0 h-auto gap-0">
-                    <TabsTrigger value="profile" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                    <TabsTrigger value="profile" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                         <User class="w-4 h-4 mr-2" />
                         {{ $t('features.profile.tabs.profile') }}
                     </TabsTrigger>
-                    <TabsTrigger value="password" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                    <TabsTrigger value="password" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                         <KeyRound class="w-4 h-4 mr-2" />
                         {{ $t('features.profile.tabs.password') }}
                     </TabsTrigger>
-                    <TabsTrigger value="two-factor" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                    <TabsTrigger value="two-factor" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                         <ShieldCheck class="w-4 h-4 mr-2" />
                         {{ $t('features.profile.tabs.two-factor') }}
                     </TabsTrigger>
-                    <TabsTrigger value="history" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                    <TabsTrigger value="history" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                         <History class="w-4 h-4 mr-2" />
                         {{ $t('features.profile.tabs.history') }}
                     </TabsTrigger>
@@ -42,7 +42,7 @@
                         <div class="flex items-center gap-x-6">
                              <div class="relative">
                                 <Avatar class="h-24 w-24">
-                                    <AvatarImage :src="profileForm.avatar || undefined" alt="Avatar" />
+                                    <AvatarImage :src="profileForm.avatar || ''" alt="Avatar" />
                                     <AvatarFallback class="text-lg">{{ getInitials(profileForm.name) }}</AvatarFallback>
                                 </Avatar>
                                  <button
@@ -173,58 +173,40 @@ import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import toast from '../../services/toast';
 import { useAuthStore } from '../../stores/auth';
-// @ts-ignore - TODO: Migrate components
+// TODO: Migrate components
 import LoginHistory from '../../components/admin/LoginHistory.vue';
-// @ts-ignore - TODO: Migrate components
+// TODO: Migrate components
 import TwoFactorSettings from '../../components/admin/TwoFactorSettings.vue';
-// @ts-ignore - TODO: Migrate components
-import MediaPicker from '../../components/MediaPicker.vue';
+// TODO: Migrate components
+import MediaPicker from '@/components/media/MediaPicker.vue';
 
 // Shadcn Components
-// @ts-ignore
-import Card from '../../components/ui/card.vue';
-// @ts-ignore
-import CardContent from '../../components/ui/card-content.vue';
-// @ts-ignore
-import CardDescription from '../../components/ui/card-description.vue';
-// @ts-ignore
-import CardHeader from '../../components/ui/card-header.vue';
-// @ts-ignore
-import CardTitle from '../../components/ui/card-title.vue';
+// Shadcn Components
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+    Input,
+    Button,
+    Label,
+    Textarea,
+    Avatar,
+    AvatarImage,
+    AvatarFallback
+} from '@/components/ui';
 
-// @ts-ignore
-import Tabs from '../../components/ui/tabs.vue';
-// @ts-ignore
-import TabsContent from '../../components/ui/tabs-content.vue';
-// @ts-ignore
-import TabsList from '../../components/ui/tabs-list.vue';
-// @ts-ignore
-import TabsTrigger from '../../components/ui/tabs-trigger.vue';
-
-// @ts-ignore
-import Input from '../../components/ui/input.vue';
-// @ts-ignore
-import Button from '../../components/ui/button.vue';
-// @ts-ignore
-import Label from '../../components/ui/label.vue';
-// @ts-ignore
-import Textarea from '../../components/ui/textarea.vue';
-
-// @ts-ignore
-import Avatar from '../../components/ui/avatar.vue';
-// @ts-ignore
-import AvatarImage from '../../components/ui/avatar-image.vue';
-// @ts-ignore
-import AvatarFallback from '../../components/ui/avatar-fallback.vue';
-
-import { 
-    Loader2, 
-    X, 
-    User, 
-    KeyRound, 
-    ShieldCheck, 
-    History 
-} from 'lucide-vue-next';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import User from 'lucide-vue-next/dist/esm/icons/user.js';
+import KeyRound from 'lucide-vue-next/dist/esm/icons/key-round.js';
+import ShieldCheck from 'lucide-vue-next/dist/esm/icons/shield-check.js';
+import History from 'lucide-vue-next/dist/esm/icons/history.js';
 
 // Simple Separator Component (Functional)
 const Separator = { // Minimal local component or just use div
@@ -258,7 +240,7 @@ const profileForm: Ref<ProfileForm> = ref({
     avatar: null,
 });
 
-const initialProfileForm: Ref<ProfileForm | null> = ref(null);
+const initialProfileForm: Ref<ProfileForm | null> = ref<any>(null);
 
 const passwordForm = ref({
     current_password: '',
@@ -304,7 +286,7 @@ const fetchProfile = async () => {
             };
             initialProfileForm.value = JSON.parse(JSON.stringify(profileForm.value));
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error fetching profile:', error);
         toast.error(t('common.messages.error.default'));
     }

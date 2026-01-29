@@ -18,7 +18,7 @@
         <BaseLabel class="mb-0">{{ activeTabLabel }}</BaseLabel>
         <BaseToggle 
           v-model="localValue[activeTab].enabled" 
-          @update:modelValue="updateValue"
+          @update:model-value="updateValue"
         />
       </div>
 
@@ -47,17 +47,14 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
 import type { BlockInstance } from '../../../types/builder'
-import { 
-  ArrowUpDown, 
-  ArrowLeftRight, 
-  Scaling, 
-  RotateCw, 
-  Droplet, 
-  Layers,
-  ChevronUp,
-  ChevronDown
-} from 'lucide-vue-next'
-import { BaseLabel, BaseToggle } from '../ui'
+import ArrowUpDown from 'lucide-vue-next/dist/esm/icons/arrow-up-down.js';
+import ArrowLeftRight from 'lucide-vue-next/dist/esm/icons/arrow-left-right.js';
+import Scaling from 'lucide-vue-next/dist/esm/icons/scaling.js';
+import RotateCw from 'lucide-vue-next/dist/esm/icons/rotate-cw.js';
+import Droplet from 'lucide-vue-next/dist/esm/icons/droplet.js';
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';import { BaseLabel, BaseToggle } from '../ui'
 
 const props = defineProps<{
   field: any;

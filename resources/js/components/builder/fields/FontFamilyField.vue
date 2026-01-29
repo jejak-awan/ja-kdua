@@ -41,7 +41,7 @@ const standardFonts = [
 
 const fontField = computed(() => {
   // Combine standard fonts with global variables if available
-  const globalFonts = (builder?.globalFonts as any)?.value || []
+  const globalFonts = (builder as any)?.globalFonts?.value || []
   const customFonts = globalFonts.map((f: any) => ({
     label: f.name || f.family,
     value: f.family,

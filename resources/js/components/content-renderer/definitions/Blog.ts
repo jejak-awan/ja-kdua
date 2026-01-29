@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { LayoutGrid } from 'lucide-vue-next';
+import LayoutGrid from 'lucide-vue-next/dist/esm/icons/layout-grid.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

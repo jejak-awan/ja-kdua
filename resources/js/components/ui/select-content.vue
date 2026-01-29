@@ -1,11 +1,11 @@
 <template>
   <SelectPortal>
     <SelectContent
+      v-bind="delegatedProps"
       :class="cn(
         'relative z-50 min-w-[8rem] overflow-hidden rounded-xl border border-border/60 bg-popover text-popover-foreground shadow-xl',
         props.class
       )"
-      :position="position"
     >
       <SelectViewport class="p-1 max-h-60 overflow-y-auto">
         <slot />
@@ -14,18 +14,17 @@
   </SelectPortal>
 </template>
 
-<script setup>
-import { SelectPortal, SelectContent, SelectViewport } from 'radix-vue';
+<script setup lang="ts">
+import { SelectPortal, SelectContent, type SelectContentProps, SelectViewport } from 'radix-vue';
 import { cn } from '@/lib/utils';
+import { computed, type HTMLAttributes } from 'vue';
 
-const props = defineProps({
-  class: {
-    type: String,
-    default: '',
-  },
-  position: {
-    type: String,
-    default: 'popper',
-  },
+const props = withDefaults(defineProps<SelectContentProps & { class?: HTMLAttributes['class'] }>(), {
+  position: 'popper',
+});
+
+const delegatedProps = computed(() => {
+  const { class: _, ...delegated } = props;
+  return delegated;
 });
 </script>

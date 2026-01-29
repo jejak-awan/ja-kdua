@@ -88,8 +88,10 @@
 import { computed, inject, ref, watch } from 'vue'
 import type { BlockInstance, BuilderInstance } from '../../../types/builder'
 import { useI18n } from 'vue-i18n'
-import { ChevronDown, Check, X, Search } from 'lucide-vue-next'
-import { BaseDropdown } from '../ui'
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';import { BaseDropdown } from '../ui'
 
 const props = defineProps<{
   field: any;
@@ -130,7 +132,7 @@ const filteredOptions = computed(() => {
   // 1. Dependency Filtering
   if (props.field.filter_by && module && module.id && builder) {
       const filterConfig = props.field.filter_by
-      const settings = builder.getModuleSettings(module.id)
+      const settings = builder.findModule(module.id)?.settings
       const depValue = settings?.[filterConfig.field]
 
       if (depValue) {

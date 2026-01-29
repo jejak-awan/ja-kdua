@@ -52,34 +52,37 @@
   </div>
 </template>
 
-<script setup>
-import { computed, inject } from 'vue'
-import { Check, Save, Plus, Layout } from 'lucide-vue-next'
-import { BaseDivider } from '../ui'
+<script setup lang="ts">
+import { computed, inject } from 'vue';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import BaseDivider from './BaseDivider.vue';
 
-const props = defineProps({
-  type: {
-    type: String,
-    required: true
-  },
-  fieldName: {
-    type: String,
-    default: ''
-  }
-})
+interface Props {
+  type: string;
+  fieldName?: string;
+}
 
-const emit = defineEmits(['action'])
+const props = withDefaults(defineProps<Props>(), {
+  fieldName: ''
+});
 
-const builder = inject('builder')
+const emit = defineEmits<{
+  (e: 'action', payload: { type: string, data: any }): void;
+}>();
+
+const builder = inject<any>('builder');
 
 const filteredPresets = computed(() => {
-  if (!builder?.presets) return []
-  return builder.presets.filter(p => p.type === props.type)
-})
+  if (!builder?.presets) return [];
+  return builder.presets.filter((p: any) => p.type === props.type);
+});
 
-const handleAction = (type, data = null) => {
-  emit('action', { type, data })
-}
+const handleAction = (type: string, data: any = null) => {
+  emit('action', { type, data });
+};
 </script>
 
 <style scoped>

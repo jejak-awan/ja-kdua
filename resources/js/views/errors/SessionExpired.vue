@@ -29,14 +29,14 @@
         <template #actions>
             <button
                 @click="login"
-                class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-2xl text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-orange-500 shadow-sm transition-all active:scale-95"
+                class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-2xl text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-orange-500 shadow-sm transition-[background-color,transform] active:scale-95"
             >
                 <LogIn class="w-4 h-4 mr-2" />
                 {{ t('features.errors.419.login') }}
             </button>
             <button
                 @click="refresh"
-                class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-border text-sm font-medium rounded-2xl text-foreground bg-muted hover:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-orange-500 transition-all active:scale-95"
+                class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-border text-sm font-medium rounded-2xl text-foreground bg-muted hover:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-orange-500 transition-[background-color,transform] active:scale-95"
             >
                 <RefreshCw class="w-4 h-4 mr-2 text-muted-foreground" />
                 {{ t('features.errors.419.refresh') }}
@@ -53,13 +53,15 @@
     </ErrorLayout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useI18n } from 'vue-i18n';
 import ErrorLayout from '@/layouts/ErrorLayout.vue';
-import { Fingerprint, LogIn, RefreshCw } from 'lucide-vue-next';
+import Fingerprint from 'lucide-vue-next/dist/esm/icons/fingerprint-pattern.js';
+import LogIn from 'lucide-vue-next/dist/esm/icons/log-in.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
 
 const router = useRouter();
 const route = useRoute();

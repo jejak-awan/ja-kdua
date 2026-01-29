@@ -78,69 +78,74 @@
   </BaseModal>
 </template>
 
-<script setup>
-import { ref, reactive } from 'vue'
-import { BaseModal, BaseInput, BaseCheckbox } from '../ui'
+<script setup lang="ts">
+import { ref, reactive } from 'vue';
+import { BaseModal, BaseInput, BaseCheckbox } from '../ui';
 
-const emit = defineEmits(['close', 'export', 'import'])
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'export', payload: { fileName: string }): void;
+  (e: 'import', payload: { file: File; options: Record<string, boolean> }): void;
+}>();
 
-const activeTab = ref('export')
+const activeTab = ref('export');
 const tabs = [
   { id: 'export', label: 'Export' },
   { id: 'import', label: 'Import' }
-]
+];
 
 const exportForm = reactive({
   fileName: ''
-})
+});
 
-const selectedFile = ref(null)
-const fileInput = ref(null)
-const isDragOver = ref(false)
+const selectedFile = ref<File | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
+const isDragOver = ref(false);
 
 const importOptions = ref([
   { id: 'replace', label: 'Replace Existing Content.', value: true },
   { id: 'backup', label: 'Download Backup Before Importing', value: false },
   { id: 'presets', label: 'Import Presets', value: false },
   { id: 'new', label: 'Import To New Canvas', value: false }
-])
+]);
 
 const triggerFileInput = () => {
-  fileInput.value.click()
-}
+  fileInput.value?.click();
+};
 
-const onFileSelected = (e) => {
-  const file = e.target.files[0]
+const onFileSelected = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const file = target.files?.[0];
   if (file) {
-    selectedFile.value = file
+    selectedFile.value = file;
   }
-}
+};
 
-const handleDrop = (e) => {
-  isDragOver.value = false
-  const files = e.dataTransfer.files
+const handleDrop = (e: DragEvent) => {
+  isDragOver.value = false;
+  const files = e.dataTransfer?.files;
   if (files && files.length > 0) {
-    const file = files[0]
+    const file = files[0];
     if (file.name.endsWith('.json')) {
-      selectedFile.value = file
+      selectedFile.value = file;
     }
   }
-}
+};
 
 const handleExport = () => {
-  emit('export', { fileName: exportForm.fileName || 'Layout' })
-}
+  emit('export', { fileName: exportForm.fileName || 'Layout' });
+};
 
 const handleImport = () => {
-  if (!selectedFile.value) return
+  if (!selectedFile.value) return;
   
   const options = importOptions.value.reduce((acc, opt) => {
-    acc[opt.id] = opt.value
-    return acc
-  }, {})
+    acc[opt.id] = opt.value;
+    return acc;
+  }, {} as Record<string, boolean>);
   
-  emit('import', { file: selectedFile.value, options })
-}
+  emit('import', { file: selectedFile.value, options });
+};
 </script>
 
 <style scoped>

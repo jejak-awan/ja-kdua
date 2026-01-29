@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { BarChart3 } from 'lucide-vue-next';
+import BarChart3 from 'lucide-vue-next/dist/esm/icons/chart-bar-stacked.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

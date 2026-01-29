@@ -173,6 +173,20 @@
                                 </dl>
                             </div>
 
+                            <!-- Tags -->
+                            <div v-if="media.tag_names && media.tag_names.length > 0" class="bg-muted/50 border border-border/40 rounded-xl p-3">
+                                <h4 class="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{{ $t('features.media.tags') || 'Tags' }}</h4>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span 
+                                        v-for="tag in media.tag_names" 
+                                        :key="tag"
+                                        class="px-2 py-0.5 bg-background border border-border/40 rounded-md text-[10px] font-medium text-foreground"
+                                    >
+                                        {{ tag }}
+                                    </span>
+                                </div>
+                            </div>
+
                             <!-- URL Copy -->
                             <div class="bg-muted/50 border border-border/40 rounded-xl p-3">
                                 <h4 class="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{{ $t('features.media.modals.view.url') }}</h4>
@@ -242,54 +256,82 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, markRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useToast } from '@/composables/useToast.js';
-import { X, Copy, Edit, Scissors, RefreshCw, Move, Square, Maximize, FileText } from 'lucide-vue-next';
-import api from '../../services/api';
-import Button from '../ui/button.vue';
+import { useToast } from '@/composables/useToast';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import Edit from 'lucide-vue-next/dist/esm/icons/pen.js';
+import Scissors from 'lucide-vue-next/dist/esm/icons/scissors.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import Move from 'lucide-vue-next/dist/esm/icons/move.js';
+import Square from 'lucide-vue-next/dist/esm/icons/square.js';
+import Maximize from 'lucide-vue-next/dist/esm/icons/maximize.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import api from '@/services/api';
+import { Button } from '@/components/ui';
 import ResizeMediaModal from './ResizeMediaModal.vue';
 import ImageEditor from './ImageEditor.vue';
+import type { Media } from '@/types/cms';
 
-const props = defineProps({
-    media: {
-        type: Object,
-        required: true,
-    },
-});
+interface UsageDetail {
+    id: number | string;
+    type: string;
+    title?: string;
+}
 
-const emit = defineEmits(['close', 'updated']);
+interface DragStart {
+    x: number;
+    y: number;
+    scrollLeft: number;
+    scrollTop: number;
+    fillX: number;
+    fillY: number;
+}
+
+const props = defineProps<{
+    media: Media;
+}>();
+
+const emit = defineEmits<{
+    (e: 'close'): void;
+    (e: 'updated'): void;
+}>();
+
 const { t } = useI18n();
 const toast = useToast();
 
 const loadingUsage = ref(false);
-const usageDetail = ref([]);
+const usageDetail = ref<UsageDetail[]>([]);
 const generatingThumbnail = ref(false);
 const showResizeModal = ref(false);
 const showImageEditor = ref(false);
 
 // Display mode state
-const displayMode = ref('stretch');
+const displayMode = ref<'contain' | 'stretch' | 'actual'>('stretch');
 const displayModes = [
-    { value: 'contain', label: 'Fit', icon: markRaw(Square) },
-    { value: 'stretch', label: 'Fill', icon: markRaw(Maximize) },
-    { value: 'actual', label: '1:1', icon: markRaw(Move) },
+    { value: 'contain' as const, label: 'Fit', icon: markRaw(Square) },
+    { value: 'stretch' as const, label: 'Fill', icon: markRaw(Maximize) },
+    { value: 'actual' as const, label: '1:1', icon: markRaw(Move) },
 ];
 
 // Drag state
-const previewContainer = ref(null);
+const previewContainer = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
-const dragStart = ref({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0, fillX: 50, fillY: 50 });
+const dragStart = ref<DragStart>({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0, fillX: 50, fillY: 50 });
 const fillPosition = ref({ x: 50, y: 50 });
 
-const startDrag = (e) => {
+const startDrag = (e: MouseEvent | TouchEvent) => {
     if (displayMode.value !== 'actual' && displayMode.value !== 'stretch') return;
     isDragging.value = true;
-    const pos = e.touches ? e.touches[0] : e;
+    
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
     dragStart.value = {
-        x: pos.clientX,
-        y: pos.clientY,
+        x: clientX,
+        y: clientY,
         scrollLeft: previewContainer.value?.scrollLeft || 0,
         scrollTop: previewContainer.value?.scrollTop || 0,
         fillX: fillPosition.value.x,
@@ -297,28 +339,26 @@ const startDrag = (e) => {
     };
 };
 
-const onDrag = (e) => {
+const onDrag = (e: MouseEvent | TouchEvent) => {
     if (!isDragging.value) return;
     if (displayMode.value !== 'actual' && displayMode.value !== 'stretch') return;
     
-    e.preventDefault();
-    const pos = e.touches ? e.touches[0] : e;
-    const dx = pos.clientX - dragStart.value.x;
-    const dy = pos.clientY - dragStart.value.y;
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
+    const dx = clientX - dragStart.value.x;
+    const dy = clientY - dragStart.value.y;
 
     if (displayMode.value === 'actual' && previewContainer.value) {
         previewContainer.value.scrollLeft = dragStart.value.scrollLeft - dx;
         previewContainer.value.scrollTop = dragStart.value.scrollTop - dy;
     } else if (displayMode.value === 'stretch' && previewContainer.value) {
-        // Calculate percentage change based on container size
-        // Moving right (positive dx) means looking left (decreasing position %)
         const containerWidth = previewContainer.value.clientWidth;
         const containerHeight = previewContainer.value.clientHeight;
         
         const deltaXPercent = (dx / containerWidth) * 100;
         const deltaYPercent = (dy / containerHeight) * 100;
 
-        // Invert delta because dragging content right means moving viewport left
         fillPosition.value = {
             x: Math.max(0, Math.min(100, dragStart.value.fillX - deltaXPercent)),
             y: Math.max(0, Math.min(100, dragStart.value.fillY - deltaYPercent)),
@@ -334,7 +374,8 @@ const fetchUsageDetail = async () => {
     loadingUsage.value = true;
     try {
         const response = await api.get(`/admin/ja/media/${props.media.id}/usage`);
-        usageDetail.value = response.data.data || response.data || [];
+        const data = response.data.data || response.data || [];
+        usageDetail.value = data;
     } catch (error) {
         console.error('Failed to fetch usage detail:', error);
         usageDetail.value = [];
@@ -347,9 +388,10 @@ const generateThumbnail = async () => {
     generatingThumbnail.value = true;
     try {
         await api.post(`/admin/ja/media/${props.media.id}/thumbnail`);
-        toast.success.thumbnail();
+        // We need a proper success toast for thumbnail
+        toast.success.action(t('features.media.modals.view.thumbnailGenerated') || 'Thumbnail generated successfully');
         emit('updated');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to generate thumbnail:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -368,11 +410,13 @@ const handleImageEdited = () => {
 };
 
 const copyUrl = () => {
-    navigator.clipboard.writeText(props.media.url);
-    toast.success.urlCopied();
+    if (props.media.url) {
+        navigator.clipboard.writeText(props.media.url);
+        toast.success.urlCopied();
+    }
 };
 
-const formatFileSize = (bytes) => {
+const formatFileSize = (bytes: number) => {
     if (!bytes) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];

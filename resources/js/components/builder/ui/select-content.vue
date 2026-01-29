@@ -14,18 +14,12 @@
   </SelectPortal>
 </template>
 
-<script setup>
-import { SelectPortal, SelectContent, SelectViewport } from 'radix-vue';
+<script setup lang="ts">
+import { SelectPortal, SelectContent, type SelectContentProps, SelectViewport } from 'radix-vue';
 import { cn } from '../../../lib/utils';
 
-const props = defineProps({
-  class: {
-    type: String,
-    default: '',
-  },
-  position: {
-    type: String,
-    default: 'popper',
-  },
+const props = withDefaults(defineProps<SelectContentProps & { class?: string }>(), {
+  class: '',
+  position: 'popper',
 });
 </script>

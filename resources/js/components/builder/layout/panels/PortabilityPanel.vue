@@ -47,45 +47,42 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, inject } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Copy } from 'lucide-vue-next'
+<script setup lang="ts">
+import { ref, computed, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import type { BuilderInstance } from '../../../../types/builder';
 
-const { t } = useI18n()
-const icons = { Copy }
-const builder = inject('builder')
-const activeTab = ref('export')
-const importJson = ref('')
+const { t } = useI18n();
+const icons = { Copy };
+const builder = inject<BuilderInstance>('builder');
+const activeTab = ref('export');
+const importJson = ref('');
 
 const exportJson = computed(() => {
-  const blocks = builder?.blocks?.value || builder?.blocks || []
-  if (!blocks) return ''
-  return JSON.stringify(blocks, null, 2)
-})
+  const blocks = builder?.blocks?.value || [];
+  if (!blocks) return '';
+  return JSON.stringify(blocks, null, 2);
+});
 
 const copyToClipboard = () => {
-  navigator.clipboard.writeText(exportJson.value)
+  navigator.clipboard.writeText(exportJson.value);
   // Toast notification would go here
-}
+};
 
 const handleImport = () => {
-    if(!importJson.value) return
+    if(!importJson.value || !builder) return;
     try {
-        const blocks = JSON.parse(importJson.value)
+        const blocks = JSON.parse(importJson.value);
         if(Array.isArray(blocks)) {
-            if (builder.blocks && typeof builder.blocks === 'object' && 'value' in builder.blocks) {
-                builder.blocks.value = blocks
-            } else {
-                builder.blocks = blocks
-            }
-            builder.takeSnapshot() // Add to history
-            alert(t('builder.panels.portability.import.success'))
+             builder.blocks.value = blocks;
+             builder.takeSnapshot(); // Add to history
+             alert(t('builder.panels.portability.import.success'));
         }
     } catch(e) {
-        alert(t('builder.panels.portability.import.invalid'))
+        alert(t('builder.panels.portability.import.invalid'));
     }
-}
+};
 </script>
 
 <style scoped>

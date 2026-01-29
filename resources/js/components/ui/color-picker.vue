@@ -5,7 +5,7 @@
         </PopoverTrigger>
         <PopoverTrigger as-child v-else>
             <button 
-                class="w-8 h-8 rounded border border-border shadow-sm shrink-0 cursor-pointer transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 relative overflow-hidden"
+                class="w-8 h-8 rounded border border-border shadow-sm shrink-0 cursor-pointer transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 relative overflow-hidden"
                 :style="{ backgroundColor: modelValue || '#000000' }"
                 :title="title || 'Pick a color'"
             >
@@ -21,8 +21,7 @@
                 
                 <!-- CUSTOM PICKER TAB -->
                 <TabsContent value="picker" class="p-3 space-y-4">
-                    
-                    <!-- Saturation/Brightness Area -->
+<!-- Saturation/Brightness Area -->
                     <div 
                         class="w-full h-32 rounded-md relative cursor-crosshair overflow-hidden border border-border"
                         :style="{ backgroundColor: `hsl(${hsv.h}, 100%, 50%)` }"
@@ -81,8 +80,7 @@
                              </button>
                         </div>
                     </div>
-
-                </TabsContent>
+</TabsContent>
 
                 <!-- PRESETS TAB -->
                 <TabsContent value="presets" class="p-3 space-y-4">
@@ -94,7 +92,7 @@
                                 type="button"
                                 v-for="color in colorPalette"
                                 :key="color"
-                                class="w-6 h-6 rounded border border-border/50 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                class="w-6 h-6 rounded border border-border/50 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50"
                                 :class="{ 'ring-2 ring-primary': modelValue === color }"
                                 :style="{ backgroundColor: color }"
                                 @click="updateFromPreset(color)"
@@ -112,7 +110,7 @@
                                 type="button"
                                 v-for="color in themeColors"
                                 :key="color.variable"
-                                class="w-6 h-6 rounded border border-border/50 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                class="w-6 h-6 rounded border border-border/50 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50"
                                 :class="{ 'ring-2 ring-primary': modelValue === color.variable }"
                                 :style="{ backgroundColor: color.value }"
                                 @click="updateFromPreset(color.variable)"
@@ -127,8 +125,8 @@
     </Popover>
 </template>
 
-<script setup>
-import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue';
+<script setup lang="ts">
+import { ref, reactive, computed, watch } from 'vue';
 import Popover from '@/components/ui/popover.vue';
 import PopoverTrigger from '@/components/ui/popover-trigger.vue';
 import PopoverContent from '@/components/ui/popover-content.vue';
@@ -137,24 +135,36 @@ import TabsList from '@/components/ui/tabs-list.vue';
 import TabsTrigger from '@/components/ui/tabs-trigger.vue';
 import TabsContent from '@/components/ui/tabs-content.vue';
 import Input from '@/components/ui/input.vue';
-import { Pipette } from 'lucide-vue-next';
+import Pipette from 'lucide-vue-next/dist/esm/icons/pipette.js';
 
-const props = defineProps({
-    modelValue: { type: String, default: '#000000' },
-    title: { type: String, default: '' },
-    themeColors: { type: Array, default: () => [] }
+interface ColorPreset {
+    variable: string;
+    value: string;
+    name: string;
+}
+
+const props = withDefaults(defineProps<{
+    modelValue?: string;
+    title?: string;
+    themeColors?: ColorPreset[];
+}>(), {
+    modelValue: '#000000',
+    title: '',
+    themeColors: () => []
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+    'update:modelValue': [value: string];
+}>();
 
 // HSV State
 const hsv = reactive({ h: 0, s: 0, v: 0 });
-const saturationArea = ref(null);
+const saturationArea = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
-const hasEyeDropper = ref(window.EyeDropper !== undefined);
+const hasEyeDropper = ref((window as any).EyeDropper !== undefined);
 
 // Helper: Hex to HSV
-const hexToHsv = (hex) => {
+const hexToHsv = (hex: string) => {
     let r = 0, g = 0, b = 0;
     if (hex.length === 4) {
         r = parseInt("0x" + hex[1] + hex[1]);
@@ -168,7 +178,7 @@ const hexToHsv = (hex) => {
     r /= 255; g /= 255; b /= 255;
     
     let max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h, s, v = max;
+    let h = 0, s, v = max;
     let d = max - min;
     s = max === 0 ? 0 : d / max;
 
@@ -186,8 +196,8 @@ const hexToHsv = (hex) => {
 };
 
 // Helper: HSV to Hex
-const hsvToHex = (h, s, v) => {
-    let r, g, b, i, f, p, q, t;
+const hsvToHex = (h: number, s: number, v: number) => {
+    let r = 0, g = 0, b = 0, i, f, p, q, t;
     h /= 360; s /= 100; v /= 100;
     i = Math.floor(h * 6);
     f = h * 6 - i;
@@ -202,7 +212,7 @@ const hsvToHex = (h, s, v) => {
         case 4: r = t; g = p; b = v; break;
         case 5: r = v; g = p; b = q; break;
     }
-    const toHex = x => {
+    const toHex = (x: number) => {
         let hex = Math.round(x * 255).toString(16);
         return hex.length === 1 ? '0' + hex : hex;
     };
@@ -233,22 +243,23 @@ watch(hsv, () => {
     }
 });
 
-const handleHexInput = (val) => {
-    if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-        emit('update:modelValue', val);
+const handleHexInput = (val: string | number) => {
+    const sVal = String(val);
+    if (/^#[0-9A-Fa-f]{6}$/.test(sVal)) {
+        emit('update:modelValue', sVal);
     }
 };
 
-const updateFromPreset = (color) => {
+const updateFromPreset = (color: string) => {
     emit('update:modelValue', color);
 };
 
 const pickEyeDropper = async () => {
-    if (!window.EyeDropper) {
+    if (!(window as any).EyeDropper) {
         alert('Your browser does not support the Eyedropper API. Test in Chrome/Edge.');
         return;
     }
-    const eyeDropper = new window.EyeDropper();
+    const eyeDropper = new (window as any).EyeDropper();
     try {
         const result = await eyeDropper.open();
         if (result && result.sRGBHex) {
@@ -261,7 +272,7 @@ const pickEyeDropper = async () => {
 };
 
 // Saturation/Brightness Drag Logic
-const handleDrag = (event) => {
+const handleDrag = (event: MouseEvent) => {
     if (!saturationArea.value) return;
     const rect = saturationArea.value.getBoundingClientRect();
     let x = (event.clientX - rect.left) / rect.width;
@@ -274,14 +285,14 @@ const handleDrag = (event) => {
     hsv.v = Math.round(y * 100);
 };
 
-const startDragSaturation = (event) => {
+const startDragSaturation = (event: MouseEvent) => {
     isDragging.value = true;
     handleDrag(event);
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', stopDragSaturation);
 };
 
-const onMouseMove = (event) => {
+const onMouseMove = (event: MouseEvent) => {
     if (isDragging.value) handleDrag(event);
 };
 

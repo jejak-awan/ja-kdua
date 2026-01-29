@@ -3,18 +3,21 @@
         <DialogContent class="sm:max-w-md">
             <DialogHeader>
                 <DialogTitle>{{ $t('features.file_manager.modals.createFolder.title') }}</DialogTitle>
+                <DialogDescription>
+                    {{ $t('features.file_manager.modals.createFolder.placeholder') || 'Create a new folder to organize your digital assets.' }}
+                </DialogDescription>
             </DialogHeader>
 
             <form @submit.prevent="handleSubmit" class="grid gap-4 py-4">
                 <div class="grid gap-2">
                     <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                        {{ $t('features.file_manager.labels.folderName') }} <span class="text-destructive">*</span>
+                        {{ $t('features.file_manager.modals.createFolder.name') || 'Folder Name' }} <span class="text-destructive">*</span>
                     </label>
                     <Input
                         v-model="folderName"
                         type="text"
                         required
-                        :placeholder="$t('features.file_manager.placeholders.folderName')"
+                        :placeholder="$t('features.file_manager.modals.createFolder.placeholder')"
                         class="col-span-3"
                     />
                 </div>
@@ -25,48 +28,57 @@
                     variant="outline"
                     @click="$emit('close')"
                     type="button"
+                    class="rounded-xl h-10 px-5 border-border/60 hover:bg-accent/10 text-foreground font-bold transition-colors"
                 >
-                    {{ $t('features.file_manager.actions.cancel') }}
+                    {{ $t('features.file_manager.modals.createFolder.cancel') || 'Cancel' }}
                 </Button>
                 <Button
                     @click="handleSubmit"
                     :disabled="creating || !isValid"
                     type="submit"
+                    class="rounded-xl h-10 px-5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg shadow-primary/20 transition-colors active:scale-[0.98]"
                 >
-                    {{ creating ? $t('features.file_manager.actions.creating') : $t('features.file_manager.actions.create') }}
+                    <Loader2 v-if="creating" class="w-4 h-4 mr-2 animate-spin" />
+                    {{ creating ? $t('features.file_manager.modals.createFolder.creating') : $t('features.file_manager.modals.createFolder.create') }}
                 </Button>
             </DialogFooter>
         </DialogContent>
     </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../services/api';
-import Button from '../ui/button.vue';
-import Input from '../ui/input.vue';
-import Dialog from '../ui/dialog.vue';
-import DialogContent from '../ui/dialog-content.vue';
-import DialogHeader from '../ui/dialog-header.vue';
-import DialogTitle from '../ui/dialog-title.vue';
-import DialogFooter from '../ui/dialog-footer.vue';
-import { useToast } from '../../composables/useToast';
-import { useFormValidation } from '../../composables/useFormValidation';
-import { folderSchema } from '../../schemas';
+import api from '@/services/api';
+import {
+    Button,
+    Input,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter
+} from '@/components/ui';
+import { useToast } from '@/composables/useToast';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { folderSchema } from '@/schemas';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 
 const { t } = useI18n();
 const toast = useToast();
-const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(folderSchema);
+const { validateWithZod, setErrors, clearErrors } = useFormValidation(folderSchema);
 
-const props = defineProps({
-    path: {
-        type: String,
-        default: '/',
-    },
+const props = withDefaults(defineProps<{
+    path?: string;
+}>(), {
+    path: '/'
 });
 
-const emit = defineEmits(['close', 'created']);
+const emit = defineEmits<{
+    'close': [];
+    'created': [];
+}>();
 
 const folderName = ref('');
 const creating = ref(false);
@@ -88,7 +100,7 @@ const handleSubmit = async () => {
         toast.success.create('Folder');
         emit('created');
         emit('close');
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {

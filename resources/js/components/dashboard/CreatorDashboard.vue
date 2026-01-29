@@ -98,7 +98,7 @@
                 <CardTitle>{{ $t('features.dashboard.traffic.visits') }}</CardTitle>
                 <!-- Time Range Filter -->
                 <div class="w-[180px]">
-                    <Select v-model="timeRange" @update:modelValue="fetchStats">
+                    <Select v-model="timeRange" @update:model-value="fetchStats">
                         <SelectTrigger class="w-full">
                             <SelectValue :placeholder="$t('features.dashboard.traffic.filters.last7Days')" />
                         </SelectTrigger>
@@ -197,61 +197,78 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useAuthStore } from '../../stores/auth';
+import { useAuthStore } from '@/stores/auth';
 import { useI18n } from 'vue-i18n';
-import api from '../../services/api';
-import { parseSingleResponse, ensureArray } from '../../utils/responseParser';
+import api from '@/services/api';
+import { parseSingleResponse, ensureArray } from '@/utils/responseParser';
 
 import QuickActions from '@/components/admin/QuickActions.vue';
-import Card from '@/components/ui/card.vue';
-import CardHeader from '@/components/ui/card-header.vue';
-import CardTitle from '@/components/ui/card-title.vue';
-import CardContent from '@/components/ui/card-content.vue';
-import Button from '@/components/ui/button.vue';
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+    Button,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+    Badge,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
+} from '@/components/ui';
 import DoughnutChart from '@/components/charts/DoughnutChart.vue';
 import LineChart from '@/components/charts/LineChart.vue';
-import Select from '@/components/ui/select.vue';
-import SelectContent from '@/components/ui/select-content.vue';
-import SelectItem from '@/components/ui/select-item.vue';
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-import SelectValue from '@/components/ui/select-value.vue';
-import Badge from '@/components/ui/badge.vue';
-import Table from '@/components/ui/table.vue';
-import TableBody from '@/components/ui/table-body.vue';
-import TableCell from '@/components/ui/table-cell.vue';
-import TableHead from '@/components/ui/table-head.vue';
-import TableHeader from '@/components/ui/table-header.vue';
-import TableRow from '@/components/ui/table-row.vue';
 
-import { 
-    FileText, 
-    Image, 
-    AlertCircle, 
-    FolderOpen, 
-    Clock3,
-    RefreshCw,
-    PenTool,
-    Edit3,
-    PieChart,
-    Activity,
-    Trophy
-} from 'lucide-vue-next';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Image from 'lucide-vue-next/dist/esm/icons/image.js';
+import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
+import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';
+import Clock3 from 'lucide-vue-next/dist/esm/icons/clock-3.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import PenTool from 'lucide-vue-next/dist/esm/icons/pen-tool.js';
+import Edit3 from 'lucide-vue-next/dist/esm/icons/pen-tool.js';
+import PieChart from 'lucide-vue-next/dist/esm/icons/chart-pie.js';
+import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
+import Trophy from 'lucide-vue-next/dist/esm/icons/trophy.js';
+
+interface CreatorStats {
+    myContents?: {
+        total: number;
+        published: number;
+        pending: number;
+        draft: number;
+    };
+    myMedia?: {
+        total: number;
+    };
+}
+
+import type { CreatorDashboardData, TrafficDataPoint, StatusDataPoint, TopContentItem } from '@/types/dashboard';
 
 const { t } = useI18n();
 const authStore = useAuthStore();
-const stats = ref({});
-const statusData = ref([]);
-const activityData = ref([]);
-const topContent = ref([]);
+const stats = ref<NonNullable<CreatorDashboardData['stats']>>({
+    myContents: { total: 0, published: 0, pending: 0, draft: 0 },
+    myMedia: { total: 0 }
+});
+const statusData = ref<StatusDataPoint[]>([]);
+const activityData = ref<TrafficDataPoint[]>([]);
+const topContent = ref<TopContentItem[]>([]);
 const loading = ref(false);
 const timeRange = ref('30'); // Default to 30 days
 
-const mapStatusToLabel = (status) => {
+const mapStatusToLabel = (status: string) => {
     // Map status to translation key
     // assuming status are: published, draft, pending
-    const map = {
+    const map: Record<string, string> = {
         'published': t('features.dashboard.stats.creator.published'),
         'draft': t('features.dashboard.stats.creator.drafts'),
         'pending': t('features.dashboard.stats.creator.pendingReview'),
@@ -259,7 +276,7 @@ const mapStatusToLabel = (status) => {
     return map[status] || status; // Fallback to raw status
 };
 
-const getStatusColor = (status) => {
+const getStatusColor = (status: string) => {
     switch (status) {
         case 'published': return 'bg-success/15 text-success border-0';
         case 'pending': return 'bg-warning/15 text-warning border-0';
@@ -274,7 +291,7 @@ const fetchStats = async () => {
         const response = await api.get('/dashboard/creator', {
             params: { days: timeRange.value }
         });
-        const data = parseSingleResponse(response);
+        const data = parseSingleResponse<CreatorDashboardData>(response);
         
         if (data) {
             // Stats
@@ -284,7 +301,7 @@ const fetchStats = async () => {
             
             // Content Status Chart
             if (data.charts && data.charts.myContentByStatus) {
-                const rawStatus = ensureArray(data.charts.myContentByStatus);
+                const rawStatus = ensureArray<{ status: string; count: number }>(data.charts.myContentByStatus);
                 statusData.value = rawStatus.map(item => ({
                     label: mapStatusToLabel(item.status),
                     count: item.count
@@ -293,7 +310,7 @@ const fetchStats = async () => {
             
             // Recent Activity Chart (Now Content Traffic)
             // Note: API key changed to 'contentTraffic'
-            const rawTraffic = data.charts.contentTraffic ? ensureArray(data.charts.contentTraffic) : (data.charts.recentActivity ? ensureArray(data.charts.recentActivity) : []);
+            const rawTraffic = data.charts?.contentTraffic ? ensureArray<{ date: string; count: number }>(data.charts.contentTraffic) : (data.charts?.recentActivity ? ensureArray<{ date: string; count: number }>(data.charts.recentActivity) : []);
             
             activityData.value = rawTraffic.map(item => ({
                 period: item.date,
@@ -302,7 +319,7 @@ const fetchStats = async () => {
 
             // Top Content
             if (data.topContent) {
-                 topContent.value = ensureArray(data.topContent);
+                 topContent.value = ensureArray<TopContentItem>(data.topContent);
             }
         }
     } catch (error) {

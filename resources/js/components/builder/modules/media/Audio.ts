@@ -142,7 +142,7 @@ const AudioModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `trackName_${f.name}`,
                     label: `Track Name ${f.label}`
@@ -151,7 +151,7 @@ const AudioModule: ModuleDefinition = {
             {
                 id: 'artistTypography',
                 label: 'Artist Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `artistName_${f.name}`,
                     label: `Artist ${f.label}`

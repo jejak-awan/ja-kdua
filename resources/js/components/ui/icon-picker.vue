@@ -1,6 +1,6 @@
 <template>
   <Popover v-model:open="open">
-    <PopoverTrigger asChild>
+    <PopoverTrigger as-child>
       <slot name="trigger">
         <Button
           variant="outline"
@@ -78,8 +78,8 @@
   </Popover>
 </template>
 
-<script setup>
-import { ref, computed, shallowRef, onMounted } from 'vue';
+<script setup lang="ts">
+import { ref, computed } from 'vue';
 import Button from './button.vue';
 import Input from './input.vue';
 import Popover from './popover.vue';
@@ -88,22 +88,25 @@ import PopoverContent from './popover-content.vue';
 import Tabs from './tabs.vue';
 import TabsList from './tabs-list.vue';
 import TabsTrigger from './tabs-trigger.vue';
-import { ChevronsUpDown, X } from 'lucide-vue-next';
-import * as LucideIcons from 'lucide-vue-next';
+import ChevronsUpDown from 'lucide-vue-next/dist/esm/icons/chevrons-up-down.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import Circle from 'lucide-vue-next/dist/esm/icons/circle.js';
 import { iconCategories } from '../../config/icon-categories';
 
-const props = defineProps({
-  modelValue: {
-    type: String,
-    default: ''
-  },
-  placeholder: {
-    type: String,
-    default: 'Select icon...'
-  }
+// Keep a few common icons for the trigger and initial render
+const commonIcons: Record<string, any> = { Circle };
+
+const props = withDefaults(defineProps<{
+  modelValue?: string;
+  placeholder?: string;
+}>(), {
+  modelValue: '',
+  placeholder: 'Select icon...'
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+  'update:modelValue': [value: string];
+}>();
 
 const open = ref(false);
 const searchQuery = ref('');
@@ -111,60 +114,68 @@ const activeTab = ref('General');
 
 const selectedIcon = computed(() => props.modelValue);
 
-// Get ALL icon names from Lucide, excluding createLucideIcon internal
-const allIconNames = Object.keys(LucideIcons).filter(key => {
-    // Basic exclusions
-    if (key === 'default' || key === 'createLucideIcon' || key === 'Icon' || !/^[A-Z]/.test(key)) {
-        return false;
+const LucideIconsBatch = ref<any>(null);
+const isLoadingIcons = ref(false);
+
+const loadIcons = async () => {
+    if (LucideIconsBatch.value || isLoadingIcons.value) return;
+    isLoadingIcons.value = true;
+    try {
+        LucideIconsBatch.value = await import('lucide-vue-next');
+    } catch (err) {
+        console.error('Failed to load icons:', err);
+    } finally {
+        isLoadingIcons.value = false;
     }
-    
-    // Check if it looks like a component (defensive)
-    const exp = LucideIcons[key];
-    if (typeof exp !== 'object' && typeof exp !== 'function') return false;
-    
-    return true;
+};
+
+// Start loading when popover opens
+import { watch } from 'vue';
+watch(open, (isOpen) => {
+    if (isOpen) loadIcons();
 });
 
-// Map categories for display (limiting to first 3 + All in tabs usually, but Grid layout handles more)
-// We will show top 7 categories + All
+// Get ALL icon names from Lucide once loaded
+const allIconNames = computed(() => {
+    if (!LucideIconsBatch.value) return [];
+    return Object.keys(LucideIconsBatch.value).filter(key => {
+        if (key === 'default' || key === 'createLucideIcon' || key === 'Icon' || !/^[A-Z]/.test(key)) {
+            return false;
+        }
+        const exp = (LucideIconsBatch.value as any)[key];
+        return typeof exp === 'object' || typeof exp === 'function';
+    });
+});
+
+// Map categories for display
 const displayCategories = computed(() => {
-    // Only return categories that actually have icons
     return iconCategories; 
 });
 
 const filteredIcons = computed(() => {
-  let icons = []; // Default to all
+  let icons: string[] = [];
 
   if (activeTab.value === 'all') {
-      icons = allIconNames;
+      icons = allIconNames.value;
   } else {
-      // Get icons for specific category
-      icons = iconCategories[activeTab.value] || [];
+      icons = (iconCategories as Record<string, string[]>)[activeTab.value] || [];
   }
 
-  // Filter by search query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
-    // If searching, we might want to search ALL icons even if in a category?
-    // User preference usually. Let's strict filter the CURRENT view first.
-    // Actually, widespread search is better UX.
-    // If strict search in category returns 0, maybe search all?
-    // Let's stick to simple: Filter the CURRENT active list.
-    // EXCEPT if 'all' is active.
-    
-    // Improvement: If search is active, maybe auto-switch to "all"?
-    // For now: strict filter.
     return icons.filter(icon => icon.toLowerCase().includes(query));
   }
 
   return icons;
 });
 
-const getIconComponent = (iconName) => {
-  return LucideIcons[iconName] || LucideIcons.Circle;
+const getIconComponent = (iconName: string) => {
+  if (commonIcons[iconName]) return commonIcons[iconName];
+  if (LucideIconsBatch.value && LucideIconsBatch.value[iconName]) return LucideIconsBatch.value[iconName];
+  return commonIcons.Circle;
 };
 
-const selectIcon = (icon) => {
+const selectIcon = (icon: string) => {
   emit('update:modelValue', icon);
   open.value = false;
   searchQuery.value = '';

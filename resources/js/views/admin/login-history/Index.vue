@@ -52,7 +52,7 @@
                     <div class="flex flex-wrap items-center gap-3">
                         <Select
                             v-model="userFilter"
-                            @update:model-value="fetchHistory"
+                            @update:model-value="fetchHistory()"
                         >
                             <SelectTrigger class="w-[180px]">
                                 <SelectValue :placeholder="t('features.login_history.filters.allUsers')" />
@@ -66,7 +66,7 @@
                         </Select>
                         <Select
                             v-model="statusFilter"
-                            @update:model-value="fetchHistory"
+                            @update:model-value="fetchHistory()"
                         >
                             <SelectTrigger class="w-[180px]">
                                 <SelectValue :placeholder="t('features.login_history.filters.allStatus')" />
@@ -169,28 +169,53 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
-import { useToast } from '../../../composables/useToast';
-import { useConfirm } from '../../../composables/useConfirm';
-import Button from '../../../components/ui/button.vue';
-import Pagination from '../../../components/ui/pagination.vue';
-import Input from '../../../components/ui/input.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
+import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
+import { useConfirm } from '@/composables/useConfirm';
+import {
+    Button,
+    Pagination,
+    Input,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from '@/components/ui';
+
+interface User {
+    id: number;
+    name: string;
+    email: string;
+}
+
+interface LoginEntry {
+    id: number;
+    user?: User | null;
+    ip_address: string;
+    status: 'success' | 'failed';
+    login_at: string;
+    failure_reason: string | null;
+}
+
+interface LoginStatistics {
+    total_logins: number;
+    failed_logins: number;
+    today_logins: number;
+    unique_ips_today: number;
+    active_sessions: number;
+}
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 
-const history = ref([]);
-const users = ref([]);
-const statistics = ref(null);
+const history = ref<LoginEntry[]>([]);
+const users = ref<User[]>([]);
+const statistics = ref<LoginStatistics | null>(null);
 const loading = ref(false);
 const exporting = ref(false);
 const userFilter = ref('');
@@ -201,13 +226,13 @@ const perPage = ref(25);
 const currentPage = ref(1);
 const totalRecords = ref(0);
 
-const fetchHistory = async (page = 1) => {
+const fetchHistory = async (page: number = 1) : Promise<void> => {
     currentPage.value = page;
     loading.value = true;
     try {
         const params = new URLSearchParams();
-        params.append('page', page);
-        params.append('per_page', perPage.value);
+        params.append('page', String(page));
+        params.append('per_page', String(perPage.value));
         if (userFilter.value && userFilter.value !== 'all') params.append('user_id', userFilter.value);
         if (statusFilter.value && statusFilter.value !== 'all') params.append('status', statusFilter.value);
         if (dateFrom.value) params.append('date_from', dateFrom.value);
@@ -216,7 +241,7 @@ const fetchHistory = async (page = 1) => {
         const response = await api.get(`/admin/ja/login-history?${params.toString()}`);
         
         // Parse nested response
-        let data = [];
+        let data: LoginEntry[] = [];
         if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
             data = response.data.data.data;
             totalRecords.value = response.data.data.total || data.length;
@@ -225,43 +250,38 @@ const fetchHistory = async (page = 1) => {
             totalRecords.value = data.length;
         }
         history.value = data;
-    } catch (error) {
-        console.error('Failed to fetch login history:', error);
+    } catch (error: any) {
+        console.error('Failed to fetch login history:', error.message);
     } finally {
         loading.value = false;
     }
 };
 
-const fetchStatistics = async () => {
+const fetchStatistics = async () : Promise<void> => {
     try {
         const response = await api.get('/admin/ja/login-history/statistics');
         statistics.value = response.data?.data || response.data;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch statistics:', error);
     }
 };
 
-const fetchUsers = async () => {
+const fetchUsers = async () : Promise<void> => {
     try {
         const response = await api.get('/admin/ja/users');
         const data = response.data?.data?.data || response.data?.data || [];
         users.value = Array.isArray(data) ? data : [];
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch users:', error);
         users.value = [];
     }
 };
 
-const clearDateFilter = () => {
-    dateFrom.value = '';
-    dateTo.value = '';
-};
-
-const clearLogs = async () => {
+const clearLogs = async () : Promise<void> => {
     const confirmed = await confirm({
         title: t('features.system.logs.actions.clear'),
         message: t('features.system.logs.confirm.clear') || 'Are you sure you want to clear all logs?',
-        variant: 'destructive',
+        variant: 'danger',
         confirmText: t('common.actions.clear'),
     });
 
@@ -272,13 +292,13 @@ const clearLogs = async () => {
         await fetchHistory();
         await fetchStatistics();
         toast.success.action(t('features.system.logs.messages.cleared') || 'Logs cleared successfully');
-    } catch (error) {
-        console.error('Failed to clear logs:', error);
+    } catch (error: any) {
+        console.error('Failed to clear logs:', error.message);
         toast.error.fromResponse(error);
     }
 };
 
-const exportHistory = async () => {
+const exportHistory = async () : Promise<void> => {
     exporting.value = true;
     try {
         const params = new URLSearchParams();
@@ -300,15 +320,15 @@ const exportHistory = async () => {
         link.remove();
         window.URL.revokeObjectURL(url);
         toast.success.action(t('features.analytics.export.success') || 'Export started');
-    } catch (error) {
-        console.error('Failed to export:', error);
+    } catch (error: any) {
+        console.error('Failed to export:', error.message);
         toast.error.fromResponse(error);
     } finally {
         exporting.value = false;
     }
 };
 
-const formatDate = (dateString) => {
+const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleString();
 };

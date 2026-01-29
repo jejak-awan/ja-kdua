@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Sliders } from 'lucide-vue-next';
+import Sliders from 'lucide-vue-next/dist/esm/icons/sliders-horizontal.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

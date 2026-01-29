@@ -55,10 +55,12 @@
 
         <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
              <!-- Main Content Area (Center) -->
-            <div :class="[
+            <div
+:class="[
                 form.editor_type === 'builder' ? 'lg:col-span-12' : (isSidebarOpen ? 'lg:col-span-8' : 'lg:col-span-11'),
-                'space-y-8 transition-all duration-300 ease-in-out'
-            ]">
+                'space-y-8 transition-colors duration-300 ease-in-out'
+            ]"
+>
                 <ContentMain
                     v-model="form"
                     @save="handleSubmit"
@@ -69,7 +71,7 @@
             </div>
 
             <!-- Sidebar (Right) - Control Tower (Only show for classic editor) -->
-            <div v-if="form.editor_type !== 'builder'" :class="[isSidebarOpen ? 'lg:col-span-4' : 'lg:col-span-1', 'space-y-6 transition-all duration-300 ease-in-out']">
+            <div v-if="form.editor_type !== 'builder'" :class="[isSidebarOpen ? 'lg:col-span-4' : 'lg:col-span-1', 'space-y-6 transition-colors duration-300 ease-in-out']">
                 <ActionToolbar 
                     :is-sidebar-open="isSidebarOpen"
                     :loading="loading"
@@ -139,54 +141,58 @@ import { useHead } from '@vueuse/head';
 import { useCmsStore } from '@/stores/cms';
 import api from '@/services/api';
 import { useAuthStore } from '@/stores/auth';
-import { parseSingleResponse, parseResponse, ensureArray } from '@/utils/responseParser';
-// @ts-ignore
-import Button from '@/components/ui/button.vue';
-// @ts-ignore
-import Badge from '@/components/ui/badge.vue';
-import { 
-    Save, 
-    Loader2, 
-    Lock,
-    Unlock,
-    Clock3,
-} from 'lucide-vue-next';
+
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import Lock from 'lucide-vue-next/dist/esm/icons/lock.js';
+import Unlock from 'lucide-vue-next/dist/esm/icons/lock-open.js';
+import Clock3 from 'lucide-vue-next/dist/esm/icons/clock-3.js';
+
+// UI Components
+
+import {
+    Button,
+    Badge,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    Alert,
+    AlertTitle,
+    AlertDescription
+} from '@/components/ui';
 import ActionToolbar from '@/components/content/ActionToolbar.vue';
-// @ts-ignore
-import Dialog from '@/components/ui/dialog.vue';
-// @ts-ignore
-import DialogContent from '@/components/ui/dialog-content.vue';
-// @ts-ignore
-import DialogHeader from '@/components/ui/dialog-header.vue';
-// @ts-ignore
-import DialogTitle from '@/components/ui/dialog-title.vue';
-// @ts-ignore
-import DialogDescription from '@/components/ui/dialog-description.vue';
-// @ts-ignore
-import DialogFooter from '@/components/ui/dialog-footer.vue';
-import AutoSaveIndicator from '@/components/AutoSaveIndicator.vue';
+import AutoSaveIndicator from '@/components/layout/AutoSaveIndicator.vue';
 import ContentPreviewModal from '@/components/admin/ContentPreviewModal.vue';
 import ContentMain from '@/components/content/ContentMain.vue';
 import ContentSidebar from '@/components/content/ContentSidebar.vue';
-// @ts-ignore
-import Alert from '@/components/ui/alert.vue';
-// @ts-ignore
-import AlertTitle from '@/components/ui/alert-title.vue';
-// @ts-ignore
-import AlertDescription from '@/components/ui/alert-description.vue';
+
+// Composables & Utils
+import { parseSingleResponse, parseResponse, ensureArray } from '@/utils/responseParser';
 import { useAutoSave } from '@/composables/useAutoSave';
 import { useToast } from '@/composables/useToast';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { contentSchema } from '@/schemas';
-import type { Category, Tag } from '@/types/cms';
+import type { Content, Category, Tag, ContentForm, MenuItem, ContentTemplate } from '@/types/cms';
+
+interface LockStatus {
+    is_locked: boolean;
+    locked_by?: {
+        id: number;
+        name: string;
+    };
+    can_unlock: boolean;
+}
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const toast = useToast();
 const cmsStore = useCmsStore();
-
 const authStore = useAuthStore();
+
 const isSidebarOpen = ref(true);
 const contentId = route.params.id as string;
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(contentSchema);
@@ -196,11 +202,11 @@ const categories = ref<Category[]>([]);
 const tags = ref<Tag[]>([]);
 const menus = ref<any[]>([]);
 const selectedTags = ref<Tag[]>([]);
-const lockStatus = ref<any>(null);
-const lockInterval = ref<any>(null);
-const initialForm = ref<any>(null);
+const lockStatus = ref<LockStatus | null>(null);
+const lockInterval = ref<ReturnType<typeof setInterval> | null>(null);
+const initialForm = ref<string | null>(null);
 
-const form = ref<any>({
+const form = ref<ContentForm>({
     title: '',
     slug: '',
     excerpt: '',
@@ -209,7 +215,6 @@ const form = ref<any>({
     status: 'draft',
     type: 'post',
     category_id: null,
-    published_at: null,
     meta_title: '',
     meta_description: '',
     meta_keywords: '',
@@ -222,7 +227,8 @@ const form = ref<any>({
     },
     blocks: [],
     comment_status: true,
-    editor_type: null
+    editor_type: null,
+    is_featured: false
 });
 
 useHead({
@@ -235,7 +241,7 @@ const isDirty = computed(() => {
         ...form.value,
         tags: selectedTags.value.map(t => t.id),
     };
-    return JSON.stringify(currentForm) !== JSON.stringify(initialForm.value);
+    return JSON.stringify(currentForm) !== initialForm.value;
 });
 
 // Auto-generation logic (Similar to Create but cautious about overwriting existing data)
@@ -282,69 +288,80 @@ const {
     startAutoSave,
 } = useAutoSave(formWithTags as any, contentId as any, {
     interval: 30000, // 30 seconds
-    // enabled is a getter that listens to autoSaveEnabled ref
-    // @ts-ignore - complex getter type
-    get enabled() {
-        return autoSaveEnabled.value;
-    },
+    enabled: computed(() => autoSaveEnabled.value),
 });
 
 const handleAutoSaveToggle = (isEnabled: boolean) => {
     autoSaveEnabled.value = isEnabled;
 };
 
+const formatDateTimeLocal = (dateString: string | undefined | null): string | undefined => {
+    if (!dateString) return undefined;
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return undefined;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 const fetchContent = async () => {
     loading.value = true;
     try {
         const response = await api.get(`/admin/ja/contents/${contentId}`);
-        const content = parseSingleResponse(response) || {};
+        const content = parseSingleResponse<Content>(response);
         
-        form.value = {
-            title: content.title || '',
-            slug: content.slug || '',
-            excerpt: content.excerpt || '',
-            body: content.body || '',
-            featured_image: content.featured_image || null,
-            status: content.status || 'draft',
-            type: content.type || 'post',
-            category_id: content.category_id || null,
-            published_at: content.published_at ? formatDateTimeLocal(content.published_at) : null,
-            meta_title: content.meta_title || '',
-            meta_description: content.meta_description || '',
-            meta_keywords: content.meta_keywords || '',
-            og_image: content.og_image || null,
-            menu_item: {
-                add_to_menu: false,
-                menu_id: '',
-                parent_id: null,
-                title: ''
-            },
-            blocks: content.blocks || [],
-            comment_status: content.comment_status !== undefined ? content.comment_status : true,
-            editor_type: content.editor_type || null
-        };
-
-        // Handle menu items
-        if (content.menu_items && content.menu_items.length > 0) {
-            const menuItem = content.menu_items[0];
-            form.value.menu_item = {
-                add_to_menu: true,
-                menu_id: menuItem.menu_id,
-                parent_id: menuItem.parent_id,
-                title: menuItem.title
+        if (content) {
+            form.value = {
+                title: content.title || '',
+                slug: content.slug || '',
+                excerpt: content.excerpt || '',
+                body: content.body || '',
+                featured_image: content.featured_image || null,
+                status: content.status || 'draft',
+                type: content.type || 'post',
+                category_id: content.category_id || null,
+                published_at: formatDateTimeLocal(content.published_at),
+                meta_title: content.meta_title || '',
+                meta_description: content.meta_description || '',
+                meta_keywords: content.meta_keywords || '',
+                og_image: content.og_image || null,
+                menu_item: {
+                    add_to_menu: false,
+                    menu_id: '',
+                    parent_id: null,
+                    title: ''
+                },
+                blocks: content.blocks || [],
+                comment_status: content.comment_status !== undefined ? !!content.comment_status : true,
+                editor_type: (content.editor_type as 'classic' | 'builder' | null) || null,
+                is_featured: !!content.is_featured
             };
-        }
 
-        // Set selected tags
-        if (content.tags && Array.isArray(content.tags)) {
-            selectedTags.value = content.tags;
+            // Handle menu items
+            if (content.menu_items && content.menu_items.length > 0) {
+                const menuItem = content.menu_items[0];
+                form.value.menu_item = {
+                    add_to_menu: true,
+                    menu_id: String(menuItem.menu_id),
+                    parent_id: menuItem.parent_id,
+                    title: menuItem.title || ''
+                };
+            }
+
+            // Set selected tags
+            if (content.tags && Array.isArray(content.tags)) {
+                selectedTags.value = content.tags as Tag[];
+            }
         }
         
         // Save initial state for dirty checking (including tags)
-        initialForm.value = JSON.parse(JSON.stringify({
+        initialForm.value = JSON.stringify({
             ...form.value,
             tags: selectedTags.value.map(t => t.id),
-        }));
+        });
         
         // Enable auto-save after content is loaded
         autoSaveEnabled.value = true;
@@ -355,7 +372,7 @@ const fetchContent = async () => {
     } catch (error: any) {
         console.error('Failed to fetch content:', error);
         toast.error.load(error);
-        router.push({ name: 'contents' });
+        router.push({ name: 'content-studio' });
     } finally {
         loading.value = false;
     }
@@ -364,26 +381,31 @@ const fetchContent = async () => {
 const lockContent = async () => {
     try {
         const response = await api.post(`/admin/ja/contents/${contentId}/lock`);
-        lockStatus.value = parseSingleResponse(response) || {};
+        const data = parseSingleResponse<LockStatus>(response);
+        if (data && typeof data === 'object' && 'is_locked' in data) {
+            lockStatus.value = data;
+        } else {
+            lockStatus.value = null;
+        }
         
         // Refresh lock status every 30 seconds
         if (lockInterval.value) {
             clearInterval(lockInterval.value);
         }
         lockInterval.value = setInterval(checkLockStatus, 30000);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to lock content:', error);
     }
 };
 
 const checkLockStatus = async () => {
     try {
-        const response = await api.get(`/admin/ja/contents/${contentId}`);
-        const content = parseSingleResponse(response) || {};
-        if (content.lock_status) {
-            lockStatus.value = content.lock_status;
+        const response = await api.get(`/admin/ja/contents/${contentId}/lock-status`);
+        const data = parseSingleResponse<LockStatus>(response);
+        if (data) {
+            lockStatus.value = data;
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to check lock status:', error);
     }
 };
@@ -391,7 +413,7 @@ const checkLockStatus = async () => {
 const handleUnlock = async () => {
     try {
         await api.post(`/admin/ja/contents/${contentId}/unlock`);
-        lockStatus.value = { is_locked: false };
+        lockStatus.value = { is_locked: false, can_unlock: true };
         if (lockInterval.value) {
             clearInterval(lockInterval.value);
         }
@@ -413,11 +435,11 @@ const previewContent = computed(() => {
         title: form.value.title,
         body: form.value.body,
         excerpt: form.value.excerpt,
-        featured_image: form.value.featured_image,
-        author: { name: 'Current User' }, // You can get from auth store
+        featured_image: form.value.featured_image || undefined,
+        author: { name: authStore.user?.name || 'Current User' },
         category: category ? { name: category.name } : null,
         published_at: form.value.published_at || new Date().toISOString(),
-    };
+    } as any;
 });
 
 const handlePublishFromPreview = async () => {
@@ -425,23 +447,12 @@ const handlePublishFromPreview = async () => {
     await handleSubmit();
 };
 
-const formatDateTimeLocal = (dateString: string) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
-
 const fetchCategories = async () => {
     try {
         const response = await api.get('/admin/ja/categories', { params: { per_page: 100 } });
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch categories:', error);
         categories.value = [];
     }
@@ -449,14 +460,14 @@ const fetchCategories = async () => {
 
 const fetchTags = async (query = '') => {
     try {
-        const params: any = { per_page: 50 };
+        const params: Record<string, any> = { per_page: 50 };
         if (query) {
             params.search = query;
         }
         const response = await api.get('/admin/ja/tags', { params });
         const { data } = parseResponse(response);
         tags.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch tags:', error);
     }
 };
@@ -466,13 +477,14 @@ const fetchMenus = async () => {
         const response = await api.get('/admin/ja/menus');
         const data = response.data?.data || response.data || [];
         menus.value = Array.isArray(data) ? data : [];
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch menus:', error);
     }
 };
 
-const handleModeSelected = (mode: string) => {
-    form.value.editor_type = mode;
+const handleModeSelected = (mode: string | null) => {
+    if (!mode) return;
+    form.value.editor_type = mode as 'classic' | 'builder';
     // Only auto-open sidebar if classic is selected
     if (mode === 'classic') {
         isSidebarOpen.value = true;
@@ -483,18 +495,17 @@ const handleModeSelected = (mode: string) => {
 
 const handleSubmit = async (status: string | null = null) => {
     // Update status if provided (from Builder save/publish buttons)
-    if (status && (status === 'draft' || status === 'published')) {
+    if (status && (status === 'draft' || status === 'published' || status === 'archived' || status === 'scheduled')) {
         form.value.status = status;
     }
 
-    if (!validateWithZod(form.value)) return;
+    if (!validateWithZod(form.value as any)) return;
 
     loading.value = true;
     clearErrors();
     
     // Optimistic UI update for lock status check
-    const currentLock = lockStatus.value;
-    if (currentLock?.is_locked && currentLock?.locked_by?.id !== authStore.user?.id) {
+    if (lockStatus.value?.is_locked && lockStatus.value.locked_by?.id !== authStore.user?.id) {
         toast.error.action(t('features.content.form.locked'));
         loading.value = false;
         return;
@@ -514,7 +525,7 @@ const handleSubmit = async (status: string | null = null) => {
 
         // Auto-select first category if none selected and categories are available
         if (!form.value.category_id && categories.value.length > 0) {
-            form.value.category_id = categories.value[0].id;
+            form.value.category_id = Number(categories.value[0].id);
         }
 
         // Prepare tags
@@ -531,25 +542,21 @@ const handleSubmit = async (status: string | null = null) => {
         const updatedContent = parseSingleResponse(response);
         
         if (updatedContent) {
-            form.value = {
-                ...form.value,
-                ...updatedContent,
-            };
             if (response.data?.updated_at) {
                 lastSaved.value = new Date(response.data.updated_at);
             }
         }
         
         // Update initial form after successful save
-        initialForm.value = JSON.parse(JSON.stringify({
+        initialForm.value = JSON.stringify({
             ...form.value,
             tags: selectedTags.value.map(t => t.id),
-        }));
+        });
         
         toast.success.update('Content');
         
         // Only redirect if not saving from within the builder (status will be a string if from builder)
-        if (typeof status !== 'string') {
+        if (status === null) {
             router.push({ name: 'content-studio' });
         }
     } catch (error: any) {

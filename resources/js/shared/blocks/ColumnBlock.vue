@@ -3,24 +3,24 @@
     :module="module" 
     :mode="mode" 
     :device="device" 
-    class="column-block transition-all duration-500"
+    class="column-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Column'"
     :style="cardStyles"
   >
-    <div class="column-inner w-full h-full flex flex-col transition-all duration-500" :style="columnStyles">
+    <div class="column-inner w-full h-full flex flex-col transition-[width] duration-500" :style="columnStyles">
       <!-- Builder Mode -->
       <template v-if="mode === 'edit'">
         <slot />
         <!-- Empty State -->
-        <div v-if="!module.children?.length" class="column-empty flex-grow flex items-center justify-center p-8 border-2 border-dashed border-gray-50/50 dark:border-gray-900/50 rounded-xl text-gray-200 bg-gray-50/20 dark:bg-gray-900/20 transition-all duration-300 hover:border-emerald-400/30">
+        <div v-if="!module.children?.length" class="column-empty flex-grow flex items-center justify-center p-8 border-2 border-dashed border-gray-50/50 dark:border-gray-900/50 rounded-xl text-gray-200 bg-gray-50/20 dark:bg-gray-900/20 transition-colors duration-300 hover:border-emerald-400/30">
            <PlusIcon class="w-6 h-6 opacity-20 animate-pulse text-emerald-500" />
         </div>
       </template>
 
       <!-- Renderer Mode -->
       <template v-else>
-        <div v-for="child in nestedBlocks" :key="child.id" class="column-child transition-all duration-300">
+        <div v-for="child in nestedBlocks" :key="child.id" class="column-child transition-colors duration-300">
           <BlockRenderer
             v-if="BlockRenderer"
             :block="child"
@@ -35,8 +35,7 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Plus as PlusIcon } from 'lucide-vue-next'
-import { 
+import PlusIcon from 'lucide-vue-next/dist/esm/icons/plus.js';import { 
     getVal,
     getLayoutStyles,
     getResponsiveValue 
@@ -57,7 +56,6 @@ const props = withDefaults(defineProps<{
 const builder = inject<BuilderInstance | null>('builder', null)
 const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
-// @ts-ignore
 const BlockRenderer = inject<any>('BlockRenderer', null)
 
 const cardStyles = computed(() => {

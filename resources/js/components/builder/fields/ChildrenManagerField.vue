@@ -67,8 +67,8 @@
 import { computed, inject, ref } from 'vue'
 import type { BlockInstance, BuilderInstance } from '../../../types/builder'
 import { useI18n } from 'vue-i18n'
-import { Plus, Layout } from 'lucide-vue-next'
-import { BaseButton } from '../ui'
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';import { BaseButton } from '../ui'
 import ModuleActions from './ModuleActions.vue'
 
 const props = defineProps<{
@@ -122,7 +122,7 @@ const getChildLabel = (child: BlockInstance) => {
 }
 
 const isSelected = (id: string) => {
-    return builder?.selectedModule?.id === id
+    return builder?.selectedModule.value?.id === id
 }
 
 // Actions
@@ -144,12 +144,12 @@ const copyStyles = (child: BlockInstance) => {
 
 const addChild = () => {
     if (props.module.type === 'section') {
-        builder?.openInsertRowModal(props.module.id)
+        builder?.openInsertRowModal?.(props.module.id)
     } else if (props.module.type === 'row') {
         builder?.insertModule('column', props.module.id)
     } else if (props.module.type === 'column' || isGenericContainer.value) {
         // For columns and generic containers (like Group), open the module selector
-        builder?.openInsertModal(props.module.id)
+        builder?.openInsertModal?.(props.module.id)
     } else {
         // For specialized modules (Accordion, Tabs, Map, etc.), 
         // find the allowed child type from definition and insert it
@@ -170,7 +170,7 @@ const isGenericContainer = computed(() => {
 
 const openStructureTemplate = () => {
     // Open the specialized structure template modal instead of the generic row modal
-    builder?.openStructureTemplateModal(props.module.id, props.module.type)
+    builder?.openStructureTemplateModal?.(props.module.id, props.module.type)
 }
 </script>
 

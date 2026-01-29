@@ -13,7 +13,9 @@
         :style="titleStyles"
         :contenteditable="mode === 'edit'"
         @blur="updateText('title', $event)"
-      >{{ settings.title || 'Slide Title' }}</h2>
+      >
+{{ settings.title || 'Slide Title' }}
+</h2>
       
       <p 
         v-if="settings.subtitle || mode === 'edit'" 
@@ -21,7 +23,9 @@
         :style="subtitleStyles"
         :contenteditable="mode === 'edit'"
         @blur="updateText('subtitle', $event)"
-      >{{ settings.subtitle || 'Slide subtitle goes here' }}</p>
+      >
+{{ settings.subtitle || 'Slide subtitle goes here' }}
+</p>
       
       <div v-if="settings.buttonText || mode === 'edit'" class="mt-8">
         <a 
@@ -40,15 +44,14 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import { getTypographyStyles, getResponsiveValue } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance } from '@/types/builder'
 
 const props = defineProps<{
   module: BlockInstance
   index: number
 }>()
 
-// @ts-ignore
-const builder = inject<any>('builder', null)
+const builder = inject<BuilderInstance>('builder')
 const device = computed(() => builder?.device?.value || 'desktop')
 const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
@@ -65,8 +68,8 @@ const mode = computed(() => fullwidthSliderState.mode.value)
 
 const updateText = (key: string, event: FocusEvent) => {
     if (mode.value !== 'edit' || !event.target) return
-    const value = (event.target as HTMLElement).innerText
-    builder?.updateModuleSettings(props.module.id, { [key]: value })
+    const newValue = (event.target as HTMLElement).innerText;
+    builder?.updateModuleSettings(props.module.id, { [key]: newValue })
 }
 
 const handleLinkClick = () => {

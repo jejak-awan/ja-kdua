@@ -32,51 +32,55 @@
   </BaseModal>
 </template>
 
-<script setup>
-import { ref, watch, nextTick, onMounted } from 'vue'
-import { BaseModal } from '../ui'
+<script setup lang="ts">
+import { ref, watch, nextTick } from 'vue';
+import { BaseModal } from '../ui';
 
-const props = defineProps({
-  isOpen: Boolean,
-  title: String,
-  message: String,
-  placeholder: String,
-  initialValue: {
-    type: String,
-    default: ''
-  },
-  confirmText: {
-    type: String,
-    default: 'OK'
-  },
-  cancelText: {
-    type: String,
-    default: 'Cancel'
-  }
-})
+interface Props {
+  isOpen?: boolean;
+  title?: string;
+  message?: string;
+  placeholder?: string;
+  initialValue?: string;
+  confirmText?: string;
+  cancelText?: string;
+}
 
-const emit = defineEmits(['confirm', 'cancel'])
+const props = withDefaults(defineProps<Props>(), {
+  isOpen: false,
+  title: '',
+  message: '',
+  placeholder: '',
+  initialValue: '',
+  confirmText: 'OK',
+  cancelText: 'Cancel'
+});
 
-const inputValue = ref('')
-const inputRef = ref(null)
+const emit = defineEmits<{
+  (e: 'confirm', value: string): void;
+  (e: 'cancel'): void;
+}>();
+
+const inputValue = ref('');
+const inputRef = ref<HTMLInputElement | null>(null);
 
 watch(() => props.isOpen, (newVal) => {
   if (newVal) {
-    inputValue.value = props.initialValue
+    inputValue.value = props.initialValue;
     nextTick(() => {
-      inputRef.value?.focus()
-      inputRef.value?.select()
-    })
+      inputRef.value?.focus();
+      inputRef.value?.select();
+    });
   }
-})
+});
 
 const handleConfirm = () => {
-  emit('confirm', inputValue.value)
-}
+  emit('confirm', inputValue.value);
+};
 
 const handleCancel = () => {
-  emit('cancel')
-}
+  emit('cancel');
+};
 </script>
 
 <style scoped>

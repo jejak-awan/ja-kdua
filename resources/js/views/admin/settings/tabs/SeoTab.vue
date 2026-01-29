@@ -6,7 +6,7 @@
             :title="group.title"
             :description="group.description"
             :icon="group.icon"
-            :color="group.color"
+            :color="group.color as any"
             :default-expanded="group.defaultExpanded"
         >
             <SettingField
@@ -19,34 +19,46 @@
                 :type="setting.type"
                 :enabled-text="$t('features.settings.enabled')"
                 :disabled-text="$t('features.settings.disabled')"
-                :error="errors[setting.key]"
+                :error="errors?.[setting.key]"
             />
         </SettingGroup>
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import SettingGroup from '../../../../components/settings/SettingGroup.vue'
-import SettingField from '../../../../components/settings/SettingField.vue'
+import SettingGroup from '@/components/settings/SettingGroup.vue'
+import SettingField from '@/components/settings/SettingField.vue'
+
+interface Setting {
+    id: number | string;
+    key: string;
+    value: any;
+    type: string;
+    group: string;
+}
+
+interface SettingGroupData {
+    id: string;
+    title: string;
+    description: string;
+    icon: any;
+    color: string;
+    keys: string[];
+    settings: Setting[];
+    defaultExpanded: boolean;
+}
+
+interface Props {
+    settings: Setting[];
+    formData: Record<string, any>;
+    errors?: Record<string, string[]>;
+}
 
 const { t } = useI18n()
 
-const props = defineProps({
-    settings: {
-        type: Array,
-        required: true
-    },
-    formData: {
-        type: Object,
-        required: true
-    },
-    errors: {
-        type: Object,
-        default: () => ({})
-    }
-})
+const props = defineProps<Props>()
 
 const TagIcon = {
     template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" /></svg>`
@@ -59,7 +71,7 @@ const SearchIcon = {
 const seoSettingsGrouped = computed(() => {
     const seoSettings = props.settings.filter(s => s && s.group === 'seo')
     
-    const groups = [
+    const groups: SettingGroupData[] = [
         {
             id: 'meta',
             title: t('features.settings.groups.meta.title'),

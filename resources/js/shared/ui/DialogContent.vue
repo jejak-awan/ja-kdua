@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { computed, type HTMLAttributes } from 'vue';
 import { DialogPortal, DialogOverlay, DialogContent, type DialogContentEmits, type DialogContentProps, DialogClose, useForwardPropsEmits } from 'radix-vue';
-import { X } from 'lucide-vue-next';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import { cn } from '../../lib/utils';
 
 const props = defineProps<DialogContentProps & { class?: HTMLAttributes['class'] }>();

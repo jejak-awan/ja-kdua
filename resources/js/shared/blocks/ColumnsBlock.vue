@@ -1,5 +1,5 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="columns-block">
+  <BaseBlock :module="module" :mode="mode" :settings="settings" class="columns-block">
     <div class="columns-inner flex flex-wrap" :class="[reverseClasses]" :style="flexStyles">
       <!-- Builder Mode -->
       <template v-if="mode === 'edit'">
@@ -29,31 +29,29 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { getVal, getResponsiveValue } from '../utils/styleUtils'
+import { getVal } from '../utils/styleUtils'
+import type { BlockProps, BuilderInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  nestedBlocks: { type: Array, default: () => [] }
+const props = withDefaults(defineProps<BlockProps>(), {
+  mode: 'view',
+  device: 'desktop',
+  nestedBlocks: () => []
 })
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
+const builder = inject<BuilderInstance>('builder', null as any)
+const settings = computed(() => props.settings || props.module?.settings || {})
 
-const BlockRenderer = inject('BlockRenderer', null)
-
-const isModern = computed(() => props.nestedBlocks && props.nestedBlocks.length > 0)
+const BlockRenderer = inject<any>('BlockRenderer', null)
 const computedColumns = computed(() => props.nestedBlocks || [])
 
 const colWidths = computed(() => {
     const numCols = computedColumns.value.length
     if (numCols === 0) return []
     
-    let widths = []
+    let widths: number[] = []
     const layout = getVal(settings.value, 'layout') || '1-1'
     
     switch (layout) {
@@ -85,7 +83,7 @@ const reverseClasses = computed(() => {
     const mobileDir = getVal(settings.value, 'mobileDirection') || 'column'
     const desktopDir = getVal(settings.value, 'direction') || 'row'
     
-    const directionMap = {
+    const directionMap: Record<string, string> = {
         'row': 'flex-row',
         'row-reverse': 'flex-row-reverse',
         'column': 'flex-col',

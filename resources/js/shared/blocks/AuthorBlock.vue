@@ -3,15 +3,17 @@
     :module="module" 
     :settings="settings" 
     :mode="mode"
-    class="author-block transition-all duration-300"
+    class="author-block transition-colors duration-300"
     :style="cardStyles"
     :id="settings.html_id"
     :aria-label="settings.aria_label"
   >
-    <div :class="[
+    <div
+:class="[
       'author-container flex',
       layout === 'vertical' ? 'flex-col items-center text-center' : 'items-start text-left'
-    ]" :style="containerStyles">
+    ]" :style="containerStyles"
+>
       <Avatar :style="imageStyles" class="flex-shrink-0 author-avatar">
         <AvatarImage 
           v-if="authorImage" 
@@ -56,7 +58,7 @@
               v-for="(link, i) in activeSocialLinks" 
               :key="i" 
               :href="mode === 'view' ? link.url : null" 
-              class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-primary hover:text-white hover:-translate-y-0.5 transition-all"
+              class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-primary hover:text-white hover:-translate-y-0.5 transition-colors"
               target="_blank"
               @click="handleLinkClick"
           >
@@ -72,8 +74,13 @@
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Avatar, AvatarImage, AvatarFallback } from '../ui'
-import { UserCircle, Twitter, Linkedin, Facebook, Instagram, Github, Globe } from 'lucide-vue-next'
-import { 
+import UserCircle from 'lucide-vue-next/dist/esm/icons/circle-user.js';
+import Twitter from 'lucide-vue-next/dist/esm/icons/twitter.js';
+import Linkedin from 'lucide-vue-next/dist/esm/icons/linkedin.js';
+import Facebook from 'lucide-vue-next/dist/esm/icons/facebook.js';
+import Instagram from 'lucide-vue-next/dist/esm/icons/instagram.js';
+import Github from 'lucide-vue-next/dist/esm/icons/github.js';
+import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';import { 
   getVal,
   getLayoutStyles,
   getTypographyStyles,

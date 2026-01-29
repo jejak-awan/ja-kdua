@@ -241,7 +241,7 @@
                       v-for="(hex, shade) in selectedFamily.variants" 
                       :key="shade"
                       class="variant-item"
-                      @click="selectPreset(hex)"
+                      @click="selectPreset(hex as string)"
                   >
                       <div class="variant-preview" :style="{ backgroundColor: hex }"></div>
                       <span class="variant-label">{{ shade }}</span>
@@ -317,7 +317,7 @@
                   <span class="color-hex">{{ color.value }}</span>
               </div>
               <div class="global-list-item add-item" @click="addGlobalColor">
-                  <div class="add-icon-sm"><Plus :size="12"/></div>
+                  <div class="add-icon-sm"><Plus :size="12" /></div>
                   <span>{{ t('builder.modals.colorPicker.addGlobal') }}</span>
               </div>
           </div>
@@ -330,357 +330,364 @@
               {{ t('builder.fields.actions.manageGlobal') }}
           </button>
       </div>
-
-  </BaseModal>
+</BaseModal>
 </template>
 
-<script setup>
-import { ref, computed, onMounted, onUnmounted, watch, inject } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { X, ChevronDown, ChevronUp, LayoutGrid, List, Plus } from 'lucide-vue-next'
-import { parseColor, hsvToRgb, rgbToHex, rgbToHsv, hexToRgb } from '../core/colorUtils'
-import { themeVariables, toCssVarName } from '../core/cssVariables'
-import { BaseModal, BaseColorSlider } from '../ui' 
-import { MATERIAL_COLORS } from '../core/MaterialColors'
+<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted, watch, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
+import LayoutGrid from 'lucide-vue-next/dist/esm/icons/layout-grid.js';
+import List from 'lucide-vue-next/dist/esm/icons/list.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import { parseColor, hsvToRgb, rgbToHex, rgbToHsv, hexToRgb } from '../core/colorUtils';
+import { themeVariables, toCssVarName } from '../core/cssVariables';
+import { BaseModal, BaseColorSlider } from '../ui';
+import { MATERIAL_COLORS } from '../core/MaterialColors';
+import type { BuilderInstance } from '../../../types/builder';
 
 // Props
-const props = defineProps({
-  modelValue: {
-    type: String,
-    default: '#ffffff'
-  },
-  initialMode: {
-    type: String,
-    default: 'hex', // 'hex' or 'css_var'
-    validator: (val) => ['hex', 'css_var'].includes(val)
-  }
-})
+interface Props {
+  modelValue?: string;
+  initialMode?: 'hex' | 'css_var';
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: '#ffffff',
+  initialMode: 'hex'
+});
 
 // Emits
-const emit = defineEmits(['update:modelValue', 'close'])
-const { t } = useI18n()
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void;
+  (e: 'close'): void;
+}>();
+
+const { t } = useI18n();
 
 // Inject Builder
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder');
 
 // State
-const hue = ref(0)
-const s = ref(0)
-const v = ref(100)
-const alpha = ref(1)
-const isDragging = ref(false)
-const svArea = ref(null)
+const hue = ref(0);
+const s = ref(0);
+const v = ref(100);
+const alpha = ref(1);
+const isDragging = ref(false);
+const svArea = ref<HTMLElement | null>(null);
 
-const showFilters = ref(false)
-const viewMode = ref('grid')
+const showFilters = ref(false);
+const viewMode = ref<'grid' | 'list'>('grid');
 
 // Tab/View State
-const colorView = ref('custom') // 'custom' or 'presets'
+const colorView = ref<'custom' | 'presets'>('custom');
 
 // Material Presets State
-const selectedFamilyId = ref('indigo')
-const selectedFamily = computed(() => MATERIAL_COLORS.find(f => f.id === selectedFamilyId.value) || MATERIAL_COLORS[0])
+const selectedFamilyId = ref('indigo');
+const selectedFamily = computed(() => MATERIAL_COLORS.find(f => f.id === selectedFamilyId.value) || MATERIAL_COLORS[0]);
 const smartPairings = computed(() => {
-    const pairings = selectedFamily.value?.pairings || []
-    return pairings.map(pid => MATERIAL_COLORS.find(f => f.id === pid)).filter(Boolean)
-})
+    const pairings = selectedFamily.value?.pairings || [];
+    return pairings.map(pid => MATERIAL_COLORS.find(f => f.id === pid)).filter((p): p is typeof MATERIAL_COLORS[0] => !!p);
+});
 
 // Input Mode State - initialize from prop
-const inputMode = ref(props.initialMode || 'hex')
-const cssVarValue = ref('')
-const showModeDropdown = ref(false)
-const modeDropdownRef = ref(null)
+const inputMode = ref<'hex' | 'css_var'>(props.initialMode);
+const cssVarValue = ref('');
+const showModeDropdown = ref(false);
+const modeDropdownRef = ref<HTMLElement | null>(null);
 
 // Shared Global Colors
-const { globalColors } = builder.globalVariables || { globalColors: ref([]) }
+const globalColors = computed(() => builder?.globalVariables.globalColors.value || []);
 
 // Suggestions State
-const showVarSuggestions = ref(false)
+const showVarSuggestions = ref(false);
 
 const allSuggestions = computed(() => {
     // 1. Static Theme Variables
-    const staticVars = themeVariables || []
+    const staticVars = themeVariables || [];
     
     // 2. Dynamic Global Colors (converted to --slug)
-    const colors = globalColors?.value || []
-    const dynamicVars = colors.map(c => toCssVarName(c?.name || ''))
+    const colors = globalColors.value || [];
+    const dynamicVars = colors.map((c: any) => toCssVarName(c?.name || ''));
     
     // Merge and deduplicate
-    return [...new Set([...staticVars, ...dynamicVars])]
-})
+    return [...new Set([...staticVars, ...dynamicVars])];
+});
 
 const filteredSuggestions = computed(() => {
-    if (!cssVarValue.value) return allSuggestions.value
-    const val = cssVarValue.value.toLowerCase()
-    return allSuggestions.value.filter(v => v.includes(val))
-})
+    if (!cssVarValue.value) return allSuggestions.value;
+    const val = cssVarValue.value.toLowerCase();
+    return allSuggestions.value.filter(v => v.includes(val));
+});
 
-const selectVar = (val) => {
+const selectVar = (val: string) => {
     // Switch to CSS Var mode and clear hex state
-    inputMode.value = 'css_var'
-    cssVarValue.value = val
-    showVarSuggestions.value = false
+    inputMode.value = 'css_var';
+    cssVarValue.value = val;
+    showVarSuggestions.value = false;
     // Reset alpha to 1 when selecting new variable
-    alpha.value = 1
-    emitUpdate()
-}
+    alpha.value = 1;
+    emitUpdate();
+};
 
 const handleVarBlur = () => {
     setTimeout(() => {
-        showVarSuggestions.value = false
-    }, 200)
-}
+        showVarSuggestions.value = false;
+    }, 200);
+};
 
-const toggleModeDropdown = () => showModeDropdown.value = !showModeDropdown.value
+const toggleModeDropdown = () => showModeDropdown.value = !showModeDropdown.value;
 
-const setMode = (mode) => {
-    inputMode.value = mode
-    showModeDropdown.value = false
-    emitUpdate()
-}
+const setMode = (mode: 'hex' | 'css_var') => {
+    inputMode.value = mode;
+    showModeDropdown.value = false;
+    emitUpdate();
+};
 
 // Click Outside for Mode Dropdown
-const handleClickOutside = (event) => {
-    if (showModeDropdown.value && modeDropdownRef.value && !modeDropdownRef.value.contains(event.target)) {
-        showModeDropdown.value = false
+const handleClickOutside = (event: Event) => {
+    if (showModeDropdown.value && modeDropdownRef.value && !modeDropdownRef.value.contains(event.target as Node)) {
+        showModeDropdown.value = false;
     }
-}
+};
 
-const toggleFilters = () => showFilters.value = !showFilters.value
-
-// Shared Global Colors (Declared above)
-// const { globalColors } = builder.globalVariables || { globalColors: ref([]) }
+const toggleFilters = () => showFilters.value = !showFilters.value;
 
 // Computed
-const hueColor = computed(() => `hsl(${hue.value}, 100%, 50%)`)
+const hueColor = computed(() => `hsl(${hue.value}, 100%, 50%)`);
 
 const currentColor = computed(() => {
   if (inputMode.value === 'css_var') {
       // Cannot easily preview var without context, return transparent or approximation
       // If we could resolve it, we would.
-      return 'transparent' 
+      return 'transparent';
   }
-  const { r, g, b } = hsvToRgb(hue.value / 360, s.value / 100, v.value / 100)
+  const { r, g, b } = hsvToRgb(hue.value / 360, s.value / 100, v.value / 100);
   if (alpha.value < 1) {
-    return `rgba(${r}, ${g}, ${b}, ${alpha.value})`
+    return `rgba(${r}, ${g}, ${b}, ${alpha.value})`;
   }
-  return rgbToHex(r, g, b)
-})
+  return rgbToHex(r, g, b);
+});
 
 const hexValue = computed(() => {
-  const { r, g, b } = hsvToRgb(hue.value / 360, s.value / 100, v.value / 100)
-  return rgbToHex(r, g, b).replace('#', '')
-})
+  const { r, g, b } = hsvToRgb(hue.value / 360, s.value / 100, v.value / 100);
+  return rgbToHex(r, g, b).replace('#', '');
+});
 // Track if this is the first initialization
-const isFirstInit = ref(true)
+const isFirstInit = ref(true);
 
 // Initialize
 const initFromProp = () => {
-  const val = props.modelValue || ''
+  const val = props.modelValue || '';
   
   // On first init, prioritize initialMode prop over value detection
   if (isFirstInit.value) {
-    isFirstInit.value = false
+    isFirstInit.value = false;
     
     // If initialMode is css_var, use it regardless of value
     if (props.initialMode === 'css_var') {
-      inputMode.value = 'css_var'
+      inputMode.value = 'css_var';
       // Parse cssVarValue and alpha from value
-      parseVarValue(val)
-      return
+      parseVarValue(val);
+      return;
     }
   }
   
   // Detect color-mix format (CSS var with alpha)
   if (val.startsWith('color-mix(')) {
-    inputMode.value = 'css_var'
-    parseVarValue(val)
-    return
+    inputMode.value = 'css_var';
+    parseVarValue(val);
+    return;
   }
   
   // Normal detection based on value
   if (val.startsWith('var(') || val.startsWith('--')) {
-      inputMode.value = 'css_var'
-      cssVarValue.value = val.replace(/^var\(\s*(.+?)\s*\)$/, '$1')
-      alpha.value = 1
-      return
+      inputMode.value = 'css_var';
+      cssVarValue.value = val.replace(/^var\(\s*(.+?)\s*\)$/, '$1');
+      alpha.value = 1;
+      return;
   }
 
-  inputMode.value = 'hex'
-  const { r, g, b, a } = parseColor(val)
-  const hsv = rgbToHsv(r, g, b)
-  hue.value = hsv.h
-  s.value = hsv.s
-  v.value = hsv.v
-  alpha.value = a
-}
+  inputMode.value = 'hex';
+  const { r, g, b, a } = parseColor(val);
+  const hsv = rgbToHsv(r, g, b);
+  hue.value = hsv.h;
+  s.value = hsv.s;
+  v.value = hsv.v;
+  alpha.value = a;
+};
 
 // Helper to parse CSS var value with potential color-mix
-const parseVarValue = (val) => {
+const parseVarValue = (val: string) => {
   if (val.startsWith('color-mix(')) {
     // Extract variable and opacity from color-mix(in srgb, var(--foo), transparent 20%)
-    const match = val.match(/color-mix\(in srgb,\s*(.+?),\s*transparent\s*(\d+(\.\d+)?)%\)/)
+    const match = val.match(/color-mix\(in srgb,\s*(.+?),\s*transparent\s*(\d+(\.\d+)?)%\)/);
     if (match) {
-      const inner = match[1].trim()
-      cssVarValue.value = inner.startsWith('var(') ? inner.replace(/^var\(\s*(.+?)\s*\)$/, '$1') : inner
-      const transparentPercent = parseFloat(match[2])
-      alpha.value = (100 - transparentPercent) / 100
+      const inner = match[1].trim();
+      cssVarValue.value = inner.startsWith('var(') ? inner.replace(/^var\(\s*(.+?)\s*\)$/, '$1') : inner;
+      const transparentPercent = parseFloat(match[2]);
+      alpha.value = (100 - transparentPercent) / 100;
     } else {
-      cssVarValue.value = ''
-      alpha.value = 1
+      cssVarValue.value = '';
+      alpha.value = 1;
     }
   } else if (val.startsWith('var(') || val.startsWith('--')) {
-    cssVarValue.value = val.replace(/^var\(\s*(.+?)\s*\)$/, '$1')
-    alpha.value = 1
+    cssVarValue.value = val.replace(/^var\(\s*(.+?)\s*\)$/, '$1');
+    alpha.value = 1;
   } else {
-    cssVarValue.value = ''
-    alpha.value = 1
+    cssVarValue.value = '';
+    alpha.value = 1;
   }
-}
+};
 
-watch(() => props.modelValue, initFromProp, { immediate: true })
+watch(() => props.modelValue, initFromProp, { immediate: true });
 
 // Drag Logic (SV)
-const handleDrag = (e) => {
-  if (!isDragging.value || !svArea.value) return
-  const rect = svArea.value.getBoundingClientRect()
-  const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width))
-  const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height))
-  s.value = (x / rect.width) * 100
-  v.value = 100 - ((y / rect.height) * 100)
-  emitUpdate()
-}
+const handleDrag = (e: MouseEvent) => {
+  if (!isDragging.value || !svArea.value) return;
+  const rect = svArea.value.getBoundingClientRect();
+  const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+  const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+  s.value = (x / rect.width) * 100;
+  v.value = 100 - ((y / rect.height) * 100);
+  emitUpdate();
+};
 
-const startDragSV = (e) => {
-  isDragging.value = true
-  handleDrag(e)
-  window.addEventListener('mousemove', handleDrag)
-  window.addEventListener('mouseup', stopDragSV)
-}
+const startDragSV = (e: MouseEvent) => {
+  isDragging.value = true;
+  handleDrag(e);
+  window.addEventListener('mousemove', handleDrag);
+  window.addEventListener('mouseup', stopDragSV);
+};
 
 const stopDragSV = () => {
-  isDragging.value = false
-  window.removeEventListener('mousemove', handleDrag)
-  window.removeEventListener('mouseup', stopDragSV)
-}
+  isDragging.value = false;
+  window.removeEventListener('mousemove', handleDrag);
+  window.removeEventListener('mouseup', stopDragSV);
+};
 
 // Updates
-const updateHue = () => emitUpdate()
-const updateAlpha = () => emitUpdate()
+const updateHue = () => emitUpdate();
 
 // Alpha as percentage for BaseColorSlider (0-100)
 const alphaPercent = computed({
   get: () => Math.round(alpha.value * 100),
-  set: (val) => {
-    alpha.value = val / 100
-    emitUpdate()
+  set: (val: number) => {
+    alpha.value = val / 100;
+    emitUpdate();
   }
-})
+});
 
-const updateAlphaFromSlider = (val) => {
-  alpha.value = val / 100
-  emitUpdate()
-}
+const updateAlphaFromSlider = (val: number) => {
+  alpha.value = val / 100;
+  emitUpdate();
+};
 
-const updateAlphaFromInput = (e) => {
-  const val = parseFloat(e.target.value)
+const updateAlphaFromInput = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const val = parseFloat(target.value);
   if (!isNaN(val)) {
-    alpha.value = Math.max(0, Math.min(100, val)) / 100
-    emitUpdate()
+    alpha.value = Math.max(0, Math.min(100, val)) / 100;
+    emitUpdate();
   }
-}
+};
 
-const handleHexInput = (e) => {
-    let val = e.target.value
-    if (!val.startsWith('#')) val = '#' + val
-    const rgb = hexToRgb(val)
+const handleHexInput = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    let val = target.value;
+    if (!val.startsWith('#')) val = '#' + val;
+    const rgb = hexToRgb(val);
     if (rgb) {
-        const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b)
-        hue.value = hsv.h
-        s.value = hsv.s
-        v.value = hsv.v
-        emitUpdate()
+        const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+        hue.value = hsv.h;
+        s.value = hsv.s;
+        v.value = hsv.v;
+        emitUpdate();
     }
-}
+};
 
-const selectPreset = (color) => {
+const selectPreset = (color: string) => {
   // Switch to Hex mode and clear CSS var state
-  inputMode.value = 'hex'
-  cssVarValue.value = ''
+  inputMode.value = 'hex';
+  cssVarValue.value = '';
   
-  const { r, g, b, a } = parseColor(color)
-  const hsv = rgbToHsv(r, g, b)
-  hue.value = hsv.h
-  s.value = hsv.s
-  v.value = hsv.v
-  alpha.value = a
+  const { r, g, b, a } = parseColor(color);
+  const hsv = rgbToHsv(r, g, b);
+  hue.value = hsv.h;
+  s.value = hsv.s;
+  v.value = hsv.v;
+  alpha.value = a;
 
   // Switch back to custom view for fine-tuning
-  colorView.value = 'custom'
+  colorView.value = 'custom';
   
-  emitUpdate()
-}
+  emitUpdate();
+};
 
 const emitUpdate = () => {
   if (inputMode.value === 'css_var') {
-      let val = cssVarValue.value
+      let val = cssVarValue.value;
       // Wrap in var() if it starts with --
       if (val && val.startsWith('--')) {
-          val = `var(${val})`
+          val = `var(${val})`;
       }
       // Apply alpha using color-mix if alpha < 1
       if (val && alpha.value < 1) {
-          const transparentPercent = Math.round((1 - alpha.value) * 100)
-          val = `color-mix(in srgb, ${val}, transparent ${transparentPercent}%)`
+          const transparentPercent = Math.round((1 - alpha.value) * 100);
+          val = `color-mix(in srgb, ${val}, transparent ${transparentPercent}%)`;
       }
-      emit('update:modelValue', val)
-      return
+      emit('update:modelValue', val);
+      return;
   }
 
-  const { r, g, b } = hsvToRgb(hue.value / 360, s.value / 100, v.value / 100)
-  let val = rgbToHex(r, g, b)
+  const { r, g, b } = hsvToRgb(hue.value / 360, s.value / 100, v.value / 100);
+  let val = rgbToHex(r, g, b);
   if (alpha.value < 1) {
-      val = `rgba(${r}, ${g}, ${b}, ${alpha.value})`
+      val = `rgba(${r}, ${g}, ${b}, ${alpha.value})`;
   }
-  emit('update:modelValue', val)
-}
+  emit('update:modelValue', val);
+};
 
 // Global Actions
 const addGlobalColor = () => {
     // Open Global Manager to add a new color
-    openGlobalManager()
-}
+    openGlobalManager();
+};
 
 const openGlobalManager = () => {
-    if (builder && builder.activePanel) {
-        builder.activePanel = 'global_variables'
-        if (builder.globalAction) {
-            builder.globalAction = { type: 'add_color', timestamp: Date.now() }
+    if (builder && (builder as any).activePanel) {
+        (builder as any).activePanel.value = 'global_variables';
+        if ((builder as any).globalAction) {
+            (builder as any).globalAction.value = { type: 'add_color', timestamp: Date.now() };
         }
     }
-    emit('close')
-}
+    emit('close');
+};
 
 // Opacity Spinners
 const incrementAlpha = () => {
-    alpha.value = Math.min(1, Math.round((alpha.value + 0.01) * 100) / 100)
-    emitUpdate()
-}
+    alpha.value = Math.min(1, Math.round((alpha.value + 0.01) * 100) / 100);
+    emitUpdate();
+};
 
 const decrementAlpha = () => {
-    alpha.value = Math.max(0, Math.round((alpha.value - 0.01) * 100) / 100)
-    emitUpdate()
-}
+    alpha.value = Math.max(0, Math.round((alpha.value - 0.01) * 100) / 100);
+    emitUpdate();
+};
 
 onMounted(() => {
-    window.addEventListener('click', handleClickOutside)
-})
+    window.addEventListener('click', handleClickOutside);
+});
 
 onUnmounted(() => {
-  window.removeEventListener('mousemove', handleDrag)
-  window.removeEventListener('mouseup', stopDragSV)
-  window.removeEventListener('click', handleClickOutside)
-})
+  window.removeEventListener('mousemove', handleDrag);
+  window.removeEventListener('mouseup', stopDragSV);
+  window.removeEventListener('click', handleClickOutside);
+});
 </script>
 
 <style scoped>

@@ -33,7 +33,7 @@
                 <div v-for="activity in activities.slice(0, 5)" :key="activity.id" class="p-4 hover:bg-muted/30 transition-colors group">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0">
-                            <Avatar class="h-10 w-10 ring-2 ring-background group-hover:ring-muted transition-all">
+                            <Avatar class="h-10 w-10 ring-2 ring-background group-hover:ring-muted transition-[ring-color]">
                                 <AvatarFallback :class="getUserAvatarClass(activity)" class="font-bold text-xs">
                                     {{ getUserInitials(activity.user?.name) }}
                                 </AvatarFallback>
@@ -47,7 +47,7 @@
                                 <span class="text-[10px] text-muted-foreground flex items-center gap-1">
                                     <Clock class="w-3 h-3" />
                                     {{ formatTime(activity.created_at) }}
-                                </span >
+                                </span>
                             </div>
                             <p class="text-sm text-muted-foreground flex items-center flex-wrap gap-2">
                                 <Badge 
@@ -66,7 +66,7 @@
         </CardContent>
         
         <div class="p-3 bg-muted/10 border-t border-border/40">
-            <Button variant="ghost" size="sm" class="w-full text-primary hover:bg-primary/5 group" asChild>
+            <Button variant="ghost" size="sm" class="w-full text-primary hover:bg-primary/5 group" as-child>
                 <router-link :to="{ name: 'activity-logs' }" class="flex items-center justify-center">
                     {{ $t('features.dashboard.widgets.recentActivity.viewAll') }}
                     <ArrowRight class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
@@ -76,31 +76,54 @@
     </Card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { parseResponse } from '@/utils/responseParser';
-import Card from '@/components/ui/card.vue';
-import CardHeader from '@/components/ui/card-header.vue';
-import CardTitle from '@/components/ui/card-title.vue';
-import CardDescription from '@/components/ui/card-description.vue';
-import CardContent from '@/components/ui/card-content.vue';
-import Button from '@/components/ui/button.vue';
-import Badge from '@/components/ui/badge.vue';
-import Avatar from '@/components/ui/avatar.vue';
-import AvatarFallback from '@/components/ui/avatar-fallback.vue';
-import { History, Clock, ArrowRight, Loader2, ZapOff } from 'lucide-vue-next';
+import { 
+    Card, 
+    CardHeader, 
+    CardTitle, 
+    CardDescription, 
+    CardContent, 
+    Button, 
+    Badge, 
+    Avatar, 
+    AvatarFallback 
+} from '@/components/ui';
+import History from 'lucide-vue-next/dist/esm/icons/history.js';
+import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
+import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import ZapOff from 'lucide-vue-next/dist/esm/icons/zap-off.js';
+
+interface Activity {
+    id: number;
+    user_id?: number | null;
+    user?: {
+        name: string;
+        [key: string]: any;
+    } | null;
+    action?: string;
+    type?: string;
+    description: string;
+    created_at: string;
+    [key: string]: any;
+}
 
 const { t } = useI18n();
 
-const activities = ref([]);
+const activities = ref<Activity[]>([]);
 const loading = ref(false);
-let refreshInterval = null;
+const refreshInterval = ref<ReturnType<typeof setInterval> | null>(null);
 
 const fetchActivities = async () => {
-    if (window.__isSessionTerminated) {
-        if (refreshInterval) clearInterval(refreshInterval);
+    if ((window as any).__isSessionTerminated) {
+        if (refreshInterval.value) {
+            clearInterval(refreshInterval.value);
+            refreshInterval.value = null;
+        }
         return;
     }
 
@@ -111,9 +134,8 @@ const fetchActivities = async () => {
     try {
         const response = await api.get('/admin/ja/activity-logs', { params: { per_page: 6 } });
         const { data } = parseResponse(response);
-        activities.value = data || [];
-    } catch (error) {
-        // Silently handle canceled requests (401/session errors)
+        activities.value = (data as Activity[]) || [];
+    } catch (error: any) {
         if (error.code !== 'ERR_CANCELED' && error.response?.status !== 401) {
             console.error('Failed to fetch recent activities:', error);
         }
@@ -122,11 +144,11 @@ const fetchActivities = async () => {
     }
 };
 
-const formatTime = (date) => {
+const formatTime = (date: string) => {
     if (!date) return '';
     const d = new Date(date);
     const now = new Date();
-    const diff = Math.floor((now - d) / 1000);
+    const diff = Math.floor((now.getTime() - d.getTime()) / 1000);
 
     if (diff < 60) return t('features.dashboard.widgets.recentActivity.time.justNow');
     if (diff < 3600) return t('features.dashboard.widgets.recentActivity.time.ago', { time: `${Math.floor(diff / 60)}m` });
@@ -135,7 +157,7 @@ const formatTime = (date) => {
     return d.toLocaleDateString();
 };
 
-const getUserInitials = (name) => {
+const getUserInitials = (name?: string) => {
     if (!name) return '?';
     return name
         .split(' ')
@@ -145,7 +167,7 @@ const getUserInitials = (name) => {
         .toUpperCase();
 };
 
-const getUserAvatarClass = (activity) => {
+const getUserAvatarClass = (activity: Activity) => {
     const id = activity.user_id || 0;
     const colors = [
         'bg-primary/10 text-primary',
@@ -157,7 +179,7 @@ const getUserAvatarClass = (activity) => {
     return colors[id % colors.length];
 };
 
-const getActionBadgeClass = (action) => {
+const getActionBadgeClass = (action?: string) => {
     const a = (action || '').toLowerCase();
     if (a.includes('create')) return 'bg-success/10 text-success';
     if (a.includes('update')) return 'bg-info/10 text-info';
@@ -166,9 +188,8 @@ const getActionBadgeClass = (action) => {
     return 'bg-muted text-muted-foreground';
 };
 
-const getActionLabel = (action) => {
+const getActionLabel = (action?: string) => {
     if (!action) return '-';
-    // Check security event types first (some activity logs might be security related)
     let key = `features.security.logs.eventTypes.${action}`;
     let translated = t(key);
     
@@ -182,11 +203,13 @@ const getActionLabel = (action) => {
 
 onMounted(() => {
     fetchActivities();
-    refreshInterval = setInterval(fetchActivities, 120000); // Increased from 30s to 2m
+    refreshInterval.value = setInterval(fetchActivities, 120000);
 });
 
 onUnmounted(() => {
-    if (refreshInterval) clearInterval(refreshInterval);
+    if (refreshInterval.value) {
+        clearInterval(refreshInterval.value);
+    }
 });
 
 defineExpose({ fetchActivities });

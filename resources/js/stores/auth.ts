@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
-import { AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse, isCancel } from 'axios';
 import api, { getCsrfCookie } from '../services/api';
-import type { User, Role, AuthState, AuthResponse, LoginCredentials } from '../types/auth';
+import type { User, Role, AuthState, AuthResponse, LoginCredentials, RegisterData, ResetPasswordData } from '../types/auth';
 
 export const ROLE_RANKS: Record<string, number> = {
     'super-admin': 100,
@@ -119,10 +119,12 @@ export const useAuthStore = defineStore('auth', {
                     throw new Error('Invalid response format from server');
                 }
             } catch (error: any) {
-                const errorData = error.response?.data || {};
+                // Handle different error statuses
+                const axiosError = error as AxiosError<any>;
+                const errorData = axiosError.response?.data || {};
                 const errors = errorData.errors || {};
-                const status = error.response?.status;
-                const headers = error.response?.headers || {};
+                const status = axiosError.response?.status;
+                const headers = axiosError.response?.headers || {};
 
                 // Handle rate limiting (429)
                 if (status === 429) {
@@ -135,18 +137,7 @@ export const useAuthStore = defineStore('auth', {
                     }
                     // Try from headers (axios lowercases header names)
                     else if (headers['retry-after']) {
-                        retryAfter = parseInt(headers['retry-after'], 10);
-                    }
-                    // Try capitalized version
-                    else if (headers['Retry-After']) {
-                        retryAfter = parseInt(headers['Retry-After'], 10);
-                    }
-                    // Try from error response headers directly
-                    else if (error.response?.headers?.['retry-after']) {
-                        retryAfter = parseInt(error.response.headers['retry-after'], 10);
-                    }
-                    else if (error.response?.headers?.['Retry-After']) {
-                        retryAfter = parseInt(error.response.headers['Retry-After'], 10);
+                        retryAfter = parseInt(headers['retry-after'] as string, 10);
                     }
 
                     const retryAfterSeconds = retryAfter;
@@ -190,7 +181,7 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        async register(userData: any): Promise<AuthResponse> {
+        async register(userData: RegisterData): Promise<AuthResponse> {
             try {
                 // Ensure CSRF cookie is fresh before register
                 await getCsrfCookie();
@@ -198,11 +189,12 @@ export const useAuthStore = defineStore('auth', {
                 const response = await api.post('/register', userData);
                 this.setAuth(response.data);
                 return { success: true, data: response.data };
-            } catch (error: any) {
+            } catch (error: unknown) {
+                const axiosError = error as AxiosError<any>;
                 return {
                     success: false,
-                    message: error.response?.data?.message || 'Registration failed',
-                    errors: error.response?.data?.errors,
+                    message: axiosError.response?.data?.message || 'Registration failed',
+                    errors: axiosError.response?.data?.errors,
                 };
             }
         },
@@ -211,12 +203,13 @@ export const useAuthStore = defineStore('auth', {
             try {
                 // Skip 401 handler redirect - logout is intentionally ending session
                 await api.post('/logout', {}, { _skipManualRedirect: true } as any);
-            } catch (error: any) {
+            } catch (error: unknown) {
                 // Silence session errors (401/419) and cancellations during logout
                 // These are expected if the session is already terminated.
-                const status = error.response?.status;
-                // @ts-ignore
-                const isSilentError = status === 401 || status === 419 || AxiosError.isCancel(error);
+                const axiosError = error as AxiosError;
+                const status = axiosError.response?.status;
+
+                const isSilentError = status === 401 || status === 419 || isCancel(error);
 
                 if (!isSilentError) {
                     console.error('Logout error:', error);
@@ -242,9 +235,10 @@ export const useAuthStore = defineStore('auth', {
                     localStorage.setItem('user', JSON.stringify(userData));
                 }
                 return { success: true, data: userData };
-            } catch (error: any) {
+            } catch (error: unknown) {
                 this.clearAuth();
-                return { success: false, message: error.response?.data?.message };
+                const axiosError = error as AxiosError<any>;
+                return { success: false, message: axiosError.response?.data?.message };
             }
         },
 
@@ -260,15 +254,16 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        async resetPassword(data: any): Promise<AuthResponse> {
+        async resetPassword(data: ResetPasswordData): Promise<AuthResponse> {
             try {
                 const response = await api.post('/reset-password', data);
                 return { success: true, message: response.data.message };
-            } catch (error: any) {
+            } catch (error: unknown) {
+                const axiosError = error as AxiosError<any>;
                 return {
                     success: false,
-                    message: error.response?.data?.message || 'Password reset failed',
-                    errors: error.response?.data?.errors,
+                    message: axiosError.response?.data?.message || 'Password reset failed',
+                    errors: axiosError.response?.data?.errors,
                 };
             }
         },

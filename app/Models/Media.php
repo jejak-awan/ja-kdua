@@ -21,7 +21,7 @@ class Media extends Model
         'size',
         'alt',
         'description',
-        'description',
+        'caption',
         'folder_id',
         'author_id',
         'is_shared',
@@ -37,7 +37,7 @@ class Media extends Model
         'is_shared' => 'boolean',
     ];
 
-    protected $appends = ['url', 'thumbnail_url'];
+    protected $appends = ['url', 'thumbnail_url', 'tag_names'];
 
     public function folder()
     {
@@ -47,6 +47,16 @@ class Media extends Model
     public function usages()
     {
         return $this->hasMany(MediaUsage::class);
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'media_tag');
+    }
+
+    public function getTagNamesAttribute()
+    {
+        return $this->tags->pluck('name')->toArray();
     }
 
     public function getUsageCountAttribute()

@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="fullwidth-portfolio-block transition-all duration-500"
+    class="fullwidth-portfolio-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Fullwidth Portfolio'"
     :style="cardStyles"
@@ -27,12 +27,14 @@
           <div class="slide-overlay absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-8 text-center" :style="overlayStyles">
             <h3 
               v-if="settings.showTitle !== false" 
-              class="slide-title mb-2 transition-all duration-500 translate-y-4 group-hover:translate-y-0" 
+              class="slide-title mb-2 transition-[width] duration-500 translate-y-4 group-hover:translate-y-0" 
               :style="titleStyles"
-            >{{ item.title }}</h3>
+            >
+{{ item.title }}
+</h3>
             <span 
               v-if="settings.showMeta !== false" 
-              class="slide-meta opacity-80 transition-all duration-500 translate-y-4 group-hover:translate-y-0 delay-100" 
+              class="slide-meta opacity-80 transition-[width] duration-500 translate-y-4 group-hover:translate-y-0 delay-100" 
               :style="metaStyles"
             >{{ item.category }}</span>
           </div>
@@ -42,14 +44,14 @@
       <!-- Navigation Arrows -->
       <button 
         v-if="settings.showArrows !== false && portfolioItems.length > columns" 
-        class="nav-arrow absolute top-1/2 -translate-y-1/2 left-6 z-20 w-12 h-12 flex items-center justify-center bg-white/90 dark:bg-slate-900/90 border-0 rounded-full cursor-pointer shadow-lg hover:bg-white transition-all duration-300 group/arrow" 
+        class="nav-arrow absolute top-1/2 -translate-y-1/2 left-6 z-20 w-12 h-12 flex items-center justify-center bg-white/90 dark:bg-slate-900/90 border-0 rounded-full cursor-pointer shadow-lg hover:bg-white transition-colors duration-300 group/arrow" 
         @click="prev"
       >
         <ChevronLeft class="w-6 h-6 text-slate-900 dark:text-slate-100 group-hover/arrow:-translate-x-1 transition-transform" />
       </button>
       <button 
         v-if="settings.showArrows !== false && portfolioItems.length > columns" 
-        class="nav-arrow absolute top-1/2 -translate-y-1/2 right-6 z-20 w-12 h-12 flex items-center justify-center bg-white/90 dark:bg-slate-900/90 border-0 rounded-full cursor-pointer shadow-lg hover:bg-white transition-all duration-300 group/arrow" 
+        class="nav-arrow absolute top-1/2 -translate-y-1/2 right-6 z-20 w-12 h-12 flex items-center justify-center bg-white/90 dark:bg-slate-900/90 border-0 rounded-full cursor-pointer shadow-lg hover:bg-white transition-colors duration-300 group/arrow" 
         @click="next"
       >
         <ChevronRight class="w-6 h-6 text-slate-900 dark:text-slate-100 group-hover/arrow:translate-x-1 transition-transform" />
@@ -61,8 +63,9 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { FolderOpen, ChevronLeft, ChevronRight } from 'lucide-vue-next'
-import { 
+import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';
+import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';import { 
     getVal,
     getTypographyStyles,
     getLayoutStyles,

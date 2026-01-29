@@ -6,7 +6,7 @@
             :title="group.title"
             :description="group.description"
             :icon="group.icon"
-            :color="group.color"
+            :color="group.color as any"
             :default-expanded="group.defaultExpanded"
         >
             <SettingField
@@ -19,35 +19,47 @@
                 :type="setting.type"
                 :enabled-text="$t('features.settings.enabled')"
                 :disabled-text="$t('features.settings.disabled')"
-                :error="errors[setting.key]"
+                :error="errors?.[setting.key]"
                 :disabled="isSettingDisabled(setting.key)"
             />
         </SettingGroup>
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import SettingGroup from '../../../../components/settings/SettingGroup.vue'
-import SettingField from '../../../../components/settings/SettingField.vue'
+import SettingGroup from '@/components/settings/SettingGroup.vue'
+import SettingField from '@/components/settings/SettingField.vue'
+
+interface Setting {
+    id: number | string;
+    key: string;
+    value: any;
+    type: string;
+    group: string;
+}
+
+interface SettingGroupData {
+    id: string;
+    title: string;
+    description: string;
+    icon: any;
+    color: string;
+    keys: string[];
+    settings: Setting[];
+    defaultExpanded: boolean;
+}
+
+interface Props {
+    settings: Setting[];
+    formData: Record<string, any>;
+    errors?: Record<string, string[]>;
+}
 
 const { t } = useI18n()
 
-const props = defineProps({
-    settings: {
-        type: Array,
-        required: true
-    },
-    formData: {
-        type: Object,
-        required: true
-    },
-    errors: {
-        type: Object,
-        default: () => ({})
-    }
-})
+const props = defineProps<Props>()
 
 const ShieldCheckIcon = {
     template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>`
@@ -69,7 +81,7 @@ const BotIcon = {
     template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" /></svg>`
 }
 
-const isSettingDisabled = (key) => {
+const isSettingDisabled = (key: string) => {
     // Captcha dependencies
     const captchaSettings = ['captcha_method', 'captcha_on_login', 'captcha_on_register']
     if (captchaSettings.includes(key)) {
@@ -88,7 +100,7 @@ const isSettingDisabled = (key) => {
 const securitySettingsGrouped = computed(() => {
     const securitySettings = props.settings.filter(s => s && s.group === 'security')
     
-    const groups = [
+    const groups: SettingGroupData[] = [
         {
             id: 'authentication',
             title: t('features.settings.groups.authentication.title'),

@@ -36,7 +36,7 @@ const generateFractions = () => {
 
 const widthOptions = generateFractions()
 
-export const backgroundSettings = {
+export const backgroundSettings: ModuleGroup = {
     id: 'background',
     label: 'Background',
     presets: true,
@@ -353,7 +353,7 @@ export const transformSettings: ModuleGroup = {
 }
 
 // Visibility
-export const visibilitySettings: ModuleGroup = {
+export const visibilitySettings: ModuleGroup & { fields: ModuleField[] } = {
     id: 'visibility',
     label: 'Visibility',
     fields: [
@@ -457,7 +457,7 @@ export const positionSettings: ModuleGroup = {
 }
 
 // Transition
-export const transitionSettings: ModuleGroup = {
+export const transitionSettings: ModuleGroup & { fields: ModuleField[] } = {
     id: 'transitions',
     label: 'Transitions',
     fields: [
@@ -498,7 +498,7 @@ export const transitionSettings: ModuleGroup = {
 }
 
 // Loop
-export const loopSettings: ModuleGroup = {
+export const loopSettings: ModuleGroup & { fields: ModuleField[] } = {
     id: 'loop',
     label: 'Loop',
     fields: [

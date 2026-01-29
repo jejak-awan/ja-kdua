@@ -4,10 +4,10 @@
   </div>
 </template>
 
-<script setup>
-import { computed } from 'vue';
-import { cva } from 'class-variance-authority';
+<script setup lang="ts">
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
+import type { HTMLAttributes } from 'vue';
 
 const alertVariants = cva(
   'relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground',
@@ -24,14 +24,8 @@ const alertVariants = cva(
   }
 );
 
-const props = defineProps({
-  variant: {
-    type: String,
-    default: 'default',
-  },
-  class: {
-    type: String,
-    default: '',
-  },
-});
+const props = defineProps<{
+  variant?: VariantProps<typeof alertVariants>['variant'];
+  class?: HTMLAttributes['class'];
+}>();
 </script>

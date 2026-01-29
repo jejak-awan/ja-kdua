@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="signup-block transition-all duration-300"
+    class="signup-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Signup Form'"
     :style="cardStyles"
@@ -61,14 +61,14 @@
             
             <div v-if="showTerms" class="flex items-center space-x-3 mt-2">
               <Checkbox id="terms" required />
-              <Label htmlFor="terms" class="text-sm font-normal opacity-80 cursor-pointer hover:opacity-100 transition-opacity">
+              <Label html-for="terms" class="text-sm font-normal opacity-80 cursor-pointer hover:opacity-100 transition-opacity">
                 {{ termsText }}
               </Label>
             </div>
             
             <Button 
                 type="submit" 
-                class="w-full h-14 mt-4 font-bold rounded-xl shadow-xl shadow-primary/20 transition-all hover:-translate-y-1 active:translate-y-0" 
+                class="w-full h-14 mt-4 font-bold rounded-xl shadow-xl shadow-primary/20 transition-colors hover:-translate-y-1 active:translate-y-0" 
                 :style="buttonStyles"
                 :disabled="loading"
             >
@@ -91,8 +91,7 @@
 import { computed, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Input, Button, Label, Checkbox } from '../ui'
-import { Loader2 } from 'lucide-vue-next'
-import { 
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';import { 
   getTypographyStyles,
   getLayoutStyles,
   getVal,

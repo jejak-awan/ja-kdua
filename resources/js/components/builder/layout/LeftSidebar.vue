@@ -27,11 +27,18 @@
 </template>
 
 <script setup lang="ts">
-import { 
-  Layers, FileText, Clock, Layout, Settings, Palette, 
-  Sparkles, Share2, HelpCircle, Settings2, Database, Grid
-} from 'lucide-vue-next'
-import { inject, computed } from 'vue'
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
+import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
+import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
+import Share2 from 'lucide-vue-next/dist/esm/icons/share-2.js';
+import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
+import Settings2 from 'lucide-vue-next/dist/esm/icons/settings.js';
+import Database from 'lucide-vue-next/dist/esm/icons/database.js';
+import Grid from 'lucide-vue-next/dist/esm/icons/grid-2x2.js';import { inject, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { SIDEBAR_PANELS } from '../core/constants'
 import type { BuilderInstance } from '../../../types/builder'

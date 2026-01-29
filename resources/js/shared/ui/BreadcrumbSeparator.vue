@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import { type HTMLAttributes } from 'vue';
-import { ChevronRight } from 'lucide-vue-next';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
 import { cn } from '../../lib/utils';
 
 const props = defineProps<{

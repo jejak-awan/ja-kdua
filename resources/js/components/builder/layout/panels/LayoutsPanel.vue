@@ -71,54 +71,69 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, inject } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { 
-    Plus, LayoutTemplate, Sparkles, Layout, 
-    Users, MessageSquare, FileText, Megaphone, Search 
-} from 'lucide-vue-next'
-import draggable from 'vuedraggable'
-import { sectionTemplates } from '../../templates/SectionTemplates.js'
-import { pageTemplates } from '../../templates/PageTemplates.js'
-import ModuleRegistry from '../../core/ModuleRegistry'
+<script setup lang="ts">
+import { ref, computed, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import LayoutTemplate from 'lucide-vue-next/dist/esm/icons/layout-template.js';
+import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import Users from 'lucide-vue-next/dist/esm/icons/users.js';
+import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Megaphone from 'lucide-vue-next/dist/esm/icons/megaphone.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import draggable from 'vuedraggable';
+import { sectionTemplates } from '../../templates/SectionTemplates.js';
+import { pageTemplates } from '../../templates/PageTemplates.js';
+import ModuleRegistry from '../../core/ModuleRegistry';
+import type { BuilderInstance, BlockInstance } from '../../../../types/builder';
 
-const { t } = useI18n()
-const builder = inject('builder')
+interface Template {
+  id: string;
+  name: string;
+  description?: string;
+  category: string;
+  templateType: 'section' | 'page';
+  factory?: () => BlockInstance[];
+}
 
-const searchTerm = ref('')
-const activeCategory = ref('all')
+const { t } = useI18n();
+const builder = inject<BuilderInstance>('builder');
+
+const searchTerm = ref('');
+const activeCategory = ref('all');
 
 // Extract unique categories including 'pages'
 const categories = computed(() => {
-    const cats = new Set(sectionTemplates.map(t => t.category).filter(Boolean))
-    return ['all', 'pages', ...Array.from(cats).sort()]
-})
+    const cats = new Set(sectionTemplates.map((t: any) => t.category).filter(Boolean));
+    return ['all', 'pages', ...Array.from(cats).sort()] as string[];
+});
 
 // Combined and filtered templates
-const filteredTemplates = computed(() => {
-    let all = []
+const filteredTemplates = computed<Template[]>(() => {
+    let all: Template[] = [];
     
     // Add sections
-    sectionTemplates.forEach(s => all.push({ ...s, templateType: 'section' }))
+    sectionTemplates.forEach((s: any) => all.push({ ...s, templateType: 'section' }));
     
     // Add pages
-    pageTemplates.forEach(p => all.push({ ...p, category: 'pages', templateType: 'page' }))
+    pageTemplates.forEach((p: any) => all.push({ ...p, category: 'pages', templateType: 'page' }));
 
     return all.filter(template => {
         const matchesSearch = template.name.toLowerCase().includes(searchTerm.value.toLowerCase()) || 
-                              (template.description && template.description.toLowerCase().includes(searchTerm.value.toLowerCase()))
-        const matchesCategory = activeCategory.value === 'all' || template.category === activeCategory.value
+                              (template.description && template.description.toLowerCase().includes(searchTerm.value.toLowerCase()));
+        const matchesCategory = activeCategory.value === 'all' || template.category === activeCategory.value;
         
-        return matchesSearch && matchesCategory
-    })
-})
+        return matchesSearch && matchesCategory;
+    });
+});
 
 // Icon mapping based on category with vibrant colors
-const getPreviewIcon = (template) => {
-  if (template.templateType === 'page') return LayoutTemplate
+const getPreviewIcon = (template: Template) => {
+  if (template.templateType === 'page') return LayoutTemplate;
   
-  const iconMap = {
+  const iconMap: Record<string, any> = {
     hero: Sparkles,
     features: Layout,
     content: FileText,
@@ -126,86 +141,96 @@ const getPreviewIcon = (template) => {
     team: Users,
     header: FileText,
     contact: MessageSquare
-  }
-  return iconMap[template.category] || Layout
-}
+  };
+  return iconMap[template.category] || Layout;
+};
 
 // Clone function for Drag and Drop
-const cloneTemplate = (template) => {
-    if (!template.factory) return null
+const cloneTemplate = (template: Template) => {
+    if (!template.factory) return null;
     
     // If it's a page, we shouldn't really drag it? 
     // But if we do, it might return an array of sections which Draggable might not handle well as a single item drop.
     // For now, let's treat Page templates as "Click to Insert/Replace" only or return first block if dragged.
     if (template.templateType === 'page') {
-        const blocks = template.factory()
-        return blocks[0] // Dragging a page only drags the first block for now
+        const blocks = template.factory();
+        return blocks[0]; // Dragging a page only drags the first block for now
     }
     
-    const block = template.factory()
-    const regenerateIds = (node) => {
-        node.id = ModuleRegistry.generateId()
+    const blocks = template.factory();
+    // Factory might return array or single object depending on template implementation.
+    // Assuming sections return an array of blocks or a single block?
+    // Usually sectionTemplates factory returns a single BlockInstance (root section).
+    // Let's assume it returns BlockInstance based on usage.
+    // Actually, looking at previous code: `const block = template.factory()`
+    
+    const block = Array.isArray(blocks) ? blocks[0] : blocks as unknown as BlockInstance;
+
+    const regenerateIds = (node: BlockInstance) => {
+        node.id = ModuleRegistry.generateId();
         if (node.children) {
-            node.children.forEach(regenerateIds)
+            node.children.forEach(regenerateIds);
         }
-    }
-    regenerateIds(block)
-    return block
-}
+    };
+    regenerateIds(block);
+    return block;
+};
 
 // Click to Insert
-const insertTemplate = async (template) => {
-    if (!builder || !template.factory) return
+const insertTemplate = async (template: Template) => {
+    if (!builder || !template.factory) return;
     
     // Handle Page Templates (Full Content Replacement)
     if (template.templateType === 'page') {
-        const confirmed = await builder?.confirm({
+        const confirmed = await builder.confirm?.({
             title: t('builder.modals.confirm.resetLayout'),
             message: t('builder.modals.confirm.resetLayoutDesc'),
             confirmText: t('builder.modals.confirm.confirm'),
             cancelText: t('builder.modals.confirm.cancel'),
             type: 'warning'
-        })
+        });
         if (confirmed) {
-            const blocks = template.factory()
+            const blocks = template.factory();
             
             // Regenerate all IDs for safety
-            const regenerateAll = (nodes) => {
+            const regenerateAll = (nodes: BlockInstance[]) => {
                 nodes.forEach(node => {
-                    node.id = ModuleRegistry.generateId()
-                    if (node.children) regenerateAll(node.children)
-                })
-            }
-            regenerateAll(blocks)
+                    node.id = ModuleRegistry.generateId();
+                    if (node.children) regenerateAll(node.children);
+                });
+            };
+            regenerateAll(blocks);
             
-            builder.blocks.value = blocks
-            builder.takeSnapshot()
+            builder.blocks.value = blocks;
+            builder.takeSnapshot();
         }
-        return
+        return;
     }
 
     // Handle Section Templates (Insertion)
-    const block = cloneTemplate(template)
+    const block = cloneTemplate(template);
+    if (!block) return;
+
     // Access the value of the computed ref
-    if (!builder.blocks.value) builder.blocks.value = []
+    if (!builder.blocks.value) builder.blocks.value = [];
     
-    let index = builder.blocks.value.length
+    let index = builder.blocks.value.length;
     if (builder.selectedModuleId.value) {
-        const selIndex = builder.blocks.value.findIndex(b => b.id === builder.selectedModuleId.value)
+        const selIndex = builder.blocks.value.findIndex((b: BlockInstance) => b.id === builder.selectedModuleId.value);
         if (selIndex !== -1) {
-            index = selIndex + 1
+            index = selIndex + 1;
         }
     }
     
-    builder.blocks.value.splice(index, 0, block)
-    builder.takeSnapshot()
-    builder.selectModule(block.id)
+    builder.blocks.value.splice(index, 0, block);
+    builder.takeSnapshot();
+    builder.selectModule(block.id);
     
     setTimeout(() => {
-        const el = document.getElementById(`module-${block.id}`)
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }, 100)
-}
+        const el = document.getElementById(`module-${block.id}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+};
 </script>
 
 <style scoped>

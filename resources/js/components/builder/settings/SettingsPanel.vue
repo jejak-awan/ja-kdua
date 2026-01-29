@@ -17,40 +17,33 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import ModuleRegistry from '../core/ModuleRegistry'
 import SettingsGroup from './SettingsGroup.vue'
+import type { BlockInstance, ModuleDefinition } from '@/types/builder'
 
-const props = defineProps({
-  module: {
-    type: Object,
-    required: true
-  },
-  activeTab: {
-    type: String,
-    default: 'content'
-  },
-  searchQuery: {
-    type: String,
-    default: ''
-  },
-  device: {
-    type: String, // 'desktop', 'tablet', 'mobile'
-    default: 'desktop'
-  }
+const props = withDefaults(defineProps<{
+  module: BlockInstance;
+  activeTab?: string;
+  searchQuery?: string;
+  device?: string;
+}>(), {
+  activeTab: 'content',
+  searchQuery: '',
+  device: 'desktop'
 })
 
 // Get module definition
-const moduleDefinition = computed(() => 
+const moduleDefinition = computed<ModuleDefinition | undefined>(() => 
   ModuleRegistry.get(props.module.type)
 )
 
 // Get groups for current tab
 const groups = computed(() => {
   const def = moduleDefinition.value
-  if (!def?.settings?.[props.activeTab]) return []
-  return def.settings[props.activeTab]
+  if (!def?.settings?.[props.activeTab as keyof typeof def.settings]) return []
+  return def.settings[props.activeTab as keyof typeof def.settings]
 })
 
 // Filter groups by search query
@@ -59,8 +52,8 @@ const filteredGroups = computed(() => {
   
   const query = props.searchQuery.toLowerCase()
   
-  return groups.value.map(group => {
-    const filteredFields = group.fields.filter(field => 
+  return groups.value.map((group: any) => {
+    const filteredFields = group.fields.filter((field: any) => 
       field.label.toLowerCase().includes(query) ||
       field.name.toLowerCase().includes(query)
     )
@@ -72,7 +65,7 @@ const filteredGroups = computed(() => {
 })
 
 // Single group open logic
-const activeGroupId = ref(null)
+const activeGroupId = ref<string | null>(null)
 
 // Initialize first group as open
 watch(groups, (newGroups) => {
@@ -81,7 +74,7 @@ watch(groups, (newGroups) => {
   }
 }, { immediate: true })
 
-const toggleGroup = (id) => {
+const toggleGroup = (id: string) => {
   if (activeGroupId.value === id) {
     activeGroupId.value = null
   } else {

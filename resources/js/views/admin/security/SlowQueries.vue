@@ -128,21 +128,24 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
-import Button from '@/components/ui/button.vue';
-import Card from '@/components/ui/card.vue';
-import CardContent from '@/components/ui/card-content.vue';
-import Input from '@/components/ui/input.vue';
-import Label from '@/components/ui/label.vue';
-import Badge from '@/components/ui/badge.vue';
-import { RefreshCw, Loader2 } from 'lucide-vue-next';
+import {
+    Button,
+    Card,
+    CardContent,
+    Input,
+    Label,
+    Badge
+} from '@/components/ui';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 
 const toast = useToast();
-const queries = ref([]);
-const stats = ref({});
+const queries = ref<any[]>([]);
+const stats = ref<any>({});
 const loading = ref(false);
 const threshold = ref(1000);
 
@@ -169,7 +172,7 @@ async function fetchQueries() {
       current_page: response.data.data.current_page || 1,
       last_page: response.data.data.last_page || 1,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to fetch slow queries:', error);
   } finally {
     loading.value = false;
@@ -180,7 +183,7 @@ async function fetchStats() {
   try {
     const response = await api.get('/admin/ja/security/slow-queries/statistics');
     stats.value = response.data.data || {};
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to fetch stats:', error);
   }
 }
@@ -195,18 +198,18 @@ function resetFilters() {
   fetchQueries();
 }
 
-function changePage(page) {
+function changePage(page: number) {
   filters.value.page = page;
   fetchQueries();
 }
 
-function getDurationVariant(duration) {
+function getDurationVariant(duration: number) {
   if (duration >= 5000) return 'destructive';
-  if (duration >= 2000) return 'warning';
+  if (duration >= 2000) return 'secondary'; // Fallback for warning
   return 'secondary';
 }
 
-function formatDate(dateString) {
+function formatDate(dateString: string) {
   return new Date(dateString).toLocaleString();
 }
 

@@ -3,14 +3,14 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="video-popup-block transition-all duration-300"
+    class="video-popup-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Video Popup'"
     :style="cardStyles"
   >
     <template #default="{ settings: blockSettings }">
       <Card 
-          class="video-popup-container relative group h-[500px] rounded-[48px] overflow-hidden cursor-pointer shadow-2xl border-none transition-all duration-700 hover:-translate-y-2 bg-slate-900" 
+          class="video-popup-container relative group h-[500px] rounded-[48px] overflow-hidden cursor-pointer shadow-2xl border-none transition-colors duration-700 hover:-translate-y-2 bg-slate-900" 
           :style="containerStyles"
           @click="openPopup"
       >
@@ -25,7 +25,7 @@
         </div>
         
         <!-- Overlay -->
-        <div class="video-popup-overlay absolute inset-0 transition-all duration-700 bg-slate-900/40 group-hover:bg-primary/20 backdrop-blur-[2px] group-hover:backdrop-blur-none" :style="overlayStyles" />
+        <div class="video-popup-overlay absolute inset-0 transition-colors duration-700 bg-slate-900/40 group-hover:bg-primary/20 backdrop-blur-[2px] group-hover:backdrop-blur-none" :style="overlayStyles" />
         
         <!-- Content Wrap -->
         <div class="video-content-wrap relative z-10 flex flex-col items-center justify-center h-full gap-8 p-12 text-center">
@@ -33,7 +33,7 @@
             <div class="relative">
                 <div class="absolute inset-0 bg-white/20 rounded-full animate-ping group-hover:bg-primary/40"></div>
                 <Button 
-                    class="video-popup-button relative w-24 h-24 rounded-full bg-white text-primary hover:bg-white hover:scale-110 shadow-[0_0_50px_rgba(255,255,255,0.3)] transition-all duration-500 flex items-center justify-center p-0 border-none"
+                    class="video-popup-button relative w-24 h-24 rounded-full bg-white text-primary hover:bg-white hover:scale-110 shadow-[0_0_50px_rgba(255,255,255,0.3)] transition-[width] duration-500 flex items-center justify-center p-0 border-none"
                     :style="buttonStyles"
                 >
                   <Play class="play-icon fill-current translate-x-1" :size="32" />
@@ -44,7 +44,7 @@
                 <h4 v-if="blockSettings.buttonText" class="button-text font-black text-3xl md:text-4xl text-white tracking-tighter drop-shadow-2xl mb-2 group-hover:text-primary transition-colors duration-500" :style="buttonTextStyles">
                     {{ blockSettings.buttonText || 'Experience the Vision' }}
                 </h4>
-                <div class="w-12 h-1.5 bg-white/30 rounded-full group-hover:bg-primary group-hover:w-24 transition-all duration-700"></div>
+                <div class="w-12 h-1.5 bg-white/30 rounded-full group-hover:bg-primary group-hover:w-24 transition-colors duration-700"></div>
             </div>
         </div>
       </Card>
@@ -56,8 +56,8 @@
 import { computed } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Card, Button } from '../ui'
-import { Play, Film } from 'lucide-vue-next'
-import { 
+import Play from 'lucide-vue-next/dist/esm/icons/play.js';
+import Film from 'lucide-vue-next/dist/esm/icons/film.js';import { 
   getTypographyStyles,
   getLayoutStyles,
   getVal,

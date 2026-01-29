@@ -21,11 +21,23 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-defineProps({ plugin: { type: Object, default: null } });
-defineEmits(['close', 'saved']);
+
+interface Plugin {
+    name: string;
+    [key: string]: any;
+}
+
+defineProps<{
+    plugin?: Plugin | null;
+}>();
+
+defineEmits<{
+    (e: 'close'): void;
+    (e: 'saved'): void;
+}>();
 </script>
 

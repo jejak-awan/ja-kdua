@@ -10,8 +10,7 @@
         :model-value="activeCategoryId === category.id"
         @update:model-value="(val) => toggleCategory(category.id)"
       >
-           
-           <!-- Numbers Specific Layout -->
+<!-- Numbers Specific Layout -->
            <div v-if="category.id === 'numbers'" class="numbers-list">
                <div class="list-header">
                    <div class="col-name" style="padding-left: 20px;">{{ t('builder.panels.globalVariables.table.name') }}</div>
@@ -74,7 +73,7 @@
                                :icon="Trash2" 
                                variant="ghost" 
                                size="sm" 
-                               @click="deleteVariable(index, 'numbers')" 
+                               @click="handleDeleteVariable(index, 'numbers')" 
                                class="delete-btn"
                            />
                        </div>
@@ -124,7 +123,7 @@
                                :icon="Trash2" 
                                variant="ghost" 
                                size="sm" 
-                               @click="deleteVariable(index, 'text')" 
+                               @click="handleDeleteVariable(index, 'text')" 
                                class="delete-btn"
                            />
                        </div>
@@ -185,7 +184,7 @@
                                :icon="Trash2" 
                                variant="ghost" 
                                size="sm" 
-                               @click="deleteVariable(index, 'images')" 
+                               @click="handleDeleteVariable(index, 'images')" 
                                class="delete-btn"
                            />
                        </div>
@@ -196,9 +195,7 @@
                    <Plus :size="12" />
                    {{ t('builder.panels.globalVariables.actions.addImage') }}
                </BaseButton>
-               
-
-           </div>
+</div>
 
            <!-- Links Specific Layout -->
            <div v-else-if="category.id === 'links'" class="links-list">
@@ -235,7 +232,7 @@
                                :icon="Trash2" 
                                variant="ghost" 
                                size="sm" 
-                               @click="deleteVariable(index, 'links')" 
+                               @click="handleDeleteVariable(index, 'links')" 
                                class="delete-btn"
                            />
                        </div>
@@ -283,7 +280,7 @@
                                     <input 
                                         v-model="color.hex" 
                                         class="hex-input"
-                                        @input="updateColorFromHex(index, $event.target.value)"
+                                        @input="(e) => handleHexInput(index, e)"
                                     />
                                     <div class="opacity-separator"></div>
                                     <input 
@@ -301,19 +298,18 @@
                                         v-model="color.opacity" 
                                         variant="alpha"
                                         :color="color.value"
-                                        :min="0" 
-                                        :max="100" 
+                                        :min="0"
+                                        :max="100"
                                     />
                                 </div>
                             </div>
-                           
-                           <IconButton 
-                               :icon="Trash2" 
-                               variant="ghost" 
-                               size="sm" 
-                               @click="deleteVariable(index, 'colors')" 
-                               class="delete-btn"
-                           />
+                                                      <IconButton 
+                                :icon="Trash2" 
+                                variant="ghost" 
+                                size="sm" 
+                                @click="handleDeleteVariable(index, 'colors')" 
+                                class="delete-btn"
+                            />
                        </div>
                    </template>
                </draggable>
@@ -358,7 +354,7 @@
                                :icon="Trash2" 
                                variant="ghost" 
                                size="sm" 
-                               @click="deleteVariable(index, 'fonts')" 
+                               @click="handleDeleteVariable(index, 'fonts')" 
                                class="delete-btn"
                            />
                        </div>
@@ -393,7 +389,7 @@
     <teleport to="body">
         <ColorPickerModal 
             v-if="isColorPickerOpen" 
-            :model-value="globalColors[editingColorIndex].value"
+            :model-value="editingColorValue"
             @update:model-value="updateColorValue"
             @close="isColorPickerOpen = false"
         />
@@ -401,24 +397,52 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, nextTick, onMounted, inject, watch, defineAsyncComponent } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ChevronRight, ChevronUp, ChevronDown, Plus, GripVertical, Trash2, Image as ImageIcon, Upload } from 'lucide-vue-next'
-import draggable from 'vuedraggable'
+<script setup lang="ts">
+import { ref, computed, nextTick, onMounted, inject, watch, defineAsyncComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
+import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import GripVertical from 'lucide-vue-next/dist/esm/icons/grip-vertical.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
+import Upload from 'lucide-vue-next/dist/esm/icons/upload.js';
+import draggable from 'vuedraggable';
 import { 
     BaseCollapsible, BaseInput, BaseSlider, IconButton, BaseButton, BaseColorSlider,
     Select, SelectTrigger, SelectValue, SelectContent, SelectItem
-} from '../../ui'
-const ColorPickerModal = defineAsyncComponent(() => import('../../modals/ColorPickerModal.vue'))
-import MediaPicker from '../../../MediaPicker.vue'
+} from '../../ui';
+import MediaPicker from '@/components/media/MediaPicker.vue';
+import type { BuilderInstance } from '../../../../types/builder';
 
-const { t } = useI18n()
-const builder = inject('builder')
-const { 
-    globalNumbers, globalText, globalImages, globalLinks, globalColors, globalFonts,
-    addVariable, deleteVariable, loadVariables
-} = builder.globalVariables
+const ColorPickerModal = defineAsyncComponent(() => import('../../modals/ColorPickerModal.vue'));
+
+interface GlobalVariable {
+    id: string;
+    name: string;
+    value: any;
+    unit?: string;
+    hex?: string; // For colors
+    opacity?: number; // For colors
+    family?: string; // For fonts
+    type?: string;
+}
+
+const { t } = useI18n();
+const builder = inject<BuilderInstance>('builder');
+
+// Safe access to globalVariables
+const globalVariables = builder?.globalVariables;
+const globalNumbers = globalVariables?.globalNumbers;
+const globalText = globalVariables?.globalText;
+const globalImages = globalVariables?.globalImages;
+const globalLinks = globalVariables?.globalLinks;
+const globalColors = globalVariables?.globalColors;
+const globalFonts = globalVariables?.globalFonts;
+const addVariable = globalVariables?.addVariable;
+const deleteVariable = globalVariables?.deleteVariable;
+const loadVariables = globalVariables?.loadVariables;
 
 const categories = [
     { id: 'numbers', label: 'Numbers' },
@@ -427,9 +451,9 @@ const categories = [
     { id: 'links', label: 'Links' },
     { id: 'colors', label: 'Colors' },
     { id: 'fonts', label: 'Fonts' }
-]
+];
 
-const activeCategoryId = ref('numbers')
+const activeCategoryId = ref<string | null>('numbers');
 
 const fontOptions = [
     'Instrument Sans',
@@ -439,181 +463,197 @@ const fontOptions = [
     'Lato',
     'Montserrat',
     'Poppins'
-]
+];
 
-const toggleCategory = (id) => {
+const toggleCategory = (id: string) => {
     if (activeCategoryId.value === id) {
-        activeCategoryId.value = null
+        activeCategoryId.value = null;
     } else {
-        activeCategoryId.value = id
+        activeCategoryId.value = id;
     }
-}
+};
 
 // Unit Dropdown Logic
-const selectUnit = (index, unit) => {
-    globalNumbers.value[index].unit = unit
-}
+const selectUnit = (index: number, unit: string) => {
+    if (globalNumbers?.value && globalNumbers.value[index]) {
+        globalNumbers.value[index].unit = unit;
+    }
+};
 
 // Validation helper
-const hasEmptyName = (arr) => Array.isArray(arr) && arr.some(item => !item.name || item.name.trim() === '')
+const hasEmptyName = (arr: GlobalVariable[] | undefined) => Array.isArray(arr) && arr.some(item => !item.name || item.name.trim() === '');
 
-const checkAndAddVariable = (type, list) => {
+const checkAndAddVariable = (type: string, list: any) => {
     if (hasEmptyName(list.value)) {
         // Determine singular name for alert
-        const typeName = t(`builder.panels.globalVariables.${type}`).slice(0, -1) // simple singularization
-        alert(t('builder.panels.globalVariables.messages.fillName', { type: typeName }))
-        return
+        const typeName = t(`builder.panels.globalVariables.${type}`).slice(0, -1); // simple singularization
+        alert(t('builder.panels.globalVariables.messages.fillName', { type: typeName }));
+        return;
     }
-    addVariable(type)
-}
+    if (addVariable) addVariable(type);
+};
 
-const addNumberVariable = () => checkAndAddVariable('numbers', globalNumbers)
-const addTextVariable = () => checkAndAddVariable('text', globalText)
-const addImageVariable = () => checkAndAddVariable('images', globalImages)
-const addLinkVariable = () => checkAndAddVariable('links', globalLinks)
-const addColorVariable = () => checkAndAddVariable('colors', globalColors)
-const addFontVariable = () => checkAndAddVariable('fonts', globalFonts)
-
-// deleteVariable is imported directly from useGlobalVariables (but it needs index and type)
-// Wait, the imported deleteVariable takes (index, type).
-// The template calls deleteVariable(index, 'type').
-// So we can use it directly? Yes, if it matches signature.
-// Imported signature: (index, type).
-// Template usage: deleteVariable(index, 'numbers').
-// Perfect.
+const addNumberVariable = () => checkAndAddVariable('numbers', globalNumbers);
+const addTextVariable = () => checkAndAddVariable('text', globalText);
+const addImageVariable = () => checkAndAddVariable('images', globalImages);
+const addLinkVariable = () => checkAndAddVariable('links', globalLinks);
+const addColorVariable = () => checkAndAddVariable('colors', globalColors);
+const addFontVariable = () => checkAndAddVariable('fonts', globalFonts);
 
 // Media Picker Logic
-const handleMediaSelect = (index, media) => {
-    if (media && media.url) {
-        globalImages.value[index].value = media.url
+const handleMediaSelect = (index: number, media: any) => {
+    if (media && media.url && globalImages?.value) {
+        globalImages.value[index].value = media.url;
     }
-}
+};
 
 // Color Picker Logic
-const isColorPickerOpen = ref(false)
-const editingColorIndex = ref(null)
+const isColorPickerOpen = ref(false);
+const editingColorIndex = ref<number | null>(null);
 
-const openColorPicker = (index) => {
-    editingColorIndex.value = index
-    isColorPickerOpen.value = true
-}
+const editingColorValue = computed(() => {
+    if (editingColorIndex.value !== null && globalColors?.value && globalColors.value[editingColorIndex.value]) {
+        return globalColors.value[editingColorIndex.value].value;
+    }
+    return '';
+});
 
-const updateColorValue = (newValue) => {
-    if (editingColorIndex.value !== null) {
-        const color = globalColors.value[editingColorIndex.value]
-        color.value = newValue
+const openColorPicker = (index: number) => {
+    editingColorIndex.value = index;
+    isColorPickerOpen.value = true;
+};
+
+const updateColorValue = (newValue: string) => {
+    if (editingColorIndex.value !== null && globalColors?.value) {
+        const color = globalColors.value[editingColorIndex.value];
+        color.value = newValue;
         if (newValue.startsWith('#')) {
-            color.hex = newValue.replace('#', '')
+            color.hex = newValue.replace('#', '');
         }
     }
-}
+};
 
-const updateColorFromHex = (index, hex) => {
-    const color = globalColors.value[index]
-    if (!hex.startsWith('#')) hex = '#' + hex
-    color.value = hex
-}
+const handleDeleteVariable = (index: number, type: string) => {
+    if (deleteVariable) {
+        deleteVariable(index, type);
+    }
+};
+
+const handleHexInput = (index: number, event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target) {
+        updateColorFromHex(index, target.value);
+    }
+};
+
+const updateColorFromHex = (index: number, hex: string) => {
+    if (globalColors?.value) {
+        const color = globalColors.value[index];
+        if (!hex.startsWith('#')) hex = '#' + hex;
+        color.value = hex;
+    }
+};
 
 // Snapshots for Cancel
-const originalState = ref({})
+const originalState = ref<any>({});
 
 const getSnapshot = () => {
     return JSON.parse(JSON.stringify({
-        globalNumbers: globalNumbers.value,
-        globalText: globalText.value,
-        globalImages: globalImages.value,
-        globalLinks: globalLinks.value,
-        globalColors: globalColors.value,
-        globalFonts: globalFonts.value
-    }))
-}
+        globalNumbers: globalNumbers?.value,
+        globalText: globalText?.value,
+        globalImages: globalImages?.value,
+        globalLinks: globalLinks?.value,
+        globalColors: globalColors?.value,
+        globalFonts: globalFonts?.value
+    }));
+};
 
 onMounted(() => {
-    originalState.value = getSnapshot()
+    originalState.value = getSnapshot();
     
     // Check for pending action
-    if (builder?.globalAction) {
-        handleGlobalAction(builder.globalAction)
+    if (builder?.globalAction?.value) {
+        handleGlobalAction(builder.globalAction.value);
     }
-})
+});
 
 // Watch for global actions
 if (builder?.globalAction) {
-    watch(() => builder.globalAction, (action) => {
-        if (action) handleGlobalAction(action)
-    })
+    watch(() => builder.globalAction?.value, (action) => {
+        if (action) handleGlobalAction(action);
+    });
 }
 
-const handleGlobalAction = (action) => {
+const handleGlobalAction = (action: any) => {
     if (action.type === 'add_color') {
-        activeCategoryId.value = 'colors'
+        activeCategoryId.value = 'colors';
         nextTick(() => {
-            addColorVariable() 
+            addColorVariable();
             // We use our local wrapper logic to ensure validation
-        })
+        });
     }
-}
+};
 
 const validateInputs = () => {
-    const errors = []
+    const errors: string[] = [];
     
     // Validate Names
     const allVars = [
-        ...(globalNumbers.value || []).map(i => ({...i, type: 'Number'})),
-        ...(globalText.value || []).map(i => ({...i, type: 'Text'})),
-        ...(globalImages.value || []).map(i => ({...i, type: 'Image'})),
-        ...(globalLinks.value || []).map(i => ({...i, type: 'Link'})),
-        ...(globalColors.value || []).map(i => ({...i, type: 'Color'})),
-        ...(globalFonts.value || []).map(i => ({...i, type: 'Font'}))
-    ]
+        ...(globalNumbers?.value || []).map((i: any) => ({...i, type: 'Number'})),
+        ...(globalText?.value || []).map((i: any) => ({...i, type: 'Text'})),
+        ...(globalImages?.value || []).map((i: any) => ({...i, type: 'Image'})),
+        ...(globalLinks?.value || []).map((i: any) => ({...i, type: 'Link'})),
+        ...(globalColors?.value || []).map((i: any) => ({...i, type: 'Color'})),
+        ...(globalFonts?.value || []).map((i: any) => ({...i, type: 'Font'}))
+    ];
     
-    allVars.forEach(v => {
+    allVars.forEach((v: any) => {
         if (!v.name || v.name.trim() === '') {
-            errors.push(t('builder.panels.globalVariables.messages.fillName', { type: v.type }))
+            errors.push(t('builder.panels.globalVariables.messages.fillName', { type: v.type }));
         }
-    })
+    });
 
     // Validate Colors
-    const hexRegex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/
-    ;(globalColors.value || []).forEach(c => {
+    const hexRegex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+    (globalColors?.value || []).forEach((c: any) => {
         if (!hexRegex.test(c.value)) {
-            errors.push(t('builder.panels.globalVariables.messages.invalidHex', { value: c.value, name: c.name }))
+            errors.push(t('builder.panels.globalVariables.messages.invalidHex', { value: c.value, name: c.name }));
         }
-    })
+    });
 
     if (errors.length > 0) {
-        alert(errors[0]) 
-        return false
+        alert(errors[0]);
+        return false;
     }
-    return true
-}
+    return true;
+};
 
 const cancelChanges = async () => {
-    const confirmed = await builder?.confirm({
+    const confirmed = await builder?.confirm?.({
         title: t('builder.modals.confirm.discardChanges'),
         message: t('builder.modals.confirm.discardChangesDesc'),
         confirmText: t('builder.modals.confirm.discard'),
         cancelText: t('builder.modals.confirm.cancel'),
         type: 'warning'
-    })
+    });
     if (confirmed) {
         // Use loadVariables to restore state
-        loadVariables(originalState.value)
+        if (loadVariables) loadVariables(originalState.value);
     }
-}
+};
 
 const saveVariables = async () => {
-    if (!validateInputs()) return
-    originalState.value = getSnapshot() // Update snapshot
+    if (!validateInputs()) return;
+    originalState.value = getSnapshot(); // Update snapshot
     
     try {
-        await builder.saveGlobalVariables()
-        alert(t('builder.panels.globalVariables.messages.saveSuccess'))
+        if (builder?.saveGlobalVariables) await builder.saveGlobalVariables();
+        alert(t('builder.panels.globalVariables.messages.saveSuccess'));
     } catch (error) {
-        console.error('Failed to save variables:', error)
-        alert(t('builder.panels.globalVariables.messages.saveError'))
+        console.error('Failed to save variables:', error);
+        alert(t('builder.panels.globalVariables.messages.saveError'));
     }
-}
+};
 </script>
 
 <style scoped>

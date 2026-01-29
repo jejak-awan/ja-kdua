@@ -21,75 +21,83 @@
   </div>
 </template>
 
-<script setup>
-import { computed, ref, onMounted, watch } from 'vue'
+<script setup lang="ts">
+import { computed, ref, watch, type CSSProperties } from 'vue';
 
-const props = defineProps({
-  settings: {
-    type: Object,
-    required: true
-  }
-})
+interface Settings {
+    backgroundVideoMp4?: string;
+    backgroundVideoWebm?: string;
+    backgroundVideoMute?: boolean;
+    backgroundVideoLoop?: boolean;
+    backgroundVideoOverlayColor?: string;
+    backgroundVideoWidth?: string;
+    backgroundVideoHeight?: string;
+    backgroundVideoPauseOnPlay?: boolean;
+}
 
-const videoRef = ref(null)
+const props = defineProps<{
+  settings: Settings
+}>();
+
+const videoRef = ref<HTMLVideoElement | null>(null);
 
 const hasVideo = computed(() => {
-  return props.settings.backgroundVideoMp4 || props.settings.backgroundVideoWebm
-})
+  return !!(props.settings.backgroundVideoMp4 || props.settings.backgroundVideoWebm);
+});
 
 const videoUrl = computed(() => {
-  return props.settings.backgroundVideoWebm || props.settings.backgroundVideoMp4
-})
+  return props.settings.backgroundVideoWebm || props.settings.backgroundVideoMp4;
+});
 
 const isMuted = computed(() => {
-  return props.settings.backgroundVideoMute !== false // Default to muted for autoplay
-})
+  return props.settings.backgroundVideoMute !== false; // Default to muted for autoplay
+});
 
 const isLoop = computed(() => {
-  return props.settings.backgroundVideoLoop !== false // Default to loop
-})
+  return props.settings.backgroundVideoLoop !== false; // Default to loop
+});
 
 const overlayColor = computed(() => {
-  return props.settings.backgroundVideoOverlayColor || ''
-})
+  return props.settings.backgroundVideoOverlayColor || '';
+});
 
-const videoStyles = computed(() => {
-    const s = props.settings
-    const styles = {}
+const videoStyles = computed<CSSProperties>(() => {
+    const s = props.settings;
+    const styles: CSSProperties = {};
     
     if (s.backgroundVideoWidth) {
-        styles.width = s.backgroundVideoWidth
-        styles.minWidth = '0' // Override the 100% min-width in CSS
+        styles.width = s.backgroundVideoWidth;
+        styles.minWidth = '0'; // Override the 100% min-width in CSS
     }
     
     if (s.backgroundVideoHeight) {
-        styles.height = s.backgroundVideoHeight
-        styles.minHeight = '0' // Override the 100% min-height in CSS
+        styles.height = s.backgroundVideoHeight;
+        styles.minHeight = '0'; // Override the 100% min-height in CSS
     }
     
     // If either width or height is customized, we switch to contain to prevent distortion
     // unless the user wants something else. But cover is the default for background.
     if (s.backgroundVideoWidth || s.backgroundVideoHeight) {
-        styles.objectFit = 'contain'
+        styles.objectFit = 'contain';
     } else {
-        styles.objectFit = 'cover'
+        styles.objectFit = 'cover';
     }
     
-    return styles
-})
+    return styles;
+});
 
 const onVideoLoaded = () => {
     if (videoRef.value) {
         videoRef.value.play().catch(err => {
-            console.warn('Background video autoplay failed:', err)
-        })
+            console.warn('Background video autoplay failed:', err);
+        });
     }
-}
+};
 
 // Watch for pause settings (advanced)
 watch(() => props.settings.backgroundVideoPauseOnPlay, (val) => {
     // This would typically involve communication with a global play/pause state
-})
+});
 </script>
 
 <style scoped>

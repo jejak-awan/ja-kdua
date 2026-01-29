@@ -3,7 +3,7 @@
     :module="module"
     :mode="mode"
     :settings="settings"
-    class="progressbar-block transition-all duration-300"
+    class="progressbar-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Progress Bar'"
     :style="cardStyles"

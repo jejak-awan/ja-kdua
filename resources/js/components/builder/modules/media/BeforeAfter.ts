@@ -83,7 +83,7 @@ const BeforeAfterModule: ModuleDefinition = {
             {
                 id: 'labelTypography',
                 label: 'Label Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `label_${f.name}`,
                     label: `Label ${f.label}`

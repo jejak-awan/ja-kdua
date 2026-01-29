@@ -1,4 +1,4 @@
-import { FileText } from 'lucide-vue-next';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 import type { MenuItemDefinition } from '@/types/menu';
 
 const definition: MenuItemDefinition = {

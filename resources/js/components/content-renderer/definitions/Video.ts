@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Clapperboard } from 'lucide-vue-next';
+import Clapperboard from 'lucide-vue-next/dist/esm/icons/clapperboard.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

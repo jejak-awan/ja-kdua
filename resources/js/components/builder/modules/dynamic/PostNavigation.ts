@@ -82,7 +82,7 @@ const PostNavigationModule: ModuleDefinition = {
             {
                 id: 'labelTypography',
                 label: 'Label Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `label_${f.name}`,
                     label: `Label ${f.label}`
@@ -91,7 +91,7 @@ const PostNavigationModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`

@@ -1,52 +1,16 @@
-<script setup>
-import { computed } from "vue";
-import { CheckboxRoot, CheckboxIndicator, useForwardPropsEmits } from "radix-vue";
-import { cn } from "../../lib/utils";
+<script setup lang="ts">
+import { computed, type HTMLAttributes } from "vue";
+import { 
+  CheckboxRoot, 
+  CheckboxIndicator, 
+  useForwardPropsEmits,
+  type CheckboxRootEmits,
+  type CheckboxRootProps 
+} from "radix-vue";
+import { cn } from "@/lib/utils";
 
-const props = defineProps({
-  checked: {
-    type: [Boolean, String],
-    default: undefined,
-  },
-  defaultChecked: {
-    type: Boolean,
-    default: undefined,
-  },
-  required: {
-    type: Boolean,
-    default: undefined,
-  },
-  name: {
-    type: String,
-    default: undefined,
-  },
-  disabled: {
-    type: Boolean,
-    default: undefined,
-  },
-  value: {
-    type: String,
-    default: undefined,
-  },
-  id: {
-    type: String,
-    default: undefined,
-  },
-  asChild: {
-    type: Boolean,
-    default: undefined,
-  },
-  as: {
-    type: null,
-    default: undefined,
-  },
-  class: {
-    type: null,
-    default: null,
-  },
-});
-
-const emits = defineEmits(['update:checked']);
+const props = defineProps<CheckboxRootProps & { class?: HTMLAttributes['class'] }>();
+const emits = defineEmits<CheckboxRootEmits>();
 
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props;
@@ -61,7 +25,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
     v-bind="forwarded"
     data-slot="checkbox"
     :class="cn(
-      'peer h-4 w-4 shrink-0 rounded border border-border/50 ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary',
+      'peer h-4 w-4 shrink-0 rounded border border-input bg-background ring-offset-background transition-[background-color,border-color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary',
       props.class
     )"
   >

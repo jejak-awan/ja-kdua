@@ -143,7 +143,7 @@
                 <Badge :variant="getStatusVariant(vuln.status)">{{ vuln.status }}</Badge>
               </td>
               <td class="px-4 py-3">
-                <select @change="updateStatus(vuln, $event.target.value)" :value="vuln.status" class="text-xs rounded border border-input bg-background px-2 py-1">
+                <select @change="updateStatus(vuln, ($event.target as any).value)" :value="vuln.status" class="text-xs rounded border border-input bg-background px-2 py-1">
                   <option value="new">New</option>
                   <option value="acknowledged">Acknowledged</option>
                   <option value="patched">Patched</option>
@@ -169,20 +169,25 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
-import Button from '@/components/ui/button.vue';
-import Card from '@/components/ui/card.vue';
-import CardContent from '@/components/ui/card-content.vue';
-import Input from '@/components/ui/input.vue';
-import Label from '@/components/ui/label.vue';
-import Badge from '@/components/ui/badge.vue';
-import { RefreshCw, Loader2, Shield, ShieldCheck } from 'lucide-vue-next';
+import {
+    Button,
+    Card,
+    CardContent,
+    Input,
+    Label,
+    Badge
+} from '@/components/ui';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import Shield from 'lucide-vue-next/dist/esm/icons/shield.js';
+import ShieldCheck from 'lucide-vue-next/dist/esm/icons/shield-check.js';
 
 const toast = useToast();
-const vulnerabilities = ref([]);
+const vulnerabilities = ref<any[]>([]);
 const loading = ref(false);
 const auditing = ref(false);
 
@@ -220,7 +225,7 @@ async function fetchVulnerabilities() {
       current_page: response.data.data.current_page || 1,
       last_page: response.data.data.last_page || 1,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to fetch vulnerabilities:', error);
   } finally {
     loading.value = false;
@@ -233,7 +238,7 @@ async function runAudit() {
     await api.post('/admin/ja/security/run-dependency-audit');
     toast.success.action('Dependency audit completed');
     fetchVulnerabilities();
-  } catch (error) {
+  } catch (error: any) {
     toast.error.fromResponse(error);
     console.error(error);
   } finally {
@@ -241,12 +246,12 @@ async function runAudit() {
   }
 }
 
-async function updateStatus(vuln, status) {
+async function updateStatus(vuln: any, status: string) {
   try {
     await api.put(`/admin/ja/security/dependency-vulnerabilities/${vuln.id}`, { status });
     vuln.status = status;
     toast.success.action('Status updated');
-  } catch (error) {
+  } catch (error: any) {
     toast.error.fromResponse(error);
   }
 }
@@ -261,19 +266,19 @@ function resetFilters() {
   fetchVulnerabilities();
 }
 
-function changePage(page) {
+function changePage(page: number) {
   filters.value.page = page;
   fetchVulnerabilities();
 }
 
-function getSeverityVariant(severity) {
-  const variants = { critical: 'destructive', high: 'warning', medium: 'secondary', low: 'outline' };
-  return variants[severity] || 'secondary';
+function getSeverityVariant(severity: string) {
+  const variants: Record<string, string> = { critical: 'destructive', high: 'secondary', medium: 'secondary', low: 'outline' };
+  return (variants[severity] || 'secondary') as any;
 }
 
-function getStatusVariant(status) {
-  const variants = { new: 'destructive', acknowledged: 'warning', patched: 'success', ignored: 'secondary' };
-  return variants[status] || 'secondary';
+function getStatusVariant(status: string) {
+  const variants: Record<string, string> = { new: 'destructive', acknowledged: 'secondary', patched: 'default', ignored: 'secondary' };
+  return (variants[status] || 'secondary') as any;
 }
 
 onMounted(fetchVulnerabilities);

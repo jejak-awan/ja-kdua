@@ -32,8 +32,7 @@
 
     <!-- Inline Color Input Group (Matches Modal) -->
     <div class="color-input-group">
-        
-        <!-- Preview & Picker Trigger -->
+<!-- Preview & Picker Trigger -->
         <div v-if="!hidePreview" class="color-trigger" @click="openPicker" :title="hasColorValue ? t('builder.fields.color.openPicker') : (placeholderValue ? t('builder.fields.color.inherited') + placeholderValue : t('builder.fields.color.openPicker'))">
              <div class="mini-preview" :class="{ 'has-color': hasColorValue || placeholderValue, 'is-inherited': !hasColorValue && placeholderValue }">
                 <div v-if="hasColorValue || placeholderValue" class="mini-color" :style="{ backgroundColor: cssPreviewValue }"></div>
@@ -155,7 +154,7 @@
       <ColorPickerModal 
         v-if="showPicker"
         :model-value="value || '#ffffff'"
-        :initial-mode="inputMode"
+        :initial-mode="inputMode as 'hex' | 'css_var' | undefined"
         @update:model-value="handleModalUpdate"
         @close="showPicker = false"
       />
@@ -169,8 +168,12 @@ import type { BuilderInstance } from '../../../types/builder'
 import { useI18n } from 'vue-i18n'
 import { parseColor, rgbToHex } from '../core/colorUtils'
 import { themeVariables, toCssVarName } from '../core/cssVariables'
-import { ChevronUp, ChevronDown, Pipette, Plus, RotateCcw, Trash2 } from 'lucide-vue-next'
-import { IconButton, BaseColorSlider } from '../ui'
+import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import Pipette from 'lucide-vue-next/dist/esm/icons/pipette.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';import { IconButton, BaseColorSlider } from '../ui'
 
 const ColorPickerModal = defineAsyncComponent(() => import('../modals/ColorPickerModal.vue'))
 const { t } = useI18n()

@@ -9,29 +9,27 @@
   ></div>
 </template>
 
-<script setup>
-import { computed } from 'vue'
-import { cn } from '../../../lib/utils'
+<script setup lang="ts">
+import { computed } from 'vue';
+import { cn } from '@/lib/utils';
+import type { CSSProperties } from 'vue';
 
-const props = defineProps({
-  orientation: {
-    type: String,
-    default: 'horizontal', // horizontal, vertical
-  },
-  margin: {
-    type: [String, Number],
-    default: 8
-  },
-  class: {
-    type: String,
-    default: ''
-  }
-})
+interface Props {
+  orientation?: 'horizontal' | 'vertical';
+  margin?: string | number;
+  class?: string;
+}
 
-const dividerStyle = computed(() => {
-  const marginValue = typeof props.margin === 'number' ? `${props.margin}px` : props.margin
+const props = withDefaults(defineProps<Props>(), {
+  orientation: 'horizontal',
+  margin: 8,
+  class: ''
+});
+
+const dividerStyle = computed<CSSProperties>(() => {
+  const marginValue = typeof props.margin === 'number' ? `${props.margin}px` : props.margin;
   return props.orientation === 'horizontal' 
     ? { marginTop: marginValue, marginBottom: marginValue }
-    : { marginLeft: marginValue, marginRight: marginValue }
-})
+    : { marginLeft: marginValue, marginRight: marginValue };
+});
 </script>

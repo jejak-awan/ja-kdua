@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="login-block transition-all duration-300"
+    class="login-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Login Form'"
     :style="cardStyles"
@@ -61,7 +61,7 @@
             <div class="login-options flex justify-between items-center text-xs mt-1">
               <div v-if="blockSettings.showRememberMe !== false" class="flex items-center space-x-2">
                 <Checkbox id="remember" />
-                <Label htmlFor="remember" class="text-xs font-normal opacity-80 cursor-pointer">Remember me</Label>
+                <Label html-for="remember" class="text-xs font-normal opacity-80 cursor-pointer">Remember me</Label>
               </div>
               <a 
                 v-if="blockSettings.showForgotPassword !== false"
@@ -76,7 +76,7 @@
             <!-- Button -->
             <Button 
                 type="submit" 
-                class="w-full h-12 mt-2 font-bold shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 active:translate-y-0" 
+                class="w-full h-12 mt-2 font-bold shadow-lg shadow-primary/20 transition-colors hover:-translate-y-1 active:translate-y-0" 
                 :style="buttonStyles"
                 :disabled="loading"
             >
@@ -99,8 +99,11 @@
 import { computed, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Label, Input, Button, Checkbox } from '../ui'
-import { User, Lock, Eye, EyeOff, Loader2 } from 'lucide-vue-next'
-import { 
+import User from 'lucide-vue-next/dist/esm/icons/user.js';
+import Lock from 'lucide-vue-next/dist/esm/icons/lock.js';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import EyeOff from 'lucide-vue-next/dist/esm/icons/eye-off.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';import { 
   getTypographyStyles,
   getLayoutStyles,
   getVal

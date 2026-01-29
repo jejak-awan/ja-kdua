@@ -12,8 +12,8 @@
             class="hidden lg:flex absolute -right-3 top-5 items-center justify-center h-6 w-6 rounded-full border border-border bg-sidebar text-muted-foreground hover:text-foreground shadow-sm z-[51]"
             :title="sidebarMinimized ? t('common.navigation.sidebar.expand') : t('common.navigation.sidebar.minimize')"
         >
-            <ChevronLeft v-if="!sidebarMinimized" class="w-3 h-3" />
-            <ChevronRight v-else class="w-3 h-3" />
+            <component :is="getIcon('chevron-left')" v-if="!sidebarMinimized" />
+            <component :is="getIcon('chevron-right')" v-else />
         </button>
 
         <div class="flex flex-col h-full">
@@ -37,7 +37,7 @@
                         @click="$emit('close')"
                         class="lg:hidden text-muted-foreground hover:text-accent-foreground"
                     >
-                        <X class="w-6 h-6" />
+                        <component :is="getIcon('x')" />
                     </button>
                 </div>
             </div>
@@ -63,8 +63,7 @@
                 <!-- Collapsible Sections -->
                 <template v-for="section in sidebarSections" :key="section.key">
                     <div v-if="filteredNavigation[section.key]?.length > 0" class="pt-2">
-                        
-                        <!-- EXPANDED MODE: Accordion Style -->
+<!-- EXPANDED MODE: Accordion Style -->
                         <template v-if="!sidebarMinimized">
                             <!-- Section Header -->
                             <button
@@ -75,8 +74,8 @@
                                     <component :is="section.icon" class="w-4 h-4" />
                                     <span>{{ t(section.labelKey) }}</span>
                                 </div>
-                                <ChevronDown 
-                                    class="w-3.5 h-3.5" 
+                                <component 
+                                    :is="getIcon('chevron-down')" 
                                     :class="{ 'rotate-180': expandedSections[section.key] }"
                                 />
                             </button>
@@ -157,125 +156,85 @@
                                     </div>
                             </Teleport>
                         </div>
-
-                    </div>
+</div>
                 </template>
             </nav>
         </div>
     </aside>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watch, onMounted, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { navigationGroups } from '../../utils/navigation';
-import { getIcon } from '../../utils/icons';
-import { useAuthStore } from '../../stores/auth';
-import { useCmsStore } from '../../stores/cms';
-import AdminLogo from './AdminLogo.vue';
+import { navigationGroups, type NavItem } from '@/utils/navigation';
+import { getIcon } from '@/utils/icons';
+import { useAuthStore } from '@/stores/auth';
+import { useCmsStore } from '@/stores/cms';
+import AdminLogo from '@/components/layouts/AdminLogo.vue';
+// Inline SVG icons from icons.ts - no lucide bundle needed
 import { 
-    ChevronLeft, 
-    ChevronRight, 
-    ChevronDown, 
-    X,
-    FileText,
-    Image,
-    MessageSquare,
-    Users,
-    Palette,
-    BarChart3,
-    ScrollText,
-    Settings,
-    Code,
-    Globe
-} from 'lucide-vue-next';
-import TooltipProvider from '../ui/tooltip-provider.vue';
-import Tooltip from '../ui/tooltip.vue';
-import TooltipTrigger from '../ui/tooltip-trigger.vue';
-import TooltipContent from '../ui/tooltip-content.vue';
+    Tooltip, 
+    TooltipContent, 
+    TooltipProvider, 
+    TooltipTrigger 
+} from '@/components/ui';
+import type { User } from '@/types/auth';
 
-const props = defineProps({
-    sidebarMinimized: {
-        type: Boolean,
-        default: false,
-    },
-    sidebarOpen: {
-        type: Boolean,
-        default: false,
-    },
-    user: {
-        type: Object,
-        default: null,
-    },
+interface SidebarSection {
+    key: string;
+    labelKey: string;
+    icon: any;
+}
+
+const props = withDefaults(defineProps<{
+    sidebarMinimized?: boolean;
+    sidebarOpen?: boolean;
+    user?: User | null;
+}>(), {
+    sidebarMinimized: false,
+    sidebarOpen: false,
+    user: null,
 });
 
-defineEmits(['toggle-minimize', 'close', 'logout']);
+const emit = defineEmits<{
+    (e: 'toggle-minimize'): void;
+    (e: 'close'): void;
+    (e: 'logout'): void;
+}>();
 
 const { t, te } = useI18n();
 const $route = useRoute();
 const authStore = useAuthStore();
 const cmsStore = useCmsStore();
 
-// Section definitions with icons
-const sidebarSections = [
-    { key: 'content', labelKey: 'common.navigation.sections.content', icon: FileText },
-    { key: 'media', labelKey: 'common.navigation.sections.media', icon: Image },
-    { key: 'engagement', labelKey: 'common.navigation.sections.engagement', icon: MessageSquare },
-    { key: 'users', labelKey: 'common.navigation.sections.usersAccess', icon: Users },
-    { key: 'appearance', labelKey: 'common.navigation.sections.appearance', icon: Palette },
-    { key: 'analytics', labelKey: 'common.navigation.sections.analyticsSeo', icon: BarChart3 },
-    { key: 'logs', labelKey: 'common.navigation.sections.logs', icon: ScrollText },
-    { key: 'system', labelKey: 'common.navigation.sections.system', icon: Settings },
-    { key: 'developer', labelKey: 'common.navigation.sections.developer', icon: Code },
+const sidebarSections: SidebarSection[] = [
+    { key: 'content', labelKey: 'common.navigation.sections.content', icon: getIcon('file-text') },
+    { key: 'media', labelKey: 'common.navigation.sections.media', icon: getIcon('image') },
+    { key: 'engagement', labelKey: 'common.navigation.sections.engagement', icon: getIcon('message-square') },
+    { key: 'users', labelKey: 'common.navigation.sections.usersAccess', icon: getIcon('users') },
+    { key: 'appearance', labelKey: 'common.navigation.sections.appearance', icon: getIcon('palette') },
+    { key: 'analytics', labelKey: 'common.navigation.sections.analyticsSeo', icon: getIcon('bar-chart') },
+    { key: 'logs', labelKey: 'common.navigation.sections.logs', icon: getIcon('scroll-text') },
+    { key: 'system', labelKey: 'common.navigation.sections.system', icon: getIcon('settings') },
+    { key: 'developer', labelKey: 'common.navigation.sections.developer', icon: getIcon('code') },
 ];
 
-
-const expandedSections = ref({});
-const activePopup = ref(null);
+const expandedSections = ref<Record<string, boolean>>({});
+const activePopup = ref<string | null>(null);
 const popupTop = ref(0);
 const popupLeft = ref(0);
-const popups = ref([]);
-let popupCloseTimeout = null;
-
-// Load persisted state
-onMounted(() => {
-    const saved = localStorage.getItem('sidebarExpandedSections');
-    if (saved) {
-        try {
-            expandedSections.value = JSON.parse(saved);
-        } catch {
-            initializeExpandedSections();
-        }
-    } else {
-        initializeExpandedSections();
-    }
-    
-    // Auto-expand section based on current route
-    autoExpandActiveSection();
-});
+const popups = ref<(HTMLElement | null)[]>([]);
+let popupCloseTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const initializeExpandedSections = () => {
-    // Default: only first section expanded (Content)
     if (sidebarSections.length > 0) {
         expandedSections.value[sidebarSections[0].key] = true;
     }
 };
 
-// Save to localStorage when changed
-watch(expandedSections, (newVal) => {
-    localStorage.setItem('sidebarExpandedSections', JSON.stringify(newVal));
-}, { deep: true });
-
-// Auto-expand section when route changes
-watch(() => $route.name, () => {
-    autoExpandActiveSection();
-});
-
 const autoExpandActiveSection = () => {
-    // Clear all first to ensure single-accordion behavior
     expandedSections.value = {};
-    
     for (const section of sidebarSections) {
         const items = filteredNavigation.value[section.key] || [];
         if (items.some(item => item.name === $route.name)) {
@@ -285,22 +244,32 @@ const autoExpandActiveSection = () => {
     }
 };
 
-const toggleSection = (key) => {
+const toggleSection = (key: string) => {
     const isCurrentlyExpanded = expandedSections.value[key];
-    // Clear all others (Accordion behavior)
     expandedSections.value = {};
-    // Toggle the clicked one
     expandedSections.value[key] = !isCurrentlyExpanded;
 };
 
-const openPopup = async (key, event = null) => {
+const closePopup = (key: string) => {
+    if (activePopup.value === key) {
+        activePopup.value = null;
+    }
+};
+
+const scheduleClosePopup = (key: string) => {
+    popupCloseTimeout = setTimeout(() => {
+        closePopup(key);
+    }, 150);
+};
+
+const openPopup = async (key: string, event: MouseEvent | null = null) => {
     if (popupCloseTimeout) {
         clearTimeout(popupCloseTimeout);
         popupCloseTimeout = null;
     }
     
     if (event) {
-        const target = event.currentTarget;
+        const target = event.currentTarget as HTMLElement;
         let anchor = target;
         if (target.tagName !== 'BUTTON') {
              const btn = target.querySelector('button');
@@ -316,37 +285,21 @@ const openPopup = async (key, event = null) => {
 
     await nextTick();
 
-    // Adjust position if out of viewport
     if (popups.value && popups.value.length > 0) {
-        // In Vue 3 with v-for and v-if, the ref array contains the mounted elements
         const content = popups.value.find(el => el);
         if (content) {
             const rect = content.getBoundingClientRect();
             const windowHeight = window.innerHeight;
             const bottomEdge = rect.top + rect.height;
             
-            // If overlapping bottom edge
             if (bottomEdge > windowHeight - 20) {
-                // Shift up to fit, with 20px padding from bottom
                 popupTop.value = Math.max(10, windowHeight - rect.height - 20);
             }
         }
     }
 };
 
-const closePopup = (key) => {
-    if (activePopup.value === key) {
-        activePopup.value = null;
-    }
-};
-
-const scheduleClosePopup = (key) => {
-    popupCloseTimeout = setTimeout(() => {
-        closePopup(key);
-    }, 150);
-};
-
-const togglePopup = (key, event) => {
+const togglePopup = (key: string, event: MouseEvent) => {
     if (activePopup.value === key) {
         activePopup.value = null;
     } else {
@@ -354,14 +307,13 @@ const togglePopup = (key, event) => {
     }
 };
 
-const isSectionActive = (key) => {
+const isSectionActive = (key: string) => {
     const items = filteredNavigation.value[key] || [];
     return items.some(item => item.name === $route.name);
 };
 
-// Filter all navigation groups based on permissions
 const filteredNavigation = computed(() => {
-    const filtered = {};
+    const filtered: Record<string, NavItem[]> = {};
     for (const [group, items] of Object.entries(navigationGroups)) {
         filtered[group] = items.filter(item => {
             if (!item.permission) return true;
@@ -371,7 +323,7 @@ const filteredNavigation = computed(() => {
     return filtered;
 });
 
-const getNavigationLabel = (item) => {
+const getNavigationLabel = (item: NavItem) => {
     const camelName = item.name.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
     const key = `common.navigation.menu.${camelName}`;
     return te(key) ? t(key) : item.label;
@@ -379,9 +331,6 @@ const getNavigationLabel = (item) => {
 
 const getVisitTooltip = computed(() => {
     const siteUrl = cmsStore.siteSettings?.site_url || 'domain.com';
-    // Strip protocol for cleaner display if desired, or keep as is.
-    // Let's keep it simple: "Visit [domain]"
-    // We can extract the domain from the URL for a cleaner tooltip
     let domain = siteUrl;
     try {
         const url = new URL(siteUrl.startsWith('http') ? siteUrl : `https://${siteUrl}`);
@@ -389,7 +338,28 @@ const getVisitTooltip = computed(() => {
     } catch (e) {
         // fallback
     }
-    
     return t('common.navigation.visit_site', { url: domain });
+});
+
+watch(expandedSections, (newVal) => {
+    localStorage.setItem('sidebarExpandedSections', JSON.stringify(newVal));
+}, { deep: true });
+
+watch(() => $route.name, () => {
+    autoExpandActiveSection();
+});
+
+onMounted(() => {
+    const saved = localStorage.getItem('sidebarExpandedSections');
+    if (saved) {
+        try {
+            expandedSections.value = JSON.parse(saved);
+        } catch {
+            initializeExpandedSections();
+        }
+    } else {
+        initializeExpandedSections();
+    }
+    autoExpandActiveSection();
 });
 </script>

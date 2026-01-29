@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="fullwidth-image-block transition-all duration-500"
+    class="fullwidth-image-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Fullwidth Image'"
     :style="cardStyles"
@@ -43,17 +43,21 @@
           :style="overlayTextStyles"
           :contenteditable="mode === 'edit'"
           @blur="(e: any) => updateField('overlayText', (e.target as HTMLElement).innerText)"
-        >{{ settings.overlayText || (mode === 'edit' ? 'Premium Aesthetic Design' : '') }}</div>
+        >
+{{ settings.overlayText || (mode === 'edit' ? 'Premium Aesthetic Design' : '') }}
+</div>
       </div>
       
       <!-- Caption -->
       <p 
         v-if="settings.caption || mode === 'edit'" 
-        class="absolute bottom-10 left-10 z-20 bg-black/40 backdrop-blur-md px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white/90 transform translate-x--4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500"
+        class="absolute bottom-10 left-10 z-20 bg-black/40 backdrop-blur-md px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white/90 transform translate-x--4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-[width] duration-500"
         :style="captionStyles"
         :contenteditable="mode === 'edit'"
         @blur="(e: any) => updateField('caption', (e.target as HTMLElement).innerText)"
-      >{{ settings.caption || (mode === 'edit' ? 'Project Insight' : '') }}</p>
+      >
+{{ settings.caption || (mode === 'edit' ? 'Project Insight' : '') }}
+</p>
     </div>
   </BaseBlock>
 </template>

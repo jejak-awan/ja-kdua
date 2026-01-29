@@ -134,7 +134,7 @@ const IconListModule: ModuleDefinition = {
             {
                 id: 'textTypography',
                 label: 'Text Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `text_${f.name}`,
                     label: `Text ${f.label}`

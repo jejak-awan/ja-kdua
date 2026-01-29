@@ -9,8 +9,7 @@
       </template>
 
       <div class="field-content px-3 pb-2 flex flex-col gap-4">
-        
-        <!-- Opacity -->
+<!-- Opacity -->
         <div class="control-row">
             <BaseLabel>{{ t('builder.settings.fields.opacity') }}</BaseLabel>
             <BaseSliderInput v-model.number="localValue.opacity" :min="0" :max="100" unit="%" :placeholder-value="100" />
@@ -86,8 +85,7 @@
                  <option value="luminosity">Luminosity</option>
             </select>
         </div>
-
-      </div>
+</div>
     </BaseCollapsible>
   </div>
 </template>
@@ -95,8 +93,7 @@
 <script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Droplets } from 'lucide-vue-next'
-import { BaseLabel, BaseSliderInput, BaseCollapsible } from '../ui'
+import Droplets from 'lucide-vue-next/dist/esm/icons/droplets.js';import { BaseLabel, BaseSliderInput, BaseCollapsible } from '../ui'
 
 interface FilterState {
   opacity: number;

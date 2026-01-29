@@ -1,35 +1,55 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
-import SettingGroup from '../../../../components/settings/SettingGroup.vue'
-import SettingField from '../../../../components/settings/SettingField.vue'
-import Button from '../../../../components/ui/button.vue'
-import { useConfirm } from '../../../../composables/useConfirm'
-import toast from '../../../../services/toast'
+import SettingGroup from '@/components/settings/SettingGroup.vue'
+import SettingField from '@/components/settings/SettingField.vue'
+import { Button } from '@/components/ui';
+import { useConfirm } from '@/composables/useConfirm'
+import toast from '@/services/toast'
+
+interface Setting {
+    id: number | string;
+    key: string;
+    value: any;
+    type: string;
+    group: string;
+}
+
+interface SettingGroupData {
+    id: string;
+    title: string;
+    description: string;
+    icon: any;
+    color: string;
+    keys: string[];
+    settings: Setting[];
+    defaultExpanded: boolean;
+    isExternal?: boolean;
+}
+
+interface TestResult {
+    success: boolean;
+    message: string;
+}
+
+interface MigrationLog {
+    type: 'success' | 'error' | 'warning' | 'info';
+    message: string;
+}
+
+interface Props {
+    settings: Setting[];
+    formData: Record<string, any>;
+    errors?: Record<string, string[]>;
+}
 
 const { t } = useI18n()
 const { confirm } = useConfirm()
 
-const props = defineProps({
-    settings: {
-        type: Array,
-        required: true
-    },
-    formData: {
-        type: Object,
-        required: true
-    },
-    errors: {
-        type: Object,
-        default: () => ({})
-    }
-})
+const props = defineProps<Props>()
 
-// Removed emit to prevent object replacement overhead
-// const emit = defineEmits(['update:formData'])
-
-const updateField = (key, value) => {
+const updateField = (key: string, value: any) => {
     // Direct mutation for stable input performance
     props.formData[key] = value
 }
@@ -57,7 +77,7 @@ const mediaSettingsGrouped = computed(() => {
     const driver = props.formData.storage_driver;
 
     // Base groups
-    const groups = [
+    const groups: SettingGroupData[] = [
         {
             id: 'upload',
             title: t('features.settings.groups.upload.title'),
@@ -151,7 +171,7 @@ const mediaSettingsGrouped = computed(() => {
 })
 
 const testingConnection = ref(false);
-const testResult = ref(null);
+const testResult = ref<TestResult | null>(null);
 
 const testConnection = async () => {
     testingConnection.value = true;
@@ -163,7 +183,7 @@ const testConnection = async () => {
             config: props.formData
         });
         testResult.value = { success: true, message: response.data.message };
-    } catch (error) {
+    } catch (error: any) {
         testResult.value = { 
             success: false, 
             message: error.response?.data?.message || 'Connection failed. Please check your credentials.' 
@@ -177,7 +197,7 @@ const testConnection = async () => {
 const migrationStatus = ref('idle'); // idle, scanning, migrating, completed, error
 const totalFiles = ref(0);
 const processedFiles = ref(0);
-const migrationLogs = ref([]);
+const migrationLogs = ref<MigrationLog[]>([]);
 const stopMigration = ref(false);
 
 const migrationProgress = computed(() => {
@@ -229,12 +249,12 @@ const startMigration = async () => {
                 const result = res.data.data;
                 
                 // Log failures
-                Object.entries(result.failed).forEach(([file, error]) => {
+                Object.entries(result.failed as Record<string, string>).forEach(([file, error]) => {
                      migrationLogs.value.push({ type: 'error', message: `Failed ${file}: ${error}` });
                 });
                 
                 processedFiles.value += batch.length;
-            } catch (err) {
+            } catch (err: any) {
                  migrationLogs.value.push({ type: 'error', message: `Batch failed: ${err.message}` });
             }
         }
@@ -244,7 +264,7 @@ const startMigration = async () => {
             migrationLogs.value.push({ type: 'success', message: 'Migration completed successfully.' });
         }
 
-    } catch (error) {
+    } catch (error: any) {
         migrationStatus.value = 'error';
         migrationLogs.value.push({ type: 'error', message: error.response?.data?.message || error.message });
     }
@@ -263,7 +283,7 @@ const handleStopMigration = () => {
             :title="group.title"
             :description="group.description"
             :icon="group.icon"
-            :color="group.color"
+            :color="group.color as any"
             :default-expanded="group.defaultExpanded"
         >
             <SettingField
@@ -277,7 +297,7 @@ const handleStopMigration = () => {
                 :type="setting.type"
                 :enabled-text="$t('features.settings.enabled')"
                 :disabled-text="$t('features.settings.disabled')"
-                :error="errors[setting.key]"
+                :error="errors?.[setting.key]"
             />
 
 
@@ -309,7 +329,7 @@ const handleStopMigration = () => {
             </p>
 
             <div v-if="migrationStatus === 'idle' || migrationStatus === 'completed' || migrationStatus === 'error'" class="flex gap-4">
-                 <Button @click="startMigration" :disabled="migrationStatus === 'scanning'">
+                 <Button @click="startMigration">
                     Start Migration
                  </Button>
             </div>
@@ -325,7 +345,7 @@ const handleStopMigration = () => {
                 
                 <!-- Progress Bar -->
                 <div class="w-full bg-secondary rounded-full h-2.5 dark:bg-gray-700">
-                    <div class="bg-primary h-2.5 rounded-full transition-all duration-300" :style="{ width: migrationProgress + '%' }"></div>
+                    <div class="bg-primary h-2.5 rounded-full transition-colors duration-300" :style="{ width: migrationProgress + '%' }"></div>
                 </div>
 
                 <Button variant="destructive" size="sm" @click="handleStopMigration">Stop</Button>
@@ -333,12 +353,14 @@ const handleStopMigration = () => {
 
             <!-- Logs -->
             <div v-if="migrationLogs.length > 0" class="mt-4 p-3 bg-muted rounded-md text-xs max-h-40 overflow-y-auto font-mono">
-                <div v-for="(log, index) in migrationLogs" :key="index" :class="{
+                <div
+v-for="(log, index) in migrationLogs" :key="index" :class="{
                     'text-success': log.type === 'success',
                     'text-destructive': log.type === 'error',
                     'text-warning': log.type === 'warning',
                     'text-foreground': log.type === 'info'
-                }">
+                }"
+>
                     [{{ log.type.toUpperCase() }}] {{ log.message }}
                 </div>
             </div>

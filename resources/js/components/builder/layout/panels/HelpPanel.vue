@@ -3,7 +3,7 @@
     <div class="help-section">
       <h4 class="section-title">{{ t('builder.panels.help.shortcuts') }}</h4>
       <div class="shortcuts-list">
-        <div class="shortcut-item" v-for="sc in shortcuts" :key="sc.key">
+        <div class="shortcut-item" v-for="sc in shortcuts" :key="sc.label">
           <span class="sc-label">{{ sc.label }}</span>
           <div class="sc-keys">
             <span class="key-badge" v-for="(k, i) in sc.keys" :key="i">{{ k }}</span>
@@ -19,13 +19,18 @@
   </div>
 </template>
 
-<script setup>
-import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n()
+const { t } = useI18n();
 
-const shortcuts = computed(() => [
+interface Shortcut {
+  label: string;
+  keys: string[];
+}
+
+const shortcuts = computed<Shortcut[]>(() => [
   { label: t('builder.panels.help.labels.save'), keys: ['Ctrl', 'S'] },
   { label: t('builder.panels.help.labels.undo'), keys: ['Ctrl', 'Z'] },
   { label: t('builder.panels.help.labels.redo'), keys: ['Ctrl', 'Shift', 'Z'] },
@@ -33,7 +38,7 @@ const shortcuts = computed(() => [
   { label: t('builder.panels.help.labels.duplicate'), keys: ['Ctrl', 'D'] },
   { label: t('builder.panels.help.labels.copy'), keys: ['Ctrl', 'C'] },
   { label: t('builder.panels.help.labels.paste'), keys: ['Ctrl', 'V'] }
-])
+]);
 </script>
 
 <style scoped>

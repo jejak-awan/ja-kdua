@@ -2,13 +2,8 @@
   <SelectValue :placeholder="placeholder" />
 </template>
 
-<script setup>
-import { SelectValue } from 'radix-vue';
+<script setup lang="ts">
+import { SelectValue, type SelectValueProps } from 'radix-vue';
 
-const props = defineProps({
-  placeholder: {
-    type: String,
-    default: '',
-  },
-});
+const props = defineProps<SelectValueProps>();
 </script>

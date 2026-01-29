@@ -5,13 +5,13 @@
                 <!-- Tabs Header -->
                 <div class="flex items-center justify-between px-3 py-1.5 bg-muted/10 h-10 shrink-0">
                     <TabsList class="bg-muted/40 h-7 p-1 gap-1 rounded-md">
-                        <TabsTrigger value="home" class="h-5 px-3 text-[11px] font-medium rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Home</TabsTrigger>
-                        <TabsTrigger value="insert" class="h-5 px-3 text-[11px] font-medium rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Insert</TabsTrigger>
-                        <TabsTrigger value="layout" class="h-5 px-3 text-[11px] font-medium rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Layout</TabsTrigger>
+                        <TabsTrigger value="home" class="h-5 px-3 text-[11px] font-medium rounded-sm transition-colors data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Home</TabsTrigger>
+                        <TabsTrigger value="insert" class="h-5 px-3 text-[11px] font-medium rounded-sm transition-colors data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Insert</TabsTrigger>
+                        <TabsTrigger value="layout" class="h-5 px-3 text-[11px] font-medium rounded-sm transition-colors data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Layout</TabsTrigger>
                         <TabsTrigger 
                             v-if="editor.isActive('table')" 
                             value="table" 
-                            class="h-5 px-3 text-[11px] font-medium rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                            class="h-5 px-3 text-[11px] font-medium rounded-sm transition-colors data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
                         >
                             Table tools
                         </TabsTrigger>
@@ -286,7 +286,7 @@
                                     <span class="text-[10px] font-medium">Line</span>
                                 </Button>
                                 <div class="flex flex-col items-center justify-center">
-                                    <IconPicker modelValue="" @update:modelValue="handleIconSelect">
+                                    <IconPicker model-value="" @update:model-value="handleIconSelect">
                                         <template #trigger>
                                             <Button variant="ghost" size="sm" class="h-11 px-4 flex flex-col gap-1 items-center justify-center hover:bg-muted/40 transition-colors">
                                                 <Smile class="w-5 h-5 opacity-70" />
@@ -404,130 +404,134 @@
     </TooltipProvider>
 </template>
 
-<script setup>
-import { ref, computed, watch, onMounted } from 'vue'
-import Button from '@/components/ui/button.vue'
-import Select from '@/components/ui/select.vue'
-import SelectTrigger from '@/components/ui/select-trigger.vue'
-import SelectValue from '@/components/ui/select-value.vue'
-import SelectContent from '@/components/ui/select-content.vue'
-import SelectItem from '@/components/ui/select-item.vue'
-import Tabs from '@/components/ui/tabs.vue'
-import TabsList from '@/components/ui/tabs-list.vue'
-import TabsTrigger from '@/components/ui/tabs-trigger.vue'
-import TabsContent from '@/components/ui/tabs-content.vue'
-import ColorPicker from '@/components/ui/color-picker.vue'
-import IconPicker from '../ui/icon-picker.vue'
+<script setup lang="ts">
+import { ref, computed, watch, onMounted } from 'vue';
+import { 
+    Button, 
+    Select, 
+    SelectTrigger, 
+    SelectValue, 
+    SelectContent, 
+    SelectItem, 
+    Tabs, 
+    TabsList, 
+    TabsTrigger, 
+    TabsContent, 
+    ColorPicker, 
+    IconPicker 
+} from '@/components/ui';
 import { 
     TooltipProvider, 
     TooltipRoot, 
     TooltipTrigger, 
     TooltipContent, 
     TooltipPortal 
-} from 'radix-vue'
+} from 'radix-vue';
 
-import { 
-    Bold, 
-    Italic, 
-    Underline as UnderlineIcon,
-    Strikethrough, 
-    List, 
-    ListOrdered, 
-    Quote, 
-    Minus, 
-    Undo, 
-    Redo,
-    Image as ImageIcon,
-    Code,
-    Code2,
-    RemoveFormatting,
-    AlignLeft,
-    AlignCenter,
-    AlignRight,
-    AlignJustify,
-    Table as TableIcon,
-    Table2,
-    Columns,
-    Trash2,
-    Palette,
-    Merge,
-    Split,
-    Plus,
-    FileCode,
-    FileCode2,
-    Type as DropcapIcon,
-    LayoutGrid,
-    CheckCircle2,
-    RefreshCw,
-    Maximize2,
-    Sparkles,
-    Smile,
-} from 'lucide-vue-next'
+import Bold from 'lucide-vue-next/dist/esm/icons/bold.js';
+import Italic from 'lucide-vue-next/dist/esm/icons/italic.js';
+import UnderlineIcon from 'lucide-vue-next/dist/esm/icons/underline.js';
+import Strikethrough from 'lucide-vue-next/dist/esm/icons/strikethrough.js';
+import List from 'lucide-vue-next/dist/esm/icons/list.js';
+import ListOrdered from 'lucide-vue-next/dist/esm/icons/list-ordered.js';
+import Quote from 'lucide-vue-next/dist/esm/icons/quote.js';
+import Minus from 'lucide-vue-next/dist/esm/icons/minus.js';
+import Undo from 'lucide-vue-next/dist/esm/icons/undo.js';
+import Redo from 'lucide-vue-next/dist/esm/icons/redo.js';
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
+import Code from 'lucide-vue-next/dist/esm/icons/code.js';
+import RemoveFormatting from 'lucide-vue-next/dist/esm/icons/remove-formatting.js';
+import AlignLeft from 'lucide-vue-next/dist/esm/icons/align-start-horizontal.js';
+import AlignCenter from 'lucide-vue-next/dist/esm/icons/align-center-horizontal.js';
+import AlignRight from 'lucide-vue-next/dist/esm/icons/align-end-horizontal.js';
+import AlignJustify from 'lucide-vue-next/dist/esm/icons/align-horizontal-justify-center.js';
+import TableIcon from 'lucide-vue-next/dist/esm/icons/table.js';
+import Table2 from 'lucide-vue-next/dist/esm/icons/table.js';
+import Columns from 'lucide-vue-next/dist/esm/icons/columns-2.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
+import Merge from 'lucide-vue-next/dist/esm/icons/merge.js';
+import Split from 'lucide-vue-next/dist/esm/icons/split.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import FileCode from 'lucide-vue-next/dist/esm/icons/file-code.js';
+import FileCode2 from 'lucide-vue-next/dist/esm/icons/file-code.js';
+import DropcapIcon from 'lucide-vue-next/dist/esm/icons/type.js';
+import LayoutGrid from 'lucide-vue-next/dist/esm/icons/layout-grid.js';
+import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
+import Smile from 'lucide-vue-next/dist/esm/icons/smile.js';
 
-import { useCmsStore } from '@/stores/cms'
-import AiAssistPopover from './AiAssistPopover.vue'
+import { useCmsStore } from '@/stores/cms';
+import AiAssistPopover from '@/components/editor/AiAssistPopover.vue';
+import type { Editor } from '@tiptap/vue-3';
 
-const props = defineProps({
-    editor: Object,
-    showHtmlView: Boolean
-})
+const props = defineProps<{
+    editor: Editor | undefined;
+    showHtmlView: boolean;
+}>();
 
-const emit = defineEmits(['insertTable', 'openMedia', 'insertHtml', 'toggleHtml', 'insertIcon'])
+const emit = defineEmits<{
+    (e: 'insertTable'): void;
+    (e: 'openMedia'): void;
+    (e: 'insertHtml'): void;
+    (e: 'toggleHtml'): void;
+    (e: 'insertIcon', iconName: string): void;
+}>();
 
-const cmsStore = useCmsStore()
-const activeTab = ref('home')
+const cmsStore = useCmsStore();
+const activeTab = ref('home');
 
-const handleIconSelect = (iconName) => {
-    emit('insertIcon', iconName)
-}
+const handleIconSelect = (iconName: string) => {
+    emit('insertIcon', iconName);
+};
 
-const handleAiResult = (text) => {
-    if (!props.editor) return
+const handleAiResult = (text: string) => {
+    if (!props.editor) return;
     
-    const { from, to } = props.editor.state.selection
+    const { from, to } = props.editor.state.selection;
     
     // If text was selected, replace it. Otherwise insert at cursor.
     if (from !== to) {
-        props.editor.chain().focus().deleteSelection().insertContent(text).run()
+        props.editor.chain().focus().deleteSelection().insertContent(text).run();
     } else {
-        props.editor.chain().focus().insertContent(text).run()
+        props.editor.chain().focus().insertContent(text).run();
     }
-}
+};
 
 const getEditorContext = computed(() => {
-    if (!props.editor) return ''
+    if (!props.editor) return '';
     
-    const { from, to } = props.editor.state.selection
+    const { from, to } = props.editor.state.selection;
     
     // If text is selected, use that as context
     if (from !== to) {
-        return props.editor.state.doc.textBetween(from, to, ' ')
+        return props.editor.state.doc.textBetween(from, to, ' ');
     }
     
-    // Otherwise use up to 1000 chars around the cursor or the whole doc if small
-    return props.editor.getText().slice(0, 5000) // Simple fallback
-})
+    // Otherwise use up to 5000 chars
+    return props.editor.getText().slice(0, 5000);
+});
 
 // Sync selected color with editor state
 const selectedColor = computed({
     get: () => props.editor?.getAttributes('textStyle').color || '',
-    set: (color) => {
+    set: (color: string) => {
+        if (!props.editor) return;
         if (color) {
-            props.editor.chain().focus().setColor(color).run()
+            props.editor.chain().focus().setColor(color).run();
         } else {
-            props.editor.chain().focus().unsetColor().run()
+            props.editor.chain().focus().unsetColor().run();
         }
     }
-})
+});
 
 // Watch for table activity and auto-switch tab
 watch(() => props.editor?.isActive('table'), (isInTable) => {
     if (isInTable) {
-        activeTab.value = 'table'
+        activeTab.value = 'table';
     } else if (activeTab.value === 'table') {
-        activeTab.value = 'home'
+        activeTab.value = 'home';
     }
-}, { immediate: true })
+}, { immediate: true });
 
 const isAiEnabled = computed(() => {
     const enabled = cmsStore.settings['ai_enabled'];
@@ -535,38 +539,40 @@ const isAiEnabled = computed(() => {
     if (!isEnabled) return false;
     
     // Check if default provider has key
-    const provider = cmsStore.settings['ai_default_provider'] || 'gemini';
+    const provider = (cmsStore.settings['ai_default_provider'] as string) || 'gemini';
     return !!cmsStore.settings[`${provider}_api_key`];
-})
+});
 
 onMounted(() => {
     // Check if store has ai settings, if not fetch them
     if (!cmsStore.settings['gemini_api_key']) {
-        cmsStore.fetchSettingsGroup('ai')
+        cmsStore.fetchSettingsGroup('ai');
     }
-})
+});
 
 function getHeaderLevel() {
-    if (props.editor?.isActive('heading', { level: 1 })) return '1'
-    if (props.editor?.isActive('heading', { level: 2 })) return '2'
-    if (props.editor?.isActive('heading', { level: 3 })) return '3'
-    return 'p'
+    if (props.editor?.isActive('heading', { level: 1 })) return '1';
+    if (props.editor?.isActive('heading', { level: 2 })) return '2';
+    if (props.editor?.isActive('heading', { level: 3 })) return '3';
+    return 'p';
 }
 
-function setHeaderLevel(val) {
+function setHeaderLevel(val: string) {
+    if (!props.editor) return;
     if (val === 'p') {
-         props.editor.chain().focus().setParagraph().run()
+         props.editor.chain().focus().setParagraph().run();
     } else {
-         props.editor.chain().focus().toggleHeading({ level: parseInt(val) }).run()
+         props.editor.chain().focus().toggleHeading({ level: parseInt(val) as 1 | 2 | 3 | 4 | 5 | 6 }).run();
     }
 }
 
 function getFontFamily() {
-    return props.editor?.getAttributes('textStyle').fontFamily || 'Inter'
+    return props.editor?.getAttributes('textStyle').fontFamily || 'Inter';
 }
 
-function setFontFamily(val) {
-    props.editor.chain().focus().setFontFamily(val).run()
+function setFontFamily(val: string) {
+    if (!props.editor) return;
+    props.editor.chain().focus().setFontFamily(val).run();
 }
 </script>
 

@@ -119,7 +119,7 @@
               <label class="field-label">{{ t('features.menus.form.selectMenu') || 'Select Menu' }}</label>
               <select v-model="selectedMenuId" @change="handleMenuChange" class="setting-select">
                 <option value="">{{ t('features.menus.form.selectMenu') }}</option>
-                <option v-for="menu in builder.menus" :key="menu.id" :value="menu.id">
+                <option v-for="menu in builder?.menus?.value || []" :key="menu.id" :value="menu.id">
                   {{ menu.name }}
                 </option>
               </select>
@@ -171,7 +171,7 @@
             <label class="field-label">{{ t('features.content.form.category') }}</label>
             <select v-model="content.category_id" class="setting-select">
               <option :value="null">{{ t('features.content.form.selectCategory') || 'Select Category' }}</option>
-              <option v-for="cat in builder.categories" :key="cat.id" :value="cat.id">
+              <option v-for="cat in builder?.categories?.value || []" :key="cat.id" :value="cat.id">
                 {{ cat.name }}
               </option>
             </select>
@@ -365,7 +365,7 @@
           <div class="field-group">
             <label class="field-label">{{ t('features.content.form.ogImage') || 'OG Image' }}</label>
             <MediaPicker
-              @selected="(media) => content.og_image = media?.url || media"
+              @selected="(media: any) => content.og_image = media?.url || media"
               :constraints="{ allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'] }"
             >
               <template #trigger="{ open }">
@@ -388,28 +388,73 @@
   </div>
 </template>
 
-<script setup>
-import { ref, inject, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { 
-  Image, 
-  Search, 
-  X, 
-  Edit2, 
-  Globe,
-  ChevronDown,
-  FileCheck,
-  Tags,
-  FileText,
-  MenuSquare,
-  MessageSquare
-} from 'lucide-vue-next'
-import MediaPicker from '../../../MediaPicker.vue'
-import api from '@/services/api'
+<script setup lang="ts">
+import { ref, inject, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import Edit2 from 'lucide-vue-next/dist/esm/icons/pen-line.js';
+import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import FileCheck from 'lucide-vue-next/dist/esm/icons/file-check.js';
+import Tags from 'lucide-vue-next/dist/esm/icons/tags.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import MenuSquare from 'lucide-vue-next/dist/esm/icons/square-menu.js';
+import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
+import MediaPicker from '@/components/media/MediaPicker.vue';
+import api from '@/services/api';
+import type { BuilderInstance } from '../../../../types/builder';
 
-const { t } = useI18n()
-const builder = inject('builder')
-const content = builder.content
+// Define loose interfaces for Content as it can be dynamic
+interface Tag {
+  id?: number | string;
+  name: string;
+}
+
+interface MenuItem {
+  add_to_menu: boolean;
+  menu_id: number | string;
+  parent_id: number | string | null;
+  title: string;
+}
+
+interface Content {
+  id?: number | string;
+  title?: string;
+  slug?: string;
+  status?: string;
+  published_at?: string;
+  type?: string;
+  is_featured?: boolean;
+  excerpt?: string;
+  comment_status?: boolean;
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+  featured_image?: string | null;
+  og_image?: string | null;
+  category_id?: number | string | null;
+  tags: Tag[];
+  menu_item?: MenuItem;
+  [key: string]: any;
+}
+
+interface MenuParentItem {
+  id: number | string;
+  parent_id: number | string | null;
+  title?: string;
+  label?: string;
+  sort_order: number;
+  children?: MenuParentItem[];
+  depth?: number;
+}
+
+const { t } = useI18n();
+const builder = inject<BuilderInstance>('builder');
+
+// Safely access content
+const content = computed(() => builder?.content.value as Content);
 
 // Collapsible section states
 const sections = ref({
@@ -420,12 +465,12 @@ const sections = ref({
   excerpt: false,
   discussion: false,
   seo: false
-})
+});
 
 // Menu handling
-const selectedMenuId = ref(content.value?.menu_item?.menu_id || '')
-const menuParentItems = ref([])
-const loadingParentItems = ref(false)
+const selectedMenuId = ref<number | string>(content.value?.menu_item?.menu_id || '');
+const menuParentItems = ref<MenuParentItem[]>([]);
+const loadingParentItems = ref(false);
 
 const toggleAddToMenu = () => {
   if (!content.value.menu_item) {
@@ -434,110 +479,116 @@ const toggleAddToMenu = () => {
       menu_id: '',
       parent_id: null,
       title: ''
-    }
+    };
   } else {
-    content.value.menu_item.add_to_menu = !content.value.menu_item.add_to_menu
+    content.value.menu_item.add_to_menu = !content.value.menu_item.add_to_menu;
   }
-}
+};
 
 const handleMenuChange = async () => {
   if (!selectedMenuId.value) {
-    menuParentItems.value = []
-    return
+    menuParentItems.value = [];
+    return;
   }
   
-  content.value.menu_item.menu_id = parseInt(selectedMenuId.value)
-  await fetchMenuParentItems(selectedMenuId.value)
-}
+  if (content.value.menu_item) {
+    content.value.menu_item.menu_id = parseInt(selectedMenuId.value as string);
+  }
+  await fetchMenuParentItems(selectedMenuId.value);
+};
 
-const fetchMenuParentItems = async (menuId) => {
+const fetchMenuParentItems = async (menuId: number | string) => {
   if (!menuId) {
-    menuParentItems.value = []
-    return
+    menuParentItems.value = [];
+    return;
   }
   
-  loadingParentItems.value = true
+  loadingParentItems.value = true;
   try {
-    const response = await api.get(`/admin/ja/menus/${menuId}/items`)
-    const data = response.data?.data || response.data || []
-    const flatItems = Array.isArray(data) ? data : []
+    const response = await api.get(`/admin/ja/menus/${menuId}/items`);
+    const data = response.data?.data || response.data || [];
+    const flatItems = Array.isArray(data) ? data : [];
     
     if (flatItems.length > 0 && !flatItems[0].depth) {
-      menuParentItems.value = flattenTreeForSelect(buildTree(flatItems))
+      menuParentItems.value = flattenTreeForSelect(buildTree(flatItems));
     } else {
-      menuParentItems.value = flatItems
+      menuParentItems.value = flatItems;
     }
   } catch (error) {
-    console.error('Failed to fetch menu items:', error)
+    console.error('Failed to fetch menu items:', error);
   } finally {
-    loadingParentItems.value = false
+    loadingParentItems.value = false;
   }
-}
+};
 
-const buildTree = (items, parentId = null) => {
+const buildTree = (items: MenuParentItem[], parentId: number | string | null = null): MenuParentItem[] => {
   return items
     .filter(item => item.parent_id === parentId)
     .sort((a, b) => a.sort_order - b.sort_order)
     .map(item => ({
       ...item,
       children: buildTree(items, item.id)
-    }))
-}
+    }));
+};
 
-const flattenTreeForSelect = (items, depth = 0) => {
-  let result = []
+const flattenTreeForSelect = (items: MenuParentItem[], depth = 0): MenuParentItem[] => {
+  let result: MenuParentItem[] = [];
   items.forEach(item => {
-    result.push({ ...item, depth })
+    result.push({ ...item, depth });
     if (item.children) {
-      result = result.concat(flattenTreeForSelect(item.children, depth + 1))
+      result = result.concat(flattenTreeForSelect(item.children, depth + 1));
     }
-  })
-  return result
-}
+  });
+  return result;
+};
 
 // Initial load of parent items if menu_id is set
 watch(() => content.value?.menu_item?.menu_id, (newVal) => {
   if (newVal && menuParentItems.value.length === 0) {
-    selectedMenuId.value = newVal
-    fetchMenuParentItems(newVal)
+    selectedMenuId.value = newVal;
+    fetchMenuParentItems(newVal);
   }
-}, { immediate: true })
+}, { immediate: true });
 
 // Tag search logic
-const tagQuery = ref('')
+const tagQuery = ref('');
 const tagSuggestions = computed(() => {
-  if (!tagQuery.value || tagQuery.value.length < 2) return []
-  const query = tagQuery.value.toLowerCase()
-  return builder.availableTags.filter(tag => 
+  if (!tagQuery.value || tagQuery.value.length < 2) return [];
+  const query = tagQuery.value.toLowerCase();
+  
+  // Assuming builder.availableTags exists and is an array of Tags
+  const availableTags = (builder?.availableTags || []) as Tag[];
+  
+  return availableTags.filter(tag => 
     tag.name.toLowerCase().includes(query) && 
     !content.value.tags.find(t => t.id === tag.id)
-  ).slice(0, 5)
-})
+  ).slice(0, 5);
+});
 
-const addTag = (tag) => {
+const addTag = (tag: Tag) => {
   if (!content.value.tags.find(t => t.id === tag.id)) {
-    content.value.tags.push(tag)
+    content.value.tags.push(tag);
   }
-  tagQuery.value = ''
-}
+  tagQuery.value = '';
+};
 
 const addCustomTag = () => {
-  if (!tagQuery.value) return
+  if (!tagQuery.value) return;
   if (!content.value.tags.find(t => t.name.toLowerCase() === tagQuery.value.toLowerCase())) {
-    content.value.tags.push({ name: tagQuery.value })
+    content.value.tags.push({ name: tagQuery.value });
   }
-  tagQuery.value = ''
-}
+  tagQuery.value = '';
+};
 
-const removeTag = (tag) => {
+const removeTag = (tag: Tag) => {
   content.value.tags = content.value.tags.filter(t => 
     tag.id ? t.id !== tag.id : t.name !== tag.name
-  )
-}
+  );
+};
 
 const handleTagSearch = () => {
   // Reactive via computed
-}
+};
 </script>
 
 <style scoped>

@@ -12,8 +12,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { MapPin } from 'lucide-vue-next'
-import type { BlockInstance } from '@/types/builder'
+import MapPin from 'lucide-vue-next/dist/esm/icons/map-pin.js';import type { BlockInstance } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance

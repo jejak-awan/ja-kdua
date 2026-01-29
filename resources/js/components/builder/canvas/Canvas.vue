@@ -58,13 +58,12 @@
 
 <script setup lang="ts">
 import { computed, inject, watch, onMounted } from 'vue'
-import { Plus } from 'lucide-vue-next'
-import { useI18n } from 'vue-i18n'
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';import { useI18n } from 'vue-i18n'
 // @ts-ignore
 import draggable from 'vuedraggable'
 import ModuleWrapper from './ModuleWrapper.vue'
 import CanvasGridView from './CanvasGridView.vue'
-import ThemePageResolver from '@/components/ThemePageResolver.vue'
+import ThemePageResolver from '@/components/shared/ThemePageResolver.vue'
 import type { BuilderInstance, BlockInstance } from '../../../types/builder'
 
 // Inject builder

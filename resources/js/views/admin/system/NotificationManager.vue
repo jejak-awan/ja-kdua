@@ -6,7 +6,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Send Notification Form -->
-            <div v-show="!sidebarCollapsed" class="lg:col-span-4 transition-all duration-300">
+            <div v-show="!sidebarCollapsed" class="lg:col-span-4 transition-colors duration-300">
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle>{{ $t('features.system.notifications.create.title') }}</CardTitle>
@@ -16,10 +16,12 @@
                     </CardHeader>
                     <div class="px-6 pb-2" v-if="queueHealth">
                          <div class="flex items-center gap-2">
-                            <div :class="[
+                            <div
+:class="[
                                 'h-2 w-2 rounded-full',
                                 queueHealth.is_active ? 'bg-green-500' : 'bg-yellow-500'
-                            ]"></div>
+                            ]"
+></div>
                             <span class="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                                 {{ queueHealth.message }} ({{ queueHealth.driver }})
                             </span>
@@ -135,7 +137,7 @@
             </div>
 
             <!-- History Table -->
-            <div :class="[sidebarCollapsed ? 'lg:col-span-12' : 'lg:col-span-8', 'transition-all duration-300']">
+            <div :class="[sidebarCollapsed ? 'lg:col-span-12' : 'lg:col-span-8', 'transition-colors duration-300']">
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between space-y-0">
                         <div class="flex items-center gap-4">
@@ -256,53 +258,114 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, reactive, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
-import toast from '../../../services/toast';
-import { useConfirm } from '../../../composables/useConfirm';
-import { Send, Loader2, Trash2, Activity, Info, AlertTriangle, CheckCircle2, ChevronLeft, Plus } from 'lucide-vue-next';
-import { parseResponse } from '../../../utils/responseParser';
+import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
+import { useConfirm } from '@/composables/useConfirm';
+import Send from 'lucide-vue-next/dist/esm/icons/send.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
+import Info from 'lucide-vue-next/dist/esm/icons/info.js';
+import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';
+import CheckCircle2 from 'lucide-vue-next/dist/esm/icons/circle-check-big.js';
+import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import { parseResponse, parseSingleResponse } from '@/utils/responseParser';
 
 // UI Components
-import Card from '../../../components/ui/card.vue';
-import CardHeader from '../../../components/ui/card-header.vue';
-import CardTitle from '../../../components/ui/card-title.vue';
-import CardContent from '../../../components/ui/card-content.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import Table from '../../../components/ui/table.vue';
-import TableBody from '../../../components/ui/table-body.vue';
-import TableCell from '../../../components/ui/table-cell.vue';
-import TableHead from '../../../components/ui/table-head.vue';
-import TableHeader from '../../../components/ui/table-header.vue';
-import TableRow from '../../../components/ui/table-row.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
+// UI Components
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+    Button,
+    Input,
+    Badge,
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    Checkbox
+} from '@/components/ui';
+
+interface Role {
+    id: number;
+    name: string;
+}
+
+interface User {
+    id: number;
+    name: string;
+    email: string;
+}
+
+interface Notification {
+    id: number;
+    title: string;
+    message: string;
+    type: string;
+    recipient_count: number;
+    created_at: string;
+}
+
+interface NotificationForm {
+    target_type: 'all' | 'role' | 'user';
+    target_id: string | undefined;
+    type: string;
+    title: string;
+    message: string;
+    is_async: boolean;
+}
+
+interface QueueHealth {
+    is_active: boolean;
+    message: string;
+    driver: string;
+}
+
+interface PaginationInfo {
+    current_page: number;
+    last_page: number;
+    total: number;
+    from: number;
+    to: number;
+}
+
+interface SelectedItem {
+    title: string;
+    message: string;
+    created_at: string;
+}
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
+const toast = useToast();
 
-const roles = ref([]);
-const users = ref([]);
-const history = ref([]);
-const pagination = ref(null);
+const roles = ref<Role[]>([]);
+const users = ref<User[]>([]);
+const history = ref<Notification[]>([]);
+const pagination = ref<PaginationInfo | null>(null);
 const sending = ref(false);
-const revoking = ref(null);
-const selectedItems = ref([]);
+const revoking = ref<number | null>(null);
+const selectedItems = ref<SelectedItem[]>([]);
 const bulkRevoking = ref(false);
-const queueHealth = ref(null);
+const queueHealth = ref<QueueHealth | null>(null);
 const sidebarCollapsed = ref(false);
 
-const form = reactive({
+const form = reactive<NotificationForm>({
     target_type: 'all',
-    target_id: null,
+    target_id: undefined,
     type: 'info',
     title: '',
     message: '',
@@ -311,7 +374,7 @@ const form = reactive({
 
 // Reset target_id when target_type changes to prevent invalid selections
 watch(() => form.target_type, () => {
-    form.target_id = '';
+    form.target_id = undefined;
 });
 
 // Form validation
@@ -327,52 +390,53 @@ const isFormValid = computed(() => {
     return true;
 });
 
-const getBadgeVariant = (type) => {
+const getBadgeVariant = (type: string) => {
     switch (type) {
         case 'error': return 'destructive';
-        case 'warning': return 'warning';
+        case 'warning': return 'secondary';
         case 'success': return 'default';
         default: return 'secondary';
     }
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string) => {
     if (!date) return '-';
     return new Date(date).toLocaleString();
 };
 
-const fetchData = async () => {
+const fetchData = async () : Promise<void> => {
     try {
         const [rolesRes, usersRes, healthRes] = await Promise.all([
             api.get('/admin/ja/roles'),
             api.get('/admin/ja/users'),
             api.get('/admin/ja/system/info')
         ]);
-        roles.value = parseResponse(rolesRes).data;
-        users.value = parseResponse(usersRes).data;
-        queueHealth.value = parseResponse(healthRes).data?.queue_health;
-    } catch (error) {
+        roles.value = parseResponse<Role>(rolesRes).data;
+        users.value = parseResponse<User>(usersRes).data;
+        const data = parseSingleResponse<any>(healthRes);
+        queueHealth.value = data?.queue_health || null;
+    } catch (error: any) {
         console.error('Failed to fetch data:', error);
     }
 };
 
-const fetchHistory = async (page = 1) => {
+const fetchHistory = async (page = 1) : Promise<void> => {
     try {
         const res = await api.get('/admin/ja/notifications/system', {
             params: { page, limit: 10 }
         });
-        const parsed = parseResponse(res);
+        const parsed = parseResponse<Notification>(res);
         history.value = parsed.data;
-        pagination.value = parsed.pagination;
+        pagination.value = parsed.pagination || null;
         
         // Clear selection on page change or refresh
         selectedItems.value = [];
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch history:', error);
     }
 };
 
-const isSelected = (item) => {
+const isSelected = (item: Notification) => {
     return selectedItems.value.some(i => 
         i.title === item.title && 
         i.message === item.message && 
@@ -380,7 +444,7 @@ const isSelected = (item) => {
     );
 };
 
-const toggleSelect = (item) => {
+const toggleSelect = (item: Notification) => {
     const index = selectedItems.value.findIndex(i => 
         i.title === item.title && 
         i.message === item.message && 
@@ -422,7 +486,7 @@ const handleBulkRevoke = async () => {
     const confirmed = await confirm({
         title: t('features.system.notifications.form.revoke'),
         message: t('features.system.notifications.confirm.revoke'),
-        variant: 'destructive',
+        variant: 'danger',
         confirmText: t('features.system.notifications.form.revoke'),
     });
 
@@ -433,22 +497,22 @@ const handleBulkRevoke = async () => {
         await api.post('/admin/ja/notifications/system/bulk-revoke', {
             broadcasts: selectedItems.value
         });
-        toast.success(t('features.system.notifications.messages.revoked'));
+        toast.success.action(t('features.system.notifications.messages.revoked'));
         selectedItems.value = [];
         fetchHistory(pagination.value?.current_page || 1);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to bulk revoke:', error);
-        toast.error('Error', t('features.system.notifications.messages.failed'));
+        toast.error.validation(t('features.system.notifications.messages.failed'));
     } finally {
         bulkRevoking.value = false;
     }
 };
 
-const handleRevoke = async (notification) => {
+const handleRevoke = async (notification: Notification) => {
     const confirmed = await confirm({
         title: t('features.system.notifications.form.revoke'),
         message: t('features.system.notifications.confirm.revoke'),
-        variant: 'destructive',
+        variant: 'danger',
         confirmText: t('features.system.notifications.form.revoke'),
     });
 
@@ -463,11 +527,11 @@ const handleRevoke = async (notification) => {
                 created_at: notification.created_at
             }
         });
-        toast.success(t('features.system.notifications.messages.revoked'));
+        toast.success.action(t('features.system.notifications.messages.revoked'));
         fetchHistory(pagination.value?.current_page || 1);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to revoke:', error);
-        toast.error('Error', t('features.system.notifications.messages.failed'));
+        toast.error.validation(t('features.system.notifications.messages.failed'));
     } finally {
         revoking.value = null;
     }
@@ -475,19 +539,19 @@ const handleRevoke = async (notification) => {
 
 const handleSend = async () => {
     if (!form.title || !form.message) {
-        toast.error('Error', 'Please fill in all fields');
+        toast.error.validation('Please fill in all fields');
         return;
     }
 
     if (form.target_type !== 'all' && !form.target_id) {
-        toast.error('Error', 'Please select a target');
+        toast.error.validation('Please select a target');
         return;
     }
 
     const confirmed = await confirm({
         title: t('features.system.notifications.create.title'),
         message: t('features.system.notifications.confirm.send'),
-        variant: 'default',
+        variant: 'info',
         confirmText: t('features.system.notifications.form.send'),
     });
 
@@ -496,7 +560,7 @@ const handleSend = async () => {
     sending.value = true;
     try {
         await api.post('/admin/ja/notifications/broadcast', form);
-        toast.success(form.is_async 
+        toast.success.action(form.is_async 
             ? t('features.system.notifications.messages.sent') 
             : 'Notifikasi berhasil dikirim secara langsung'
         );
@@ -507,9 +571,9 @@ const handleSend = async () => {
         
         // Refresh history
         fetchHistory();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to send:', error);
-        toast.error('Error', t('features.system.notifications.messages.failed'));
+        toast.error.validation(t('features.system.notifications.messages.failed'));
     } finally {
         sending.value = false;
     }

@@ -1,20 +1,21 @@
 <template>
   <AccordionItem
+    v-bind="delegatedProps"
     :class="cn('border-b', props.class)"
-    v-bind="$attrs"
   >
     <slot />
   </AccordionItem>
 </template>
 
-<script setup>
-import { AccordionItem } from 'radix-vue';
+<script setup lang="ts">
+import { AccordionItem, type AccordionItemProps } from 'radix-vue';
 import { cn } from '@/lib/utils';
+import { computed, type HTMLAttributes } from 'vue';
 
-const props = defineProps({
-  class: {
-    type: String,
-    default: '',
-  },
+const props = defineProps<AccordionItemProps & { class?: HTMLAttributes['class'] }>();
+
+const delegatedProps = computed(() => {
+  const { class: _, ...delegated } = props;
+  return delegated;
 });
 </script>

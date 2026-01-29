@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode"
     :device="device"
-    class="post-nav-block transition-all duration-500"
+    class="post-nav-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Post Navigation'"
     :style="cardStyles"
@@ -14,11 +14,11 @@
             <a 
                 v-if="prevPost || mode === 'edit'" 
                 :href="mode === 'view' ? (prevPost?.url || '#') : '#'" 
-                class="post-nav-item post-nav-item--prev group flex-1 flex items-center gap-8 p-10 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-50 dark:border-slate-800 transition-all duration-700 hover:-translate-x-2 hover:shadow-primary/10" 
+                class="post-nav-item post-nav-item--prev group flex-1 flex items-center gap-8 p-10 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-50 dark:border-slate-800 transition-colors duration-700 hover:-translate-x-2 hover:shadow-primary/10" 
                 :style="itemStyles"
                 @click="handleLinkClick"
             >
-              <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-950 flex items-center justify-center transition-all duration-500 group-hover:bg-primary group-hover:text-white group-hover:scale-110 shadow-xl">
+              <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-950 flex items-center justify-center transition-[width] duration-500 group-hover:bg-primary group-hover:text-white group-hover:scale-110 shadow-xl">
                   <LucideIcon name="ChevronLeft" class="w-7 h-7" :style="iconStyles" />
               </div>
               <div class="post-nav-content flex flex-col gap-2">
@@ -40,11 +40,11 @@
             <a 
                 v-if="nextPost || mode === 'edit'" 
                 :href="mode === 'view' ? (nextPost?.url || '#') : '#'" 
-                class="post-nav-item post-nav-item--next group flex-1 flex flex-row-reverse items-center text-right gap-8 p-10 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-50 dark:border-slate-800 transition-all duration-700 hover:translate-x-2 hover:shadow-primary/10" 
+                class="post-nav-item post-nav-item--next group flex-1 flex flex-row-reverse items-center text-right gap-8 p-10 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-50 dark:border-slate-800 transition-colors duration-700 hover:translate-x-2 hover:shadow-primary/10" 
                 :style="itemStyles"
                 @click="handleLinkClick"
             >
-              <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-950 flex items-center justify-center transition-all duration-500 group-hover:bg-primary group-hover:text-white group-hover:scale-110 shadow-xl">
+              <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-950 flex items-center justify-center transition-[width] duration-500 group-hover:bg-primary group-hover:text-white group-hover:scale-110 shadow-xl">
                   <LucideIcon name="ChevronRight" class="w-7 h-7" :style="iconStyles" />
               </div>
               <div class="post-nav-content flex flex-col gap-2">

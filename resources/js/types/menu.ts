@@ -1,24 +1,27 @@
 export interface Menu {
-    id: number;
+    id: number | string;
     name: string;
-    location: string;
+    description?: string;
+    location?: string;
     locale?: string;
-    is_active: boolean;
+    is_active?: boolean;
     items?: MenuItem[];
     created_at?: string;
     updated_at?: string;
-    [key: string]: any;
 }
 
 export interface MenuItem {
-    id: number | null;
+    id?: number | string | null;
     _temp_id?: string;
-    parent_id?: number | null;
-    menu_id?: number;
-    title: string;
-    type: string; // 'custom', 'post', 'page', 'category', 'system'
+    parent_id?: number | string | null;
+    menu_id?: number | string | null;
+    title?: string;
+    type?: string; // 'custom', 'post', 'page', 'category', 'system'
     target_id?: number | null;
     url?: string;
+    target?: string;
+    order?: number;
+    depth?: number;
     icon?: string | null;
     css_class?: string | null;
     description?: string | null;
@@ -41,7 +44,8 @@ export interface MenuItem {
     show_heading_line?: boolean;
 
     children?: MenuItem[];
-    [key: string]: any;
+    add_to_menu?: boolean; // UI only
+    [key: string]: any; // Keep any for dynamic properties since it's a plugin-based registry
 }
 
 export interface MenuItemDTO {

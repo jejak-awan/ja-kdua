@@ -28,9 +28,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { NodeViewWrapper, NodeViewContent, nodeViewProps } from '@tiptap/vue-3'
-import { Copy, Check } from 'lucide-vue-next'
-
-const props = defineProps(nodeViewProps)
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';const props = defineProps(nodeViewProps)
 
 const copied = ref(false)
 

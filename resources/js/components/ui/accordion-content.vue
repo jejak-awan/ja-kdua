@@ -1,5 +1,6 @@
 <template>
   <AccordionContent
+    v-bind="delegatedProps"
     :class="cn(
       'overflow-hidden text-sm',
       props.class
@@ -11,14 +12,15 @@
   </AccordionContent>
 </template>
 
-<script setup>
-import { AccordionContent } from 'radix-vue';
+<script setup lang="ts">
+import { AccordionContent, type AccordionContentProps } from 'radix-vue';
 import { cn } from '@/lib/utils';
+import { computed, type HTMLAttributes } from 'vue';
 
-const props = defineProps({
-  class: {
-    type: String,
-    default: '',
-  },
+const props = defineProps<AccordionContentProps & { class?: HTMLAttributes['class'] }>();
+
+const delegatedProps = computed(() => {
+  const { class: _, ...delegated } = props;
+  return delegated;
 });
 </script>

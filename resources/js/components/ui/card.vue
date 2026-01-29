@@ -3,7 +3,7 @@
     data-slot="card"
     :data-size="size"
     :class="cn(
-      'ring-foreground/10 bg-card text-card-foreground gap-4 overflow-hidden rounded-xl py-4 text-sm ring-1 has-[[data-slot=card-footer]]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-[[data-slot=card-footer]]:pb-0 group/card flex flex-col shadow-none',
+      'bg-card text-card-foreground gap-4 overflow-hidden rounded-xl border border-border/40 py-4 text-sm has-[[data-slot=card-footer]]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-[[data-slot=card-footer]]:pb-0 group/card flex flex-col shadow-none',
       props.class
     )"
   >
@@ -11,17 +11,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { cn } from '@/lib/utils';
 
-const props = defineProps({
-  class: {
-    type: String,
-    default: '',
-  },
-  size: {
-    type: String,
-    default: 'default', // 'default' | 'sm'
-  },
-});
+const props = defineProps<{
+  class?: any;
+  size?: 'default' | 'sm';
+}>();
 </script>

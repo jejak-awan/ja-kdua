@@ -230,10 +230,15 @@ import Input from '../../ui/input.vue';
 import Label from '../../ui/label.vue';
 import SourceItem from './SourceItem.vue';
 
-import { 
-    FileText, File, Tag, Link as LinkIcon, Columns,
-    Plus, PlusCircle, Loader2, PanelLeftClose
-} from 'lucide-vue-next';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import File from 'lucide-vue-next/dist/esm/icons/file.js';
+import Tag from 'lucide-vue-next/dist/esm/icons/tag.js';
+import LinkIcon from 'lucide-vue-next/dist/esm/icons/link.js';
+import Columns from 'lucide-vue-next/dist/esm/icons/columns-2.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import PlusCircle from 'lucide-vue-next/dist/esm/icons/circle-plus.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import PanelLeftClose from 'lucide-vue-next/dist/esm/icons/panel-left-close.js';
 
 const { t } = useI18n();
 const menuContext = useMenuContext();

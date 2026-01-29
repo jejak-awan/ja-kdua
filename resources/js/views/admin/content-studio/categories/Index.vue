@@ -112,7 +112,7 @@
                                     <Checkbox 
                                         v-if="authStore.hasPermission('delete categories')"
                                         :checked="selectedIds.includes(category.id)" 
-                                        @update:checked="(checked) => toggleSelect(checked, category.id)"
+                                        @update:checked="(checked: any) => toggleSelect(!!checked, category.id)"
                                     />
                                 </TableCell>
                                 <TableCell>
@@ -135,7 +135,7 @@
                                 </TableCell>
                                 <TableCell class="text-muted-foreground font-mono text-xs">{{ category.slug }}</TableCell>
                                 <TableCell>
-                                    <Badge :variant="category.is_active ? 'success' : 'secondary'">
+                                    <Badge :variant="(category.is_active ? 'default' : 'secondary') as any">
                                         {{ category.is_active ? $t('features.categories.status.active') : $t('features.categories.status.inactive') }}
                                     </Badge>
                                 </TableCell>
@@ -193,70 +193,54 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '@/services/api';
-import { 
-    Plus, 
-    Search, 
-    Loader2,
-    Trash2,
-    Edit2,
-    ChevronRight,
-    Filter
-} from 'lucide-vue-next';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Edit2 from 'lucide-vue-next/dist/esm/icons/pen-line.js';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
+import Filter from 'lucide-vue-next/dist/esm/icons/list-filter.js';
 import { debounce } from '@/utils/debounce';
 import { cn } from '@/lib/utils';
 import CategoryFormModal from './CategoryFormModal.vue';
 
-// Shadcn UI
-// @ts-ignore
-import Button from '@/components/ui/button.vue';
-// @ts-ignore
-import Input from '@/components/ui/input.vue';
-// @ts-ignore
-import Badge from '@/components/ui/badge.vue';
-// @ts-ignore
-import Checkbox from '@/components/ui/checkbox.vue';
-// @ts-ignore
-import Card from '@/components/ui/card.vue';
-// @ts-ignore
-import CardHeader from '@/components/ui/card-header.vue';
-// @ts-ignore
-import CardContent from '@/components/ui/card-content.vue';
-// @ts-ignore
-import Pagination from '@/components/ui/pagination.vue';
-// @ts-ignore
-import Table from '@/components/ui/table.vue';
-// @ts-ignore
-import TableBody from '@/components/ui/table-body.vue';
-// @ts-ignore
-import TableCell from '@/components/ui/table-cell.vue';
-// @ts-ignore
-import TableHead from '@/components/ui/table-head.vue';
-// @ts-ignore
-import TableHeader from '@/components/ui/table-header.vue';
-// @ts-ignore
-import TableRow from '@/components/ui/table-row.vue';
-// @ts-ignore
-import Select from '@/components/ui/select.vue';
-// @ts-ignore
-import SelectContent from '@/components/ui/select-content.vue';
-// @ts-ignore
-import SelectItem from '@/components/ui/select-item.vue';
-// @ts-ignore
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-// @ts-ignore
-import SelectValue from '@/components/ui/select-value.vue';
-import { useAuthStore } from '@/stores/auth';
+// UI Components
+import {
+    Button,
+    Input,
+    Badge,
+    Checkbox,
+    Card,
+    CardHeader,
+    CardContent,
+    Pagination,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from '@/components/ui';
 
+// Stores & Composables
+import { useAuthStore } from '@/stores/auth';
 import { useConfirm } from '@/composables/useConfirm';
 import { useToast } from '@/composables/useToast';
 import type { Category } from '@/types/cms';
+import { parseResponse, type PaginationData } from '@/utils/responseParser';
 
-const props = defineProps({
-    isEmbedded: {
-        type: Boolean,
-        default: false
-    }
-});
+interface FlatCategory extends Category {
+    _depth: number;
+}
+
+const props = defineProps<{
+    isEmbedded?: boolean;
+}>();
 
 const { t } = useI18n();
 const router = useRouter();
@@ -269,14 +253,13 @@ const search = ref('');
 const statusFilter = ref('all');
 const selectedIds = ref<number[]>([]);
 const expandedIds = ref<number[]>([]); // Track expanded nodes
-const perPage = ref(5);
-const pagination = ref<any>({
+const pagination = ref<PaginationData>({
     current_page: 1,
     last_page: 1,
     per_page: 5,
     total: 0,
-    from: 0,
-    to: 0
+    from: 1,
+    to: 1
 });
 
 // Modal State
@@ -293,13 +276,12 @@ const toggleExpand = (id: number) => {
     } else {
         expandedIds.value.push(id);
     }
-    expandedIds.value = [...expandedIds.value];
 };
 
 // Helper to check if category has children
-const hasChildren = (category: Category) => {
+const hasChildren = (category: Category): boolean => {
     const children = category.all_children || category.children;
-    return children && Array.isArray(children) && children.length > 0;
+    return !!(children && Array.isArray(children) && children.length > 0);
 };
 
 // Helper to collect all parent IDs for auto-expansion
@@ -316,11 +298,11 @@ const getAllParentIds = (nodes: Category[]): number[] => {
 };
 
 // Flatten tree into array for Table display, calculating depth
-const flattenTree = (nodes: Category[], depth = 0): any[] => {
+const flattenTree = (nodes: Category[], depth = 0): FlatCategory[] => {
     if (!nodes) return [];
-    let result: any[] = [];
+    let result: FlatCategory[] = [];
     nodes.forEach(node => {
-        const flatNode = { ...node, _depth: depth };
+        const flatNode: FlatCategory = { ...node, _depth: depth };
         result.push(flatNode);
         
         const children = node.all_children || node.children;
@@ -335,67 +317,48 @@ const flattenTree = (nodes: Category[], depth = 0): any[] => {
 
 // Computed flat list for display
 const flatCategories = computed(() => {
-    let nodesToFlatten = categories.value;
-    // Dependency on expandedIds.value is inside flattenTree
-    return flattenTree(nodesToFlatten);
+    return flattenTree(categories.value);
 });
 
 const fetchCategories = async (page = 1) => {
     loading.value = true;
     try {
-        const params: any = {
+        const params: Record<string, any> = {
             page: page,
             per_page: pagination.value.per_page,
             tree: true 
         };
         
         if (search.value) {
-            // params.tree = false; // Keep tree structure but filter?
-            // If searching, we usually flatten or just show matches.
-            // Backend might return flat list if 'tree' is false.
-            // Let's assume backend handles 'search' with 'tree=false' for simplicity in this standardized view
             params.tree = false;
             params.search = search.value;
         }
 
-        // Add status filter
         if (statusFilter.value && statusFilter.value !== 'all') {
             params.is_active = statusFilter.value === 'active' ? 1 : 0;
         }
 
         const response = await api.get('/admin/ja/categories', { params });
+        const { data, pagination: paginationData } = parseResponse<Category>(response);
         
-        if (response.data) {
-             const data = response.data;
-             const meta = data.meta || data; 
-             
-             if (data.data) {
-                 categories.value = data.data;
-             } else {
-                 categories.value = Array.isArray(data) ? data : [];
-             }
+        categories.value = data || [];
 
-             // Auto-expand all by default on first load or page change
-             if (!search.value) {
-                 expandedIds.value = getAllParentIds(categories.value);
-             } else {
-                 expandedIds.value = [];
-             }
-
-             pagination.value = {
-                 current_page: meta.current_page || 1,
-                 last_page: meta.last_page || 1,
-                 per_page: meta.per_page || 5,
-                 total: meta.total || categories.value.length || 0,
-                 from: meta.from || 0,
-                 to: meta.to || 0
-             };
+        // Auto-expand all by default on first load or page change
+        if (!search.value) {
+            expandedIds.value = getAllParentIds(categories.value);
         } else {
-            categories.value = [];
+            expandedIds.value = [];
+        }
+
+        if (paginationData) {
+            pagination.value = paginationData;
+        } else {
+            pagination.value.total = categories.value.length;
+            pagination.value.current_page = 1;
         }
         
         selectedIds.value = [];
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch categories:', error);
     } finally {
         loading.value = false;

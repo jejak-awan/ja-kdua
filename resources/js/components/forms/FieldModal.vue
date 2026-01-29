@@ -93,7 +93,7 @@
                     <label class="block text-sm font-medium text-foreground mb-1">
                         {{ $t('features.forms.fieldModal.options') }} <span class="text-destructive">*</span>
                     </label>
-                    <div class="space-y-2">
+                    <div class="space-y-2" v-if="fieldData.options">
                         <div
                             v-for="(option, index) in fieldData.options"
                             :key="index"
@@ -154,30 +154,43 @@
     </Dialog>
 </template>
 
-<script setup>
-import { ref, reactive, computed, watch } from 'vue';
-
+<script setup lang="ts">
+import { reactive, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import toast from '../../services/toast';
-import Dialog from '../ui/dialog.vue';
-import DialogContent from '../ui/dialog-content.vue';
-import DialogHeader from '../ui/dialog-header.vue';
-import DialogTitle from '../ui/dialog-title.vue';
-import DialogFooter from '../ui/dialog-footer.vue';
-import Button from '../ui/button.vue';
+import toast from '@/services/toast';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    Button
+} from '@/components/ui';
+
+interface Field {
+    id?: number | string;
+    name: string;
+    label: string;
+    type: string;
+    placeholder?: string;
+    help_text?: string;
+    options?: string[];
+    is_required: boolean;
+    [key: string]: any;
+}
 
 const { t } = useI18n();
 
-const props = defineProps({
-    field: {
-        type: Object,
-        default: null
-    }
-});
+const props = defineProps<{
+    field?: Field | null;
+}>();
 
-const emit = defineEmits(['close', 'save']);
+const emit = defineEmits<{
+    (e: 'close'): void;
+    (e: 'save', field: Field): void;
+}>();
 
-const fieldData = reactive({
+const fieldData = reactive<Field>({
     name: '',
     label: '',
     type: 'text',
@@ -216,28 +229,29 @@ const handleTypeChange = () => {
     // Reset options if type doesn't need them
     if (!needsOptions.value) {
         fieldData.options = [];
-    } else if (fieldData.options.length === 0) {
+    } else if (!fieldData.options || fieldData.options.length === 0) {
         fieldData.options = [''];
     }
 };
 
 const addOption = () => {
+    if (!fieldData.options) fieldData.options = [];
     fieldData.options.push('');
 };
 
-const removeOption = (index) => {
-    fieldData.options.splice(index, 1);
+const removeOption = (index: number) => {
+    fieldData.options?.splice(index, 1);
 };
 
 const saveField = () => {
-    if (needsOptions.value && fieldData.options.length === 0) {
+    if (needsOptions.value && (!fieldData.options || fieldData.options.length === 0)) {
         toast.error('Error', t('features.forms.fieldModal.optionRequired'));
         return;
     }
 
-    const fieldToSave = {
+    const fieldToSave: Field = {
         ...fieldData,
-        options: needsOptions.value ? fieldData.options.filter(opt => opt.trim()) : []
+        options: needsOptions.value ? fieldData.options?.filter(opt => opt.trim()) : []
     };
 
     if (props.field && props.field.id) {

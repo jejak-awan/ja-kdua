@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode"
     :settings="settings"
-    class="social-links-block transition-all duration-300"
+    class="social-links-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Social Links'"
   >
@@ -15,7 +15,7 @@
         :href="mode === 'view' ? (link.url || '#') : undefined"
         target="_blank"
         rel="noopener noreferrer"
-        class="social-link-btn group transition-all duration-300 hover:scale-[var(--hover-scale)] active:scale-95 shadow-md hover:shadow-xl"
+        class="social-link-btn group transition-colors duration-300 hover:scale-[var(--hover-scale)] active:scale-95 shadow-md hover:shadow-xl"
         :class="buttonClass(link)"
         :style="getButtonStyle(link)"
         variant="outline"

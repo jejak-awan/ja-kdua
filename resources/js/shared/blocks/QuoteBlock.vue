@@ -3,16 +3,16 @@
     :module="module"
     :mode="mode"
     :settings="settings"
-    class="quote-block-wrapper transition-all duration-300"
+    class="quote-block-wrapper transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Quote'"
   >
     <Card 
-        class="quote-container relative overflow-hidden bg-white dark:bg-slate-900 border-none shadow-2xl rounded-[3rem] p-10 md:p-20 group transition-all duration-700 hover:-translate-y-3"
+        class="quote-container relative overflow-hidden bg-white dark:bg-slate-900 border-none shadow-2xl rounded-[3rem] p-10 md:p-20 group transition-colors duration-700 hover:-translate-y-3"
         :style="containerStyles"
     >
       <!-- Background Decorative Quote -->
-      <div class="absolute -top-12 -left-12 text-slate-100 dark:text-slate-800 transition-all duration-1000 group-hover:scale-125 group-hover:rotate-12 pointer-events-none">
+      <div class="absolute -top-12 -left-12 text-slate-100 dark:text-slate-800 transition-colors duration-1000 group-hover:scale-125 group-hover:rotate-12 pointer-events-none">
           <QuoteIcon :size="240" />
       </div>
 
@@ -58,8 +58,7 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import { Quote as QuoteIcon } from 'lucide-vue-next'
-import BaseBlock from '../components/BaseBlock.vue'
+import QuoteIcon from 'lucide-vue-next/dist/esm/icons/quote.js';import BaseBlock from '../components/BaseBlock.vue'
 import { Card } from '../ui'
 import { 
   getVal, 

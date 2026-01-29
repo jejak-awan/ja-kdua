@@ -3,7 +3,7 @@
     :module="module" 
     :settings="settings" 
     :mode="mode"
-    class="group-carousel-block transition-all duration-300"
+    class="group-carousel-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Group Carousel'"
   >
@@ -19,7 +19,7 @@
                 <slot />
                 <!-- Fallback placeholders if no children -->
                 <CarouselItem v-if="!module.children?.length" v-for="i in 3" :key="i" class="pl-4" :class="slideBasisClass">
-                    <div class="slide-placeholder h-[300px] flex flex-col items-center justify-center p-12 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] text-slate-400 gap-4 transition-all hover:border-primary/50 group-hover:bg-slate-50/50 dark:group-hover:bg-slate-900/50">
+                    <div class="slide-placeholder h-[300px] flex flex-col items-center justify-center p-12 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] text-slate-400 gap-4 transition-colors hover:border-primary/50 group-hover:bg-slate-50/50 dark:group-hover:bg-slate-900/50">
                         <div class="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-900 flex items-center justify-center shadow-sm">
                             <Layers class="w-8 h-8 opacity-40 text-primary" />
                         </div>
@@ -50,8 +50,8 @@
 
           <!-- Navigation -->
           <template v-if="showControls">
-              <CarouselPrevious v-if="settings.showArrows !== false" class="left-2 opacity-0 group-hover:opacity-100 transition-all duration-500 hover:scale-110 active:scale-95 shadow-xl border-none" :style="arrowStyles" />
-              <CarouselNext v-if="settings.showArrows !== false" class="right-2 opacity-0 group-hover:opacity-100 transition-all duration-500 hover:scale-110 active:scale-95 shadow-xl border-none" :style="arrowStyles" />
+              <CarouselPrevious v-if="settings.showArrows !== false" class="left-2 opacity-0 group-hover:opacity-100 transition-[width] duration-500 hover:scale-110 active:scale-95 shadow-xl border-none" :style="arrowStyles" />
+              <CarouselNext v-if="settings.showArrows !== false" class="right-2 opacity-0 group-hover:opacity-100 transition-[width] duration-500 hover:scale-110 active:scale-95 shadow-xl border-none" :style="arrowStyles" />
           </template>
         </Carousel>
     </div>
@@ -67,8 +67,7 @@ import CarouselItem from '../ui/CarouselItem.vue'
 import CarouselNext from '../ui/CarouselNext.vue'
 import CarouselPrevious from '../ui/CarouselPrevious.vue'
 import Autoplay from 'embla-carousel-autoplay'
-import { Layers } from 'lucide-vue-next'
-import { 
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';import { 
   getVal,
   getLayoutStyles
 } from '../utils/styleUtils'

@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode"
     :device="device"
-    class="related-posts-block transition-all duration-500"
+    class="related-posts-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Related Posts'"
     :style="cardStyles"
@@ -15,13 +15,15 @@
         :style="mainTitleStyles"
         :contenteditable="mode === 'edit'"
         @blur="(e: any) => updateField('title', (e.target as HTMLElement).innerText)"
-      >{{ titleValue }}</h3>
+      >
+{{ titleValue }}
+</h3>
       
-      <div class="related-posts-grid grid transition-all duration-500" :style="gridStyles">
+      <div class="related-posts-grid grid transition-[width] duration-500" :style="gridStyles">
         <article 
             v-for="(post, index) in displayPosts" 
             :key="index" 
-            class="related-post group flex flex-col h-full bg-white dark:bg-slate-900 border border-slate-50 dark:border-slate-800 rounded-[2.5rem] overflow-hidden shadow-2xl transition-all duration-700 hover:-translate-y-4"
+            class="related-post group flex flex-col h-full bg-white dark:bg-slate-900 border border-slate-50 dark:border-slate-800 rounded-[2.5rem] overflow-hidden shadow-2xl transition-colors duration-700 hover:-translate-y-4"
         >
           <div v-if="showImage" class="post-image aspect-video relative bg-slate-50 dark:bg-slate-950 overflow-hidden flex items-center justify-center">
              <div class="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10" />

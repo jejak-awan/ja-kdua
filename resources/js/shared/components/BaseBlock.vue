@@ -65,7 +65,7 @@ import type { BlockInstance, BlockProps, BuilderInstance } from '../../types/bui
 
 const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
-  device: null
+  device: 'desktop'
 })
 
 const blockRef = ref<HTMLElement | null>(null)
@@ -75,7 +75,7 @@ const builder = inject<BuilderInstance>('builder')
 const detectedDevice = useResponsiveDevice()
 const device = computed(() => props.device || detectedDevice.value)
 
-const settings = computed(() => props.module?.settings || {})
+const settings = computed(() => props.settings || props.module?.settings || {})
 const isSelected = computed(() => props.mode === 'edit' && builder?.selectedModuleId.value === props.module.id)
 
 const wrapperStyles = computed(() => {

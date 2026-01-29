@@ -55,51 +55,65 @@
   </div>
 </template>
 
-<script setup>
-import { computed, inject, ref, onMounted, onUnmounted } from 'vue'
-import { Undo2, Redo2, Palette, ChevronDown, Check, Loader2 } from 'lucide-vue-next'
-import { IconButton, BaseDivider, BaseDropdown } from '../ui'
+<script setup lang="ts">
+import { computed, inject, ref, onMounted, onUnmounted } from 'vue';
+import Undo2 from 'lucide-vue-next/dist/esm/icons/undo-2.js';
+import Redo2 from 'lucide-vue-next/dist/esm/icons/redo-2.js';
+import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import { IconButton, BaseDivider, BaseDropdown } from '../ui';
+import type { BuilderInstance } from '../../../types/builder';
 
 // Props & Emits
-const emit = defineEmits(['save'])
+const emit = defineEmits<{
+  (e: 'save'): void;
+}>();
 
 // Inject Builder
-const builder = inject('builder')
-const isMobile = ref(false)
+const builder = inject<BuilderInstance>('builder');
+const isMobile = ref(false);
 
 // State
-const canUndo = computed(() => builder?.canUndo?.value || false)
-const canRedo = computed(() => builder?.canRedo?.value || false)
-const activeThemeSlug = computed(() => builder?.activeTheme?.value || 'janari')
-const availableThemes = computed(() => builder?.availableThemes?.value || [])
-const loadingThemes = computed(() => builder?.loadingThemes?.value || false)
+const canUndo = computed(() => builder?.canUndo?.value || false);
+const canRedo = computed(() => builder?.canRedo?.value || false);
+const activeThemeSlug = computed(() => builder?.activeTheme?.value || 'janari');
+const availableThemes = computed(() => builder?.availableThemes?.value || []);
+const loadingThemes = computed(() => builder?.loadingThemes?.value || false);
 
 const currentThemeName = computed(() => {
-    const theme = availableThemes.value.find(t => t.slug === activeThemeSlug.value)
-    return theme ? theme.name : activeThemeSlug.value
-})
+    const theme = availableThemes.value.find(t => t.slug === activeThemeSlug.value);
+    return theme ? theme.name : activeThemeSlug.value;
+});
 
-const changeTheme = (slug) => {
-    builder?.loadTheme(slug)
-}
+const changeTheme = (slug: string) => {
+    builder?.loadTheme(slug);
+};
+
+import { throttle } from '../../../shared/utils/performance';
+
+// ... (existing imports)
 
 // Window resize listener for responsive class
 const checkMobile = () => {
-    isMobile.value = window.innerWidth <= 768
-}
+    isMobile.value = window.innerWidth <= 768;
+};
+
+const throttledCheck = throttle(checkMobile, 200);
 
 onMounted(() => {
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
+    checkMobile();
+    window.addEventListener('resize', throttledCheck);
     
     if (builder && availableThemes.value.length === 0) {
-        builder.fetchThemes()
+        builder.fetchThemes();
     }
-})
+});
 
 onUnmounted(() => {
-    window.removeEventListener('resize', checkMobile)
-})
+    window.removeEventListener('resize', throttledCheck);
+});
 </script>
 
 <style scoped>

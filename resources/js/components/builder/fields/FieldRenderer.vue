@@ -214,6 +214,7 @@ const isVisible = computed(() => {
     }
     
     const checkSingleCondition = (condition: any, settings: any): boolean => {
+        if (!condition || !condition.field) return true;
         const targetField = condition.field as string;
         const targetValue = condition.value;
         const operator = condition.operator || 'eq';

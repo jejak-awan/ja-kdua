@@ -113,7 +113,7 @@ const SignupModule: ModuleDefinition = {
             {
                 id: 'subtitleTypography',
                 label: 'Subtitle Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `subtitle_${f.name}`,
                     label: `Subtitle ${f.label}`
@@ -122,7 +122,7 @@ const SignupModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -131,7 +131,7 @@ const SignupModule: ModuleDefinition = {
             {
                 id: 'inputTypography',
                 label: 'Input Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `input_${f.name}`,
                     label: `Input ${f.label}`
@@ -142,7 +142,7 @@ const SignupModule: ModuleDefinition = {
                 label: 'Button Style',
                 fields: [
                     { name: 'buttonBackgroundColor', type: 'color', label: 'Button Background', responsive: true },
-                    ...typographySettings.fields!.map(f => ({
+                    ...((typographySettings.fields as any[])).map(f => ({
                         ...f,
                         name: `button_${f.name}`,
                         label: `Button ${f.label}`

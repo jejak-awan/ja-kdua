@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="accordion-block transition-all duration-300"
+    class="accordion-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Accordion'"
     :style="cardStyles"
@@ -23,7 +23,7 @@
             v-for="(item, index) in items" 
             :key="index"
             :value="`item-${index}`"
-            class="accordion-item transition-all duration-300 border-none"
+            class="accordion-item transition-colors duration-300 border-none"
             :class="[
                 getItemClasses(blockSettings, index),
             ]"
@@ -45,7 +45,7 @@
               
               <template #icon>
                 <div 
-                  class="accordion-icon ml-4 transition-all duration-300 shrink-0 [&[data-state=open]]:rotate-180"
+                  class="accordion-icon ml-4 transition-colors duration-300 shrink-0 [&[data-state=open]]:rotate-180"
                   :style="iconStyles(blockSettings)"
                 >
                   <LucideIcon :name="getIconName(blockSettings)" class="w-full h-full opacity-60 group-hover:opacity-100" />
@@ -72,19 +72,15 @@ import BaseBlock from '../components/BaseBlock.vue'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../ui'
 import LucideIcon from '../../components/ui/LucideIcon.vue'
 import { getVal, getLayoutStyles, getTypographyStyles } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BlockProps } from '@/types/builder'
 
-const props = withDefaults(defineProps<{
-  module: BlockInstance
-  mode?: 'view' | 'edit'
-  device?: 'desktop' | 'tablet' | 'mobile'
-}>(), {
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })
 
-const settings = computed(() => props.module?.settings || {})
-const items = computed(() => settings.value.items || [])
+const settings = computed(() => props.settings || props.module?.settings || {})
+const items = computed<any[]>(() => settings.value.items || [])
 const openIndices = ref<number[]>([])
 
 const toggle = (index: number) => {

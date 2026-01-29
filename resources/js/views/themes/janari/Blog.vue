@@ -33,7 +33,7 @@
                      <!-- Featured Post -->
                      <div v-if="featuredPost" class="mb-12">
                          <h2 class="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-6">Featured Article</h2>
-                         <router-link :to="featuredPost.slug ? `/blog/${featuredPost.slug}` : '#'" class="block bg-card rounded-2xl overflow-hidden shadow-lg border border-border group hover:shadow-xl transition-all cursor-pointer">
+                         <router-link :to="featuredPost.slug ? `/blog/${featuredPost.slug}` : '#'" class="block bg-card rounded-2xl overflow-hidden shadow-lg border border-border group hover:shadow-xl transition-colors cursor-pointer">
                              <div class="grid grid-cols-1 lg:grid-cols-2">
                                  <div class="aspect-video lg:aspect-[4/3] overflow-hidden">
                                      <img 
@@ -73,7 +73,7 @@
                                 v-for="article in displayArticles" 
                                 :key="article.id" 
                                 :to="article.slug ? `/blog/${article.slug}` : '#'"
-                                class="block bg-card rounded-xl overflow-hidden border border-border hover:shadow-lg transition-all group cursor-pointer"
+                                class="block bg-card rounded-xl overflow-hidden border border-border hover:shadow-lg transition-shadow group cursor-pointer"
                              >
                                  <article class="h-full flex flex-col">
                                      <div class="aspect-video overflow-hidden">
@@ -95,7 +95,7 @@
                                          <p class="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">{{ article.excerpt }}</p>
                                          <div class="mt-auto pt-2 text-xs font-bold text-primary flex items-center gap-1">
                                             Read More 
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                                          </div>
                                      </div>
                                  </article>
@@ -109,13 +109,25 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import api from '@/services/api'
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue'
 
-const pageData = ref(null)
-const articles = ref([])
+import type { Content } from '@/types/cms'
+
+interface Article extends Partial<Content> {
+    readTime: string;
+    image: string; // Alias for featured_image
+}
+
+interface PageData extends Content {
+    title: string;
+    blocks?: any[]; 
+}
+
+const pageData = ref<PageData | null>(null)
+const articles = ref<Article[]>([])
 const loading = ref(true)
 
 const featuredPost = computed(() => {
@@ -126,7 +138,7 @@ const displayArticles = computed(() => {
     return articles.value.slice(1)
 })
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string | undefined) => {
     if (!dateString) return ''
     return new Date(dateString).toLocaleDateString('id-ID', {
         day: 'numeric',
@@ -146,8 +158,7 @@ const fetchPosts = async () => {
             }
         });
         
-        
-        let posts = [];
+        let posts: any[] = [];
         
         // Defensive handling of response structure
         if (response.data && Array.isArray(response.data.data)) {
@@ -189,7 +200,7 @@ onMounted(async () => {
     // Try to get the "blog" CMS page first
     const response = await api.get('/cms/contents/blog')
     pageData.value = response.data.data
-  } catch (error) {
+  } catch (error: any) {
     if (error.response?.status !== 404) {
       console.error('Failed to fetch blog page:', error)
     }
@@ -202,3 +213,4 @@ onMounted(async () => {
   }
 })
 </script>
+

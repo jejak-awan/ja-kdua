@@ -24,69 +24,66 @@
   </BaseModal>
 </template>
 
-<script setup>
-import { computed } from 'vue'
-import { AlertTriangle, AlertCircle, Info, Trash2, HelpCircle } from 'lucide-vue-next'
-import BaseModal from '../ui/BaseModal.vue'
-import { BaseButton } from '../ui'
+<script setup lang="ts">
+import { computed } from 'vue';
+import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';
+import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
+import Info from 'lucide-vue-next/dist/esm/icons/info.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
+import BaseModal from '../ui/BaseModal.vue';
+import { BaseButton } from '../ui';
 
-const props = defineProps({
-  isOpen: {
-    type: Boolean,
-    default: false
-  },
-  title: {
-    type: String,
-    default: 'Confirm'
-  },
-  message: {
-    type: String,
-    default: 'Are you sure?'
-  },
-  confirmText: {
-    type: String,
-    default: 'Confirm'
-  },
-  cancelText: {
-    type: String,
-    default: 'Cancel'
-  },
-  type: {
-    type: String,
-    default: 'warning', // danger, warning, info, delete
-    validator: (val) => ['danger', 'warning', 'info', 'delete'].includes(val)
-  }
-})
+interface Props {
+  isOpen?: boolean;
+  title?: string;
+  message?: string;
+  confirmText?: string;
+  cancelText?: string;
+  type?: 'danger' | 'warning' | 'info' | 'delete';
+}
 
-const emit = defineEmits(['confirm', 'cancel'])
+const props = withDefaults(defineProps<Props>(), {
+  isOpen: false,
+  title: 'Confirm',
+  message: 'Are you sure?',
+  confirmText: 'Confirm',
+  cancelText: 'Cancel',
+  type: 'warning'
+});
+
+const emit = defineEmits<{
+  (e: 'confirm'): void;
+  (e: 'cancel'): void;
+}>();
 
 const iconComponent = computed(() => {
   switch (props.type) {
     case 'danger':
-      return AlertCircle
+      return AlertCircle;
     case 'delete':
-      return Trash2
+      return Trash2;
     case 'info':
-      return Info
+      return Info;
     case 'warning':
     default:
-      return AlertTriangle
+      return AlertTriangle;
   }
-})
+});
 
-const iconClass = computed(() => `icon-${props.type}`)
+const iconClass = computed(() => `icon-${props.type}`);
 
 const confirmVariant = computed(() => {
-  return props.type === 'danger' || props.type === 'delete' ? 'danger' : 'primary'
-})
+  return props.type === 'danger' || props.type === 'delete' ? 'danger' : 'primary';
+});
 
 const handleConfirm = () => {
-  emit('confirm')
-}
+  emit('confirm');
+};
 
 const handleCancel = () => {
-  emit('cancel')
-}
+  emit('cancel');
+};
 </script>
 
 <style scoped>

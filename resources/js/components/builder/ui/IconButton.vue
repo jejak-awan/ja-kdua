@@ -16,66 +16,57 @@
   </Button>
 </template>
 
-<script setup>
-import { computed } from 'vue'
-import Button from './Button.vue'
+<script setup lang="ts">
+import { computed } from 'vue';
+import { type Component } from 'vue';
+import Button from '@/components/ui/button.vue';
 
-const props = defineProps({
-  icon: {
-    type: [Object, Function, String],
-    required: true
-  },
-  variant: {
-    type: String,
-    default: 'secondary', // ghost, secondary, primary
-  },
-  size: {
-    type: String,
-    default: 'md', // sm, md, lg
-  },
-  active: {
-    type: Boolean,
-    default: false
-  },
-  title: {
-    type: String,
-    default: ''
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  },
-  class: {
-    type: null,
-    default: ''
-  }
-})
+interface Props {
+  icon: object | Function | string | Component;
+  variant?: 'primary' | 'secondary' | 'ghost'; // custom variants mapped to shred
+  size?: 'sm' | 'md' | 'lg';
+  active?: boolean;
+  title?: string;
+  disabled?: boolean;
+  class?: any;
+}
 
-defineEmits(['click'])
+const props = withDefaults(defineProps<Props>(), {
+  variant: 'secondary',
+  size: 'md',
+  active: false,
+  title: '',
+  disabled: false,
+  class: ''
+});
+
+defineEmits<{
+  (e: 'click', event: MouseEvent): void;
+}>();
 
 const mappedVariant = computed(() => {
-  if (props.active) return 'default'
-  const map = {
+  if (props.active) return 'default';
+  const map: Record<string, any> = {
     'primary': 'default',
     'secondary': 'secondary',
     'ghost': 'ghost'
-  }
-  return map[props.variant] || 'secondary'
-})
+  };
+  return map[props.variant] || 'secondary';
+});
 
 const iconSize = computed(() => {
   switch (props.size) {
-    case 'sm': return 14
-    case 'lg': return 20
-    default: return 16
+    case 'sm': return 14;
+    case 'lg': return 20;
+    default: return 16;
   }
-})
+});
 
 const sizeClasses = computed(() => {
     switch (props.size) {
-        case 'sm': return 'w-7 h-7'
-        case 'lg': return 'w-10 h-10'
-        default: return 'w-8 h-8'
+        case 'sm': return 'w-7 h-7';
+        case 'lg': return 'w-10 h-10';
+        default: return 'w-8 h-8';
     }
-})
+});
 </script>

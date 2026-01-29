@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Search } from 'lucide-vue-next';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

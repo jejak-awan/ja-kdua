@@ -76,32 +76,38 @@ import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { tagSchema } from '@/schemas';
-import { Loader2 } from 'lucide-vue-next';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import type { Tag } from '@/types/cms';
 
 // Shadcn UI
-// @ts-ignore
-import Button from '@/components/ui/button.vue';
-// @ts-ignore
-import Input from '@/components/ui/input.vue';
-// @ts-ignore
-import Label from '@/components/ui/label.vue';
-// @ts-ignore
-import Textarea from '@/components/ui/textarea.vue';
-// @ts-ignore
-import Dialog from '@/components/ui/dialog.vue';
-import DialogContent from '@/components/ui/dialog-content.vue';
-import DialogDescription from '@/components/ui/dialog-description.vue';
-import DialogFooter from '@/components/ui/dialog-footer.vue';
-import DialogHeader from '@/components/ui/dialog-header.vue';
-import DialogTitle from '@/components/ui/dialog-title.vue';
+import {
+    Button,
+    Input,
+    Label,
+    Textarea,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from '@/components/ui';
+
+interface TagForm {
+    name: string;
+    slug: string;
+    description: string;
+}
 
 const props = defineProps<{
     open: boolean;
     tag?: Tag | null;
 }>();
 
-const emit = defineEmits(['update:open', 'success']);
+const emit = defineEmits<{
+    'update:open': [value: boolean];
+    'success': [];
+}>();
 
 const { t } = useI18n();
 const toast = useToast();
@@ -110,7 +116,7 @@ const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(ta
 const saving = ref(false);
 const isEdit = computed(() => !!props.tag);
 
-const form = ref<any>({
+const form = ref<TagForm>({
     name: '',
     slug: '',
     description: '',
@@ -121,7 +127,11 @@ watch(() => props.open, (isOpen) => {
     if (isOpen) {
         clearErrors();
         if (props.tag) {
-            form.value = { ...props.tag };
+            form.value = {
+                name: props.tag.name || '',
+                slug: props.tag.slug || '',
+                description: props.tag.description || '',
+            };
         } else {
             // Reset
             form.value = {

@@ -12,8 +12,14 @@
           </div>
           <div class="interaction-actions">
             <IconButton :icon="editingIndex === index ? ChevronUp : Settings2" size="sm" @click="toggleEdit(index)" />
-            <IconButton :icon="Trash2" size="sm" variant="danger" @click="removeInteraction(index)" />
-          </div>
+            <IconButton 
+              :icon="Trash2" 
+              size="sm" 
+              variant="ghost" 
+              class="text-red-500 hover:bg-red-500/10"
+              @click="removeInteraction(index)" 
+            />
+</div>
         </div>
         
         <!-- Inline Editor -->
@@ -94,8 +100,10 @@
 <script setup lang="ts">
 import { ref, watch, inject, computed } from 'vue'
 import type { BlockInstance, BuilderInstance } from '../../../types/builder'
-import { Plus, Settings2, Trash2, ChevronUp } from 'lucide-vue-next'
-import { BaseButton, IconButton, BaseLabel, BasePopover } from '../ui'
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Settings2 from 'lucide-vue-next/dist/esm/icons/settings.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';import { BaseButton, IconButton, BaseLabel, BasePopover } from '../ui'
 
 interface InteractionItem {
   trigger: string;
@@ -137,8 +145,8 @@ const availableActions = [
 
 const allModules = computed(() => {
     // Collect all modules from builder for target selection
-    if (!builder?.allModules) return []
-    return builder.allModules.value.filter((m: BlockInstance) => m.id !== props.module.id)
+    if (!builder || !(builder as any).allModules) return []
+    return (builder as any).allModules.value.filter((m: BlockInstance) => m.id !== props.module.id)
 })
 
 const getInteractionLabel = (id: string) => {
@@ -151,7 +159,7 @@ const getActionLabel = (id: string) => {
 
 const getTargetLabel = (id: string) => {
     if (id === props.module.id) return 'Self'
-    const m = builder?.allModules?.value.find((mod: BlockInstance) => mod.id === id)
+    const m = (builder as any)?.allModules?.value.find((mod: BlockInstance) => mod.id === id)
     return m ? (m.title || m.type) : id.substring(0, 8)
 }
 

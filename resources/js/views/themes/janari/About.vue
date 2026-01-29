@@ -99,16 +99,29 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue'
 
-const pageData = ref(null)
+interface TeamMember {
+    name: string;
+    role: string;
+    image: string;
+}
+
+import type { Content } from '@/types/cms'
+
+interface PageData extends Content {
+    title: string;
+    blocks?: any[];
+}
+
+const pageData = ref<PageData | null>(null)
 const loading = ref(true)
 
 // Team members data
-const teamMembers = [
+const teamMembers: TeamMember[] = [
     { name: 'Ari Nurcahya', role: 'Lead Developer', image: '/images/fallback/team-1.png' },
     { name: 'Sarah Amira', role: 'Frontend Engineer', image: '/images/fallback/team-2.png' },
     { name: 'Budi Santoso', role: 'Backend Engineer', image: '/images/fallback/team-3.png' },
@@ -127,3 +140,4 @@ onMounted(async () => {
   }
 })
 </script>
+

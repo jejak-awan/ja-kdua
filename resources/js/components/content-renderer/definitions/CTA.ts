@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { MousePointerClick } from 'lucide-vue-next';
+import MousePointerClick from 'lucide-vue-next/dist/esm/icons/mouse-pointer-click.js';
 import { defineAsyncComponent } from 'vue';
 
 

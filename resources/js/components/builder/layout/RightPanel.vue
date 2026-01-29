@@ -56,8 +56,7 @@
       </button>
       
       <div class="panel-tabs-actions">
-
-        <!-- Responsive Breakpoint Dropdown -->
+<!-- Responsive Breakpoint Dropdown -->
 
         <div class="responsive-dropdown-wrapper">
           <BaseDropdown align="right" :width="160">
@@ -88,8 +87,7 @@
             </template>
           </BaseDropdown>
         </div>
-        
-        </div>
+</div>
     </div>
     
     <!-- Search -->
@@ -136,8 +134,20 @@
 <script setup lang="ts">
 import { ref, computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { X, ArrowLeft, Smartphone, ChevronDown, Copy, Search, Monitor, Tablet, MousePointer, Settings, SlidersHorizontal, Check, Library, ChevronsRight } from 'lucide-vue-next'
-import { SETTINGS_TABS } from '../core/constants'
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
+import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Monitor from 'lucide-vue-next/dist/esm/icons/monitor.js';
+import Tablet from 'lucide-vue-next/dist/esm/icons/tablet.js';
+import MousePointer from 'lucide-vue-next/dist/esm/icons/mouse-pointer.js';
+import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
+import SlidersHorizontal from 'lucide-vue-next/dist/esm/icons/sliders-horizontal.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import Library from 'lucide-vue-next/dist/esm/icons/library.js';
+import ChevronsRight from 'lucide-vue-next/dist/esm/icons/chevrons-right.js';import { SETTINGS_TABS } from '../core/constants'
 import ModuleRegistry from '../core/ModuleRegistry'
 import SettingsPanel from '../settings/SettingsPanel.vue'
 import ResponsiveBreakpointsModal from '../modals/ResponsiveBreakpointsModal.vue'

@@ -6,7 +6,7 @@
             :title="group.title"
             :description="group.description"
             :icon="group.icon"
-            :color="group.color"
+            :color="group.color as any"
             :default-expanded="group.defaultExpanded"
         >
             <SettingField
@@ -20,38 +20,41 @@
                 :type="setting.type"
                 :enabled-text="$t('features.settings.enabled')"
                 :disabled-text="$t('features.settings.disabled')"
-                :error="errors[setting.key]"
+                :error="errors?.[setting.key]"
             />
         </SettingGroup>
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import SettingGroup from '../../../../components/settings/SettingGroup.vue'
-import SettingField from '../../../../components/settings/SettingField.vue'
+import SettingGroup from '@/components/settings/SettingGroup.vue'
+import SettingField from '@/components/settings/SettingField.vue'
+
+interface Setting {
+    id: number | string;
+    key: string;
+    value: any;
+    type: string;
+    group: string;
+}
+
+interface Props {
+    settings: Setting[];
+    formData: Record<string, any>;
+    errors?: Record<string, string[]>;
+}
 
 const { t } = useI18n()
 
-const props = defineProps({
-    settings: {
-        type: Array,
-        required: true
-    },
-    formData: {
-        type: Object,
-        required: true
-    },
-    errors: {
-        type: Object,
-        default: () => ({})
-    }
-})
+const props = defineProps<Props>()
 
-const emit = defineEmits(['update:formData'])
+const emit = defineEmits<{
+    (e: 'update:formData', value: Record<string, any>): void;
+}>()
 
-const updateField = (key, value) => {
+const updateField = (key: string, value: any) => {
     emit('update:formData', { ...props.formData, [key]: value })
 }
 
@@ -64,11 +67,22 @@ const ClockIcon = {
     template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
 }
 
+interface SettingGroupData {
+    id: string;
+    title: string;
+    description: string;
+    icon: any;
+    color: string;
+    keys: string[];
+    settings: Setting[];
+    defaultExpanded: boolean;
+}
+
 // General settings grouped by category
 const generalSettingsGrouped = computed(() => {
     const generalSettings = props.settings.filter(s => s && s.group === 'general')
     
-    const groups = [
+    const groups: SettingGroupData[] = [
         {
             id: 'site',
             title: t('features.settings.groups.siteInfo.title'),

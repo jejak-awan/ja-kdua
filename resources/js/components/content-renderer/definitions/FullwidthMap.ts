@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { MapPin } from 'lucide-vue-next';
+import MapPin from 'lucide-vue-next/dist/esm/icons/map-pin.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

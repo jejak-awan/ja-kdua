@@ -1,36 +1,31 @@
 <template>
-  <component :is="iconComponent" v-if="iconComponent" :size="numericSize" :stroke-width="strokeWidth" :color="color" :class="customClass" />
+  <component 
+    :is="iconComponent" 
+    v-if="iconComponent" 
+    :size="numericSize" 
+    :stroke-width="strokeWidth" 
+    :color="color" 
+    :class="props.class" 
+  />
 </template>
 
-<script setup>
-import { computed } from 'vue'
-import * as icons from 'lucide-vue-next'
+<script setup lang="ts">
+import { computed, shallowRef, watch, type HTMLAttributes, type Component } from 'vue'
 
-const props = defineProps({
-  name: {
-    type: String,
-    required: true
-  },
-  size: {
-    type: [Number, String],
-    default: 16
-  },
-  strokeWidth: {
-    type: [Number, String],
-    default: 2
-  },
-  color: {
-    type: String,
-    default: 'currentColor'
-  },
-  class: {
-    type: String,
-    default: ''
-  }
-})
+const props = withDefaults(defineProps<{
+  name: string;
+  size?: number | string;
+  strokeWidth?: number | string;
+  color?: string;
+  class?: HTMLAttributes['class'];
+}>(), {
+  size: 16,
+  strokeWidth: 2,
+  color: 'currentColor',
+  class: '',
+});
 
 const numericSize = computed(() => {
-    // If it's a number string "24", parse it. If "24px", parse it.
     if (typeof props.size === 'string') {
         const parsed = parseInt(props.size);
         return isNaN(parsed) ? 16 : parsed;
@@ -38,17 +33,55 @@ const numericSize = computed(() => {
     return props.size;
 })
 
-const customClass = computed(() => props.class)
+// Icon cache to prevent re-importing
+const iconCache = new Map<string, Component>();
+const iconComponent = shallowRef<Component | null>(null);
 
-const iconComponent = computed(() => {
-  if (!props.name) return null;
+// Convert PascalCase/camelCase to kebab-case for file names
+const toKebabCase = (str: string): string => {
+  return str
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/([A-Z])([A-Z][a-z])/g, '$1-$2')
+    .toLowerCase();
+};
+
+// Convert to PascalCase for exports
+const toPascalCase = (str: string): string => {
+  return str.replace(/(^|[-_])(\w)/g, (_, __, c) => c.toUpperCase());
+};
+
+// Load icon dynamically from per-icon file
+watch(() => props.name, async (name) => {
+  if (!name) {
+    iconComponent.value = null;
+    return;
+  }
   
-  // Convert name to PascalCase if it's kebab-case or snake_case
-  // e.g. arrow-right -> ArrowRight
-  const pascalName = props.name
-    .replace(/(^\w|-\w|_\w)/g, m => m.replace(/-|_/, '').toUpperCase())
+  const kebabName = toKebabCase(name);
+  const pascalName = toPascalCase(name);
   
-  // Handle edge cases or direct matches
-  return icons[pascalName] || icons[props.name] || null
-})
+  // Check cache first
+  if (iconCache.has(kebabName)) {
+    iconComponent.value = iconCache.get(kebabName) || null;
+    return;
+  }
+  
+  try {
+    // Dynamic import from per-icon file - enables tree-shaking
+    const module = await import(`lucide-vue-next/dist/esm/icons/${kebabName}.js`);
+    const icon = module.default || module[pascalName];
+    
+    if (icon) {
+      iconCache.set(kebabName, icon);
+      iconComponent.value = icon;
+    } else {
+      console.warn(`LucideIcon: Icon "${name}" not found`);
+      iconComponent.value = null;
+    }
+  } catch (error) {
+    console.warn(`LucideIcon: Failed to load icon "${name}"`, error);
+    iconComponent.value = null;
+  }
+}, { immediate: true });
 </script>
+

@@ -54,12 +54,9 @@
 import BaseBlock from '../components/BaseBlock.vue'
 import LucideIcon from '../../components/ui/LucideIcon.vue'
 import { getVal, toCSS, getLayoutStyles, getTypographyStyles } from '../utils/styleUtils'
+import type { BlockProps } from '@/types/builder'
 
-const props = withDefaults(defineProps<{
-  module: any; 
-  mode: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile' | null;
-}>(), {
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })

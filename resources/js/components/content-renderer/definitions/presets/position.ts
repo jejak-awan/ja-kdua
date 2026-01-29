@@ -5,11 +5,15 @@ import type { SettingOption, SettingDefinition, ModuleSettings } from '@/types/b
  * Positioning, z-index, and layout settings
  */
 
-import {
-    AlignStartVertical, AlignCenterVertical, AlignEndVertical,
-    AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
-    LayoutGrid, Rows, Columns as ColumnsIcon
-} from 'lucide-vue-next';
+import AlignStartVertical from 'lucide-vue-next/dist/esm/icons/align-start-vertical.js';
+import AlignCenterVertical from 'lucide-vue-next/dist/esm/icons/align-center-vertical.js';
+import AlignEndVertical from 'lucide-vue-next/dist/esm/icons/align-end-vertical.js';
+import AlignStartHorizontal from 'lucide-vue-next/dist/esm/icons/align-start-horizontal.js';
+import AlignCenterHorizontal from 'lucide-vue-next/dist/esm/icons/align-center-horizontal.js';
+import AlignEndHorizontal from 'lucide-vue-next/dist/esm/icons/align-end-horizontal.js';
+import LayoutGrid from 'lucide-vue-next/dist/esm/icons/layout-grid.js';
+import Rows from 'lucide-vue-next/dist/esm/icons/rows-2.js';
+import ColumnsIcon from 'lucide-vue-next/dist/esm/icons/columns-2.js';
 
 export const positionModeOptions: SettingOption[] = [
     { label: 'Static', value: 'static' },

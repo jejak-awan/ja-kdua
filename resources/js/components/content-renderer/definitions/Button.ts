@@ -4,7 +4,12 @@ import type { BlockDefinition } from '@/types/builder';
  * Customizable CTA button with comprehensive styling options
  */
 
-import { MousePointer, AlignLeft, AlignCenter, AlignRight, ArrowLeft, ArrowRight } from 'lucide-vue-next';
+import MousePointer from 'lucide-vue-next/dist/esm/icons/mouse-pointer.js';
+import AlignLeft from 'lucide-vue-next/dist/esm/icons/align-start-horizontal.js';
+import AlignCenter from 'lucide-vue-next/dist/esm/icons/align-center-horizontal.js';
+import AlignRight from 'lucide-vue-next/dist/esm/icons/align-end-horizontal.js';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
+import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js';
 import { defineAsyncComponent } from 'vue';
 import { fontFamilyOptions, fontWeightOptions } from './presets/typography';
 import { borderRadiusPresets } from './presets/border';

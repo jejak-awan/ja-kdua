@@ -4,7 +4,10 @@ import type { BlockDefinition } from '@/types/builder';
  * Hero header with comprehensive styling options for each sub-component
  */
 
-import { LayoutTemplate, AlignLeft, AlignCenter, AlignRight } from 'lucide-vue-next';
+import LayoutTemplate from 'lucide-vue-next/dist/esm/icons/layout-template.js';
+import AlignLeft from 'lucide-vue-next/dist/esm/icons/align-start-horizontal.js';
+import AlignCenter from 'lucide-vue-next/dist/esm/icons/align-center-horizontal.js';
+import AlignRight from 'lucide-vue-next/dist/esm/icons/align-end-horizontal.js';
 import { defineAsyncComponent } from 'vue';
 
 // Import reusable presets

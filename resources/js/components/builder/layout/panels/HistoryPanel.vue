@@ -28,44 +28,46 @@
   </div>
 </template>
 
-<script setup>
-import { computed, inject } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Clock, Flag } from 'lucide-vue-next'
+<script setup lang="ts">
+import { computed, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
+import Flag from 'lucide-vue-next/dist/esm/icons/flag.js';
+import type { BuilderInstance } from '../../../../types/builder';
 
-const { t } = useI18n()
+const { t } = useI18n();
 // Inject builder state
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder');
 
 // History State
-const history = computed(() => builder?.history?.value || [])
-const historyIndex = computed(() => builder?.historyIndex?.value ?? -1)
+const history = computed(() => builder?.history?.value || []);
+const historyIndex = computed(() => builder?.historyIndex?.value ?? -1);
 
 // Methods
-const jumpTo = (index) => {
+const jumpTo = (index: number) => {
   // We need to support jump in useBuilder or just use undo/redo loop
   // For now, let's implement a simple jump wrapper if logic exists, 
   // or fall back to loop undo/redo
-  if (!builder) return
+  if (!builder) return;
   
-  const current = historyIndex.value
-  const diff = index - current
+  const current = historyIndex.value;
+  const diff = index - current;
   
-  if (diff === 0) return
+  if (diff === 0) return;
   
   if (diff < 0) {
     // Undo X times
-    for (let i = 0; i < Math.abs(diff); i++) builder.undo()
+    for (let i = 0; i < Math.abs(diff); i++) builder.undo();
   } else {
     // Redo X times
-    for (let i = 0; i < diff; i++) builder.redo()
+    for (let i = 0; i < diff; i++) builder.redo();
   }
-}
+};
 
-const getLabel = (index) => {
-  if (index === 0) return t('builder.panels.history.sessionStart')
-  return t('builder.panels.history.action', { index: index })
-}
+const getLabel = (index: number) => {
+  if (index === 0) return t('builder.panels.history.sessionStart');
+  return t('builder.panels.history.action', { index: index });
+};
 </script>
 
 <style scoped>

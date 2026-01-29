@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { HelpCircle } from 'lucide-vue-next';
+import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

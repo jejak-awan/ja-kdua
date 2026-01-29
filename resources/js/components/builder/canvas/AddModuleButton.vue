@@ -17,9 +17,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Plus } from 'lucide-vue-next'
-
-const icons = { Plus }
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';const icons = { Plus }
 
 interface Props {
   type?: 'section' | 'row' | 'column' | 'module';

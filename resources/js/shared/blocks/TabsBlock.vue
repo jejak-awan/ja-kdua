@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="tabs-block transition-all duration-300"
+    class="tabs-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Tabs'"
     :style="cardStyles"
@@ -28,7 +28,7 @@
               v-for="(tab, index) in items" 
               :key="index"
               :value="`tab-${index}`"
-              class="tab-button group whitespace-nowrap transition-all duration-300 relative shadow-none"
+              class="tab-button group whitespace-nowrap transition-colors duration-300 relative shadow-none"
               :class="[
                   buttonClasses(blockSettings, activeTabIndex === index),
               ]"
@@ -74,8 +74,28 @@
 import { computed, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui'
-import * as LucideIcons from 'lucide-vue-next'
-import { getVal, getLayoutStyles, getTypographyStyles } from '../utils/styleUtils'
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
+import User from 'lucide-vue-next/dist/esm/icons/user.js';
+import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
+import Bell from 'lucide-vue-next/dist/esm/icons/bell.js';
+import Calendar from 'lucide-vue-next/dist/esm/icons/calendar.js';
+import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
+import Star from 'lucide-vue-next/dist/esm/icons/star.js';
+import Heart from 'lucide-vue-next/dist/esm/icons/heart.js';
+import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
+import Info from 'lucide-vue-next/dist/esm/icons/info.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';import { getVal, getLayoutStyles, getTypographyStyles } from '../utils/styleUtils'
+import type { Component } from 'vue'
+
+const iconMap: Record<string, Component> = {
+  Layers, Layout, Settings, User, Globe, FileText, Mail, Bell, 
+  Calendar, Zap, Star, Heart, HelpCircle, Info, Check, X
+}
 import type { BlockInstance } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
@@ -100,7 +120,7 @@ const activeTabValue = computed({
 
 const getIcon = (name: any) => {
     const cleanName = typeof name === 'string' ? name.replace('lucide:', '') : name
-    return (LucideIcons as any)[cleanName] || null
+    return iconMap[cleanName] || iconMap.Zap
 }
 
 const isVertical = (settings: any, device: string) => {

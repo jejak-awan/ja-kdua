@@ -51,14 +51,13 @@
          ></textarea>
       </div>
     </div>
-
-  </div>
+</div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, onBeforeUnmount, onMounted } from 'vue'
-import { Image, Sparkles } from 'lucide-vue-next'
-import { Editor, EditorContent } from '@tiptap/vue-3'
+import Image from 'lucide-vue-next/dist/esm/icons/image.js';
+import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { Underline } from '@tiptap/extension-underline'
 import { TextStyle } from '@tiptap/extension-text-style'

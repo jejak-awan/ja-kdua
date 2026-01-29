@@ -27,4 +27,9 @@ class Tag extends Model
     {
         return $this->belongsToMany(Content::class, 'content_tag');
     }
+
+    public function media(): BelongsToMany
+    {
+        return $this->belongsToMany(Media::class, 'media_tag');
+    }
 }

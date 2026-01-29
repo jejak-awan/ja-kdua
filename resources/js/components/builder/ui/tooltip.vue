@@ -1,14 +1,9 @@
 
-<script setup>
-import { TooltipRoot, useForwardPropsEmits } from 'radix-vue'
+<script setup lang="ts">
+import { TooltipRoot, type TooltipRootEmits, type TooltipRootProps, useForwardPropsEmits } from 'radix-vue'
 
-const props = defineProps({
-  defaultOpen: { type: Boolean, required: false },
-  open: { type: Boolean, required: false },
-  delayDuration: { type: Number, required: false },
-  disableHoverableContent: { type: Boolean, required: false },
-})
-const emits = defineEmits(['update:open'])
+const props = defineProps<TooltipRootProps>()
+const emits = defineEmits<TooltipRootEmits>()
 
 const forwarded = useForwardPropsEmits(props, emits)
 </script>

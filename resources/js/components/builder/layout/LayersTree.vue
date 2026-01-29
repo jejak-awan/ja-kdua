@@ -65,108 +65,107 @@
   </draggable>
 </template>
 
-<script setup>
-import { ref, inject, computed, watch } from 'vue'
-import draggable from 'vuedraggable'
-import { useI18n } from 'vue-i18n'
-import { 
-    ChevronRight, ChevronDown, Layout, Columns, Box, 
-    Type, Image, Square, MoreVertical 
-} from 'lucide-vue-next'
-import ModuleRegistry from '../core/ModuleRegistry'
+<script setup lang="ts">
+import { ref, inject, computed, watch } from 'vue';
+import draggable from 'vuedraggable';
+import { useI18n } from 'vue-i18n';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import Columns from 'lucide-vue-next/dist/esm/icons/columns-2.js';
+import Box from 'lucide-vue-next/dist/esm/icons/box.js';
+import Type from 'lucide-vue-next/dist/esm/icons/type.js';
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
+import Square from 'lucide-vue-next/dist/esm/icons/square.js';
+import MoreVertical from 'lucide-vue-next/dist/esm/icons/ellipsis-vertical.js';
+import ModuleRegistry from '../core/ModuleRegistry';
+import type { BuilderInstance, BlockInstance } from '../../../types/builder';
 
 // CRITICAL: Define name for recursion
 defineOptions({
   name: 'LayersTree'
-})
+});
 
-const icons = { ChevronRight, ChevronDown, MoreVertical }
-const builder = inject('builder')
+const icons = { ChevronRight, ChevronDown, MoreVertical };
+const builder = inject<BuilderInstance>('builder');
 
-const props = defineProps({
-  blocks: {
-    type: Array,
-    required: true
-  },
-  selectedId: {
-    type: String,
-    default: null
-  },
-  searchTerm: {
-    type: String,
-    default: ''
-  },
-  collapseSignal: {
-    type: Number,
-    default: 0
-  }
-})
+interface Props {
+  blocks: BlockInstance[];
+  selectedId?: string | null;
+  searchTerm?: string;
+  collapseSignal?: number;
+}
 
-defineEmits(['select'])
+const props = withDefaults(defineProps<Props>(), {
+  selectedId: null,
+  searchTerm: '',
+  collapseSignal: 0
+});
 
-const { t, te } = useI18n()
+const emit = defineEmits<{
+  (e: 'select', id: string): void;
+}>();
+
+const { t, te } = useI18n();
 
 // Expanded state
-const expanded = ref({})
+const expanded = ref<Record<string, boolean>>({});
 
-const toggleExpand = (id) => {
-  expanded.value[id] = !expanded.value[id]
-}
+const toggleExpand = (id: string) => {
+  expanded.value[id] = !expanded.value[id];
+};
 
-const isExpanded = (id) => {
-  return expanded.value[id] !== false
-}
+const isExpanded = (id: string) => {
+  return expanded.value[id] !== false;
+};
 
 // Watch for collapse signal from parent
 watch(() => props.collapseSignal, () => {
-    expanded.value = {} // Reset all to non-existent (default False in my logic? No, wait)
-    // Actually, isExpanded returns true if not false. 
     // To collapse all, we need to set all to false.
     props.blocks.forEach(block => {
-        expanded.value[block.id] = false
-    })
-})
+        expanded.value[block.id] = false;
+    });
+});
 
-const getTitle = (block) => {
-  if (block.settings?.admin_label) return block.settings.admin_label
-  if (te(`builder.modules.${block.type}`)) return t(`builder.modules.${block.type}`)
-  const def = ModuleRegistry.get(block.type)
-  return def?.title || block.type
-}
+const getTitle = (block: BlockInstance) => {
+  if (block.settings?.admin_label) return block.settings.admin_label;
+  if (te(`builder.modules.${block.type}`)) return t(`builder.modules.${block.type}`);
+  const def = ModuleRegistry.get(block.type);
+  return def?.title || block.type;
+};
 
-const getIcon = (type) => {
-    if (type === 'section') return Layout
-    if (type === 'row') return Columns
-    if (type === 'column') return Square
-    if (type.includes('text') || type.includes('heading')) return Type
-    if (type.includes('image')) return Image
-    return Box
-}
+const getIcon = (type: string) => {
+    if (type === 'section') return Layout;
+    if (type === 'row') return Columns;
+    if (type === 'column') return Square;
+    if (type.includes('text') || type.includes('heading')) return Type;
+    if (type.includes('image')) return ImageIcon;
+    return Box;
+};
 
-const handleContextMenu = (e, block) => {
+const handleContextMenu = (e: MouseEvent, block: BlockInstance) => {
     if (builder?.openContextMenu) {
-        builder.openContextMenu(block.id, e, getTitle(block), block.type)
+        builder.openContextMenu(block.id, e, getTitle(block), block.type);
     }
-}
+};
 
 // Filtering
 const filteredBlocks = computed(() => {
-    if (!props.searchTerm) return props.blocks
+    if (!props.searchTerm) return props.blocks;
     
-    const term = props.searchTerm.toLowerCase()
-    return props.blocks.filter(block => {
-        const titleMatch = getTitle(block).toLowerCase().includes(term)
-        const typeMatch = block.type.toLowerCase().includes(term)
+    const term = props.searchTerm.toLowerCase();
+    const matches = (block: BlockInstance): boolean => {
+        const titleMatch = getTitle(block).toLowerCase().includes(term);
+        const typeMatch = block.type.toLowerCase().includes(term);
         
-        // Also check children recursively (if any child matches, parent should show)
-        const hasMatchingChild = block.children?.some(child => {
-            // Simplified check for depth 1, the component itself handles deeper recursion
-            return getTitle(child).toLowerCase().includes(term) || child.type.toLowerCase().includes(term)
-        })
+        // Also check children recursively
+        const hasMatchingChild = block.children?.some(child => matches(child));
 
-        return titleMatch || typeMatch || hasMatchingChild
-    })
-})
+        return titleMatch || typeMatch || !!hasMatchingChild;
+    };
+
+    return props.blocks.filter(matches);
+});
 </script>
 
 <style scoped>

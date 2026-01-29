@@ -1,11 +1,4 @@
-/**
- * Response Parser Utility
- * 
- * Provides consistent parsing of API responses from BaseApiController.
- * Handles both paginated and non-paginated responses.
- */
-
-import { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 
 export interface PaginationData {
     current_page: number;
@@ -16,24 +9,40 @@ export interface PaginationData {
     per_page?: number;
 }
 
-export interface ParsedResponse<T = any> {
+/**
+ * Standard API Response structure from BaseApiController
+ */
+export interface BaseApiResponse<T> {
+    success: boolean;
+    message?: string;
     data: T;
+}
+
+/**
+ * Parsed structure for frontend consume
+ */
+export interface ParsedResponse<T> {
+    data: T[];
     pagination: PaginationData | null;
 }
 
 /**
  * Parse API response data
- * Handles BaseApiController response structure
+ * Handles BaseApiController response structure for lists/collections
  */
-export function parseResponse<T = any>(response: AxiosResponse): ParsedResponse<T> {
-    let data: any = [];
+export function parseResponse<T>(response: AxiosResponse<any>): ParsedResponse<T> {
+    let data: T[] = [];
     let pagination: PaginationData | null = null;
+
+    const responseData = response.data;
+    if (!responseData) return { data: [], pagination: null };
 
     // Helper to extract pagination from an object
     const extractPagination = (obj: any): PaginationData | null => {
+        if (!obj) return null;
         if (obj.pagination) return obj.pagination;
         if (obj.meta?.pagination) return obj.meta.pagination;
-        if (obj.current_page) {
+        if (typeof obj.current_page === 'number') {
             return {
                 current_page: obj.current_page,
                 last_page: obj.last_page,
@@ -46,28 +55,28 @@ export function parseResponse<T = any>(response: AxiosResponse): ParsedResponse<
         return null;
     };
 
-    // Handle paginated response from BaseApiController
-    if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
-        data = response.data.data.data;
-        pagination = extractPagination(response.data.data);
+    // Case 1: Data is nested inside success wrapper (standard Laravel pattern)
+    // response.data.data.data (paginated) or response.data.data (direct)
+    const inner = responseData.data;
+
+    if (inner) {
+        if (Array.isArray(inner.data)) {
+            data = inner.data;
+            pagination = extractPagination(inner);
+        } else if (Array.isArray(inner)) {
+            data = inner;
+            pagination = extractPagination(responseData);
+        } else {
+            // Single object wrapped in data
+            data = [inner as T];
+        }
     }
-    // Handle simple success response or where data is the array
-    else if (response.data?.data && Array.isArray(response.data.data)) {
-        data = response.data.data;
-        pagination = extractPagination(response.data);
-    }
-    // Handle direct array response (fallback)
-    else if (Array.isArray(response.data)) {
-        data = response.data;
-    }
-    // Handle alternative paginated format (items key)
-    else if (response.data?.items && Array.isArray(response.data.items)) {
-        data = response.data.items;
-        pagination = extractPagination(response.data);
-    }
-    // Handle single object response
-    else if (response.data?.data && !Array.isArray(response.data.data)) {
-        data = [response.data.data];
+    // Case 2: Direct array or items
+    else if (Array.isArray(responseData)) {
+        data = responseData;
+    } else if (Array.isArray(responseData.items)) {
+        data = responseData.items;
+        pagination = extractPagination(responseData);
     }
 
     return { data, pagination };
@@ -76,29 +85,34 @@ export function parseResponse<T = any>(response: AxiosResponse): ParsedResponse<
 /**
  * Parse single object response
  */
-export function parseSingleResponse<T = any>(response: AxiosResponse): T | null {
-    if (response.data?.data) {
-        return response.data.data;
+export function parseSingleResponse<T>(response: AxiosResponse<any>): T | null {
+    if (!response.data) return null;
+
+    // Check if it's wrapped in a 'data' property
+    if (Object.prototype.hasOwnProperty.call(response.data, 'data')) {
+        return response.data.data as T;
     }
-    return response.data || null;
+
+    return response.data as T;
 }
 
 /**
  * Parse pagination info from response
  */
-export function parsePagination(response: AxiosResponse): PaginationData | null {
-    // From BaseApiController.paginated()
-    if (response.data?.data?.pagination) {
-        return response.data.data.pagination;
-    }
-    // From direct paginated response
-    if (response.data?.current_page) {
+export function parsePagination(response: AxiosResponse<any>): PaginationData | null {
+    const d = response.data;
+    if (!d) return null;
+
+    if (d.data?.pagination) return d.data.pagination;
+    if (d.pagination) return d.pagination;
+
+    if (typeof d.current_page === 'number') {
         return {
-            current_page: response.data.current_page,
-            last_page: response.data.last_page,
-            from: response.data.from,
-            to: response.data.to,
-            total: response.data.total,
+            current_page: d.current_page,
+            last_page: d.last_page,
+            from: d.from,
+            to: d.to,
+            total: d.total,
         };
     }
     return null;
@@ -107,9 +121,9 @@ export function parsePagination(response: AxiosResponse): PaginationData | null 
 /**
  * Ensure value is an array
  */
-export function ensureArray<T = any>(value: any): T[] {
+export function ensureArray<T>(value: unknown): T[] {
     if (Array.isArray(value)) {
-        return value;
+        return value as T[];
     }
     return [];
 }

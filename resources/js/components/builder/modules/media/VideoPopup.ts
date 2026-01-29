@@ -102,7 +102,7 @@ const VideoPopupModule: ModuleDefinition = {
             {
                 id: 'buttonTypography',
                 label: 'Button Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `button_${f.name}`,
                     label: `Button ${f.label}`

@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { type HTMLAttributes } from 'vue';
-import { ArrowLeft } from 'lucide-vue-next';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
 import { useCarousel } from './useCarousel';
 import Button from './Button.vue'; 
 import { cn } from '../../lib/utils';

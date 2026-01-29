@@ -183,7 +183,7 @@
             <div v-else class="flex gap-6 items-start h-full" :class="{ 'opacity-60 pointer-events-none': isTrashed }">
                 <!-- Left: Source Panel -->
                 <div 
-                    class="transition-all duration-300 shrink-0"
+                    class="transition-[width] duration-300 shrink-0"
                     :style="{ width: isSidebarCollapsed ? '48px' : '300px' }"
                 >
                     <Button 
@@ -231,7 +231,7 @@
 
                 <!-- Right: Properties Panel -->
                 <div 
-                    class="sticky top-4 transition-all duration-300 shrink-0"
+                    class="sticky top-4 transition-[width] duration-300 shrink-0"
                     :style="{ width: isPropertiesCollapsed ? '48px' : propertiesWidth + 'px' }"
                 >
                     <Button 
@@ -288,10 +288,17 @@ import SelectValue from '../ui/select-value.vue';
 import SelectContent from '../ui/select-content.vue';
 import SelectItem from '../ui/select-item.vue';
 
-import { 
-    Loader2, Save, Undo2, Redo2, Eye,
-    PanelLeftOpen, Plus, Trash2, RotateCcw, PanelRightOpen, MenuSquare
-} from 'lucide-vue-next';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import Undo2 from 'lucide-vue-next/dist/esm/icons/undo-2.js';
+import Redo2 from 'lucide-vue-next/dist/esm/icons/redo-2.js';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import PanelLeftOpen from 'lucide-vue-next/dist/esm/icons/panel-left-open.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import PanelRightOpen from 'lucide-vue-next/dist/esm/icons/panel-right-open.js';
+import MenuSquare from 'lucide-vue-next/dist/esm/icons/square-menu.js';
 
 interface Props {
     menuId: string | number;

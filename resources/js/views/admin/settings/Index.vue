@@ -18,7 +18,7 @@
                             v-for="tab in tabs" 
                             :key="tab.id" 
                             :value="tab.id"
-                            class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all"
+                            class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors"
                         >
                             <component :is="getTabIcon(tab.id)" class="w-4 h-4 mr-2" />
                             {{ $t('features.settings.tabs.' + tab.id) }}
@@ -148,40 +148,55 @@
     </div>
 </template>
 
-<script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, computed, watch, defineAsyncComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
-import api from '../../../services/api';
-import { parseResponse, parseSingleResponse, ensureArray } from '../../../utils/responseParser';
-import Tabs from '../../../components/ui/tabs.vue';
-import TabsList from '../../../components/ui/tabs-list.vue';
-import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
-import Button from '../../../components/ui/button.vue';
-import { useToast } from '../../../composables/useToast';
-import { useConfirm } from '../../../composables/useConfirm';
+import api from '@/services/api';
+import { parseResponse, parseSingleResponse, ensureArray } from '@/utils/responseParser';
+import {
+    Tabs,
+    TabsList,
+    TabsTrigger,
+    Button
+} from '@/components/ui';
+import { useToast } from '@/composables/useToast';
+import { useConfirm } from '@/composables/useConfirm';
 import { useCmsStore } from '@/stores/cms';
-import { 
-    Settings, 
-    Mail, 
-    MessageSquare, 
-    Search, 
-    Shield, 
-    Activity, 
-    HardDrive, 
-    Sparkles 
-} from 'lucide-vue-next';
+import SettingsIcon from 'lucide-vue-next/dist/esm/icons/settings.js';
+import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
+import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Shield from 'lucide-vue-next/dist/esm/icons/shield.js';
+import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
+import HardDrive from 'lucide-vue-next/dist/esm/icons/hard-drive.js';
+import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
 
-// Import tab components
-import GeneralTab from './tabs/GeneralTab.vue';
-import EmailTab from './tabs/EmailTab.vue';
-import SeoTab from './tabs/SeoTab.vue';
-import MediaTab from './tabs/MediaTab.vue';
-import SecurityTab from './tabs/SecurityTab.vue';
-import PerformanceTab from './tabs/PerformanceTab.vue';
-import DiscussionTab from './tabs/DiscussionTab.vue';
-import AiTab from './tabs/AiTab.vue';
-import EmailTestSection from './EmailTestSection.vue';
+// Async Tab Components
+const GeneralTab = defineAsyncComponent(() => import('./tabs/GeneralTab.vue'));
+const EmailTab = defineAsyncComponent(() => import('./tabs/EmailTab.vue'));
+const SeoTab = defineAsyncComponent(() => import('./tabs/SeoTab.vue'));
+const MediaTab = defineAsyncComponent(() => import('./tabs/MediaTab.vue'));
+const SecurityTab = defineAsyncComponent(() => import('./tabs/SecurityTab.vue'));
+const PerformanceTab = defineAsyncComponent(() => import('./tabs/PerformanceTab.vue'));
+const DiscussionTab = defineAsyncComponent(() => import('./tabs/DiscussionTab.vue'));
+const AiTab = defineAsyncComponent(() => import('./tabs/AiTab.vue'));
+const EmailTestSection = defineAsyncComponent(() => import('./EmailTestSection.vue'));
+
+interface Setting {
+    id: number | string;
+    key: string;
+    value: any;
+    type: string;
+    group: string;
+    description?: string;
+    is_public?: number;
+}
+
+interface Tab {
+    id: string;
+    label: string;
+}
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
@@ -192,13 +207,13 @@ const cmsStore = useCmsStore();
 const loading = ref(false);
 const saving = ref(false);
 // Initialize tab from query param if present (e.g., ?tab=performance)
-const validTabs = ['general', 'email', 'seo', 'security', 'performance', 'media', 'comments'];
-const initialTab = validTabs.includes(route.query.tab) ? route.query.tab : 'general';
+const validTabs = ['general', 'email', 'seo', 'security', 'performance', 'media', 'comments', 'ai'];
+const initialTab = validTabs.includes(route.query.tab as string) ? (route.query.tab as string) : 'general';
 const activeTab = ref(initialTab);
-const settings = ref([]);
-const formData = ref({});
-const initialFormData = ref({}); // Track initial state
-const errors = ref({});
+const settings = ref<Setting[]>([]);
+const formData = ref<Record<string, any>>({});
+const initialFormData = ref<Record<string, any>>({}); // Track initial state
+const errors = ref<Record<string, string[]>>({});
 
 const isDirty = computed(() => {
     // Compare only keys present in currentSettings to handle tab switching correctly
@@ -213,28 +228,27 @@ const isDirty = computed(() => {
 
 // Email testing state
 const validatingConfig = ref(false);
-const configValidation = ref(null);
+const configValidation = ref<any>(null);
 const testingConnection = ref(false);
-const connectionResult = ref(null);
+const connectionResult = ref<any>(null);
 const sendingTestEmail = ref(false);
-const testEmailResult = ref(null);
+const testEmailResult = ref<any>(null);
 const testEmail = ref({
     to: '',
     subject: '',
     message: '',
 });
 const loadingQueueStatus = ref(false);
-const queueStatus = ref(null);
+const queueStatus = ref<any>(null);
 const loadingLogs = ref(false);
-const emailLogs = ref([]);
+const emailLogs = ref<any[]>([]);
 
 // Cache Management State
-const cacheStatus = ref(null);
-const loadingCacheStatus = ref(false);
+const cacheStatus = ref<any>(null);
 const clearingCache = ref(false);
 const warmingCache = ref(false);
 
-const tabs = [
+const tabs: Tab[] = [
     { id: 'general', label: 'General' },
     { id: 'email', label: 'Email' },
     { id: 'comments', label: 'Discussion' },
@@ -245,9 +259,9 @@ const tabs = [
     { id: 'ai', label: 'AI Assistance' },
 ];
 
-const getTabIcon = (tabId) => {
+const getTabIcon = (tabId: string) => {
     switch (tabId) {
-        case 'general': return Settings;
+        case 'general': return SettingsIcon;
         case 'email': return Mail;
         case 'comments': return MessageSquare;
         case 'seo': return Search;
@@ -255,7 +269,7 @@ const getTabIcon = (tabId) => {
         case 'performance': return Activity;
         case 'media': return HardDrive;
         case 'ai': return Sparkles;
-        default: return Settings;
+        default: return SettingsIcon;
     }
 };
 
@@ -275,7 +289,7 @@ const fetchSettings = async () => {
         settings.value = ensureArray(data);
 
         // Inject missing CDN settings with defaults
-        const ensureSetting = (key, value, type, group, description = '') => {
+        const ensureSetting = (key: string, value: any, type: string, group: string, description = '') => {
             if (!settings.value.find(s => s.key === key)) {
                 settings.value.push({
                     id: 'temp_' + key,
@@ -322,7 +336,7 @@ const fetchSettings = async () => {
         ensureSetting('gemini_api_key', '', 'password', 'ai');
 
         initializeFormData();
-    } catch (error) {
+    } catch (error: any) {
         settings.value = [];
     } finally {
         loading.value = false;
@@ -361,15 +375,6 @@ const resetForm = () => {
     initializeFormData();
 };
 
-const formatValue = (value, type) => {
-    if (type === 'boolean') {
-        return value ? t('common.labels.yes') : t('common.labels.no');
-    } else if (type === 'json') {
-        return typeof value === 'string' ? value : JSON.stringify(value);
-    }
-    return value;
-};
-
 const handleSubmit = async () => {
     saving.value = true;
     errors.value = {};
@@ -399,8 +404,6 @@ const handleSubmit = async () => {
             settings: settingsToUpdate,
         });
         
-
-        
         toast.success.save();
         await fetchSettings();
         await cmsStore.fetchSettingsGroup(activeTab.value); // Force refresh store for reactivity
@@ -410,7 +413,7 @@ const handleSubmit = async () => {
             getCacheStatus();
         }
         initialFormData.value = JSON.parse(JSON.stringify(formData.value));
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
              errors.value = error.response.data.errors || {};
         } else {
@@ -429,7 +432,7 @@ const validateEmailConfig = async () => {
         const response = await api.get('/admin/ja/email-test/validate-config');
         const { data } = parseResponse(response);
         configValidation.value = data;
-    } catch (error) {
+    } catch (error: any) {
         configValidation.value = {
             valid: false,
             errors: [error.response?.data?.message || t('features.settings.emailTest.failed')],
@@ -447,7 +450,7 @@ const testSmtpConnection = async () => {
         const response = await api.post('/admin/ja/email-test/test-connection');
         const { data } = parseResponse(response);
         connectionResult.value = data;
-    } catch (error) {
+    } catch (error: any) {
         connectionResult.value = {
             connected: false,
             host: 'unknown',
@@ -476,7 +479,7 @@ const sendTestEmail = async () => {
             subject: testEmail.value.subject || undefined,
             message: testEmail.value.message || undefined,
         });
-        const { data, message } = parseResponse(response);
+        const message = response.data?.message;
         testEmailResult.value = {
             success: true,
             message: message || t('features.settings.emailTest.sentSuccess'),
@@ -486,7 +489,7 @@ const sendTestEmail = async () => {
         testEmail.value.message = '';
         // Refresh logs
         await getRecentLogs();
-    } catch (error) {
+    } catch (error: any) {
         testEmailResult.value = {
             success: false,
             message: error.response?.data?.message || t('features.settings.emailTest.sendFailed'),
@@ -502,7 +505,7 @@ const getQueueStatus = async () => {
         const response = await api.get('/admin/ja/email-test/queue-status');
         const { data } = parseResponse(response);
         queueStatus.value = data;
-    } catch (error) {
+    } catch (error: any) {
         queueStatus.value = {
             driver: 'unknown',
             connection: 'unknown',
@@ -519,8 +522,8 @@ const getRecentLogs = async () => {
     try {
         const response = await api.get('/admin/ja/email-test/recent-logs?limit=10');
         const { data } = parseResponse(response);
-        emailLogs.value = data.logs || [];
-    } catch (error) {
+        emailLogs.value = (data as any).logs || [];
+    } catch (error: any) {
         emailLogs.value = [];
     } finally {
         loadingLogs.value = false;
@@ -529,14 +532,11 @@ const getRecentLogs = async () => {
 
 // Cache Management Methods
 const getCacheStatus = async () => {
-    loadingCacheStatus.value = true;
     try {
         const response = await api.get('/admin/ja/system/cache-status');
-        cacheStatus.value = parseSingleResponse(response);
-    } catch (error) {
+        cacheStatus.value = parseSingleResponse<any>(response);
+    } catch (error: any) {
         console.error('Failed to get cache status:', error);
-    } finally {
-        loadingCacheStatus.value = false;
     }
 };
 
@@ -555,7 +555,7 @@ const clearSystemCache = async () => {
         await api.post('/admin/ja/system/cache/clear');
         toast.success.action(t('features.settings.cache.cleared'));
         getCacheStatus();
-    } catch (error) {
+    } catch (error: any) {
         toast.error.fromResponse(error);
     } finally {
         clearingCache.value = false;
@@ -568,26 +568,10 @@ const warmSystemCache = async () => {
         await api.post('/admin/ja/system/cache/warm');
         toast.success.action(t('features.settings.cache.warmed'));
         getCacheStatus();
-    } catch (error) {
+    } catch (error: any) {
         toast.error.fromResponse(error);
     } finally {
         warmingCache.value = false;
-    }
-};
-
-const formatDate = (dateString) => {
-    if (!dateString) return '';
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    } catch {
-        return dateString;
     }
 };
 
@@ -614,3 +598,4 @@ onMounted(() => {
     }
 });
 </script>
+

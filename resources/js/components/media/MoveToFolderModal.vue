@@ -39,29 +39,32 @@
     </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
-import Button from '../ui/button.vue';
-import Dialog from '@/components/ui/dialog.vue';
-import DialogContent from '@/components/ui/dialog-content.vue';
-import DialogHeader from '@/components/ui/dialog-header.vue';
-import DialogTitle from '@/components/ui/dialog-title.vue';
-import DialogDescription from '@/components/ui/dialog-description.vue';
-import DialogFooter from '@/components/ui/dialog-footer.vue';
-import Select from '@/components/ui/select.vue';
-import SelectContent from '@/components/ui/select-content.vue';
-import SelectItem from '@/components/ui/select-item.vue';
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-import SelectValue from '@/components/ui/select-value.vue';
+import { 
+    Button, 
+    Dialog, 
+    DialogContent, 
+    DialogHeader, 
+    DialogTitle, 
+    DialogDescription, 
+    DialogFooter, 
+    Select, 
+    SelectContent, 
+    SelectItem, 
+    SelectTrigger, 
+    SelectValue 
+} from '@/components/ui';
+import type { MediaFolder } from '@/types/cms';
 
-const props = defineProps({
-    folders: {
-        type: Array,
-        default: () => [],
-    },
-});
+const props = defineProps<{
+    folders?: MediaFolder[];
+}>();
 
-const emit = defineEmits(['close', 'moved']);
+const emit = defineEmits<{
+    (e: 'close'): void;
+    (e: 'moved', folderId: string | null): void;
+}>();
 
 const selectedFolderId = ref('root');
 

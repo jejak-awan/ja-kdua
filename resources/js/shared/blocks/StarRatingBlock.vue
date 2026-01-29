@@ -3,7 +3,7 @@
     :module="module"
     :mode="mode"
     :settings="settings"
-    class="star-rating-block transition-all duration-300"
+    class="star-rating-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Star Rating'"
   >
@@ -70,8 +70,7 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import { Star } from 'lucide-vue-next'
-import { Badge } from '../ui'
+import Star from 'lucide-vue-next/dist/esm/icons/star.js';import { Badge } from '../ui'
 import BaseBlock from '../components/BaseBlock.vue'
 import { 
   getVal, 

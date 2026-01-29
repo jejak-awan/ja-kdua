@@ -69,37 +69,49 @@
   </Card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useAuthStore } from '@/stores/auth';
 import { parseResponse, parseSingleResponse } from '@/utils/responseParser';
-import Card from '@/components/ui/card.vue';
-import CardHeader from '@/components/ui/card-header.vue';
-import CardTitle from '@/components/ui/card-title.vue';
-import CardContent from '@/components/ui/card-content.vue';
-import CardFooter from '@/components/ui/card-footer.vue';
-import Button from '@/components/ui/button.vue';
-import Badge from '@/components/ui/badge.vue';
 import { 
-  Mail, 
-  RefreshCw, 
-  Zap, 
-  ChevronRight, 
-  History 
-} from 'lucide-vue-next';
+    Card, 
+    CardHeader, 
+    CardTitle, 
+    CardContent, 
+    CardFooter, 
+    Button, 
+    Badge 
+} from '@/components/ui';
+import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
+
+interface EmailStats {
+    templates: number;
+    subscribers: number;
+    smtp_status: string;
+}
+
+interface EmailLog {
+    to: string;
+    subject: string;
+    sent_at: string;
+    [key: string]: any;
+}
 
 const { t } = useI18n();
 const authStore = useAuthStore();
 
 const loading = ref(false);
-const stats = ref({
+const stats = ref<EmailStats>({
   templates: 0,
   subscribers: 0,
   smtp_status: 'unknown'
 });
-const logs = ref([]);
+const logs = ref<EmailLog[]>([]);
 
 const statusBadgeClass = computed(() => {
   const status = stats.value.smtp_status?.toLowerCase();
@@ -112,9 +124,9 @@ const statusBadgeClass = computed(() => {
 const fetchStats = async () => {
   try {
     const response = await api.get('/admin/ja/system/statistics');
-    const data = parseSingleResponse(response);
+    const data = parseSingleResponse(response) as any;
     if (data && data.email) {
-      stats.value = data.email;
+      stats.value = data.email as EmailStats;
     }
   } catch (error) {
     console.error('Failed to fetch email stats:', error);
@@ -124,8 +136,12 @@ const fetchStats = async () => {
 const fetchLogs = async () => {
   try {
     const response = await api.get('/admin/ja/email-test/recent-logs?limit=5');
-    const { data } = parseResponse(response);
-    logs.value = data.logs || [];
+    const { data } = parseResponse(response) as any;
+    if (data && Array.isArray(data.logs)) {
+        logs.value = data.logs;
+    } else {
+        logs.value = [];
+    }
   } catch (error) {
     console.error('Failed to fetch email logs:', error);
   }
@@ -137,7 +153,7 @@ const refresh = async () => {
   loading.value = false;
 };
 
-const formatTime = (dateString) => {
+const formatTime = (dateString: string) => {
   if (!dateString) return '';
   const date = new Date(dateString);
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

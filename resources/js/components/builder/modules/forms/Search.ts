@@ -87,7 +87,7 @@ const SearchModule: ModuleDefinition = {
             {
                 id: 'inputTypography',
                 label: 'Input Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `input_${f.name}`,
                     label: `Input ${f.label}`
@@ -96,7 +96,7 @@ const SearchModule: ModuleDefinition = {
             {
                 id: 'buttonTypography',
                 label: 'Button Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `button_${f.name}`,
                     label: `Button ${f.label}`

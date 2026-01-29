@@ -9,19 +9,19 @@
             <Tabs v-model="activeTab" class="w-full">
                 <div class="mb-10 px-6 pt-6">
                     <TabsList class="bg-transparent p-0 h-auto gap-0">
-                        <TabsTrigger value="sitemap" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <TabsTrigger value="sitemap" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                             <Globe class="w-4 h-4 mr-2" />
                             {{ $t('features.seo.tabs.sitemap') }}
                         </TabsTrigger>
-                        <TabsTrigger value="robots" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <TabsTrigger value="robots" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                             <FileText class="w-4 h-4 mr-2" />
                             {{ $t('features.seo.tabs.robots') }}
                         </TabsTrigger>
-                        <TabsTrigger value="analysis" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <TabsTrigger value="analysis" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                             <Search class="w-4 h-4 mr-2" />
                             {{ $t('features.seo.tabs.analysis') }}
                         </TabsTrigger>
-                        <TabsTrigger value="schema" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                        <TabsTrigger value="schema" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                             <FileJson class="w-4 h-4 mr-2" />
                             {{ $t('features.seo.tabs.schema') }}
                         </TabsTrigger>
@@ -145,7 +145,7 @@
                                 >
                                     <CardContent class="p-4">
                                         <div class="flex items-center justify-between mb-2">
-                                            <span class="text-sm font-semibold text-foreground capitalize">{{ key.replace(/_/g, ' ') }}</span>
+                                            <span class="text-sm font-semibold text-foreground capitalize">{{ (key as string).replace(/_/g, ' ') }}</span>
                                             <Badge
                                                 :variant="result.score >= 80 ? 'default' : result.score >= 60 ? 'secondary' : 'destructive'"
                                                 class="font-bold"
@@ -229,12 +229,12 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
+import { useToast } from '../../../composables/useToast';
 import Card from '../../../components/ui/card.vue';
 import CardHeader from '../../../components/ui/card-header.vue';
 import CardTitle from '../../../components/ui/card-title.vue';
@@ -252,15 +252,21 @@ import Tabs from '../../../components/ui/tabs.vue';
 import TabsList from '../../../components/ui/tabs-list.vue';
 import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
 import TabsContent from '../../../components/ui/tabs-content.vue';
-import { 
-    Globe, FileText, Search, 
-    FileJson, RefreshCw, Copy, 
-    Save, RotateCcw, Activity, 
-    Code2, Loader2 
-} from 'lucide-vue-next';
+import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import FileJson from 'lucide-vue-next/dist/esm/icons/file-braces.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
+import Code2 from 'lucide-vue-next/dist/esm/icons/code-xml.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
 const { t } = useI18n();
+const toast = useToast();
 const activeTab = ref('sitemap');
 const tabs = computed(() => [
     { id: 'sitemap', label: t('features.seo.tabs.sitemap') },
@@ -274,13 +280,13 @@ const sitemapUrl = ref('/sitemap.xml');
 const generatingSitemap = ref(false);
 const robotsContent = ref('');
 const savingRobots = ref(false);
-const contents = ref([]);
-const selectedContentId = ref(null);
+const contents = ref<any[]>([]);
+const selectedContentId = ref<any>(null);
 const analyzing = ref(false);
-const analysisResults = ref(null);
-const selectedContentForSchema = ref(null);
+const analysisResults = ref<any>(null);
+const selectedContentForSchema = ref<any>(null);
 const generatingSchema = ref(false);
-const schemaJson = ref(null);
+const schemaJson = ref<any>(null);
 const initialRobotsContent = ref('');
 
 const isDirty = computed(() => {
@@ -290,10 +296,10 @@ const isDirty = computed(() => {
 const fetchRobotsTxt = async () => {
     try {
         const response = await api.get('/admin/ja/seo/robots-txt');
-        const data = parseSingleResponse(response) || {};
+        const data = parseSingleResponse<any>(response) || {};
         robotsContent.value = data.content || '';
         initialRobotsContent.value = robotsContent.value;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch robots.txt:', error);
     }
 };
@@ -304,7 +310,7 @@ const saveRobotsTxt = async () => {
         await api.put('/admin/ja/seo/robots-txt', { content: robotsContent.value });
         initialRobotsContent.value = robotsContent.value;
         toast.success.save();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to save robots.txt:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -317,7 +323,7 @@ const generateSitemap = async () => {
     try {
         await api.get('/admin/ja/seo/sitemap');
         toast.success.action(t('features.seo.sitemap.generated'));
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to generate sitemap:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -327,7 +333,7 @@ const generateSitemap = async () => {
 
 const copySitemapUrl = () => {
     navigator.clipboard.writeText(window.location.origin + sitemapUrl.value);
-    toast.success(t('features.seo.sitemap.copySuccess'));
+    toast.success.default(t('features.seo.sitemap.copySuccess'));
 };
 
 const fetchContents = async () => {
@@ -335,7 +341,7 @@ const fetchContents = async () => {
         const response = await api.get('/admin/ja/contents');
         const { data } = parseResponse(response);
         contents.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch contents:', error);
         contents.value = [];
     }
@@ -347,8 +353,8 @@ const runAnalysis = async () => {
     analyzing.value = true;
     try {
         const response = await api.get(`/admin/ja/contents/${selectedContentId.value}/seo-analysis`);
-        analysisResults.value = parseSingleResponse(response) || {};
-    } catch (error) {
+        analysisResults.value = parseSingleResponse<any>(response) || {};
+    } catch (error: any) {
         console.error('Failed to run SEO analysis:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -362,9 +368,9 @@ const generateSchema = async () => {
     generatingSchema.value = true;
     try {
         const response = await api.get(`/admin/ja/contents/${selectedContentForSchema.value}/schema`);
-        const schema = parseSingleResponse(response) || {};
+        const schema = parseSingleResponse<any>(response) || {};
         schemaJson.value = JSON.stringify(schema, null, 2);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to generate schema:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -375,7 +381,7 @@ const generateSchema = async () => {
 const copySchema = () => {
     if (schemaJson.value) {
         navigator.clipboard.writeText(schemaJson.value);
-        toast.success(t('features.seo.schema.copySuccess'));
+        toast.success.default(t('features.seo.schema.copySuccess'));
     }
 };
 

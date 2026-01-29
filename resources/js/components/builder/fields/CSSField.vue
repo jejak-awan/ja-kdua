@@ -21,11 +21,11 @@
             rows="8"
           ></textarea>
           <div class="editor-toolbar">
-            <IconButton icon="Plus" size="xs" />
-            <IconButton icon="Power" size="xs" />
-            <IconButton icon="ArrowDownUp" size="xs" />
+            <IconButton :icon="Plus" size="sm" />
+            <IconButton :icon="Power" size="sm" />
+            <IconButton :icon="ArrowDownUp" size="sm" />
             <div class="flex-1"></div>
-            <IconButton icon="BrainCircuit" size="xs" />
+            <IconButton :icon="BrainCircuit" size="sm" />
           </div>
         </div>
       </div>
@@ -46,11 +46,11 @@
             rows="4"
           ></textarea>
           <div class="editor-toolbar">
-            <IconButton icon="Plus" size="xs" />
-            <IconButton icon="Power" size="xs" />
-            <IconButton icon="ArrowDownUp" size="xs" />
+            <IconButton :icon="Plus" size="sm" />
+            <IconButton :icon="Power" size="sm" />
+            <IconButton :icon="ArrowDownUp" size="sm" />
             <div class="flex-1"></div>
-            <IconButton icon="BrainCircuit" size="xs" />
+            <IconButton :icon="BrainCircuit" size="sm" />
           </div>
         </div>
       </div>
@@ -61,8 +61,10 @@
 <script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue'
 import type { BlockInstance } from '../../../types/builder'
-import { Plus, Power, ArrowDownUp, BrainCircuit } from 'lucide-vue-next'
-import { BaseSegmentedControl, BaseLabel, IconButton } from '../ui'
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Power from 'lucide-vue-next/dist/esm/icons/power.js';
+import ArrowDownUp from 'lucide-vue-next/dist/esm/icons/arrow-down-up.js';
+import BrainCircuit from 'lucide-vue-next/dist/esm/icons/brain-circuit.js';import { BaseSegmentedControl, BaseLabel, IconButton } from '../ui'
 
 interface CSSState {
   free: string;

@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="gallery-block transition-all duration-300"
+    class="gallery-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Gallery'"
     :style="cardStyles"
@@ -16,7 +16,7 @@
         <Card 
           v-for="(image, index) in galleryImages" 
           :key="index"
-          class="gallery-item group relative aspect-square overflow-hidden rounded-[32px] bg-slate-100 dark:bg-slate-900 border-none shadow-lg cursor-pointer transition-all duration-700 hover:shadow-2xl hover:-translate-y-2"
+          class="gallery-item group relative aspect-square overflow-hidden rounded-[32px] bg-slate-100 dark:bg-slate-900 border-none shadow-lg cursor-pointer transition-colors duration-700 hover:shadow-2xl hover:-translate-y-2"
         >
           <div class="gallery-image-wrapper w-full h-full relative">
               <img 
@@ -32,7 +32,7 @@
               <!-- Overlay -->
               <div 
                 v-if="hoverEffect !== 'none'"
-                class="absolute inset-0 z-10 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-sm"
+                class="absolute inset-0 z-10 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-[width] duration-500 backdrop-blur-sm"
                 :style="{ backgroundColor: blockSettings.overlayColor || 'rgba(0,0,0,0.2)' }"
               >
                   <div class="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white flex items-center justify-center transform scale-90 group-hover:scale-100 transition-transform duration-500">
@@ -40,7 +40,7 @@
                   </div>
               </div>
 
-              <CardContent v-if="showCaptions && image.caption && captionPosition === 'overlay'" class="absolute inset-x-0 bottom-0 z-20 p-8 pt-12 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0 text-white pointer-events-none">
+              <CardContent v-if="showCaptions && image.caption && captionPosition === 'overlay'" class="absolute inset-x-0 bottom-0 z-20 p-8 pt-12 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-[width] duration-500 translate-y-4 group-hover:translate-y-0 text-white pointer-events-none">
                   <p class="text-sm font-bold tracking-tight line-clamp-2" :style="captionStyles">{{ image.caption }}</p>
               </CardContent>
           </div>
@@ -63,8 +63,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Image as ImageIcon, Plus } from 'lucide-vue-next'
-import BaseBlock from '../components/BaseBlock.vue'
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';import BaseBlock from '../components/BaseBlock.vue'
 import { Card, CardContent } from '../ui'
 import { 
     getVal, 

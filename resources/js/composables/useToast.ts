@@ -17,6 +17,7 @@ interface ToastSuccessHandlers {
     folderCreated: () => void;
     urlCopied: () => void;
     createFromTemplate: () => void;
+    default: (message: string) => void;
 }
 
 interface ToastErrorHandlers {
@@ -30,6 +31,7 @@ interface ToastErrorHandlers {
     permission: () => void;
     fileTooLarge: () => void;
     templateCreateContent: (error: any) => void;
+    default: (message: string) => void;
 }
 
 /**
@@ -187,6 +189,7 @@ export function useToast() {
 
             // Content Template Specific
             createFromTemplate: () => toast.success(t('common.messages.toast.success'), t('features.content_templates.messages.createContentSuccess') || 'Content created from template'),
+            default: (message) => toast.success(t('common.messages.toast.success'), message),
         } as ToastSuccessHandlers,
 
         error: {
@@ -204,6 +207,7 @@ export function useToast() {
 
             // Specific Domain Errors
             templateCreateContent: (error) => toast.error(t('common.messages.toast.error'), getErrorMessage(error, 'features.content_templates.messages.createError')),
+            default: (message) => toast.error(t('common.messages.toast.error'), message),
         } as ToastErrorHandlers,
 
         warning: (title: string, message: string) => toast.warning(title, message),

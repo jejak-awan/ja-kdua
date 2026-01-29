@@ -1,119 +1,134 @@
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card border border-border/40 shadow-none rounded-xl max-w-md w-full">
-                <div class="flex items-center justify-between p-6 border-b border-border/40">
-                    <h3 class="text-lg font-semibold">{{ $t('features.media.modals.folder.title') }}</h3>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        @click="$emit('close')"
-                    >
-                        <X class="w-5 h-5" stroke-width="1.5" />
-                    </Button>
+    <Dialog :open="true" @update:open="$emit('close')">
+        <DialogContent class="sm:max-w-md">
+            <DialogHeader>
+                <DialogTitle>{{ $t('features.media.modals.folder.title') }}</DialogTitle>
+                <DialogDescription>
+                    {{ $t('features.media.modals.folder.placeholder') || 'Create a new folder to organize your media.' }}
+                </DialogDescription>
+            </DialogHeader>
+
+            <form @submit.prevent="handleSubmit" class="grid gap-4 py-4">
+                <div class="grid gap-2">
+                    <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        {{ $t('features.media.modals.folder.name') }} <span class="text-destructive">*</span>
+                    </label>
+                    <Input
+                        v-model="form.name"
+                        type="text"
+                        required
+                        :placeholder="$t('features.media.modals.folder.placeholder')"
+                    />
                 </div>
 
-                <!-- Content -->
-                <div class="p-6">
-                    <form @submit.prevent="handleSubmit" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-foreground mb-1">
-                                {{ $t('features.media.modals.folder.name') }} <span class="text-red-500">*</span>
-                            </label>
-                            <Input
-                                v-model="form.name"
-                                type="text"
-                                required
-                                :placeholder="$t('features.media.modals.folder.placeholder')"
-                            />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-foreground mb-1">
-                                {{ $t('features.media.modals.folder.parent') }}
-                            </label>
-                            <Select v-model="form.parent_id">
-                                <SelectTrigger class="w-full">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem :value="null">{{ $t('features.media.modals.folder.noParent') }}</SelectItem>
-                                    <SelectItem
-                                        v-for="folder in folders"
-                                        :key="folder.id"
-                                        :value="folder.id"
-                                    >
-                                        {{ folder.name }}
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <!-- Shared Status (Admin Only) -->
-                        <div v-if="canManageMedia" class="flex items-start space-x-2 p-3 bg-blue-50/20 border border-blue-200/40 rounded-xl">
-                            <Checkbox 
-                                id="folder_is_shared" 
-                                v-model:checked="form.is_shared"
-                                class="mt-0.5"
-                            />
-                            <div class="flex-1">
-                                <label for="folder_is_shared" class="text-sm font-medium text-foreground cursor-pointer">
-                                    {{ $t('features.media.modals.edit.isShared') }}
-                                </label>
-                                <p class="text-xs text-muted-foreground mt-0.5">
-                                    {{ $t('features.media.modals.edit.isSharedHelp') }}
-                                </p>
-                            </div>
-                        </div>
-                    </form>
+                <div class="grid gap-2">
+                    <label class="text-sm font-medium leading-none">
+                        {{ $t('features.media.modals.folder.parent') }}
+                    </label>
+                    <Select 
+                        :model-value="form.parent_id ? String(form.parent_id) : 'none'"
+                        @update:model-value="(val) => form.parent_id = val === 'none' ? null : Number(val)"
+                    >
+                        <SelectTrigger class="w-full bg-background border-border/40 rounded-xl">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="none">{{ $t('features.media.modals.folder.noParent') }}</SelectItem>
+                            <SelectItem
+                                v-for="folder in folders"
+                                :key="folder.id"
+                                :value="String(folder.id)"
+                            >
+                                {{ folder.name }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
-                <!-- Footer -->
-                <div class="flex items-center justify-end space-x-3 p-6 border-t border-border/40">
-                    <Button
-                        variant="outline"
-                        @click="$emit('close')"
-                    >
-                        {{ $t('features.media.actions.cancel') }}
-                    </Button>
-                    <Button
-                        @click="handleSubmit"
-                        :disabled="saving || !isValid"
-                    >
-                        {{ saving ? $t('features.media.modals.folder.creating') : $t('features.media.modals.folder.create') }}
-                    </Button>
+                <!-- Shared Status (Admin Only) -->
+                <div v-if="canManageMedia" class="flex items-start space-x-3 p-3 bg-muted/40 border border-border/60 rounded-xl mt-2 transition-colors hover:bg-muted/60">
+                    <Checkbox 
+                        id="folder_is_shared" 
+                        v-model:checked="form.is_shared"
+                        class="mt-0.5 border-primary/50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                    />
+                    <div class="flex-1">
+                        <label for="folder_is_shared" class="text-sm font-bold text-foreground cursor-pointer select-none">
+                            {{ $t('features.media.modals.edit.isShared') }}
+                        </label>
+                        <p class="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+                            {{ $t('features.media.modals.edit.isSharedHelp') }}
+                        </p>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
+            </form>
+
+            <DialogFooter>
+                <Button
+                    variant="outline"
+                    @click="$emit('close')"
+                    class="rounded-xl"
+                >
+                    {{ $t('features.media.actions.cancel') }}
+                </Button>
+                <Button
+                    @click="handleSubmit"
+                    :disabled="saving || !isValid"
+                    class="rounded-xl shadow-lg shadow-primary/20"
+                >
+                    <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
+                    {{ saving ? $t('features.media.modals.folder.creating') : $t('features.media.modals.folder.create') }}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useToast } from '@/composables/useToast.js';
-import { X } from 'lucide-vue-next';
-import api from '../../services/api';
-import Button from '../ui/button.vue';
-import Input from '../ui/input.vue';
-import Select from '../ui/select.vue';
-import SelectContent from '../ui/select-content.vue';
-import SelectItem from '../ui/select-item.vue';
-import SelectTrigger from '../ui/select-trigger.vue';
-import SelectValue from '../ui/select-value.vue';
-import Checkbox from '../ui/checkbox.vue';
-import { useAuthStore } from '../../stores/auth';
+import { useToast } from '@/composables/useToast';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import api from '@/services/api';
+import { 
+    Button, 
+    Input, 
+    Select, 
+    SelectContent, 
+    SelectItem, 
+    SelectTrigger, 
+    SelectValue, 
+    Checkbox,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter
+} from '@/components/ui';
+import { useAuthStore } from '@/stores/auth';
+import type { MediaFolder } from '@/types/cms';
+
+interface FolderForm {
+    name: string;
+    parent_id: number | null;
+    is_shared: boolean;
+}
 
 const authStore = useAuthStore();
 const { t } = useI18n();
 const toast = useToast();
 
-const emit = defineEmits(['close', 'created']);
+const emit = defineEmits<{
+    (e: 'close'): void;
+    (e: 'created'): void;
+}>();
 
 const saving = ref(false);
-const folders = ref([]);
+const folders = ref<MediaFolder[]>([]);
 
-const form = ref({
+const form = ref<FolderForm>({
     name: '',
     parent_id: null,
     is_shared: false,
@@ -129,7 +144,7 @@ const fetchFolders = async () => {
     try {
         const response = await api.get('/admin/ja/media-folders');
         const data = response.data.data || response.data || [];
-        folders.value = data.filter(f => !f.is_trashed);
+        folders.value = data.filter((f: MediaFolder) => !f.is_trashed);
     } catch (error) {
         console.error('Failed to fetch folders:', error);
     }
@@ -141,9 +156,10 @@ const handleSubmit = async () => {
     saving.value = true;
     try {
         await api.post('/admin/ja/media-folders', form.value);
+        toast.success.create('Folder');
         emit('created');
-        form.value = { name: '', parent_id: null, is_shared: false };
-    } catch (error) {
+        emit('close');
+    } catch (error: any) {
         console.error('Failed to create folder:', error);
         toast.error.fromResponse(error);
     } finally {

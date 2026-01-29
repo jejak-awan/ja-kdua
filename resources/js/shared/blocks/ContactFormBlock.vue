@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="contact-form-block transition-all duration-300"
+    class="contact-form-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Contact Form'"
     :style="cardStyles"
@@ -40,7 +40,7 @@
           <div class="form-footer col-span-full text-center mt-6">
             <Button 
               type="submit" 
-              class="h-14 px-12 rounded-full font-bold shadow-xl shadow-primary/20 transition-all hover:-translate-y-1 active:translate-y-0"
+              class="h-14 px-12 rounded-full font-bold shadow-xl shadow-primary/20 transition-colors hover:-translate-y-1 active:translate-y-0"
               :style="buttonStyles"
               :disabled="isSubmitting"
             >
@@ -64,8 +64,8 @@ import { computed, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import ContactFieldBlock from './ContactFieldBlock.vue'
 import { Button } from '../ui'
-import { Send, Loader2 } from 'lucide-vue-next'
-import { 
+import Send from 'lucide-vue-next/dist/esm/icons/send.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';import { 
   getTypographyStyles,
   getLayoutStyles,
   getVal

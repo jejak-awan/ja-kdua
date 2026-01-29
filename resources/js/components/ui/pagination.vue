@@ -18,13 +18,13 @@
       <div v-if="showPerPage" class="flex items-center gap-2">
         <span>{{ $t('common.pagination.rowsPerPage') }}</span>
         <Select :model-value="String(perPage)" @update:model-value="handlePerPageChange">
-          <RadixSelectTrigger class="flex h-8 w-[65px] items-center justify-between rounded-lg border border-border/50 bg-transparent px-2.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 hover:bg-muted/30 transition-all outline-none">
+          <RadixSelectTrigger class="flex h-8 w-[65px] items-center justify-between rounded-lg border border-border/50 bg-transparent px-2.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 hover:bg-muted/30 transition-colors outline-none">
             <RadixSelectValue />
             <RadixSelectIcon as-child>
               <ChevronDown class="h-3.5 w-3.5 opacity-50" />
             </RadixSelectIcon>
           </RadixSelectTrigger>
-          <SelectContent>
+          <SelectContent side="top" :side-offset="5">
             <SelectItem v-for="option in perPageOptions" :key="option" :value="String(option)">
               {{ option }}
             </SelectItem>
@@ -105,9 +105,13 @@
   </div>
 </template>
 
-<script setup>
-import { computed } from 'vue';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronDown } from 'lucide-vue-next';
+<script setup lang="ts">
+import { computed, type HTMLAttributes } from 'vue';
+import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
+import ChevronsLeft from 'lucide-vue-next/dist/esm/icons/chevrons-left.js';
+import ChevronsRight from 'lucide-vue-next/dist/esm/icons/chevrons-right.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import { 
   SelectTrigger as RadixSelectTrigger, 
   SelectValue as RadixSelectValue,
@@ -118,56 +122,35 @@ import Select from '@/components/ui/select.vue';
 import SelectContent from '@/components/ui/select-content.vue';
 import SelectItem from '@/components/ui/select-item.vue';
 import { cn } from '@/lib/utils';
+import { useI18n } from 'vue-i18n';
 
-const props = defineProps({
-  // Current page number (1-indexed)
-  currentPage: {
-    type: Number,
-    required: true,
-  },
-  // Total number of items
-  totalItems: {
-    type: Number,
-    required: true,
-  },
-  // Items per page
-  perPage: {
-    type: Number,
-    default: 10,
-  },
-  // Available per page options
-  perPageOptions: {
-    type: Array,
-    default: () => [5, 10, 15, 20, 25, 50, 100],
-  },
-  // Show rows per page selector
-  showPerPage: {
-    type: Boolean,
-    default: true,
-  },
-  // Show page number buttons
-  showPageNumbers: {
-    type: Boolean,
-    default: false,
-  },
-  // Show first/last page buttons
-  showFirstLast: {
-    type: Boolean,
-    default: false,
-  },
-  // Maximum visible page buttons
-  maxVisiblePages: {
-    type: Number,
-    default: 5,
-  },
-  // Custom class
-  class: {
-    type: String,
-    default: '',
-  },
+const { t } = useI18n();
+
+const props = withDefaults(defineProps<{
+  currentPage: number;
+  totalItems: number;
+  perPage?: number;
+  perPageOptions?: number[];
+  showPerPage?: boolean;
+  showPageNumbers?: boolean;
+  showFirstLast?: boolean;
+  maxVisiblePages?: number;
+  class?: HTMLAttributes['class'];
+}>(), {
+  perPage: 10,
+  perPageOptions: () => [5, 10, 15, 20, 25, 50, 100],
+  showPerPage: true,
+  showPageNumbers: false,
+  showFirstLast: false,
+  maxVisiblePages: 5,
+  class: '',
 });
 
-const emit = defineEmits(['update:currentPage', 'update:perPage', 'page-change']);
+const emit = defineEmits<{
+  'update:currentPage': [page: number];
+  'update:perPage': [perPage: number];
+  'page-change': [page: number];
+}>();
 
 // Computed properties
 const totalPages = computed(() => {
@@ -183,7 +166,7 @@ const to = computed(() => {
 });
 
 const visiblePages = computed(() => {
-  const pages = [];
+  const pages: (number | string)[] = [];
   const total = totalPages.value;
   const current = props.currentPage;
   const max = props.maxVisiblePages;
@@ -228,13 +211,13 @@ const visiblePages = computed(() => {
 });
 
 // Methods
-const goToPage = (page) => {
-  if (page < 1 || page > totalPages.value || page === props.currentPage) return;
+const goToPage = (page: number | string) => {
+  if (typeof page === 'string' || page < 1 || page > totalPages.value || page === props.currentPage) return;
   emit('update:currentPage', page);
   emit('page-change', page);
 };
 
-const handlePerPageChange = (value) => {
+const handlePerPageChange = (value: string) => {
   const newPerPage = parseInt(value, 10);
   emit('update:perPage', newPerPage);
   // Reset to page 1 when changing per page

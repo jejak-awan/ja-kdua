@@ -191,6 +191,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('tags', App\Http\Controllers\Api\V1\TagController::class)->middleware('permission:view tags');
 
         // Media (with rate limiting for uploads - increased for better UX)
+        Route::get('media/filters', [App\Http\Controllers\Api\V1\MediaController::class, 'filters'])->middleware('permission:view media');
         Route::get('media/statistics', [App\Http\Controllers\Api\V1\MediaController::class, 'statistics'])->middleware('permission:view media');
         Route::post('media/upload', [App\Http\Controllers\Api\V1\MediaController::class, 'upload'])
             ->middleware('throttle:30,1'); // 30 uploads per minute (increased from 10)
@@ -198,14 +199,17 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:10,1'); // 10 batch uploads per minute (increased from 5)
         Route::post('media/bulk-action', [App\Http\Controllers\Api\V1\MediaController::class, 'bulkAction'])->middleware('permission:edit media');
         Route::delete('media/empty-trash', [App\Http\Controllers\Api\V1\MediaController::class, 'emptyTrash'])->middleware('permission:delete media');
+        Route::post('media/empty-trash', [App\Http\Controllers\Api\V1\MediaController::class, 'emptyTrash'])->middleware('permission:delete media'); // Frontend compat
         Route::post('media/download-zip', [App\Http\Controllers\Api\V1\MediaController::class, 'downloadZip'])->middleware('permission:view media');
         Route::post('media/scan', [App\Http\Controllers\Api\V1\MediaController::class, 'scan'])->middleware('permission:manage media');
         Route::get('media', [App\Http\Controllers\Api\V1\MediaController::class, 'index'])->middleware('permission:view media');
         Route::get('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'show'])->middleware('permission:view media');
         Route::put('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'update']);
         Route::delete('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'destroy']);
+        Route::post('media/{media}/delete', [App\Http\Controllers\Api\V1\MediaController::class, 'destroy']); // Frontend compat
         Route::post('media/{id}/restore', [App\Http\Controllers\Api\V1\MediaController::class, 'restore']);
         Route::delete('media/{id}/force-delete', [App\Http\Controllers\Api\V1\MediaController::class, 'forceDelete']);
+        Route::post('media/{id}/force-delete', [App\Http\Controllers\Api\V1\MediaController::class, 'forceDelete']); // Frontend compat
         Route::post('media/{media}/thumbnail', [App\Http\Controllers\Api\V1\MediaController::class, 'generateThumbnail'])->middleware('permission:edit media');
         Route::post('media/{media}/resize', [App\Http\Controllers\Api\V1\MediaController::class, 'resize'])->middleware('permission:edit media');
         Route::post('media/{media}/edit', [App\Http\Controllers\Api\V1\MediaController::class, 'edit']);
@@ -214,7 +218,9 @@ Route::prefix('v1')->group(function () {
         // Media Folders
         Route::post('media-folders/{id}/restore', [App\Http\Controllers\Api\V1\MediaFolderController::class, 'restore'])->middleware('permission:edit media');
         Route::delete('media-folders/{id}/force-delete', [App\Http\Controllers\Api\V1\MediaFolderController::class, 'forceDelete'])->middleware('permission:delete media');
+        Route::post('media-folders/{id}/force-delete', [App\Http\Controllers\Api\V1\MediaFolderController::class, 'forceDelete'])->middleware('permission:delete media'); // Frontend compat
         Route::apiResource('media-folders', App\Http\Controllers\Api\V1\MediaFolderController::class)->middleware('permission:view media');
+        Route::post('media-folders/{mediaFolder}/delete', [App\Http\Controllers\Api\V1\MediaFolderController::class, 'destroy'])->middleware('permission:delete media'); // Frontend compat
         Route::post('media-folders/{mediaFolder}/move', [App\Http\Controllers\Api\V1\MediaFolderController::class, 'move'])->middleware('permission:edit media');
 
         // Comments (admin)
@@ -509,6 +515,7 @@ Route::prefix('v1')->group(function () {
         Route::post('file-manager/delete', [App\Http\Controllers\Api\V1\FileManagerController::class, 'delete'])->middleware('permission:manage files'); // Frontend compat
         Route::post('file-manager/folder', [App\Http\Controllers\Api\V1\FileManagerController::class, 'createFolder'])->middleware('permission:manage files');
         Route::delete('file-manager/folder', [App\Http\Controllers\Api\V1\FileManagerController::class, 'deleteFolder'])->middleware('permission:manage files');
+        Route::post('file-manager/folder/delete', [App\Http\Controllers\Api\V1\FileManagerController::class, 'deleteFolder'])->middleware('permission:manage files'); // Frontend compat
         Route::post('file-manager/move', [App\Http\Controllers\Api\V1\FileManagerController::class, 'move'])->middleware('permission:manage files');
         Route::post('file-manager/rename', [App\Http\Controllers\Api\V1\FileManagerController::class, 'rename'])->middleware('permission:manage files');
         Route::get('file-manager/trash', [App\Http\Controllers\Api\V1\FileManagerController::class, 'trash'])->middleware('permission:manage files');

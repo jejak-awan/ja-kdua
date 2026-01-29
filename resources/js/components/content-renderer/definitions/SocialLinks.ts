@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Share2 } from 'lucide-vue-next';
+import Share2 from 'lucide-vue-next/dist/esm/icons/share-2.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

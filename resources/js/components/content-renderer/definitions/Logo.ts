@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Image as ImageIcon } from 'lucide-vue-next';
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

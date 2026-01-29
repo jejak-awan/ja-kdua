@@ -317,12 +317,31 @@ class MenuController extends BaseApiController
 
     public function getByLocation(Request $request, $location)
     {
-        $menu = Menu::getByLocation($location);
+        $cacheKey = "menu_location_{$location}";
+        
+        $menu = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($location) {
+            $menu = Menu::getByLocation($location);
+            
+            if ($menu) {
+                // Eager load items and their recursive children with their targets to fix N+1
+                $menu->load([
+                    'items' => function ($query) {
+                        $query->with(['target', 'children' => function ($q) {
+                            $q->with(['target', 'children' => function ($sq) {
+                                $sq->with(['target']);
+                            }]);
+                        }]);
+                    }
+                ]);
+            }
+            
+            return $menu;
+        });
 
         if (! $menu) {
             return $this->success(null, 'No menu assigned to this location');
         }
 
-        return $this->success($menu->load(['items.children.children']), 'Menu retrieved successfully');
+        return $this->success($menu, 'Menu retrieved successfully');
     }
 }

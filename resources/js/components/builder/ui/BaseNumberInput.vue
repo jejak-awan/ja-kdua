@@ -37,36 +37,41 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronUp, ChevronDown } from 'lucide-vue-next'
+import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 
-const props = defineProps<{
+interface Props {
   modelValue: number | string;
   label?: string;
   step?: number;
   min?: number;
   max?: number;
-}>()
+}
 
-const emit = defineEmits(['update:modelValue'])
+const props = defineProps<Props>();
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: number | string): void;
+}>();
 
 const handleInput = (e: Event) => {
-    const val = (e.target as HTMLInputElement).value
-    emit('update:modelValue', val === '' ? '' : Number(val))
-}
+    const val = (e.target as HTMLInputElement).value;
+    emit('update:modelValue', val === '' ? '' : Number(val));
+};
 
 const increment = () => {
-    let val = Number(props.modelValue || 0)
-    val += props.step || 1
-    if (props.max !== undefined && val > props.max) val = props.max
-    emit('update:modelValue', val)
-}
+    let val = Number(props.modelValue || 0);
+    val += props.step || 1;
+    if (props.max !== undefined && val > props.max) val = props.max;
+    emit('update:modelValue', val);
+};
 
 const decrement = () => {
-    let val = Number(props.modelValue || 0)
-    val -= props.step || 1
-    if (props.min !== undefined && val < props.min) val = props.min
-    emit('update:modelValue', val)
-}
+    let val = Number(props.modelValue || 0);
+    val -= props.step || 1;
+    if (props.min !== undefined && val < props.min) val = props.min;
+    emit('update:modelValue', val);
+};
 </script>
 
 <style scoped>

@@ -21,7 +21,7 @@
         <template #actions>
             <button
                 @click="goBack"
-                class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-border text-sm font-medium rounded-2xl text-foreground bg-muted hover:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-yellow-500 transition-all active:scale-95"
+                class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-border text-sm font-medium rounded-2xl text-foreground bg-muted hover:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-yellow-500 transition-[background-color,transform] active:scale-95"
             >
                 <ArrowLeft class="w-4 h-4 mr-2 text-muted-foreground" />
                 {{ t('features.errors.404.back') }}
@@ -29,7 +29,7 @@
             
             <router-link
                 to="/"
-                class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-2xl text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-yellow-500 shadow-sm transition-all active:scale-95"
+                class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-2xl text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-yellow-500 shadow-sm transition-[background-color,transform] active:scale-95"
             >
                 <Home class="w-4 h-4 mr-2" />
                 {{ t('features.errors.404.home') }}
@@ -46,12 +46,14 @@
     </ErrorLayout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import ErrorLayout from '@/layouts/ErrorLayout.vue';
-import { AlertTriangle, Home, ArrowLeft } from 'lucide-vue-next';
+import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';
+import Home from 'lucide-vue-next/dist/esm/icons/house.js';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
 
 const router = useRouter();
 const { t } = useI18n();

@@ -1,8 +1,8 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="container-block">
+  <BaseBlock :module="module" :mode="mode" :settings="settings" class="container-block">
     <component
       :is="settings.link_url ? 'a' : 'div'"
-      class="container-inner relative overflow-hidden transition-all duration-300 w-full min-h-[50px]"
+      class="container-inner relative overflow-hidden transition-colors duration-300 w-full min-h-[50px]"
       :href="mode === 'view' ? settings.link_url : null"
       :target="mode === 'view' && settings.link_url ? (settings.link_target || '_self') : null"
       :style="innerStyles"
@@ -40,25 +40,25 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Box } from 'lucide-vue-next'
-import { 
+import Box from 'lucide-vue-next/dist/esm/icons/box.js';import { 
   getResponsiveValue
 } from '../utils/styleUtils'
+import type { BlockProps, BuilderInstance } from '@/types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  nestedBlocks: { type: Array, default: () => [] }
+const props = withDefaults(defineProps<BlockProps>(), {
+  mode: 'view',
+  device: 'desktop',
+  nestedBlocks: () => []
 })
 
-const builder = inject('builder', null)
-const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
+const builder = inject<BuilderInstance>('builder', null as any)
+const settings = computed(() => props.settings || props.module?.settings || {})
+const currentDevice = computed(() => props.device || builder?.device?.value || 'desktop')
 
-const BlockRenderer = inject('BlockRenderer', null)
+const BlockRenderer = inject<any>('BlockRenderer', null)
 
 const innerStyles = computed(() => ({}))
 
@@ -67,11 +67,11 @@ const overlayStyles = computed(() => ({
 }))
 
 const contentStyles = computed(() => {
-  const direction = getResponsiveValue(settings.value, 'direction', device.value) || 'column'
-  const alignItems = getResponsiveValue(settings.value, 'alignItems', device.value) || 'stretch'
-  const justifyContent = getResponsiveValue(settings.value, 'justifyContent', device.value) || 'flex-start'
-  const gap = getResponsiveValue(settings.value, 'gap', device.value) || 0
-  const wrap = getResponsiveValue(settings.value, 'wrap', device.value)
+  const direction = getResponsiveValue(settings.value, 'direction', currentDevice.value) || 'column'
+  const alignItems = getResponsiveValue(settings.value, 'alignItems', currentDevice.value) || 'stretch'
+  const justifyContent = getResponsiveValue(settings.value, 'justifyContent', currentDevice.value) || 'flex-start'
+  const gap = getResponsiveValue(settings.value, 'gap', currentDevice.value) || 0
+  const wrap = getResponsiveValue(settings.value, 'wrap', currentDevice.value)
 
   return {
     display: 'flex',
@@ -79,7 +79,7 @@ const contentStyles = computed(() => {
     alignItems: alignItems,
     justifyContent: justifyContent,
     gap: typeof gap === 'number' ? `${gap}px` : gap,
-    flexWrap: wrap === 'flex-wrap' || wrap === true ? 'wrap' : 'nowrap'
+    flexWrap: (wrap === 'flex-wrap' || wrap === true ? 'wrap' : 'nowrap') as 'wrap' | 'nowrap'
   }
 })
 </script>

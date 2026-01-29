@@ -84,26 +84,29 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { X } from 'lucide-vue-next';
-import api from '../../services/api';
-import toast from '../../services/toast';
-import Button from '../ui/button.vue';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
+import { Button } from '@/components/ui';
+import type { Media } from '@/types/cms';
 
-const props = defineProps({
-    media: {
-        type: Object,
-        required: true,
-    },
-});
+const props = defineProps<{
+    media: Media;
+}>();
 
-const emit = defineEmits(['close', 'resized']);
+const emit = defineEmits<{
+    (e: 'close'): void;
+    (e: 'resized'): void;
+}>();
+
 const { t } = useI18n();
+const toast = useToast();
 
-const width = ref(null);
-const height = ref(null);
+const width = ref<number | null>(null);
+const height = ref<number | null>(null);
 const maintainAspectRatio = ref(true);
 const resizing = ref(false);
 const originalDimensions = ref({ width: 0, height: 0 });
@@ -119,8 +122,8 @@ const isValid = computed(() => {
     return !!width.value && !!height.value;
 });
 
-const onImageLoad = (e) => {
-    const img = e.target;
+const onImageLoad = (e: Event) => {
+    const img = e.target as HTMLImageElement;
     width.value = img.naturalWidth;
     height.value = img.naturalHeight;
     originalDimensions.value = {
@@ -132,9 +135,10 @@ const onImageLoad = (e) => {
 const previewStyle = computed(() => {
     if (!width.value || !height.value) return {};
     return {
-        width: `${width.value}px`,
-        height: `${height.value}px`,
-        objectFit: 'contain',
+        aspectRatio: `${width.value} / ${height.value}`,
+        maxHeight: '300px',
+        maxWidth: '100%',
+        objectFit: 'contain' as const,
     };
 });
 
@@ -166,11 +170,11 @@ const handleResize = async () => {
             height: height.value,
             maintain_aspect_ratio: maintainAspectRatio.value,
         });
-        toast.success(t('features.media.modals.resize.success'));
+        toast.success.action(t('features.media.modals.resize.success') || 'Image resized successfully');
         emit('resized');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to resize media:', error);
-        toast.error('Error', error.response?.data?.message || t('features.media.modals.resize.failed'));
+        toast.error.fromResponse(error);
     } finally {
         resizing.value = false;
     }

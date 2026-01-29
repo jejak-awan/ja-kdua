@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode"
     :device="device"
-    class="filterable-portfolio-block transition-all duration-500"
+    class="filterable-portfolio-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Filterable Portfolio'"
     :style="cardStyles"
@@ -15,7 +15,7 @@
           v-for="cat in categories" 
           :key="cat" 
           :variant="activeFilter === cat ? 'default' : 'outline'"
-          class="rounded-full px-8 py-6 font-black uppercase tracking-widest text-[10px] transition-all duration-500 shadow-xl hover:shadow-2xl" 
+          class="rounded-full px-8 py-6 font-black uppercase tracking-widest text-[10px] transition-[width] duration-500 shadow-xl hover:shadow-2xl" 
           :style="activeFilter === cat ? {} : filterBtnStyles"
           @click="activeFilter = cat"
         >
@@ -24,11 +24,11 @@
       </div>
       
       <!-- Portfolio Grid -->
-      <div class="portfolio-grid grid transition-all duration-500" :style="gridStyles">
+      <div class="portfolio-grid grid transition-[width] duration-500" :style="gridStyles">
         <Card 
             v-for="(item, i) in filteredItems" 
             :key="i" 
-            class="portfolio-item relative aspect-square rounded-[3.5rem] overflow-hidden group cursor-pointer border-none shadow-2xl transition-all duration-700 hover:-translate-y-4"
+            class="portfolio-item relative aspect-square rounded-[3.5rem] overflow-hidden group cursor-pointer border-none shadow-2xl transition-colors duration-700 hover:-translate-y-4"
             @click="handleItemClick(item)"
         >
           <div class="item-background absolute inset-0 z-0 bg-slate-50 dark:bg-slate-950 flex items-center justify-center transition-transform duration-1000 group-hover:scale-110">
@@ -37,7 +37,7 @@
           </div>
           
           <div 
-            class="item-overlay absolute inset-0 z-20 flex flex-col items-center justify-center p-12 text-center opacity-0 group-hover:opacity-100 transition-all duration-700 backdrop-blur-xl bg-primary/80" 
+            class="item-overlay absolute inset-0 z-20 flex flex-col items-center justify-center p-12 text-center opacity-0 group-hover:opacity-100 transition-colors duration-700 backdrop-blur-xl bg-primary/80" 
             :style="overlayStyles"
           >
             <Badge 
@@ -56,7 +56,7 @@
                 {{ item.title }}
             </h4>
             
-            <div class="mt-10 w-16 h-16 rounded-3xl bg-white text-primary flex items-center justify-center transform translate-y-8 group-hover:translate-y-0 transition-all duration-700 delay-150 shadow-2xl hover:scale-110">
+            <div class="mt-10 w-16 h-16 rounded-3xl bg-white text-primary flex items-center justify-center transform translate-y-8 group-hover:translate-y-0 transition-colors duration-700 delay-150 shadow-2xl hover:scale-110">
                  <LucideIcon name="ArrowUpRight" class="w-7 h-7" />
             </div>
           </div>
@@ -70,8 +70,7 @@
 import { computed, ref, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Button, Badge, Card } from '../ui'
-import { FolderOpen } from 'lucide-vue-next'
-import LucideIcon from '../../components/ui/LucideIcon.vue'
+import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';import LucideIcon from '../../components/ui/LucideIcon.vue'
 import { 
   getVal,
   getLayoutStyles,

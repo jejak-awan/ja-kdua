@@ -8,7 +8,7 @@
             <div class="flex items-center gap-3">
                 <Select
                     v-model="selectedType"
-                    @update:modelValue="fetchThemes"
+                    @update:model-value="fetchThemes"
                 >
                     <SelectTrigger class="w-[180px]">
                         <SelectValue :placeholder="$t('features.themes.types.all')" />
@@ -85,7 +85,7 @@
                     </div>
 
                     <!-- Hover Actions -->
-                    <div class="absolute inset-0 bg-background/50 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
+                    <div class="absolute inset-0 bg-background/50 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-colors flex items-center justify-center gap-2">
                         <Button
                             @click="openPreview(theme)"
                             variant="secondary"
@@ -224,7 +224,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import api from '../../../services/api';
 import toast from '../../../services/toast';
@@ -245,12 +245,26 @@ import SelectValue from '../../../components/ui/select-value.vue';
 const { t } = useI18n();
 const { confirm } = useConfirm();
 
-const themes = ref([]);
+interface Theme {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    author?: string;
+    version?: string;
+    type?: string;
+    parent_theme?: string;
+    is_active?: boolean;
+    status?: string;
+    preview_image?: string;
+}
+
+const themes = ref<Theme[]>([]);
 const selectedType = ref('');
 const scanning = ref(false);
 const showPreviewModal = ref(false);
 const showCustomizerModal = ref(false);
-const selectedTheme = ref(null);
+const selectedTheme = ref<Theme | null>(null);
 
 const fetchThemes = async () => {
     try {
@@ -258,7 +272,7 @@ const fetchThemes = async () => {
         const response = await api.get('/admin/ja/themes', { params });
         const { data } = parseResponse(response);
         themes.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch themes:', error);
         themes.value = [];
     }
@@ -271,7 +285,7 @@ const scanThemes = async () => {
         await fetchThemes();
         const count = response.data?.data?.count || 0;
         toast.success(t('features.themes.messages.scanSuccess', { count }));
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to scan themes:', error);
         toast.error('Error', t('features.themes.messages.scanFailed'));
     } finally {
@@ -279,7 +293,7 @@ const scanThemes = async () => {
     }
 };
 
-const activateTheme = async (theme) => {
+const activateTheme = async (theme: Theme) => {
     const confirmed = await confirm({
         title: t('features.themes.actions.activate'),
         message: t('features.themes.messages.activateConfirm', { name: theme.name }),
@@ -293,13 +307,13 @@ const activateTheme = async (theme) => {
         await api.post(`/admin/ja/themes/${theme.slug}/activate`);
         await fetchThemes();
         toast.success(t('features.themes.messages.activateSuccess'));
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to activate theme:', error);
-        toast.error.fromResponse(error);
+        toast.error(error instanceof Error ? error.message : 'Failed to activate theme');
     }
 };
 
-const validateTheme = async (theme) => {
+const validateTheme = async (theme: Theme) => {
     try {
         const response = await api.post(`/admin/ja/themes/${theme.slug}/validate`);
         const data = response.data?.data || response.data;
@@ -314,18 +328,18 @@ const validateTheme = async (theme) => {
         }
         
         await fetchThemes();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to validate theme:', error);
         toast.error('Error', t('features.themes.messages.validateError'));
     }
 };
 
-const openPreview = (theme) => {
+const openPreview = (theme: Theme) => {
     selectedTheme.value = theme;
     showPreviewModal.value = true;
 };
 
-const openCustomizer = (theme) => {
+const openCustomizer = (theme: Theme) => {
     selectedTheme.value = theme;
     showCustomizerModal.value = true;
 };

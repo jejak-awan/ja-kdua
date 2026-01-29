@@ -35,9 +35,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Settings, Copy, Trash, GripVertical, Columns, MoreVertical } from 'lucide-vue-next'
-
-const { t } = useI18n()
+import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import Trash from 'lucide-vue-next/dist/esm/icons/trash.js';
+import GripVertical from 'lucide-vue-next/dist/esm/icons/grip-vertical.js';
+import Columns from 'lucide-vue-next/dist/esm/icons/columns-2.js';
+import MoreVertical from 'lucide-vue-next/dist/esm/icons/ellipsis-vertical.js';const { t } = useI18n()
 
 interface Props {
   label?: string;

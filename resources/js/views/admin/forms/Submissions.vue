@@ -201,11 +201,11 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
+import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
 import Pagination from '../../../components/ui/pagination.vue';
 import Button from '../../../components/ui/button.vue';
@@ -217,29 +217,34 @@ import SelectContent from '../../../components/ui/select-content.vue';
 import SelectItem from '../../../components/ui/select-item.vue';
 import SelectTrigger from '../../../components/ui/select-trigger.vue';
 import SelectValue from '../../../components/ui/select-value.vue';
-import { X, Download, Loader2, FileText, Check, Trash2 } from 'lucide-vue-next';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 
 const { t } = useI18n();
+const toast = useToast();
 
-const props = defineProps({
-    form: {
-        type: Object,
-        required: true
-    }
-});
+import type { Form, FormSubmission, FormStatistics } from '@/types/forms';
+
+const props = defineProps<{
+    form: Form
+}>();
 
 const emit = defineEmits(['close']);
 
 const { confirm } = useConfirm();
-const submissions = ref([]);
+const submissions = ref<FormSubmission[]>([]);
 const loading = ref(true);
-const statistics = ref(null);
-const pagination = ref(null);
+const statistics = ref<FormStatistics | null>(null);
+const pagination = ref<any>(null);
 const search = ref('');
 const statusFilter = ref('all');
 const dateFrom = ref('');
 const dateTo = ref('');
-const selectedSubmission = ref(null);
+const selectedSubmission = ref<FormSubmission | null>(null);
 
 const fetchSubmissions = async (page = 1) => {
     try {
@@ -252,9 +257,9 @@ const fetchSubmissions = async (page = 1) => {
             ...(dateTo.value && { date_to: dateTo.value })
         };
         const response = await api.get(`/admin/ja/forms/${props.form.id}/submissions`, { params });
-        submissions.value = response.data.data || response.data;
+        submissions.value = (response.data.data || response.data) as FormSubmission[];
         pagination.value = response.data;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error fetching submissions:', error);
     } finally {
         loading.value = false;
@@ -264,30 +269,30 @@ const fetchSubmissions = async (page = 1) => {
 const fetchStatistics = async () => {
     try {
         const response = await api.get(`/admin/ja/forms/${props.form.id}/submissions/statistics`);
-        statistics.value = response.data?.data || response.data;
-    } catch (error) {
+        statistics.value = (response.data?.data || response.data) as FormStatistics;
+    } catch (error: any) {
         console.error('Error fetching statistics:', error);
     }
 };
 
-const loadPage = (page) => {
+const loadPage = (page: number) => {
     fetchSubmissions(page);
 };
 
-const viewSubmission = async (submission) => {
+const viewSubmission = async (submission: FormSubmission) => {
     try {
         const response = await api.get(`/admin/ja/form-submissions/${submission.id}`);
-        selectedSubmission.value = response.data;
+        selectedSubmission.value = response.data as FormSubmission;
         if (submission.status === 'new') {
             markAsRead(submission, false);
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error fetching submission details:', error);
         selectedSubmission.value = submission;
     }
 };
 
-const markAsRead = async (submission, refresh = true) => {
+const markAsRead = async (submission: FormSubmission, refresh = true) => {
     try {
         await api.put(`/admin/ja/form-submissions/${submission.id}/read`);
         if (refresh) {
@@ -296,12 +301,12 @@ const markAsRead = async (submission, refresh = true) => {
         } else {
             submission.status = 'read';
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error marking submission as read:', error);
     }
 };
 
-const deleteSubmission = async (submission) => {
+const deleteSubmission = async (submission: FormSubmission) => {
     const confirmed = await confirm({
         title: t('features.forms.submissions.actions.delete'),
         message: t('features.forms.submissions.messages.deleteConfirm'),
@@ -313,9 +318,9 @@ const deleteSubmission = async (submission) => {
 
     try {
         await api.delete(`/admin/ja/forms/${props.form.id}/submissions/${submission.id}`);
-        toast.success(t('features.forms.submissions.messages.deleteSuccess'));
+        toast.success.default(t('features.forms.submissions.messages.deleteSuccess'));
         fetchSubmissions();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete submission:', error);
         toast.error.fromResponse(error);
     }
@@ -338,21 +343,21 @@ const exportSubmissions = async () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        toast.success(t('features.forms.submissions.messages.exportSuccess'));
-    } catch (error) {
+        toast.success.default(t('features.forms.submissions.messages.exportSuccess'));
+    } catch (error: any) {
         console.error('Failed to export submissions:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string | null | undefined) => {
     if (!date) return '-';
     const parsed = new Date(date);
     if (isNaN(parsed.getTime())) return '-';
     return parsed.toLocaleString();
 };
 
-const formatValue = (value) => {
+const formatValue = (value: any) => {
     if (Array.isArray(value)) {
         return value.join(', ');
     }

@@ -3,7 +3,7 @@
     :module="module"
     :mode="mode"
     :settings="settings"
-    class="countdown-block transition-all duration-300"
+    class="countdown-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Countdown Timer'"
     :style="cardStyles"
@@ -11,7 +11,7 @@
     <div class="countdown-items flex flex-wrap" :style="containerStyles">
       <Card 
         v-if="getVal(settings, 'showDays', device) !== false" 
-        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-all"
+        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-colors"
         :style="unitBaseStyles"
       >
         <CardContent class="p-0 flex flex-col items-center">
@@ -26,7 +26,7 @@
       
       <Card 
         v-if="getVal(settings, 'showHours', device) !== false" 
-        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-all"
+        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-colors"
         :style="unitBaseStyles"
       >
         <CardContent class="p-0 flex flex-col items-center">
@@ -41,7 +41,7 @@
       
       <Card 
         v-if="getVal(settings, 'showMinutes', device) !== false" 
-        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-all"
+        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-colors"
         :style="unitBaseStyles"
       >
         <CardContent class="p-0 flex flex-col items-center">
@@ -56,7 +56,7 @@
       
       <Card 
         v-if="getVal(settings, 'showSeconds', device) !== false" 
-        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-all"
+        class="countdown-unit group flex-1 min-w-[120px] bg-white dark:bg-slate-900 border-none shadow-xl rounded-[32px] overflow-hidden p-6 transition-colors"
         :style="unitBaseStyles"
       >
         <CardContent class="p-0 flex flex-col items-center">

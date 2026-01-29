@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Minus } from 'lucide-vue-next';
+import Minus from 'lucide-vue-next/dist/esm/icons/minus.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

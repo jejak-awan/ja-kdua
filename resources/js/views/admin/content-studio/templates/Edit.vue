@@ -146,7 +146,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -155,6 +155,7 @@ import { useToast } from '../../../../composables/useToast';
 import { useFormValidation } from '../../../../composables/useFormValidation';
 import { contentTemplateSchema } from '../../../../schemas';
 import { parseSingleResponse } from '../../../../utils/responseParser';
+import type { ContentTemplate } from '../../../../types/cms';
 import Card from '../../../../components/ui/card.vue';
 import CardHeader from '../../../../components/ui/card-header.vue';
 import CardTitle from '../../../../components/ui/card-title.vue';
@@ -168,12 +169,10 @@ import SelectTrigger from '../../../../components/ui/select-trigger.vue';
 import SelectValue from '../../../../components/ui/select-value.vue';
 import SelectContent from '../../../../components/ui/select-content.vue';
 import SelectItem from '../../../../components/ui/select-item.vue';
-import TiptapEditor from '@/components/TiptapEditor.vue';
-import { 
-    ChevronLeft, 
-    Save, 
-    Loader2 
-} from 'lucide-vue-next';
+import TiptapEditor from '@/components/editor/TiptapEditor.vue';
+import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js';
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -184,13 +183,13 @@ const templateId = route.params.id;
 
 const loading = ref(false);
 const saving = ref(false);
-const initialForm = ref(null);
+const initialForm = ref<any>(null);
 
 const form = ref({
     name: '',
     slug: '',
     description: '',
-    type: 'post',
+    type: 'post' as 'post' | 'page' | 'custom',
     title_template: '',
     body_template: '',
     excerpt_template: '',
@@ -205,21 +204,23 @@ const fetchTemplate = async () => {
     loading.value = true;
     try {
         const response = await api.get(`/admin/ja/content-templates/${templateId}`);
-        const template = parseSingleResponse(response) || {};
+        const template = parseSingleResponse<ContentTemplate>(response);
         
-        form.value = {
-            name: template.name || '',
-            slug: template.slug || '',
-            description: template.description || '',
-            type: template.type || 'post',
-            title_template: template.title_template || '',
-            body_template: template.body_template || '',
-            excerpt_template: template.excerpt_template || '',
-        };
+        if (template) {
+            form.value = {
+                name: template.name || '',
+                slug: template.slug || '',
+                description: template.description || '',
+                type: (template.type as 'post' | 'page' | 'custom') || 'post',
+                title_template: template.title_template || '',
+                body_template: template.body_template || '',
+                excerpt_template: template.excerpt_template || '',
+            };
+        }
         
         // Save initial state for dirty checking
         initialForm.value = JSON.parse(JSON.stringify(form.value));
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch template:', error);
         toast.error.load(error);
         router.push({ name: 'content-studio', query: { tab: 'templates' } });
@@ -239,7 +240,7 @@ const handleSubmit = async () => {
         
         // Update initial form after successful save
         initialForm.value = JSON.parse(JSON.stringify(form.value));
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {

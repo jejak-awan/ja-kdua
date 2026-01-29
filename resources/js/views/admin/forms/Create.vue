@@ -159,7 +159,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -181,7 +181,7 @@ const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(fo
 
 const saving = ref(false);
 const showFieldModal = ref(false);
-const editingField = ref(null);
+const editingField = ref<any>(null);
 
 const formData = reactive({
     name: '',
@@ -190,7 +190,7 @@ const formData = reactive({
     success_message: '',
     redirect_url: '',
     is_active: true,
-    fields: []
+    fields: [] as any[]
 });
 
 const isValid = computed(() => {
@@ -203,7 +203,7 @@ const generateSlug = () => {
     }
 };
 
-const slugify = (text) => {
+const slugify = (text: string) => {
     return text
         .toString()
         .toLowerCase()
@@ -242,8 +242,8 @@ const handleSubmit = async () => {
         };
         await api.post('/admin/ja/forms', payload);
         toast.success.create('Form');
-        router.push({ name: 'forms.index' });
-    } catch (error) {
+        router.push({ name: 'forms' });
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {
@@ -259,22 +259,23 @@ const handleAddField = () => {
     editingField.value = null;
 };
 
-const handleUpdateField = (field) => {
+const handleUpdateField = (field: any) => {
     editingField.value = { ...field };
     showFieldModal.value = true;
 };
 
-const handleDeleteField = (fieldId) => {
-    formData.fields = formData.fields.filter(f => f.id !== fieldId);
+const handleDeleteField = (fieldId: string | number | undefined) => {
+    if (!fieldId) return;
+    formData.fields = formData.fields.filter((f: any) => f.id !== fieldId);
 };
 
-const handleReorderFields = (fields) => {
+const handleReorderFields = (fields: any[]) => {
     formData.fields = fields;
 };
 
-const handleFieldSave = (field) => {
+const handleFieldSave = (field: any) => {
     if (field.id) {
-        const index = formData.fields.findIndex(f => f.id === field.id);
+        const index = formData.fields.findIndex((f: any) => f.id === field.id);
         if (index !== -1) {
             formData.fields[index] = field;
         }

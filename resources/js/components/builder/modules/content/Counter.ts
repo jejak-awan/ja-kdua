@@ -130,7 +130,7 @@ const CounterModule: ModuleDefinition = {
             {
                 id: 'numberTypography',
                 label: 'Number Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `number_${f.name}`,
                     label: `Number ${f.label}`
@@ -139,7 +139,7 @@ const CounterModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`

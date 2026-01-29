@@ -4,11 +4,11 @@
       class="fixed inset-0 z-50 bg-black/20 dark:bg-background/80 backdrop-blur-sm"
     />
     <RadixDialogContent
+      v-bind="forwarded"
       :class="cn(
         'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-border/40 bg-popover p-6 rounded-xl shadow-2xl',
         props.class
       )"
-      v-bind="$attrs"
     >
       <slot />
       
@@ -32,26 +32,30 @@
   </DialogPortal>
 </template>
 
-<script setup>
-import { DialogPortal, DialogOverlay, DialogContent as RadixDialogContent, DialogClose } from 'radix-vue';
-import { X } from 'lucide-vue-next';
+<script setup lang="ts">
+import { DialogPortal, DialogOverlay, DialogContent as RadixDialogContent, DialogClose, type DialogContentProps, useForwardPropsEmits, type DialogContentEmits } from 'radix-vue';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import { cn } from '@/lib/utils';
 import { useI18n } from 'vue-i18n';
 import Tooltip from './tooltip.vue';
 import TooltipContent from './tooltip-content.vue';
 import TooltipTrigger from './tooltip-trigger.vue';
 import TooltipProvider from './tooltip-provider.vue';
+import { computed, type HTMLAttributes } from 'vue';
 
 const { t } = useI18n();
 
-const props = defineProps({
-  class: {
-    type: String,
-    default: '',
-  },
-  hideClose: {
-    type: Boolean,
-    default: false,
-  },
+const props = defineProps<DialogContentProps & { 
+  class?: HTMLAttributes['class'];
+  hideClose?: boolean;
+}>();
+
+const emits = defineEmits<DialogContentEmits>();
+
+const delegatedProps = computed(() => {
+  const { class: _, hideClose: __, ...delegated } = props;
+  return delegated;
 });
+
+const forwarded = useForwardPropsEmits(delegatedProps, emits);
 </script>

@@ -1,32 +1,13 @@
-<script setup>
-import { computed } from 'vue'
-import { PopoverContent, PopoverPortal, useForwardPropsEmits, PopoverClose } from 'radix-vue'
-import { X } from 'lucide-vue-next'
+<script setup lang="ts">
+import { computed, type HTMLAttributes } from 'vue'
+import { PopoverContent, type PopoverContentEmits, type PopoverContentProps, PopoverPortal, useForwardPropsEmits } from 'radix-vue'
 import { cn } from '@/lib/utils'
 
-const props = defineProps({
-  forceMount: { type: Boolean, required: false },
-  trapFocus: { type: Boolean, required: false },
-  side: { type: null, required: false },
-  sideOffset: { type: Number, required: false, default: 4 },
-  align: { type: null, required: false, default: 'center' },
-  alignOffset: { type: Number, required: false },
-  avoidCollisions: { type: Boolean, required: false },
-  collisionBoundary: { type: null, required: false },
-  collisionPadding: { type: [Number, Object], required: false },
-  arrowPadding: { type: Number, required: false },
-  sticky: { type: String, required: false },
-  hideWhenDetached: { type: Boolean, required: false },
-  updatePositionStrategy: { type: String, required: false },
-  onEscapeKeyDown: { type: Function, required: false },
-  onPointerDownOutside: { type: Function, required: false },
-  onFocusOutside: { type: Function, required: false },
-  onInteractOutside: { type: Function, required: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: null, required: false },
-  class: { type: String, required: false },
+const props = withDefaults(defineProps<PopoverContentProps & { class?: HTMLAttributes['class'] }>(), {
+  sideOffset: 4,
+  align: 'center',
 })
-const emits = defineEmits(['escapeKeyDown', 'pointerDownOutside', 'focusOutside', 'interactOutside', 'openAutoFocus', 'closeAutoFocus'])
+const emits = defineEmits<PopoverContentEmits>()
 
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props

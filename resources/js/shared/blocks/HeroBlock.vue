@@ -7,7 +7,7 @@
         :style="containerStyles(settings, blockDevice)"
       >
         <div 
-            class="hero-inner relative overflow-hidden transition-all duration-700 group" 
+            class="hero-inner relative overflow-hidden transition-colors duration-700 group" 
             :style="innerStyles(settings, blockDevice)"
         >
             <!-- Decorative Orbs -->
@@ -52,7 +52,7 @@
                     </Badge>
 
                     <h1 
-                        class="hero-title font-black leading-tight mb-8 tracking-tighter transition-all duration-500" 
+                        class="hero-title font-black leading-tight mb-8 tracking-tighter transition-[width] duration-500" 
                         :style="getTypographyStyles(settings, 'title_', blockDevice)"
                         :contenteditable="mode === 'edit'"
                         @blur="e => updateField('title', (e.target as HTMLElement).innerText)"
@@ -62,7 +62,7 @@
                     
                     <div 
                         v-if="mode === 'edit' || getVal(settings, 'subtitle', blockDevice)"
-                        class="hero-subtitle text-xl opacity-90 leading-relaxed font-medium mb-12 transition-all duration-500" 
+                        class="hero-subtitle text-xl opacity-90 leading-relaxed font-medium mb-12 transition-[width] duration-500" 
                         :style="getTypographyStyles(settings, 'subtitle_', blockDevice)"
                         :contenteditable="mode === 'edit'"
                         @blur="e => updateField('subtitle', (e.target as HTMLElement).innerText)"
@@ -99,13 +99,9 @@ import {
     getLayoutStyles,
     toCSS
 } from '../utils/styleUtils'
-import type { BlockInstance, BuilderInstance } from '../../types/builder'
+import type { BlockInstance, BuilderInstance, BlockProps } from '../../types/builder'
 
-const props = withDefaults(defineProps<{
-  module: BlockInstance;
-  mode?: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile' | null;
-}>(), {
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })

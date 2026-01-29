@@ -18,6 +18,7 @@ export interface ThemeSettingSchema {
 
 export interface Theme {
     name: string;
+    slug: string;
     type: string;
     manifest?: ThemeManifest;
     settings?: Record<string, any>;

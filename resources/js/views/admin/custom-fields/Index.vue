@@ -20,11 +20,11 @@
         <Tabs v-model="currentTab" class="w-full">
             <div class="mb-10">
                 <TabsList class="bg-transparent p-0 h-auto gap-0">
-                    <TabsTrigger value="groups" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                    <TabsTrigger value="groups" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                         <Layout class="w-4 h-4 mr-2" />
                         {{ t('features.developer.custom_fields.tabs.groups') }}
                     </TabsTrigger>
-                    <TabsTrigger value="fields" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                    <TabsTrigger value="fields" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                         <FileCode class="w-4 h-4 mr-2" />
                         {{ t('features.developer.custom_fields.tabs.fields') }}
                     </TabsTrigger>
@@ -36,7 +36,7 @@
                     <CardContent class="p-0">
                         <div v-if="loadingGroups" class="p-12 text-center">
                             <Loader2 class="w-8 h-8 animate-spin mx-auto text-muted-foreground mb-4" />
-                            <p class="text-muted-foreground font-medium">{{ t('features.developer.webhooks.loading') }}</p>
+                            <p class="text-muted-foreground font-medium">{{ t('features.developer.custom_fields.loading') || t('features.developer.webhooks.loading') }}</p>
                         </div>
                         <div v-else-if="fieldGroups.length === 0" class="p-12 text-center">
                             <Layout class="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
@@ -101,7 +101,7 @@
                     <CardContent class="p-0">
                         <div v-if="loadingFields" class="p-12 text-center">
                             <Loader2 class="w-8 h-8 animate-spin mx-auto text-muted-foreground mb-4" />
-                            <p class="text-muted-foreground font-medium">{{ t('features.developer.webhooks.loading') }}</p>
+                            <p class="text-muted-foreground font-medium">{{ t('features.developer.custom_fields.loading') || t('features.developer.webhooks.loading') }}</p>
                         </div>
                         <div v-else-if="filteredFields.length === 0" class="p-12 text-center">
                             <FileCode class="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
@@ -169,7 +169,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -195,15 +195,15 @@ import Tabs from '../../../components/ui/tabs.vue';
 import TabsList from '../../../components/ui/tabs-list.vue';
 import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
 import TabsContent from '../../../components/ui/tabs-content.vue';
-import { 
-    Plus, 
-    Search, 
-    Pencil, 
-    Trash2, 
-    Layout, 
-    FileCode,
-    Loader2
-} from 'lucide-vue-next';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import FileCode from 'lucide-vue-next/dist/esm/icons/file-code.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+
+import type { FieldGroup, CustomField } from '@/types/custom-fields';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
@@ -215,8 +215,8 @@ const tabs = computed(() => [
     { name: 'fields', label: t('features.developer.custom_fields.tabs.fields') },
 ]);
 
-const fieldGroups = ref([]);
-const customFields = ref([]);
+const fieldGroups = ref<FieldGroup[]>([]);
+const customFields = ref<CustomField[]>([]);
 const loadingGroups = ref(false);
 const loadingFields = ref(false);
 const fieldSearch = ref('');
@@ -224,10 +224,10 @@ const fieldSearch = ref('');
 // Modals state
 const showCreateGroupModal = ref(false);
 const showEditGroupModal = ref(false);
-const editingGroup = ref(null);
+const editingGroup = ref<any>(null);
 const showCreateFieldModal = ref(false);
 const showEditFieldModal = ref(false);
-const editingField = ref(null);
+const editingField = ref<any>(null);
 
 const filteredFields = computed(() => {
     if (!fieldSearch.value) return customFields.value;
@@ -243,9 +243,9 @@ const fetchFieldGroups = async () => {
     loadingGroups.value = true;
     try {
         const response = await api.get('/admin/ja/field-groups');
-        const { data } = parseResponse(response);
-        fieldGroups.value = ensureArray(data);
-    } catch (error) {
+        const { data } = parseResponse<FieldGroup>(response);
+        fieldGroups.value = ensureArray<FieldGroup>(data);
+    } catch (error: any) {
         console.error('Failed to fetch field groups:', error);
     } finally {
         loadingGroups.value = false;
@@ -256,9 +256,9 @@ const fetchCustomFields = async () => {
     loadingFields.value = true;
     try {
         const response = await api.get('/admin/ja/custom-fields');
-        const { data } = parseResponse(response);
-        customFields.value = ensureArray(data);
-    } catch (error) {
+        const { data } = parseResponse<CustomField>(response);
+        customFields.value = ensureArray<CustomField>(data);
+    } catch (error: any) {
         console.error('Failed to fetch custom fields:', error);
     } finally {
         loadingFields.value = false;
@@ -266,12 +266,12 @@ const fetchCustomFields = async () => {
 };
 
 // Group Actions
-const editGroup = (group) => {
+const editGroup = (group: any) => {
     editingGroup.value = group;
     showEditGroupModal.value = true;
 };
 
-const deleteGroup = async (group) => {
+const deleteGroup = async (group: any) => {
     const confirmed = await confirm({
         title: t('features.developer.custom_fields.groups.actions.delete'),
         message: t('features.developer.custom_fields.groups.confirm.delete', { name: group.name }),
@@ -285,7 +285,7 @@ const deleteGroup = async (group) => {
         await api.delete(`/admin/ja/custom-fields/groups/${group.id}`);
         toast.success.delete(t('features.developer.custom_fields.tabs.groups'));
         fetchFieldGroups();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete group:', error);
         toast.error.delete(error, t('features.developer.custom_fields.tabs.groups'));
     }
@@ -303,12 +303,12 @@ const handleGroupSaved = () => {
 };
 
 // Field Actions
-const editField = (field) => {
+const editField = (field: CustomField) => {
     editingField.value = field;
     showEditFieldModal.value = true;
 };
 
-const deleteField = async (field) => {
+const deleteField = async (field: CustomField) => {
     const confirmed = await confirm({
         title: t('features.developer.custom_fields.fields.actions.delete'),
         message: t('features.developer.custom_fields.fields.confirm.delete', { label: field.label }),
@@ -322,7 +322,7 @@ const deleteField = async (field) => {
         await api.delete(`/admin/ja/custom-fields/fields/${field.id}`);
         toast.success.delete(t('features.developer.custom_fields.tabs.fields'));
         fetchCustomFields();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete field:', error);
         toast.error.delete(error, t('features.developer.custom_fields.tabs.fields'));
     }

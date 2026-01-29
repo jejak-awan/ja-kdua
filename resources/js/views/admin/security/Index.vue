@@ -32,27 +32,27 @@
         <Tabs v-model="activeTab" class="w-full">
             <div class="mb-10">
                 <TabsList class="bg-transparent p-0 h-auto gap-0">
-                    <TabsTrigger value="overview" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                    <TabsTrigger value="overview" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                         <BarChart3 class="w-4 h-4 mr-2" />
                         {{ $t('features.security.tabs.overview') }}
                     </TabsTrigger>
-                    <TabsTrigger value="blocklist" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                    <TabsTrigger value="blocklist" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                         <ShieldX class="w-4 h-4 mr-2" />
                         {{ $t('features.security.tabs.blocklist') }}
                     </TabsTrigger>
-                    <TabsTrigger value="whitelist" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                    <TabsTrigger value="whitelist" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                         <ShieldCheck class="w-4 h-4 mr-2" />
                         {{ $t('features.security.tabs.whitelist') }}
                     </TabsTrigger>
-                    <TabsTrigger value="csp-reports" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                    <TabsTrigger value="csp-reports" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                         <FileWarning class="w-4 h-4 mr-2" />
                         {{ $t('features.security.tabs.cspReports') }}
                     </TabsTrigger>
-                    <TabsTrigger value="slow-queries" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                    <TabsTrigger value="slow-queries" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                         <Timer class="w-4 h-4 mr-2" />
                         {{ $t('features.security.tabs.slowQueries') }}
                     </TabsTrigger>
-                    <TabsTrigger value="vulnerabilities" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-all">
+                    <TabsTrigger value="vulnerabilities" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                         <ShieldAlert class="w-4 h-4 mr-2" />
                         {{ $t('features.security.tabs.vulnerabilities') }}
                     </TabsTrigger>
@@ -215,10 +215,10 @@
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem :value="10">10</SelectItem>
-                                <SelectItem :value="25">25</SelectItem>
-                                <SelectItem :value="50">50</SelectItem>
-                                <SelectItem :value="100">100</SelectItem>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="25">25</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                                <SelectItem value="100">100</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -296,7 +296,7 @@
                     :total-items="filteredLogs.length"
                     :per-page="Number(logsPerPage)"
                     @page-change="(val) => logsCurrentPage = val"
-                    @update:per-page="(val) => { logsPerPage = val; logsCurrentPage = 1; }"
+                    @update:per-page="(val) => { logsPerPage = String(val); logsCurrentPage = 1; }"
                     class="border-none shadow-none px-6 py-4"
                 />
             </Card>
@@ -328,10 +328,10 @@
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem :value="10">10</SelectItem>
-                                    <SelectItem :value="25">25</SelectItem>
-                                    <SelectItem :value="50">50</SelectItem>
-                                    <SelectItem :value="100">100</SelectItem>
+                                    <SelectItem value="10">10</SelectItem>
+                                    <SelectItem value="25">25</SelectItem>
+                                    <SelectItem value="50">50</SelectItem>
+                                    <SelectItem value="100">100</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -406,7 +406,7 @@
                         :total-items="blocklist.length"
                         :per-page="Number(blocklistPerPage)"
                         @page-change="(val) => blocklistCurrentPage = val"
-                        @update:per-page="(val) => { blocklistPerPage = val; blocklistCurrentPage = 1; }"
+                        @update:per-page="(val) => { blocklistPerPage = String(val); blocklistCurrentPage = 1; }"
                         class="border-none shadow-none px-6 py-4"
                     />
                 </Card>
@@ -438,10 +438,10 @@
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem :value="10">10</SelectItem>
-                                    <SelectItem :value="25">25</SelectItem>
-                                    <SelectItem :value="50">50</SelectItem>
-                                    <SelectItem :value="100">100</SelectItem>
+                                    <SelectItem value="10">10</SelectItem>
+                                    <SelectItem value="25">25</SelectItem>
+                                    <SelectItem value="50">50</SelectItem>
+                                    <SelectItem value="100">100</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -525,7 +525,7 @@
                         :total-items="whitelist.length"
                         :per-page="Number(whitelistPerPage)"
                         @page-change="(val) => whitelistCurrentPage = val"
-                        @update:per-page="(val) => { whitelistPerPage = val; whitelistCurrentPage = 1; }"
+                        @update:per-page="(val) => { whitelistPerPage = String(val); whitelistCurrentPage = 1; }"
                         class="border-none shadow-none px-6 py-4"
                     />
                 </Card>
@@ -550,11 +550,11 @@
                     <div class="px-6 pb-4 grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div class="bg-muted/30 rounded-lg p-4">
                             <p class="text-sm text-muted-foreground">{{ $t('features.security.cspReports.stats.total') }}</p>
-                            <p class="text-2xl font-bold text-foreground">{{ cspStats.total || 0 }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ cspStats?.total || 0 }}</p>
                         </div>
                         <div class="bg-muted/30 rounded-lg p-4">
                             <p class="text-sm text-muted-foreground">{{ $t('features.security.cspReports.stats.new') }}</p>
-                            <p class="text-2xl font-bold text-orange-600">{{ cspStats.new || 0 }}</p>
+                            <p class="text-2xl font-bold text-orange-600">{{ cspStats?.new || 0 }}</p>
                         </div>
                         <div class="bg-muted/30 rounded-lg p-4">
                             <p class="text-sm text-muted-foreground">{{ $t('features.security.cspReports.stats.topViolation') }}</p>
@@ -603,7 +603,7 @@
                     </div>
 
                     <div v-if="selectedCspReports.length > 0" class="px-6 pb-4">
-                        <div class="bg-muted/50 border border-border rounded-lg p-4 flex items-center justify-between transition-all duration-200">
+                        <div class="bg-muted/50 border border-border rounded-lg p-4 flex items-center justify-between transition-colors duration-200">
                             <span class="text-sm font-medium text-foreground">
                                 {{ $t('features.security.bulkActions.selected', { count: selectedCspReports.length }) }}
                             </span>
@@ -657,7 +657,7 @@
                                         <td class="px-4 py-3">
                                             <Badge variant="destructive">{{ report.violated_directive }}</Badge>
                                         </td>
-                                        <td class="px-4 py-3 text-sm max-w-xs truncate" :title="report.blocked_uri">{{ report.blocked_uri || 'N/A' }}</td>
+                                        <td class="px-4 py-3 text-sm max-w-xs truncate" :title="report.blocked_uri ?? undefined">{{ report.blocked_uri || 'N/A' }}</td>
                                         <td class="px-4 py-3 text-sm text-muted-foreground max-w-xs truncate" :title="report.document_uri">{{ report.document_uri }}</td>
                                         <td class="px-4 py-3 font-mono text-sm">{{ report.ip_address }}</td>
                                         <td class="px-4 py-3">
@@ -699,19 +699,19 @@
                     <div class="px-6 pb-4 grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div class="bg-muted/30 rounded-lg p-4">
                             <p class="text-sm text-muted-foreground">{{ $t('features.security.slowQueries.stats.total') }}</p>
-                            <p class="text-2xl font-bold text-foreground">{{ slowQueryStats.total || 0 }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ slowQueryStats?.total || 0 }}</p>
                         </div>
                         <div class="bg-muted/30 rounded-lg p-4">
                             <p class="text-sm text-muted-foreground">{{ $t('features.security.slowQueries.stats.avgDuration') }}</p>
-                            <p class="text-2xl font-bold text-orange-600">{{ slowQueryStats.avg_duration || 0 }}ms</p>
+                            <p class="text-2xl font-bold text-orange-600">{{ slowQueryStats?.avg_duration || 0 }}ms</p>
                         </div>
                         <div class="bg-muted/30 rounded-lg p-4">
                             <p class="text-sm text-muted-foreground">{{ $t('features.security.slowQueries.stats.maxDuration') }}</p>
-                            <p class="text-2xl font-bold text-red-600">{{ slowQueryStats.max_duration || 0 }}ms</p>
+                            <p class="text-2xl font-bold text-red-600">{{ slowQueryStats?.max_duration || 0 }}ms</p>
                         </div>
                         <div class="bg-muted/30 rounded-lg p-4">
                             <p class="text-sm text-muted-foreground">{{ $t('features.security.slowQueries.stats.today') }}</p>
-                            <p class="text-2xl font-bold text-blue-600">{{ slowQueryStats.today || 0 }}</p>
+                            <p class="text-2xl font-bold text-blue-600">{{ slowQueryStats?.today || 0 }}</p>
                         </div>
                     </div>
 
@@ -971,85 +971,176 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
-import { useToast } from '../../../composables/useToast';
-import { useConfirm } from '../../../composables/useConfirm';
-import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
-import Tabs from '../../../components/ui/tabs.vue';
-import TabsList from '../../../components/ui/tabs-list.vue';
-import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
-import TabsContent from '../../../components/ui/tabs-content.vue';
-import Card from '../../../components/ui/card.vue';
-import CardHeader from '../../../components/ui/card-header.vue';
-import CardTitle from '../../../components/ui/card-title.vue';
-import CardDescription from '../../../components/ui/card-description.vue';
-import CardContent from '../../../components/ui/card-content.vue';
-import Pagination from '../../../components/ui/pagination.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Label from '../../../components/ui/label.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import Table from '../../../components/ui/table.vue';
-import TableHeader from '../../../components/ui/table-header.vue';
-import TableBody from '../../../components/ui/table-body.vue';
-import TableHead from '../../../components/ui/table-head.vue';
-import TableRow from '../../../components/ui/table-row.vue';
-import TableCell from '../../../components/ui/table-cell.vue';
-import { 
-    ShieldAlert, 
-    ShieldX, 
-    ShieldCheck, 
-    UserX, 
-    Trash2, 
-    RefreshCw, 
-    Search, 
-    Loader2, 
-    ArrowLeft,
-    Plus,
-    BarChart3,
-    FileWarning,
-    Timer
-} from 'lucide-vue-next';
+import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
+import { useConfirm } from '@/composables/useConfirm';
+import { parseResponse, ensureArray, parseSingleResponse } from '@/utils/responseParser';
+import {
+    Tabs,
+    TabsList,
+    TabsTrigger,
+    TabsContent,
+    Card,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+    CardContent,
+    Pagination,
+    Button,
+    Input,
+    Label,
+    Checkbox,
+    Badge,
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem
+} from '@/components/ui';
+import ShieldAlert from 'lucide-vue-next/dist/esm/icons/shield-alert.js';
+import ShieldX from 'lucide-vue-next/dist/esm/icons/shield-x.js';
+import ShieldCheck from 'lucide-vue-next/dist/esm/icons/shield-check.js';
+import UserX from 'lucide-vue-next/dist/esm/icons/user-x.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import BarChart3 from 'lucide-vue-next/dist/esm/icons/chart-bar-stacked.js';
+import FileWarning from 'lucide-vue-next/dist/esm/icons/file-x.js';
+import Timer from 'lucide-vue-next/dist/esm/icons/timer.js';
+
+interface User {
+    id: number;
+    name: string;
+    email: string;
+}
+
+interface Log {
+    id: number;
+    event_type: string;
+    ip_address: string;
+    user_id?: number | null;
+    user?: User | null;
+    details: string;
+    created_at: string;
+}
+
+interface Statistics {
+    total_events: number;
+    failed_logins: number;
+    blocked_ips: number;
+    [key: string]: any;
+}
+
+interface IpManagementItem {
+    id: number | string;
+    ip_address: string;
+    reason?: string | null;
+    created_by?: number | null;
+    creator?: User | null;
+    created_at: string;
+}
+
+interface IpStatus {
+    is_blocked: boolean;
+    reason?: string | null;
+    [key: string]: any;
+}
+
+interface CspReport {
+    id: number;
+    violated_directive: string;
+    blocked_uri: string | null;
+    document_uri: string;
+    ip_address: string;
+    status: 'new' | 'reviewed' | 'false_positive';
+    created_at: string;
+}
+
+interface CspStats {
+    total?: number;
+    new?: number;
+    by_directive?: { violated_directive: string; count: number }[];
+    recent_trend?: { date: string; count: number }[];
+    [key: string]: any;
+}
+
+interface SlowQuery {
+    id: number;
+    route: string | null;
+    duration: number;
+    user_id?: number | null;
+    user?: User | null;
+    query: string;
+    created_at: string;
+}
+
+interface SlowQueryStats {
+    total?: number;
+    avg_duration?: number;
+    max_duration?: number;
+    today?: number;
+}
+
+interface Vulnerability {
+    id: number;
+    package_name: string;
+    version: string;
+    severity: 'critical' | 'high' | 'medium' | 'low';
+    cve: string | null;
+    source: 'composer' | 'npm';
+    status: 'new' | 'acknowledged' | 'patched' | 'ignored';
+}
+
+interface VulnStats {
+    total: number;
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+}
+
+interface PaginationInfo {
+    total: number;
+    current_page: number;
+    last_page: number;
+}
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 // Data
-const logs = ref([]);
-const statistics = ref(null);
-const blocklist = ref([]);
-const whitelist = ref([]);
+const logs = ref<Log[]>([]);
+const statistics = ref<Statistics | null>(null);
+const blocklist = ref<IpManagementItem[]>([]);
+const whitelist = ref<IpManagementItem[]>([]);
 const loading = ref(false);
 
 // UI State
-const activeTab = ref('overview');
-const logFilter = ref('all');
-const logSearch = ref('');
-const ipToBlock = ref('');
-const ipToCheck = ref('');
-const ipToUnblock = ref('');
-const ipToWhitelist = ref('');
-const ipStatus = ref(null);
-const selectedLogIds = ref([]);
-const selectedBlocklistIds = ref([]);
-const selectedWhitelistIds = ref([]);
+const activeTab = ref<string>('overview');
+const logFilter = ref<string>('all');
+const logSearch = ref<string>('');
+const ipToBlock = ref<string>('');
+const ipToCheck = ref<string>('');
+const ipToUnblock = ref<string>('');
+const ipToWhitelist = ref<string>('');
+const ipStatus = ref<IpStatus | null>(null);
+const selectedLogIds = ref<string[]>([]);
+const selectedBlocklistIds = ref<string[]>([]);
+const selectedWhitelistIds = ref<string[]>([]);
 
 // Pagination State
-const logsPerPage = ref(25);
-const logsCurrentPage = ref(1);
-const blocklistPerPage = ref(10);
-const blocklistCurrentPage = ref(1);
-const whitelistPerPage = ref(10);
-const whitelistCurrentPage = ref(1);
+const logsPerPage = ref<string>('25');
+const logsCurrentPage = ref<number>(1);
+const blocklistPerPage = ref<string>('10');
+const blocklistCurrentPage = ref<number>(1);
+const whitelistPerPage = ref<string>('10');
+const whitelistCurrentPage = ref<number>(1);
 
 // Reset pagination when filter changes
 watch([logFilter, logSearch, logsPerPage], () => {
@@ -1075,7 +1166,7 @@ const tabs = computed(() => [
 ]);
 
 // Filtered logs
-const filteredLogs = computed(() => {
+const filteredLogs = computed<Log[]>(() => {
     let filtered = logs.value;
     
     if (logFilter.value && logFilter.value !== 'all') {
@@ -1095,38 +1186,38 @@ const filteredLogs = computed(() => {
 });
 
 // Paginated data
-const logsTotalPages = computed(() => Math.max(1, Math.ceil(filteredLogs.value.length / logsPerPage.value)));
-const logsStartIndex = computed(() => (logsCurrentPage.value - 1) * logsPerPage.value);
-const logsEndIndex = computed(() => Math.min(logsStartIndex.value + logsPerPage.value, filteredLogs.value.length));
-const paginatedLogs = computed(() => filteredLogs.value.slice(logsStartIndex.value, logsEndIndex.value));
+const logsTotalPages = computed(() => Math.max(1, Math.ceil(filteredLogs.value.length / Number(logsPerPage.value))));
+const logsStartIndex = computed(() => (logsCurrentPage.value - 1) * Number(logsPerPage.value));
+const logsEndIndex = computed(() => Math.min(logsStartIndex.value + Number(logsPerPage.value), filteredLogs.value.length));
+const paginatedLogs = computed<Log[]>(() => filteredLogs.value.slice(logsStartIndex.value, logsEndIndex.value));
 
-const blocklistTotalPages = computed(() => Math.max(1, Math.ceil(blocklist.value.length / blocklistPerPage.value)));
-const blocklistStartIndex = computed(() => (blocklistCurrentPage.value - 1) * blocklistPerPage.value);
-const blocklistEndIndex = computed(() => Math.min(blocklistStartIndex.value + blocklistPerPage.value, blocklist.value.length));
-const paginatedBlocklist = computed(() => blocklist.value.slice(blocklistStartIndex.value, blocklistEndIndex.value));
+const blocklistTotalPages = computed(() => Math.max(1, Math.ceil(blocklist.value.length / Number(blocklistPerPage.value))));
+const blocklistStartIndex = computed(() => (blocklistCurrentPage.value - 1) * Number(blocklistPerPage.value));
+const blocklistEndIndex = computed(() => Math.min(blocklistStartIndex.value + Number(blocklistPerPage.value), blocklist.value.length));
+const paginatedBlocklist = computed<IpManagementItem[]>(() => blocklist.value.slice(blocklistStartIndex.value, blocklistEndIndex.value));
 
-const whitelistTotalPages = computed(() => Math.max(1, Math.ceil(whitelist.value.length / whitelistPerPage.value)));
-const whitelistStartIndex = computed(() => (whitelistCurrentPage.value - 1) * whitelistPerPage.value);
-const whitelistEndIndex = computed(() => Math.min(whitelistStartIndex.value + whitelistPerPage.value, whitelist.value.length));
-const paginatedWhitelist = computed(() => whitelist.value.slice(whitelistStartIndex.value, whitelistEndIndex.value));
+const whitelistTotalPages = computed(() => Math.max(1, Math.ceil(whitelist.value.length / Number(whitelistPerPage.value))));
+const whitelistStartIndex = computed(() => (whitelistCurrentPage.value - 1) * Number(whitelistPerPage.value));
+const whitelistEndIndex = computed(() => Math.min(whitelistStartIndex.value + Number(whitelistPerPage.value), whitelist.value.length));
+const paginatedWhitelist = computed<IpManagementItem[]>(() => whitelist.value.slice(whitelistStartIndex.value, whitelistEndIndex.value));
 
 // Fetch functions
-const fetchLogs = async () => {
+const fetchLogs = async () : Promise<void> => {
     loading.value = true;
     try {
         const response = await api.get('/admin/ja/security/logs', {
             params: { per_page: logsPerPage.value }
         });
         const result = parseResponse(response);
-        logs.value = result.data || [];
-    } catch (error) {
+        logs.value = (result.data as unknown as Log[]) || [];
+    } catch (error: any) {
         console.error('Failed to fetch logs:', error);
     } finally {
         loading.value = false;
     }
 };
 
-const clearLogs = async () => {
+const clearLogs = async () : Promise<void> => {
     const confirmed = await confirm({
         title: t('features.system.logs.actions.clear'),
         message: t('features.system.logs.confirm.clear'),
@@ -1140,35 +1231,35 @@ const clearLogs = async () => {
         await api.delete('admin/ja/security/logs');
         toast.success.action(t('features.system.logs.messages.cleared'));
         fetchLogs();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to clear logs:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const fetchStats = async () => {
+const fetchStats = async () : Promise<void> => {
     try {
         const response = await api.get('admin/ja/security/stats');
-        statistics.value = parseSingleResponse(response) || {};
-    } catch (error) {
+        statistics.value = (parseSingleResponse<Statistics>(response) as Statistics) || null;
+    } catch (error: any) {
         console.error('Failed to fetch stats:', error);
     }
 };
 
-const fetchBlocklist = async () => {
+const fetchBlocklist = async () : Promise<void> => {
     try {
         const response = await api.get('admin/ja/security/blocklist');
-        blocklist.value = ensureArray(parseSingleResponse(response));
-    } catch (error) {
+        blocklist.value = ensureArray(parseSingleResponse<IpManagementItem[]>(response)) as IpManagementItem[];
+    } catch (error: any) {
         console.error('Failed to fetch blocklist:', error);
     }
 };
 
-const fetchWhitelist = async () => {
+const fetchWhitelist = async () : Promise<void> => {
     try {
         const response = await api.get('admin/ja/security/whitelist');
-        whitelist.value = ensureArray(parseSingleResponse(response));
-    } catch (error) {
+        whitelist.value = ensureArray(parseSingleResponse<IpManagementItem[]>(response)) as IpManagementItem[];
+    } catch (error: any) {
         console.error('Failed to fetch whitelist:', error);
     }
 };
@@ -1176,7 +1267,7 @@ const fetchWhitelist = async () => {
 // IP Actions
 const blockIP = async () => {
     if (!ipToBlock.value) {
-        toast.error(t('features.security.messages.enterIp'));
+        toast.error.validation(t('features.security.messages.enterIp'));
         return;
     }
 
@@ -1195,22 +1286,21 @@ const blockIP = async () => {
         ipToBlock.value = '';
         await fetchBlocklist();
         await fetchLogs();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to block IP:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const checkIPStatus = async () => {
+const checkIPStatus = async () : Promise<void> => {
     if (!ipToCheck.value) {
-        toast.error(t('features.security.messages.enterIp'));
+        toast.error.validation(t('features.security.messages.enterIp'));
         return;
     }
-
     try {
         const response = await api.get('admin/ja/security/check-ip', { params: { ip_address: ipToCheck.value } });
-        ipStatus.value = parseSingleResponse(response) || {};
-    } catch (error) {
+        ipStatus.value = (parseSingleResponse<IpStatus>(response) as IpStatus) || null;
+    } catch (error: any) {
         console.error('Failed to check IP status:', error);
         toast.error.fromResponse(error);
     }
@@ -1218,7 +1308,7 @@ const checkIPStatus = async () => {
 
 const unblockIP = async () => {
     if (!ipToUnblock.value) {
-        toast.error(t('features.security.messages.enterIp'));
+        toast.error.validation(t('features.security.messages.enterIp'));
         return;
     }
 
@@ -1238,13 +1328,13 @@ const unblockIP = async () => {
         ipToUnblock.value = '';
         await fetchBlocklist();
         await fetchLogs();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to unblock IP:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const blockIPFromLog = async (ip) => {
+const blockIPFromLog = async (ip: string) : Promise<void> => {
     const confirmed = await confirm({
         title: t('features.security.logs.actions.blockIp'),
         message: t('features.security.messages.confirmBlock', { ip }),
@@ -1259,14 +1349,14 @@ const blockIPFromLog = async (ip) => {
         toast.success.action(t('features.security.messages.blockSuccess'));
         await fetchBlocklist();
         await fetchLogs();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to block IP:', error);
         toast.error.fromResponse(error);
     }
 };
 
 // Bulk actions for logs
-const bulkBlockFromLogs = async () => {
+const bulkBlockFromLogs = async () : Promise<void> => {
     if (selectedLogIds.value.length === 0) return;
     
     const confirmed = await confirm({
@@ -1284,13 +1374,13 @@ const bulkBlockFromLogs = async () => {
         selectedLogIds.value = [];
         await fetchBlocklist();
         await fetchLogs();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to bulk block:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const toggleAllLogs = (checked) => {
+const toggleAllLogs = (checked: boolean) : void => {
     if (checked) {
         selectedLogIds.value = paginatedLogs.value.map(log => log.ip_address);
     } else {
@@ -1298,7 +1388,7 @@ const toggleAllLogs = (checked) => {
     }
 };
 
-const handleSelectLog = (checked, ip) => {
+const handleSelectLog = (checked: boolean, ip: string) : void => {
     if (checked) {
         selectedLogIds.value.push(ip);
     } else {
@@ -1307,7 +1397,7 @@ const handleSelectLog = (checked, ip) => {
 };
 
 // Blocklist Actions
-const removeFromBlocklist = async (ip) => {
+const removeFromBlocklist = async (ip: string) : Promise<void> => {
     const confirmed = await confirm({
         title: t('features.security.blocklist.actions.unblock'),
         message: t('features.security.messages.confirmUnblock', { ip }),
@@ -1321,17 +1411,17 @@ const removeFromBlocklist = async (ip) => {
         await api.post('admin/ja/security/unblock-ip', { ip_address: ip });
         toast.success.action(t('features.security.messages.unblockSuccess'));
         await fetchBlocklist();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to remove from blocklist:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const moveToWhitelist = async (ip) => {
+const moveToWhitelist = async (ip: string) : Promise<void> => {
     const confirmed = await confirm({
         title: t('features.security.blocklist.actions.moveToWhitelist'),
         message: t('features.security.messages.confirmMoveToWhitelist', { ip }),
-        variant: 'default',
+        variant: 'info',
         confirmText: t('common.actions.move'),
     });
 
@@ -1343,13 +1433,13 @@ const moveToWhitelist = async (ip) => {
         toast.success.action(t('features.security.messages.movedToWhitelist'));
         await fetchBlocklist();
         await fetchWhitelist();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to move to whitelist:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const bulkUnblock = async () => {
+const bulkUnblock = async () : Promise<void> => {
     if (selectedBlocklistIds.value.length === 0) return;
     
     const confirmed = await confirm({
@@ -1366,13 +1456,13 @@ const bulkUnblock = async () => {
         toast.success.action(t('features.security.messages.bulkUnblockSuccess'));
         selectedBlocklistIds.value = [];
         await fetchBlocklist();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to bulk unblock:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const toggleAllBlocklist = (checked) => {
+const toggleAllBlocklist = (checked: boolean) : void => {
     if (checked) {
         selectedBlocklistIds.value = paginatedBlocklist.value.map(item => item.ip_address);
     } else {
@@ -1380,7 +1470,7 @@ const toggleAllBlocklist = (checked) => {
     }
 };
 
-const handleSelectBlocklist = (checked, ip) => {
+const handleSelectBlocklist = (checked: boolean, ip: string) : void => {
     if (checked) {
         selectedBlocklistIds.value.push(ip);
     } else {
@@ -1389,9 +1479,9 @@ const handleSelectBlocklist = (checked, ip) => {
 };
 
 // Whitelist Actions
-const addToWhitelist = async (ip) => {
+const addToWhitelist = async (ip: string) : Promise<void> => {
     if (!ip) {
-        toast.error(t('features.security.messages.enterIp'));
+        toast.error.validation(t('features.security.messages.enterIp'));
         return;
     }
 
@@ -1400,17 +1490,17 @@ const addToWhitelist = async (ip) => {
         toast.success.action(t('features.security.messages.whitelistSuccess'));
         ipToWhitelist.value = '';
         await fetchWhitelist();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to add to whitelist:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const removeFromWhitelist = async (ip) => {
+const removeFromWhitelist = async (ip: string) : Promise<void> => {
     const confirmed = await confirm({
         title: t('features.security.whitelist.actions.remove'),
         message: t('features.security.messages.confirmRemoveWhitelist', { ip }),
-        variant: 'destructive',
+        variant: 'danger',
         confirmText: t('common.actions.remove'),
     });
 
@@ -1420,19 +1510,19 @@ const removeFromWhitelist = async (ip) => {
         await api.post('/admin/ja/security/remove-whitelist', { data: { ip_address: ip } });
         toast.success.action(t('features.security.messages.whitelistRemoveSuccess'));
         await fetchWhitelist();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to remove from whitelist:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const bulkRemoveWhitelist = async () => {
+const bulkRemoveWhitelist = async () : Promise<void> => {
     if (selectedWhitelistIds.value.length === 0) return;
     
     const confirmed = await confirm({
         title: t('features.security.bulkActions.removeSelected'),
         message: t('features.security.messages.confirmBulkRemoveWhitelist', { count: selectedWhitelistIds.value.length }),
-        variant: 'destructive',
+        variant: 'danger',
         confirmText: t('common.actions.remove'),
     });
 
@@ -1443,13 +1533,13 @@ const bulkRemoveWhitelist = async () => {
         toast.success.action(t('features.security.messages.bulkWhitelistRemoveSuccess'));
         selectedWhitelistIds.value = [];
         await fetchWhitelist();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to bulk remove whitelist:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const toggleAllWhitelist = (checked) => {
+const toggleAllWhitelist = (checked: boolean) : void => {
     if (checked) {
         selectedWhitelistIds.value = paginatedWhitelist.value.map(item => item.ip_address);
     } else {
@@ -1457,7 +1547,7 @@ const toggleAllWhitelist = (checked) => {
     }
 };
 
-const handleSelectWhitelist = (checked, ip) => {
+const handleSelectWhitelist = (checked: boolean, ip: string) : void => {
     if (checked) {
         selectedWhitelistIds.value.push(ip);
     } else {
@@ -1466,15 +1556,15 @@ const handleSelectWhitelist = (checked, ip) => {
 };
 
 // Helpers
-const getEventLabel = (eventType) => {
+const getEventLabel = (eventType: string) : string => {
     const key = `features.security.logs.eventTypes.${eventType}`;
     const translated = t(key);
     // If translation key doesn't exist, return formatted event type
-    return translated !== key ? translated : eventType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return translated !== key ? translated : eventType.replace(/_/g, ' ').replace(/\b\w/g, l => (l as string).toUpperCase());
 };
 
-const getEventClass = (eventType) => {
-    const classes = {
+const getEventClass = (eventType: string) : string => {
+    const classes: Record<string, string> = {
         'login_failed': 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
         'login_success': 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
         'ip_blocked': 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
@@ -1490,7 +1580,7 @@ const getEventClass = (eventType) => {
     return classes[eventType] || 'bg-muted/50 text-muted-foreground border border-border';
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string | null | undefined) : string => {
     if (!date) return '-';
     return new Date(date).toLocaleString(undefined, {
         year: 'numeric',
@@ -1502,7 +1592,7 @@ const formatDate = (date) => {
 };
 
 // Refresh all data
-const refreshAll = async () => {
+const refreshAll = async () : Promise<void> => {
     await Promise.all([
         fetchLogs(),
         fetchStats(),
@@ -1511,72 +1601,66 @@ const refreshAll = async () => {
     ]);
 };
 
-onMounted(() => {
-    fetchLogs();
-    fetchStats();
-    fetchBlocklist();
-    fetchWhitelist();
-});
 
 // ========================================
 // CSP REPORTS TAB
 // ========================================
-const cspReports = ref([]);
-const cspStats = ref({});
+const cspReports = ref<CspReport[]>([]);
+const cspStats = ref<CspStats | null>(null);
 const cspLoading = ref(false);
-const selectedCspReports = ref([]);
-const cspFilters = ref({ status: 'all', directive: '', date_from: '', date_to: '', page: 1, per_page: 50 });
-const cspPagination = ref({ total: 0, current_page: 1, last_page: 1 });
+const selectedCspReports = ref<number[]>([]);
+const cspFilters = ref<Record<string, any>>({ status: 'all', directive: '', date_from: '', date_to: '', page: 1, per_page: 50 });
+const cspPagination = ref<PaginationInfo>({ total: 0, current_page: 1, last_page: 1 });
 
-const cspTopViolation = computed(() => {
-    if (!cspStats.value.by_directive || cspStats.value.by_directive.length === 0) return 'None';
+const cspTopViolation = computed<string>(() => {
+    if (!cspStats.value?.by_directive || cspStats.value.by_directive.length === 0) return 'None';
     return cspStats.value.by_directive[0].violated_directive;
 });
 
-const cspRecentCount = computed(() => {
-    if (!cspStats.value.recent_trend) return 0;
+const cspRecentCount = computed<number>(() => {
+    if (!cspStats.value?.recent_trend) return 0;
     const lastDay = cspStats.value.recent_trend[cspStats.value.recent_trend.length - 1];
     return lastDay ? lastDay.count : 0;
 });
 
-const fetchCspReports = async () => {
+const fetchCspReports = async () : Promise<void> => {
     cspLoading.value = true;
     try {
-        const params = { ...cspFilters.value };
+        const params: Record<string, any> = { ...cspFilters.value };
         if (params.status === 'all') params.status = '';
         
         const response = await api.get('admin/ja/security/csp-reports', { params });
         const result = response.data?.data ? response.data.data : response.data;
-        cspReports.value = result.data || [];
+        cspReports.value = (result.data as CspReport[]) || [];
         cspPagination.value = {
             total: result.total || 0,
             current_page: result.current_page || 1,
             last_page: result.last_page || 1,
         };
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch CSP reports:', error);
     } finally {
         cspLoading.value = false;
     }
 };
 
-const fetchCspStats = async () => {
+const fetchCspStats = async () : Promise<void> => {
     try {
         const response = await api.get('admin/ja/security/csp-reports/statistics');
-        cspStats.value = response.data?.data || {};
-    } catch (error) {
+        cspStats.value = (response.data?.data as CspStats) || {};
+    } catch (error: any) {
         console.error('Failed to fetch CSP stats:', error);
     }
 };
 
-const applyCspFilters = () => { cspFilters.value.page = 1; fetchCspReports(); };
-const resetCspFilters = () => { cspFilters.value = { status: 'all', directive: '', date_from: '', date_to: '', page: 1, per_page: 50 }; fetchCspReports(); };
+const applyCspFilters = () : void => { cspFilters.value.page = 1; fetchCspReports(); };
+const resetCspFilters = () : void => { cspFilters.value = { status: 'all', directive: '', date_from: '', date_to: '', page: 1, per_page: 50 }; fetchCspReports(); };
 
-const toggleAllCspReports = (checked) => {
+const toggleAllCspReports = (checked: boolean) : void => {
     selectedCspReports.value = checked ? cspReports.value.map(r => r.id) : [];
 };
 
-const handleSelectCspReport = (checked, id) => {
+const handleSelectCspReport = (checked: boolean, id: number) : void => {
     if (checked) {
         selectedCspReports.value.push(id);
     } else {
@@ -1584,7 +1668,7 @@ const handleSelectCspReport = (checked, id) => {
     }
 };
 
-const cspBulkAction = async (action) => {
+const cspBulkAction = async (action: string) : Promise<void> => {
     if (selectedCspReports.value.length === 0) return;
     const confirmed = await confirm({
         title: t('common.actions.confirm'),
@@ -1599,60 +1683,60 @@ const cspBulkAction = async (action) => {
         selectedCspReports.value = [];
         fetchCspReports();
         fetchCspStats();
-    } catch (error) {
+    } catch (error: any) {
         toast.error.fromResponse(error);
     }
 };
 
-const getCspStatusVariant = (status) => {
-    const variants = { new: 'warning', reviewed: 'info', false_positive: 'secondary' };
+const getCspStatusVariant = (status: string) : "warning" | "info" | "secondary" => {
+    const variants: Record<string, "warning" | "info" | "secondary"> = { new: 'warning', reviewed: 'info', false_positive: 'secondary' };
     return variants[status] || 'secondary';
 };
 
-const getCspStatusLabel = (status) => {
-    const labels = { new: t('features.security.cspReports.status.new'), reviewed: t('features.security.cspReports.status.reviewed'), false_positive: t('features.security.cspReports.status.falsePositive') };
+const getCspStatusLabel = (status: string) : string => {
+    const labels: Record<string, string> = { new: t('features.security.cspReports.status.new'), reviewed: t('features.security.cspReports.status.reviewed'), false_positive: t('features.security.cspReports.status.falsePositive') };
     return labels[status] || status;
 };
 
 // ========================================
 // SLOW QUERIES TAB
 // ========================================
-const slowQueries = ref([]);
-const slowQueryStats = ref({});
+const slowQueries = ref<SlowQuery[]>([]);
+const slowQueryStats = ref<SlowQueryStats | null>(null);
 const slowQueryLoading = ref(false);
-const slowQueryFilters = ref({ route: '', min_duration: '', date_from: '', date_to: '', page: 1, per_page: 50 });
-const slowQueryPagination = ref({ total: 0, current_page: 1, last_page: 1 });
+const slowQueryFilters = ref<Record<string, any>>({ route: '', min_duration: '', date_from: '', date_to: '', page: 1, per_page: 50 });
+const slowQueryPagination = ref<PaginationInfo>({ total: 0, current_page: 1, last_page: 1 });
 
-const fetchSlowQueries = async () => {
+const fetchSlowQueries = async () : Promise<void> => {
     slowQueryLoading.value = true;
     try {
         const response = await api.get('/admin/ja/security/slow-queries', { params: slowQueryFilters.value });
-        slowQueries.value = response.data?.data?.data || [];
+        slowQueries.value = (response.data?.data?.data as SlowQuery[]) || [];
         slowQueryPagination.value = {
             total: response.data?.data?.total || 0,
             current_page: response.data?.data?.current_page || 1,
             last_page: response.data?.data?.last_page || 1,
         };
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch slow queries:', error);
     } finally {
         slowQueryLoading.value = false;
     }
 };
 
-const fetchSlowQueryStats = async () => {
+const fetchSlowQueryStats = async () : Promise<void> => {
     try {
         const response = await api.get('/admin/ja/security/slow-queries/statistics');
-        slowQueryStats.value = response.data?.data || {};
-    } catch (error) {
+        slowQueryStats.value = (response.data?.data as SlowQueryStats) || {};
+    } catch (error: any) {
         console.error('Failed to fetch slow query stats:', error);
     }
 };
 
-const applySlowQueryFilters = () => { slowQueryFilters.value.page = 1; fetchSlowQueries(); };
-const resetSlowQueryFilters = () => { slowQueryFilters.value = { route: '', min_duration: '', date_from: '', date_to: '', page: 1, per_page: 50 }; fetchSlowQueries(); };
+const applySlowQueryFilters = () : void => { slowQueryFilters.value.page = 1; fetchSlowQueries(); };
+const resetSlowQueryFilters = () : void => { slowQueryFilters.value = { route: '', min_duration: '', date_from: '', date_to: '', page: 1, per_page: 50 }; fetchSlowQueries(); };
 
-const getSlowQueryDurationVariant = (duration) => {
+const getSlowQueryDurationVariant = (duration: number) : "destructive" | "warning" | "secondary" => {
     if (duration >= 5000) return 'destructive';
     if (duration >= 2000) return 'warning';
     return 'secondary';
@@ -1661,13 +1745,13 @@ const getSlowQueryDurationVariant = (duration) => {
 // ========================================
 // DEPENDENCY VULNERABILITIES TAB
 // ========================================
-const vulnerabilities = ref([]);
+const vulnerabilities = ref<Vulnerability[]>([]);
 const vulnLoading = ref(false);
 const auditRunning = ref(false);
-const vulnFilters = ref({ source: 'all', severity: 'all', status: 'all', package: '', page: 1, per_page: 50 });
-const vulnPagination = ref({ total: 0, current_page: 1, last_page: 1 });
+const vulnFilters = ref<Record<string, any>>({ source: 'all', severity: 'all', status: 'all', package: '', page: 1, per_page: 50 });
+const vulnPagination = ref<PaginationInfo>({ total: 0, current_page: 1, last_page: 1 });
 
-const vulnStats = ref({
+const vulnStats = ref<VulnStats>({
     total: 0,
     critical: 0,
     high: 0,
@@ -1675,77 +1759,83 @@ const vulnStats = ref({
     low: 0
 });
 
-const fetchVulnStats = async () => {
+const fetchVulnStats = async () : Promise<void> => {
     try {
         const response = await api.get('/admin/ja/security/dependency-vulnerabilities/statistics');
-        vulnStats.value = response.data?.data || {};
-    } catch (error) {
+        vulnStats.value = (response.data?.data as VulnStats) || {
+            total: 0,
+            critical: 0,
+            high: 0,
+            medium: 0,
+            low: 0
+        };
+    } catch (error: any) {
         console.error('Failed to fetch vulnerability stats:', error);
     }
 };
 
-const fetchVulnerabilities = async () => {
+const fetchVulnerabilities = async () : Promise<void> => {
     vulnLoading.value = true;
     try {
-        const params = { ...vulnFilters.value };
+        const params: Record<string, any> = { ...vulnFilters.value };
         if (params.source === 'all') params.source = '';
         if (params.severity === 'all') params.severity = '';
         if (params.status === 'all') params.status = '';
 
         const response = await api.get('/admin/ja/security/dependency-vulnerabilities', { params });
         const result = response.data?.data ? response.data.data : response.data;
-        vulnerabilities.value = result.data || [];
+        vulnerabilities.value = (result.data as Vulnerability[]) || [];
         vulnPagination.value = {
             total: result.total || 0,
             current_page: result.current_page || 1,
             last_page: result.last_page || 1,
         };
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch vulnerabilities:', error);
     } finally {
         vulnLoading.value = false;
     }
 };
 
-const runDependencyAudit = async () => {
+const runDependencyAudit = async () : Promise<void> => {
     auditRunning.value = true;
     try {
         await api.post('/admin/ja/security/run-dependency-audit');
         toast.success.action(t('features.security.vulnerabilities.auditCompleted'));
         fetchVulnerabilities();
         fetchVulnStats();
-    } catch (error) {
+    } catch (error: any) {
         toast.error.fromResponse(error);
     } finally {
         auditRunning.value = false;
     }
 };
 
-const updateVulnStatus = async (vuln, status) => {
+const updateVulnStatus = async (vuln: Vulnerability, status: string | number) : Promise<void> => {
     try {
         await api.put(`/admin/ja/security/dependency-vulnerabilities/${vuln.id}`, { status });
-        vuln.status = status;
+        vuln.status = status as Vulnerability['status'];
         toast.success.action(t('common.messages.success.updated', { item: 'Status' }));
-    } catch (error) {
+    } catch (error: any) {
         toast.error.fromResponse(error);
     }
 };
 
-const applyVulnFilters = () => { vulnFilters.value.page = 1; fetchVulnerabilities(); };
-const resetVulnFilters = () => { vulnFilters.value = { source: 'all', severity: 'all', status: 'all', package: '', page: 1, per_page: 50 }; fetchVulnerabilities(); };
+const applyVulnFilters = () : void => { vulnFilters.value.page = 1; fetchVulnerabilities(); };
+const resetVulnFilters = () : void => { vulnFilters.value = { source: 'all', severity: 'all', status: 'all', package: '', page: 1, per_page: 50 }; fetchVulnerabilities(); };
 
-const getVulnSeverityVariant = (severity) => {
-    const variants = { critical: 'destructive', high: 'warning', medium: 'secondary', low: 'outline' };
+const getVulnSeverityVariant = (severity: string) : "destructive" | "warning" | "secondary" | "outline" => {
+    const variants: Record<string, "destructive" | "warning" | "secondary" | "outline"> = { critical: 'destructive', high: 'warning', medium: 'secondary', low: 'outline' };
     return variants[severity] || 'secondary';
 };
 
-const getVulnStatusVariant = (status) => {
-    const variants = { new: 'destructive', acknowledged: 'warning', patched: 'secondary', ignored: 'outline' };
+const getVulnStatusVariant = (status: string) : "destructive" | "warning" | "secondary" | "outline" => {
+    const variants: Record<string, "destructive" | "warning" | "secondary" | "outline"> = { new: 'destructive', acknowledged: 'warning', patched: 'secondary', ignored: 'outline' };
     return variants[status] || 'secondary';
 };
 
 // Watch for tab changes to load data on demand
-watch(activeTab, (newTab) => {
+watch(activeTab, (newTab: string) => {
     if (newTab === 'csp-reports' && cspReports.value.length === 0) {
         fetchCspReports();
         fetchCspStats();
@@ -1756,5 +1846,12 @@ watch(activeTab, (newTab) => {
         fetchVulnerabilities();
         fetchVulnStats();
     }
+});
+
+onMounted(() => {
+    fetchLogs();
+    fetchStats();
+    fetchBlocklist();
+    fetchWhitelist();
 });
 </script>

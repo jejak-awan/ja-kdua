@@ -20,7 +20,7 @@ export const ValidationService = {
         const sanitizedSettings = SanitizationService.sanitizeObject(settings)
 
         // 2. Get schema
-        const schema = getSchemaForBlock(type as any)
+        const schema = getSchemaForBlock(type)
 
         if (!schema) {
             // If no schema defined, assume valid but sanitized

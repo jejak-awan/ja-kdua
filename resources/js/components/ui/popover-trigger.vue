@@ -1,10 +1,7 @@
-<script setup>
-import { PopoverTrigger } from 'radix-vue'
+<script setup lang="ts">
+import { PopoverTrigger, type PopoverTriggerProps } from 'radix-vue'
 
-const props = defineProps({
-  asChild: { type: Boolean, required: false, default: false },
-  as: { type: null, required: false, default: 'button' },
-})
+const props = defineProps<PopoverTriggerProps>()
 </script>
 
 <template>

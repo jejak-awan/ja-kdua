@@ -5,7 +5,7 @@
             <div 
                 v-for="(item, index) in items(settings)" 
                 :key="index"
-                class="feature-item transition-all duration-500 hover:-translate-y-3 group p-8 border border-transparent"
+                class="feature-item transition-[width] duration-500 hover:-translate-y-3 group p-8 border border-transparent"
                 :class="[
                     getVal(settings, 'cardShadow') || 'shadow-none',
                     getVal(settings, 'cardRadius') || 'rounded-2xl',
@@ -33,25 +33,40 @@
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed } from 'vue'
+<script setup lang="ts">
+import { inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { getVal } from '../utils/styleUtils'
-import * as LucideIcons from 'lucide-vue-next'
+import Star from 'lucide-vue-next/dist/esm/icons/star.js';
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
+import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
+import Code2 from 'lucide-vue-next/dist/esm/icons/code-xml.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
+import Shield from 'lucide-vue-next/dist/esm/icons/shield.js';
+import Heart from 'lucide-vue-next/dist/esm/icons/heart.js';
+import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';import type { Component } from 'vue'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const iconMap: Record<string, Component> = {
+    Star, Layers, Palette, Globe, Code2, Check, Zap, Shield, Heart, HelpCircle
+}
+import type { BlockProps, BuilderInstance } from '@/types/builder'
+
+const props = withDefaults(defineProps<BlockProps>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const items = (settings) => getVal(settings, 'items') || []
+const builder = inject<BuilderInstance>('builder', null as any)
 
-const gridStyles = (settings, device) => {
+const items = (settings: any) => getVal(settings, 'items') || []
+
+const gridStyles = (settings: any, device: string) => {
     const cols = getVal(settings, 'columns', device) || 3
     const gap = getVal(settings, 'gap', device) || 'gap-8'
     
-    const gapMap = {
+    const gapMap: Record<string, string> = {
         'gap-4': '1rem',
         'gap-8': '2rem',
         'gap-12': '3rem'
@@ -63,7 +78,7 @@ const gridStyles = (settings, device) => {
     }
 }
 
-const cardStyles = (settings) => {
+const cardStyles = (settings: any) => {
     return {
         backgroundColor: getVal(settings, 'cardBgColor') || 'rgba(255, 255, 255, 0.5)',
         borderColor: getVal(settings, 'cardBorderColor') || 'rgba(0,0,0,0.1)',
@@ -72,26 +87,26 @@ const cardStyles = (settings) => {
     }
 }
 
-const iconWrapperStyles = (settings) => {
+const iconWrapperStyles = (settings: any) => {
     return {
         backgroundColor: getVal(settings, 'iconBgColor') || 'rgba(37, 99, 235, 0.1)'
     }
 }
 
-const iconSizeClass = (settings) => {
+const iconSizeClass = (settings: any) => {
     const wrapperSize = getVal(settings, 'iconSize') || 'w-14 h-14'
     if (wrapperSize.includes('w-20')) return 'w-10 h-10'
     if (wrapperSize.includes('w-14')) return 'w-7 h-7'
     return 'w-5 h-5'
 }
 
-const getIcon = (iconName) => {
-    if (!iconName) return null
+const getIcon = (iconName: string) => {
+    if (!iconName) return iconMap.Star
     const pascalName = iconName
         .split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join('')
-        return LucideIcons[pascalName] || LucideIcons[iconName] || LucideIcons.Star
+    return iconMap[pascalName] || iconMap[iconName] || iconMap.Star
 }
 </script>
 

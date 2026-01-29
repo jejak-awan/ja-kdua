@@ -27,7 +27,7 @@
                         data-slot="search-trigger"
                         class="hidden md:flex items-center w-64 px-3 py-2 text-sm text-muted-foreground bg-transparent border border-border/40 rounded-lg hover:bg-muted/5 hover:text-foreground"
                     >
-                        <Search class="w-4 h-4 mr-2 opacity-50" />
+                        <component :is="getIcon('search')" class="mr-2 opacity-50" />
                         <span>{{ t('common.actions.search') }}...</span>
                         <kbd class="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded-md border-border/40 bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 uppercase">
                             <span class="text-[10px]">Ctrl</span>
@@ -47,7 +47,7 @@
 
                     <!-- Global Search Component -->
                     <GlobalSearch 
-                        v-model:isOpen="showGlobalSearch" 
+                        v-model:is-open="showGlobalSearch" 
                     />
                 </div>
                 
@@ -196,7 +196,7 @@
                             >
                                 <span class="mr-3 text-base leading-none">{{ getLanguageFlag(lang) }}</span>
                                 <span class="flex-1 text-left">{{ lang.native_name }}</span>
-                                <Check v-if="currentLanguage?.code === lang.code" class="ml-auto w-4 h-4 text-primary" />
+                                <component :is="getIcon('check')" v-if="currentLanguage?.code === lang.code" class="ml-auto text-primary" />
                             </button>
                         </div>
                         <div class="border-t border-border">
@@ -222,21 +222,31 @@
     </header>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '../../stores/auth';
-import { useLanguage } from '../../composables/useLanguage'; // Added
-import api from '../../services/api';
-import Breadcrumbs from '../Breadcrumbs.vue';
-import DarkModeToggle from '../DarkModeToggle.vue';
-import GlobalSearch from '../GlobalSearch.vue';
-import { Check } from 'lucide-vue-next'; // Added Check icon
+import { useAuthStore } from '@/stores/auth';
+import { useLanguage, type Language } from '@/composables/useLanguage';
+import api from '@/services/api';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.vue';
+import DarkModeToggle from '@/components/shared/DarkModeToggle.vue';
+import GlobalSearch from '@/components/shared/GlobalSearch.vue';
+import { getIcon } from '@/utils/icons';
+import type { User } from '@/types/auth';
+
+interface Notification {
+    id: number;
+    title: string;
+    message: string;
+    read_at: string | null;
+    created_at: string;
+    [key: string]: any;
+}
 
 const router = useRouter();
 const authStore = useAuthStore();
-const { t, te } = useI18n();
+const { t } = useI18n();
 
 // Language Composable
 const {
@@ -247,66 +257,53 @@ const {
     initializeLanguage,
 } = useLanguage();
 
-const selectLanguage = async (lang) => {
-    await setLanguage(lang.code);
-    // Optional: showUserMenu.value = false; // Keep open or close? Usually keep open or close is fine. Let's close for "action complete" feel.
-    showUserMenu.value = false;
-};
-const props = defineProps({
-    isAuthenticated: {
-        type: Boolean,
-        default: false,
-    },
-    user: {
-        type: Object,
-        default: null,
-    },
+const props = withDefaults(defineProps<{
+    isAuthenticated?: boolean;
+    user?: User | null;
+}>(), {
+    isAuthenticated: false,
+    user: null,
 });
 
-const emit = defineEmits(['toggle-sidebar', 'logout']);
+const emit = defineEmits<{
+    (e: 'toggle-sidebar'): void;
+    (e: 'logout'): void;
+}>();
 
 const showNotificationsDropdown = ref(false);
 const showUserMenu = ref(false);
-const notifications = ref([]);
+const notifications = ref<Notification[]>([]);
 const loadingNotifications = ref(false);
-const notificationInterval = ref(null);
+const notificationInterval = ref<ReturnType<typeof setInterval> | null>(null);
 const avatarError = ref(false);
-
-// Global Search State
 const showGlobalSearch = ref(false);
 
+const selectLanguage = async (lang: Language) => {
+    await setLanguage(lang.code);
+    showUserMenu.value = false;
+};
+
 const unreadNotificationsCount = computed(() => {
-    if (!Array.isArray(notifications.value)) {
-        return 0;
-    }
     return notifications.value.filter(n => !n.read_at).length;
 });
 
 const recentNotifications = computed(() => {
-    if (!Array.isArray(notifications.value)) {
-        return [];
-    }
     return notifications.value.slice(0, 5);
 });
 
 const userAvatar = computed(() => {
     if (!props.user?.avatar || avatarError.value) return null;
 
-    const formatUrl = (path) => {
-        if (!path) return null;
+    const formatUrl = (path: any) => {
+        if (!path || typeof path !== 'string') return null;
         if (path.startsWith('http') || path.startsWith('/storage/')) return path;
-        // Remove leading slash if exists to avoid double slash
         return `/storage/${path.replace(/^\//, '')}`;
     };
 
-    if (typeof props.user.avatar === 'string') {
-        return formatUrl(props.user.avatar);
-    }
-    if (props.user.avatar?.url) {
-        return formatUrl(props.user.avatar.url);
-    }
-    if (props.user.avatar?.path) {
-        return formatUrl(props.user.avatar.path);
+    const avatar = props.user.avatar;
+    if (typeof avatar === 'string') return formatUrl(avatar);
+    if (typeof avatar === 'object') {
+        return formatUrl(avatar.url || avatar.path);
     }
     return null;
 });
@@ -317,22 +314,18 @@ const userInitial = computed(() => {
 });
 
 const fetchNotifications = async () => {
-    if (!props.isAuthenticated || window.__isSessionTerminated) return;
+    if (!props.isAuthenticated || (window as any).__isSessionTerminated) return;
     
     loadingNotifications.value = true;
     try {
         const response = await api.get('/admin/ja/notifications?limit=5');
         
-        let data = [];
-        // Handle paginated response structure: { success: true, data: { data: [...] } }
+        let data: Notification[] = [];
         if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
             data = response.data.data.data;
-        } 
-        // Handle standard resource response: { data: [...] }
-        else if (response.data?.data && Array.isArray(response.data.data)) {
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
             data = response.data.data;
-        } 
-        else if (Array.isArray(response.data)) {
+        } else if (Array.isArray(response.data)) {
             data = response.data;
         }
         
@@ -345,7 +338,7 @@ const fetchNotifications = async () => {
     }
 };
 
-const handleNotificationClick = async (notification) => {
+const handleNotificationClick = async (notification: Notification) => {
     if (!notification.read_at) {
         try {
             await api.put(`/admin/ja/notifications/${notification.id}/read`);
@@ -357,11 +350,11 @@ const handleNotificationClick = async (notification) => {
     showNotificationsDropdown.value = false;
 };
 
-const formatNotificationDate = (date) => {
+const formatNotificationDate = (date: string) => {
     if (!date) return '';
     const now = new Date();
     const notifDate = new Date(date);
-    const diffMs = now - notifDate;
+    const diffMs = now.getTime() - notifDate.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
@@ -373,18 +366,15 @@ const formatNotificationDate = (date) => {
     return notifDate.toLocaleDateString();
 };
 
-// Close all dropdowns helper
 const closeAllDropdowns = () => {
     showNotificationsDropdown.value = false;
     showUserMenu.value = false;
 };
 
-// Dispatch event to close child component dropdowns (LanguageSwitcher, DarkModeToggle)
 const closeChildDropdowns = () => {
     window.dispatchEvent(new CustomEvent('close-navbar-dropdowns'));
 };
 
-// Toggle functions that close other dropdowns first
 const toggleNotifications = () => {
     const wasOpen = showNotificationsDropdown.value;
     closeAllDropdowns();
@@ -404,11 +394,12 @@ const handleLogout = () => {
     emit('logout');
 };
 
-const handleClickOutside = (event) => {
-    if (showNotificationsDropdown.value && !event.target.closest('.relative')) {
+const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    if (showNotificationsDropdown.value && !target.closest('.relative')) {
         showNotificationsDropdown.value = false;
     }
-    if (showUserMenu.value && !event.target.closest('.relative')) {
+    if (showUserMenu.value && !target.closest('.relative')) {
         showUserMenu.value = false;
     }
 };
@@ -416,10 +407,11 @@ const handleClickOutside = (event) => {
 watch(() => props.isAuthenticated, (isAuth) => {
     if (isAuth) {
         fetchNotifications();
-        notificationInterval.value = setInterval(fetchNotifications, 120000); // Increased from 30s to 2m
+        notificationInterval.value = setInterval(fetchNotifications, 120000);
     } else {
         if (notificationInterval.value) {
             clearInterval(notificationInterval.value);
+            notificationInterval.value = null;
         }
     }
 });
@@ -427,7 +419,7 @@ watch(() => props.isAuthenticated, (isAuth) => {
 onMounted(() => {
     if (props.isAuthenticated) {
         fetchNotifications();
-        notificationInterval.value = setInterval(fetchNotifications, 120000); // Increased from 30s to 2m
+        notificationInterval.value = setInterval(fetchNotifications, 120000);
     }
     initializeLanguage();
     document.addEventListener('click', handleClickOutside);

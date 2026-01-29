@@ -3,19 +3,19 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="before-after-block transition-all duration-500"
+    class="before-after-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Before After Comparison'"
     :style="cardStyles"
   >
     <div 
-        class="comparison-container relative bg-slate-100 dark:bg-slate-800 rounded-[2rem] overflow-hidden cursor-ew-resize group shadow-2xl transition-all duration-700" 
+        class="comparison-container relative bg-slate-100 dark:bg-slate-800 rounded-[2rem] overflow-hidden cursor-ew-resize group shadow-2xl transition-colors duration-700" 
         :style="containerStyles" 
         @mousemove="handleMove" 
         @touchmove="handleTouch"
     >
       <!-- Before Image Container (Dynamic Width Layer) -->
-      <div class="comparison-before absolute inset-0 z-10 overflow-hidden transition-all duration-100 ease-out" :style="beforeStyles">
+      <div class="comparison-before absolute inset-0 z-10 overflow-hidden transition-colors duration-100 ease-out" :style="beforeStyles">
         <div v-if="!settings.beforeImage" class="placeholder-image w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-200 dark:bg-slate-700">
             <ImageIcon class="w-12 h-12 mb-4 opacity-50 animate-pulse" />
             <span class="text-[10px] font-black uppercase tracking-widest">Premium Before</span>
@@ -42,12 +42,12 @@
       
       <!-- Slider Handle -->
       <div 
-        class="comparison-slider absolute top-0 bottom-0 z-30 flex flex-col items-center justify-center transition-all duration-100 ease-out" 
+        class="comparison-slider absolute top-0 bottom-0 z-30 flex flex-col items-center justify-center transition-colors duration-100 ease-out" 
         :style="sliderStyles"
       >
-        <div class="slider-line h-full shadow-2xl transition-all duration-500" :style="sliderLineStyles"></div>
+        <div class="slider-line h-full shadow-2xl transition-[width] duration-500" :style="sliderLineStyles"></div>
         <div 
-            class="slider-handle w-14 h-14 bg-white/10 backdrop-blur-xl flex items-center justify-center rounded-full shadow-2xl border-2 border-white/20 text-white transition-all duration-500 hover:scale-125 active:scale-90 hover:bg-white hover:text-slate-900 group" 
+            class="slider-handle w-14 h-14 bg-white/10 backdrop-blur-xl flex items-center justify-center rounded-full shadow-2xl border-2 border-white/20 text-white transition-[width] duration-500 hover:scale-125 active:scale-90 hover:bg-white hover:text-slate-900 group" 
             :style="handleStyles"
         >
           <GripVertical class="w-6 h-6 pointer-events-none transition-transform duration-500 group-hover:rotate-12" />
@@ -60,8 +60,8 @@
 <script setup lang="ts">
 import { computed, ref, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Image as ImageIcon, GripVertical } from 'lucide-vue-next'
-import { 
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
+import GripVertical from 'lucide-vue-next/dist/esm/icons/grip-vertical.js';import { 
     getVal,
     getTypographyStyles,
     getLayoutStyles,

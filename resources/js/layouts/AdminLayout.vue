@@ -1,5 +1,8 @@
 <template>
-    <div class="min-h-screen bg-sidebar text-foreground">
+    <div 
+        class="min-h-screen bg-sidebar text-foreground admin-instant"
+        :class="{ 'no-transitions': resizing }"
+    >
         <!-- Sidebar -->
         <AdminSidebar
             :sidebar-minimized="sidebarMinimized"
@@ -11,26 +14,19 @@
         />
 
         <!-- Mobile Backdrop -->
-        <Transition
-            enter-active-class="transition-opacity ease-linear duration-300"
-            enter-from-class="opacity-0"
-            enter-to-class="opacity-100"
-            leave-active-class="transition-opacity ease-linear duration-300"
-            leave-from-class="opacity-100"
-            leave-to-class="opacity-0"
-        >
-            <div 
-                v-if="sidebarOpen" 
-                class="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden"
-                @click="closeSidebar"
-            ></div>
-        </Transition>
+        <div 
+            v-if="sidebarOpen" 
+            class="fixed inset-0 z-40 bg-background/60 lg:hidden"
+            @click="closeSidebar"
+        ></div>
 
         <!-- Main Content -->
-        <div :class="[
-            'transition-all duration-300 ease-in-out',
-            sidebarMinimized ? 'lg:pl-[68px]' : 'lg:pl-64'
-        ]">
+        <div
+            :class="[
+                'min-h-screen',
+                sidebarMinimized ? 'lg:pl-[68px]' : 'lg:pl-64'
+            ]"
+        >
             <!-- Top Navbar -->
             <AdminNavbar
                 :is-authenticated="authStore.isAuthenticated"
@@ -48,13 +44,13 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useCmsStore } from '../stores/cms';
 import { useSidebar } from '../composables/useSidebar';
 import { useLayoutMount } from '../composables/useLayoutMount';
 import { useHead } from '@vueuse/head';
-import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AdminSidebar from '../components/layouts/AdminSidebar.vue';
 import AdminNavbar from '../components/layouts/AdminNavbar.vue';
@@ -68,6 +64,30 @@ const { sidebarMinimized, sidebarOpen, toggleSidebarMinimize, toggleSidebarOpen,
 
 // Use shared mounted state for synchronized transitions
 const { mounted } = useLayoutMount();
+
+// Resize Throttling
+const resizing = ref(false);
+let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+
+const handleResize = () => {
+    resizing.value = true;
+    document.body.classList.add('no-transitions');
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        resizing.value = false;
+        document.body.classList.remove('no-transitions');
+    }, 200);
+};
+
+onMounted(() => {
+    window.addEventListener('resize', handleResize);
+});
+
+onUnmounted(() => {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    document.body.classList.remove('no-transitions');
+    window.removeEventListener('resize', handleResize);
+});
 
 // Reactive Global Title Management
 useHead({

@@ -10,11 +10,11 @@
         <!-- Dropdown Select (if field has options) -->
         <Select
             v-if="hasOptions && !isMailPort"
-            :model-value="localValue"
+            :model-value="localValue !== null && localValue !== undefined ? String(localValue) : undefined"
             :disabled="disabled"
-            @update:model-value="localValue = $event; updateValue()"
+            @update:model-value="localValue = hasNumericOptions ? Number($event) : $event; updateValue()"
         >
-            <SelectTrigger :class="{ 'border-destructive focus:ring-destructive': error }">
+            <SelectTrigger :class="error ? 'border-destructive focus:ring-destructive' : ''">
                 <SelectValue :placeholder="$t('common.actions.select')" />
             </SelectTrigger>
             <SelectContent>
@@ -35,54 +35,53 @@
             :disabled="disabled"
             @update:model-value="localValue = Number($event); updateValue()"
         >
-            <SelectTrigger :class="{ 'border-destructive focus:ring-destructive': error }">
+            <SelectTrigger :class="error ? 'border-destructive focus:ring-destructive' : ''">
                 <SelectValue :placeholder="$t('common.actions.select')" />
             </SelectTrigger>
             <SelectContent>
                 <SelectItem
                     v-for="option in translatedMailPortOptions"
                     :key="option.value"
-                    :value="String(option.value)"
+                    :value="option.value"
                 >
                     {{ option.label }}
                 </SelectItem>
             </SelectContent>
         </Select>
 
-        <!-- Text Input -->
         <Input
             v-else-if="(type === 'string' || type === 'password') && !isTextarea"
-            v-model="localValue"
+            :model-value="(localValue as string)"
             :disabled="disabled"
-            @input="updateValue"
+            @input="localValue = ($event.target as HTMLInputElement).value; updateValue()"
             :type="(isPassword || type === 'password') ? 'password' : 'text'"
-            :class="{ 'border-destructive focus-visible:ring-destructive': error }"
+            :class="error ? 'border-destructive focus-visible:ring-destructive' : ''"
         />
 
         <!-- Textarea -->
         <Textarea
             v-else-if="isTextarea"
-            v-model="localValue"
+            :model-value="(localValue as string)"
             :disabled="disabled"
-            @input="updateValue"
+            @input="localValue = ($event.target as HTMLTextAreaElement).value; updateValue()"
             :rows="3"
-            :class="{ 'border-destructive focus-visible:ring-destructive': error }"
+            :class="error ? 'border-destructive focus-visible:ring-destructive' : ''"
         />
 
         <!-- Number Input -->
         <Input
             v-else-if="type === 'integer'"
-            v-model.number="localValue"
+            :model-value="(localValue as number)"
             :disabled="disabled"
-            @input="updateValue"
+            @input="localValue = Number(($event.target as HTMLInputElement).value); updateValue()"
             type="number"
-            :class="{ 'border-destructive focus-visible:ring-destructive': error }"
+            :class="error ? 'border-destructive focus-visible:ring-destructive' : ''"
         />
 
         <!-- Boolean Toggle -->
         <div v-else-if="type === 'boolean'" class="mt-1 flex items-center space-x-2">
             <Switch
-                :checked="localValue"
+                :checked="Boolean(localValue)"
                 :disabled="disabled"
                 @update:checked="localValue = $event; updateValue()"
             />
@@ -98,66 +97,57 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { getFieldOptions, getMailPortOptions } from '../../config/settingsFieldOptions'
-import Input from '../../components/ui/input.vue'
-import Textarea from '../../components/ui/textarea.vue'
-import Switch from '../../components/ui/switch.vue'
-import Select from '../../components/ui/select.vue'
-import SelectContent from '../../components/ui/select-content.vue'
-import SelectItem from '../../components/ui/select-item.vue'
-import SelectTrigger from '../../components/ui/select-trigger.vue'
-import SelectValue from '../../components/ui/select-value.vue'
+import { getFieldOptions, getMailPortOptions } from '@/config/settingsFieldOptions'
+import {
+    Input,
+    Textarea,
+    Switch,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from '@/components/ui'
+
+interface SettingOption {
+    value: string | number;
+    label?: string;
+    labelKey?: string;
+}
 
 const { t } = useI18n()
 
-const props = defineProps({
-    modelValue: {
-        required: true
-    },
-    fieldKey: {
-        type: String,
-        required: true
-    },
-    label: {
-        type: String,
-        required: true
-    },
-    description: {
-        type: String,
-        default: ''
-    },
-    type: {
-        type: String,
-        default: 'string'
-    },
-    mailEncryption: {
-        type: String,
-        default: 'tls'
-    },
-    enabledText: {
-        type: String,
-        default: 'Enabled'
-    },
-    disabledText: {
-        type: String,
-        default: 'Disabled'
-    },
-    error: {
-        type: [String, Array],
-        default: null
-    },
-    disabled: {
-        type: Boolean,
-        default: false
-    }
-})
+type SettingValue = string | number | boolean | null;
 
-const emit = defineEmits(['update:modelValue'])
+const props = withDefaults(defineProps<{
+    modelValue: SettingValue;
+    fieldKey: string;
+    label: string;
+    description?: string;
+    type?: string;
+    mailEncryption?: string;
+    enabledText?: string;
+    disabledText?: string;
+    error?: string | string[] | null;
+    disabled?: boolean;
+}>(), {
+    description: '',
+    type: 'string',
+    mailEncryption: 'tls',
+    enabledText: 'Enabled',
+    disabledText: 'Disabled',
+    error: null,
+    disabled: false,
+});
 
-const localValue = ref(props.modelValue)
+const emit = defineEmits<{
+    (e: 'update:modelValue', value: SettingValue): void;
+}>()
+
+const localValue = ref<SettingValue>(props.modelValue)
 
 // Watch for external changes
 watch(() => props.modelValue, (newValue) => {
@@ -171,30 +161,34 @@ const hasOptions = computed(() => {
     return getFieldOptions(props.fieldKey) !== null
 })
 
-const fieldOptions = computed(() => {
+const fieldOptions = computed<SettingOption[]>(() => {
     return getFieldOptions(props.fieldKey) || []
 })
 
 // Translate options using labelKey
 const translatedFieldOptions = computed(() => {
     return fieldOptions.value.map(option => ({
-        value: option.value,
-        label: option.labelKey ? t(option.labelKey) : (option.label || option.value)
+        value: String(option.value),
+        label: option.labelKey ? t(option.labelKey) : (option.label || String(option.value))
     }))
+})
+
+const hasNumericOptions = computed(() => {
+    return fieldOptions.value.some(option => typeof option.value === 'number')
 })
 
 const isMailPort = computed(() => {
     return props.fieldKey === 'mail_port'
 })
 
-const mailPortOptions = computed(() => {
-    return getMailPortOptions(props.mailEncryption)
+const mailPortOptions = computed<SettingOption[]>(() => {
+    return getMailPortOptions(props.mailEncryption || 'tls')
 })
 
 const translatedMailPortOptions = computed(() => {
     return mailPortOptions.value.map(option => ({
-        value: option.value,
-        label: option.labelKey ? t(option.labelKey) : (option.label || option.value)
+        value: String(option.value),
+        label: option.labelKey ? t(option.labelKey) : (option.label || String(option.value))
     }))
 })
 

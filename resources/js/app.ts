@@ -7,7 +7,6 @@ import { createPinia } from 'pinia';
 import { createHead } from '@vueuse/head';
 import router from './router'; // Assuming router is index.js/ts
 import App from './App.vue';
-// @ts-ignore
 import lazyLoad from './directives/lazyLoad';
 import i18n from './i18n';
 

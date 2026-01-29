@@ -18,7 +18,8 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         selectedModuleId,
         hoveredModuleId,
         device,
-        clipboard
+        clipboard,
+        markAsDirty
     } = state
     const { takeSnapshot } = historyManager
 
@@ -112,6 +113,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
     function removeModule(id: string): boolean {
         const removed = removeModuleById(blocks.value, id)
         if (removed) {
+            markAsDirty()
             takeSnapshot({ immediate: true })
             if (selectedModuleId.value === id) {
                 clearSelection()
@@ -133,6 +135,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         const index = siblings.findIndex(m => m.id === id)
 
         siblings.splice(index + 1, 0, duplicate)
+        markAsDirty()
         takeSnapshot({ immediate: true })
         selectModule(duplicate.id)
 
@@ -151,6 +154,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
 
         const [module] = siblings.splice(index, 1)
         siblings.splice(newIndex, 0, module)
+        markAsDirty()
         takeSnapshot({ immediate: true })
 
         return true
@@ -170,6 +174,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
 
         module.settings = validation.data
         blocks.value = [...blocks.value]
+        markAsDirty()
         takeSnapshot() // Debounced
         return true
     }
@@ -196,6 +201,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
 
         Object.assign(module, data)
         blocks.value = [...blocks.value]
+        markAsDirty()
         takeSnapshot() // Debounced
         return true
     }
@@ -224,6 +230,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
 
         module.settings = validation.data
         blocks.value = [...blocks.value]
+        markAsDirty()
         takeSnapshot() // Debounced
         return true
     }
@@ -238,6 +245,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         }))
 
         triggerRef(blocks)
+        markAsDirty()
         takeSnapshot({ immediate: true })
         return true
     }
@@ -262,6 +270,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
             minHeight: undefined
         }
 
+        markAsDirty()
         takeSnapshot({ immediate: true })
         return true
     }
@@ -318,6 +327,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
             }
         }
 
+        markAsDirty()
         takeSnapshot({ immediate: true })
         triggerRef(blocks)
         return true
@@ -354,6 +364,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
             else blocks.value.push(duplicate)
         }
 
+        markAsDirty()
         takeSnapshot({ immediate: true })
         return duplicate
     }
@@ -376,6 +387,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         if (!module.settings.design) module.settings.design = {}
         module.settings.design = { ...module.settings.design, ...clipboard.value.data }
         triggerRef(blocks)
+        markAsDirty()
         takeSnapshot({ immediate: true })
         return true
     }
@@ -383,6 +395,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
     function resetLayout(): void {
         blocks.value = []
         clearSelection()
+        markAsDirty()
         takeSnapshot({ immediate: true })
     }
 

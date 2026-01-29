@@ -12,7 +12,7 @@
                     <div class="flex items-center gap-6">
                         <router-link 
                             v-for="item in headerTopItems" 
-                            :key="item.id" 
+                            :key="item.id || item.title" 
                             :to="item.url || '/'"
                             class="text-muted-foreground hover:text-primary transition-colors"
                         >
@@ -85,7 +85,7 @@
                             
                             <!-- Mega Menu Dropdown -->
                             <div 
-                                class="absolute top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
+                                class="absolute top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-colors duration-200 z-50"
                                 :class="getDropdownPositionClasses(item.mega_menu_layout)"
                             >
                                 <div 
@@ -127,49 +127,88 @@
                                                         </div>
                                                     </div>
                                                     <div class="flex flex-col gap-1">
-                                                        <router-link
-                                                            v-for="subChild in child.children"
-                                                            :key="subChild.id"
-                                                            :to="subChild.url || '/'"
-                                                            :target="subChild.open_in_new_tab ? '_blank' : null"
-                                                            class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors group/subitem"
-                                                        >
-                                                            <div 
-                                                                v-if="subChild.icon"
-                                                                class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/subitem:bg-primary/20 transition-colors"
+                                                        <template v-for="subChild in child.children" :key="subChild.id">
+                                                            <a
+                                                                v-if="subChild.open_in_new_tab"
+                                                                :href="subChild.url || '#'"
+                                                                target="_blank"
+                                                                class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors group/subitem"
                                                             >
-                                                                <component :is="getIconComponent(subChild.icon)" class="w-4 h-4 text-primary" />
-                                                            </div>
-                                                            <div class="flex-1 min-w-0">
-                                                                <div class="flex items-center gap-2">
-                                                                    <span class="font-medium text-sm text-foreground">{{ subChild.title }}</span>
-                                                                    <span v-if="subChild.badge" class="px-1.5 py-0.5 text-[10px] font-medium rounded-full" :class="getBadgeClasses(subChild.badge_color)">{{ subChild.badge }}</span>
+                                                                <div 
+                                                                    v-if="subChild.icon"
+                                                                    class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/subitem:bg-primary/20 transition-colors"
+                                                                >
+                                                                    <component :is="getIconComponent(subChild.icon)" class="w-4 h-4 text-primary" />
                                                                 </div>
-                                                            </div>
-                                                        </router-link>
+                                                                <div class="flex-1 min-w-0">
+                                                                    <div class="flex items-center gap-2">
+                                                                        <span class="font-medium text-sm text-foreground">{{ subChild.title }}</span>
+                                                                        <span v-if="subChild.badge" class="px-1.5 py-0.5 text-[10px] font-medium rounded-full" :class="getBadgeClasses(subChild.badge_color)">{{ subChild.badge }}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </a>
+                                                            <router-link
+                                                                v-else
+                                                                :to="subChild.url || '/'"
+                                                                class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors group/subitem"
+                                                            >
+                                                                <div 
+                                                                    v-if="subChild.icon"
+                                                                    class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/subitem:bg-primary/20 transition-colors"
+                                                                >
+                                                                    <component :is="getIconComponent(subChild.icon)" class="w-4 h-4 text-primary" />
+                                                                </div>
+                                                                <div class="flex-1 min-w-0">
+                                                                    <div class="flex items-center gap-2">
+                                                                        <span class="font-medium text-sm text-foreground">{{ subChild.title }}</span>
+                                                                        <span v-if="subChild.badge" class="px-1.5 py-0.5 text-[10px] font-medium rounded-full" :class="getBadgeClasses(subChild.badge_color)">{{ subChild.badge }}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </router-link>
+                                                        </template>
                                                     </div>
                                                 </div>
                                                 
                                                 <!-- Direct Link Item (No children) -->
-                                                <router-link
-                                                    v-else
-                                                    :to="child.url || '/'"
-                                                    :target="child.open_in_new_tab ? '_blank' : null"
-                                                    class="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors group/item"
-                                                >
-                                                    <div 
-                                                        v-if="child.icon"
-                                                        class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition-colors"
+                                                <template v-else>
+                                                    <a
+                                                        v-if="child.open_in_new_tab"
+                                                        :to="child.url || '/'"
+                                                        target="_blank"
+                                                        class="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors group/item"
                                                     >
-                                                        <component :is="getIconComponent(child.icon)" class="w-5 h-5 text-primary" />
-                                                    </div>
-                                                    <div class="flex-1 min-w-0">
-                                                        <div class="flex items-center gap-2">
-                                                            <span class="font-medium text-sm text-foreground">{{ child.heading || child.title }}</span>
-                                                            <span v-if="child.badge" class="px-1.5 py-0.5 text-[10px] font-medium rounded-full" :class="getBadgeClasses(child.badge_color)">{{ child.badge }}</span>
+                                                        <div 
+                                                            v-if="child.icon"
+                                                            class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition-colors"
+                                                        >
+                                                            <component :is="getIconComponent(child.icon)" class="w-5 h-5 text-primary" />
                                                         </div>
-                                                    </div>
-                                                </router-link>
+                                                        <div class="flex-1 min-w-0">
+                                                            <div class="flex items-center gap-2">
+                                                                <span class="font-medium text-sm text-foreground">{{ child.heading || child.title }}</span>
+                                                                <span v-if="child.badge" class="px-1.5 py-0.5 text-[10px] font-medium rounded-full" :class="getBadgeClasses(child.badge_color)">{{ child.badge }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                    <router-link
+                                                        v-else
+                                                        :to="child.url || '/'"
+                                                        class="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors group/item"
+                                                    >
+                                                        <div 
+                                                            v-if="child.icon"
+                                                            class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition-colors"
+                                                        >
+                                                            <component :is="getIconComponent(child.icon)" class="w-5 h-5 text-primary" />
+                                                        </div>
+                                                        <div class="flex-1 min-w-0">
+                                                            <div class="flex items-center gap-2">
+                                                                <span class="font-medium text-sm text-foreground">{{ child.heading || child.title }}</span>
+                                                                <span v-if="child.badge" class="px-1.5 py-0.5 text-[10px] font-medium rounded-full" :class="getBadgeClasses(child.badge_color)">{{ child.badge }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </router-link>
+                                                </template>
                                             </template>
                                         </div>
                                     </template>
@@ -185,10 +224,10 @@
                                                     <div class="flex flex-col lg:flex-row gap-8 items-center bg-primary/[0.03] rounded-2xl p-6 border border-border/40 hover:bg-primary/[0.05] transition-colors">
                                                         <router-link 
                                                             :to="promoChild.url || '/'"
-                                                            class="relative group/promo rounded-xl overflow-hidden w-full lg:w-2/5 shadow-md hover:shadow-xl transition-all duration-500"
+                                                            class="relative group/promo rounded-xl overflow-hidden w-full lg:w-2/5 shadow-md hover:shadow-xl transition-[width] duration-500"
                                                         >
                                                             <img 
-                                                                :src="promoChild.image" 
+                                                                :src="promoChild.image || ''" 
                                                                 :alt="promoChild.title"
                                                                 class="w-full object-cover transition-transform duration-700 group-hover/promo:scale-110"
                                                                 :class="getImageSizeClasses(promoChild.image_size)"
@@ -236,19 +275,19 @@
 
                                     <!-- CASE B: Default Flat List -->
                                     <template v-else>
-                                        <router-link
-                                            v-for="child in item.children"
-                                            :key="child.id"
-                                            :to="child.url || '/'"
-                                            :target="child.open_in_new_tab ? '_blank' : null"
-                                            class="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group/item"
-                                        >
-                                            <div 
-                                                v-if="child.icon"
-                                                class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition-colors"
+                                        <template v-for="child in item.children" :key="child.id">
+                                            <a
+                                                v-if="child.open_in_new_tab"
+                                                :href="child.url || '#'"
+                                                target="_blank"
+                                                class="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group/item"
                                             >
-                                                <component :is="getIconComponent(child.icon)" class="w-5 h-5 text-primary" />
-                                            </div>
+                                                <div 
+                                                    v-if="child.icon"
+                                                    class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition-colors"
+                                                >
+                                                    <component :is="getIconComponent(child.icon)" class="w-5 h-5 text-primary" />
+                                                </div>
                                                 <div class="flex items-center gap-2">
                                                     <span class="font-medium text-sm text-foreground">{{ child.title }}</span>
                                                     <span 
@@ -259,7 +298,30 @@
                                                         {{ child.badge }}
                                                     </span>
                                                 </div>
-                                        </router-link>
+                                            </a>
+                                            <router-link
+                                                v-else
+                                                :to="child.url || '/'"
+                                                class="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group/item"
+                                            >
+                                                <div 
+                                                    v-if="child.icon"
+                                                    class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition-colors"
+                                                >
+                                                    <component :is="getIconComponent(child.icon)" class="w-5 h-5 text-primary" />
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="font-medium text-sm text-foreground">{{ child.title }}</span>
+                                                    <span 
+                                                        v-if="child.badge"
+                                                        class="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
+                                                        :class="getBadgeClasses(child.badge_color)"
+                                                    >
+                                                        {{ child.badge }}
+                                                    </span>
+                                                </div>
+                                            </router-link>
+                                        </template>
 
                                         <!-- Promotional Sections (Flat List Case) -->
                                         <div 
@@ -271,10 +333,10 @@
                                                     <div class="flex flex-col gap-4 bg-muted/20 rounded-xl p-4 border border-border/30">
                                                         <router-link 
                                                             :to="child.url || '/'"
-                                                            class="relative group/promo rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all h-40"
+                                                            class="relative group/promo rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-colors h-40"
                                                         >
                                                             <img 
-                                                                :src="child.image" 
+                                                                :src="child.image || ''" 
                                                                 :alt="child.title"
                                                                 class="w-full h-full object-cover transition-transform duration-500 group-hover/promo:scale-110"
                                                             />
@@ -319,27 +381,48 @@
                         </a>
                         
                         <!-- Regular route links use router-link -->
-                        <router-link 
-                            v-else
-                            :to="item.url || '/'"
-                            :target="item.open_in_new_tab ? '_blank' : null"
-                            :class="getNavItemClasses(false)"
-                            :active-class="getNavItemClasses(true)"
-                        >
-                            <component 
-                                v-if="item.icon" 
-                                :is="getIconComponent(item.icon)" 
-                                class="w-4 h-4" 
-                            />
-                            {{ item.title }}
-                            <span 
-                                v-if="item.badge"
-                                class="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
-                                :class="getBadgeClasses(item.badge_color)"
+                        <template v-else>
+                            <a
+                                v-if="item.open_in_new_tab"
+                                :href="item.url || '#'"
+                                target="_blank"
+                                :class="getNavItemClasses(false)"
                             >
-                                {{ item.badge }}
-                            </span>
-                        </router-link>
+                                <component 
+                                    v-if="item.icon" 
+                                    :is="getIconComponent(item.icon)" 
+                                    class="w-4 h-4" 
+                                />
+                                {{ item.title }}
+                                <span 
+                                    v-if="item.badge"
+                                    class="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
+                                    :class="getBadgeClasses(item.badge_color)"
+                                >
+                                    {{ item.badge }}
+                                </span>
+                            </a>
+                            <router-link 
+                                v-else
+                                :to="item.url || '/'"
+                                :class="getNavItemClasses(false)"
+                                :active-class="getNavItemClasses(true)"
+                            >
+                                <component 
+                                    v-if="item.icon" 
+                                    :is="getIconComponent(item.icon)" 
+                                    class="w-4 h-4" 
+                                />
+                                {{ item.title }}
+                                <span 
+                                    v-if="item.badge"
+                                    class="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
+                                    :class="getBadgeClasses(item.badge_color)"
+                                >
+                                    {{ item.badge }}
+                                </span>
+                            </router-link>
+                        </template>
                     </template>
                 </nav>
 
@@ -359,7 +442,7 @@
                     </router-link>
                     <router-link 
                         :to="headerCtaUrl"
-                        class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-full hover:bg-primary/90 transition-all shadow-lg transform hover:-translate-y-0.5"
+                        class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-full hover:bg-muted transition-colors shadow-lg transform hover:-translate-y-0.5"
                     >
                         {{ headerCtaText }}
                     </router-link>
@@ -394,7 +477,7 @@
                 <div class="container mx-auto px-4 py-4 space-y-2">
                     <router-link 
                         v-for="item in navItems" 
-                        :key="item.id" 
+                        :key="item.id || item.title" 
                         :to="item.url || '/'"
                         class="block px-4 py-2.5 text-base font-medium text-muted-foreground hover:text-primary hover:bg-accent rounded-lg transition-colors"
                         active-class="text-primary bg-accent"
@@ -423,17 +506,37 @@
     </header>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useTheme } from '../../../../composables/useTheme';
-import { useMenu } from '../../../../composables/useMenu';
-import { useCmsStore } from '../../../../stores/cms';
-import { useResponsiveDevice } from '../../../../shared/utils/useResponsiveDevice';
-import ThemeToggle from '../../../../components/ThemeToggle.vue';
-import LanguageSwitcher from '../../../../components/LanguageSwitcher.vue';
-import { ChevronDown, ArrowRight, Quote } from 'lucide-vue-next';
-import * as LucideIcons from 'lucide-vue-next';
+import { useTheme } from '@/composables/useTheme';
+import { useMenu } from '@/composables/useMenu';
+import { useCmsStore } from '@/stores/cms';
+import { useResponsiveDevice } from '@/shared/utils/useResponsiveDevice';
+import ThemeToggle from '@/components/shared/ThemeToggle.vue';
+import LanguageSwitcher from '@/components/shared/LanguageSwitcher.vue';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js';
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
+import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
+import Code2 from 'lucide-vue-next/dist/esm/icons/code-xml.js';
+import Quote from 'lucide-vue-next/dist/esm/icons/quote.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import User from 'lucide-vue-next/dist/esm/icons/user.js';
+import LogIn from 'lucide-vue-next/dist/esm/icons/log-in.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
+import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import MenuIcon from 'lucide-vue-next/dist/esm/icons/menu.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import type { Component } from 'vue';
+import type { MenuItem } from '@/types/menu';
+
+const iconMap: Record<string, Component> = {
+    ChevronDown, ArrowRight, Layers, Palette, Globe, Code2, Quote, Search, User, LogIn, Layout, Settings, HelpCircle, FileText, MenuIcon, X
+};
 
 const { t } = useI18n();
 const { getSetting } = useTheme();
@@ -452,8 +555,8 @@ const brandingDisplay = computed(() => getSetting('branding_display', 'logo_only
 // Dynamic Branding Fallbacks
 const cmsStore = useCmsStore();
 const { siteSettings } = cmsStore;
-const siteName = computed(() => getSetting('site_title') || siteSettings?.site_name || 'Janari');
-const siteLogo = computed(() => getSetting('brand_logo') || siteSettings?.site_logo || '');
+const siteName = computed(() => (getSetting('site_title') as string) || siteSettings?.site_name || 'Janari');
+const siteLogo = computed(() => (getSetting('brand_logo') as string) || siteSettings?.site_logo || '');
 const siteVersion = computed(() => siteSettings?.site_version || 'v1.0 Janari');
 const headerCtaText = computed(() => getSetting('header_cta_text', 'Get Started'));
 const headerCtaUrl = computed(() => getSetting('header_cta_url', '/register'));
@@ -473,10 +576,10 @@ const headerStyleClasses = computed(() => {
 // Navigation Style
 const navStyle = computed(() => getSetting('nav_style', 'glass'));
 
-const getNavItemClasses = (isActive) => {
-    const baseClasses = 'flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-all duration-300 relative';
+const getNavItemClasses = (isActive: boolean) => {
+    const baseClasses = 'flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors duration-300 relative';
     
-    const styles = {
+    const styles: Record<string, { base: string; active: string }> = {
         // Glass Morph - Modern blur with transparency (Default)
         glass: {
             base: `${baseClasses} text-foreground/70 hover:text-foreground rounded-xl hover:bg-white/10 hover:backdrop-blur-sm hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] dark:hover:bg-white/5`,
@@ -519,17 +622,18 @@ const getNavItemClasses = (isActive) => {
         }
     };
     
-    const currentStyle = styles[navStyle.value] || styles.glass;
+    const currentStyle = styles[navStyle.value as string] || styles.glass;
     return isActive ? currentStyle.active : currentStyle.base;
 };
 
 // Mega Menu Helpers
-const getIconComponent = (iconName) => {
-    return LucideIcons[iconName] || null;
+const getIconComponent = (iconName?: string | null): Component | null => {
+    if (!iconName) return null;
+    return iconMap[iconName] || HelpCircle; // Fallback to HelpCircle if not in map
 };
 
-const getBadgeClasses = (color) => {
-    const colorMap = {
+const getBadgeClasses = (color?: string | null) => {
+    const colorMap: Record<string, string> = {
         primary: 'bg-primary text-primary-foreground',
         secondary: 'bg-secondary text-secondary-foreground',
         destructive: 'bg-destructive text-destructive-foreground',
@@ -537,18 +641,18 @@ const getBadgeClasses = (color) => {
         warning: 'bg-amber-500 text-white',
         default: 'bg-muted text-muted-foreground',
     };
-    return colorMap[color] || colorMap.default;
+    return colorMap[color || 'default'] || colorMap.default;
 };
 
 // Mega Menu Layout Helpers
-const getDropdownPositionClasses = (layout) => {
+const getDropdownPositionClasses = (layout?: string) => {
     if (layout === 'full') {
         return 'left-0 right-0 w-full fixed mt-2 px-4 container mx-auto transform -translate-x-1/2 left-1/2';
     }
     return 'left-0 min-w-[280px]';
 };
 
-const getMegaMenuLayoutClasses = (item) => {
+const getMegaMenuLayoutClasses = (item: MenuItem) => {
     const layout = item.mega_menu_layout || 'default';
     const childCount = item.children?.length || 0;
     
@@ -568,7 +672,7 @@ const getMegaMenuLayoutClasses = (item) => {
 };
 
 // Promotional image helpers
-const hasPromotionalImages = (items) => {
+const hasPromotionalImages = (items?: MenuItem[]): boolean => {
     if (!items) return false;
     for (const item of items) {
         if (item.image) return true;
@@ -577,9 +681,9 @@ const hasPromotionalImages = (items) => {
     return false;
 };
 
-const getPromotionalItems = (items) => {
+const getPromotionalItems = (items?: MenuItem[]): MenuItem[] => {
     if (!items) return [];
-    let promoItems = [];
+    let promoItems: MenuItem[] = [];
     items.forEach(item => {
         if (item.image) promoItems.push(item);
         if (item.children) {
@@ -589,7 +693,7 @@ const getPromotionalItems = (items) => {
     return promoItems;
 };
 
-const getImageSizeClasses = (size) => {
+const getImageSizeClasses = (size?: string | null) => {
     switch (size) {
         case 'landscape_sm': return 'aspect-video h-24 lg:h-28 object-cover';
         case 'landscape_md': return 'aspect-video h-32 lg:h-36 object-cover';
@@ -602,13 +706,13 @@ const getImageSizeClasses = (size) => {
     }
 };
 
-const groupItemsByColumn = (items, layout) => {
+const groupItemsByColumn = (items: MenuItem[], layout: string) => {
     let maxCols = 1;
     if (layout === 'grid-2') maxCols = 2;
     if (layout === 'grid-3') maxCols = 3;
     if (layout === 'full') maxCols = 4;
     
-    const groups = Array.from({length: maxCols}, () => []);
+    const groups: MenuItem[][] = Array.from({length: maxCols}, () => []);
     
     // Sort items by sort_order first to maintain order within columns
     const sortedItems = [...items].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
@@ -631,7 +735,7 @@ const route = useRoute();
 const currentMenuLocation = computed(() => {
     // 1. Priority: Route meta override
     if (route.meta?.menu_location) {
-        return route.meta.menu_location;
+        return route.meta.menu_location as string;
     }
     
     // 2. Special Case: Homepage
@@ -653,7 +757,8 @@ watch(currentMenuLocation, async (newLoc) => {
     
     // Fallback logic: If specific menu is empty/not found, fetch default 'header'
     // Note: useMenu store needs to handle empty response gracefully or we check here
-    if (!menus.value[newLoc] || !menus.value[newLoc].items || menus.value[newLoc].items.length === 0) {
+    const menu = menus.value[newLoc];
+    if (!menu || !menu.items || menu.items.length === 0) {
         if (newLoc !== 'header') {
             console.warn(`Menu location '${newLoc}' not found or empty. Falling back to 'header'.`);
             await fetchMenuByLocation('header');
@@ -666,71 +771,85 @@ onMounted(() => {
     fetchMenuByLocation('header_top');
 });
 
-const navItems = computed(() => {
+const navItems = computed<MenuItem[]>(() => {
     const loc = currentMenuLocation.value;
     // Return specific menu if exists and has items
     if (menus.value[loc] && menus.value[loc].items && menus.value[loc].items.length > 0) {
-        return menus.value[loc].items;
+        return menus.value[loc].items as MenuItem[];
     }
     
     // Check default 'header' menu
-    if (menus.value['header']?.items?.length > 0) {
-        return menus.value['header'].items;
+    if ((menus.value['header']?.items?.length || 0) > 0) {
+        return menus.value['header'].items as MenuItem[];
     }
 
     // Fallback JA-CMS Demo Menu
     return [
         { 
-            id: 'home-fallback', 
+            id: null,
+            _temp_id: 'home-fallback', 
             title: t('features.frontend.nav.home') || 'Home', 
             url: '/', 
+            type: 'custom',
             children: [] 
         },
         { 
-            id: 'about-fallback', 
+            id: null,
+            _temp_id: 'about-fallback', 
             title: 'Tentang', 
             url: '/about', 
+            type: 'custom',
             children: [] 
         },
         { 
-            id: 'features-fallback', 
+            id: null,
+            _temp_id: 'features-fallback', 
             title: 'Fitur', 
             url: '#features',
+            type: 'custom',
             children: [
-                { id: 'f1', title: 'Block Builder', url: '#features', icon: 'Layers' },
-                { id: 'f2', title: 'Theme System', url: '#features', icon: 'Palette' },
-                { id: 'f3', title: 'Multi-language', url: '#features', icon: 'Globe' },
-                { id: 'f4', title: 'API-First', url: '#features', icon: 'Code2' }
+                { id: null, _temp_id: 'f1', title: 'Block Builder', url: '#features', icon: 'Layers', type: 'custom', children: [] },
+                { id: null, _temp_id: 'f2', title: 'Theme System', url: '#features', icon: 'Palette', type: 'custom', children: [] },
+                { id: null, _temp_id: 'f3', title: 'Multi-language', url: '#features', icon: 'Globe', type: 'custom', children: [] },
+                { id: null, _temp_id: 'f4', title: 'API-First', url: '#features', icon: 'Code2', type: 'custom', children: [] }
             ]
         },
         { 
-            id: 'advantages-fallback', 
+            id: null,
+            _temp_id: 'advantages-fallback', 
             title: 'Keunggulan', 
             url: '#advantages', 
+            type: 'custom',
             children: [] 
         },
         { 
-            id: 'team-fallback', 
+            id: null,
+            _temp_id: 'team-fallback', 
             title: 'Tim Dev', 
             url: '#team', 
+            type: 'custom',
             children: [] 
         },
         { 
-            id: 'blog-fallback', 
+            id: null,
+            _temp_id: 'blog-fallback', 
             title: 'Blog', 
             url: '/blog', 
+            type: 'custom',
             children: [] 
         },
         { 
-            id: 'contact-fallback', 
+            id: null,
+            _temp_id: 'contact-fallback', 
             title: 'Kontak', 
             url: '/contact', 
+            type: 'custom',
             children: [] 
         }
     ];
 });
 
-const isParentActive = (item) => {
+const isParentActive = (item: MenuItem) => {
     if (!item.children || item.children.length === 0) return false;
     // Check if any child URL matches current path (or is parent of current path)
     return item.children.some(child => {
@@ -751,8 +870,9 @@ const isParentActive = (item) => {
     });
 };
 
-const headerTopItems = computed(() => menus.value['header_top']?.items || []);
+const headerTopItems = computed(() => (menus.value['header_top']?.items as MenuItem[]) || []);
 </script>
+
 
 <style scoped>
 /* ====== MODERN NAV STYLES 2024-2026 ====== */

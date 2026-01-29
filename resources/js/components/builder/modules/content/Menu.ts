@@ -102,7 +102,7 @@ const MenuModule: ModuleDefinition = {
                 id: 'menuTypography',
                 label: 'Menu Typography',
                 fields: [
-                    ...typographySettings.fields!.map(f => ({
+                    ...((typographySettings.fields as any[])).map(f => ({
                         ...f,
                         name: `menu_${f.name}`,
                         label: `Menu ${f.label}`

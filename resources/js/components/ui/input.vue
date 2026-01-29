@@ -1,32 +1,34 @@
-<script setup>
+<script setup lang="ts">
 import { cn } from '@/lib/utils';
+import type { HTMLAttributes } from 'vue';
 
-// Actually, to be safe and dependency-free (if vueuse isn't verified), standard way:
-const props = defineProps({
-  defaultValue: {
-    type: [String, Number],
-    default: undefined,
-  },
-  modelValue: {
-    type: [String, Number],
-    default: undefined,
-  },
-  class: {
-    type: String,
-    default: '',
-  },
+interface Props {
+  defaultValue?: string | number;
+  modelValue?: string | number;
+  class?: HTMLAttributes['class'];
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  class: '',
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string | number): void;
+}>();
+
+const handleInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  emit('update:modelValue', target.value);
+};
 </script>
 
 <template>
   <input
     :value="modelValue"
-    @input="emit('update:modelValue', $event.target.value)"
+    @input="handleInput"
     data-slot="input"
     :class="cn(
-      'flex h-8 w-full rounded-lg border border-border/50 bg-transparent px-2.5 py-1 text-base file:h-6 file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm placeholder:text-muted-foreground outline-none file:inline-flex file:border-0 file:bg-transparent',
+      'flex h-10 w-full rounded-lg border border-border/50 bg-transparent px-3 py-1 text-base file:h-6 file:text-sm file:font-medium focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 md:text-sm placeholder:text-muted-foreground outline-none file:inline-flex file:border-0 file:bg-transparent',
       props.class
     )"
     v-bind="$attrs"

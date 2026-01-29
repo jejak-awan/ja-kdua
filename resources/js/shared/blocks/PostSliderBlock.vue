@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode"
     :device="device"
-    class="post-slider-block transition-all duration-500"
+    class="post-slider-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Post Slider'"
     :style="cardStyles"
@@ -31,7 +31,7 @@
                       :key="index" 
                       class="pl-0 basis-full"
                   >
-                      <div class="relative overflow-hidden rounded-[4rem] shadow-2xl transition-all duration-1000 group/item" :style="slideStyles">
+                      <div class="relative overflow-hidden rounded-[4rem] shadow-2xl transition-colors duration-1000 group/item" :style="slideStyles">
                           <!-- Image Area -->
                           <div v-if="post.image" class="absolute inset-0 z-0 transition-transform duration-[2000ms] group-hover/item:scale-110">
                                <img :src="post.image" class="w-full h-full object-cover" />
@@ -43,17 +43,17 @@
                           <div class="relative z-20 h-full flex flex-col justify-center items-center text-center p-12 md:p-32 text-white">
                               <Badge 
                                   v-if="settings.showMeta !== false" 
-                                  class="mb-8 bg-white/10 backdrop-blur-2xl border-white/20 text-white rounded-2xl px-8 py-2 font-black uppercase tracking-[0.3em] text-[10px] transform -translate-y-8 opacity-0 group-hover/item:translate-y-0 group-hover/item:opacity-100 transition-all duration-700"
+                                  class="mb-8 bg-white/10 backdrop-blur-2xl border-white/20 text-white rounded-2xl px-8 py-2 font-black uppercase tracking-[0.3em] text-[10px] transform -translate-y-8 opacity-0 group-hover/item:translate-y-0 group-hover/item:opacity-100 transition-colors duration-700"
                                   :style="metaStyles"
                               >
                                   {{ post.date }} • {{ post.readTime }}
                               </Badge>
                               
-                              <h2 class="text-4xl md:text-7xl font-black mb-10 leading-[0.9] tracking-tighter max-w-5xl transition-all duration-700 delay-100 transform -translate-y-4 group-hover/item:translate-y-0" :style="itemTitleStyles">
+                              <h2 class="text-4xl md:text-7xl font-black mb-10 leading-[0.9] tracking-tighter max-w-5xl transition-colors duration-700 delay-100 transform -translate-y-4 group-hover/item:translate-y-0" :style="itemTitleStyles">
                                   {{ post.title }}
                               </h2>
                               
-                              <p v-if="settings.showExcerpt !== false" class="text-lg md:text-2xl font-medium opacity-80 mb-12 max-w-2xl leading-relaxed transition-all duration-700 delay-200 transform translate-y-4 group-hover/item:translate-y-0" :style="excerptStyles">
+                              <p v-if="settings.showExcerpt !== false" class="text-lg md:text-2xl font-medium opacity-80 mb-12 max-w-2xl leading-relaxed transition-colors duration-700 delay-200 transform translate-y-4 group-hover/item:translate-y-0" :style="excerptStyles">
                                   {{ post.excerpt }}
                               </p>
                               
@@ -61,7 +61,7 @@
                                   v-if="settings.showButton !== false" 
                                   as="a"
                                   :href="mode === 'view' ? post.url : '#'" 
-                                  class="h-16 px-16 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl hover:scale-105 active:scale-95 transition-all duration-500 delay-300 transform translate-y-8 opacity-0 group-hover/item:translate-y-0 group-hover/item:opacity-100" 
+                                  class="h-16 px-16 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl hover:scale-105 active:scale-95 transition-[width] duration-500 delay-300 transform translate-y-8 opacity-0 group-hover/item:translate-y-0 group-hover/item:opacity-100" 
                                   :style="buttonDisplayStyles"
                                   @click="(e: any) => mode === 'edit' ? e.preventDefault() : null"
                               >
@@ -75,8 +75,8 @@
 
               <!-- Controls -->
               <template v-if="settings.showArrows !== false">
-                  <CarouselPrevious class="left-8 w-16 h-16 opacity-0 group-hover/main:opacity-100 transition-all duration-500 bg-white/5 backdrop-blur-2xl border-white/10 text-white hover:bg-white/20 hover:scale-110" />
-                  <CarouselNext class="right-8 w-16 h-16 opacity-0 group-hover/main:opacity-100 transition-all duration-500 bg-white/5 backdrop-blur-2xl border-white/10 text-white hover:bg-white/20 hover:scale-110" />
+                  <CarouselPrevious class="left-8 w-16 h-16 opacity-0 group-hover/main:opacity-100 transition-[width] duration-500 bg-white/5 backdrop-blur-2xl border-white/10 text-white hover:bg-white/20 hover:scale-110" />
+                  <CarouselNext class="right-8 w-16 h-16 opacity-0 group-hover/main:opacity-100 transition-[width] duration-500 bg-white/5 backdrop-blur-2xl border-white/10 text-white hover:bg-white/20 hover:scale-110" />
               </template>
           </Carousel>
       </div>

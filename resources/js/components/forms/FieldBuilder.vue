@@ -76,17 +76,33 @@
     </div>
 </template>
 
-<script setup>
-const props = defineProps({
-    fields: {
-        type: Array,
-        default: () => []
-    }
+<script setup lang="ts">
+interface Field {
+    id?: number | string;
+    name: string;
+    label: string;
+    type: string;
+    placeholder?: string;
+    help_text?: string;
+    options?: string[];
+    is_required?: boolean;
+    [key: string]: any;
+}
+
+const props = withDefaults(defineProps<{
+    fields?: Field[];
+}>(), {
+    fields: () => []
 });
 
-const emit = defineEmits(['add-field', 'update-field', 'delete-field', 'reorder-fields']);
+const emit = defineEmits<{
+    (e: 'add-field'): void;
+    (e: 'update-field', field: Field): void;
+    (e: 'delete-field', id: number | string | undefined): void;
+    (e: 'reorder-fields', fields: Field[]): void;
+}>();
 
-const moveField = (index, direction) => {
+const moveField = (index: number, direction: 'up' | 'down') => {
     const newFields = [...props.fields];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     

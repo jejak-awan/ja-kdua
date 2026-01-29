@@ -45,8 +45,7 @@
       
       <!-- Helpers for active side style -->
       <div class="style-inputs flex flex-col gap-3">
-         
-         <!-- Width -->
+<!-- Width -->
          <div class="input-row">
             <BaseLabel>{{ t('builder.fields.border.width') }}</BaseLabel>
             <BaseSliderInput 
@@ -88,8 +87,14 @@
 <script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Link2, CornerUpLeft, BoxSelect, Square, ArrowUp, ArrowRight, ArrowDown, ArrowLeft } from 'lucide-vue-next'
-import { 
+import Link2 from 'lucide-vue-next/dist/esm/icons/link.js';
+import CornerUpLeft from 'lucide-vue-next/dist/esm/icons/corner-up-left.js';
+import BoxSelect from 'lucide-vue-next/dist/esm/icons/square-dashed.js';
+import Square from 'lucide-vue-next/dist/esm/icons/square.js';
+import ArrowUp from 'lucide-vue-next/dist/esm/icons/arrow-up.js';
+import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js';
+import ArrowDown from 'lucide-vue-next/dist/esm/icons/arrow-down.js';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';import { 
   BaseCollapsible, 
   BaseLabel, 
   BaseSegmentedControl, 

@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="video-block transition-all duration-300"
+    class="video-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Video Player'"
     :style="cardStyles"
@@ -17,7 +17,7 @@
         <iframe 
           v-if="videoType === 'youtube' && youtubeId"
           :src="youtubeEmbedUrl"
-          class="video-iframe absolute inset-0 w-full h-full grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
+          class="video-iframe absolute inset-0 w-full h-full grayscale-[0.2] group-hover:grayscale-0 transition-colors duration-700"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen
@@ -27,7 +27,7 @@
         <iframe 
           v-else-if="videoType === 'vimeo' && vimeoId"
           :src="vimeoEmbedUrl"
-          class="video-iframe absolute inset-0 w-full h-full grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
+          class="video-iframe absolute inset-0 w-full h-full grayscale-[0.2] group-hover:grayscale-0 transition-colors duration-700"
           frameborder="0"
           allow="autoplay; fullscreen; picture-in-picture"
           allowfullscreen
@@ -47,7 +47,7 @@
         
         <!-- Placeholder (Mode Edit Only or empty URL) -->
         <div v-else class="video-placeholder absolute inset-0 flex flex-col items-center justify-center gap-6 bg-slate-900 text-slate-700">
-          <div class="w-20 h-20 rounded-full border-2 border-slate-800 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:border-primary group-hover:text-primary">
+          <div class="w-20 h-20 rounded-full border-2 border-slate-800 flex items-center justify-center transition-[width] duration-500 group-hover:scale-110 group-hover:border-primary group-hover:text-primary">
               <Play :size="32" class="translate-x-0.5" />
           </div>
           <span class="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">{{ mode === 'edit' ? 'Video Stream Ready' : 'No Source' }}</span>
@@ -59,8 +59,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Play } from 'lucide-vue-next'
-import BaseBlock from '../components/BaseBlock.vue'
+import Play from 'lucide-vue-next/dist/esm/icons/play.js';import BaseBlock from '../components/BaseBlock.vue'
 import { 
     getVal,
     getLayoutStyles,

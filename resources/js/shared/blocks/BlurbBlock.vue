@@ -7,13 +7,13 @@
         :style="containerStyles(settings, blockDevice)"
       >
         <div 
-            class="blurb-content-wrapper transition-all duration-300 group" 
+            class="blurb-content-wrapper transition-colors duration-300 group" 
             :style="blurbContentWrapperStyles(settings, blockDevice)"
         >
             <!-- Media (Icon/Image) -->
             <div 
                 v-if="mediaType(settings, blockDevice) !== 'none'" 
-                class="blurb-media flex items-center justify-center shrink-0 transition-all duration-500 ease-out" 
+                class="blurb-media flex items-center justify-center shrink-0 transition-[width] duration-500 ease-out" 
                 :style="mediaWrapperStyles(settings, blockDevice)"
             >
                 <LucideIcon 
@@ -42,7 +42,7 @@
             >
                 <h3 
                     v-if="mode === 'edit' || getVal(settings, 'title', blockDevice)" 
-                    class="blurb-title font-bold text-xl mb-3 leading-tight transition-all duration-300" 
+                    class="blurb-title font-bold text-xl mb-3 leading-tight transition-colors duration-300" 
                     :contenteditable="mode === 'edit'"
                     @blur="e => updateField('title', (e.target as HTMLElement).innerText)"
                     :style="getTypographyStyles(settings, 'title_', blockDevice)"
@@ -51,7 +51,7 @@
                 </h3>
                 <div 
                     v-if="mode === 'edit' || getVal(settings, 'content', blockDevice)" 
-                    class="blurb-description font-medium leading-relaxed transition-all duration-300" 
+                    class="blurb-description font-medium leading-relaxed transition-colors duration-300" 
                     :contenteditable="mode === 'edit'"
                     @blur="e => updateField('content', (e.target as HTMLElement).innerText)"
                     v-text="getVal(settings, 'content', blockDevice)"
@@ -70,20 +70,15 @@ import { inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Avatar, AvatarImage, AvatarFallback } from '../ui'
 import LucideIcon from '../../components/ui/LucideIcon.vue'
-import { Layers } from 'lucide-vue-next'
-import { 
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';import { 
     getVal, 
     getTypographyStyles,
     getLayoutStyles,
     toCSS
 } from '../utils/styleUtils'
-import type { BlockInstance, BuilderInstance } from '../../types/builder'
+import type { BlockInstance, BuilderInstance, BlockProps } from '../../types/builder'
 
-const props = withDefaults(defineProps<{
-  module: BlockInstance;
-  mode?: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile' | null;
-}>(), {
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })

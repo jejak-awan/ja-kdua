@@ -16,23 +16,20 @@
     </div>
 </template>
 
-<script setup>
-import { ref, watch, onMounted } from 'vue';
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+import type { Theme } from '@/types/theme';
 
-const props = defineProps({
-    theme: {
-        type: Object,
-        required: true,
-    },
-    previewUrl: {
-        type: String,
-        default: '/',
-    },
-});
+const props = defineProps<{
+    theme: Theme;
+    previewUrl?: string;
+}>();
 
-const emit = defineEmits(['close']);
+defineEmits<{
+    (e: 'close'): void;
+}>();
 
-const previewFrame = ref(null);
+const previewFrame = ref<HTMLIFrameElement | null>(null);
 const loading = ref(true);
 
 // Inject CSS variables and custom CSS into iframe
@@ -40,7 +37,7 @@ const injectThemeStyles = () => {
     if (!previewFrame.value || !props.theme) return;
 
     try {
-        const iframeDoc = previewFrame.value.contentDocument || previewFrame.value.contentWindow.document;
+        const iframeDoc = previewFrame.value.contentDocument || previewFrame.value.contentWindow?.document;
         if (!iframeDoc) return;
 
         // Remove existing theme styles
@@ -63,10 +60,10 @@ const injectThemeStyles = () => {
         // Apply settings as CSS variables (Matching useTheme.js logic)
         if (props.theme.settings) {
             const settings = props.theme.settings;
-            const variables = [];
+            const variables: string[] = [];
 
             // Helper for conversion (simplified for injection)
-            const hexToHsl = (hex) => {
+            const hexToHsl = (hex: string) => {
                 if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return null;
                 let r = 0, g = 0, b = 0;
                 if (hex.length === 4) {
@@ -165,16 +162,21 @@ const onPreviewLoad = () => {
     injectThemeStyles();
 };
 
+const refreshPreview = () => {
+    if (previewFrame.value) {
+        loading.value = true;
+        previewFrame.value.src = props.previewUrl || '/';
+    }
+};
+
+defineExpose({ refreshPreview });
+
 // Watch for theme changes and re-inject styles
 watch(() => props.theme, () => {
     if (previewFrame.value && previewFrame.value.contentDocument) {
         injectThemeStyles();
     }
 }, { deep: true });
-
-onMounted(() => {
-    // Set initial preview URL with theme parameter if needed
-});
 </script>
 
 <style scoped>

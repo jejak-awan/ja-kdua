@@ -159,7 +159,7 @@ export default {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: typographySettings.fields.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -168,7 +168,7 @@ export default {
             {
                 id: 'contentTypography',
                 label: 'Content Typography',
-                fields: typographySettings.fields.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `content_${f.name}`,
                     label: `Content ${f.label}`
@@ -177,7 +177,7 @@ export default {
             {
                 id: 'buttonTypography',
                 label: 'Button Typography',
-                fields: typographySettings.fields.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `button_${f.name}`,
                     label: `Button ${f.label}`

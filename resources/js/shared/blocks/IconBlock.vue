@@ -8,7 +8,7 @@
       >
         <component
           :is="getVal(settings, 'linkUrl') ? 'a' : 'div'"
-          class="icon-wrapper transition-all duration-300 group"
+          class="icon-wrapper transition-colors duration-300 group"
           :href="getVal(settings, 'linkUrl') || undefined"
           :target="getVal(settings, 'linkTarget') || '_self'"
           :aria-label="getVal(settings, 'aria_label', blockDevice) || undefined"
@@ -36,12 +36,9 @@ import {
     getMaskStyles,
     getLayoutStyles
 } from '../utils/styleUtils'
+import type { BlockProps } from '@/types/builder'
 
-const props = withDefaults(defineProps<{
-  module: any;
-  mode?: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile' | null;
-}>(), {
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })

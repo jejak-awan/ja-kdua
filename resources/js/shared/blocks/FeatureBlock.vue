@@ -7,13 +7,13 @@
         :style="containerStyles(settings, blockDevice)"
       >
         <Card 
-            class="feature-card transition-all duration-500 group overflow-hidden" 
+            class="feature-card transition-[width] duration-500 group overflow-hidden" 
             :class="cardClasses(settings, blockDevice)" 
             :style="cardStyles(settings, blockDevice)"
             :aria-label="getVal(settings, 'aria_label', blockDevice) || undefined"
         >
             <div 
-                class="feature-inner flex transition-all duration-500" 
+                class="feature-inner flex transition-[width] duration-500" 
                 :class="innerClasses(settings, blockDevice)"
             >
                 <div class="feature-icon-wrap relative flex-shrink-0" :style="iconWrapperStyles(settings, blockDevice)">
@@ -26,7 +26,7 @@
                 <div class="feature-content flex-1 pt-1 min-w-0">
                     <CardTitle 
                         v-if="mode === 'edit' || getVal(settings, 'title', blockDevice)"
-                        class="text-xl font-bold mb-3 tracking-tight transition-all duration-300" 
+                        class="text-xl font-bold mb-3 tracking-tight transition-colors duration-300" 
                         :style="getTypographyStyles(settings, 'title_', blockDevice)"
                         :contenteditable="mode === 'edit'"
                         @blur="(e: any) => updateField('title', (e.target as HTMLElement).innerText)"
@@ -35,7 +35,7 @@
                     </CardTitle>
                     <CardDescription 
                         v-if="mode === 'edit' || getVal(settings, 'description', blockDevice)"
-                        class="opacity-70 leading-relaxed text-sm transition-all duration-300" 
+                        class="opacity-70 leading-relaxed text-sm transition-colors duration-300" 
                         :style="getTypographyStyles(settings, 'description_', blockDevice)"
                         :contenteditable="mode === 'edit'"
                         @blur="(e: any) => updateField('description', (e.target as HTMLElement).innerText)"
@@ -54,20 +54,31 @@
 import { inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Card, CardTitle, CardDescription } from '../ui'
-import * as LucideIcons from 'lucide-vue-next'
+import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
+import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
+import Code2 from 'lucide-vue-next/dist/esm/icons/code-xml.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import Star from 'lucide-vue-next/dist/esm/icons/star.js';
+import Shield from 'lucide-vue-next/dist/esm/icons/shield.js';
+import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
+import Info from 'lucide-vue-next/dist/esm/icons/info.js';
+import Heart from 'lucide-vue-next/dist/esm/icons/heart.js';
+import Bell from 'lucide-vue-next/dist/esm/icons/bell.js';import type { Component } from 'vue'
+
+const iconMap: Record<string, Component> = {
+    Zap, Layers, Palette, Globe, Code2, Check, Star, Shield, HelpCircle, Info, Heart, Bell
+}
 import { 
     getVal, 
     getTypographyStyles,
     getLayoutStyles,
     toCSS
 } from '../utils/styleUtils'
-import type { BlockInstance, BuilderInstance } from '../../types/builder'
+import type { BlockInstance, BuilderInstance, BlockProps } from '../../types/builder'
 
-const props = withDefaults(defineProps<{
-  module: BlockInstance;
-  mode?: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile' | null;
-}>(), {
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })
@@ -76,7 +87,7 @@ const builder = inject<BuilderInstance>('builder', null as any)
 
 const iconComponent = (settings: any, device: string) => {
   const iconName = getVal(settings, 'icon', device) || 'Zap'
-  return (LucideIcons as any)[iconName] || LucideIcons.Zap
+  return iconMap[iconName] || iconMap.Zap
 }
 
 const containerStyles = (settings: any, device: string) => {

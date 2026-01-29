@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="map-block transition-all duration-300"
+    class="map-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Interactive Map'"
     :style="cardStyles"
@@ -46,8 +46,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { MapPin } from 'lucide-vue-next'
-import BaseBlock from '../components/BaseBlock.vue'
+import MapPin from 'lucide-vue-next/dist/esm/icons/map-pin.js';import BaseBlock from '../components/BaseBlock.vue'
 import { 
     getVal, 
     getLayoutStyles,

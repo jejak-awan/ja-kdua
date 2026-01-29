@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Columns } from 'lucide-vue-next';
+import Columns from 'lucide-vue-next/dist/esm/icons/columns-2.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

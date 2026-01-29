@@ -7,7 +7,7 @@
             :style="containerStyles(settings, blockDevice)"
         >
             <div 
-                class="cta-inner relative overflow-hidden transition-all duration-500 group rounded-[48px]" 
+                class="cta-inner relative overflow-hidden transition-[width] duration-500 group rounded-[48px]" 
                 :style="innerStyles(settings, blockDevice)"
             >
                 <!-- Decorative Orbs -->
@@ -29,7 +29,7 @@
                         }"
                     >
                         <h2 
-                            class="cta-title font-black leading-none mb-6 tracking-tighter transition-all duration-300" 
+                            class="cta-title font-black leading-none mb-6 tracking-tighter transition-colors duration-300" 
                             :style="getTypographyStyles(settings, 'title_', blockDevice)"
                             :contenteditable="mode === 'edit'"
                             @blur="e => updateField('title', (e.target as HTMLElement).innerText)"
@@ -37,7 +37,7 @@
                             {{ getVal(settings, 'title', blockDevice) }}
                         </h2>
                         <div 
-                            class="cta-body text-xl opacity-90 leading-relaxed font-medium transition-all duration-300" 
+                            class="cta-body text-xl opacity-90 leading-relaxed font-medium transition-colors duration-300" 
                             :style="getTypographyStyles(settings, 'content_', blockDevice)"
                             :contenteditable="mode === 'edit'"
                             @blur="e => updateField('content', (e.target as HTMLElement).innerText)"
@@ -56,7 +56,7 @@
                             :href="mode === 'view' ? (getVal(settings, 'buttonUrl') || '#') : undefined"
                             :target="getVal(settings, 'buttonTarget') || '_self'"
                             :aria-label="getVal(settings, 'aria_label', blockDevice) || undefined"
-                            class="h-14 px-12 rounded-full font-bold shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
+                            class="h-14 px-12 rounded-full font-bold shadow-2xl transition-colors duration-300 hover:scale-105 active:scale-95"
                             :style="buttonDisplayStyles(settings, blockDevice)"
                             @click="onButtonClick"
                         >
@@ -81,13 +81,9 @@ import {
     getTypographyStyles,
     getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance, BuilderInstance } from '../../types/builder'
+import type { BlockInstance, BuilderInstance, BlockProps } from '../../types/builder'
 
-const props = withDefaults(defineProps<{
-  module: BlockInstance;
-  mode?: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile' | null;
-}>(), {
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })

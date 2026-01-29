@@ -116,8 +116,15 @@
 <script setup lang="ts">
 import { ref, computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { X, Construction, ChevronsLeft, Plus, LayoutGrid, Eye, Search, Filter, MoreVertical } from 'lucide-vue-next'
-import { SIDEBAR_PANELS } from '../core/constants'
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import Construction from 'lucide-vue-next/dist/esm/icons/construction.js';
+import ChevronsLeft from 'lucide-vue-next/dist/esm/icons/chevrons-left.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import LayoutGrid from 'lucide-vue-next/dist/esm/icons/layout-grid.js';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Filter from 'lucide-vue-next/dist/esm/icons/list-filter.js';
+import MoreVertical from 'lucide-vue-next/dist/esm/icons/ellipsis-vertical.js';import { SIDEBAR_PANELS } from '../core/constants'
 import LayersTree from './LayersTree.vue'
 import HistoryPanel from './panels/HistoryPanel.vue'
 import PageSettingsPanel from './panels/PageSettingsPanel.vue'

@@ -42,8 +42,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Link2 } from 'lucide-vue-next'
-import { BaseLabel, BaseInput, BaseSegmentedControl } from '../ui'
+import Link2 from 'lucide-vue-next/dist/esm/icons/link.js';import { BaseLabel, BaseInput, BaseSegmentedControl } from '../ui'
 
 const { t } = useI18n()
 
@@ -93,8 +92,8 @@ const updateValue = (side: string, val: any) => {
   emitUpdate()
 }
 
-const updateUnit = (unit: string) => {
-  localValue.value.unit = unit
+const updateUnit = (unit: string | number | boolean) => {
+  localValue.value.unit = String(unit)
   emitUpdate()
 }
 

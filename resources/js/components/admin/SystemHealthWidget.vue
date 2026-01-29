@@ -43,7 +43,7 @@
             <div
               :class="getProgressBarClass(health.cpu?.status)"
               :style="{ width: `${health.cpu?.percent || 0}%` }"
-              class="h-full transition-all duration-500 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.1)]"
+              class="h-full transition-[width] duration-500 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.1)]"
             ></div>
           </div>
           <p v-if="health.cpu?.load" class="text-[10px] text-muted-foreground line-clamp-1 italic">
@@ -66,7 +66,7 @@
             <div
               :class="getProgressBarClass(health.memory?.status)"
               :style="{ width: `${health.memory?.percent || 0}%` }"
-              class="h-full transition-all duration-500 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.1)]"
+              class="h-full transition-[width] duration-500 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.1)]"
             ></div>
           </div>
           <p class="text-[10px] text-muted-foreground line-clamp-1 italic">
@@ -89,7 +89,7 @@
                     <div
                         :class="getProgressBarClass(health.disk?.status)"
                         :style="{ width: `${health.disk?.percent || 0}%` }"
-                        class="h-full transition-all duration-500"
+                        class="h-full transition-[width] duration-500"
                     ></div>
                 </div>
             </div>
@@ -139,37 +139,54 @@
   </Card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useAuthStore } from '@/stores/auth';
 import { parseSingleResponse } from '@/utils/responseParser';
-import Card from '@/components/ui/card.vue';
-import CardHeader from '@/components/ui/card-header.vue';
-import CardTitle from '@/components/ui/card-title.vue';
-import CardContent from '@/components/ui/card-content.vue';
-import CardFooter from '@/components/ui/card-footer.vue';
-import Button from '@/components/ui/button.vue';
-import Badge from '@/components/ui/badge.vue';
 import { 
-    Activity, 
-    RefreshCw, 
-    Cpu, 
-    Layers, 
-    HardDrive, 
-    Database, 
-    Zap, 
-    Clock, 
-    CheckCircle2, 
-    AlertCircle 
-} from 'lucide-vue-next';
+    Card, 
+    CardHeader, 
+    CardTitle, 
+    CardContent, 
+    CardFooter, 
+    Button, 
+    Badge 
+} from '@/components/ui';
+import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import Cpu from 'lucide-vue-next/dist/esm/icons/cpu.js';
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import HardDrive from 'lucide-vue-next/dist/esm/icons/hard-drive.js';
+import Database from 'lucide-vue-next/dist/esm/icons/database.js';
+import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
+import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
+import CheckCircle2 from 'lucide-vue-next/dist/esm/icons/circle-check-big.js';
+import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
+
+interface HealthMetric {
+    percent?: number;
+    used?: string;
+    total?: string;
+    status: string;
+    load?: string;
+    message?: string;
+}
+
+interface SystemHealth {
+    cpu: HealthMetric;
+    memory: HealthMetric;
+    disk: HealthMetric;
+    database: HealthMetric;
+    redis: HealthMetric;
+    overall: string;
+}
 
 const { t } = useI18n();
 const authStore = useAuthStore();
 
-
-const health = ref({
+const health = ref<SystemHealth>({
   cpu: { percent: 0, status: 'unknown' },
   memory: { percent: 0, used: '0 B', total: '0 B', status: 'unknown' },
   disk: { percent: 0, used: '0 B', total: '0 B', status: 'unknown' },
@@ -179,8 +196,8 @@ const health = ref({
 });
 
 const loading = ref(false);
-const lastUpdated = ref(null);
-let refreshInterval = null;
+const lastUpdated = ref<Date | null>(null);
+const refreshInterval = ref<ReturnType<typeof setInterval> | null>(null);
 
 const overallStatus = computed(() => health.value.overall || 'unknown');
 
@@ -205,14 +222,14 @@ const overallStatusBadgeClass = computed(() => {
   return 'bg-muted text-muted-foreground';
 });
 
-const getStatusClass = (status) => {
+const getStatusClass = (status?: string) => {
   if (status === 'ok') return 'text-success';
   if (status === 'warning') return 'text-warning';
   if (status === 'critical' || status === 'error') return 'text-destructive';
   return 'text-muted-foreground';
 };
 
-const getProgressBarClass = (status) => {
+const getProgressBarClass = (status?: string) => {
   if (status === 'ok') return 'bg-success';
   if (status === 'warning') return 'bg-warning';
   if (status === 'critical' || status === 'error') return 'bg-destructive';
@@ -220,39 +237,40 @@ const getProgressBarClass = (status) => {
 };
 
 const fetchHealth = async () => {
-  if (window.__isSessionTerminated) {
-    if (refreshInterval) clearInterval(refreshInterval);
-    return;
-  }
-
-  // Permission check
-  if (!authStore.hasPermission('manage system')) return;
-
-  loading.value = true;
-  try {
-    const response = await api.get('/admin/ja/system/health/detailed');
-    const data = parseSingleResponse(response);
-    if (data) {
-      health.value = data;
-      lastUpdated.value = new Date();
+    if ((window as any).__isSessionTerminated) {
+        if (refreshInterval.value) {
+            clearInterval(refreshInterval.value);
+            refreshInterval.value = null;
+        }
+        return;
     }
-  } catch (error) {
-    // Silently handle canceled requests (401/session errors)
-    if (error.code !== 'ERR_CANCELED' && error.response?.status !== 401) {
-      console.error('Failed to fetch system health:', error);
+
+    if (!authStore.hasPermission('manage system')) return;
+
+    loading.value = true;
+    try {
+        const response = await api.get('/admin/ja/system/health/detailed');
+        const data = parseSingleResponse(response);
+        if (data) {
+            health.value = data as SystemHealth;
+            lastUpdated.value = new Date();
+        }
+    } catch (error: any) {
+        if (error.code !== 'ERR_CANCELED' && error.response?.status !== 401) {
+            console.error('Failed to fetch system health:', error);
+        }
+    } finally {
+        loading.value = false;
     }
-  } finally {
-    loading.value = false;
-  }
 };
 
 const refresh = () => {
   fetchHealth();
 };
 
-const formatTime = (date) => {
+const formatTime = (date: Date) => {
   if (!date) return '';
-  return new Date(date).toLocaleTimeString('en-US', {
+  return date.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
@@ -260,14 +278,14 @@ const formatTime = (date) => {
 };
 
 onMounted(() => {
-  fetchHealth();
-  refreshInterval = setInterval(fetchHealth, 120000); // Increased from 30s to 2m
+    fetchHealth();
+    refreshInterval.value = setInterval(fetchHealth, 120000);
 });
 
 onUnmounted(() => {
-  if (refreshInterval) {
-    clearInterval(refreshInterval);
-  }
+    if (refreshInterval.value) {
+        clearInterval(refreshInterval.value);
+    }
 });
 </script>
 

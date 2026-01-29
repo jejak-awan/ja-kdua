@@ -49,7 +49,7 @@
             <button 
               v-for="item in group.items" 
               :key="item.id"
-              class="group flex items-center justify-between px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all duration-200 active:scale-[0.98] text-left"
+              class="group flex items-center justify-between px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-[background-color,transform] duration-200 active:scale-[0.98] text-left"
               @click="selectItem(item)"
             >
               <div class="flex flex-col items-start gap-0 min-w-0 flex-1 mr-3">
@@ -57,7 +57,7 @@
                 <span v-if="item.description" class="text-[8px] text-muted-foreground line-clamp-1 opacity-50 group-hover:opacity-100 transition-opacity truncate w-full">{{ item.description }}</span>
               </div>
               
-              <Badge variant="outline" class="shrink-0 bg-slate-100/30 dark:bg-slate-800/20 border-slate-200/50 dark:border-slate-800/50 text-[8px] font-mono font-medium px-1 py-0 text-slate-500 dark:text-slate-400 group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/20 transition-all duration-200">
+              <Badge variant="outline" class="shrink-0 bg-slate-100/30 dark:bg-slate-800/20 border-slate-200/50 dark:border-slate-800/50 text-[8px] font-mono font-medium px-1 py-0 text-slate-500 dark:text-slate-400 group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/20 transition-colors duration-200">
                 {{ item.tag }}
               </Badge>
             </button>
@@ -74,60 +74,77 @@
   </div>
 </template>
 
-<script setup>
-  import { ref, computed, onMounted, inject } from 'vue'
-  import { Search, Loader2, X, AlertCircle, SearchX } from 'lucide-vue-next'
-  import { Input, Badge, Button } from './index'
-  import api from '@/services/api'
+<script setup lang="ts">
+  import { ref, computed, onMounted, inject, type Ref } from 'vue';
+  import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
+import SearchX from 'lucide-vue-next/dist/esm/icons/search-x.js';
+  import { Input, Badge, Button } from '@/components/ui';
+  import api from '@/services/api';
 
-  const props = defineProps({
-    source: {
-      type: String,
-      default: 'all' // all | page | loop | site | archive | user
-    },
-    contentId: {
-      type: [Number, String],
-      default: null
-    },
-    showClose: {
-      type: Boolean,
-      default: false
-    }
-  })
+  interface Props {
+    source?: string;
+    contentId?: number | string | null;
+    showClose?: boolean;
+  }
 
-  const emit = defineEmits(['select', 'close'])
-  const builder = inject('builder', null)
+  const props = withDefaults(defineProps<Props>(), {
+    source: 'all',
+    contentId: null,
+    showClose: false
+  });
 
-  const searchQuery = ref('')
-  const dataGroups = ref({})
-  const loading = ref(false)
-  const error = ref(null)
+  interface DynamicItem {
+    id: string;
+    label: string;
+    tag: string;
+    description: string;
+  }
+
+  interface DynamicGroup {
+    label: string;
+    items: DynamicItem[];
+  }
+
+  const emit = defineEmits<{
+    (e: 'select', item: DynamicItem): void;
+    (e: 'close'): void;
+  }>();
+  
+  const builder = inject<any>('builder', null);
+
+  const searchQuery = ref('');
+  const dataGroups = ref<Record<string, DynamicGroup>>({});
+  const loading = ref(false);
+  const error = ref<string | null>(null);
 
   // Fetch dynamic sources from backend
   const fetchDynamicSources = async () => {
-    loading.value = true
-    error.value = null
+    loading.value = true;
+    error.value = null;
     
     try {
       const params = {
         context: props.source,
         content_id: props.contentId || builder?.contentId
-      }
+      };
       
-      const response = await api.get('/admin/ja/builder/dynamic-sources', { params })
-      dataGroups.value = response.data?.data || response.data || {}
+      const response = await api.get('/admin/ja/builder/dynamic-sources', { params });
+      dataGroups.value = response.data?.data || response.data || {};
     } catch (err) {
-      console.error('Failed to fetch dynamic sources:', err)
-      error.value = 'Failed to load dynamic data sources'
+      console.error('Failed to fetch dynamic sources:', err);
+      error.value = 'Failed to load dynamic data sources';
       // Fallback to default sources
-      dataGroups.value = getDefaultSources()
+      dataGroups.value = getDefaultSources();
     } finally {
-      loading.value = false
+      loading.value = false;
     }
-  }
+  };
 
   // Default sources as fallback
-  const getDefaultSources = () => ({
+  const getDefaultSources = (): Record<string, DynamicGroup> => ({
     page: {
       label: 'Page / Post',
       items: [
@@ -155,37 +172,37 @@
         { id: 'current_date', label: 'Current Date', tag: '{{current_date}}', description: 'Today\'s dynamic date' }
       ]
     }
-  })
+  });
 
   const filteredGroups = computed(() => {
-    const query = searchQuery.value.toLowerCase()
-    const result = {}
+    const query = searchQuery.value.toLowerCase();
+    const result: Record<string, DynamicGroup> = {};
 
     Object.entries(dataGroups.value).forEach(([key, group]) => {
       const items = group.items.filter(item => 
         item.label.toLowerCase().includes(query) || 
         item.tag.toLowerCase().includes(query) ||
         (item.description && item.description.toLowerCase().includes(query))
-      )
+      );
 
       if (items.length > 0) {
         result[key] = {
           ...group,
           items
-        }
+        };
       }
-    })
+    });
 
-    return result
-  })
+    return result;
+  });
 
-  const selectItem = (item) => {
-    emit('select', item)
-  }
+  const selectItem = (item: DynamicItem) => {
+    emit('select', item);
+  };
 
   onMounted(() => {
-    fetchDynamicSources()
-  })
+    fetchDynamicSources();
+  });
 </script>
 
 <style scoped>

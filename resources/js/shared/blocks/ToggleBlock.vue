@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="toggle-block w-full transition-all duration-300"
+    class="toggle-block w-full transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Toggle'"
     :style="cardStyles"
@@ -13,12 +13,12 @@
         <Accordion 
           type="single" 
           collapsible 
-          :defaultValue="defaultOpenValue ? 'item-1' : ''"
+          :default-value="defaultOpenValue ? 'item-1' : ''"
           class="w-full"
         >
           <AccordionItem value="item-1" class="border-none toggle-item">
             <AccordionTrigger 
-              class="toggle-header flex items-center justify-between py-4 px-6 rounded-xl hover:no-underline transition-all"
+              class="toggle-header flex items-center justify-between py-4 px-6 rounded-xl hover:no-underline transition-colors"
               :class="[iconPositionValue === 'left' ? 'flex-row-reverse' : '']"
               :style="headerStyles"
             >

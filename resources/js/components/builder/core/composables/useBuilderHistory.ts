@@ -2,7 +2,7 @@ import { computed, ref, onBeforeUnmount } from 'vue'
 import type { BuilderState } from '../../../../types/builder'
 
 export function useBuilderHistory(state: BuilderState) {
-    const { blocks, history, historyIndex, maxHistory } = state
+    const { blocks, history, historyIndex, maxHistory, markAsDirty } = state
     const snapshotTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
 
     const canUndo = computed(() => historyIndex.value > 0)
@@ -74,6 +74,7 @@ export function useBuilderHistory(state: BuilderState) {
         if (!canUndo.value) return false
         historyIndex.value--
         blocks.value = JSON.parse(history.value[historyIndex.value])
+        markAsDirty()
         return true
     }
 
@@ -83,6 +84,7 @@ export function useBuilderHistory(state: BuilderState) {
         if (!canRedo.value) return false
         historyIndex.value++
         blocks.value = JSON.parse(history.value[historyIndex.value])
+        markAsDirty()
         return true
     }
 

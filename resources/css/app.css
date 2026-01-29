@@ -217,16 +217,24 @@
     }
 }
 
-/* Global Transition Suppression for Theme Switching and Initial Mount */
+/* Global Transition Suppression */
+.admin-instant,
+.admin-instant *,
+.admin-instant *::before,
+.admin-instant *::after,
 .no-transitions,
 .no-transitions *,
 .no-transitions *::before,
 .no-transitions *::after {
     transition: none !important;
     animation: none !important;
-    transition-property: none !important;
     transition-duration: 0s !important;
-    transition-delay: 0s !important;
+    transition-property: none !important;
+}
+
+/* Ensure admin-level interactions are snappy */
+[data-slot] {
+    transition: none !important;
 }
 
 /* Dark mode support - class-based */
@@ -487,4 +495,9 @@
 
 .animate-rotate-in {
     animation: rotateIn 0.6s both;
+}
+
+/* Theme Switch Flash Prevention */
+.no-transitions * {
+    transition: none !important;
 }

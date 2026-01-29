@@ -1,6 +1,6 @@
 <template>
     <div 
-        class="border border-border rounded-lg bg-card relative shadow-sm transition-all"
+        class="border border-border rounded-lg bg-card relative shadow-sm transition-shadow"
         :class="[
             isSelected ? 'ring-2 ring-primary border-primary' : 'hover:shadow-md',
             typeColorClass
@@ -30,7 +30,7 @@
                         <Badge v-if="item.type !== 'custom'" variant="outline" class="text-[10px] px-1.5 py-0">
                             {{ typeLabel }}
                         </Badge>
-                        <Badge v-if="item.badge" :variant="item.badge_color || 'primary'" class="text-[10px]">
+                        <Badge v-if="item.badge" :variant="(item.badge_color as any) || 'default'" class="text-[10px]">
                             {{ item.badge }}
                         </Badge>
                     </div>
@@ -90,7 +90,7 @@
         <!-- Nested Children (Drop Zone) -->
         <div 
             v-show="isExpanded" 
-            class="ml-6 pl-2 pr-2 transition-all"
+            class="ml-6 pl-2 pr-2 transition-shadow"
             :class="item.children && item.children.length > 0 ? 'border-t border-border/50 py-2 bg-muted/10' : 'py-1'"
         >
             <slot name="children" />
@@ -109,10 +109,15 @@ import type { MenuItem } from '../../../types/menu';
 import Badge from '../../ui/badge.vue';
 import Button from '../../ui/button.vue';
 
-import { 
-    GripVertical, ChevronDown, Copy, Trash2,
-    FileText, File, Tag, Link as LinkIcon, Columns 
-} from 'lucide-vue-next';
+import GripVertical from 'lucide-vue-next/dist/esm/icons/grip-vertical.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import File from 'lucide-vue-next/dist/esm/icons/file.js';
+import Tag from 'lucide-vue-next/dist/esm/icons/tag.js';
+import LinkIcon from 'lucide-vue-next/dist/esm/icons/link.js';
+import Columns from 'lucide-vue-next/dist/esm/icons/columns-2.js';
 
 const props = defineProps<{
     item: MenuItem;
@@ -136,7 +141,7 @@ const iconComponent = computed(() => {
 });
 
 const iconColorClass = computed(() => {
-    const definition = menuItemRegistry.get(props.item.type);
+    const definition = menuItemRegistry.get(props.item.type || '');
     const color = definition?.color || 'gray';
     // Using simple color mapping, ensure these classes exist in your CSS/Tailwind
     return `text-${color}-500`;
@@ -158,10 +163,10 @@ const typeLabel = computed(() => {
     // Handle known types with translations
     if (type === 'custom') return t('features.menus.form.customLink');
     if (type === 'column_group') return t('features.menus.form.types.column_group');
-    if (['page', 'post', 'category'].includes(type)) return t(`features.menus.form.types.${type}`);
+    if (['page', 'post', 'category'].includes(type || '')) return t(`features.menus.form.types.${type}`);
 
     // Fallback to registry or raw type
-    const definition = menuItemRegistry.get(type);
+    const definition = menuItemRegistry.get(type || '');
     return definition?.label || type;
 });
 

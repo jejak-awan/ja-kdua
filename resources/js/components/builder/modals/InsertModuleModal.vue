@@ -1,21 +1,21 @@
 <template>
   <BaseModal
     :is-open="true"
-    :title="$t('builder.insertModal.title')"
+    :title="t('builder.insertModal.title')"
     :width="700"
     draggable
     placement="center"
     @close="$emit('close')"
   >
     <template #header>
-      <Tabs v-model="activeTab" class="modal-tabs-container" @update:modelValue="handleTabChange">
+      <Tabs v-model="activeTab" class="modal-tabs-container" @update:model-value="handleTabChange">
         <TabsList class="modal-tabs-list">
           <TabsTrigger 
             v-for="tab in tabs" 
             :key="tab.id" 
             :value="tab.id"
           >
-            {{ te('builder.insertModal.tabs.' + tab.id) ? $t('builder.insertModal.tabs.' + tab.id) : tab.label }}
+            {{ te('builder.insertModal.tabs.' + tab.id) ? t('builder.insertModal.tabs.' + tab.id) : tab.label }}
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -57,20 +57,19 @@
           </div>
           
           <div v-if="Object.keys(groupedModules).length === 0" class="no-results">
-            {{ $t('builder.insertModal.noResults', { query: searchQuery }) }}
+            {{ t('builder.insertModal.noResults', { query: searchQuery }) }}
           </div>
         </div>
         
         <!-- New Row Tab -->
         <div v-if="activeTab === 'row'" class="layout-content">
-          
-          <!-- Unified Layout Groups Loop -->
+<!-- Unified Layout Groups Loop -->
           <div v-for="group in allGroups" :key="group.id" class="layout-group">
             <h4 class="group-title">
               <span :class="['category-badge', `category-badge--${group.type}`]">
                 {{ group.type === 'flex' ? t('builder.fields.layoutTypes.flex') : t('builder.fields.layoutTypes.grid') }}
               </span>
-              {{ te('builder.insertModal.layoutGroups.' + group.id) ? $t('builder.insertModal.layoutGroups.' + group.id) : group.title }}
+              {{ te('builder.insertModal.layoutGroups.' + group.id) ? t('builder.insertModal.layoutGroups.' + group.id) : group.title }}
             </h4>
             
             <div class="layout-grid">
@@ -117,16 +116,15 @@
               </button>
             </div>
           </div>
-
-        </div>
+</div>
         
         <div v-if="activeTab === 'presets'" class="library-content">
           <div v-if="loadingPresets" class="no-results">
             <div class="loading-spinner"></div>
-            <p>{{ $t('builder.messages.loading') }}</p>
+            <p>{{ t('builder.messages.loading') }}</p>
           </div>
           <div v-else-if="filteredPresets.length === 0" class="no-results">
-            {{ $t('builder.insertModal.noResults', { query: searchQuery }) }}
+            {{ t('builder.insertModal.noResults', { query: searchQuery }) }}
           </div>
           <div v-else class="module-content">
             <div v-for="(typePresets, type) in groupedPresets" :key="type" class="module-group">
@@ -150,7 +148,7 @@
         
         <div v-if="activeTab === 'library'" class="library-content">
           <div class="no-results">
-            {{ $t('builder.insertModal.libraryEmpty') }}
+            {{ t('builder.insertModal.libraryEmpty') }}
           </div>
         </div>
       </div>
@@ -158,20 +156,58 @@
   </BaseModal>
 </template>
 
-<script setup>
-import { ref, computed, inject, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { 
-  X, Search, Type, Heading, Image, MousePointer, Video, Layout,
-  AlignJustify, Square, Columns, MessageSquare, Quote, Star,
-  Play, Clock, AlertCircle, Code, Users, Circle, List,
-  MapPin, Music, SplitSquareHorizontal, Film, Layers, FileText, Phone,
-  Share2, Award, LayoutGrid, CreditCard, Menu, Folder,
-  Box, BarChart2, Newspaper, MessageCircle, Timer, 
-  Download, Mail, Calendar, Bookmark, User, Hash, Percent, Sparkles
-} from 'lucide-vue-next'
-import { BaseModal, BaseInput, Tabs, TabsList, TabsTrigger } from '../ui'
-import ModuleRegistry from '../core/ModuleRegistry'
+<script setup lang="ts">
+import { ref, computed, inject, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Type from 'lucide-vue-next/dist/esm/icons/type.js';
+import Heading from 'lucide-vue-next/dist/esm/icons/heading.js';
+import Image from 'lucide-vue-next/dist/esm/icons/image.js';
+import MousePointer from 'lucide-vue-next/dist/esm/icons/mouse-pointer.js';
+import Video from 'lucide-vue-next/dist/esm/icons/video.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import AlignJustify from 'lucide-vue-next/dist/esm/icons/align-horizontal-justify-center.js';
+import Square from 'lucide-vue-next/dist/esm/icons/square.js';
+import Columns from 'lucide-vue-next/dist/esm/icons/columns-2.js';
+import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
+import Quote from 'lucide-vue-next/dist/esm/icons/quote.js';
+import Star from 'lucide-vue-next/dist/esm/icons/star.js';
+import Play from 'lucide-vue-next/dist/esm/icons/play.js';
+import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
+import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
+import Code from 'lucide-vue-next/dist/esm/icons/code.js';
+import Users from 'lucide-vue-next/dist/esm/icons/users.js';
+import Circle from 'lucide-vue-next/dist/esm/icons/circle.js';
+import List from 'lucide-vue-next/dist/esm/icons/list.js';
+import MapPin from 'lucide-vue-next/dist/esm/icons/map-pin.js';
+import Music from 'lucide-vue-next/dist/esm/icons/music.js';
+import SplitSquareHorizontal from 'lucide-vue-next/dist/esm/icons/split.js';
+import Film from 'lucide-vue-next/dist/esm/icons/film.js';
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Phone from 'lucide-vue-next/dist/esm/icons/phone.js';
+import Share2 from 'lucide-vue-next/dist/esm/icons/share-2.js';
+import Award from 'lucide-vue-next/dist/esm/icons/award.js';
+import LayoutGrid from 'lucide-vue-next/dist/esm/icons/layout-grid.js';
+import CreditCard from 'lucide-vue-next/dist/esm/icons/credit-card.js';
+import Menu from 'lucide-vue-next/dist/esm/icons/menu.js';
+import Folder from 'lucide-vue-next/dist/esm/icons/folder.js';
+import Box from 'lucide-vue-next/dist/esm/icons/box.js';
+import BarChart2 from 'lucide-vue-next/dist/esm/icons/chart-bar.js';
+import Newspaper from 'lucide-vue-next/dist/esm/icons/newspaper.js';
+import MessageCircle from 'lucide-vue-next/dist/esm/icons/message-circle.js';
+import Timer from 'lucide-vue-next/dist/esm/icons/timer.js';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
+import Calendar from 'lucide-vue-next/dist/esm/icons/calendar.js';
+import Bookmark from 'lucide-vue-next/dist/esm/icons/bookmark.js';
+import User from 'lucide-vue-next/dist/esm/icons/user.js';
+import Hash from 'lucide-vue-next/dist/esm/icons/hash.js';
+import Percent from 'lucide-vue-next/dist/esm/icons/percent.js';
+import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
+import { BaseModal, BaseInput, Tabs, TabsList, TabsTrigger } from '../ui';
+import ModuleRegistry from '../core/ModuleRegistry';
 import { 
     equalLayouts, 
     offsetLayouts, 
@@ -180,9 +216,10 @@ import {
     gridMultiRowPresets,
     masonryPresets,
     sidebarPresets
-} from '../constants/layouts.js'
+} from '../constants/layouts.js';
+import type { BuilderInstance } from '../../../types/builder';
 
-const icons = { 
+const icons: Record<string, any> = { 
   X, Search, Type, Heading, Image, MousePointer, Video, Layout,
   AlignJustify, Square, Columns, MessageSquare, Quote, Star,
   Play, Clock, AlertCircle, Code, Users, Circle, List,
@@ -190,18 +227,21 @@ const icons = {
   Share2, Award, LayoutGrid, CreditCard, Menu, Folder,
   Box, BarChart2, Newspaper, MessageCircle, Timer,
   Download, Mail, Calendar, Bookmark, User, Hash, Percent, Sparkles
-}
+};
 
 // Emits
-const emit = defineEmits(['close', 'insert'])
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'insert', type: string, payload?: any): void;
+}>();
 
 // Props/Injections
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder');
 
 // State
-const activeTab = ref('module')
-const searchQuery = ref('')
-const { t, te } = useI18n()
+const activeTab = ref('module');
+const searchQuery = ref('');
+const { t, te } = useI18n();
 
 // Tabs
 const tabs = [
@@ -209,7 +249,7 @@ const tabs = [
   { id: 'row', label: 'Row' },
   { id: 'presets', label: 'Preset' },
   { id: 'library', label: 'Library' }
-]
+];
 
 // Group all presets for a unified loop
 const allGroups = computed(() => [
@@ -220,86 +260,86 @@ const allGroups = computed(() => [
   { id: 'grid-multi-row', type: 'grid', title: 'Multi-Row', items: gridMultiRowPresets },
   { id: 'masonry', type: 'grid', title: 'Masonry', items: masonryPresets },
   { id: 'sidebar', type: 'grid', title: 'Sidebar', items: sidebarPresets }
-])
+]);
 
 // Modules
-const modules = computed(() => ModuleRegistry.getContentModules())
+const modules = computed(() => ModuleRegistry.getContentModules());
 
 const groupedModules = computed(() => {
-  let filtered = modules.value
+  let filtered = modules.value;
   
   // Filter by search
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(m => 
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter((m: any) => 
       m.title.toLowerCase().includes(query) ||
       m.name.toLowerCase().includes(query)
-    )
+    );
   }
 
   // Group by category
-  const groups = {}
-  filtered.forEach(module => {
-     const catKey = module.category.toLowerCase()
-     const cat = t('builder.categories.' + catKey)
+  const groups: Record<string, any[]> = {};
+  filtered.forEach((module: any) => {
+     const catKey = module.category.toLowerCase();
+     const cat = t('builder.categories.' + catKey);
      if (!groups[cat]) {
-       groups[cat] = []
+       groups[cat] = [];
      }
-     groups[cat].push(module)
-  })
+     groups[cat].push(module);
+  });
   
-  return groups
-})
+  return groups;
+});
 
 // Presets - builder.presets is already a reactive Proxy, not a ref
-const loadingPresets = computed(() => builder?.loadingPresets?.value || false)
-const presets = computed(() => builder?.presets?.value || [])
+const loadingPresets = computed(() => builder?.loadingPresets?.value || false);
+const presets = computed(() => builder?.presets?.value || []);
 
 const filteredPresets = computed(() => {
-  if (!searchQuery.value) return presets.value
-  const query = searchQuery.value.toLowerCase()
-  return presets.value.filter(p => p.name.toLowerCase().includes(query))
-})
+  if (!searchQuery.value) return presets.value;
+  const query = searchQuery.value.toLowerCase();
+  return presets.value.filter(p => p.name.toLowerCase().includes(query));
+});
 
 const groupedPresets = computed(() => {
-  const groups = {}
+  const groups: Record<string, any[]> = {};
   filteredPresets.value.forEach(preset => {
-    const type = preset.type.charAt(0).toUpperCase() + preset.type.slice(1)
-    if (!groups[type]) groups[type] = []
-    groups[type].push(preset)
-  })
-  return groups
-})
+    const type = preset.type.charAt(0).toUpperCase() + preset.type.slice(1);
+    if (!groups[type]) groups[type] = [];
+    groups[type].push(preset);
+  });
+  return groups;
+});
 
 // Methods
-const getIcon = (iconName) => {
-  return icons[iconName] || icons.Layout
-}
+const getIcon = (iconName: string) => {
+  return icons[iconName] || icons.Layout;
+};
 
-const selectModule = (name) => {
-  emit('insert', name)
-}
+const selectModule = (name: string) => {
+  emit('insert', name);
+};
 
-const selectLayout = (layout) => {
-  emit('insert', 'row', layout)
-}
+const selectLayout = (layout: any) => {
+  emit('insert', 'row', layout);
+};
 
-const selectPreset = (preset) => {
-  emit('insert', 'preset', preset)
-}
+const selectPreset = (preset: any) => {
+  emit('insert', 'preset', preset);
+};
 
-const handleTabChange = (tabId) => {
-  activeTab.value = tabId
+const handleTabChange = (tabId: string) => {
+  activeTab.value = tabId;
   if (tabId === 'presets' && presets.value.length === 0) {
-    builder?.fetchPresets()
+    builder?.fetchPresets();
   }
-}
+};
 
 onMounted(() => {
   if (activeTab.value === 'presets' || activeTab.value === 'library') {
-    builder?.fetchPresets()
+    builder?.fetchPresets();
   }
-})
+});
 </script>
 
 <style scoped>

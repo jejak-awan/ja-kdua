@@ -50,18 +50,24 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Directive</label>
-          <input v-model="filters.directive" type="text" placeholder="e.g. script-src" 
-                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+          <input
+v-model="filters.directive" type="text" placeholder="e.g. script-src" 
+                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date From</label>
-          <input v-model="filters.date_from" type="date" 
-                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+          <input
+v-model="filters.date_from" type="date" 
+                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date To</label>
-          <input v-model="filters.date_to" type="date" 
-                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+          <input
+v-model="filters.date_to" type="date" 
+                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+>
         </div>
       </div>
       <div class="flex justify-end gap-2 mt-4">
@@ -70,7 +76,7 @@
       </div>
     </div>
 
-    <div v-if="selectedReports.length > 0" class="bg-muted/50 border border-border rounded-lg p-4 mb-4 flex items-center justify-between transition-all duration-200">
+    <div v-if="selectedReports.length > 0" class="bg-muted/50 border border-border rounded-lg p-4 mb-4 flex items-center justify-between transition-colors duration-200">
       <span class="text-sm font-medium text-foreground">
         {{ selectedReports.length }} report(s) selected
       </span>
@@ -87,8 +93,10 @@
         <thead class="bg-gray-50 dark:bg-gray-900">
           <tr>
             <th class="px-4 py-3">
-              <input type="checkbox" @change="toggleSelectAll" :checked="allSelected" 
-                     class="rounded border-gray-300 dark:border-gray-600">
+              <input
+type="checkbox" @change="toggleSelectAll" :checked="allSelected" 
+                     class="rounded border-gray-300 dark:border-gray-600"
+>
             </th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
               Violated Directive
@@ -113,8 +121,10 @@
         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
           <tr v-for="report in reports" :key="report.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
             <td class="px-4 py-3">
-              <input type="checkbox" v-model="selectedReports" :value="report.id" 
-                     class="rounded border-gray-300 dark:border-gray-600">
+              <input
+type="checkbox" v-model="selectedReports" :value="report.id" 
+                     class="rounded border-gray-300 dark:border-gray-600"
+>
             </td>
             <td class="px-4 py-3">
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
@@ -157,29 +167,39 @@
           Showing {{ pagination.from }} to {{ pagination.to }} of {{ pagination.total }} results
         </div>
         <div class="flex gap-2">
-          <Button @click="changePage(pagination.current_page - 1)" 
+          <Button
+@click="changePage(pagination.current_page - 1)" 
                   :disabled="pagination.current_page === 1" 
-                  variant="outline" size="sm">Previous</Button>
-          <Button @click="changePage(pagination.current_page + 1)" 
+                  variant="outline" size="sm"
+>
+Previous
+</Button>
+          <Button
+@click="changePage(pagination.current_page + 1)" 
                   :disabled="pagination.current_page === pagination.last_page" 
-                  variant="outline" size="sm">Next</Button>
+                  variant="outline" size="sm"
+>
+Next
+</Button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import Button from '@/components/ui/button.vue';
+import { Button, Badge } from '@/components/ui';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
+import { useConfirm } from '@/composables/useConfirm';
 
 const toast = useToast();
+const { confirm: confirmDialog } = useConfirm();
 
-const reports = ref([]);
-const stats = ref({});
-const selectedReports = ref([]);
+const reports = ref<any[]>([]);
+const stats = ref<any>({});
+const selectedReports = ref<any[]>([]);
 const loading = ref(false);
 
 const filters = ref({
@@ -228,7 +248,7 @@ async function fetchReports() {
       from: response.data.data.from,
       to: response.data.data.to,
     };
-  } catch (error) {
+  } catch (error: any) {
     toast.error.fromResponse(error);
     console.error(error);
   } finally {
@@ -240,7 +260,7 @@ async function fetchStatistics() {
   try {
     const response = await api.get('/admin/ja/security/csp-reports/statistics');
     stats.value = response.data.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to load statistics', error);
   }
 }
@@ -262,12 +282,12 @@ function resetFilters() {
   fetchReports();
 }
 
-function changePage(page) {
+function changePage(page: number) {
   filters.value.page = page;
   fetchReports();
 }
 
-function toggleSelectAll(event) {
+function toggleSelectAll(event: any) {
   if (event.target.checked) {
     selectedReports.value = reports.value.map(r => r.id);
   } else {
@@ -275,10 +295,14 @@ function toggleSelectAll(event) {
   }
 }
 
-async function bulkAction(action) {
+async function bulkAction(action: string) {
   if (selectedReports.value.length === 0) return;
 
-  const confirmed = confirm(`Are you sure you want to ${action.replace('_', ' ')} ${selectedReports.value.length} report(s)?`);
+  const confirmed = await confirmDialog({
+    title: 'Bulk Action',
+    message: `Are you sure you want to ${action.replace('_', ' ')} ${selectedReports.value.length} report(s)?`,
+    variant: action === 'delete' ? 'danger' : 'info',
+  });
   if (!confirmed) return;
 
   try {
@@ -290,7 +314,7 @@ async function bulkAction(action) {
     selectedReports.value = [];
     fetchReports();
     fetchStatistics();
-  } catch (error) {
+  } catch (error: any) {
     toast.error.fromResponse(error);
     console.error(error);
   }
@@ -301,20 +325,20 @@ function refreshReports() {
   fetchStatistics();
 }
 
-function getStatusVariant(status) {
-  const variants = {
+function getStatusVariant(status: string) {
+  const variants: Record<string, string> = {
     new: 'warning',
     reviewed: 'info',
     false_positive: 'secondary',
   };
-  return variants[status] || 'secondary';
+  return (variants[status] || 'secondary') as any;
 }
 
-function formatStatus(status) {
+function formatStatus(status: string) {
   return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
-function formatDate(dateString) {
+function formatDate(dateString: string) {
   const date = new Date(dateString);
   return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
 }

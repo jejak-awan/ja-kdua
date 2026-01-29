@@ -142,7 +142,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -163,12 +163,10 @@ import SelectTrigger from '../../../../components/ui/select-trigger.vue';
 import SelectValue from '../../../../components/ui/select-value.vue';
 import SelectContent from '../../../../components/ui/select-content.vue';
 import SelectItem from '../../../../components/ui/select-item.vue';
-import TiptapEditor from '@/components/TiptapEditor.vue';
-import { 
-    ChevronLeft, 
-    Save, 
-    Loader2 
-} from 'lucide-vue-next';
+import TiptapEditor from '@/components/editor/TiptapEditor.vue';
+import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js';
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -180,7 +178,7 @@ const form = ref({
     name: '',
     slug: '',
     description: '',
-    type: 'post',
+    type: 'post' as 'post' | 'page' | 'custom',
     title_template: '',
     body_template: '',
     excerpt_template: '',
@@ -196,7 +194,7 @@ const generateSlug = () => {
     }
 };
 
-const slugify = (text) => {
+const slugify = (text: string) => {
     return text
         .toString()
         .toLowerCase()
@@ -217,7 +215,7 @@ const handleSubmit = async () => {
         await api.post('/admin/ja/content-templates', form.value);
         toast.success.create('Template');
         router.push({ name: 'content-studio', query: { tab: 'templates' } });
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {

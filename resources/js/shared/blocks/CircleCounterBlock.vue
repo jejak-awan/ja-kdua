@@ -3,7 +3,7 @@
     :module="module"
     :mode="mode"
     :settings="settings"
-    class="circle-counter-wrapper transition-all duration-300"
+    class="circle-counter-wrapper transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Progress Circle'"
     :style="cardStyles"

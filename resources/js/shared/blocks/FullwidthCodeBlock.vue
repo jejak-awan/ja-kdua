@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="fullwidth-code-block transition-all duration-500"
+    class="fullwidth-code-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Fullwidth Code'"
     :style="cardStyles"
@@ -28,8 +28,7 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Code } from 'lucide-vue-next'
-import { 
+import Code from 'lucide-vue-next/dist/esm/icons/code.js';import { 
     getVal,
     getLayoutStyles
 } from '../utils/styleUtils'

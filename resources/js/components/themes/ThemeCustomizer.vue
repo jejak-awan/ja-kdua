@@ -25,35 +25,39 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import api from '../../services/api';
 import Sidebar from './customizer/sidebar/Sidebar.vue';
 import PreviewArea from './customizer/preview/PreviewArea.vue';
 import { toast } from '../../services/toast';
 import { useConfirm } from '../../composables/useConfirm';
+import type { Theme, ThemeSection } from '@/types/theme';
 
-const props = defineProps({
-    theme: { type: Object, required: true },
-    previewUrl: { type: String, default: '/' },
-});
+const props = defineProps<{
+    theme: Theme;
+    previewUrl?: string;
+}>();
 
-const emit = defineEmits(['close', 'saved']);
+const emit = defineEmits<{
+    (e: 'close'): void;
+    (e: 'saved'): void;
+}>();
 
 // State
-const fullTheme = ref({ ...props.theme });
-const formValues = ref({});
+const fullTheme = ref<Theme>({ ...props.theme });
+const formValues = ref<Record<string, any>>({});
 const customCss = ref('');
 const saving = ref(false);
 const loading = ref(true);
-const previewTheme = ref({});
-const initialSettings = ref(null);
+const previewTheme = ref<Theme>({ ...props.theme });
+const initialSettings = ref<Record<string, any> | null>(null);
 const initialCss = ref('');
-const availableMenus = ref([]);
+const availableMenus = ref<{ value: string | number; label: string }[]>([]);
 const { confirm } = useConfirm();
 
 // History State
-const history = ref([]);
+const history = ref<string[]>([]);
 const historyIndex = ref(-1);
 const isHistoryChange = ref(false);
 
@@ -69,7 +73,7 @@ const fetchMenus = async () => {
     try {
         const response = await api.get('/admin/ja/menus');
         const data = response.data.data || response.data;
-        availableMenus.value = (Array.isArray(data) ? data : []).map(m => ({
+        availableMenus.value = (Array.isArray(data) ? data : []).map((m: any) => ({
             value: m.id,
             label: m.name
         }));
@@ -94,9 +98,9 @@ const fetchThemeDetails = async () => {
     }
 };
 
-const settingsSections = computed(() => {
+const settingsSections = computed<ThemeSection[]>(() => {
     const schema = fullTheme.value.manifest?.settings_schema || {};
-    const sectionsMap = {};
+    const sectionsMap: Record<string, ThemeSection> = {};
 
     Object.keys(schema).forEach(key => {
         const setting = schema[key];
@@ -141,10 +145,10 @@ const settingsSections = computed(() => {
 });
 
 const loadSettings = () => {
-    const defaults = {};
+    const defaults: Record<string, any> = {};
     if (fullTheme.value.manifest?.settings_schema) {
         Object.keys(fullTheme.value.manifest.settings_schema).forEach(key => {
-            defaults[key] = fullTheme.value.manifest.settings_schema[key].default ?? '';
+            defaults[key] = fullTheme.value.manifest!.settings_schema![key].default ?? '';
         });
     }
 
@@ -209,7 +213,7 @@ const redo = () => {
 const canUndo = computed(() => historyIndex.value > 0);
 const canRedo = computed(() => historyIndex.value < history.value.length - 1);
 
-const restoreSnapshot = (snapshotJson) => {
+const restoreSnapshot = (snapshotJson: string) => {
     isHistoryChange.value = true;
     const snapshot = JSON.parse(snapshotJson);
     formValues.value = { ...snapshot.settings };

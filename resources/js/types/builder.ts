@@ -1,4 +1,7 @@
-import type { Ref, ComputedRef } from 'vue';
+import type { Ref, ComputedRef, Component } from 'vue';
+import type { Category, Tag } from './taxonomy';
+import type { Menu } from './menu';
+import type { ThemeData, ThemeSettings } from './theme';
 
 export interface BuilderOptions {
     mode?: 'site' | 'page';
@@ -7,7 +10,7 @@ export interface BuilderOptions {
 export interface ModuleSettings {
     _label?: string;
     disabled?: boolean;
-    [key: string]: any; // Keep flexible for module-specific settings, but define known common keys
+    [key: string]: any;
 }
 
 export interface BlockInstance {
@@ -15,6 +18,8 @@ export interface BlockInstance {
     type: string;
     settings: ModuleSettings;
     children?: BlockInstance[];
+    data?: any; // Added for compatibility
+    sourceType?: string; // Added for compatibility
 }
 
 export interface Canvas {
@@ -44,7 +49,7 @@ export interface PageMetadata {
     og_image?: string | null;
     comment_status?: boolean;
     is_featured?: boolean;
-    tags?: any[];
+    tags?: Tag[];
     menu_item?: {
         add_to_menu: boolean;
         menu_id: string;
@@ -54,8 +59,21 @@ export interface PageMetadata {
     [key: string]: any;
 }
 
+export interface GlobalSettings {
+    container_max_width: string;
+    block_spacing: string;
+    [key: string]: any;
+}
+
+export interface BuilderHistoryEntry {
+    blocks: BlockInstance[];
+    globalSettings: GlobalSettings;
+    editingIndex: number | null;
+    activeBlockId: string | null;
+}
+
 export interface HistorySnapshot {
-    blocks: string; // JSON string for now
+    blocks: string;
     timestamp: number;
 }
 
@@ -63,7 +81,7 @@ export interface BuilderState {
     mode: Ref<string>;
     canvases: Ref<Canvas[]>;
     activeCanvasId: Ref<string>;
-    blocks: Ref<BlockInstance[]>; // Computable refs usually typed as Ref in consumers
+    blocks: Ref<BlockInstance[]>;
     history: Ref<string[]>;
     historyIndex: Ref<number>;
     maxHistory: number;
@@ -79,9 +97,9 @@ export interface BuilderState {
     isFullscreen: Ref<boolean>;
     activeTheme: Ref<string>;
     selectedThemeSlug: Ref<string | null>;
-    themeData: Ref<any>;
-    themeSettings: Ref<Record<string, any>>;
-    responsiveModal: Ref<any>;
+    themeData: Ref<ThemeData | null>;
+    themeSettings: Ref<ThemeSettings>;
+    responsiveModal: Ref<any>; // Changed back to any to fix cast issues in templates
     savePresetModal: Ref<any>;
     confirmModal: Ref<any>;
     inputModal: Ref<any>;
@@ -89,20 +107,83 @@ export interface BuilderState {
     showGrid: Ref<boolean>;
     snapToObjects: Ref<boolean>;
     autoSave: Ref<boolean>;
-    pages: Ref<any[]>;
+    pages: Ref<PageMetadata[]>;
     currentPageId: Ref<number | null>;
     pagesLoading: Ref<boolean>;
-    categories: Ref<any[]>;
-    availableTags: Ref<any[]>;
-    menus: Ref<any[]>;
-    availableThemes: Ref<any[]>;
+    categories: Ref<Category[]>;
+    availableTags: Ref<Tag[]>;
+    menus: Ref<Menu[]>;
+    availableThemes: Ref<ThemeData[]>;
     loadingThemes: Ref<boolean>;
-    clipboard: Ref<any>;
-    lastSavedBlocks: Ref<string>;
+    clipboard: Ref<{ type: string; data: any; sourceType?: string } | null>;
+    dataVersion: Ref<number>;
+    lastSavedVersion: Ref<number>;
+    markAsDirty: () => void;
     isDirty: ComputedRef<boolean>;
 }
 
-// Module Management Interface
+export interface SettingOption {
+    label?: string;
+    value: any;
+    icon?: any;
+    group?: string;
+}
+
+export interface SettingDefinition {
+    key?: string;
+    name?: string; // Alias for key
+    type: string;
+    label: string;
+    default?: any;
+    options?: SettingOption[] | string;
+    tab?: 'content' | 'style' | 'advanced';
+    condition?: (settings: any) => boolean;
+    show_if?: { field: string; value: any } | any;
+    responsive?: boolean;
+    multiple?: boolean;
+    searchable?: boolean;
+    itemLabel?: string;
+    units?: string[];
+    unit?: string;
+    min?: number;
+    max?: number;
+    step?: number;
+    [key: string]: any;
+}
+
+export type ModuleField = SettingDefinition;
+
+export interface ModuleGroup {
+    id: string;
+    label: string;
+    description?: string;
+    presets?: boolean;
+    fields: (ModuleField | any)[];
+    condition?: (settings: any) => boolean;
+}
+
+export interface BlockDefinition {
+    type?: string;
+    title?: string;
+    name?: string;
+    label?: string;
+    description?: string;
+    icon?: any;
+    category?: string;
+    component?: Component | any;
+    settingsComponent?: Component;
+    defaultSettings?: Record<string, any> | null;
+    defaults?: Record<string, any> | null; // Legacy alias for defaultSettings
+    canHaveChildren?: boolean;
+    allowedChildren?: string[];
+    children?: string[] | null; // Legacy alias for allowedChildren/canHaveChildren hint
+    settings?: SettingDefinition[] | any;
+    parent?: string[] | string | null;
+}
+
+// Alias for BlockDefinition
+export type ModuleDefinition = BlockDefinition;
+
 export interface ModuleManager {
     selectedModule: ComputedRef<BlockInstance | null>;
     modulePath: ComputedRef<BlockInstance[]>;
@@ -127,6 +208,27 @@ export interface ModuleManager {
     resetLayout: () => void;
     findModule: (id: string) => BlockInstance | null;
     findParentById: (items: BlockInstance[], id: string) => BlockInstance | null;
+
+    // Management/Registry Parts
+    definitions: Ref<Record<string, BlockDefinition>>;
+    moduleCategories: Ref<string[]>;
+    loadingModules: Ref<boolean>;
+    registerModule: (definition: BlockDefinition) => void;
+    getModuleDefinition: (type: string) => BlockDefinition | undefined;
+    fetchTemplates: () => Promise<any[]>;
+    fetchWidgets: () => Promise<any[]>;
+}
+
+export interface GlobalVariablesManager {
+    globalNumbers: Ref<any[]>;
+    globalText: Ref<any[]>;
+    globalImages: Ref<any[]>;
+    globalLinks: Ref<any[]>;
+    globalColors: Ref<any[]>;
+    globalFonts: Ref<any[]>;
+    addVariable: (type: string) => void;
+    deleteVariable: (index: number, type: string) => void;
+    loadVariables: (data: any) => void;
 }
 
 export interface BuilderInstance extends BuilderState, ModuleManager {
@@ -153,13 +255,24 @@ export interface BuilderInstance extends BuilderState, ModuleManager {
     setMainCanvas: (id: string) => void;
 
     // Helpers
-    getModuleDefinition: (type: string) => any;
-    globalVariables: any;
+    globalVariables: GlobalVariablesManager;
+    saveGlobalVariables: () => Promise<void>;
+    globalAction: Ref<any>;
     loadTheme: (slug?: string | null) => Promise<void>;
     handleSavePreset: (name: string) => Promise<void>;
     confirm: (options: any) => Promise<boolean>;
     prompt: (options: any) => Promise<string | null>;
     openResponsiveModal: (config: any) => void;
+    fetchThemes: () => Promise<void>; // Restored
+    updateThemeSettings: (themeSlug: string, settings: any) => Promise<void>; // Restored
+    fetchTemplates: () => Promise<any[]>;
+    createTemplate: (data: { name: string; type: string }) => Promise<any>;
+    deleteTemplate: (id: string | number) => Promise<boolean>;
+    updateContentMeta: (id: string | number, meta: any) => Promise<any>;
+    savePreset: (module: BlockInstance, name: string) => Promise<BuilderPreset>;
+    deletePreset: (id: string | number) => Promise<boolean | void>;
+    getComponent: (type: string) => any;
+
 
     // External
     markAsSaved: () => void;
@@ -180,95 +293,73 @@ export interface BuilderInstance extends BuilderState, ModuleManager {
     openStructureTemplateModal?: (targetId: string | null, targetType: string | null) => void;
     openContextMenu?: (moduleId: string, event: MouseEvent, title?: string, type?: string, mode?: string) => void;
 
-    // Presets
+    // Presets & Dynamic Content
+    insertFromPreset: (preset: any, parentId?: string | null, index?: number) => BlockInstance | null;
+    applyPreset: (id: string, preset: any) => boolean;
+    fetchPresets: () => Promise<void>;
     presets: Ref<any[]>;
     loadingPresets: Ref<boolean>;
-    fetchPresets: () => Promise<void>;
-    savePreset: (module: any, name: string) => Promise<any>;
-    deletePreset: (id: number | string) => Promise<boolean | undefined>;
+}
 
-    // Theme & Templates
-    updateThemeSettings: (themeSlug: string, settings: any) => Promise<void>;
-    fetchTemplates: () => Promise<any[]>;
-    createTemplate: (data: { name: string; type: string }) => Promise<any>;
-    deleteTemplate: (id: number | string) => Promise<boolean>;
-    updateContentMeta: (id: number | string, meta: any) => Promise<any>;
-    fetchThemes: () => Promise<void>;
+export interface BuilderPreset {
+    id: string;
+    name: string;
+    type: string;
+    settings: ModuleSettings;
+    category?: string;
+    image?: string;
+}
+
+export interface PresetManager {
+    presets: Ref<BuilderPreset[]>;
+    loading: Ref<boolean>;
+    fetchPresets: (type?: string) => Promise<void>;
+    savePreset: (module: BlockInstance, name: string) => Promise<BuilderPreset>;
+    deletePreset: (id: string) => Promise<void>;
+}
+
+export interface GlobalVariable {
+    id: string;
+    name: string;
+    slug: string;
+    type: string;
+    value: string | number | boolean | Record<string, any>;
+    group?: string;
+}
+
+export interface BuilderContext {
+    state: BuilderState;
+    availableVariables: Ref<GlobalVariable[]>;
+    colors: Ref<GlobalVariable[]>;
+    fonts: Ref<GlobalVariable[]>;
+    spacings: Ref<GlobalVariable[]>;
+    containers: Ref<GlobalVariable[]>;
+
+    // Actions
+    save: (data?: any) => Promise<void>;
+    undo: () => void;
+    redo: () => void;
+    preview: () => void;
+
+    // Modals
+    confirm: (options: { title: string, message: string, variant?: string }) => Promise<boolean>;
+    prompt: (options: { title: string, label: string, defaultValue?: string }) => Promise<string | null>;
+    openResponsiveModal: (config: Record<string, any>) => void;
+}
+
+export interface DragData {
+    type: 'module' | 'block' | 'section';
+    id: string;
+    data?: BlockInstance | Record<string, any>;
 }
 
 export interface BlockProps {
     module: BlockInstance;
     mode: 'edit' | 'view';
-    device?: 'desktop' | 'tablet' | 'mobile' | null;
+    device?: 'desktop' | 'tablet' | 'mobile';
     manualStyles?: boolean;
-}
-
-export interface SettingOption {
-    label: string;
-    value: any;
-    icon?: any;
-}
-
-export interface SettingDefinition {
-    key?: string;
-    type: string;
-    label: string;
-    default?: any;
-    options?: SettingOption[];
-    tab?: 'content' | 'style' | 'advanced';
-    condition?: (settings: ModuleSettings) => boolean;
-    [key: string]: any;
-}
-
-export interface BlockDefinition {
-    name: string;
-    label: string;
-    icon?: any;
-    component: any;
-    settings?: SettingDefinition[];
-    defaultSettings?: Record<string, any>;
-    category?: string;
-    description?: string;
-}
-
-export interface ModuleField {
-    name: string;
-    type: string;
-    label: string;
-    default?: any;
-    responsive?: boolean;
-    options?: SettingOption[] | string;
-    min?: number;
-    max?: number;
-    step?: number;
-    unit?: string;
-    units?: string[];
-    placeholder?: string;
-    multiple?: boolean;
-    searchable?: boolean;
-    show_if?: { field: string; value: any | any[] };
-    [key: string]: any;
-}
-
-export interface ModuleGroup {
-    id: string;
-    label: string;
-    fields: (ModuleField | ModuleGroup | any)[];
-    presets?: boolean;
-    condition?: (settings: any) => boolean;
-}
-
-export interface ModuleDefinition {
-    name: string;
-    title: string;
-    icon: any;
-    category: string;
-    children?: string[] | null;
-    defaults: Record<string, any>;
-    settings: {
-        content: (ModuleGroup | any)[];
-        design: (ModuleGroup | any)[];
-        advanced: (ModuleGroup | any)[];
-    };
-    [key: string]: any;
+    settings?: ModuleSettings;
+    nestedBlocks?: BlockInstance[];
+    context?: any;
+    id?: string;
 }

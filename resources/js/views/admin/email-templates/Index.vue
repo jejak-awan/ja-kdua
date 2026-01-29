@@ -20,7 +20,7 @@
                         v-model="search"
                         type="text"
                         :placeholder="$t('features.email_templates.list.search')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                     >
                 </div>
             </div>
@@ -104,7 +104,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
@@ -115,7 +115,7 @@ import { parseResponse, ensureArray } from '../../../utils/responseParser';
 const router = useRouter();
 const { confirm } = useConfirm();
 
-const templates = ref([]);
+const templates = ref<any[]>([]);
 const loading = ref(false);
 const search = ref('');
 
@@ -123,7 +123,7 @@ const filteredTemplates = computed(() => {
     if (!search.value) return templates.value;
     
     const searchLower = search.value.toLowerCase();
-    return templates.value.filter(template => 
+    return templates.value.filter((template: any) => 
         template.name.toLowerCase().includes(searchLower) ||
         (template.subject && template.subject.toLowerCase().includes(searchLower))
     );
@@ -135,7 +135,7 @@ const fetchTemplates = async () => {
         const response = await api.get('/admin/ja/email-templates');
         const { data } = parseResponse(response);
         templates.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch templates:', error);
         templates.value = [];
     } finally {
@@ -143,30 +143,30 @@ const fetchTemplates = async () => {
     }
 };
 
-const previewTemplate = async (template) => {
+const previewTemplate = async (template: any) => {
     try {
         const response = await api.post(`/admin/ja/email-templates/${template.id}/preview`);
         const previewWindow = window.open('', '_blank');
         if (previewWindow) {
             previewWindow.document.write(response.data.html || response.data);
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to preview template:', error);
         toast.error('Error', 'Failed to preview template');
     }
 };
 
-const sendTestEmail = async (template) => {
+const sendTestEmail = async (template: any) => {
     try {
         await api.post(`/admin/ja/email-templates/${template.id}/send-test`);
         toast.success('Test email sent successfully');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to send test email:', error);
         toast.error('Error', error.response?.data?.message || 'Failed to send test email');
     }
 };
 
-const deleteTemplate = async (template) => {
+const handleDelete = async (template: any) => {
     const confirmed = await confirm({
         title: 'Delete Template',
         message: `Are you sure you want to delete "${template.name}"?`,
@@ -180,13 +180,13 @@ const deleteTemplate = async (template) => {
         await api.delete(`/admin/ja/email-templates/${template.id}`);
         toast.success('Template deleted successfully');
         fetchTemplates();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete template:', error);
         toast.error('Error', 'Failed to delete template');
     }
 };
 
-const formatDate = (date) => {
+const formatDate = (date: any) => {
     return new Date(date).toLocaleDateString();
 };
 

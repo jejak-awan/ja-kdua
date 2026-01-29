@@ -145,116 +145,139 @@
   </div>
 </template>
 
-<script setup>
-import { onMounted, onUnmounted, computed, inject } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { 
-  Copy, CopyPlus, Trash2, Type, ClipboardPaste, Undo2, Redo2,
-  ArrowUpLeft, Settings, Download, Edit, CheckCircle, Plus, ChevronRight,
-  Palette, PaintBucket, RotateCcw, Layers, Eye, EyeOff, BookmarkPlus
-} from 'lucide-vue-next'
+<script setup lang="ts">
+import { onMounted, onUnmounted, computed, inject, type CSSProperties } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import CopyPlus from 'lucide-vue-next/dist/esm/icons/copy-plus.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Type from 'lucide-vue-next/dist/esm/icons/type.js';
+import ClipboardPaste from 'lucide-vue-next/dist/esm/icons/clipboard-paste.js';
+import Undo2 from 'lucide-vue-next/dist/esm/icons/undo-2.js';
+import Redo2 from 'lucide-vue-next/dist/esm/icons/redo-2.js';
+import ArrowUpLeft from 'lucide-vue-next/dist/esm/icons/arrow-up-left.js';
+import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import Edit from 'lucide-vue-next/dist/esm/icons/pen.js';
+import CheckCircle from 'lucide-vue-next/dist/esm/icons/circle-check.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
+import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
+import PaintBucket from 'lucide-vue-next/dist/esm/icons/paint-bucket.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import EyeOff from 'lucide-vue-next/dist/esm/icons/eye-off.js';
+import BookmarkPlus from 'lucide-vue-next/dist/esm/icons/bookmark-plus.js';
 
-const { t } = useI18n()
-const builder = inject('builder')
+const { t } = useI18n();
+const builder = inject<any>('builder');
 
-const props = defineProps({
-    visible: Boolean,
-    x: Number,
-    y: Number,
-    moduleId: String,
-    title: String,
-    type: String,
-    mode: {
-      type: String,
-      default: 'module'
-    }
-})
+interface Props {
+    visible?: boolean;
+    x?: number;
+    y?: number;
+    moduleId?: string;
+    title?: string;
+    type?: string;
+    mode?: string;
+}
 
-const emit = defineEmits(['close', 'action'])
+const props = withDefaults(defineProps<Props>(), {
+    visible: false,
+    x: 0,
+    y: 0,
+    mode: 'module'
+});
+
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'action', action: string, moduleId?: string, mode?: string): void;
+}>();
 
 // Computed properties for menu state
-const canUndo = computed(() => builder?.canUndo ?? false)
-const canRedo = computed(() => builder?.canRedo ?? false)
-const hasClipboard = computed(() => !!builder?.clipboard)
-const hasStyleClipboard = computed(() => !!builder?.styleClipboard)
-const isMainCanvas = computed(() => props.type === 'Main')
-const typeLabel = computed(() => props.type || 'Module')
+const canUndo = computed(() => builder?.canUndo ?? false);
+const canRedo = computed(() => builder?.canRedo ?? false);
+const hasClipboard = computed(() => !!builder?.clipboard);
+const hasStyleClipboard = computed(() => !!builder?.styleClipboard);
+const isMainCanvas = computed(() => props.type === 'Main');
+const typeLabel = computed(() => props.type || 'Module');
 
 const isContainer = computed(() => {
-    const containerTypes = ['section', 'row', 'column']
-    return containerTypes.includes(props.type?.toLowerCase())
-})
+    const containerTypes = ['section', 'row', 'column'];
+    return props.type ? containerTypes.includes(props.type.toLowerCase()) : false;
+});
 
 const hasParent = computed(() => {
-    if (!props.moduleId || !builder) return false
-    const parent = builder.findParentById?.(builder.blocks, props.moduleId)
-    return !!parent
-})
+    if (!props.moduleId || !builder) return false;
+    const parent = builder.findParentById?.(builder.blocks, props.moduleId);
+    return !!parent;
+});
 
 const canSaveToLibrary = computed(() => {
-    const libraryTypes = ['section', 'row']
-    return libraryTypes.includes(props.type?.toLowerCase())
-})
+    const libraryTypes = ['section', 'row'];
+    return props.type ? libraryTypes.includes(props.type.toLowerCase()) : false;
+});
 
 const isDisabled = computed(() => {
-    if (!props.moduleId || !builder) return false
-    const module = builder.findModule?.(props.moduleId)
-    return module?.settings?.disabled === true
-})
+    if (!props.moduleId || !builder) return false;
+    const module = builder.findModule?.(props.moduleId);
+    return module?.settings?.disabled === true;
+});
 
 // Dynamic positioning to prevent overflow
-const menuStyle = computed(() => {
-    const style = {
+const menuStyle = computed<CSSProperties>(() => {
+    const style: CSSProperties = {
         top: `${props.y}px`,
         left: `${props.x}px`
-    }
+    };
     
     // Adjust if menu would go off-screen (basic check)
     if (typeof window !== 'undefined') {
-        const menuWidth = 220
-        const menuHeight = 400
+        const menuWidth = 220;
+        const menuHeight = 400;
         
-        if (props.x + menuWidth > window.innerWidth) {
-            style.left = `${props.x - menuWidth}px`
+        if ((props.x || 0) + menuWidth > window.innerWidth) {
+            style.left = `${(props.x || 0) - menuWidth}px`;
         }
-        if (props.y + menuHeight > window.innerHeight) {
-            style.top = `${Math.max(10, window.innerHeight - menuHeight - 10)}px`
+        if ((props.y || 0) + menuHeight > window.innerHeight) {
+            style.top = `${Math.max(10, window.innerHeight - menuHeight - 10)}px`;
         }
     }
     
-    return style
-})
+    return style;
+});
 
 // Close on click outside
-const handleClickOutside = (e) => {
+const handleClickOutside = (e: Event) => {
     if (props.visible) {
-        emit('close')
+        emit('close');
     }
-}
+};
 
-const handleAction = (action) => {
+const handleAction = (action: string) => {
     // Prevent disabled actions
-    if (action === 'undo' && !canUndo.value) return
-    if (action === 'redo' && !canRedo.value) return
-    if (action === 'paste' && !hasClipboard.value) return
-    if (action === 'paste-style' && !hasStyleClipboard.value) return
+    if (action === 'undo' && !canUndo.value) return;
+    if (action === 'redo' && !canRedo.value) return;
+    if (action === 'paste' && !hasClipboard.value) return;
+    if (action === 'paste-style' && !hasStyleClipboard.value) return;
     
-    emit('action', action, props.moduleId, props.mode)
-    emit('close')
-}
+    emit('action', action, props.moduleId, props.mode);
+    emit('close');
+};
 
 onMounted(() => {
     // Delay adding listeners to ensure we don't catch the same event that opened the menu
     setTimeout(() => {
-        window.addEventListener('click', handleClickOutside, { capture: true })
-        window.addEventListener('contextmenu', handleClickOutside) 
-    }, 10)
-})
+        window.addEventListener('click', handleClickOutside, { capture: true });
+        window.addEventListener('contextmenu', handleClickOutside); 
+    }, 10);
+});
 
 onUnmounted(() => {
-    window.removeEventListener('click', handleClickOutside, { capture: true })
-    window.removeEventListener('contextmenu', handleClickOutside)
-})
+    window.removeEventListener('click', handleClickOutside, { capture: true });
+    window.removeEventListener('contextmenu', handleClickOutside);
+});
 </script>
 
 <style scoped>

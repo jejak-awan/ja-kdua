@@ -70,7 +70,7 @@ const FullwidthSlideItemModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -79,7 +79,7 @@ const FullwidthSlideItemModule: ModuleDefinition = {
             {
                 id: 'subtitleTypography',
                 label: 'Subtitle Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `subtitle_${f.name}`,
                     label: `Subtitle ${f.label}`
@@ -88,7 +88,7 @@ const FullwidthSlideItemModule: ModuleDefinition = {
             {
                 id: 'bodyTypography',
                 label: 'Body Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `body_${f.name}`,
                     label: `Body ${f.label}`

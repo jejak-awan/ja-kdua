@@ -3,17 +3,17 @@
     :module="module" 
     :mode="mode" 
     :device="device" 
-    class="row-block transition-all duration-500"
+    class="row-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Row'"
     :style="cardStyles"
   >
-    <div class="row-inner flex flex-wrap w-full transition-all duration-500" :style="rowStyles">
+    <div class="row-inner flex flex-wrap w-full transition-[width] duration-500" :style="rowStyles">
       <!-- Builder Mode -->
       <template v-if="mode === 'edit'">
         <slot />
         <!-- Auto Generated Columns if empty -->
-        <div v-if="!module.children?.length" class="row-empty w-full flex justify-center p-10 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl text-gray-300 bg-gray-50/30 dark:bg-gray-900/30 transition-all duration-300">
+        <div v-if="!module.children?.length" class="row-empty w-full flex justify-center p-10 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl text-gray-300 bg-gray-50/30 dark:bg-gray-900/30 transition-colors duration-300">
            <LayoutIcon class="w-10 h-10 opacity-10 animate-pulse" />
         </div>
       </template>
@@ -23,7 +23,7 @@
         <div 
           v-for="(child, index) in nestedBlocks" 
           :key="child.id" 
-          class="row-column h-full transition-all duration-300"
+          class="row-column h-full transition-colors duration-300"
           :style="getColumnStyles(index)"
         >
           <BlockRenderer
@@ -40,8 +40,7 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Layout as LayoutIcon } from 'lucide-vue-next'
-import { 
+import LayoutIcon from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';import { 
     getVal,
     getLayoutStyles,
     getResponsiveValue 
@@ -62,7 +61,6 @@ const props = withDefaults(defineProps<{
 const builder = inject<BuilderInstance | null>('builder', null)
 const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
 
-// @ts-ignore
 const BlockRenderer = inject<any>('BlockRenderer', null)
 
 const cardStyles = computed(() => {

@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode"
     :settings="settings"
-    class="comments-block transition-all duration-300"
+    class="comments-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Comments Section'"
   >
@@ -21,7 +21,7 @@
       
       <!-- Comments List -->
       <div class="comments-list space-y-12 mb-20">
-        <article v-for="comment in displayComments" :key="comment.id" class="comment-item group flex gap-8 p-10 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-50 dark:border-slate-800 transition-all duration-500 hover:-translate-y-2">
+        <article v-for="comment in displayComments" :key="comment.id" class="comment-item group flex gap-8 p-10 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-50 dark:border-slate-800 transition-[width] duration-500 hover:-translate-y-2">
           <div v-if="settings.showAvatar !== false" class="comment-avatar-wrapper relative flex-shrink-0" :style="avatarStyles">
             <div class="absolute inset-0 bg-primary/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
             <div class="relative w-full h-full rounded-2xl bg-slate-100 dark:bg-slate-950 flex items-center justify-center overflow-hidden border-2 border-slate-50 dark:border-slate-800 group-hover:border-primary transition-colors">
@@ -37,7 +37,7 @@
               </div>
               <button 
                   v-if="settings.showReplyButton !== false" 
-                  class="comment-reply h-10 px-6 rounded-2xl bg-slate-50 dark:bg-slate-950 text-[10px] font-black uppercase tracking-widest transition-all duration-300 hover:bg-primary hover:text-white group/reply"
+                  class="comment-reply h-10 px-6 rounded-2xl bg-slate-50 dark:bg-slate-950 text-[10px] font-black uppercase tracking-widest transition-colors duration-300 hover:bg-primary hover:text-white group/reply"
                   @click="handleReply(comment.id)"
               >
                   Reply
@@ -79,11 +79,11 @@
             <textarea 
                 :placeholder="settings.commentPlaceholder || 'Share your insights...'" 
                 rows="5" 
-                class="w-full p-8 bg-slate-50 dark:bg-slate-950 border-none rounded-[2.5rem] font-medium focus:ring-4 focus:ring-primary/10 outline-none transition-all mb-8 text-slate-900 dark:text-white"
+                class="w-full p-8 bg-slate-50 dark:bg-slate-950 border-none rounded-[2.5rem] font-medium focus:ring-4 focus:ring-primary/10 outline-none transition-colors mb-8 text-slate-900 dark:text-white"
                 :style="fieldStyles" 
             />
             <Button 
-                class="form-submit h-14 px-12 bg-primary text-white rounded-[1.5rem] font-black uppercase tracking-widest text-xs shadow-2xl hover:scale-105 active:scale-95 transition-all duration-500"
+                class="form-submit h-14 px-12 bg-primary text-white rounded-[1.5rem] font-black uppercase tracking-widest text-xs shadow-2xl hover:scale-105 active:scale-95 transition-[width] duration-500"
                 :style="buttonStyles"
             >
                 {{ settings.submitText || 'Publish Comment' }}

@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="fullwidth-map-block transition-all duration-300"
+    class="fullwidth-map-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Fullwidth Map'"
     :style="cardStyles"
@@ -38,8 +38,7 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { MapPin } from 'lucide-vue-next'
-import { 
+import MapPin from 'lucide-vue-next/dist/esm/icons/map-pin.js';import { 
     getVal,
     getLayoutStyles,
     getResponsiveValue 

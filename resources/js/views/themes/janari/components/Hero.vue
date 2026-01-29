@@ -32,21 +32,21 @@
       <div class="mt-10 flex justify-center gap-4">
         <router-link 
           to="/blog" 
-          class="px-8 py-3 rounded-lg bg-white text-indigo-600 font-bold hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+          class="px-8 py-3 rounded-lg bg-white text-indigo-600 font-bold hover:bg-muted transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1"
         >
           Explore Content
         </router-link>
         <router-link 
             v-if="isAuthenticated"
             to="/admin" 
-            class="px-8 py-3 rounded-lg border-2 border-white text-white font-bold hover:bg-white/10 transition-all"
+            class="px-8 py-3 rounded-lg border-2 border-white text-white font-bold hover:bg-muted transition-colors"
         >
             Dashboard
         </router-link>
         <router-link 
             v-else
             to="/login"
-            class="px-8 py-3 rounded-lg border-2 border-white text-white font-bold hover:bg-white/10 transition-all"
+            class="px-8 py-3 rounded-lg border-2 border-white text-white font-bold hover:bg-muted transition-colors"
         >
             Get Started
         </router-link>
@@ -70,24 +70,33 @@
   </section>
 </template>
 
-<script setup>
-import { useI18n } from 'vue-i18n'
+<script setup lang="ts">
+// import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+interface HeroSettings {
+    hero_bg?: string;
+    brand_logo?: string;
+    hero_title?: string;
+    hero_subtitle?: string;
+    font_heading?: string;
+}
 
-defineProps({
-  settings: {
-    type: Object,
-    default: () => ({})
-  },
-  stats: {
-    type: Object,
-    default: () => ({ contents: 0, visitors: 0, categories: 0 })
-  },
-  isAuthenticated: {
-    type: Boolean,
-    default: false
-  }
+interface HeroStats {
+    contents: number;
+    visitors: number;
+    categories: number;
+}
+
+interface Props {
+  settings?: HeroSettings;
+  stats?: HeroStats;
+  isAuthenticated?: boolean;
+}
+
+withDefaults(defineProps<Props>(), {
+  settings: () => ({}),
+  stats: () => ({ contents: 0, visitors: 0, categories: 0 }),
+  isAuthenticated: false
 })
 </script>
 

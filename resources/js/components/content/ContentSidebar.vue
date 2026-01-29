@@ -30,7 +30,7 @@
                         <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.status') }}</Label>
                         <Select
                             :model-value="modelValue.status"
-                            @update:model-value="(val) => updateField('status', val)"
+                            @update:model-value="(val: string) => updateField('status', val)"
                         >
                             <SelectTrigger class="w-full h-9">
                                 <SelectValue />
@@ -70,7 +70,7 @@
                         <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.type') }}</Label>
                          <Select
                             :model-value="modelValue.type"
-                            @update:model-value="(val) => updateField('type', val)"
+                            @update:model-value="(val: string) => updateField('type', val)"
                         >
                             <SelectTrigger class="w-full h-9 capitalize">
                                 <SelectValue />
@@ -153,9 +153,9 @@
 
                         <div class="space-y-1.5">
                             <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.menus.form.parentItem') }}</Label>
-                            <Select
+                             <Select
                                 :model-value="modelValue.menu_item.parent_id ? modelValue.menu_item.parent_id.toString() : 'root'"
-                                @update:model-value="(val) => updateMenuField('parent_id', val === 'root' ? null : parseInt(val))"
+                                @update:model-value="(val: string) => updateMenuField('parent_id', val === 'root' ? null : parseInt(val))"
                                 :disabled="loadingParentItems"
                             >
                                 <SelectTrigger class="w-full h-9">
@@ -163,8 +163,8 @@
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="root">{{ $t('features.menus.form.rootItem') }}</SelectItem>
-                                    <SelectItem v-for="item in menuParentItems" :key="item.id" :value="item.id.toString()">
-                                        {{ '&nbsp;'.repeat(item.depth * 2) + (item.title || item.label) }}
+                                    <SelectItem v-for="item in menuParentItems" :key="item.id!" :value="item.id!.toString()">
+                                        {{ '&nbsp;'.repeat((item.depth || 0) * 2) + (item.title || item.label) }}
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
@@ -206,8 +206,8 @@
                     <div class="space-y-1.5">
                         <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.category') }}</Label>
                         <Select
-                            :model-value="modelValue.category_id ? modelValue.category_id.toString() : null"
-                            @update:model-value="(val) => updateField('category_id', val ? parseInt(val) : null)"
+                            :model-value="modelValue.category_id ? modelValue.category_id.toString() : ''"
+                            @update:model-value="(val: string) => updateField('category_id', val ? parseInt(val) : null)"
                         >
                             <SelectTrigger class="w-full h-9">
                                 <SelectValue :placeholder="$t('features.content.form.selectCategory')" />
@@ -254,7 +254,7 @@
                             >
                                 <div
                                     v-for="tag in filteredTags"
-                                    :key="tag.id"
+                                    :key="tag.id || tag.name"
                                     @mousedown.prevent="selectTag(tag)"
                                     class="px-3 py-2 text-xs cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
                                 >
@@ -291,7 +291,7 @@
                     </div>
                 </button>
                 <div v-show="sections.image" class="border-t border-border/5 p-5">
-                     <FeaturedImage v-model="modelValue.featured_image" @update:modelValue="(val) => updateField('featured_image', val)" />
+                     <FeaturedImage :model-value="modelValue.featured_image || null" @update:model-value="(val: any) => updateField('featured_image', val)" />
                 </div>
             </div>
 
@@ -412,7 +412,7 @@
                     <div class="space-y-1.5">
                         <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.ogImage') }}</Label>
                         <MediaPicker
-                            @selected="(media) => updateField('og_image', media?.url || media)"
+                            @selected="(media: any) => updateField('og_image', (media?.url ?? media) || null)"
                             :label="$t('features.content.form.selectOgImage')"
                             :constraints="{
                                 allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
@@ -439,26 +439,56 @@
     </div>
 </template>
 
-<script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
-import Label from '@/components/ui/label.vue';
-import Input from '@/components/ui/input.vue';
-import Textarea from '@/components/ui/textarea.vue';
-import Select from '@/components/ui/select.vue';
-import SelectContent from '@/components/ui/select-content.vue';
-import SelectItem from '@/components/ui/select-item.vue';
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-import SelectValue from '@/components/ui/select-value.vue';
-import Badge from '@/components/ui/badge.vue';
-import Button from '@/components/ui/button.vue';
-import Switch from '@/components/ui/switch.vue';
-import { X, ChevronDown, FileCheck, Tags, FileText, Search, Image as ImageIcon, MenuSquare, MessageSquare } from 'lucide-vue-next';
+import {
+    Label,
+    Input,
+    Textarea,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+    Badge,
+    Button,
+    Switch
+} from '@/components/ui';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import FileCheck from 'lucide-vue-next/dist/esm/icons/file-check.js';
+import Tags from 'lucide-vue-next/dist/esm/icons/tags.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
+import MenuSquare from 'lucide-vue-next/dist/esm/icons/square-menu.js';
+import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
 import FeaturedImage from './FeaturedImage.vue';
-import MediaPicker from '../MediaPicker.vue';
+import MediaPicker from '@/components/media/MediaPicker.vue';
+import type { Content, ContentForm, Category, Tag, MenuItem, Menu } from '@/types/cms';
 
 const { t } = useI18n();
+
+const props = withDefaults(defineProps<{
+    modelValue: ContentForm;
+    categories?: Category[];
+    tags?: Tag[];
+    selectedTags?: Tag[];
+    menus?: any[]; // Menu type in cms.ts might differ, using any for list if strict Menu type causes issues, but let's try Menu[] first if compatible. cms.ts has Menu interface.
+}>(), {
+    categories: () => [],
+    tags: () => [],
+    selectedTags: () => [],
+    menus: () => []
+});
+
+const emit = defineEmits<{
+    'update:modelValue': [value: ContentForm];
+    'update:selectedTags': [tags: Tag[]];
+    'search-tags': [query: string];
+}>();
 
 // Collapsible section states
 const sections = ref({
@@ -475,30 +505,8 @@ const sections = ref({
 const tagInput = ref('');
 const showTagSuggestions = ref(false);
 
-const props = defineProps({
-    modelValue: {
-        type: Object,
-        required: true
-    },
-    categories: {
-        type: Array,
-        default: () => []
-    },
-    tags: {
-        type: Array,
-        default: () => []
-    },
-    selectedTags: {
-        type: Array,
-        default: () => []
-    },
-    menus: {
-        type: Array,
-        default: () => []
-    }
-});
-
-const emit = defineEmits(['update:modelValue', 'update:selectedTags', 'search-tags']);
+const menuParentItems = ref<MenuItem[]>([]);
+const loadingParentItems = ref(false);
 
 // Filter available tags based on input and already selected
 const availableTags = computed(() => {
@@ -510,20 +518,14 @@ const availableTags = computed(() => {
 
 // Filter tags based on current input for suggestions
 const filteredTags = computed(() => {
-    // If searching remotely (implied by changing tags prop), we just use availableTags
-    // But we can still do local prefix match highlight or simple filter
     const query = tagInput.value.trim().toLowerCase();
     
-    // If no query, show partial list
     if (!query) return availableTags.value.slice(0, 10);
     
-    // When searching, the parent updates 'tags' prop. 
-    // We can just return availableTags because the parent should have filtered them.
-    // However, for smoother UX (if network delay), we can still filter locally what we have.
     return availableTags.value.slice(0, 10);
 });
 
-const updateField = (field, value) => {
+const updateField = (field: string, value: any) => {
     emit('update:modelValue', { ...props.modelValue, [field]: value });
 };
 
@@ -544,7 +546,12 @@ const handleTagEnter = () => {
         emit('update:selectedTags', [...props.selectedTags, existingTag]);
     } else {
         // Create new tag (temporary, will be created on backend during save)
-        const newTag = { id: null, name: name, isNew: true };
+        const newTag: Tag = { 
+            id: 0, 
+            name: name, 
+            slug: name.toLowerCase().replace(/\s+/g, '-'),
+            isNew: true 
+        };
         emit('update:selectedTags', [...props.selectedTags, newTag]);
     }
     
@@ -552,10 +559,10 @@ const handleTagEnter = () => {
     showTagSuggestions.value = false;
 };
 
-const timer = ref(null);
+const timer = ref<ReturnType<typeof setTimeout> | null>(null);
 
-const handleTagInput = (e) => {
-    const val = e.target.value;
+const handleTagInput = (e: Event) => {
+    const val = (e.target as HTMLInputElement).value;
     tagInput.value = val;
     
     if (timer.value) clearTimeout(timer.value);
@@ -575,7 +582,7 @@ const handleTagBlur = () => {
 };
 
 // Select tag from suggestions
-const selectTag = (tag) => {
+const selectTag = (tag: Tag) => {
     if (!props.selectedTags.find(st => st.id === tag.id)) {
         emit('update:selectedTags', [...props.selectedTags, tag]);
     }
@@ -584,15 +591,13 @@ const selectTag = (tag) => {
 };
 
 // Remove tag (support both id and name for new tags)
-const removeTag = (tagIdOrName) => {
+const removeTag = (tagIdOrName: string | number | null) => {
     emit('update:selectedTags', props.selectedTags.filter(t => 
         t.id ? t.id !== tagIdOrName : t.name !== tagIdOrName
     ));
 };
-const menuParentItems = ref([]);
-const loadingParentItems = ref(false);
 
-const updateMenuField = (field, value) => {
+const updateMenuField = (field: string, value: any) => {
     emit('update:modelValue', {
         ...props.modelValue,
         menu_item: {
@@ -602,12 +607,13 @@ const updateMenuField = (field, value) => {
     });
 };
 
-const handleMenuChange = (val) => {
-    updateMenuField('menu_id', parseInt(val));
+const handleMenuChange = (val: string) => {
+    const id = val ? parseInt(val) : null;
+    updateMenuField('menu_id', id);
     fetchMenuParentItems(val);
 };
 
-const fetchMenuParentItems = async (menuId) => {
+const fetchMenuParentItems = async (menuId: string | number) => {
     if (!menuId) {
         menuParentItems.value = [];
         return;
@@ -617,27 +623,8 @@ const fetchMenuParentItems = async (menuId) => {
     try {
         const response = await api.get(`/admin/ja/menus/${menuId}/items`);
         const data = response.data?.data || response.data || [];
-        // Flatten logic or just basic list? Usually API returns tree or flat.
-        // Assuming flat list or need flattening. If tree, need to flatten for select.
-        // Let's assume the API returns flat list or we flatten it.
-        // Based on Edit.vue, it returns flatItems then builds tree.
-        // We probably want a flat list with depth indicators.
-        
-        // Simple flatten for now if it's tree, or just use as is if flat.
-        // Let's assume it returns all items.
-        // We'll filter out the current item if we were editing a menu item directly, 
-        // but here we are editing CONTENT which is a target. 
-        // We can't select "self" as parent because "self" is a content, not a menu item yet (or is it?).
-        // Actually, if we are updating an existing menu item, we shouldn't select itself as parent.
-        // But the menu item ID is not known easily here unless we pass it.
-        // For simplicity, just list all items. User is smart enough not to create cycles (backend should prevent too).
-        
-        // Let's reuse the flatten logic from Edit.vue if possible, or just a simple recursive flatten.
-        // But for time, let's assume flat response or simple list.
-        // Actually, `Edit.vue` builds tree. So API likely returns flat array.
         const flatItems = Array.isArray(data) ? data : [];
         
-        // Calculate depth if not present
         if (flatItems.length > 0 && !flatItems[0].depth) {
              menuParentItems.value = flattenTreeForSelect(buildTree(flatItems));
         } else {
@@ -650,18 +637,18 @@ const fetchMenuParentItems = async (menuId) => {
     }
 };
 
-const buildTree = (items, parentId = null) => {
+const buildTree = (items: MenuItem[], parentId: number | string | null = null): MenuItem[] => {
     return items
         .filter(item => item.parent_id === parentId)
-        .sort((a, b) => a.sort_order - b.sort_order)
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
         .map(item => ({
             ...item,
-            children: buildTree(items, item.id)
+            children: buildTree(items, item.id || null)
         }));
 };
 
-const flattenTreeForSelect = (items, depth = 0) => {
-    let result = [];
+const flattenTreeForSelect = (items: MenuItem[], depth = 0): MenuItem[] => {
+    let result: MenuItem[] = [];
     items.forEach(item => {
         result.push({ ...item, depth });
         if (item.children) {
@@ -677,5 +664,4 @@ watch(() => props.modelValue.menu_item?.menu_id, (newVal) => {
         fetchMenuParentItems(newVal);
     }
 }, { immediate: true });
-
 </script>

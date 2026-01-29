@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { LayoutDashboard } from 'lucide-vue-next';
+import LayoutDashboard from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

@@ -15,32 +15,32 @@
   </div>
 </template>
 
-<script setup>
-import Switch from './Switch.vue'
-import Label from './Label.vue'
+<script setup lang="ts">
+import Switch from '@/components/ui/switch.vue';
+import Label from '@/components/ui/label.vue';
 
-const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    default: false
-  },
-  label: {
-    type: String,
-    default: ''
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  }
-})
+interface Props {
+  modelValue?: boolean;
+  label?: string;
+  disabled?: boolean;
+}
 
-const emit = defineEmits(['update:modelValue', 'change'])
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: false,
+  label: '',
+  disabled: false
+});
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: boolean): void;
+  (e: 'change', value: boolean): void;
+}>();
 
 const toggle = () => {
-  if (props.disabled) return
-  const newValue = !props.modelValue
-  emit('update:modelValue', newValue)
-  emit('change', newValue)
-}
+  if (props.disabled) return;
+  const newValue = !props.modelValue;
+  emit('update:modelValue', newValue);
+  emit('change', newValue);
+};
 </script>
 

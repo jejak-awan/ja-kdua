@@ -132,7 +132,7 @@ export default {
             {
                 id: 'headerTypography',
                 label: 'Header Typography',
-                fields: typographySettings.fields.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `header_${f.name}`,
                     label: `Header ${f.label}`
@@ -141,7 +141,7 @@ export default {
             {
                 id: 'contentTypography',
                 label: 'Content Typography',
-                fields: typographySettings.fields.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `content_${f.name}`,
                     label: `Content ${f.label}`

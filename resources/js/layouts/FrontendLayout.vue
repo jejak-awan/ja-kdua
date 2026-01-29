@@ -13,11 +13,13 @@
       <!-- Main Content -->
       <!-- Hybrid: Main is boxed | Full: Main is full -->
       <main class="main-content flex-1 w-full">
-         <div :class="{
+         <div
+:class="{
            'container mx-auto': layoutStyle === 'hybrid',
            'px-6 md:px-12 lg:px-20': layoutStyle === 'hybrid', // Increased padding
            'w-full': layoutStyle === 'full'
-         }" :style="hybridContentStyles">
+         }" :style="hybridContentStyles"
+>
             <Breadcrumbs v-if="!isHomePage" :class="{'mb-6': layoutStyle === 'hybrid'}" />
             <router-view v-slot="{ Component }">
               <transition name="fade" mode="out-in">
@@ -43,7 +45,8 @@
     >
       <ThemePageResolver page="components/Header" />
       
-      <main class="main-content flex-1 px-6 md:px-12 lg:px-16 py-8"> <!-- Added padding here too -->
+      <main class="main-content flex-1 px-6 md:px-12 lg:px-16 py-8">
+<!-- Added padding here too -->
          <Breadcrumbs v-if="!isHomePage" class="mb-6" />
          <router-view v-slot="{ Component }">
             <transition name="fade" mode="out-in">
@@ -61,7 +64,7 @@
     <button
       v-if="showBackToTop"
       @click="scrollToTop"
-      class="fixed bottom-6 right-6 z-50 p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+      class="fixed bottom-6 right-6 z-50 p-3 rounded-full shadow-lg transition-colors duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
       :class="layoutStyle === 'framed' ? 'bg-primary text-primary-foreground' : 'bg-primary/90 text-primary-foreground backdrop-blur-sm hover:bg-primary'"
       title="Back to Top"
     >
@@ -69,16 +72,15 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
       </svg>
     </button>
-
-  </div>
+</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted, ref, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useTheme } from '@/composables/useTheme'
-import ThemePageResolver from '@/components/ThemePageResolver.vue'
-import Breadcrumbs from '@/components/Breadcrumbs.vue'
+import ThemePageResolver from '@/components/shared/ThemePageResolver.vue'
+import Breadcrumbs from '@/components/layout/Breadcrumbs.vue'
 
 const route = useRoute()
 const { activeTheme, loadActiveTheme, getSetting } = useTheme()
@@ -87,11 +89,12 @@ const { activeTheme, loadActiveTheme, getSetting } = useTheme()
 const isHomePage = computed(() => route.path === '/')
 
 // Layout settings
-const layoutStyle = computed(() => getSetting('layout_style', 'full'))
-const containerMaxWidth = computed(() => getSetting('container_max_width', 1400))
-const boxedBgColor = computed(() => getSetting('boxed_bg_color', '#f1f5f9'))
-const boxedShadow = computed(() => getSetting('boxed_shadow', 'lg'))
-const framedPadding = computed(() => getSetting('framed_padding', 16))
+const layoutStyle = computed(() => getSetting('layout_style', 'full') as string)
+const containerMaxWidth = computed(() => getSetting('container_max_width', 1400) as number)
+const boxedBgColor = computed(() => getSetting('boxed_bg_color', '#f1f5f9') as string)
+const boxedShadow = computed(() => getSetting('boxed_shadow', 'lg') as string)
+// @ts-ignore - framedPadding unused but kept for parity
+const framedPadding = computed(() => getSetting('framed_padding', 16) as number)
 
 // ROOT CLASSES (Outer most div)
 const rootClasses = computed(() => {
@@ -136,7 +139,7 @@ const hybridContentStyles = computed(() => {
   return {}
 })
 
-const enableBackToTop = computed(() => getSetting('back_to_top', true))
+const enableBackToTop = computed(() => getSetting('back_to_top', true) as boolean)
 const showBackToTop = ref(false)
 
 const handleScroll = () => {

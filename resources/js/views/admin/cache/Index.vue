@@ -123,7 +123,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import api from '../../../services/api';
 import { parseSingleResponse } from '../../../utils/responseParser';
@@ -139,18 +139,16 @@ import TableRow from '../../../components/ui/table-row.vue';
 import TableCell from '../../../components/ui/table-cell.vue';
 import TableHead from '../../../components/ui/table-head.vue';
 import Badge from '../../../components/ui/badge.vue';
-import { 
-    Activity, 
-    Target, 
-    XCircle, 
-    Trash2, 
-    FileText, 
-    Zap 
-} from 'lucide-vue-next';
+import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
+import Target from 'lucide-vue-next/dist/esm/icons/target.js';
+import XCircle from 'lucide-vue-next/dist/esm/icons/circle-x.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
 import toast from '../../../services/toast';
 import { useConfirm } from '../../../composables/useConfirm';
 
-const cacheStats = ref({
+const cacheStats = ref<any>({
     status: 'Active',
     hits: 0,
     misses: 0,
@@ -163,7 +161,7 @@ const fetchCacheStats = async () => {
     try {
         // Try to get cache stats from SystemController
         const response = await api.get('/admin/ja/system/cache-status');
-        const data = parseSingleResponse(response);
+        const data = parseSingleResponse<any>(response);
         if (data) {
             cacheStats.value = {
                 status: data.status || 'Active',
@@ -172,7 +170,7 @@ const fetchCacheStats = async () => {
                 details: data.details || null,
             };
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch cache stats:', error);
         // Keep default values on error
         cacheStats.value = {
@@ -198,7 +196,7 @@ const clearAllCache = async () => {
         await api.post('/admin/ja/cache/clear');
         toast.success('All cache cleared successfully');
         await fetchCacheStats();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to clear cache:', error);
         toast.error('Error', 'Failed to clear cache');
     } finally {
@@ -221,7 +219,7 @@ const clearContentCache = async () => {
         await api.post('/admin/ja/cache/clear-content');
         toast.success('Content cache cleared successfully');
         await fetchCacheStats();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to clear content cache:', error);
         toast.error('Error', 'Failed to clear content cache');
     } finally {
@@ -235,7 +233,7 @@ const warmUpCache = async () => {
         await api.post('/admin/ja/cache/warm-up');
         toast.success('Cache warmed up successfully');
         await fetchCacheStats();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to warm up cache:', error);
         toast.error('Error', 'Failed to warm up cache');
     } finally {

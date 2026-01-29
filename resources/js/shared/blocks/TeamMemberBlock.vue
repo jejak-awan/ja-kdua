@@ -3,12 +3,12 @@
     :module="module"
     :mode="mode"
     :settings="settings"
-    class="team-member-block transition-all duration-300"
+    class="team-member-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Team Member'"
   >
     <div 
-      class="flex transition-all duration-300 w-full p-8 rounded-[3rem] bg-white dark:bg-slate-900 border border-slate-50 dark:border-slate-800 shadow-xl hover:-translate-y-3 group" 
+      class="flex transition-colors duration-300 w-full p-8 rounded-[3rem] bg-white dark:bg-slate-900 border border-slate-50 dark:border-slate-800 shadow-xl hover:-translate-y-3 group" 
       :class="[
         layout === 'stacked' ? 'flex-col items-center gap-8 text-center' : 'flex-row items-center gap-10 text-left',
         getVal(settings, 'alignment', device) === 'right' ? 'flex-row-reverse text-right' : ''
@@ -60,7 +60,7 @@
                 v-for="(link, index) in socialLinks" 
                 :key="index"
                 :href="link.url || '#'"
-                class="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-950 text-slate-400 flex items-center justify-center hover:bg-primary hover:text-white hover:-translate-y-1 hover:rotate-6 transition-all duration-300 shadow-sm border border-slate-100 dark:border-slate-800"
+                class="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-950 text-slate-400 flex items-center justify-center hover:bg-primary hover:text-white hover:-translate-y-1 hover:rotate-6 transition-colors duration-300 shadow-sm border border-slate-100 dark:border-slate-800"
                 @click.prevent
               >
                 <LucideIcon :name="link.network || 'globe'" class="w-4 h-4" />
@@ -77,8 +77,7 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import { User } from 'lucide-vue-next'
-import BaseBlock from '../components/BaseBlock.vue'
+import User from 'lucide-vue-next/dist/esm/icons/user.js';import BaseBlock from '../components/BaseBlock.vue'
 import { Avatar, AvatarImage, AvatarFallback } from '../ui'
 import LucideIcon from '../../components/ui/LucideIcon.vue'
 import { 

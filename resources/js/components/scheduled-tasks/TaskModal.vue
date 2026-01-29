@@ -92,37 +92,56 @@
     </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../services/api';
-import { useToast } from '../../composables/useToast';
-import { useFormValidation } from '../../composables/useFormValidation';
-import { taskSchema } from '../../schemas';
-import Dialog from '../ui/dialog.vue';
-import DialogContent from '../ui/dialog-content.vue';
-import DialogHeader from '../ui/dialog-header.vue';
-import DialogTitle from '../ui/dialog-title.vue';
-import DialogFooter from '../ui/dialog-footer.vue';
-import Button from '../ui/button.vue';
-import { Loader2 } from 'lucide-vue-next';
+import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { taskSchema } from '@/schemas';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    Button
+} from '@/components/ui';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+
+interface Task {
+    id: number;
+    name: string;
+    command: string;
+    schedule: string;
+    description: string;
+    is_active: boolean;
+}
+
+interface TaskForm {
+    name: string;
+    command: string;
+    schedule: string;
+    description: string;
+    is_active: boolean;
+}
 
 const { t } = useI18n();
 const toast = useToast();
-const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(taskSchema);
+const { validateWithZod, setErrors, clearErrors } = useFormValidation(taskSchema);
 
-const props = defineProps({
-    task: {
-        type: Object,
-        default: null,
-    },
-});
+const props = defineProps<{
+    task?: Task | null;
+}>();
 
-const emit = defineEmits(['close', 'saved']);
+const emit = defineEmits<{
+    (e: 'close'): void;
+    (e: 'saved'): void;
+}>();
 
 const saving = ref(false);
 
-const form = ref({
+const form = ref<TaskForm>({
     name: '',
     command: '',
     schedule: '',
@@ -156,7 +175,7 @@ const handleSubmit = async () => {
             toast.success.create('Scheduled Task');
         }
         emit('saved');
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {

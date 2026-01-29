@@ -26,79 +26,73 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue'
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import type { CSSProperties } from 'vue';
 
-const props = defineProps({
-  modelValue: {
-    type: Number,
-    default: 0
-  },
-  min: {
-    type: Number,
-    default: 0
-  },
-  max: {
-    type: Number,
-    default: 100
-  },
-  step: {
-    type: Number,
-    default: 1
-  },
-  variant: {
-    type: String,
-    default: 'alpha', // 'alpha', 'hue', 'saturation', 'value'
-    validator: (val) => ['alpha', 'hue', 'saturation', 'value'].includes(val)
-  },
-  color: {
-    type: String,
-    default: '#ffffff' // Base color for gradient
-  }
-})
+interface Props {
+  modelValue?: number;
+  min?: number;
+  max?: number;
+  step?: number;
+  variant?: 'alpha' | 'hue' | 'saturation' | 'value';
+  color?: string;
+}
 
-const emit = defineEmits(['update:modelValue'])
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: 0,
+  min: 0,
+  max: 100,
+  step: 1,
+  variant: 'alpha',
+  color: '#ffffff'
+});
 
-const isActive = ref(false)
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: number): void;
+}>();
+
+const isActive = ref(false);
 
 const handlePosition = computed(() => {
-  const range = props.max - props.min
-  return ((props.modelValue - props.min) / range) * 100
-})
+  const range = (props.max || 100) - (props.min || 0);
+  return ((props.modelValue || 0) - (props.min || 0)) / range * 100;
+});
 
-const trackStyle = computed(() => {
+const trackStyle = computed<CSSProperties>(() => {
   if (props.variant === 'hue') {
     return {
       background: 'linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)'
-    }
+    };
   }
   if (props.variant === 'saturation') {
     return {
       background: 'linear-gradient(to right, #808080, #f00)'
-    }
+    };
   }
   if (props.variant === 'value') {
     return {
       background: 'linear-gradient(to right, #000, #fff)'
-    }
+    };
   }
   // Alpha variant uses checkerboard pattern (handled in CSS)
-  return {}
-})
+  return {};
+});
 
-const gradientStyle = computed(() => {
+const gradientStyle = computed<CSSProperties>(() => {
   if (props.variant === 'alpha') {
     return {
       background: `linear-gradient(to right, transparent, ${props.color})`
-    }
+    };
   }
-  return {}
-})
+  return {};
+});
 
-const handleInput = (e) => {
-  const value = parseFloat(e.target.value)
-  emit('update:modelValue', value)
-}
+const handleInput = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const value = parseFloat(target.value);
+  emit('update:modelValue', value);
+};
 </script>
 
 <style scoped>

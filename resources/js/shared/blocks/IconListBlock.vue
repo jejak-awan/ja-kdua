@@ -3,7 +3,7 @@
     :module="module"
     :mode="mode"
     :settings="settings"
-    class="icon-list-wrapper transition-all duration-300"
+    class="icon-list-wrapper transition-colors duration-300"
     :style="cardStyles"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Icon List'"
@@ -12,7 +12,7 @@
       <div 
         v-for="(item, index) in items" 
         :key="index"
-        class="icon-list-item group flex items-start gap-4 transition-all duration-300"
+        class="icon-list-item group flex items-start gap-4 transition-colors duration-300"
         :style="itemStyles(index as number)"
       >
         <div class="icon-wrapper shrink-0 transition-transform duration-300 group-hover:scale-110" :style="iconWrapperStyles">

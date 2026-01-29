@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="newsletter-block transition-all duration-300"
+    class="newsletter-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Newsletter Signup'"
     :style="cardStyles"
@@ -32,7 +32,7 @@
           </div>
           <Button 
             type="submit" 
-            class="h-12 px-8 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 active:translate-y-0" 
+            class="h-12 px-8 rounded-xl font-bold shadow-lg shadow-primary/20 transition-colors hover:-translate-y-1 active:translate-y-0" 
             :style="buttonStyles"
             :disabled="loading"
           >
@@ -52,8 +52,8 @@
 import { computed, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Input, Button } from '../ui'
-import { Mail, Loader2 } from 'lucide-vue-next'
-import { 
+import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';import { 
   getTypographyStyles,
   getLayoutStyles,
   getVal,

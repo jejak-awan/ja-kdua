@@ -152,7 +152,7 @@
           <div
             v-for="action in recentActions.slice(0, 3)"
             :key="action.id"
-            class="flex items-center p-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all cursor-pointer group"
+            class="flex items-center p-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors cursor-pointer group"
             @click="repeatAction(action)"
           >
             <Clock class="w-4 h-4 mr-2 opacity-50 group-hover:opacity-100 transition-opacity" />
@@ -165,44 +165,49 @@
   </Card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, type RouteLocationRaw } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '../../stores/auth';
-import Card from '@/components/ui/card.vue';
-import CardHeader from '@/components/ui/card-header.vue';
-import CardTitle from '@/components/ui/card-title.vue';
-import CardContent from '@/components/ui/card-content.vue';
+import { useAuthStore } from '@/stores/auth';
 import { 
-  Zap, 
-  FileEdit, 
-  PlusSquare, 
-  Upload, 
-  Hash, 
-  Tag, 
-  UserCog, 
-  MessageSquare, 
-  Settings,
-  Clock,
-  Layout 
-} from 'lucide-vue-next';
+    Card, 
+    CardHeader, 
+    CardTitle, 
+    CardContent 
+} from '@/components/ui';
+import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
+import FileEdit from 'lucide-vue-next/dist/esm/icons/file-pen.js';
+import PlusSquare from 'lucide-vue-next/dist/esm/icons/square-plus.js';
+import Upload from 'lucide-vue-next/dist/esm/icons/upload.js';
+import Hash from 'lucide-vue-next/dist/esm/icons/hash.js';
+import Tag from 'lucide-vue-next/dist/esm/icons/tag.js';
+import UserCog from 'lucide-vue-next/dist/esm/icons/user-cog.js';
+import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
+import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
+import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+
+interface RecentAction {
+    id: number;
+    action: string;
+    timestamp: string;
+}
 
 const { t } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
 
-const props = defineProps({
-  showRecent: {
-    type: Boolean,
-    default: true,
-  },
+const props = withDefaults(defineProps<{
+  showRecent?: boolean;
+}>(), {
+  showRecent: true,
 });
 
 const loading = ref(false);
-const recentActions = ref([]);
+const recentActions = ref<RecentAction[]>([]);
 
-const actionRoutes = {
+const actionRoutes: Record<string, RouteLocationRaw> = {
   'create-post': { name: 'contents.create', query: { type: 'post' } },
   'create-page': { name: 'contents.create', query: { type: 'page' } },
   'upload-media': { name: 'media' },
@@ -214,7 +219,7 @@ const actionRoutes = {
   'site-editor': { name: 'builder.site' },
 };
 
-const actionLabels = {
+const actionLabels: Record<string, string> = {
   'create-post': 'features.dashboard.widgets.quickActions.createPost',
   'create-page': 'features.dashboard.widgets.quickActions.createPage',
   'upload-media': 'features.dashboard.widgets.quickActions.uploadMedia',
@@ -226,12 +231,28 @@ const actionLabels = {
   'site-editor': 'features.dashboard.widgets.quickActions.siteEditor',
 };
 
-const getActionLabel = (action) => {
+const getActionLabel = (action: string) => {
     const key = actionLabels[action];
     return key ? t(key) : action;
 };
 
-const handleAction = (action) => {
+const saveRecentAction = (action: string) => {
+  const newAction: RecentAction = {
+    id: Date.now(),
+    action,
+    timestamp: new Date().toISOString(),
+  };
+  
+  const stored = localStorage.getItem('quickActions_recent');
+  const actions: RecentAction[] = stored ? JSON.parse(stored) : [];
+  const filtered = actions.filter(a => a.action !== action);
+  filtered.unshift(newAction);
+  const limited = filtered.slice(0, 10);
+  localStorage.setItem('quickActions_recent', JSON.stringify(limited));
+  recentActions.value = limited;
+};
+
+const handleAction = (action: string) => {
   if (loading.value) return;
   
   loading.value = true;
@@ -246,30 +267,14 @@ const handleAction = (action) => {
   }, 500);
 };
 
-const saveRecentAction = (action) => {
-  const newAction = {
-    id: Date.now(),
-    action,
-    timestamp: new Date().toISOString(),
-  };
-  
-  const stored = localStorage.getItem('quickActions_recent');
-  const actions = stored ? JSON.parse(stored) : [];
-  const filtered = actions.filter(a => a.action !== action);
-  filtered.unshift(newAction);
-  const limited = filtered.slice(0, 10);
-  localStorage.setItem('quickActions_recent', JSON.stringify(limited));
-  recentActions.value = limited;
-};
-
-const repeatAction = (action) => {
+const repeatAction = (action: RecentAction) => {
   handleAction(action.action);
 };
 
-const formatTime = (timestamp) => {
+const formatTime = (timestamp: string) => {
   const date = new Date(timestamp);
   const now = new Date();
-  const diff = now - date;
+  const diff = now.getTime() - date.getTime();
   
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
@@ -284,7 +289,11 @@ const formatTime = (timestamp) => {
 const loadRecentActions = () => {
   const stored = localStorage.getItem('quickActions_recent');
   if (stored) {
-    recentActions.value = JSON.parse(stored);
+    try {
+        recentActions.value = JSON.parse(stored);
+    } catch (e) {
+        recentActions.value = [];
+    }
   }
 };
 

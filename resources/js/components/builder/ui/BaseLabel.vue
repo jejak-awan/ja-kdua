@@ -3,8 +3,8 @@
     class="flex items-center gap-1.5 text-[11px] font-semibold tracking-wider transition-colors"
     :class="[
         muted ? 'text-slate-500' : 'text-slate-900',
-        uppercase && 'uppercase'
-    ]"
+        uppercase ? 'uppercase' : ''
+    ].filter(Boolean).join(' ')"
   >
     <slot name="prefix" />
     <slot />
@@ -12,17 +12,16 @@
   </Label>
 </template>
 
-<script setup>
-import Label from './Label.vue'
+<script setup lang="ts">
+import Label from '@/components/ui/label.vue';
 
-defineProps({
-  muted: {
-    type: Boolean,
-    default: true
-  },
-  uppercase: {
-    type: Boolean,
-    default: false
-  }
-})
+interface Props {
+  muted?: boolean;
+  uppercase?: boolean;
+}
+
+withDefaults(defineProps<Props>(), {
+  muted: true,
+  uppercase: false
+});
 </script>

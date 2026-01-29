@@ -25,7 +25,14 @@
             "unpublished": "Tidak Diterbitkan",
             "login_success": "Login Berhasil",
             "login_failed": "Login Gagal",
-            "session_invalidated": "Sesi Berakhir"
+            "session_invalidated": "Sesi Berakhir",
+            "bulk_action_media": "Aksi Masal Media",
+            "uploaded_media": "Unggah Media",
+            "emptied_trash": "Kosongkan Sampah",
+            "soft_deleted_folder": "Pindahkan Folder ke Sampah",
+            "soft_deleted_media": "Pindahkan Media ke Sampah",
+            "soft_deleted_file": "Pindahkan File ke Sampah",
+            "delete_permanent": "Dihapus Permanen"
         }
     },
     "export": {

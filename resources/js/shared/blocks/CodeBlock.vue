@@ -3,12 +3,12 @@
     :module="module"
     :mode="mode"
     :settings="settings"
-    class="code-block-wrapper transition-all duration-300"
+    class="code-block-wrapper transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Code Block'"
   >
     <div 
-        class="code-container transition-all duration-300" 
+        class="code-container transition-colors duration-300" 
         :class="[themeClass]"
         :style="containerStyles"
     >
@@ -44,8 +44,8 @@
 
 <script setup lang="ts">
 import { computed, ref, inject } from 'vue'
-import { Copy, Check } from 'lucide-vue-next'
-import BaseBlock from '../components/BaseBlock.vue'
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';import BaseBlock from '../components/BaseBlock.vue'
 import { 
   getVal, 
   getLayoutStyles,

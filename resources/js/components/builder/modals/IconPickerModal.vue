@@ -76,72 +76,72 @@
   </BaseModal>
 </template>
 
-<script setup>
-import { ref, computed, watch } from 'vue'
-import { Search } from 'lucide-vue-next'
-import { BaseModal, BaseInput, BaseButton } from '../ui'
-import LucideIcon from '../../ui/LucideIcon.vue'
-import { allIcons, categories } from '../../../shared/assets/icons'
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import { BaseModal, BaseInput, BaseButton } from '../ui';
+import LucideIcon from '../../ui/LucideIcon.vue';
+import { allIcons, categories } from '../../../shared/assets/icons';
 
-const props = defineProps({
-  value: {
-    type: String,
-    default: ''
-  },
-  onSelect: {
-    type: Function,
-    required: true
-  }
-})
+interface Props {
+  value?: string;
+  onSelect: (icon: string) => void;
+}
 
-const emit = defineEmits(['close'])
+const props = withDefaults(defineProps<Props>(), {
+  value: ''
+});
 
-const searchQuery = ref('')
-const activeCategory = ref('all')
-const pageSize = ref(150)
+const emit = defineEmits<{
+  (e: 'close'): void;
+}>();
+
+const searchQuery = ref('');
+const activeCategory = ref('all');
+const pageSize = ref(150);
 
 const filteredIcons = computed(() => {
-  let list = allIcons
+  let list = allIcons;
   
   if (activeCategory.value !== 'all') {
-    const category = categories.find(c => c.id === activeCategory.value)
+    const category = categories.find(c => c.id === activeCategory.value);
     if (category) {
-      list = category.icons
+      list = category.icons;
     }
   }
 
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
+    const query = searchQuery.value.toLowerCase();
     list = list.filter(name => 
       name.toLowerCase().includes(query)
-    )
+    );
   }
 
-  return list
-})
+  return list;
+});
 
 const displayedIcons = computed(() => {
-  return filteredIcons.value.slice(0, pageSize.value)
-})
+  return filteredIcons.value.slice(0, pageSize.value);
+});
 
 const hasMore = computed(() => {
-  return filteredIcons.value.length > pageSize.value
-})
+  return filteredIcons.value.length > pageSize.value;
+});
 
-const selectIcon = (iconName) => {
-  props.onSelect(iconName)
-  emit('close')
-}
+const selectIcon = (iconName: string) => {
+  props.onSelect(iconName);
+  emit('close');
+};
 
 const resetFilters = () => {
-  searchQuery.value = ''
-  activeCategory.value = 'all'
-}
+  searchQuery.value = '';
+  activeCategory.value = 'all';
+};
 
 // Reset page size when filters change
 watch([searchQuery, activeCategory], () => {
-  pageSize.value = 150
-})
+  pageSize.value = 150;
+});
 </script>
 
 <style scoped>

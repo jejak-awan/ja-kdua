@@ -12,7 +12,7 @@
           :target="getVal(settings, 'link_target') || '_self'"
           :aria-label="getVal(settings, 'aria_label', blockDevice) || undefined"
           :role="getVal(settings, 'aria_label', blockDevice) ? 'img' : undefined"
-          class="logo-link group transition-all duration-300"
+          class="logo-link group transition-colors duration-300"
           :style="logoLinkStyles(settings, blockDevice)"
           @click="onLinkClick"
         >
@@ -20,7 +20,7 @@
             v-if="getVal(settings, 'image')" 
             :src="getVal(settings, 'image')" 
             :alt="getVal(settings, 'altText') || 'Logo'" 
-            class="logo-image transition-all duration-500 ease-out"
+            class="logo-image transition-[width] duration-500 ease-out"
             :style="imageStyles(settings, blockDevice)" 
           />
           <div v-else class="logo-placeholder" :style="placeholderStyles(settings, blockDevice)">
@@ -34,19 +34,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Image as ImageIcon } from 'lucide-vue-next'
-import BaseBlock from '../components/BaseBlock.vue'
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';import BaseBlock from '../components/BaseBlock.vue'
 import { 
     getVal, 
     toCSS,
     getLayoutStyles
 } from '../utils/styleUtils'
+import type { BlockProps } from '@/types/builder'
 
-const props = withDefaults(defineProps<{
-  module: any;
-  mode?: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile' | null;
-}>(), {
+const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })

@@ -51,6 +51,7 @@ return [
     */
 
     'channels' => [
+        // Note: Standard Laravel logs use 'ja-cms' prefix (e.g. ja-cms-*.log) instead of 'laravel'
 
         'stack' => [
             'driver' => 'stack',

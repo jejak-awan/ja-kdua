@@ -33,25 +33,27 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted, provide } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from '@/services/toast'
 import Builder from '@/components/builder/Builder.vue'
-import Dialog from '@/components/ui/dialog.vue';
-import DialogContent from '@/components/ui/dialog-content.vue';
-import DialogHeader from '@/components/ui/dialog-header.vue';
-import DialogTitle from '@/components/ui/dialog-title.vue';
-import DialogDescription from '@/components/ui/dialog-description.vue';
-import DialogFooter from '@/components/ui/dialog-footer.vue';
-import Button from '@/components/ui/button.vue';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    Button
+} from '@/components/ui';
 
 const router = useRouter()
 const isFullscreen = ref(false)
-const builderRef = ref(null)
+const builderRef = ref<any>(null)
 const showConfirmDialog = ref(false)
 
-const handleSave = async (status) => {
+const handleSave = async (status: any) => {
     if (!builderRef.value?.builder) return
     
     // In site mode, we might just use saveContent logic from builder
@@ -83,7 +85,7 @@ const confirmClose = () => {
     router.push({ name: 'dashboard' })
 }
 
-const handleFullscreenUpdate = (val) => {
+const handleFullscreenUpdate = (val: boolean) => {
   isFullscreen.value = val
 }
 
@@ -92,7 +94,7 @@ const handleFullscreenUpdate = (val) => {
 // For SiteEditor, we watch the builder's state if we can, or just let it teleport.
 
 // Handle escape key to close modal if not fullscreen
-const handleEsc = (e) => {
+const handleEsc = (e: KeyboardEvent) => {
   if (e.key === 'Escape' && !isFullscreen.value) {
     handleClose()
   }

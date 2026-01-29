@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { computed, type HTMLAttributes } from 'vue';
 import { SelectItem, SelectItemIndicator, type SelectItemProps, SelectItemText } from 'radix-vue';
-import { Check } from 'lucide-vue-next';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 import { cn } from '../../lib/utils';
 
 const props = defineProps<SelectItemProps & { class?: HTMLAttributes['class'] }>();

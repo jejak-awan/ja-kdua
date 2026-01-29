@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { UserPlus } from 'lucide-vue-next';
+import UserPlus from 'lucide-vue-next/dist/esm/icons/user-plus.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

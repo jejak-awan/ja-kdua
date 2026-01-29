@@ -40,8 +40,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Info } from 'lucide-vue-next'
-import FieldActions from './FieldActions.vue'
+import Info from 'lucide-vue-next/dist/esm/icons/info.js';import FieldActions from './FieldActions.vue'
 
 const props = defineProps<{
   label: string;

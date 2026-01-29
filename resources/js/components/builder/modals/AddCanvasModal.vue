@@ -71,33 +71,38 @@
   </BaseModal>
 </template>
 
-<script setup>
-import { reactive, computed } from 'vue'
-import { Info, Check, ChevronDown } from 'lucide-vue-next'
-import { BaseModal, BaseInput, BaseToggle, BaseDropdown } from '../ui'
+<script setup lang="ts">
+import { reactive, computed } from 'vue';
+import Info from 'lucide-vue-next/dist/esm/icons/info.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import { BaseModal, BaseInput, BaseToggle, BaseDropdown } from '../ui';
 
-const emit = defineEmits(['close', 'add'])
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'add', payload: { title: string; isGlobal: boolean; append: string }): void;
+}>();
 
 const form = reactive({
   title: '',
   isGlobal: false,
   append: 'none'
-})
+});
 
 const appendOptions = [
   { label: "Don't Append", value: 'none' },
   { label: 'Append Above', value: 'above' },
   { label: 'Append Below', value: 'below' }
-]
+];
 
 const activeAppendLabel = computed(() => {
-  return appendOptions.find(opt => opt.value === form.append)?.label || "Don't Append"
-})
+  return appendOptions.find(opt => opt.value === form.append)?.label || "Don't Append";
+});
 
 const handleSubmit = () => {
-  if (!form.title) return
-  emit('add', { ...form })
-}
+  if (!form.title) return;
+  emit('add', { ...form });
+};
 </script>
 
 <style scoped>

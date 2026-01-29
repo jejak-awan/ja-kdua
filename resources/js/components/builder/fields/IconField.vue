@@ -47,8 +47,9 @@
 <script setup lang="ts">
 import { computed, ref, inject } from 'vue'
 import type { BuilderInstance } from '../../../types/builder'
-import { Search, Plus, Maximize2 } from 'lucide-vue-next'
-import { BaseInput, BaseButton } from '../ui'
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Maximize2 from 'lucide-vue-next/dist/esm/icons/maximize.js';import { BaseInput, BaseButton } from '../ui'
 import LucideIcon from '../../ui/LucideIcon.vue'
 import { commonIcons, allIcons } from '../../../shared/assets/icons'
 
@@ -86,7 +87,7 @@ const selectIcon = (iconName: string) => {
 }
 
 const openModal = () => {
-  builder?.openIconPickerModal(activeValue.value, (iconName: string) => {
+  builder?.openIconPickerModal?.(activeValue.value || '', (iconName: string) => {
     selectIcon(iconName)
   })
 }

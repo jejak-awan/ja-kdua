@@ -68,7 +68,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -83,10 +83,11 @@ import TableRow from '../../../components/ui/table-row.vue';
 import TableHead from '../../../components/ui/table-head.vue';
 import TableBody from '../../../components/ui/table-body.vue';
 import TableCell from '../../../components/ui/table-cell.vue';
-import { 
-    Plus, Pencil, Trash2, 
-    Loader2, Layout 
-} from 'lucide-vue-next';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
 import WidgetModal from '../../../components/widgets/WidgetModal.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
@@ -94,11 +95,11 @@ const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 
-const widgets = ref([]);
+const widgets = ref<any[]>([]);
 const loading = ref(false);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
-const editingWidget = ref(null);
+const editingWidget = ref<any>(null);
 
 const fetchWidgets = async () => {
     loading.value = true;
@@ -106,19 +107,19 @@ const fetchWidgets = async () => {
         const response = await api.get('/admin/ja/widgets');
         const { data } = parseResponse(response);
         widgets.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch widgets:', error);
     } finally {
         loading.value = false;
     }
 };
 
-const editWidget = (widget) => {
+const editWidget = (widget: any) => {
     editingWidget.value = widget;
     showEditModal.value = true;
 };
 
-const deleteWidget = async (widget) => {
+const deleteWidget = async (widget: any) => {
     const confirmed = await confirm({
         title: t('features.widgets.actions.delete'),
         message: t('features.widgets.confirm.delete', { title: widget.title }),
@@ -132,7 +133,7 @@ const deleteWidget = async (widget) => {
         await api.delete(`/admin/ja/widgets/${widget.id}`);
         toast.success.delete(t('features.widgets.title'));
         fetchWidgets();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete widget:', error);
         toast.error.delete(error, t('features.widgets.title'));
     }

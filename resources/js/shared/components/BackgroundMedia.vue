@@ -21,52 +21,53 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
 import { getVal } from '../utils/styleUtils'
 
-const props = defineProps({
-  settings: { type: Object, required: true },
-  device: { type: String, default: 'desktop' }
-})
+const props = defineProps<{
+  settings: Record<string, any>;
+  device?: string;
+}>();
 
-const videoRef = ref(null)
+const videoRef = ref<HTMLVideoElement | null>(null)
 
 const hasVideo = computed(() => {
-  return getVal(props.settings, 'backgroundVideoMp4', props.device) || 
-         getVal(props.settings, 'backgroundVideoWebm', props.device)
+  return getVal(props.settings, 'backgroundVideoMp4', props.device || 'desktop') || 
+         getVal(props.settings, 'backgroundVideoWebm', props.device || 'desktop')
 })
 
 const videoUrl = computed(() => {
-  return getVal(props.settings, 'backgroundVideoWebm', props.device) || 
-         getVal(props.settings, 'backgroundVideoMp4', props.device)
+  return getVal(props.settings, 'backgroundVideoWebm', props.device || 'desktop') || 
+         getVal(props.settings, 'backgroundVideoMp4', props.device || 'desktop')
 })
 
 const isMuted = computed(() => {
-  return getVal(props.settings, 'backgroundVideoMute', props.device) !== false
+  return getVal(props.settings, 'backgroundVideoMute', props.device || 'desktop') !== false
 })
 
 const isLoop = computed(() => {
-  return getVal(props.settings, 'backgroundVideoLoop', props.device) !== false
+  return getVal(props.settings, 'backgroundVideoLoop', props.device || 'desktop') !== false
 })
 
 const overlayColor = computed(() => {
-  return getVal(props.settings, 'backgroundVideoOverlayColor', props.device) || ''
+  return getVal(props.settings, 'backgroundVideoOverlayColor', props.device || 'desktop') || ''
 })
 
 const videoStyles = computed(() => {
-    const styles = {}
+    const styles: Record<string, string> = {}
+    const device = props.device || 'desktop'
     
-    const w = getVal(props.settings, 'backgroundVideoWidth', props.device)
-    const h = getVal(props.settings, 'backgroundVideoHeight', props.device)
+    const w = getVal(props.settings, 'backgroundVideoWidth', device)
+    const h = getVal(props.settings, 'backgroundVideoHeight', device)
     
     if (w) {
-        styles.width = w
+        styles.width = String(w)
         styles.minWidth = '0'
     }
     
     if (h) {
-        styles.height = h
+        styles.height = String(h)
         styles.minHeight = '0'
     }
     

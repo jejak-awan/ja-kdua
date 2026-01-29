@@ -198,76 +198,55 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { 
-    Tag as TagIcon, 
-    BarChart3, 
-    MousePointer2, 
-    Edit, 
-    Trash2, 
-    Plus, 
-    Search as SearchIcon, 
-    Filter,
-    Loader2
-} from 'lucide-vue-next';
+import TagIcon from 'lucide-vue-next/dist/esm/icons/tag.js';
+import BarChart3 from 'lucide-vue-next/dist/esm/icons/chart-bar-stacked.js';
+import MousePointer2 from 'lucide-vue-next/dist/esm/icons/mouse-pointer-2.js';
+import Edit from 'lucide-vue-next/dist/esm/icons/pen.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import SearchIcon from 'lucide-vue-next/dist/esm/icons/search.js';
+import Filter from 'lucide-vue-next/dist/esm/icons/list-filter.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import api from '@/services/api';
 import { useConfirm } from '@/composables/useConfirm';
 import { useToast } from '@/composables/useToast';
 import { debounce } from '@/utils/debounce';
-import { parseResponse } from '@/utils/responseParser';
+import { parseResponse, type PaginationData } from '@/utils/responseParser';
 import { cn } from '@/lib/utils';
 import TagFormModal from './TagFormModal.vue';
 
-// @ts-ignore
-import Button from '@/components/ui/button.vue';
-// @ts-ignore
-import Input from '@/components/ui/input.vue';
-// @ts-ignore
-import Badge from '@/components/ui/badge.vue';
-// @ts-ignore
-import Checkbox from '@/components/ui/checkbox.vue';
-// @ts-ignore
-import Card from '@/components/ui/card.vue';
-// @ts-ignore
-import CardHeader from '@/components/ui/card-header.vue';
-// @ts-ignore
-import CardContent from '@/components/ui/card-content.vue';
-// @ts-ignore
-import Pagination from '@/components/ui/pagination.vue';
-// @ts-ignore
-import Table from '@/components/ui/table.vue';
-// @ts-ignore
-import TableBody from '@/components/ui/table-body.vue';
-// @ts-ignore
-import TableCell from '@/components/ui/table-cell.vue';
-// @ts-ignore
-import TableHead from '@/components/ui/table-head.vue';
-// @ts-ignore
-import TableHeader from '@/components/ui/table-header.vue';
-// @ts-ignore
-import TableRow from '@/components/ui/table-row.vue';
-// @ts-ignore
-import Select from '@/components/ui/select.vue';
-// @ts-ignore
-import SelectContent from '@/components/ui/select-content.vue';
-// @ts-ignore
-import SelectItem from '@/components/ui/select-item.vue';
-// @ts-ignore
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-// @ts-ignore
-import SelectValue from '@/components/ui/select-value.vue';
+// UI Components
+import {
+    Button,
+    Input,
+    Badge,
+    Checkbox,
+    Card,
+    CardHeader,
+    CardContent,
+    Pagination,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from '@/components/ui';
 
 import { useAuthStore } from '@/stores/auth';
 import type { Tag } from '@/types/cms';
 
-const props = defineProps({
-    isEmbedded: {
-        type: Boolean,
-        default: false
-    }
-});
+const props = defineProps<{
+    isEmbedded?: boolean;
+}>();
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
@@ -280,7 +259,7 @@ const statistics = ref<any>(null);
 const search = ref('');
 const filterUsage = ref('all');
 const selectedIds = ref<number[]>([]);
-const pagination = ref<any>({
+const pagination = ref<PaginationData>({
     current_page: 1,
     per_page: 20,
     total: 0,
@@ -300,30 +279,32 @@ const onSearchInput = debounce(() => {
 const fetchTags = async (page = 1) => {
     loading.value = true;
     try {
-        const params: any = {
+        const params: Record<string, any> = {
             page: page,
             per_page: pagination.value.per_page,
             search: search.value,
-            usage: filterUsage.value !== 'all' ? filterUsage.value : undefined
         };
 
+        if (filterUsage.value !== 'all') {
+            params.usage = filterUsage.value;
+        }
+
         const response = await api.get('/admin/ja/tags', { params });
-        const { data, pagination: meta } = parseResponse(response);
+        const { data, pagination: paginationData } = parseResponse(response);
         
-        tags.value = data;
-        if (meta) {
-            pagination.value = {
-                ...pagination.value,
-                ...meta
-            };
+        tags.value = (data as unknown as Tag[]) || [];
+        if (paginationData) {
+            pagination.value = paginationData;
+        } else {
+             pagination.value = { ...pagination.value, total: tags.value.length, current_page: 1 };
         }
 
         // Fetch statistics
         try {
             const statsResponse = await api.get('/admin/ja/tags/statistics');
             statistics.value = statsResponse.data.data || statsResponse.data;
-        } catch (error) {
-            // Fallback: simple stats from current page or rough estimate
+        } catch (error: any) {
+            // Fallback
             if (!statistics.value) {
                 statistics.value = {
                     total_tags: pagination.value.total || tags.value.length,
@@ -332,7 +313,7 @@ const fetchTags = async (page = 1) => {
                 };
             }
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch tags:', error);
     } finally {
         loading.value = false;
@@ -352,7 +333,9 @@ const changePerPage = (value: string | number) => {
 
 const toggleSelection = (id: number, checked: boolean) => {
     if (checked) {
-        selectedIds.value.push(id);
+        if (!selectedIds.value.includes(id)) {
+            selectedIds.value.push(id);
+        }
     } else {
         selectedIds.value = selectedIds.value.filter(i => i !== id);
     }
@@ -385,7 +368,7 @@ const bulkDelete = async () => {
         toast.success.delete('Tags');
     } catch (error: any) {
         console.error('Bulk delete failed:', error);
-        toast.error.action(error);
+        toast.error.fromResponse(error);
     }
 };
 
@@ -403,8 +386,6 @@ const openEditModal = (tag: Tag) => {
 const handleModalSuccess = () => {
     fetchTags(pagination.value.current_page);
 };
-
-// editTag replaced by openEditModal
 
 const deleteTag = async (tag: Tag) => {
     const confirmed = await confirm({

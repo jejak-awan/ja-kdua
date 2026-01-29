@@ -210,7 +210,7 @@
                                     <div class="flex-shrink-0 h-9 w-9">
                                         <img
                                             v-if="user.avatar"
-                                            :src="user.avatar"
+                                            :src="typeof user.avatar === 'string' ? user.avatar : user.avatar.url"
                                             :alt="user.name"
                                             class="h-9 w-9 rounded-full object-cover"
                                         >
@@ -364,41 +364,38 @@ import api from '@/services/api';
 import { cn } from '@/lib/utils';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
 import { useToast } from '@/composables/useToast';
-// @ts-ignore
-import Button from '@/components/ui/button.vue';
-// @ts-ignore
-import Pagination from '@/components/ui/pagination.vue';
-// @ts-ignore
-import Input from '@/components/ui/input.vue';
-// @ts-ignore
-import Card from '@/components/ui/card.vue';
-// @ts-ignore
-import Select from '@/components/ui/select.vue';
-// @ts-ignore
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-// @ts-ignore
-import SelectValue from '@/components/ui/select-value.vue';
-// @ts-ignore
-import SelectContent from '@/components/ui/select-content.vue';
-// @ts-ignore
-import SelectItem from '@/components/ui/select-item.vue';
-// @ts-ignore
-import Checkbox from '@/components/ui/checkbox.vue';
-// @ts-ignore
-import Badge from '@/components/ui/badge.vue';
-// @ts-ignore
-import Table from '@/components/ui/table.vue';
-// @ts-ignore
-import TableHeader from '@/components/ui/table-header.vue';
-// @ts-ignore
-import TableBody from '@/components/ui/table-body.vue';
-// @ts-ignore
-import TableRow from '@/components/ui/table-row.vue';
-// @ts-ignore
-import TableCell from '@/components/ui/table-cell.vue';
-// @ts-ignore
-import TableHead from '@/components/ui/table-head.vue';
-import { Plus, Search, Loader2, Users, LogOut, Pencil, Trash2, CheckCheck, CheckCircle, AlertCircle, UserPlus, Activity, RotateCcw, Tag } from 'lucide-vue-next';
+import {
+    Pagination,
+    Input,
+    Card,
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+    Checkbox,
+    Badge,
+    Table,
+    TableHeader,
+    TableBody,
+    TableRow,
+    TableCell,
+    TableHead
+} from '@/components/ui';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import Users from 'lucide-vue-next/dist/esm/icons/users.js';
+import LogOut from 'lucide-vue-next/dist/esm/icons/log-out.js';
+import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import CheckCheck from 'lucide-vue-next/dist/esm/icons/check-check.js';
+import CheckCircle from 'lucide-vue-next/dist/esm/icons/circle-check.js';
+import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
+import UserPlus from 'lucide-vue-next/dist/esm/icons/user-plus.js';
+import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import Tag from 'lucide-vue-next/dist/esm/icons/tag.js';
 import { useAuthStore } from '@/stores/auth';
 import { useConfirm } from '@/composables/useConfirm';
 import type { User, Role } from '@/types/auth';
@@ -531,7 +528,7 @@ const fetchStats = async () => {
         if (response.data && response.data.data) {
             stats.value = response.data.data;
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch stats:', error);
     }
 };
@@ -573,7 +570,7 @@ const fetchRoles = async () => {
             });
             roles.value = Array.from(uniqueRoles.values());
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch roles:', error);
     }
 };

@@ -2,7 +2,7 @@
     <Line :data="chartData" :options="chartOptions" />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watchEffect } from 'vue';
 import { Line } from 'vue-chartjs';
 import {
@@ -15,6 +15,9 @@ import {
     Tooltip,
     Legend,
     Filler,
+    ChartOptions,
+    ChartData,
+    ScriptableContext
 } from 'chart.js';
 import { useDarkMode } from '@/composables/useDarkMode';
 
@@ -29,23 +32,21 @@ ChartJS.register(
     Filler
 );
 
-const props = defineProps({
-    data: {
-        type: Array,
-        required: true,
-    },
-    label: {
-        type: String,
-        default: 'Visits',
-    },
-    compareData: {
-        type: Array,
-        default: () => [],
-    },
-    compareLabel: {
-        type: String,
-        default: 'Previous',
-    },
+interface ChartItem {
+    period: string;
+    visits: number;
+    [key: string]: any;
+}
+
+const props = withDefaults(defineProps<{
+    data: ChartItem[];
+    label?: string;
+    compareData?: ChartItem[];
+    compareLabel?: string;
+}>(), {
+    label: 'Visits',
+    compareData: () => [],
+    compareLabel: 'Previous'
 });
 
 const { isDark } = useDarkMode();
@@ -87,8 +88,8 @@ const colors = computed(() => {
           };
 });
 
-const chartData = computed(() => {
-    const datasets = [
+const chartData = computed<ChartData<'line'>>(() => {
+    const datasets: any[] = [
         // Primary Dataset
         {
             label: props.label,
@@ -102,7 +103,7 @@ const chartData = computed(() => {
             pointHoverRadius: 4,
             fill: true,
             tension: 0.4, 
-            backgroundColor: (context) => {
+            backgroundColor: (context: ScriptableContext<'line'>) => {
                 const ctx = context.chart.ctx;
                 const gradient = ctx.createLinearGradient(0, 0, 0, 300);
                 gradient.addColorStop(0, colors.value.gradientStart);
@@ -128,7 +129,7 @@ const chartData = computed(() => {
             pointHoverRadius: 4,
             fill: true,
             tension: 0.4,
-            backgroundColor: (context) => {
+            backgroundColor: (context: ScriptableContext<'line'>) => {
                 const ctx = context.chart.ctx;
                 const gradient = ctx.createLinearGradient(0, 0, 0, 300);
                 gradient.addColorStop(0, colors.value.compareGradientStart);
@@ -146,10 +147,14 @@ const chartData = computed(() => {
     };
 });
 
-const chartOptions = computed(() => {
+const chartOptions = computed<ChartOptions<'line'>>(() => {
     return {
         responsive: true,
         maintainAspectRatio: false,
+        animation: {
+            duration: 400, // Faster animations
+        },
+        resizeDelay: 100, // Debounce resize events by 100ms
         interaction: {
             mode: 'index',
             intersect: false,

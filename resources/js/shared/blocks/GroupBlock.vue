@@ -3,13 +3,13 @@
     :module="module" 
     :mode="mode"
     :settings="settings"
-    class="group-block transition-all duration-300"
+    class="group-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Group Container'"
   >
     <component
       :is="settings.link_url ? 'a' : 'div'"
-      class="group-inner relative transition-all duration-300 w-full min-h-[50px]"
+      class="group-inner relative transition-colors duration-300 w-full min-h-[50px]"
       :href="mode === 'view' ? settings.link_url : undefined"
       :target="mode === 'view' && settings.link_url ? (settings.link_target || '_self') : undefined"
       :style="containerStyles"
@@ -55,8 +55,7 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Square } from 'lucide-vue-next'
-import { 
+import Square from 'lucide-vue-next/dist/esm/icons/square.js';import { 
   getVal,
   getLayoutStyles
 } from '../utils/styleUtils'

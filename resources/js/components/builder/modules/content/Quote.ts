@@ -89,7 +89,7 @@ const QuoteModule: ModuleDefinition = {
             {
                 id: 'quoteTypography',
                 label: 'Quote Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `quote_${f.name}`,
                     label: `Quote ${f.label}`
@@ -98,7 +98,7 @@ const QuoteModule: ModuleDefinition = {
             {
                 id: 'authorTypography',
                 label: 'Author Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `author_${f.name}`,
                     label: `Author ${f.label}`

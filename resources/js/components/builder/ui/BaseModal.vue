@@ -27,74 +27,66 @@
   </Dialog>
 </template>
 
-<script setup>
-import { computed, inject } from 'vue'
-import Dialog from './dialog.vue'
-import DialogContent from './dialog-content.vue'
-import DialogHeader from './dialog-header.vue'
-import DialogTitle from './dialog-title.vue'
-import DialogFooter from './dialog-footer.vue'
-import { cn } from '../../../lib/utils'
+<script setup lang="ts">
+import { computed, inject, type Ref } from 'vue';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui';
+import { cn } from '@/lib/utils';
 
-const props = defineProps({
-  isOpen: {
-    type: Boolean,
-    default: false
-  },
-  title: {
-    type: String,
-    default: ''
-  },
-  width: {
-    type: [String, Number],
-    default: 500
-  },
-  showClose: {
-    type: Boolean,
-    default: true
-  },
-  closeOnBackdrop: {
-    type: Boolean,
-    default: true
-  },
-  noBackdrop: {
-    type: Boolean,
-    default: false
-  },
-  placement: {
-    type: String,
-    default: 'center', // center, top-left, top-right, bottom-left, bottom-right, right-sidebar
-  },
-  class: {
-    type: String,
-    default: ''
-  }
-})
+interface Props {
+  isOpen?: boolean;
+  title?: string;
+  width?: string | number;
+  showClose?: boolean;
+  closeOnBackdrop?: boolean;
+  noBackdrop?: boolean;
+  placement?: string;
+  class?: string;
+}
 
-const emit = defineEmits(['close', 'update:isOpen'])
+const props = withDefaults(defineProps<Props>(), {
+  isOpen: false,
+  title: '',
+  width: 500,
+  showClose: true,
+  closeOnBackdrop: true,
+  noBackdrop: false,
+  placement: 'center',
+  class: ''
+});
 
-const darkMode = inject('darkMode', computed(() => false))
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'update:isOpen', value: boolean): void;
+}>();
+
+const darkMode = inject<Ref<boolean>>('darkMode', computed(() => false));
 
 const placementClass = computed(() => {
     switch (props.placement) {
-        case 'top-left': return 'top-4 left-4 translate-x-0 translate-y-0'
-        case 'top-right': return 'top-4 right-4 left-auto translate-x-0 translate-y-0'
-        case 'bottom-left': return 'bottom-4 left-4 top-auto translate-x-0 translate-y-0'
-        case 'bottom-right': return 'bottom-4 right-4 top-auto left-auto translate-x-0 translate-y-0'
-        case 'right-sidebar': return 'top-[60px] right-[340px] left-auto translate-x-0 translate-y-0'
-        default: return ''
+        case 'top-left': return 'top-4 left-4 translate-x-0 translate-y-0';
+        case 'top-right': return 'top-4 right-4 left-auto translate-x-0 translate-y-0';
+        case 'bottom-left': return 'bottom-4 left-4 top-auto translate-x-0 translate-y-0';
+        case 'bottom-right': return 'bottom-4 right-4 top-auto left-auto translate-x-0 translate-y-0';
+        case 'right-sidebar': return 'top-[60px] right-[340px] left-auto translate-x-0 translate-y-0';
+        default: return '';
     }
-})
+});
 
 const themeClasses = computed(() => {
     return [
         'ja-builder',
         darkMode.value ? 'ja-builder--dark dark' : 'ja-builder--light'
-    ].join(' ')
-})
+    ].join(' ');
+});
 
-const onOpenUpdate = (val) => {
-    if (!val) emit('close')
-    emit('update:isOpen', val)
-}
+const onOpenUpdate = (val: boolean) => {
+    if (!val) emit('close');
+    emit('update:isOpen', val);
+};
 </script>

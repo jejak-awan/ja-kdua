@@ -30,7 +30,7 @@
                 </div>
                 <Select
                     v-model="filters.status"
-                    @update:modelValue="fetchSubscribers"
+                    @update:model-value="fetchSubscribers"
                 >
                     <SelectTrigger class="w-full md:w-[200px]">
                         <SelectValue :placeholder="$t('features.newsletter.filters.allStatus')" />
@@ -43,7 +43,7 @@
                 </Select>
                 <Select
                     v-model="filters.trashed"
-                    @update:modelValue="fetchSubscribers"
+                    @update:model-value="fetchSubscribers"
                 >
                     <SelectTrigger class="w-full md:w-[160px]">
                         <SelectValue :placeholder="t('common.labels.status')" />
@@ -56,7 +56,7 @@
                 </Select>
 
                 <!-- Bulk Actions -->
-                <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 transition-all animate-in fade-in slide-in-from-top-1 ml-auto">
+                <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 transition-colors animate-in fade-in slide-in-from-top-1 ml-auto">
                     <span class="text-sm font-medium text-primary">
                         {{ selectedIds.length }} selected
                     </span>
@@ -188,11 +188,11 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import { useToast } from '@/composables/useToast.js';
+import { useToast } from '@/composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 import Card from '../../../components/ui/card.vue';
@@ -212,7 +212,10 @@ import TableHead from '../../../components/ui/table-head.vue';
 import TableBody from '../../../components/ui/table-body.vue';
 import TableCell from '../../../components/ui/table-cell.vue';
 import Pagination from '../../../components/ui/pagination.vue';
-import { Download, Search, Trash2, RotateCcw } from 'lucide-vue-next';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
 import { debounce } from '@/utils/debounce';
 
 const { t } = useI18n();
@@ -220,8 +223,8 @@ const toast = useToast();
 const { confirm } = useConfirm();
 
 const loading = ref(false);
-const subscribers = ref([]);
-const pagination = ref({});
+const subscribers = ref<any[]>([]);
+const pagination = ref<any>({});
 const filters = ref({
     status: 'all',
     q: '',
@@ -233,21 +236,21 @@ const filters = ref({
 const fetchSubscribers = async () => {
     loading.value = true;
     try {
-        const params = { ...filters.value };
-        // Don't send 'all' status to API
-        if (params.status === 'all') {
-            delete params.status;
-        }
-        if (params.trashed === 'without') {
-            delete params.trashed;
-        }
+        const params: Record<string, any> = {};
+        
+        Object.entries(filters.value).forEach(([key, value]) => {
+            if (key === 'status' && value === 'all') return;
+            if (key === 'trashed' && value === 'without') return;
+            params[key] = value;
+        });
+
         const response = await api.get('/admin/ja/newsletter/subscribers', { params });
         const { data, pagination: pag } = parseResponse(response);
         subscribers.value = data;
         if (pag) {
             pagination.value = pag;
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch subscribers:', error);
     } finally {
         loading.value = false;
@@ -259,19 +262,19 @@ const debounceSearch = debounce(() => {
     fetchSubscribers();
 }, 300);
 
-const changePage = (page) => {
-    if (page < 1 || page > pagination.value.last_page) return;
+const changePage = (page: number) => {
+    if (page < 1 || (pagination.value as any).last_page && page > (pagination.value as any).last_page) return;
     filters.value.page = page;
     fetchSubscribers();
 };
 
-const changePerPage = (perPage) => {
+const changePerPage = (perPage: number) => {
     filters.value.per_page = perPage;
     filters.value.page = 1;
     fetchSubscribers();
 };
 
-const deleteSubscriber = async (subscriber) => {
+const deleteSubscriber = async (subscriber: any) => {
     const isTrashed = !!subscriber.deleted_at;
     const confirmed = await confirm({
         title: isTrashed ? t('common.actions.forceDelete') : t('features.newsletter.actions.delete'),
@@ -293,13 +296,13 @@ const deleteSubscriber = async (subscriber) => {
             toast.success.delete('Subscriber');
         }
         fetchSubscribers();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete subscriber:', error);
         toast.error.delete(error, 'Subscriber');
     }
 };
 
-const restoreSubscriber = async (subscriber) => {
+const restoreSubscriber = async (subscriber: any) => {
     const confirmed = await confirm({
         title: t('common.actions.restore'),
         message: `Restore ${subscriber.email}?`,
@@ -313,7 +316,7 @@ const restoreSubscriber = async (subscriber) => {
         await api.post(`/admin/ja/newsletter/subscribers/${subscriber.id}/restore`);
         toast.success.restore('Subscriber');
         fetchSubscribers();
-    } catch (error) {
+    } catch (error: any) {
          console.error('Failed to restore subscriber:', error);
         toast.error.fromResponse(error);
     }
@@ -334,13 +337,13 @@ const exportCsv = async () => {
         link.click();
         link.remove();
         toast.success.action(t('common.messages.success.exported'));
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to export subscribers:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -353,19 +356,19 @@ const formatDate = (dateString) => {
 
 const bulkActionSelection = ref('');
 
-const handleBulkAction = async (value) => {
+const handleBulkAction = async (value: string) => {
     if (!value) return;
     await bulkAction(value);
     bulkActionSelection.value = '';
 };
 
-const selectedIds = ref([]);
+const selectedIds = ref<any[]>([]);
 
 const isAllSelected = computed(() => {
     return subscribers.value.length > 0 && selectedIds.value.length === subscribers.value.length;
 });
 
-const toggleSelection = (id) => {
+const toggleSelection = (id: any) => {
     const index = selectedIds.value.indexOf(id);
     if (index === -1) {
         selectedIds.value.push(id);
@@ -374,7 +377,7 @@ const toggleSelection = (id) => {
     }
 };
 
-const toggleSelectAll = (checked) => {
+const toggleSelectAll = (checked: boolean) => {
     if (checked) {
         selectedIds.value = subscribers.value.map(s => s.id);
     } else {
@@ -382,7 +385,7 @@ const toggleSelectAll = (checked) => {
     }
 };
 
-const bulkAction = async (action) => {
+const bulkAction = async (action: string) => {
     if (selectedIds.value.length === 0) return;
     
     if (action === 'delete' || action === 'force_delete') {
@@ -409,7 +412,7 @@ const bulkAction = async (action) => {
              selectedIds.value = [];
              await fetchSubscribers();
              toast.success.action(t('common.messages.success.deleted', { item: 'Subscribers' }));
-         } catch (error) {
+         } catch (error: any) {
              toast.error.action(error);
          }
     } else if (action === 'restore') {
@@ -421,7 +424,7 @@ const bulkAction = async (action) => {
              selectedIds.value = [];
              await fetchSubscribers();
              toast.success.restore('Subscribers');
-         } catch (error) {
+         } catch (error: any) {
              toast.error.action(error);
          }
     } else if (action === 'unsubscribe' || action === 'subscribe') {
@@ -433,7 +436,7 @@ const bulkAction = async (action) => {
              selectedIds.value = [];
              await fetchSubscribers();
              toast.success.action(t('common.messages.success.updated'));
-         } catch (error) {
+         } catch (error: any) {
              toast.error.action(error);
          }
     }

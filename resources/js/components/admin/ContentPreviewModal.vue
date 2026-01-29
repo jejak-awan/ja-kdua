@@ -57,38 +57,62 @@
     </Teleport>
 </template>
 
-<script setup>
-import { ref, computed, watch } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch, nextTick } from 'vue';
 import { useTheme } from '@/composables/useTheme';
 
-const props = defineProps({
-    show: {
-        type: Boolean,
-        default: false,
-    },
-    content: {
-        type: Object,
-        default: () => ({}),
-    },
-    canPublish: {
-        type: Boolean,
-        default: false,
-    },
+interface Author {
+    name: string;
+    [key: string]: any;
+}
+
+interface Category {
+    name: string;
+    [key: string]: any;
+}
+
+interface Content {
+    title?: string;
+    body?: string;
+    excerpt?: string;
+    featured_image?: string;
+    author?: Author | string;
+    category?: Category | string;
+    published_at?: string;
+    [key: string]: any;
+}
+
+interface Device {
+    name: string;
+    label: string;
+    width: string;
+}
+
+const props = withDefaults(defineProps<{
+    show?: boolean;
+    content?: Content;
+    canPublish?: boolean;
+}>(), {
+    show: false,
+    content: () => ({}),
+    canPublish: false,
 });
 
-const emit = defineEmits(['close', 'publish']);
+const emit = defineEmits<{
+    (e: 'close'): void;
+    (e: 'publish'): void;
+}>();
 
 const { activeTheme, themeSettings } = useTheme();
-const selectedDevice = ref('desktop');
+const selectedDevice = ref<string>('desktop');
 
-const devices = [
+const devices: Device[] = [
     { name: 'desktop', label: 'Desktop', width: '100%' },
     { name: 'tablet', label: 'Tablet', width: '768px' },
     { name: 'mobile', label: 'Mobile', width: '375px' },
 ];
 
 const deviceClass = computed(() => {
-    const device = devices.find(d => d.name === selectedDevice.value);
     return {
         'max-w-full': selectedDevice.value === 'desktop',
         'max-w-3xl mx-auto': selectedDevice.value === 'tablet',
@@ -113,9 +137,21 @@ const renderedContent = computed(() => {
     
     if (author || category || published_at) {
         html += '<div class="flex items-center space-x-4 text-sm text-muted-foreground mb-6">';
-        if (author) html += `<span>By ${author.name || author}</span>`;
-        if (category) html += `<span>• ${category.name || category}</span>`;
-        if (published_at) html += `<span>• ${new Date(published_at).toLocaleDateString()}</span>`;
+        
+        if (author) {
+            const authorName = typeof author === 'string' ? author : author.name;
+            html += `<span>By ${authorName}</span>`;
+        }
+        
+        if (category) {
+            const categoryName = typeof category === 'string' ? category : category.name;
+            html += `<span>• ${categoryName}</span>`;
+        }
+        
+        if (published_at) {
+            html += `<span>• ${new Date(published_at).toLocaleDateString()}</span>`;
+        }
+        
         html += '</div>';
     }
     
@@ -139,7 +175,8 @@ function enhanceCodeBlocks() {
     if (!previewEl) return;
     
     const codeBlocks = previewEl.querySelectorAll('pre:not([data-enhanced])');
-    codeBlocks.forEach((pre, index) => {
+    codeBlocks.forEach((preElement) => {
+        const pre = preElement as HTMLPreElement;
         pre.setAttribute('data-enhanced', 'true');
         
         const code = pre.querySelector('code');
@@ -164,19 +201,21 @@ function enhanceCodeBlocks() {
         `;
         
         // Copy button functionality
-        const copyBtn = header.querySelector('.copy-code-btn');
-        copyBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(content).then(() => {
-                copyBtn.textContent = 'Copied!';
-                copyBtn.style.background = '#22c55e';
-                copyBtn.style.color = '#fff';
-                setTimeout(() => {
-                    copyBtn.textContent = 'Copy';
-                    copyBtn.style.background = '#3d3d4a';
-                    copyBtn.style.color = '#a6adc8';
-                }, 2000);
+        const copyBtn = header.querySelector('.copy-code-btn') as HTMLButtonElement;
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(content).then(() => {
+                    copyBtn.textContent = 'Copied!';
+                    copyBtn.style.background = '#22c55e';
+                    copyBtn.style.color = '#fff';
+                    setTimeout(() => {
+                        copyBtn.textContent = 'Copy';
+                        copyBtn.style.background = '#3d3d4a';
+                        copyBtn.style.color = '#a6adc8';
+                    }, 2000);
+                });
             });
-        });
+        }
         
         // Create code content with line numbers
         const codeContainer = document.createElement('div');
@@ -197,7 +236,7 @@ function enhanceCodeBlocks() {
         codeContainer.appendChild(codeContent);
         
         // Expand/collapse button for long code
-        let expandBtn = null;
+        let expandBtn: HTMLButtonElement | null = null;
         if (isLong) {
             expandBtn = document.createElement('button');
             expandBtn.style.cssText = 'width: 100%; padding: 0.5rem; background: #2d2d3a; border: none; border-top: 1px solid #313244; color: #a6adc8; font-size: 0.75rem; cursor: pointer;';
@@ -206,7 +245,9 @@ function enhanceCodeBlocks() {
                 const isCollapsed = codeContainer.getAttribute('data-collapsed') === 'true';
                 codeContainer.style.maxHeight = isCollapsed ? 'none' : '150px';
                 codeContainer.setAttribute('data-collapsed', isCollapsed ? 'false' : 'true');
-                expandBtn.textContent = isCollapsed ? 'Collapse' : `Show all ${totalLines} lines`;
+                if (expandBtn) {
+                    expandBtn.textContent = isCollapsed ? 'Collapse' : `Show all ${totalLines} lines`;
+                }
             });
         }
         
@@ -215,11 +256,13 @@ function enhanceCodeBlocks() {
         wrapper.appendChild(codeContainer);
         if (expandBtn) wrapper.appendChild(expandBtn);
         
-        pre.parentNode.replaceChild(wrapper, pre);
+        if (pre.parentNode) {
+            pre.parentNode.replaceChild(wrapper, pre);
+        }
     });
 }
 
-function escapeHtml(text) {
+function escapeHtml(text: string) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
@@ -233,7 +276,7 @@ watch(() => props.show, (newVal) => {
     }
 });
 
-watch(() => props.content.body, () => {
+watch(() => props.content?.body, () => {
     if (props.show) {
         setTimeout(enhanceCodeBlocks, 100);
     }

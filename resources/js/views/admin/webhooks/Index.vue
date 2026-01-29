@@ -179,7 +179,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -192,19 +192,19 @@ const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 
-const webhooks = ref([]);
-const statistics = ref(null);
+const webhooks = ref<any[]>([]);
+const statistics = ref<any>(null);
 const loading = ref(false);
 const search = ref('');
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
-const editingWebhook = ref(null);
+const editingWebhook = ref<any>(null);
 
 const filteredWebhooks = computed(() => {
     if (!search.value) return webhooks.value;
     
     const searchLower = search.value.toLowerCase();
-    return webhooks.value.filter(webhook => 
+    return webhooks.value.filter((webhook: any) => 
         webhook.name.toLowerCase().includes(searchLower) ||
         webhook.url.toLowerCase().includes(searchLower)
     );
@@ -221,7 +221,7 @@ const fetchWebhooks = async () => {
         try {
             const statsResponse = await api.get('/admin/ja/webhooks/statistics');
             statistics.value = parseSingleResponse(statsResponse);
-        } catch (error) {
+        } catch (error: any) {
             // Calculate from webhooks if endpoint doesn't exist
             statistics.value = {
                 total: webhooks.value.length,
@@ -237,22 +237,22 @@ const fetchWebhooks = async () => {
     }
 };
 
-const editWebhook = (webhook) => {
+const editWebhook = (webhook: any) => {
     editingWebhook.value = webhook;
     showEditModal.value = true;
 };
 
-const testWebhook = async (webhook) => {
+const testWebhook = async (webhook: any) => {
     try {
         await api.post(`/admin/ja/webhooks/${webhook.id}/test`);
         toast.success.action(t('features.developer.webhooks.messages.test_success'));
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to test webhook:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const deleteWebhook = async (webhook) => {
+const deleteWebhook = async (webhook: any) => {
     const confirmed = await confirm({
         title: t('features.developer.webhooks.actions.delete'),
         message: t('features.developer.webhooks.confirm.delete', { name: webhook.name }),
@@ -266,7 +266,7 @@ const deleteWebhook = async (webhook) => {
         await api.delete(`/admin/ja/webhooks/${webhook.id}`);
         toast.success.delete('Webhook');
         fetchWebhooks();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete webhook:', error);
         toast.error.delete(error, 'Webhook');
     }

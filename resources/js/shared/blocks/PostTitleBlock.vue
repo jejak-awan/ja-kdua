@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode"
     :device="device"
-    class="post-title-block transition-all duration-500"
+    class="post-title-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Post Title'"
     :style="cardStyles"
@@ -11,7 +11,7 @@
     <div class="w-full" :style="containerStyles">
       <component 
         :is="tag" 
-        class="post-title transition-all duration-500 font-serif leading-tight outline-none" 
+        class="post-title transition-[width] duration-500 font-serif leading-tight outline-none" 
         :class="alignmentClass"
         :style="titleStyles"
         :contenteditable="mode === 'edit'"

@@ -1,5 +1,6 @@
 <template>
   <RadixSelectTrigger
+    v-bind="delegatedProps"
     data-slot="select-trigger"
     :class="cn(
       'flex h-8 w-full items-center justify-between rounded-lg border border-border/50 bg-transparent px-2.5 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50 placeholder:text-muted-foreground',
@@ -13,15 +14,16 @@
   </RadixSelectTrigger>
 </template>
 
-<script setup>
-import { SelectTrigger as RadixSelectTrigger, SelectIcon } from 'radix-vue';
-import { ChevronDown } from 'lucide-vue-next';
+<script setup lang="ts">
+import { SelectTrigger as RadixSelectTrigger, type SelectTriggerProps, SelectIcon } from 'radix-vue';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import { cn } from '@/lib/utils';
+import { computed, type HTMLAttributes } from 'vue';
 
-const props = defineProps({
-  class: {
-    type: String,
-    default: '',
-  },
+const props = defineProps<SelectTriggerProps & { class?: HTMLAttributes['class'] }>();
+
+const delegatedProps = computed(() => {
+  const { class: _, ...delegated } = props;
+  return delegated;
 });
 </script>

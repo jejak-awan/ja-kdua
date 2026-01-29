@@ -40,33 +40,18 @@
     </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue'
-import { ChevronDown } from 'lucide-vue-next'
-
-const props = defineProps({
-    title: {
-        type: String,
-        required: true
-    },
-    description: {
-        type: String,
-        required: true
-    },
-    icon: {
-        type: Object,
-        required: true
-    },
-    defaultExpanded: {
-        type: Boolean,
-        default: true
-    },
-    color: {
-        type: String,
-        default: 'primary',
-        validator: (value) => ['primary', 'blue', 'emerald', 'amber', 'red', 'purple', 'indigo', 'orange', 'pink'].includes(value)
-    }
-})
+<script setup lang="ts">
+import { ref, computed, type Component } from 'vue'
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';const props = withDefaults(defineProps<{
+    title: string;
+    description: string;
+    icon: Component | any;
+    defaultExpanded?: boolean;
+    color?: 'primary' | 'blue' | 'emerald' | 'amber' | 'red' | 'purple' | 'indigo' | 'orange' | 'pink';
+}>(), {
+    defaultExpanded: true,
+    color: 'primary',
+});
 
 const isExpanded = ref(props.defaultExpanded)
 
@@ -75,7 +60,7 @@ const toggle = () => {
 }
 
 const iconColorClass = computed(() => {
-    const colorMap = {
+    const colorMap: Record<string, string> = {
         primary: 'bg-primary/10 text-primary',
         blue: 'bg-blue-500/10 text-blue-500',
         emerald: 'bg-emerald-500/10 text-emerald-500',

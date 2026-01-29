@@ -12,6 +12,7 @@ class DeletedFile extends Model
     protected $fillable = [
         'original_path',
         'trash_path',
+        'disk',
         'name',
         'type',
         'size',

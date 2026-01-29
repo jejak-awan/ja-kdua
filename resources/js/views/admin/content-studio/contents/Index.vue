@@ -3,69 +3,61 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useHead } from '@vueuse/head';
-import { 
-    Plus, 
-    Search, 
-    CheckCircle2,
-    XCircle,
-    Clock3,
-    Pencil,
-    FileEdit,
-    Archive,
-    RotateCcw,
-    Trash2,
-    LayoutTemplate,
-    Type,
-    Layout
-} from 'lucide-vue-next';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import CheckCircle2 from 'lucide-vue-next/dist/esm/icons/circle-check-big.js';
+import XCircle from 'lucide-vue-next/dist/esm/icons/circle-x.js';
+import Clock3 from 'lucide-vue-next/dist/esm/icons/clock-3.js';
+import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
+import FileEdit from 'lucide-vue-next/dist/esm/icons/file-pen.js';
+import Archive from 'lucide-vue-next/dist/esm/icons/archive.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import LayoutTemplate from 'lucide-vue-next/dist/esm/icons/layout-template.js';
+import Type from 'lucide-vue-next/dist/esm/icons/type.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Calendar from 'lucide-vue-next/dist/esm/icons/calendar.js';
 import { useAuthStore } from '@/stores/auth';
 import { useCmsStore } from '@/stores/cms';
 import { useConfirm } from '@/composables/useConfirm';
 import { useToast } from '@/composables/useToast';
 import api from '@/services/api';
-import { parseResponse, ensureArray } from '@/utils/responseParser';
+import { parseResponse, ensureArray, type PaginationData } from '@/utils/responseParser';
 import { cn } from '@/lib/utils';
 import type { Content } from '@/types/cms';
 
-// Shadcn Components
-// @ts-ignore
-import Button from '@/components/ui/button.vue';
-// @ts-ignore
-import Input from '@/components/ui/input.vue';
-// @ts-ignore
-import Badge from '@/components/ui/badge.vue';
-// @ts-ignore
-import Card from '@/components/ui/card.vue';
-// @ts-ignore
-import CardContent from '@/components/ui/card-content.vue';
-// @ts-ignore
-import Checkbox from '@/components/ui/checkbox.vue';
-// @ts-ignore
-import Switch from '@/components/ui/switch.vue';
-// @ts-ignore
-import Pagination from '@/components/ui/pagination.vue';
-// @ts-ignore
-import Select from '@/components/ui/select.vue';
-// @ts-ignore
-import SelectContent from '@/components/ui/select-content.vue';
-// @ts-ignore
-import SelectItem from '@/components/ui/select-item.vue';
-// @ts-ignore
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-// @ts-ignore
-import SelectValue from '@/components/ui/select-value.vue';
-// @ts-ignore
-import Table from '@/components/ui/table.vue';
-// @ts-ignore
-import TableBody from '@/components/ui/table-body.vue';
-// @ts-ignore
-import TableCell from '@/components/ui/table-cell.vue';
-// @ts-ignore
-import TableHead from '@/components/ui/table-head.vue';
-// @ts-ignore
-import TableHeader from '@/components/ui/table-header.vue';
-// @ts-ignore
-import TableRow from '@/components/ui/table-row.vue';
+// UI Components
+import {
+    Button,
+    Input,
+    Badge,
+    Card,
+    CardContent,
+    Checkbox,
+    Switch,
+    Pagination,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
+} from '@/components/ui';
+
+interface ContentStats {
+    total: number;
+    published: number;
+    draft: number;
+    pending: number;
+    archived: number;
+    trashed: number;
+}
 
 const { t } = useI18n();
 const route = useRoute();
@@ -75,12 +67,9 @@ const cmsStore = useCmsStore();
 const { confirm } = useConfirm();
 const toast = useToast();
 
-const props = defineProps({
-    isEmbedded: {
-        type: Boolean,
-        default: false
-    }
-});
+const props = defineProps<{
+    isEmbedded?: boolean;
+}>();
 
 if (!props.isEmbedded) {
     useHead({
@@ -90,14 +79,14 @@ if (!props.isEmbedded) {
 
 const loading = ref(true);
 const contents = ref<Content[]>([]);
-const pagination = ref<any>({});
+const pagination = ref<PaginationData | null>(null);
 const search = ref('');
 const statusFilter = ref('all');
 const perPage = ref('10');
 const selectedContents = ref<number[]>([]);
 const bulkAction = ref('');
 
-const stats = ref({
+const stats = ref<ContentStats>({
     total: 0,
     published: 0,
     draft: 0,
@@ -106,10 +95,10 @@ const stats = ref({
     trashed: 0
 });
 
-const fetchContents = async (page = 1) => {
+const fetchContents = async (page: number = 1) => {
     loading.value = true;
     try {
-        const params: any = {
+        const params: Record<string, any> = {
             page,
             per_page: perPage.value,
             sort: 'created_at',
@@ -122,17 +111,16 @@ const fetchContents = async (page = 1) => {
         }
 
         const response = await api.get('/admin/ja/contents', { params });
-        
-        const { data, pagination: meta } = parseResponse(response);
+        const { data, pagination: meta } = parseResponse<Content[]>(response);
         
         contents.value = ensureArray(data);
-        pagination.value = meta || {};
+        pagination.value = meta;
         
     } catch (error: any) {
         console.error('Failed to fetch contents:', error);
         toast.error.action(error);
         contents.value = [];
-        pagination.value = {};
+        pagination.value = null;
     } finally {
         loading.value = false;
     }
@@ -140,7 +128,7 @@ const fetchContents = async (page = 1) => {
 
 const fetchStats = async () => {
     try {
-        const response = await api.get('/admin/ja/contents/stats');
+        const response = await api.get('/admin/ja/contents/stats') as any;
         stats.value = response.data.data || {
             total: 0,
             published: 0,
@@ -149,7 +137,7 @@ const fetchStats = async () => {
             archived: 0,
             trashed: 0
         };
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch stats:', error);
     }
 };
@@ -167,8 +155,8 @@ const toggleSelectAll = (checked: boolean) => {
 };
 
 const toggleFeatured = async (content: Content) => {
-    const previousState = content.is_featured;
-    content.is_featured = !content.is_featured;
+    const previousState = !!content.is_featured;
+    content.is_featured = !previousState;
 
     try {
         await api.patch(`/admin/ja/contents/${content.id}/toggle-featured`);
@@ -709,11 +697,12 @@ onMounted(() => {
             
             <div class="px-6 py-4 border-t border-border">
                 <Pagination
+                    v-if="pagination"
                     :total-items="pagination.total || 0"
-                    :per-page="parseInt(perPage)"
+                    :per-page="parseInt(perPage) || 10"
                     :current-page="pagination.current_page || 1"
                     @page-change="fetchContents"
-                    @update:per-page="(val) => { perPage = String(val); fetchContents(1); }"
+                    @update:per-page="(val: number) => { perPage = String(val); fetchContents(1); }"
                 />
             </div>
         </Card>

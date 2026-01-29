@@ -3,13 +3,13 @@
     :module="module" 
     :mode="mode"
     :device="device"
-    class="post-meta-block transition-all duration-500"
+    class="post-meta-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Post Metadata'"
     :style="cardStyles"
   >
     <div 
-        class="meta-inner flex flex-wrap items-center transition-all duration-500" 
+        class="meta-inner flex flex-wrap items-center transition-[width] duration-500" 
         :class="alignmentClass"
         :style="containerStyles"
     >
@@ -21,7 +21,7 @@
                     v-if="item.link" 
                     :href="mode === 'view' ? item.link : '#'" 
                     :style="linkStyles"
-                    class="hover:text-primary transition-all duration-300"
+                    class="hover:text-primary transition-colors duration-300"
                     @click.prevent="mode === 'edit' ? null : null"
                 >{{ item.value }}</a>
                 <span v-else class="text-slate-600 dark:text-slate-300 font-bold text-xs" :style="textStyles">{{ item.value }}</span>
@@ -35,8 +35,11 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Calendar, User, Tag, Clock, MessageSquare } from 'lucide-vue-next'
-import { 
+import Calendar from 'lucide-vue-next/dist/esm/icons/calendar.js';
+import User from 'lucide-vue-next/dist/esm/icons/user.js';
+import Tag from 'lucide-vue-next/dist/esm/icons/tag.js';
+import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
+import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';import { 
   getVal,
   getLayoutStyles,
   getTypographyStyles

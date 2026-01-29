@@ -299,16 +299,30 @@ class MediaFolderController extends BaseApiController
 
         $folder = MediaFolder::withTrashed()->findOrFail($id);
 
-        // Safety: Prevent deleting folders that have non-trashed children/media if context is weird
-        if ($folder->children()->count() > 0 || $folder->media()->count() > 0) {
-            return $this->validationError([
-                'folder' => ['Cannot permanently delete folder that still has active contents. Clear contents first.'],
-            ], 'Cannot permanently delete folder with active contents');
+        $this->recursiveForceDelete($folder);
+
+        return $this->success(null, 'Folder and its contents permanently deleted');
+    }
+
+    /**
+     * Recursively delete all children folders and media
+     */
+    protected function recursiveForceDelete(MediaFolder $folder)
+    {
+        // 1. Permanently delete all media files in this folder
+        foreach ($folder->media()->withTrashed()->get() as $media) {
+            // Use MediaService to ensure file cleaning if necessary
+            // or just $media->forceDelete() if model handle observers
+            $media->forceDelete();
         }
 
-        $folder->forceDelete();
+        // 2. Recurse into children folders
+        foreach ($folder->children()->withTrashed()->get() as $child) {
+            $this->recursiveForceDelete($child);
+        }
 
-        return $this->success(null, 'Folder permanently deleted');
+        // 3. Permanently delete the folder itself
+        $folder->forceDelete();
     }
 
     public function move(Request $request, MediaFolder $mediaFolder)

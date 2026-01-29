@@ -3,12 +3,12 @@
     :module="module" 
     :mode="mode"
     :settings="settings"
-    class="menu-block transition-all duration-300"
+    class="menu-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Main Navigation'"
   >
     <nav 
-        class="menu-nav flex items-center w-full transition-all duration-300" 
+        class="menu-nav flex items-center w-full transition-colors duration-300" 
         :class="[
             alignment === 'center' ? 'justify-center' : (alignment === 'right' ? 'justify-end' : 'justify-start'),
             menuStyle === 'vertical' ? 'flex-col' : 'flex-row'
@@ -22,26 +22,26 @@
       
       <!-- Desktop Menu -->
       <ul 
-        class="menu-items hidden md:flex list-none p-0 m-0 transition-all duration-300" 
+        class="menu-items hidden md:flex list-none p-0 m-0 transition-colors duration-300" 
         :class="menuStyle === 'vertical' ? 'flex-col gap-6' : 'flex-row gap-10'"
         :style="menuStyles"
       >
         <li v-for="item in menuItems" :key="item" class="menu-item group/item">
           <a 
             href="#" 
-            class="menu-link block transition-all duration-300 font-bold tracking-tight relative pb-1" 
+            class="menu-link block transition-colors duration-300 font-bold tracking-tight relative pb-1" 
             :style="linkStyles"
             @click.prevent
           >
             {{ item }}
-            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover/item:w-full"></span>
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-colors duration-300 group-hover/item:w-full"></span>
           </a>
         </li>
       </ul>
       
       <!-- Mobile Toggle -->
       <button 
-        class="menu-toggle md:hidden p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-all active:scale-95" 
+        class="menu-toggle md:hidden p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-[background-color,transform] active:scale-95" 
         @click="mobileOpen = !mobileOpen"
         aria-label="Toggle Menu"
       >
@@ -49,7 +49,7 @@
       </button>
       
       <!-- Mobile Menu Overlay -->
-      <div v-if="mobileOpen" class="mobile-menu-overlay fixed inset-0 z-[100] bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl md:hidden p-12 transition-all duration-500">
+      <div v-if="mobileOpen" class="mobile-menu-overlay fixed inset-0 z-[100] bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl md:hidden p-12 transition-[width] duration-500">
         <button class="absolute top-10 right-10 p-3 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" @click="mobileOpen = false">
             <X class="w-10 h-10 text-slate-800 dark:text-white" />
         </button>
@@ -72,8 +72,8 @@
 <script setup lang="ts">
 import { computed, ref, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Menu as MenuIcon, X } from 'lucide-vue-next'
-import { 
+import MenuIcon from 'lucide-vue-next/dist/esm/icons/menu.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';import { 
   getVal,
   getLayoutStyles,
   getTypographyStyles

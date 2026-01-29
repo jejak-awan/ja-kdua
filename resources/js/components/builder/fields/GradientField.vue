@@ -58,14 +58,16 @@
         <label class="builder-label mb-0">{{ t('builder.fields.background.gradient.selectedStop') }}</label>
         <IconButton 
           :icon="Trash2" 
-          size="xs" 
-          variant="danger" 
+          size="sm" 
+          variant="ghost" 
+          class="text-red-500 hover:bg-red-500/10"
           v-if="localStops.length > 2"
           @click="removeStop(activeStopIndex)"
         />
       </div>
       
       <div class="space-y-4">
+        <!-- ... (lines 69-487 skipped/omitted in prompt, assuming separate edits is safer) -->
         <div>
           <label class="builder-label mb-1.5">{{ t('builder.fields.common.color') }}</label>
           <ColorField 
@@ -323,8 +325,12 @@
 import { ref, computed, onMounted, inject, watch, nextTick } from 'vue'
 import type { BlockInstance, BuilderInstance } from '../../../types/builder'
 import { useI18n } from 'vue-i18n'
-import { Plus, Trash2, Copy, ChevronUp, ChevronDown, RotateCcw } from 'lucide-vue-next'
-import ColorField from './ColorField.vue'
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';import ColorField from './ColorField.vue'
 import SelectField from './SelectField.vue'
 import ToggleField from './ToggleField.vue'
 import { IconButton, BaseSlider, BaseDropdown } from '../ui'
@@ -487,7 +493,7 @@ const clearGradient = () => {
 
 const initDefaultGradient = () => {
     // Standard addition logic (copying from BackgroundField)
-    const colors: any[] = builder?.globalVariables?.globalColors || []
+    const colors: any[] = builder?.globalVariables?.globalColors.value || []
     const baseColor = colors.find((c: any) => c.name.toLowerCase().includes('primary'))?.value || '#2EA3F2'
     
     const [c1, c2] = getHarmoniousGradientColors(baseColor)

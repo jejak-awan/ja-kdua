@@ -2,7 +2,7 @@
   <div class="base-segmented-control" :class="{ 'is-full-width': fullWidth }">
     <button
       v-for="option in options"
-      :key="option.value"
+      :key="String(option.value)"
       class="segment-item"
       :class="{ 'is-active': modelValue === option.value }"
       @click="$emit('update:modelValue', option.value)"
@@ -14,23 +14,27 @@
   </div>
 </template>
 
-<script setup>
-defineProps({
-  modelValue: {
-    type: [String, Number, Boolean],
-    required: true
-  },
-  options: {
-    type: Array, // Array of { label, value, icon, iconOnly }
-    required: true
-  },
-  fullWidth: {
-    type: Boolean,
-    default: false
-  }
-})
+<script setup lang="ts">
+import { type Component } from 'vue';
 
-defineEmits(['update:modelValue'])
+interface Option {
+    label?: string;
+    value: string | number | boolean;
+    icon?: string | Component;
+    iconOnly?: boolean;
+}
+
+interface Props {
+  modelValue: string | number | boolean;
+  options: Option[];
+  fullWidth?: boolean;
+}
+
+defineProps<Props>();
+
+defineEmits<{
+  (e: 'update:modelValue', value: string | number | boolean): void;
+}>();
 </script>
 
 <style scoped>

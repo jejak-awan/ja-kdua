@@ -13,10 +13,10 @@
                 </Label>
                 <div class="relative">
                     <Type class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
-                    <Input
-                        :model-value="modelValue.meta_title"
-                        @update:model-value="(val) => $emit('update:modelValue', { ...modelValue, meta_title: val })"
-                        type="text"
+                        <Input
+                            :model-value="modelValue.meta_title"
+                            @update:model-value="(val: string | number) => $emit('update:modelValue', { ...modelValue, meta_title: val.toString() })"
+                            type="text"
                         maxlength="255"
                         class="pl-9 bg-background/50"
                         placeholder="SEO title (defaults to content title)"
@@ -35,7 +35,7 @@
                 </Label>
                 <Textarea
                     :model-value="modelValue.meta_description"
-                    @update:model-value="(val) => $emit('update:modelValue', { ...modelValue, meta_description: val })"
+                    @update:model-value="(val: string | number) => $emit('update:modelValue', { ...modelValue, meta_description: val.toString() })"
                     rows="3"
                     maxlength="500"
                     class="bg-background/50 resize-none"
@@ -56,7 +56,7 @@
                     <Hash class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
                     <Input
                         :model-value="modelValue.meta_keywords"
-                        @update:model-value="(val) => $emit('update:modelValue', { ...modelValue, meta_keywords: val })"
+                        @update:model-value="(val: string | number) => $emit('update:modelValue', { ...modelValue, meta_keywords: val.toString() })"
                         type="text"
                         class="pl-9 bg-background/50"
                         :placeholder="$t('features.content.form.keywordsPlaceholder')"
@@ -99,7 +99,7 @@
                             <Button 
                                 type="button" 
                                 variant="outline" 
-                                class="w-full gap-2 border-2 border-dashed h-12 hover:border-primary transition-all" 
+                                class="w-full gap-2 border-2 border-dashed h-12 hover:border-primary transition-colors" 
                                 @click="open"
                             >
                                 <ImageIcon class="w-4 h-4" />
@@ -117,21 +117,34 @@
     </Card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import MediaPicker from '../MediaPicker.vue';
-import Card from '@/components/ui/card.vue';
-import CardHeader from '@/components/ui/card-header.vue';
-import CardTitle from '@/components/ui/card-title.vue';
-import CardContent from '@/components/ui/card-content.vue';
-import Label from '@/components/ui/label.vue';
-import Input from '@/components/ui/input.vue';
-import Textarea from '@/components/ui/textarea.vue';
-import Button from '@/components/ui/button.vue';
-import { Globe, Type, Hash, Image as ImageIcon, Trash2 } from 'lucide-vue-next';
-import { useCmsStore } from '../../stores/cms';
+import MediaPicker from '@/components/media/MediaPicker.vue';
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+    Label,
+    Input,
+    Textarea,
+    Button
+} from '@/components/ui';
+import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
+import Type from 'lucide-vue-next/dist/esm/icons/type.js';
+import Hash from 'lucide-vue-next/dist/esm/icons/hash.js';
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import { useCmsStore } from '@/stores/cms';
+
+interface SeoData {
+    meta_title: string;
+    meta_description: string;
+    meta_keywords: string;
+    og_image: string | null;
+}
 
 const { t } = useI18n();
 const cmsStore = useCmsStore();
@@ -139,7 +152,7 @@ const { settings } = storeToRefs(cmsStore);
 
 const maxUploadSizeMB = computed(() => {
     // Setting is in KB, convert to MB
-    const sizeKB = settings.value.max_upload_size || 10240;
+    const sizeKB = (settings.value as any).max_upload_size || 10240;
     return sizeKB / 1024;
 });
 
@@ -148,18 +161,18 @@ onMounted(async () => {
     await cmsStore.fetchSettingsGroup('media');
 });
 
-defineProps({
-    modelValue: {
-        type: Object,
-        required: true,
-        default: () => ({
-            meta_title: '',
-            meta_description: '',
-            meta_keywords: '',
-            og_image: null,
-        }),
-    },
+withDefaults(defineProps<{
+    modelValue: SeoData;
+}>(), {
+    modelValue: () => ({
+        meta_title: '',
+        meta_description: '',
+        meta_keywords: '',
+        og_image: null,
+    }),
 });
 
-defineEmits(['update:modelValue']);
+defineEmits<{
+    (e: 'update:modelValue', value: SeoData): void;
+}>();
 </script>

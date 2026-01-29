@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Map } from 'lucide-vue-next';
+import Map from 'lucide-vue-next/dist/esm/icons/map.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

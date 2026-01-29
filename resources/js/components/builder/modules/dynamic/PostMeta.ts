@@ -78,7 +78,7 @@ const PostMetaModule: ModuleDefinition = {
             {
                 id: 'typography',
                 label: 'Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: f.name,
                     label: f.label
@@ -87,7 +87,7 @@ const PostMetaModule: ModuleDefinition = {
             {
                 id: 'linkTypography',
                 label: 'Link Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `link_${f.name}`,
                     label: `Link ${f.label}`

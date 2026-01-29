@@ -2,7 +2,7 @@
     <Bar :data="chartData" :options="chartOptions" />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import { Bar } from 'vue-chartjs';
 import {
@@ -13,44 +13,41 @@ import {
     BarElement,
     CategoryScale,
     LinearScale,
+    ChartOptions,
+    ChartData
 } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const props = defineProps({
-    data: {
-        type: Array,
-        required: true,
-    },
-    labelKey: {
-        type: String,
-        required: true,
-    },
-    valueKey: {
-        type: String,
-        default: 'count',
-    },
-    horizontal: {
-        type: Boolean,
-        default: true,
-    },
-});
+interface ChartItem {
+    [key: string]: any;
+}
 
-const chartData = computed(() => {
+const props = defineProps<{
+    data: ChartItem[];
+    labelKey: string;
+    valueKey?: string;
+    horizontal?: boolean;
+}>();
+
+const valueKey = computed(() => props.valueKey || 'count');
+const isHorizontal = computed(() => props.horizontal !== false);
+
+const chartData = computed<ChartData<'bar'>>(() => {
     return {
         labels: props.data.map(item => item[props.labelKey] || 'Unknown').slice(0, 10),
         datasets: [
             {
                 label: 'Visits',
                 backgroundColor: '#3B82F6', // blue-500
-                data: props.data.map(item => item[props.valueKey]).slice(0, 10),
+                data: props.data.map(item => Number(item[valueKey.value])).slice(0, 10),
             },
         ],
     };
 });
 
-const chartOptions = computed(() => ({
-    indexAxis: props.horizontal ? 'y' : 'x',
+const chartOptions = computed<ChartOptions<'bar'>>(() => ({
+    indexAxis: isHorizontal.value ? 'y' : 'x',
     responsive: true,
     maintainAspectRatio: false,
     plugins: {

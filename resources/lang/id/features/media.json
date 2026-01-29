@@ -8,6 +8,10 @@
     "newFolder": "Folder Baru",
     "shared": "Bersama",
     "allMedia": "Semua Media",
+    "trash": "Sampah",
+    "emptyTrash": "Kosongkan Sampah",
+    "tags": "Tag",
+    "noTags": "Tidak ada tag",
     "stats": {
         "total": "Total File",
         "storage": "Penyimpanan",
@@ -23,7 +27,15 @@
         "documents": "Dokumen",
         "allStatus": "Semua Media",
         "used": "Digunakan",
-        "unused": "Tidak Digunakan"
+        "unused": "Tidak Digunakan",
+        "advanced": "Filter lanjutan",
+        "author": "Penulis",
+        "allAuthors": "Semua penulis",
+        "size": "Ukuran",
+        "dateRange": "Rentang tanggal",
+        "type": "Tipe",
+        "status": "Status",
+        "sort": "Urutkan"
     },
     "actions": {
         "bulk": "Tindakan Massal",
@@ -40,7 +52,13 @@
         "cancel": "Batal",
         "close": "Tutup",
         "save": "Simpan Perubahan",
-        "open": "Buka"
+        "open": "Buka",
+        "clearSelection": "Hapus Pilihan",
+        "refresh": "Muat Ulang"
+    },
+    "views": {
+        "grid": "Tampilan Grid",
+        "list": "Tampilan List"
     },
     "loading": "Memuat media...",
     "empty": "Tidak ada media ditemukan",
@@ -60,6 +78,14 @@
         "deleteFailed": "Gagal menghapus media",
         "moveSuccess": "Berhasil memindahkan {count} file media",
         "moveFailed": "Gagal memindahkan media",
+        "emptyTrashSuccess": "Sampah berhasil dikosongkan",
+        "folderDeleted": "Folder berhasil dihapus",
+        "bulkDeleted": "Berhasil menghapus {count} item media",
+        "bulkRestored": "Berhasil memulihkan {count} item media",
+        "bulkDeletedPermanent": "Berhasil menghapus permanen {count} item media",
+        "bulkMoved": "Berhasil memindahkan {count} item media",
+        "bulkAltUpdated": "Berhasil memperbarui teks alt untuk {count} item media",
+        "bulkDownloadSuccess": "Berhasil menyiapkan ZIP untuk {count} item media",
         "updateAltSuccess": "Teks alt berhasil diperbarui",
         "updateAltFailed": "Gagal memperbarui teks alt",
         "downloadSuccess": "Berhasil mengunduh {count} file media sebagai ZIP",
@@ -91,16 +117,19 @@
             "clickToUpload": "Klik untuk mengunggah",
             "dragAndDrop": "atau seret dan lepas",
             "formats": "PNG, JPG, GIF, PDF, MP4 hingga 10MB",
-            "selectedFiles": "File Terpilih:",
+            "selectedFiles": "Berkas Terpilih:",
             "uploading": "Mengunggah...",
-            "uploadAction": "Unggah {count} File",
-            "chooseFile": "Pilih File",
+            "uploadAction": "Unggah {count} Berkas",
+            "chooseFile": "Pilih Berkas",
             "upload": "Unggah",
-            "uploadedSuccess": "Berhasil diunggah!"
+            "uploadedSuccess": "Berhasil diunggah!",
+            "cancel": "Batal"
         },
         "edit": {
             "title": "Edit Media",
             "name": "Nama",
+            "caption": "Keterangan",
+            "tags": "Tag",
             "altText": "Teks Alt",
             "altPlaceholder": "Teks alternatif untuk aksesibilitas",
             "description": "Deskripsi",
@@ -117,9 +146,10 @@
             "name": "Nama Folder",
             "placeholder": "Masukkan nama folder",
             "parent": "Folder Induk",
-            "noParent": "Tidak Ada Induk",
+            "noParent": "Tanpa Induk",
             "creating": "Membuat...",
-            "create": "Buat Folder"
+            "create": "Buat Folder",
+            "cancel": "Batal"
         },
         "picker": {
             "title": "Pilih Media",

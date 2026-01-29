@@ -2,7 +2,7 @@ import { ref, computed, watch, nextTick, type Ref } from 'vue';
 import ModuleRegistry from '../components/builder/core/ModuleRegistry';
 import { useTheme } from './useTheme';
 import { generateUUID } from '../shared/utils/uuid';
-import type { BlockInstance, BlockDefinition } from '../types/builder';
+import type { BlockInstance, BlockDefinition, BuilderHistoryEntry, GlobalSettings } from '../types/builder';
 
 export function useBuilder() {
     const { activeTheme, themeSettings, loadActiveTheme } = useTheme();
@@ -13,19 +13,19 @@ export function useBuilder() {
     const activeTab = ref('content');
     const isSidebarOpen = ref(true); // Default open (left sidebar)
     // History State
-    const history: Ref<any[]> = ref([]);
+    const history: Ref<BuilderHistoryEntry[]> = ref([]);
     const historyIndex = ref(-1);
     const isUndoing = ref(false);
 
     // Global Layout Settings
-    const globalSettings = ref({
+    const globalSettings = ref<GlobalSettings>({
         container_max_width: 'max-w-7xl mx-auto px-4',
         block_spacing: 'mb-4',
     });
 
-    const getGlobalSetting = (key: string) => (globalSettings.value as any)[key];
+    const getGlobalSetting = (key: string) => globalSettings.value[key];
     const setGlobalSetting = (key: string, value: any) => {
-        (globalSettings.value as any)[key] = value;
+        globalSettings.value[key] = value;
         takeSnapshot();
     };
 
@@ -149,20 +149,20 @@ export function useBuilder() {
 
         return {
             id: generateUUID(),
-            type: definition.name,
+            type: definition.name || type,
             settings: JSON.parse(JSON.stringify(definition.defaultSettings))
         };
     };
 
-    const cloneBlock = (blockOrDef: any): BlockInstance | null => {
-        const type = blockOrDef.type || blockOrDef.name;
+    const cloneBlock = (blockOrDef: BlockInstance | BlockDefinition): BlockInstance | null => {
+        const type = ('type' in blockOrDef ? blockOrDef.type : blockOrDef.name) || '';
         const definition = ModuleRegistry.get(type);
 
         // If no definition found, try minimal fallback if we have a type
         if (!definition && !type) return null;
 
         const defaults = definition ? definition.defaultSettings : {};
-        const existingSettings = blockOrDef.settings || {};
+        const existingSettings = (blockOrDef as BlockInstance).settings || {};
 
         return {
             id: generateUUID(),
@@ -175,13 +175,13 @@ export function useBuilder() {
     };
 
     // Actions
-    const addBlock = (blockOrType: any, index: number | null = null) => {
+    const addBlock = (blockOrType: string | BlockDefinition, index: number | null = null) => {
         let block: BlockInstance | null;
         if (typeof blockOrType === 'string') {
             block = createBlockInstance(blockOrType);
         } else {
             // It's a definition object (from sidebar drag)
-            block = createBlockInstance(blockOrType.name);
+            block = createBlockInstance(blockOrType.name || blockOrType.type || '');
         }
 
         if (!block) return;
@@ -270,7 +270,7 @@ export function useBuilder() {
             if (block.id === id) return block;
             // Search in Columns (column.blocks)
             if (block.settings && Array.isArray(block.settings.columns)) {
-                for (const column of block.settings.columns) {
+                for (const column of (block.settings.columns as any[])) {
                     const found = findBlockById(id, column.blocks || []);
                     if (found) return found;
                 }
@@ -310,7 +310,7 @@ export function useBuilder() {
                 }
                 // Handle Columns
                 if (block.settings && Array.isArray(block.settings.columns)) {
-                    for (const column of block.settings.columns) {
+                    for (const column of (block.settings.columns as any[])) {
                         if (column && Array.isArray(column.blocks) && find(column.blocks, targetId, newPath)) return true;
                     }
                 }

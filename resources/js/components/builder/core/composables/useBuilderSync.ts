@@ -16,16 +16,17 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         menus,
         availableThemes,
         loadingThemes,
-        lastSavedBlocks,
         autoSave,
         activeTheme,
-        themeSettings
+        themeSettings,
+        dataVersion,
+        lastSavedVersion
     } = state
 
     const { takeSnapshot } = historyManager
 
     function markAsSaved(): void {
-        lastSavedBlocks.value = JSON.stringify(blocks.value)
+        lastSavedVersion.value = dataVersion.value
     }
 
     async function fetchPages(): Promise<void> {
@@ -178,7 +179,9 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
             const numericId = typeof id === 'string' ? parseInt(id) : id
             if (currentPageId.value === numericId) {
                 if (pages.value.length > 0) {
-                    await setCurrentPage(pages.value[0].id)
+                    if (pages.value[0].id) {
+                        await setCurrentPage(pages.value[0].id)
+                    }
                 } else {
                     blocks.value = []
                     currentPageId.value = null

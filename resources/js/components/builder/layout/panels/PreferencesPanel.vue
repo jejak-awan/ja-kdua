@@ -76,47 +76,47 @@
   </div>
 </template>
 
-<script setup>
-import { ref, inject, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { BaseToggle, BaseDropdown } from '../../ui'
-import { ChevronDown } from 'lucide-vue-next'
-import { useLanguage } from '../../../../composables/useLanguage'
-import { useCmsStore } from '@/stores/cms'
+<script setup lang="ts">
+import { ref, inject, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { BaseToggle, BaseDropdown } from '../../ui';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import { useLanguage } from '../../../../composables/useLanguage';
+import { useCmsStore } from '@/stores/cms';
+import type { BuilderInstance } from '../../../../types/builder';
 
-const { t } = useI18n()
-const cmsStore = useCmsStore()
+const { t } = useI18n();
+const cmsStore = useCmsStore();
 const darkMode = computed({
   get: () => cmsStore.isDarkMode,
-  set: (val) => cmsStore.toggleDarkMode(val)
-})
-const builder = inject('builder', null)
+  set: (val: boolean) => cmsStore.toggleDarkMode(val)
+});
+const builder = inject<BuilderInstance>('builder');
 
 // Use builder preferences (persisted to localStorage)
-// Note: builder is a reactive object, refs are auto-unwrapped
 const showGrid = computed({
     get: () => builder?.showGrid?.value ?? false,
-    set: (val) => { if (builder && builder.showGrid) builder.showGrid.value = val }
-})
+    set: (val: boolean) => { if (builder?.showGrid) builder.showGrid.value = val; }
+});
 const snapToObjects = computed({
     get: () => builder?.snapToObjects?.value ?? true,
-    set: (val) => { if (builder && builder.snapToObjects) builder.snapToObjects.value = val }
-})
+    set: (val: boolean) => { if (builder?.snapToObjects) builder.snapToObjects.value = val; }
+});
 const autoSave = computed({
     get: () => builder?.autoSave?.value ?? true,
-    set: (val) => { if (builder && builder.autoSave) builder.autoSave.value = val }
-})
+    set: (val: boolean) => { if (builder?.autoSave) builder.autoSave.value = val; }
+});
 
 // Language Logic via useLanguage composable for global sync
 const { 
     languages: availableLocales, 
     currentLanguageCode: currentLocale, 
     setLanguage: changeLanguage 
-} = useLanguage()
+} = useLanguage();
 
 const currentLocaleName = computed(() => {
-    return availableLocales.value.find(l => l.code === currentLocale.value)?.name || currentLocale.value
-})
+    return availableLocales.value.find(l => l.code === currentLocale.value)?.name || currentLocale.value;
+});
 </script>
 
 <style scoped>

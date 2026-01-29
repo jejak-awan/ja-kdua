@@ -228,12 +228,12 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
+import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
 import Card from '../../../components/ui/card.vue';
 import Button from '../../../components/ui/button.vue';
@@ -249,23 +249,31 @@ import Dialog from '../../../components/ui/dialog.vue';
 import DialogContent from '../../../components/ui/dialog-content.vue';
 import DialogHeader from '../../../components/ui/dialog-header.vue';
 import DialogTitle from '../../../components/ui/dialog-title.vue';
-import { ArrowLeft, Download, Search, Loader2, FileText, Check, Archive, Trash2 } from 'lucide-vue-next';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import Archive from 'lucide-vue-next/dist/esm/icons/archive.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const { confirm } = useConfirm();
+const toast = useToast();
 
-const form = ref(null);
-const submissions = ref([]);
+const form = ref<any>(null);
+const submissions = ref<any[]>([]);
 const loading = ref(true);
-const statistics = ref(null);
-const pagination = ref(null);
+const statistics = ref<any>(null);
+const pagination = ref<any>(null);
 const search = ref('');
 const statusFilter = ref('all');
 const dateFrom = ref('');
 const dateTo = ref('');
-const selectedSubmission = ref(null);
+const selectedSubmission = ref<any>(null);
 const showDetail = ref(false);
 
 const formId = computed(() => route.params.id);
@@ -286,7 +294,7 @@ const fetchForm = async () => {
     try {
         const response = await api.get(`/admin/ja/forms/${formId.value}`);
         form.value = response.data?.data || response.data;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error fetching form:', error);
     }
 };
@@ -311,7 +319,7 @@ const fetchSubmissions = async (page = 1) => {
             per_page: paginatedData?.per_page || 15,
             last_page: paginatedData?.last_page || 1
         };
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error fetching submissions:', error);
     } finally {
         loading.value = false;
@@ -322,16 +330,16 @@ const fetchStatistics = async () => {
     try {
         const response = await api.get(`/admin/ja/forms/${formId.value}/submissions/statistics`);
         statistics.value = response.data?.data || response.data;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error fetching statistics:', error);
     }
 };
 
-const loadPage = (page) => {
+const loadPage = (page: number) => {
     fetchSubmissions(page);
 };
 
-const viewSubmission = async (submission) => {
+const viewSubmission = async (submission: any) => {
     selectedSubmission.value = submission;
     showDetail.value = true;
     if (submission.status === 'new') {
@@ -339,7 +347,7 @@ const viewSubmission = async (submission) => {
     }
 };
 
-const markAsRead = async (submission, refresh = true) => {
+const markAsRead = async (submission: any, refresh = true) => {
     try {
         await api.put(`/admin/ja/form-submissions/${submission.id}/read`);
         if (refresh) {
@@ -348,22 +356,22 @@ const markAsRead = async (submission, refresh = true) => {
         } else {
             submission.status = 'read';
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error marking as read:', error);
     }
 };
 
-const archiveSubmission = async (submission) => {
+const archiveSubmission = async (submission: any) => {
     try {
         await api.put(`/admin/ja/form-submissions/${submission.id}/archive`);
         fetchSubmissions(pagination.value?.current_page || 1);
         fetchStatistics();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error archiving submission:', error);
     }
 };
 
-const deleteSubmission = async (submission) => {
+const deleteSubmission = async (submission: any) => {
     const confirmed = await confirm({
         title: t('features.forms.submissions.actions.delete'),
         message: t('features.forms.submissions.messages.deleteConfirm'),
@@ -376,11 +384,11 @@ const deleteSubmission = async (submission) => {
     try {
         await api.delete(`/admin/ja/form-submissions/${submission.id}`);
         submissions.value = submissions.value.filter(s => s.id !== submission.id);
-        toast.success(t('features.forms.submissions.messages.deleteSuccess'));
+        toast.success.default(t('features.forms.submissions.messages.deleteSuccess'));
         fetchStatistics();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error deleting submission:', error);
-        toast.error('Error', error.response?.data?.message || t('features.forms.submissions.messages.deleteFailed'));
+        toast.error.fromResponse(error);
     }
 };
 
@@ -399,15 +407,15 @@ const exportSubmissions = async () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        toast.success(t('features.forms.submissions.messages.exportSuccess'));
-    } catch (error) {
+        toast.success.default(t('features.forms.submissions.messages.exportSuccess'));
+    } catch (error: any) {
         console.error('Error exporting submissions:', error);
-        toast.error('Error', t('features.forms.submissions.messages.exportFailed'));
+        toast.error.fromResponse(error);
     }
 };
 
-const getStatusLabel = (status) => {
-    const labels = {
+const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
         new: t('features.forms.stats.new'),
         read: t('features.forms.stats.read'),
         archived: t('features.forms.stats.archived')
@@ -415,20 +423,20 @@ const getStatusLabel = (status) => {
     return labels[status] || status;
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string | null | undefined) => {
     if (!date) return '-';
     const parsed = new Date(date);
     if (isNaN(parsed.getTime())) return '-';
     return parsed.toLocaleString();
 };
 
-const formatValue = (value) => {
+const formatValue = (value: any) => {
     if (Array.isArray(value)) return value.join(', ');
     if (typeof value === 'object') return JSON.stringify(value);
     return String(value || '-');
 };
 
-const getFirstFields = (data) => {
+const getFirstFields = (data: any) => {
     if (!data) return {};
     const entries = Object.entries(data);
     return Object.fromEntries(entries.slice(0, 3));

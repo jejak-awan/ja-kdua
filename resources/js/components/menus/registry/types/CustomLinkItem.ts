@@ -1,4 +1,4 @@
-import { Link } from 'lucide-vue-next';
+import Link from 'lucide-vue-next/dist/esm/icons/link.js';
 import type { MenuItemDefinition } from '@/types/menu';
 
 const definition: MenuItemDefinition = {

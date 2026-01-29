@@ -1,6 +1,6 @@
 <template>
     <div 
-        class="sticky top-[64px] z-30 transition-all duration-300 ease-in-out"
+        class="sticky top-[64px] z-30 transition-colors duration-300 ease-in-out"
         :class="[
             isSidebarOpen ? 'w-full' : 'w-12',
             'bg-background/80 backdrop-blur-md border border-border shadow-sm rounded-xl overflow-hidden mb-6'
@@ -75,35 +75,30 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import Button from '@/components/ui/button.vue';
-import { 
-    PanelRightClose, 
-    PanelRightOpen, 
-    Save, 
-    Loader2, 
-    X
-} from 'lucide-vue-next';
+import { Button } from '@/components/ui';
+import PanelRightClose from 'lucide-vue-next/dist/esm/icons/panel-right-close.js';
+import PanelRightOpen from 'lucide-vue-next/dist/esm/icons/panel-right-open.js';
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
 
-const props = defineProps({
-    isSidebarOpen: {
-        type: Boolean,
-        default: true
-    },
-    loading: {
-        type: Boolean,
-        default: false
-    },
-    disabled: {
-        type: Boolean,
-        default: false
-    },
-    isEdit: {
-        type: Boolean,
-        default: false
-    }
+const props = withDefaults(defineProps<{
+    isSidebarOpen?: boolean;
+    loading?: boolean;
+    disabled?: boolean;
+    isEdit?: boolean;
+}>(), {
+    isSidebarOpen: true,
+    loading: false,
+    disabled: false,
+    isEdit: false
 });
 
-defineEmits(['toggle-sidebar', 'save', 'cancel']);
+const emit = defineEmits<{
+    (e: 'toggle-sidebar'): void;
+    (e: 'save'): void;
+    (e: 'cancel'): void;
+}>();
 
 const saveText = computed(() => {
     if (props.isEdit) {

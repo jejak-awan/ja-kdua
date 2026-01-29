@@ -18,8 +18,7 @@
          />
 
          <div class="transform-controls flex flex-col gap-4">
-            
-            <!-- Scale Tab -->
+<!-- Scale Tab -->
             <div v-if="activeTab === 'scale'" class="control-group">
                 <div class="control-row">
                     <BaseLabel>{{ t('builder.settings.fields.scale') }}</BaseLabel>
@@ -82,8 +81,7 @@
                      <option value="bottom right">Bottom Right</option>
                 </select>
             </div>
-
-         </div>
+</div>
       </div>
     </BaseCollapsible>
   </div>
@@ -92,8 +90,11 @@
 <script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Move, Maximize, RefreshCw, Smartphone, GitMerge } from 'lucide-vue-next'
-import { BaseLabel, BaseSliderInput, BaseCollapsible, BaseSegmentedControl } from '../ui'
+import Move from 'lucide-vue-next/dist/esm/icons/move.js';
+import Maximize from 'lucide-vue-next/dist/esm/icons/maximize.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
+import GitMerge from 'lucide-vue-next/dist/esm/icons/git-merge.js';import { BaseLabel, BaseSliderInput, BaseCollapsible, BaseSegmentedControl } from '../ui'
 
 const props = defineProps<{
   field: any;

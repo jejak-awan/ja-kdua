@@ -122,7 +122,7 @@ export default {
             {
                 id: 'tabTypography',
                 label: 'Tab Typography',
-                fields: typographySettings.fields.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `tab_${f.name}`,
                     label: `Tab ${f.label}`
@@ -131,7 +131,7 @@ export default {
             {
                 id: 'tabActiveTypography',
                 label: 'Active Tab Typography',
-                fields: typographySettings.fields.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `tab_active_${f.name}`,
                     label: `Active Tab ${f.label}`
@@ -148,7 +148,7 @@ export default {
             {
                 id: 'contentTypography',
                 label: 'Content Typography',
-                fields: typographySettings.fields.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `content_${f.name}`,
                     label: `Content ${f.label}`

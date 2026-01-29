@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode"
     :device="device"
-    class="post-content-block transition-all duration-500"
+    class="post-content-block transition-[width] duration-500"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Post Content'"
     :style="cardStyles"

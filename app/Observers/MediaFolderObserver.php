@@ -12,7 +12,7 @@ class MediaFolderObserver
     public function deleting(MediaFolder $mediaFolder): void
     {
         if ($mediaFolder->isForceDeleting()) {
-            // Permanent delete - handled in controller for safety with checks
+            // Permanent delete - handled in controller/service for safety with checks
             return;
         }
 
@@ -21,9 +21,11 @@ class MediaFolderObserver
             $child->delete();
         }
 
-        // Move all media in this folder to root (All Media) instead of deleting
-        // This preserves files when folder is trashed
-        $mediaFolder->media()->update(['folder_id' => null]);
+        // Soft delete all media in this folder
+        // This preserves the folder_id relationship while trashing the files
+        foreach ($mediaFolder->media as $media) {
+            $media->delete();
+        }
     }
 
     /**
@@ -36,7 +38,10 @@ class MediaFolderObserver
             $child->restore();
         }
 
-        // Note: Media files are NOT restored here because they were moved to root
-        // (not deleted) when the folder was trashed. They remain accessible in All Media.
+        // Restore all media files that belong to this folder 
+        // We only restore media that were trashed (deleted_at is NOT null)
+        foreach ($mediaFolder->media()->onlyTrashed()->get() as $media) {
+            $media->restore();
+        }
     }
 }

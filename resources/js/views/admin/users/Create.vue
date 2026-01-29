@@ -235,16 +235,15 @@ import { parseResponse, ensureArray } from '@/utils/responseParser';
 import { useToast } from '@/composables/useToast';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { createUserSchema } from '@/schemas';
-// @ts-ignore
-import Button from '@/components/ui/button.vue';
-// @ts-ignore
-import Input from '@/components/ui/input.vue';
-// @ts-ignore
-import Textarea from '@/components/ui/textarea.vue';
-// @ts-ignore
-import Checkbox from '@/components/ui/checkbox.vue';
-import MediaPicker from '@/components/MediaPicker.vue';
-import { ArrowLeft, Loader2 } from 'lucide-vue-next';
+import {
+    Button,
+    Input,
+    Textarea,
+    Checkbox
+} from '@/components/ui';
+import MediaPicker from '@/components/media/MediaPicker.vue';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import { useAuthStore, ROLE_RANKS } from '@/stores/auth';
 import type { Role } from '@/types/auth';
 
@@ -298,7 +297,7 @@ const fetchRoles = async () => {
         const response = await api.get('/admin/ja/roles');
         const { data } = parseResponse(response);
         availableRoles.value = ensureArray(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch roles:', error);
     } finally {
         loadingRoles.value = false;

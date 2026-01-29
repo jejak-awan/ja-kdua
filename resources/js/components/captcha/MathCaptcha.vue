@@ -2,7 +2,7 @@
     <div class="captcha-math w-full">
         <!-- Unified Input Group -->
         <div 
-            class="flex items-center w-full rounded-md border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 overflow-hidden h-10 transition-all duration-200"
+            class="flex items-center w-full rounded-md border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 overflow-hidden h-10 transition-colors duration-200"
             :class="{ 'border-destructive focus-within:ring-destructive': error, 'border-green-500 focus-within:ring-green-500': verified }"
         >
             <!-- Question Prefix (Balanced Width) -->
@@ -66,16 +66,20 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { CheckCircle, RefreshCw, Check } from 'lucide-vue-next'
-import api from '../../services/api'
+import CheckCircle from 'lucide-vue-next/dist/esm/icons/circle-check.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';import api from '../../services/api'
 import Button from '../ui/button.vue'
 
 const { t } = useI18n()
 
-const emit = defineEmits(['verified', 'error'])
+const emit = defineEmits<{
+    (e: 'verified', payload: { token: string; answer: string }): void
+    (e: 'error', message: string): void
+}>()
 
 const token = ref('')
 const question = ref('...')
@@ -110,7 +114,7 @@ const verify = async () => {
         verified.value = true
         error.value = ''
         emit('verified', { token: token.value, answer: answer.value })
-    } catch (e) {
+    } catch (e: any) {
         verified.value = false
         // 422 is a validation error (wrong answer or expired token), not a system crash
         if (e.response && e.response.status === 422) {

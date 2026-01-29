@@ -3,7 +3,7 @@
     :module="module" 
     :settings="settings" 
     :mode="mode"
-    class="toc-block transition-all duration-300"
+    class="toc-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Table of Contents'"
     :style="cardStyles"
@@ -11,7 +11,7 @@
     <div class="toc-container bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm" :style="containerStyles">
         <div v-if="collapsibleValue" class="toc-header flex justify-between items-center cursor-pointer group" @click="expanded = !expanded">
           <span class="toc-title font-bold text-lg" :style="titleStyles">{{ titleValue }}</span>
-          <div class="toc-toggle-icon w-8 h-8 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 shadow-sm transition-all group-hover:scale-110">
+          <div class="toc-toggle-icon w-8 h-8 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 shadow-sm transition-shadow group-hover:scale-110">
             <ChevronDown class="w-4 h-4 transition-transform duration-300" :class="{ 'rotate-180': expanded }" />
           </div>
         </div>
@@ -33,8 +33,7 @@
 <script setup lang="ts">
 import { computed, ref, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { ChevronDown } from 'lucide-vue-next'
-import { 
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';import { 
   getVal,
   getLayoutStyles,
   getTypographyStyles,

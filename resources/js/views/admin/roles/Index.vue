@@ -31,7 +31,7 @@
                     <div
                         v-for="role in filteredRoles"
                         :key="role.id"
-                        class="group flex items-center gap-3 p-2.5 rounded-lg transition-all cursor-pointer relative"
+                        class="group flex items-center gap-3 p-2.5 rounded-lg transition-colors cursor-pointer relative"
                         :class="[
                             isSelected(role.id) ? 'bg-primary/5 border-primary/20' : 'hover:bg-muted/5' ,
                             activeRoleId === role.id ? 'ring-1 ring-primary/50 bg-primary/5' : ''
@@ -94,7 +94,7 @@
                         <span class="text-[10px] font-bold text-muted-foreground">{{ $t('features.roles.workspace.comparison.mode') }}</span>
                         <span class="text-[10px] font-bold text-primary">{{ $t('features.roles.workspace.comparison.syncing', { count: selectedRoleIds.length }) }}</span>
                     </div>
-                    <Button variant="outline" size="xs" @click="selectedRoleIds = []" class="w-full h-8 text-[10px] font-bold border-primary/20 text-primary hover:bg-primary/5 transition-all">
+                    <Button variant="outline" size="xs" @click="selectedRoleIds = []" class="w-full h-8 text-[10px] font-bold border-primary/20 text-primary hover:bg-muted transition-colors">
                         {{ $t('features.roles.workspace.clearSelection') }}
                     </Button>
                 </div>
@@ -208,14 +208,14 @@
                                 </div>
                             </div>
 
-                            <Accordion type="multiple" class="space-y-0 border-t border-border" v-model:modelValue="expandedCategories">
+                            <Accordion type="multiple" class="space-y-0 border-t border-border" v-model:model-value="expandedCategories">
                                 <AccordionItem 
                                     v-for="(perms, category) in groupedPermissions" 
                                     :key="category" 
                                     :value="String(category)"
                                     class="bg-transparent border-b border-border overflow-hidden"
                                 >
-                                    <AccordionTrigger class="px-2 py-5 bg-transparent hover:bg-muted/10 hover:no-underline transition-all">
+                                    <AccordionTrigger class="px-2 py-5 bg-transparent hover:bg-muted/10 hover:no-underline transition-colors">
                                         <div class="flex items-center justify-between w-full pr-4">
                                             <div class="flex items-center gap-3">
                                                 <div class="p-1.5 bg-primary/5 border border-primary/10 rounded-lg group-data-[state=open]:bg-primary/20 transition-colors">
@@ -231,7 +231,7 @@
                                                 variant="outline"
                                                 size="xs"
                                                 @click.stop="toggleCategory(String(category))"
-                                                class="h-7 text-[9px] font-bold border-primary/20 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
+                                                class="h-7 text-[9px] font-bold border-primary/20 text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
                                             >
                                                 {{ isCategorySelected(String(category)) ? $t('features.roles.workspace.matrix.deselectCategory') : $t('features.roles.workspace.matrix.selectCategory') }}
                                             </Button>
@@ -242,7 +242,7 @@
                                             <div
                                                 v-for="permission in perms"
                                                 :key="permission.id"
-                                                class="flex items-center space-x-3 p-2.5 rounded-lg border border-transparent hover:border-border/60 hover:bg-card transition-all cursor-pointer group/perm"
+                                                class="flex items-center space-x-3 p-2.5 rounded-lg border border-transparent hover:border-border/60 hover:bg-card transition-colors cursor-pointer group/perm"
                                                 @click="togglePermission(permission.name)"
                                             >
                                                 <Checkbox
@@ -281,14 +281,14 @@
                         </div>
 
                         <div class="space-y-6">
-                            <Accordion type="multiple" class="space-y-0 border-t border-border" v-model:modelValue="expandedCategories">
+                            <Accordion type="multiple" class="space-y-0 border-t border-border" v-model:model-value="expandedCategories">
                                 <AccordionItem 
                                     v-for="(perms, category) in groupedPermissions" 
                                     :key="category" 
                                     :value="String(category)"
                                     class="bg-transparent border-b border-border overflow-hidden"
                                 >
-                                    <AccordionTrigger class="px-2 py-5 bg-transparent hover:bg-muted/10 hover:no-underline transition-all">
+                                    <AccordionTrigger class="px-2 py-5 bg-transparent hover:bg-muted/10 hover:no-underline transition-colors">
                                         <div class="flex items-center gap-3">
                                             <div class="p-1.5 bg-background border border-border/50 rounded-lg">
                                                 <FolderOpen class="w-4 h-4 text-muted-foreground" />
@@ -388,52 +388,40 @@ import { roleSchema } from '@/schemas';
 import { useFormValidation } from '@/composables/useFormValidation';
 
 // UI Components
-// @ts-ignore
-import Button from '@/components/ui/button.vue';
-// @ts-ignore
-import Badge from '@/components/ui/badge.vue';
-// @ts-ignore
-import Input from '@/components/ui/input.vue';
-// @ts-ignore
-import Checkbox from '@/components/ui/checkbox.vue';
-// @ts-ignore
-import Table from '@/components/ui/table.vue';
-// @ts-ignore
-import TableHeader from '@/components/ui/table-header.vue';
-// @ts-ignore
-import TableRow from '@/components/ui/table-row.vue';
-// @ts-ignore
-import TableHead from '@/components/ui/table-head.vue';
-// @ts-ignore
-import TableBody from '@/components/ui/table-body.vue';
-// @ts-ignore
-import TableCell from '@/components/ui/table-cell.vue';
-// @ts-ignore
-import Accordion from '@/components/ui/accordion.vue';
-// @ts-ignore
-import AccordionItem from '@/components/ui/accordion-item.vue';
-// @ts-ignore
-import AccordionTrigger from '@/components/ui/accordion-trigger.vue';
-// @ts-ignore
-import AccordionContent from '@/components/ui/accordion-content.vue';
-
+// UI Components
+// UI Components
 import {
-    Plus,
-    RefreshCw,
-    Search,
-    Shield,
-    Users,
-    Edit3,
-    Trash2,
-    Lock,
-    Columns,
-    Loader2,
-    CheckCircle2,
-    Circle,
-    FolderOpen,
-    CheckSquare,
-    Copy
-} from 'lucide-vue-next';
+    Button,
+    Badge,
+    Input,
+    Checkbox,
+    Table,
+    TableHeader,
+    TableRow,
+    TableHead,
+    TableBody,
+    TableCell,
+    Accordion,
+    AccordionItem,
+    AccordionTrigger,
+    AccordionContent
+} from '@/components/ui';
+
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Shield from 'lucide-vue-next/dist/esm/icons/shield.js';
+import Users from 'lucide-vue-next/dist/esm/icons/users.js';
+import Edit3 from 'lucide-vue-next/dist/esm/icons/pen-tool.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Lock from 'lucide-vue-next/dist/esm/icons/lock.js';
+import Columns from 'lucide-vue-next/dist/esm/icons/columns-2.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import CheckCircle2 from 'lucide-vue-next/dist/esm/icons/circle-check-big.js';
+import Circle from 'lucide-vue-next/dist/esm/icons/circle.js';
+import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';
+import CheckSquare from 'lucide-vue-next/dist/esm/icons/square-check.js';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
 
 import type { Role, Permission } from '@/types/auth';
 
@@ -517,7 +505,7 @@ const fetchRoles = async () => {
         const rawRoles = response.data?.data?.data || response.data?.data || response.data || [];
         roles.value = Array.isArray(rawRoles) ? rawRoles.filter(Boolean) : [];
         if (workspaceMode.value === 'comparison') syncMatrixFromRoles();
-    } catch (error) {
+    } catch (error: any) {
         toast.error.load(error);
     } finally {
         loading.value = false;
@@ -539,7 +527,7 @@ const fetchPermissions = async () => {
         
         permissions.value = sanitized;
         expandedCategories.value = Object.keys(sanitized).slice(0, 2);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch permissions:', error);
     }
 };
@@ -745,7 +733,7 @@ const deleteRole = async (role: Role) => {
         if (activeRoleId.value === role.id) router.push({ name: 'roles' });
         selectedRoleIds.value = selectedRoleIds.value.filter(id => id !== role.id);
         fetchRoles();
-    } catch (error) {
+    } catch (error: any) {
         toast.error.delete(error, 'Role');
     }
 };

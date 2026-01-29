@@ -26,7 +26,7 @@
                     </p>
                 </div>
 
-                <Alert v-if="status.required" variant="warning" class="bg-warning/10 border-warning/20 text-warning">
+                <Alert v-if="status.required" variant="default" class="bg-warning/10 border-warning/20 text-warning">
                     <ShieldAlert class="h-4 w-4" />
                     <AlertTitle>{{ $t('features.auth.twoFactor.requiredTitle') || 'Setup Required' }}</AlertTitle>
                     <AlertDescription>
@@ -216,46 +216,63 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../services/api';
-import { parseSingleResponse } from '../../utils/responseParser';
+import api from '@/services/api';
+import { parseSingleResponse } from '@/utils/responseParser';
 import QRCode from 'qrcode';
-import toast from '../../services/toast';
-
-const { t } = useI18n();
-import { useConfirm } from '../../composables/useConfirm';
+import toast from '@/services/toast';
+import { useConfirm } from '@/composables/useConfirm';
 
 // Shadcn Components
-import Button from '../ui/button.vue';
-import Input from '../ui/input.vue';
-import Label from '../ui/label.vue';
-import Badge from '../ui/badge.vue';
-import Alert from '../ui/alert.vue';
-import AlertDescription from '../ui/alert-description.vue';
-import AlertTitle from '../ui/alert-title.vue';
-import Dialog from '../ui/dialog.vue';
-import DialogContent from '../ui/dialog-content.vue';
-import DialogDescription from '../ui/dialog-description.vue';
-import DialogFooter from '../ui/dialog-footer.vue';
-import DialogHeader from '../ui/dialog-header.vue';
-import DialogTitle from '../ui/dialog-title.vue';
+import {
+    Button,
+    Input,
+    Label,
+    Badge,
+    Alert,
+    AlertDescription,
+    AlertTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from '@/components/ui';
 
 // Icons
-import { 
-    Loader2, 
-    Smartphone, 
-    Copy, 
-    Trash2, 
-    RefreshCcw, 
-    Download, 
-    AlertCircle, 
-    ShieldAlert,
-    AlertTriangle
-} from 'lucide-vue-next';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import RefreshCcw from 'lucide-vue-next/dist/esm/icons/refresh-ccw.js';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
+import ShieldAlert from 'lucide-vue-next/dist/esm/icons/shield-alert.js';
+import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';
 
-const status = ref({
+interface TwoFactorStatus {
+    enabled: boolean;
+    required: boolean;
+    backup_codes_count: number;
+    enabled_at: string | null;
+    global_enabled: boolean;
+    [key: string]: any;
+}
+
+interface GenerateResponse {
+    secret: string;
+    qr_code_url?: string;
+    backup_codes?: string[];
+    [key: string]: any;
+}
+
+const { t } = useI18n();
+const { confirm } = useConfirm();
+
+const status = ref<TwoFactorStatus>({
     enabled: false,
     required: false,
     backup_codes_count: 0,
@@ -263,10 +280,10 @@ const status = ref({
     global_enabled: true
 });
 
-const qrCodeUrl = ref(null);
-const secret = ref(null);
+const qrCodeUrl = ref<string | null>(null);
+const secret = ref<string | null>(null);
 const verificationCode = ref('');
-const backupCodes = ref([]);
+const backupCodes = ref<string[]>([]);
 
 const generating = ref(false);
 const enabling = ref(false);
@@ -278,13 +295,11 @@ const showDisableConfirm = ref(false);
 const showRegenPassword = ref(false);
 const passwordConfirm = ref('');
 
-const { confirm } = useConfirm();
-
 const fetchStatus = async () => {
     try {
         const response = await api.get('/two-factor/status');
         const data = parseSingleResponse(response);
-        status.value = data;
+        status.value = data as TwoFactorStatus;
     } catch (error) {
         console.error('Error fetching 2FA status:', error);
     } finally {
@@ -300,7 +315,7 @@ const generateSecret = async () => {
 
     try {
         const response = await api.post('/two-factor/generate');
-        const data = parseSingleResponse(response);
+        const data = parseSingleResponse(response) as GenerateResponse;
         
         secret.value = data.secret;
         
@@ -314,7 +329,7 @@ const generateSecret = async () => {
         if (data.backup_codes) {
             backupCodes.value = data.backup_codes;
         }
-    } catch (error) {
+    } catch (error: any) {
         toast.error('Error', error.response?.data?.message || 'Failed to generate 2FA secret');
     } finally {
         generating.value = false;
@@ -329,7 +344,7 @@ const enable2FA = async () => {
 
     enabling.value = true;
     try {
-        const response = await api.post('/two-factor/verify', {
+        await api.post('/two-factor/verify', {
             code: verificationCode.value,
         });
         
@@ -338,7 +353,7 @@ const enable2FA = async () => {
         qrCodeUrl.value = null;
         secret.value = null;
         await fetchStatus();
-    } catch (error) {
+    } catch (error: any) {
         toast.error(t('common.status.failed'), error.response?.data?.message || t('features.auth.messages.error'));
     } finally {
         enabling.value = false;
@@ -348,7 +363,7 @@ const enable2FA = async () => {
 const disable2FA = async () => {
     disabling.value = true;
     try {
-        const response = await api.post('/two-factor/disable', {
+        await api.post('/two-factor/disable', {
             password: passwordConfirm.value,
         });
         
@@ -357,7 +372,7 @@ const disable2FA = async () => {
         showDisableConfirm.value = false;
         backupCodes.value = [];
         await fetchStatus();
-    } catch (error) {
+    } catch (error: any) {
         toast.error(t('common.status.failed'), error.response?.data?.message || t('features.auth.messages.error'));
     } finally {
         disabling.value = false;
@@ -370,7 +385,7 @@ const regenerateBackupCodes = async () => {
         const response = await api.post('/two-factor/regenerate-backup-codes', {
             password: passwordConfirm.value,
         });
-        const data = parseSingleResponse(response);
+        const data = parseSingleResponse(response) as { backup_codes?: string[] };
         
         if (data.backup_codes) {
             backupCodes.value = data.backup_codes;
@@ -379,7 +394,7 @@ const regenerateBackupCodes = async () => {
         passwordConfirm.value = '';
         showRegenPassword.value = false;
         await fetchStatus();
-    } catch (error) {
+    } catch (error: any) {
         toast.error(t('common.status.failed'), error.response?.data?.message || t('features.auth.messages.error'));
     } finally {
         regenerating.value = false;
@@ -419,4 +434,3 @@ onMounted(() => {
     fetchStatus();
 });
 </script>
-

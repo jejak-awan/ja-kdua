@@ -3,13 +3,13 @@
     :module="module" 
     :mode="mode"
     :settings="settings"
-    class="counter-block transition-all duration-300"
+    class="counter-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Number Counter'"
   >
     <div class="counter-container flex flex-col items-center" :style="containerStyles">
         <div 
-          class="counter-number font-black text-5xl lg:text-6xl tracking-tighter text-primary bg-primary/5 w-full py-6 rounded-[24px] mb-6 text-center tabular-nums transition-all duration-500 hover:bg-primary/10 hover:scale-105" 
+          class="counter-number font-black text-5xl lg:text-6xl tracking-tighter text-primary bg-primary/5 w-full py-6 rounded-[24px] mb-6 text-center tabular-nums transition-[width] duration-500 hover:bg-primary/10 hover:scale-105" 
           :style="numberStyles"
         >
           {{ prefixValue }}{{ formattedDisplayNumber }}{{ suffixValue }}

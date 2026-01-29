@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ['resources/css/app.css', 'resources/js/app.ts'],
             refresh: true,
         }),
         vue(),
@@ -25,12 +25,13 @@ export default defineConfig({
         rollupOptions: {
             output: {
                 manualChunks: (id) => {
-                    // 1. Lucide icons (Very specific)
+                    // 1. Lucide icons - bundle ALL icons together to prevent waterfall loading
+                    // This prevents 30+ separate HTTP requests for icons
                     if (id.includes('lucide-vue-next')) {
                         return 'vendor-icons';
                     }
 
-                    // 2. Tiptap and related extensions (Specific)
+                    // 2. Tiptap and related extensions 
                     if (id.includes('@tiptap') || id.includes('prosemirror') || id.includes('lowlight') || id.includes('dompurify')) {
                         return 'vendor-tiptap';
                     }
@@ -55,7 +56,12 @@ export default defineConfig({
                         return 'vendor-utils';
                     }
 
-                    // 7. Vue core (Put last to avoid catching everything with 'vue' in path)
+                    // 7. Builder Fields - Group frequently used fields to reduce waterfall
+                    if (id.includes('resources/js/components/builder/fields/')) {
+                        return 'vendor-builder-fields';
+                    }
+
+                    // 8. Vue core (Put last to avoid catching everything with 'vue' in path)
                     if (id.includes('node_modules/vue/') ||
                         id.includes('node_modules/vue-router/') ||
                         id.includes('node_modules/pinia/') ||
@@ -66,7 +72,6 @@ export default defineConfig({
                 },
             },
         },
-        // Builder components are large but acceptable
         chunkSizeWarningLimit: 1000,
         sourcemap: false,
         minify: 'esbuild',

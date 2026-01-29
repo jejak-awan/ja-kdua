@@ -10,6 +10,8 @@
     "allMedia": "All Media",
     "trash": "Trash",
     "emptyTrash": "Empty Trash",
+    "tags": "Tags",
+    "noTags": "No tags found",
     "stats": {
         "total": "Total Files",
         "storage": "Storage",
@@ -26,7 +28,15 @@
         "documents": "Documents",
         "allStatus": "All Media",
         "used": "Used",
-        "unused": "Unused"
+        "unused": "Unused",
+        "advanced": "Advanced filters",
+        "author": "Author",
+        "allAuthors": "All authors",
+        "size": "Size",
+        "dateRange": "Date range",
+        "type": "Type",
+        "status": "Status",
+        "sort": "Sort By"
     },
     "actions": {
         "bulk": "Bulk Actions",
@@ -45,7 +55,13 @@
         "cancel": "Cancel",
         "close": "Close",
         "save": "Save Changes",
-        "open": "Open"
+        "open": "Open",
+        "clearSelection": "Clear Selection",
+        "refresh": "Refresh"
+    },
+    "views": {
+        "grid": "Grid View",
+        "list": "List View"
     },
     "loading": "Loading media...",
     "empty": "No media found",
@@ -70,6 +86,14 @@
         "deleteFailed": "Failed to delete media",
         "moveSuccess": "Successfully moved {count} media file(s)",
         "moveFailed": "Failed to move media",
+        "emptyTrashSuccess": "Trash emptied successfully",
+        "folderDeleted": "Folder deleted successfully",
+        "bulkDeleted": "Successfully deleted {count} media items",
+        "bulkRestored": "Successfully restored {count} media items",
+        "bulkDeletedPermanent": "Successfully permanently deleted {count} media items",
+        "bulkMoved": "Successfully moved {count} media items",
+        "bulkAltUpdated": "Successfully updated alt text for {count} media items",
+        "bulkDownloadSuccess": "Successfully prepared ZIP for {count} media items",
         "updateAltSuccess": "Alt text updated successfully",
         "updateAltFailed": "Failed to update alt text",
         "downloadSuccess": "Successfully downloaded {count} media file(s) as ZIP",
@@ -103,14 +127,17 @@
             "formats": "PNG, JPG, GIF, PDF, MP4 up to 10MB",
             "selectedFiles": "Selected Files:",
             "uploading": "Uploading...",
-            "uploadAction": "Upload {count} File|Upload {count} Files",
+            "uploadAction": "Upload {count} File | Upload {count} Files",
             "chooseFile": "Choose File",
             "upload": "Upload",
-            "uploadedSuccess": "Uploaded successfully!"
+            "uploadedSuccess": "Uploaded successfully!",
+            "cancel": "Cancel"
         },
         "edit": {
             "title": "Edit Media",
             "name": "Name",
+            "caption": "Caption",
+            "tags": "Tags",
             "altText": "Alt Text",
             "altPlaceholder": "Alternative text for accessibility",
             "description": "Description",
@@ -129,7 +156,8 @@
             "parent": "Parent Folder",
             "noParent": "No Parent",
             "creating": "Creating...",
-            "create": "Create Folder"
+            "create": "Create Folder",
+            "cancel": "Cancel"
         },
         "picker": {
             "title": "Select Media",

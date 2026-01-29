@@ -11,3 +11,5 @@ export { default as ImportExportModal } from './ImportExportModal.vue'
 export { default as CanvasSettingsModal } from './CanvasSettingsModal.vue'
 export { default as AddCanvasModal } from './AddCanvasModal.vue'
 export { default as ResponsiveBreakpointsModal } from './ResponsiveBreakpointsModal.vue'
+export { default as ConfirmModal } from './ConfirmModal.vue';
+export { default as InputModal } from './InputModal.vue';

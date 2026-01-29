@@ -7,7 +7,7 @@
         </div>
 
         <!-- Main Content Area -->
-        <div v-if="loading && !selectedMenuId" class="flex-1 flex items-center justify-center min-h-[400px]">
+        <div v-if="isLoading && !selectedMenuId" class="flex-1 flex items-center justify-center min-h-[400px]">
             <Loader2 class="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
 
@@ -50,7 +50,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
@@ -65,9 +65,14 @@ import SelectTrigger from '../../../components/ui/select-trigger.vue';
 import SelectValue from '../../../components/ui/select-value.vue';
 import SelectContent from '../../../components/ui/select-content.vue';
 import SelectItem from '../../../components/ui/select-item.vue';
-import { 
-    Plus, Trash2, Loader2, MenuSquare, Save, RotateCcw, Undo2, Redo2
-} from 'lucide-vue-next';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import MenuSquare from 'lucide-vue-next/dist/esm/icons/square-menu.js';
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import Undo2 from 'lucide-vue-next/dist/esm/icons/undo-2.js';
+import Redo2 from 'lucide-vue-next/dist/esm/icons/redo-2.js';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const { t } = useI18n();
@@ -76,13 +81,13 @@ const route = useRoute();
 const toast = useToast();
 const { confirm } = useConfirm();
 
-const menus = ref([]);
+const menus = ref<any[]>([]);
 const showCreateModal = ref(false);
-const selectedMenuId = ref(null);
+const selectedMenuId = ref<any>(null);
 const isLoading = ref(true);
 const trashedFilter = ref('without');
 const trashedCount = ref(0);
-const builderRef = ref(null);
+const builderRef = ref<any>(null);
 
 // Computed
 const selectedMenu = computed(() => {
@@ -128,7 +133,7 @@ const fetchMenus = async () => {
         } else {
             selectedMenuId.value = null;
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch menus:', error);
         toast.error.action(t('features.menus.messages.loadingFailed') || 'Failed to load menus');
     } finally {
@@ -140,7 +145,7 @@ const openCreateModal = () => {
     showCreateModal.value = true;
 };
 
-const handleMenuCreated = async (newMenu) => {
+const handleMenuCreated = async (newMenu: any) => {
     showCreateModal.value = false;
     await fetchMenus();
     if (newMenu && newMenu.id) {
@@ -149,7 +154,7 @@ const handleMenuCreated = async (newMenu) => {
     // Toast is already shown in MenuModal.vue
 };
 
-const handleSelectMenu = (menuId) => {
+const handleSelectMenu = (menuId: any) => {
     selectedMenuId.value = menuId;
 };
 
@@ -184,7 +189,7 @@ const deleteCurrentMenu = async () => {
         }
         selectedMenuId.value = null;
         await fetchMenus();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error deleting menu:', error);
         toast.error.delete(error, t('features.menus.title'));
     }
@@ -206,7 +211,7 @@ const restoreCurrentMenu = async () => {
         await api.post(`/admin/ja/menus/${selectedMenuId.value}/restore`);
         toast.success.restore('Menu');
         await fetchMenus();
-    } catch (error) {
+    } catch (error: any) {
          console.error('Error restoring menu:', error);
         toast.error.fromResponse(error);
     }

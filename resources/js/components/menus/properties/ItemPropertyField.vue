@@ -8,7 +8,7 @@
         <!-- Text Input -->
         <Input 
             v-if="setting.type === 'text'"
-            :model-value="value"
+            :model-value="(value as string)"
             :placeholder="setting.placeholder ? t(setting.placeholder) : ''"
             class="h-8"
             @update:model-value="$emit('update', $event)"
@@ -17,7 +17,7 @@
         <!-- Textarea -->
         <Textarea 
             v-else-if="setting.type === 'textarea'"
-            :model-value="value"
+            :model-value="(value as string)"
             :placeholder="setting.placeholder ? t(setting.placeholder) : ''"
             rows="2"
             @update:model-value="$emit('update', $event)"
@@ -27,7 +27,7 @@
         <Input 
             v-else-if="setting.type === 'number'"
             type="number"
-            :model-value="value"
+            :model-value="(value as number)"
             :min="setting.min"
             :max="setting.max"
             class="h-8"
@@ -37,7 +37,7 @@
         <!-- Select -->
         <Select 
             v-else-if="setting.type === 'select'"
-            :model-value="value"
+            :model-value="String(value)"
             @update:model-value="$emit('update', $event)"
         >
             <SelectTrigger class="h-8">
@@ -46,8 +46,8 @@
             <SelectContent>
                 <SelectItem 
                     v-for="opt in setting.options" 
-                    :key="opt.value" 
-                    :value="opt.value"
+                    :key="String(opt.value)" 
+                    :value="String(opt.value)"
                 >
                     {{ t(opt.label) }}
                 </SelectItem>
@@ -58,7 +58,7 @@
         <div v-else-if="setting.type === 'boolean'" class="flex items-center gap-2 pt-1">
             <Checkbox 
                 :id="setting.key"
-                :checked="value"
+                :checked="Boolean(value)"
                 @update:checked="$emit('update', $event)"
             />
             <Label :for="setting.key" class="text-xs font-normal cursor-pointer">
@@ -70,22 +70,21 @@
         <div v-else-if="setting.type === 'color'" class="flex items-center gap-2">
             <input 
                 type="color" 
-                :value="value || '#000000'"
+                :value="(value as string) || '#000000'"
                 class="w-8 h-8 rounded border border-border cursor-pointer"
                 @input="$emit('update', ($event.target as HTMLInputElement).value)"
             />
             <Input 
-                :model-value="value"
+                :model-value="(value as string)"
                 placeholder="#000000"
                 class="h-8 flex-1 font-mono text-xs"
                 @update:model-value="$emit('update', $event)"
             />
         </div>
 
-        <!-- Icon Picker -->
         <div v-else-if="setting.type === 'icon_picker'" class="w-full">
             <IconPicker 
-                :model-value="value"
+                :model-value="(value as string)"
                 @update:model-value="$emit('update', $event)"
             />
         </div>
@@ -93,7 +92,7 @@
         <!-- Media / Image -->
         <div v-else-if="setting.type === 'media'" class="space-y-2">
             <div v-if="value" class="relative">
-                <img :src="value" alt="" class="w-full h-24 object-cover rounded border border-border" />
+                <img :src="(value as string)" alt="" class="w-full h-24 object-cover rounded border border-border" />
                 <Button 
                     size="icon" 
                     variant="destructive" 
@@ -129,36 +128,41 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { X } from 'lucide-vue-next';
-import type { MenuItemSetting } from '../../../types/menu';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import type { MenuItemSetting } from '@/types/menu';
 
 // UI Components
-import Input from '../../ui/input.vue';
-import Textarea from '../../ui/textarea.vue';
-import Label from '../../ui/label.vue';
-import Checkbox from '../../ui/checkbox.vue';
-import Select from '../../ui/select.vue';
-import SelectTrigger from '../../ui/select-trigger.vue';
-import SelectValue from '../../ui/select-value.vue';
-import SelectContent from '../../ui/select-content.vue';
-import SelectItem from '../../ui/select-item.vue';
-import Button from '../../ui/button.vue';
-import IconPicker from '../../ui/icon-picker.vue';
+import {
+    Input,
+    Textarea,
+    Label,
+    Checkbox,
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+    Button,
+    IconPicker
+} from '@/components/ui';
+
 // @ts-ignore
-import MediaPicker from '../../MediaPicker.vue';
+import MediaPicker from '@/components/media/MediaPicker.vue';
 
 const { t } = useI18n();
 
+type PropertyValue = string | number | boolean | null | undefined;
+
 const emit = defineEmits<{
-    (e: 'update', value: any): void;
+    (e: 'update', value: PropertyValue): void;
 }>();
 
 defineProps<{
     setting: MenuItemSetting;
-    value?: any;
+    value?: PropertyValue;
 }>();
 
-const handleMediaSelect = (media: any) => {
+const handleMediaSelect = (media: { url: string }) => {
     if (media && media.url) {
         emit('update', media.url);
     }

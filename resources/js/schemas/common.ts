@@ -49,7 +49,7 @@ export const redirectSchema = z.object({
         .min(1, t('common.validation.required', { field: 'From URL' })),
     to_url: z.string()
         .min(1, t('common.validation.required', { field: 'To URL' })),
-    status_code: z.number().min(300).max(399).optional(),
+    status_code: z.union([z.number(), z.string()]).optional(),
     is_active: z.boolean().optional(),
 });
 

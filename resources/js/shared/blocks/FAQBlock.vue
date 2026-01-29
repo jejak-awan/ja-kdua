@@ -7,7 +7,7 @@
     :aria-label="settings.aria_label || 'Frequently Asked Questions'"
   >
     <div 
-      class="faq-block mx-auto w-full transition-all duration-300"
+      class="faq-block mx-auto w-full transition-colors duration-300"
       :style="containerStyles"
     >
       <Accordion 
@@ -22,7 +22,7 @@
           :value="`item-${index}`"
           :class="getItemClasses(index as number)"
           :style="getItemStyles(index as number)"
-          class="faq-item transition-all duration-300"
+          class="faq-item transition-colors duration-300"
         >
           <AccordionTrigger 
             class="w-full text-left font-bold text-lg hover:no-underline group"
@@ -68,8 +68,7 @@
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../ui'
-import { ChevronDown } from 'lucide-vue-next'
-import { 
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';import { 
   getVal,
   getLayoutStyles,
   getTypographyStyles,
@@ -96,7 +95,7 @@ const getItemClasses = (index: number) => {
     let classes = ''
     
     if (variant === 'boxed') {
-        classes = 'rounded-3xl bg-white shadow-xl border border-transparent transition-all duration-300 data-[state=open]:shadow-2xl data-[state=open]:border-primary/10'
+        classes = 'rounded-3xl bg-white shadow-xl border border-transparent transition-colors duration-300 data-[state=open]:shadow-2xl data-[state=open]:border-primary/10'
     } else if (variant === 'minimal') {
         classes = 'border-b border-gray-100'
     } else {

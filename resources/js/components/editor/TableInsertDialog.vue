@@ -32,21 +32,29 @@
     </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import Button from '@/components/ui/button.vue'
+<script setup lang="ts">
+import { ref } from 'vue';
+import { Button } from '@/components/ui';
 
-const props = defineProps({
-    open: Boolean
-})
+interface TableConfig {
+    rows: number;
+    cols: number;
+}
 
-const emit = defineEmits(['update:open', 'insert'])
+const props = defineProps<{
+    open: boolean;
+}>();
 
-const config = ref({ rows: 3, cols: 3 })
+const emit = defineEmits<{
+    (e: 'update:open', value: boolean): void;
+    (e: 'insert', config: TableConfig): void;
+}>();
+
+const config = ref<TableConfig>({ rows: 3, cols: 3 });
 
 function insert() {
-    emit('insert', { ...config.value })
-    emit('update:open', false)
-    config.value = { rows: 3, cols: 3 } // Reset
+    emit('insert', { ...config.value });
+    emit('update:open', false);
+    config.value = { rows: 3, cols: 3 }; // Reset
 }
 </script>

@@ -48,7 +48,7 @@
               <span class="text-sm text-muted-foreground hidden sm:inline-block">
                 {{ selectedTasks.length }} selected
               </span>
-              <Select v-model="bulkActionSelection" @update:modelValue="handleBulkAction">
+              <Select v-model="bulkActionSelection" @update:model-value="handleBulkAction">
                 <SelectTrigger class="w-[140px] h-9 bg-primary/5 border-primary/20 text-primary hover:bg-primary/10 transition-colors">
                   <SelectValue :placeholder="$t('common.actions.bulkAction')" />
                 </SelectTrigger>
@@ -209,7 +209,7 @@
     <div class="mt-6">
         <Pagination
             v-if="pagination.total > 0"
-            :total="pagination.total"
+            :total-items="pagination.total"
             :per-page="pagination.per_page"
             :current-page="pagination.current_page"
             @page-change="changePage"
@@ -380,7 +380,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { debounce } from '@/utils/debounce';
@@ -388,63 +388,111 @@ import { debounce } from '@/utils/debounce';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
-import { useAuthStore } from '@/stores/auth'; // Import useAuthStore
+import { useAuthStore } from '@/stores/auth';
 
 // UI Components
-import Card from '@/components/ui/card.vue';
-import CardContent from '@/components/ui/card-content.vue';
-import Table from '@/components/ui/table.vue';
-import TableBody from '@/components/ui/table-body.vue';
-import TableCell from '@/components/ui/table-cell.vue';
-import TableHead from '@/components/ui/table-head.vue';
-import TableHeader from '@/components/ui/table-header.vue';
-import TableRow from '@/components/ui/table-row.vue';
-import Dialog from '@/components/ui/dialog.vue';
-import DialogContent from '@/components/ui/dialog-content.vue';
-import DialogHeader from '@/components/ui/dialog-header.vue';
-import DialogTitle from '@/components/ui/dialog-title.vue';
-import DialogFooter from '@/components/ui/dialog-footer.vue';
-import Button from '@/components/ui/button.vue';
-import Input from '@/components/ui/input.vue';
-import Label from '@/components/ui/label.vue';
-import Textarea from '@/components/ui/textarea.vue';
-import Badge from '@/components/ui/badge.vue';
-import Select from '@/components/ui/select.vue';
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-import SelectValue from '@/components/ui/select-value.vue';
-import SelectContent from '@/components/ui/select-content.vue';
-import SelectItem from '@/components/ui/select-item.vue';
-import Pagination from '@/components/ui/pagination.vue';
-import Checkbox from '@/components/ui/checkbox.vue';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    Button,
+    Input,
+    Label,
+    Textarea,
+    Badge,
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+    Pagination,
+    Checkbox
+} from '@/components/ui';
 
-import { Plus, Play, Pencil, Trash2, FileText, Loader2, Calendar, Search, Terminal } from 'lucide-vue-next'; // Add Terminal
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Play from 'lucide-vue-next/dist/esm/icons/play.js';
+import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import Calendar from 'lucide-vue-next/dist/esm/icons/calendar.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Terminal from 'lucide-vue-next/dist/esm/icons/terminal.js';
+
+interface ScheduledTask {
+  id: number;
+  name: string;
+  command: string;
+  schedule: string;
+  description: string | null;
+  is_active: boolean;
+  last_run_at: string | null;
+  last_run_duration: number | null;
+  status: 'completed' | 'running' | 'failed' | 'pending' | null;
+  output: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface AllowedCommand {
+  label: string;
+  value: string;
+}
+
+interface PaginationInfo {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+}
+
+interface TaskForm {
+  name: string;
+  command: string;
+  schedule: string;
+  description: string;
+  is_active: boolean;
+}
+
+interface AdhocCommand {
+  command: string;
+  parameters: string;
+}
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
-const authStore = useAuthStore(); // Use authStore
+const authStore = useAuthStore();
 
-const tasks = ref([]);
+const tasks = ref<ScheduledTask[]>([]);
 const loading = ref(true);
 const search = ref('');
 const dialogOpen = ref(false);
 const outputDialogOpen = ref(false);
-const runCommandDialogOpen = ref(false); // New state
+const runCommandDialogOpen = ref(false);
 const selectedTaskOutput = ref('');
-const editingTask = ref(null);
+const editingTask = ref<ScheduledTask | null>(null);
 const saving = ref(false);
-const running = ref(null);
-const allowedCommands = ref([]);
+const running = ref<number | null>(null);
+const allowedCommands = ref<AllowedCommand[]>([]);
 const cronPreset = ref('');
-const errors = ref({});
+const errors = ref<Record<string, string | string[]>>({});
 
 // Ad-hoc Command State
-const adhocCommand = ref({ command: '', parameters: '' });
+const adhocCommand = ref<AdhocCommand>({ command: '', parameters: '' });
 const adhocOutput = ref('');
 const adhocExecuting = ref(false);
 
 // Command Hints for better UX - covers all allowed commands
-const commandHints = {
+const commandHints: Record<string, string> = {
   // Cache Management
   'cache:clear': 'Hapus semua cache aplikasi. Tidak perlu parameter.',
   'cache:warm': 'Panaskan cache untuk performa. Tidak perlu parameter.',
@@ -492,17 +540,17 @@ const commandHint = computed(() => {
 });
 
 // Selection & Bulk Actions
-const selectedTasks = ref([]);
+const selectedTasks = ref<number[]>([]);
 const bulkActionSelection = ref('');
 
-const pagination = ref({
-    currentPage: 1,
-    lastPage: 1,
-    perPage: 10,
+const pagination = ref<PaginationInfo>({
+    current_page: 1,
+    last_page: 1,
+    per_page: 10,
     total: 0
 });
 
-const form = ref({
+const form = ref<TaskForm>({
   name: '',
   command: '',
   schedule: '',
@@ -510,9 +558,9 @@ const form = ref({
   is_active: true
 });
 
-const initialForm = ref(null);
+const initialForm = ref<string | null>(null);
 
-const cronPresets = {
+const cronPresets: Record<string, string> = {
   hourly: '0 * * * *',
   daily: '0 0 * * *',
   weekly: '0 0 * * 0',
@@ -525,7 +573,7 @@ const isValid = computed(() => {
 
 const isDirty = computed(() => {
     if (!initialForm.value) return true;
-    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+    return JSON.stringify(form.value) !== initialForm.value;
 });
 
 const isAllSelected = computed(() => {
@@ -543,7 +591,7 @@ onMounted(async () => {
   ]);
 });
 
-async function fetchTasks(page = 1) {
+async function fetchTasks(page = 1) : Promise<void> {
   try {
     loading.value = true;
     const params = {
@@ -571,19 +619,19 @@ async function fetchTasks(page = 1) {
     }
     
     selectedTasks.value = [];
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to fetch tasks:', error.message);
-    toast.error.load(error);
+    toast.error.fromResponse(error);
   } finally {
     loading.value = false;
   }
 }
 
-async function fetchAllowedCommands() {
+async function fetchAllowedCommands() : Promise<void> {
   try {
     const response = await api.get('/admin/ja/scheduled-tasks/allowed-commands');
     allowedCommands.value = response.data.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to fetch allowed commands:', error);
   }
 }
@@ -592,12 +640,12 @@ const debouncedSearch = debounce(() => {
     fetchTasks(1);
 }, 300);
 
-const changePage = (page) => {
+const changePage = (page: number) => {
     fetchTasks(page);
 };
 
 // Selection Logic
-const toggleSelection = (id) => {
+const toggleSelection = (id: number) => {
     if (selectedTasks.value.includes(id)) {
         selectedTasks.value = selectedTasks.value.filter(taskId => taskId !== id);
     } else {
@@ -605,7 +653,7 @@ const toggleSelection = (id) => {
     }
 };
 
-const toggleSelectAll = (checked) => {
+const toggleSelectAll = (checked: boolean) => {
     if (checked) {
         selectedTasks.value = tasks.value.map(t => t.id);
     } else {
@@ -614,7 +662,7 @@ const toggleSelectAll = (checked) => {
 };
 
 // Bulk Actions
-const handleBulkAction = async (action) => {
+const handleBulkAction = async (action: string) => {
     if (!action) return;
 
     if (action === 'delete') {
@@ -623,7 +671,7 @@ const handleBulkAction = async (action) => {
         const confirmed = await confirm({
             title: t('common.messages.confirm.title'),
             message: t('common.messages.confirm.bulkDelete'),
-            variant: 'destructive',
+            variant: 'danger',
             confirmText: t('common.actions.delete'),
         });
 
@@ -633,12 +681,6 @@ const handleBulkAction = async (action) => {
         }
 
         try {
-            // Check if backend supports bulk action, otherwise loop
-            // Assuming we might not have a bulk endpoint, we can loop for now or try common pattern
-            // Ideally: await api.post('/admin/ja/scheduled-tasks/bulk-action', { action: 'delete', ids: selectedTasks.value });
-            
-            // Implementing Client-Side Loop fallback if needed, but best to assume we need a bulk endpoint or add it.
-            // For now, let's try parallel deletion to be safe without backend changes if possible
             const deletePromises = selectedTasks.value.map(id => api.delete(`/admin/ja/scheduled-tasks/${id}`));
             await Promise.all(deletePromises);
             
@@ -646,9 +688,9 @@ const handleBulkAction = async (action) => {
             selectedTasks.value = [];
             bulkActionSelection.value = '';
             fetchTasks(pagination.value.current_page);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Bulk action failed:', error);
-            toast.error.action(error);
+            toast.error.fromResponse(error);
         }
     }
 };
@@ -665,11 +707,11 @@ function openCreateDialog() {
   };
   cronPreset.value = '';
   errors.value = {};
-  initialForm.value = JSON.parse(JSON.stringify(form.value));
+  initialForm.value = JSON.stringify(form.value);
   dialogOpen.value = true;
 }
 
-function editTask(task) {
+function editTask(task: ScheduledTask) {
   editingTask.value = task;
   errors.value = {};
   form.value = {
@@ -679,11 +721,11 @@ function editTask(task) {
     description: task.description || '',
     is_active: task.is_active
   };
-  initialForm.value = JSON.parse(JSON.stringify(form.value));
+  initialForm.value = JSON.stringify(form.value);
   dialogOpen.value = true;
 }
 
-function applyCronPreset(preset) {
+function applyCronPreset(preset: string) {
   form.value.schedule = cronPresets[preset];
 }
 
@@ -702,7 +744,7 @@ async function saveTask() {
     
     dialogOpen.value = false;
     await fetchTasks(pagination.value.current_page);
-  } catch (error) {
+  } catch (error: any) {
     if (error.response?.status === 422) {
       errors.value = error.response.data.errors || {};
     } else {
@@ -714,7 +756,7 @@ async function saveTask() {
   }
 }
 
-async function runTask(task) {
+async function runTask(task: ScheduledTask) {
   const confirmed = await confirm({
     title: t('features.scheduled_tasks.actions.run'),
     message: t('features.scheduled_tasks.confirm_run', { name: task.name }),
@@ -734,7 +776,7 @@ async function runTask(task) {
     outputDialogOpen.value = true;
     
     await fetchTasks(pagination.value.current_page);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to run task:', error.response?.data?.message || error.message);
     toast.error.fromResponse(error);
   } finally {
@@ -742,29 +784,29 @@ async function runTask(task) {
   }
 }
 
-async function toggleActive(task) {
+async function toggleActive(task: ScheduledTask) : Promise<void> {
   try {
     await api.put(`/admin/ja/scheduled-tasks/${task.id}`, {
       is_active: !task.is_active
     });
     
     await fetchTasks(pagination.value.current_page);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to toggle task:', error.message);
     toast.error.fromResponse(error);
   }
 }
 
-function viewOutput(task) {
+function viewOutput(task: ScheduledTask) {
   selectedTaskOutput.value = task.output || 'No output available';
   outputDialogOpen.value = true;
 }
 
-async function confirmDelete(task) {
+async function confirmDelete(task: ScheduledTask) {
   const confirmed = await confirm({
     title: t('features.scheduled_tasks.actions.delete'),
     message: t('features.scheduled_tasks.confirm_delete', { name: task.name }),
-    variant: 'destructive',
+    variant: 'danger',
     confirmText: t('common.actions.delete'),
   });
 
@@ -774,23 +816,23 @@ async function confirmDelete(task) {
     await api.delete(`/admin/ja/scheduled-tasks/${task.id}`);
     toast.success.delete();
     await fetchTasks(pagination.value.current_page);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to delete task:', error.message);
     toast.error.fromResponse(error);
   }
 }
 
-function getStatusVariant(status) {
-  const variants = {
+function getStatusVariant(status: string | null) {
+  const variants: Record<string, string> = {
     completed: 'success',
     running: 'default',
     failed: 'destructive',
     pending: 'secondary'
   };
-  return variants[status] || 'secondary';
+  return (variants[status || ''] || 'secondary') as any;
 }
 
-function formatDate(dateString) {
+function formatDate(dateString: string) {
   return new Date(dateString).toLocaleString();
 }
 
@@ -835,7 +877,7 @@ async function runAdhocCommand() {
          // handle error visual if needed, but text is likely enough
     }
 
-  } catch (error) {
+  } catch (error: any) {
     adhocOutput.value = error.response?.data?.message || error.message;
     console.error('Failed to execute command:', error.message);
   } finally {

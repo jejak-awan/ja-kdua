@@ -1,4 +1,4 @@
-import { Columns } from 'lucide-vue-next';
+import Columns from 'lucide-vue-next/dist/esm/icons/columns-2.js';
 import type { MenuItemDefinition } from '@/types/menu';
 
 const definition: MenuItemDefinition = {

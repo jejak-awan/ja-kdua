@@ -81,23 +81,32 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
-import Button from '../ui/button.vue';
-import Badge from '../ui/badge.vue';
+import { Button, Badge } from '@/components/ui';
 
-const props = defineProps({
-    category: {
-        type: Object,
-        required: true,
-    },
-    allCategories: {
-        type: Array,
-        default: () => [],
-    },
-});
+interface Category {
+    id: number | string;
+    name: string;
+    slug: string;
+    image?: string;
+    description?: string;
+    is_active: boolean;
+    parent_id?: number | string | null;
+    children?: Category[];
+    [key: string]: any;
+}
 
-const emit = defineEmits(['edit', 'delete', 'move']);
+const props = defineProps<{
+    category: Category;
+    allCategories?: Category[];
+}>();
+
+const emit = defineEmits<{
+    (e: 'edit', category: Category): void;
+    (e: 'delete', category: Category): void;
+    (e: 'move', category: Category): void;
+}>();
 
 const expanded = ref(true);
 

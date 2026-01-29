@@ -220,7 +220,7 @@ const BlurbModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -229,7 +229,7 @@ const BlurbModule: ModuleDefinition = {
             {
                 id: 'contentTypography',
                 label: 'Content Typography',
-                fields: typographySettings.fields!.map(f => ({
+                fields: ((typographySettings.fields as any[])).map(f => ({
                     ...f,
                     name: `content_${f.name}`,
                     label: `Content ${f.label}`

@@ -3,7 +3,7 @@
     :module="module" 
     :settings="settings" 
     :mode="mode"
-    class="sidebar-block transition-all duration-300"
+    class="sidebar-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Sidebar'"
   >

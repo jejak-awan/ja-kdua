@@ -54,52 +54,56 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Search, Palette, Check } from 'lucide-vue-next'
-import { BaseInput } from '../../ui'
-import type { BuilderInstance } from '../../../../types/builder'
+import { ref, computed, inject, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import { BaseInput } from '../../ui';
+import type { BuilderInstance } from '../../../../types/builder';
 
-const { t } = useI18n()
-const builder = inject<BuilderInstance>('builder') as any
+const { t } = useI18n();
+const builder = inject<BuilderInstance>('builder');
 
-const searchQuery = ref('')
-const loading = computed(() => builder?.loadingThemes?.value)
-const activeTheme = computed(() => builder?.activeTheme?.value)
-const selectedThemeSlug = computed(() => builder?.selectedThemeSlug?.value)
-const themes = computed(() => builder?.availableThemes?.value || [])
+const searchQuery = ref('');
+const loading = computed(() => builder?.loadingThemes?.value);
+const activeTheme = computed(() => builder?.activeTheme?.value);
+const selectedThemeSlug = computed(() => builder?.selectedThemeSlug?.value);
+const themes = computed(() => builder?.availableThemes?.value || []);
 
 const filteredThemes = computed(() => {
-  if (!searchQuery.value) return themes.value
-  const query = searchQuery.value.toLowerCase()
+  if (!searchQuery.value) return themes.value;
+  const query = searchQuery.value.toLowerCase();
   return themes.value.filter((t: any) => 
     t.name.toLowerCase().includes(query) || 
     t.slug.toLowerCase().includes(query)
-  )
-})
+  );
+});
 
 const selectTheme = (slug: string) => {
-  builder.selectedThemeSlug.value = slug
-}
+  if (builder?.selectedThemeSlug) {
+      builder.selectedThemeSlug.value = slug;
+  }
+};
 
 const activateTheme = async () => {
-    if (!selectedThemeSlug.value) return
+    if (!selectedThemeSlug.value || !builder) return;
     try {
-        await builder.loadTheme(selectedThemeSlug.value)
+        await builder.loadTheme(selectedThemeSlug.value);
     } catch (error) {
-        console.error('Failed to activate theme:', error)
+        console.error('Failed to activate theme:', error);
     }
-}
+};
 
 onMounted(() => {
     if (themes.value.length === 0) {
-        builder?.fetchThemes()
+        builder?.fetchThemes();
     }
     // Default select active theme
-    if (!selectedThemeSlug.value && activeTheme.value) {
-        builder.selectedThemeSlug.value = activeTheme.value
+    if (!selectedThemeSlug.value && activeTheme.value && builder?.selectedThemeSlug) {
+        builder.selectedThemeSlug.value = activeTheme.value;
     }
-})
+});
 </script>
 
 <style scoped>

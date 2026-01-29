@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '@/types/builder';
-import { MoveVertical } from 'lucide-vue-next';
+import MoveVertical from 'lucide-vue-next/dist/esm/icons/move-vertical.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

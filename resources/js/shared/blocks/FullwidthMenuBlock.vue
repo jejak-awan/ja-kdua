@@ -4,30 +4,32 @@
     :mode="mode" 
     :device="device"
     tag="nav"
-    class="fullwidth-menu-block transition-all duration-300"
+    class="fullwidth-menu-block transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Fullwidth Menu'"
     :style="cardStyles"
   >
     <template #default="{ settings: blockSettings }">
-      <div class="menu-inner max-w-[1400px] mx-auto px-6 flex items-center justify-between transition-all duration-300">
+      <div class="menu-inner max-w-[1400px] mx-auto px-6 flex items-center justify-between transition-colors duration-300">
         <!-- Logo -->
         <div v-if="blockSettings.showLogo || mode === 'edit'" class="menu-logo flex-shrink-0">
           <img v-if="blockSettings.logoImage" :src="blockSettings.logoImage" :style="logoStyles" :alt="blockSettings.logoText || 'Logo'" />
           <div 
             v-else 
-            class="logo-placeholder text-2xl font-bold transition-all duration-300"
+            class="logo-placeholder text-2xl font-bold transition-colors duration-300"
             :contenteditable="mode === 'edit'"
             @blur="updateText('logoText', $event)"
-          >{{ blockSettings.logoText || 'Logo' }}</div>
+          >
+{{ blockSettings.logoText || 'Logo' }}
+</div>
         </div>
         
         <!-- Menu Items -->
-        <ul class="menu-items flex list-none m-0 p-0 transition-all duration-300" :style="menuItemsStyles">
+        <ul class="menu-items flex list-none m-0 p-0 transition-colors duration-300" :style="menuItemsStyles">
           <li class="menu-item relative group" v-for="item in menuItems" :key="item.id">
             <a 
               :href="mode === 'view' ? item.url : null" 
-              class="menu-link block px-4 py-3 no-underline transition-all duration-300 whitespace-nowrap" 
+              class="menu-link block px-4 py-3 no-underline transition-colors duration-300 whitespace-nowrap" 
               :style="linkStyles"
               @click.prevent="handleLinkClick(item.url)"
             >
@@ -37,7 +39,7 @@
         </ul>
         
         <!-- Mobile Toggle -->
-        <button class="mobile-toggle block lg:hidden p-2 transition-all duration-300 bg-transparent border-0 cursor-pointer" @click="mobileMenuOpen = !mobileMenuOpen">
+        <button class="mobile-toggle block lg:hidden p-2 transition-colors duration-300 bg-transparent border-0 cursor-pointer" @click="mobileMenuOpen = !mobileMenuOpen">
           <MenuIcon class="w-6 h-6" />
         </button>
       </div>
@@ -66,8 +68,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Menu as MenuIcon } from 'lucide-vue-next'
-import { 
+import MenuIcon from 'lucide-vue-next/dist/esm/icons/menu.js';import { 
     getVal,
     getTypographyStyles,
     getLayoutStyles,
@@ -89,9 +90,8 @@ const mobileMenuOpen = ref(false)
 
 const updateText = (key: string, event: FocusEvent) => {
     if (props.mode !== 'edit' || !event.target) return
-    const value = (event.target as HTMLElement).innerText
-    // @ts-ignore
-    window.builder?.updateModuleSettings(props.module.id, { [key]: value })
+    const newValue = (event.target as HTMLElement).innerText;
+    (window as any).builder?.updateModuleSettings(props.module.id, { [key]: newValue });
 }
 
 const handleLinkClick = (url: string) => {

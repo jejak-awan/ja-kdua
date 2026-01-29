@@ -1,4 +1,4 @@
-import { watch, type Ref, type ComputedRef } from 'vue'
+import { watch, computed, ref, type Ref, type ComputedRef } from 'vue'
 import ModuleRegistry from './ModuleRegistry'
 import api from '@/services/api'
 import { useTheme } from '@/composables/useTheme'
@@ -140,6 +140,8 @@ export default function useBuilder(initialData = { blocks: [] as BlockInstance[]
         // Registry/Helper integration
         getModuleDefinition: (type: string) => ModuleRegistry.get(type),
         globalVariables,
+        saveGlobalVariables: syncManager.saveGlobalVariables,
+        globalAction: state.globalAction,
         loadTheme,
         handleSavePreset,
         updateThemeSettings: syncManager.updateThemeSettings,
@@ -159,6 +161,24 @@ export default function useBuilder(initialData = { blocks: [] as BlockInstance[]
         loadingPresets,
         fetchPresets,
         savePreset,
+        // Missing Props for Interface Compliance
+        definitions: computed(() => {
+            const defs: Record<string, any> = {};
+            ModuleRegistry.getAll().forEach(m => { if (m.name) defs[m.name] = m });
+            return defs;
+        }),
+        moduleCategories: computed(() => {
+            const categories = new Set<string>();
+            ModuleRegistry.getAll().forEach(m => {
+                if (m.category) categories.add(m.category);
+            });
+            return Array.from(categories);
+        }),
+        loadingModules: ref(false),
+        registerModule: (def: any) => ModuleRegistry.register(def),
+        fetchWidgets: async () => [],
+        getComponent: (type: string) => ModuleRegistry.getComponent(type),
+
         deletePreset
     }
 }

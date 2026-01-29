@@ -3,7 +3,7 @@
     :module="module"
     :mode="mode"
     :settings="settings"
-    class="logo-grid-wrapper transition-all duration-300"
+    class="logo-grid-wrapper transition-colors duration-300"
     :id="settings.html_id"
     :aria-label="settings.aria_label || 'Partner Logos'"
   >
@@ -24,10 +24,10 @@
       <div 
         v-for="(item, index) in items" 
         :key="index"
-        class="logo-card flex justify-center w-full transition-all duration-300 hover:z-10"
+        class="logo-card flex justify-center w-full transition-colors duration-300 hover:z-10"
         :style="getItemStyles(index as number)"
       >
-        <div class="logo-inner w-full flex items-center justify-center transition-all duration-300" :style="logoContainerStyles">
+        <div class="logo-inner w-full flex items-center justify-center transition-colors duration-300" :style="logoContainerStyles">
           <img 
             v-if="item.image" 
             :src="item.image" 
@@ -52,8 +52,7 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import { Building } from 'lucide-vue-next'
-import BaseBlock from '../components/BaseBlock.vue'
+import Building from 'lucide-vue-next/dist/esm/icons/building.js';import BaseBlock from '../components/BaseBlock.vue'
 import { 
   getVal, 
   getLayoutStyles,

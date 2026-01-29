@@ -1,7 +1,7 @@
 <template>
   <BaseModal
     :is-open="true"
-    :title="$t('builder.insertRowModal.title')"
+    :title="t('builder.insertRowModal.title')"
     :width="650"
     draggable
     placement="center"
@@ -16,7 +16,7 @@
           :class="{ 'modal-tab--active': activeTab === tab.id }"
           @click="handleTabChange(tab.id)"
         >
-          {{ te('builder.insertModal.tabs.' + tab.id) ? $t('builder.insertModal.tabs.' + tab.id) : tab.label }}
+          {{ te('builder.insertModal.tabs.' + tab.id) ? t('builder.insertModal.tabs.' + tab.id) : tab.label }}
         </button>
       </div>
     </template>
@@ -26,7 +26,7 @@
       <div v-if="activeTab === 'presets'" class="modal-search-wrapper" style="padding-bottom: 16px;">
         <BaseInput 
           v-model="searchQuery"
-          :placeholder="$t('builder.insertModal.searchPlaceholder')"
+          :placeholder="t('builder.insertModal.searchPlaceholder')"
           autofocus
         >
           <template #prefix>
@@ -37,8 +37,7 @@
 
       <div class="modal-content">
         <div v-if="activeTab === 'row'" class="layout-wrapper">
-          
-          <div v-for="group in allGroups" :key="group.id" class="layout-group">
+<div v-for="group in allGroups" :key="group.id" class="layout-group">
             <h4 class="group-title">
               <span :class="['category-badge', `category-badge--${group.type}`]">
                 {{ group.type === 'flex' ? t('builder.fields.layoutTypes.flex') : t('builder.fields.layoutTypes.grid') }}
@@ -90,8 +89,7 @@
               </button>
             </div>
           </div>
-
-        </div>
+</div>
         
         <div v-if="activeTab === 'presets'" class="library-content">
           <div v-if="loadingPresets" class="no-results">
@@ -133,13 +131,15 @@
   </BaseModal>
 </template>
 
-<script setup>
-import { ref, computed, inject } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { BaseModal, BaseInput } from '../ui'
-import { Search, Layout } from 'lucide-vue-next'
+<script setup lang="ts">
+import { ref, computed, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { BaseModal, BaseInput } from '../ui';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import type { BuilderInstance } from '../../../types/builder';
 
-const icons = { Search, Layout }
+const icons = { Search, Layout };
 import { 
     equalLayouts, 
     offsetLayouts, 
@@ -148,70 +148,76 @@ import {
     gridMultiRowPresets,
     masonryPresets,
     sidebarPresets
-} from '../constants/layouts.js'
+} from '../constants/layouts.js';
 
-const props = defineProps({
-  mode: {
-    type: String,
-    default: 'insert'
-  }
-})
+interface Props {
+  mode?: string;
+}
 
-const emit = defineEmits(['close', 'insert', 'update'])
-const activeTab = ref('row')
+const props = withDefaults(defineProps<Props>(), {
+  mode: 'insert'
+});
+
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'insert', type: string, payload?: any): void;
+  (e: 'update', layout: any): void;
+}>();
+
+const activeTab = ref('row');
 
 const tabs = computed(() => {
   if (props.mode === 'edit') {
-    return [{ id: 'row', label: 'Row Layout' }]
+    return [{ id: 'row', label: 'Row Layout' }];
   }
   return [
     { id: 'row', label: 'New Row' },
     { id: 'presets', label: 'Design Presets' },
     { id: 'library', label: 'Add From Library' }
-  ]
-})
+  ];
+});
 
-const { t, te } = useI18n()
-const builder = inject('builder')
+const { t, te } = useI18n();
+const builder = inject<BuilderInstance>('builder');
 
 const modalTitle = computed(() => {
     return props.mode === 'edit' 
         ? t('builder.insertRowModal.updateTitle', 'Update Row Layout') 
-        : t('builder.insertRowModal.title', 'Insert Row')
-})
+        : t('builder.insertRowModal.title', 'Insert Row');
+});
 
 // Search/Filter logic
-const searchQuery = ref('')
-const loadingPresets = computed(() => builder?.loadingPresets?.value || false)
-const presets = computed(() => builder?.presets?.value || [])
+const searchQuery = ref('');
+const loadingPresets = computed(() => builder?.loadingPresets?.value || false);
+const presets = computed(() => builder?.presets?.value || []);
 
 const filteredPresets = computed(() => {
-  const allPresets = presets.value.filter(p => p.type === 'row')
-  if (!searchQuery.value) return allPresets
-  const query = searchQuery.value.toLowerCase()
-  return allPresets.filter(p => p.name.toLowerCase().includes(query))
-})
+  const allPresets = presets.value.filter(p => p.type === 'row');
+  if (!searchQuery.value) return allPresets;
+  const query = searchQuery.value.toLowerCase();
+  return allPresets.filter(p => p.name.toLowerCase().includes(query));
+});
 
 const groupedPresets = computed(() => {
-  const groups = {}
+  const groups: Record<string, any[]> = {};
   filteredPresets.value.forEach(preset => {
-    const type = preset.type.charAt(0).toUpperCase() + preset.type.slice(1)
-    if (!groups[type]) groups[type] = []
-    groups[type].push(preset)
-  })
-  return groups
-})
+    const type = preset.type.charAt(0).toUpperCase() + preset.type.slice(1);
+    if (!groups[type]) groups[type] = [];
+    groups[type].push(preset);
+  });
+  return groups;
+});
 
-const selectPreset = (preset) => {
-  emit('insert', 'preset', preset)
-}
+const selectPreset = (preset: any) => {
+  emit('insert', 'preset', preset);
+};
 
-const handleTabChange = (tabId) => {
-  activeTab.value = tabId
+const handleTabChange = (tabId: string) => {
+  activeTab.value = tabId;
   if (tabId === 'presets' && presets.value.length === 0) {
-    builder?.fetchPresets()
+    builder?.fetchPresets();
   }
-}
+};
 
 const allGroups = computed(() => [
   { id: 'equal', type: 'flex', title: 'Equal Columns', items: equalLayouts },
@@ -221,16 +227,16 @@ const allGroups = computed(() => [
   { id: 'grid-multi-row', type: 'grid', title: 'Multi-Row', items: gridMultiRowPresets },
   { id: 'masonry', type: 'grid', title: 'Masonry', items: masonryPresets },
   { id: 'sidebar', type: 'grid', title: 'Sidebar', items: sidebarPresets }
-])
+]);
 
-const selectLayout = (layout) => {
+const selectLayout = (layout: any) => {
   if (props.mode === 'edit') {
-      emit('update', layout)
+      emit('update', layout);
   } else {
-      emit('insert', layout)
+      emit('insert', 'row', layout);
   }
-  emit('close')
-}
+  emit('close');
+};
 </script>
 
 <style scoped>

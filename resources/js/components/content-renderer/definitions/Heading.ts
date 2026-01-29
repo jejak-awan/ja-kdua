@@ -1,5 +1,8 @@
 import type { BlockDefinition } from '@/types/builder';
-import { Heading, AlignLeft, AlignCenter, AlignRight } from 'lucide-vue-next';
+import Heading from 'lucide-vue-next/dist/esm/icons/heading.js';
+import AlignLeft from 'lucide-vue-next/dist/esm/icons/align-start-horizontal.js';
+import AlignCenter from 'lucide-vue-next/dist/esm/icons/align-center-horizontal.js';
+import AlignRight from 'lucide-vue-next/dist/esm/icons/align-end-horizontal.js';
 import { defineAsyncComponent } from 'vue';
 
 export default {

@@ -8,7 +8,7 @@
                 :key="mode.id" 
                 @click="activeDevice = mode.id"
                 :class="activeDevice === mode.id ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : 'text-muted-foreground hover:bg-muted'"
-                class="p-2 rounded-md transition-all flex items-center gap-2"
+                class="p-2 rounded-md transition-colors flex items-center gap-2"
                 :title="mode.label"
             >
                 <component :is="mode.icon" class="w-5 h-5" />
@@ -19,7 +19,7 @@
         <button 
             @click="refreshPreview"
             :disabled="isRefreshing"
-            class="p-2 text-muted-foreground hover:text-primary hover:bg-muted rounded-md transition-all flex items-center gap-2 bg-background border hover:border-primary/50"
+            class="p-2 text-muted-foreground hover:text-primary hover:bg-muted rounded-md transition-colors flex items-center gap-2 bg-background border hover:border-primary/50"
             title="Refresh Preview"
         >
             <svg class="w-4 h-4" :class="{'animate-spin': isRefreshing}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
@@ -30,7 +30,7 @@
         <div class="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start custom-scrollbar">
             <!-- Device Container -->
             <div 
-                class="relative bg-background shadow-2xl transition-all duration-500 ease-in-out border ring-1 ring-border/10 overflow-hidden flex flex-col" 
+                class="relative bg-background shadow-2xl transition-[width] duration-500 ease-in-out border ring-1 ring-border/10 overflow-hidden flex flex-col" 
                 :class="[
                     previewClasses, 
                     activeDevice === 'desktop' ? 'rounded-xl' : 'rounded-[2.5rem] border-[14px] border-slate-900 dark:border-slate-800'
@@ -46,8 +46,8 @@
                     <!-- Fake standard status bar elements -->
                     <div class="text-[10px] font-medium text-slate-400">9:41</div>
                     <div class="flex gap-1.5">
-                        <div class="w-3 h-3 text-slate-400"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2z"/></svg></div>
-                        <div class="w-3 h-3 text-slate-400"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg></div>
+                        <div class="w-3 h-3 text-slate-400"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2z" /></svg></div>
+                        <div class="w-3 h-3 text-slate-400"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z" /></svg></div>
                     </div>
                  </div>
 
@@ -62,16 +62,20 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
+import MonitorIcon from 'lucide-vue-next/dist/esm/icons/monitor.js';
+import TabletIcon from 'lucide-vue-next/dist/esm/icons/tablet.js';
+import SmartphoneIcon from 'lucide-vue-next/dist/esm/icons/smartphone.js';
 import ThemePreview from '../../ThemePreview.vue';
+import type { Theme } from '@/types/theme';
 
-defineProps({
-    previewTheme: { type: Object, required: true },
-    previewUrl: { type: String, default: '/' },
-});
+defineProps<{
+    previewTheme: Theme;
+    previewUrl?: string;
+}>();
 
-const themePreviewRef = ref(null);
+const themePreviewRef = ref<any>(null);
 const isRefreshing = ref(false);
 
 const refreshPreview = async () => {
@@ -85,22 +89,11 @@ const refreshPreview = async () => {
     }, 800);
 };
 
-// Device Icon Components
-const MonitorIcon = {
-  template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="8" y1="21" x2="16" y2="21" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="17" x2="12" y2="21" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-};
-const TabletIcon = {
-  template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="4" y="2" width="16" height="20" rx="2" ry="2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-};
-const SmartphoneIcon = {
-  template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="5" y="2" width="14" height="20" rx="2" ry="2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-};
-
-const activeDevice = ref('desktop');
+const activeDevice = ref<'desktop' | 'tablet' | 'mobile'>('desktop');
 const deviceModes = [
-    { id: 'desktop', label: 'Desktop', icon: MonitorIcon },
-    { id: 'tablet', label: 'Tablet', icon: TabletIcon },
-    { id: 'mobile', label: 'Mobile', icon: SmartphoneIcon },
+    { id: 'desktop' as const, label: 'Desktop', icon: MonitorIcon },
+    { id: 'tablet' as const, label: 'Tablet', icon: TabletIcon },
+    { id: 'mobile' as const, label: 'Mobile', icon: SmartphoneIcon },
 ];
 
 const previewStyles = computed(() => {

@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { type HTMLAttributes } from 'vue';
-import { MoreHorizontal } from 'lucide-vue-next';
+import MoreHorizontal from 'lucide-vue-next/dist/esm/icons/ellipsis.js';
 import { cn } from '../../lib/utils';
 
 const props = defineProps<{
