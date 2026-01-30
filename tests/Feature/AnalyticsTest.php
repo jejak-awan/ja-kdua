@@ -42,7 +42,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/cms/analytics/overview');
+            ->getJson('/api/v1/admin/ja/analytics/overview');
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonStructure([
@@ -78,7 +78,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/cms/analytics/visits?group_by=day');
+            ->getJson('/api/v1/admin/ja/analytics/visits?group_by=day');
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonStructure([
@@ -113,7 +113,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/cms/analytics/top-pages?limit=3');
+            ->getJson('/api/v1/admin/ja/analytics/top-pages?limit=3');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -154,7 +154,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/cms/analytics/top-content?limit=5');
+            ->getJson('/api/v1/admin/ja/analytics/top-content?limit=5');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -184,7 +184,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/cms/analytics/devices');
+            ->getJson('/api/v1/admin/ja/analytics/devices');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -214,7 +214,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/cms/analytics/browsers');
+            ->getJson('/api/v1/admin/ja/analytics/browsers');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -244,7 +244,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/cms/analytics/countries');
+            ->getJson('/api/v1/admin/ja/analytics/countries');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -274,7 +274,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/cms/analytics/referrers?limit=5');
+            ->getJson('/api/v1/admin/ja/analytics/referrers?limit=5');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -301,7 +301,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/cms/analytics/events');
+            ->getJson('/api/v1/admin/ja/analytics/events');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -331,7 +331,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/cms/analytics/event-stats');
+            ->getJson('/api/v1/admin/ja/analytics/event-stats');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -347,7 +347,7 @@ class AnalyticsTest extends TestCase
         $user = $this->createUser();
 
         $response = $this->actingAs($user, 'sanctum')
-            ->getJson('/api/v1/admin/cms/analytics/overview');
+            ->getJson('/api/v1/admin/ja/analytics/overview');
 
         $response->assertStatus(403);
     }
@@ -357,13 +357,13 @@ class AnalyticsTest extends TestCase
      */
     public function test_unauthenticated_user_cannot_access_analytics(): void
     {
-        $response = $this->getJson('/api/v1/admin/cms/analytics/overview');
+        $response = $this->getJson('/api/v1/admin/ja/analytics/overview');
         $response->assertStatus(401);
 
-        $response = $this->getJson('/api/v1/admin/cms/analytics/visits');
+        $response = $this->getJson('/api/v1/admin/ja/analytics/visits');
         $response->assertStatus(401);
 
-        $response = $this->getJson('/api/v1/admin/cms/analytics/top-pages');
+        $response = $this->getJson('/api/v1/admin/ja/analytics/top-pages');
         $response->assertStatus(401);
     }
 }

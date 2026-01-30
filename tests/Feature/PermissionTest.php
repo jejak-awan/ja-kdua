@@ -25,19 +25,19 @@ class PermissionTest extends TestCase
         $this->actingAs($admin, 'sanctum');
 
         // Test content management
-        $response = $this->getJson('/api/v1/admin/cms/contents');
+        $response = $this->getJson('/api/v1/admin/ja/contents');
         TestHelpers::assertApiSuccess($response);
 
         // Test media management
-        $response = $this->getJson('/api/v1/admin/cms/media');
+        $response = $this->getJson('/api/v1/admin/ja/media');
         TestHelpers::assertApiSuccess($response);
 
         // Test categories
-        $response = $this->getJson('/api/v1/admin/cms/categories');
+        $response = $this->getJson('/api/v1/admin/ja/categories');
         TestHelpers::assertApiSuccess($response);
 
         // Test users
-        $response = $this->getJson('/api/v1/admin/cms/users');
+        $response = $this->getJson('/api/v1/admin/ja/users');
         TestHelpers::assertApiSuccess($response);
     }
 
@@ -51,7 +51,7 @@ class PermissionTest extends TestCase
 
         $contentData = TestHelpers::getContentData();
 
-        $response = $this->postJson('/api/v1/admin/cms/contents', $contentData);
+        $response = $this->postJson('/api/v1/admin/ja/contents', $contentData);
 
         $response->assertStatus(403);
         $response->assertJson([
@@ -71,7 +71,7 @@ class PermissionTest extends TestCase
 
         $contentData = TestHelpers::getContentData();
 
-        $response = $this->postJson('/api/v1/admin/cms/contents', $contentData);
+        $response = $this->postJson('/api/v1/admin/ja/contents', $contentData);
 
         TestHelpers::assertApiSuccess($response, 201);
     }
@@ -86,7 +86,7 @@ class PermissionTest extends TestCase
 
         $content = Content::factory()->create();
 
-        $response = $this->putJson("/api/v1/admin/cms/contents/{$content->id}", [
+        $response = $this->putJson("/api/v1/admin/ja/contents/{$content->id}", [
             'title' => 'Updated Title',
         ]);
 
@@ -106,7 +106,7 @@ class PermissionTest extends TestCase
         // User can only edit their own content without 'manage content' permission
         $content = Content::factory()->create(['author_id' => $user->id]);
 
-        $response = $this->putJson("/api/v1/admin/cms/contents/{$content->id}", array_merge(
+        $response = $this->putJson("/api/v1/admin/ja/contents/{$content->id}", array_merge(
             $content->toArray(),
             ['title' => 'Updated Title']
         ));
@@ -124,7 +124,7 @@ class PermissionTest extends TestCase
 
         $content = Content::factory()->create();
 
-        $response = $this->deleteJson("/api/v1/admin/cms/contents/{$content->id}");
+        $response = $this->deleteJson("/api/v1/admin/ja/contents/{$content->id}");
 
         $response->assertStatus(403);
     }
@@ -141,7 +141,7 @@ class PermissionTest extends TestCase
 
         $content = Content::factory()->create();
 
-        $response = $this->deleteJson("/api/v1/admin/cms/contents/{$content->id}");
+        $response = $this->deleteJson("/api/v1/admin/ja/contents/{$content->id}");
 
         TestHelpers::assertApiSuccess($response);
     }
@@ -157,13 +157,13 @@ class PermissionTest extends TestCase
         $media = Media::factory()->create();
 
         // Test update
-        $response = $this->putJson("/api/v1/admin/cms/media/{$media->id}", [
+        $response = $this->putJson("/api/v1/admin/ja/media/{$media->id}", [
             'name' => 'Updated Name',
         ]);
         $response->assertStatus(403);
 
         // Test delete
-        $response = $this->deleteJson("/api/v1/admin/cms/media/{$media->id}");
+        $response = $this->deleteJson("/api/v1/admin/ja/media/{$media->id}");
         $response->assertStatus(403);
     }
 
@@ -180,14 +180,14 @@ class PermissionTest extends TestCase
         $media = Media::factory()->create();
 
         // Test update
-        $response = $this->putJson("/api/v1/admin/cms/media/{$media->id}", [
+        $response = $this->putJson("/api/v1/admin/ja/media/{$media->id}", [
             'name' => 'Updated Name',
         ]);
         TestHelpers::assertApiSuccess($response);
 
         // Test delete
         $media2 = Media::factory()->create();
-        $response = $this->deleteJson("/api/v1/admin/cms/media/{$media2->id}");
+        $response = $this->deleteJson("/api/v1/admin/ja/media/{$media2->id}");
         TestHelpers::assertApiSuccess($response);
     }
 
@@ -202,13 +202,13 @@ class PermissionTest extends TestCase
         $category = Category::factory()->create();
 
         // Test update
-        $response = $this->putJson("/api/v1/admin/cms/categories/{$category->id}", [
+        $response = $this->putJson("/api/v1/admin/ja/categories/{$category->id}", [
             'name' => 'Updated Category',
         ]);
         $response->assertStatus(403);
 
         // Test delete
-        $response = $this->deleteJson("/api/v1/admin/cms/categories/{$category->id}");
+        $response = $this->deleteJson("/api/v1/admin/ja/categories/{$category->id}");
         $response->assertStatus(403);
     }
 
@@ -227,7 +227,7 @@ class PermissionTest extends TestCase
         $category = Category::factory()->create();
 
         // Test update
-        $response = $this->putJson("/api/v1/admin/cms/categories/{$category->id}", array_merge(
+        $response = $this->putJson("/api/v1/admin/ja/categories/{$category->id}", array_merge(
             $category->toArray(),
             ['name' => 'Updated Category']
         ));
@@ -245,11 +245,11 @@ class PermissionTest extends TestCase
         $targetUser = User::factory()->create();
 
         // Test view users list
-        $response = $this->getJson('/api/v1/admin/cms/users');
+        $response = $this->getJson('/api/v1/admin/ja/users');
         $response->assertStatus(403);
 
         // Test update user
-        $response = $this->putJson("/api/v1/admin/cms/users/{$targetUser->id}", [
+        $response = $this->putJson("/api/v1/admin/ja/users/{$targetUser->id}", [
             'name' => 'Updated Name',
         ]);
         $response->assertStatus(403);
@@ -266,7 +266,7 @@ class PermissionTest extends TestCase
         $this->actingAs($user, 'sanctum');
 
         // Test view users list
-        $response = $this->getJson('/api/v1/admin/cms/users');
+        $response = $this->getJson('/api/v1/admin/ja/users');
         TestHelpers::assertApiSuccess($response);
     }
 
@@ -369,7 +369,7 @@ class PermissionTest extends TestCase
         Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);
         Role::firstOrCreate(['name' => 'author', 'guard_name' => 'web']);
 
-        $response = $this->getJson('/api/v1/admin/cms/roles');
+        $response = $this->getJson('/api/v1/admin/ja/roles');
 
         TestHelpers::assertApiSuccess($response);
         // Assert at least 3 roles exist (admin, editor, author may be among many)
@@ -384,7 +384,7 @@ class PermissionTest extends TestCase
         $user = $this->createUser();
         $this->actingAs($user, 'sanctum');
 
-        $response = $this->getJson('/api/v1/admin/cms/roles');
+        $response = $this->getJson('/api/v1/admin/ja/roles');
 
         $response->assertStatus(403);
     }
@@ -398,7 +398,7 @@ class PermissionTest extends TestCase
         $this->actingAs($user, 'sanctum');
 
         // Try to access endpoint that requires 'manage settings' permission
-        $response = $this->getJson('/api/v1/admin/cms/settings');
+        $response = $this->getJson('/api/v1/admin/ja/settings');
 
         $response->assertStatus(403);
     }
@@ -411,7 +411,7 @@ class PermissionTest extends TestCase
         $admin = $this->createAdminUser();
         $this->actingAs($admin, 'sanctum');
 
-        $response = $this->getJson('/api/v1/admin/cms/settings');
+        $response = $this->getJson('/api/v1/admin/ja/settings');
 
         TestHelpers::assertApiSuccess($response);
     }

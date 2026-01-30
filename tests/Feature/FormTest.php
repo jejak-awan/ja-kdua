@@ -1,0 +1,302 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Form;
+use App\Models\FormField;
+use App\Models\FormSubmission;
+use App\Models\User;
+use Tests\Helpers\TestHelpers;
+use Tests\TestCase;
+
+class FormTest extends TestCase
+{
+    /**
+     * Test admin can list all forms.
+     */
+    public function test_admin_can_list_all_forms(): void
+    {
+        $admin = $this->createAdminUser();
+        $this->actingAs($admin, 'sanctum');
+
+        Form::factory()->count(3)->create();
+
+        $response = $this->getJson('/api/v1/admin/ja/forms');
+
+        TestHelpers::assertApiSuccess($response);
+    }
+
+    /**
+     * Test admin can create form.
+     */
+    public function test_admin_can_create_form(): void
+    {
+        $admin = $this->createAdminUser();
+        $this->actingAs($admin, 'sanctum');
+
+        $formData = [
+            'name' => 'Contact Form ' . uniqid(),
+            'slug' => 'contact-form-' . uniqid(),
+            'description' => 'A contact form',
+            'is_active' => true,
+        ];
+
+        $response = $this->postJson('/api/v1/admin/ja/forms', $formData);
+
+        TestHelpers::assertApiSuccess($response, 201);
+        $this->assertDatabaseHas('forms', [
+            'name' => $formData['name'],
+            'slug' => $formData['slug'],
+        ]);
+    }
+
+    /**
+     * Test form creation requires name.
+     */
+    public function test_form_creation_requires_name(): void
+    {
+        $admin = $this->createAdminUser();
+        $this->actingAs($admin, 'sanctum');
+
+        $response = $this->postJson('/api/v1/admin/ja/forms', []);
+
+        TestHelpers::assertApiValidationError($response);
+        $response->assertJsonValidationErrors(['name']);
+    }
+
+    /**
+     * Test admin can view form details.
+     */
+    public function test_admin_can_view_form_details(): void
+    {
+        $admin = $this->createAdminUser();
+        $this->actingAs($admin, 'sanctum');
+
+        $form = Form::factory()->create();
+
+        $response = $this->getJson("/api/v1/admin/ja/forms/{$form->id}");
+
+        TestHelpers::assertApiSuccess($response);
+        $response->assertJson([
+            'data' => [
+                'id' => $form->id,
+                'name' => $form->name,
+            ],
+        ]);
+    }
+
+    /**
+     * Test admin can update form.
+     */
+    public function test_admin_can_update_form(): void
+    {
+        $admin = $this->createAdminUser();
+        $this->actingAs($admin, 'sanctum');
+
+        $form = Form::factory()->create();
+
+        $response = $this->putJson("/api/v1/admin/ja/forms/{$form->id}", [
+            'name' => 'Updated Form Name',
+        ]);
+
+        TestHelpers::assertApiSuccess($response);
+        $this->assertDatabaseHas('forms', [
+            'id' => $form->id,
+            'name' => 'Updated Form Name',
+        ]);
+    }
+
+    /**
+     * Test admin can delete form.
+     */
+    public function test_admin_can_delete_form(): void
+    {
+        $admin = $this->createAdminUser();
+        $this->actingAs($admin, 'sanctum');
+
+        $form = Form::factory()->create();
+
+        $response = $this->deleteJson("/api/v1/admin/ja/forms/{$form->id}");
+
+        TestHelpers::assertApiSuccess($response);
+        $this->assertSoftDeleted('forms', [
+            'id' => $form->id,
+        ]);
+    }
+
+    /**
+     * Test admin can add field to form.
+     */
+    public function test_admin_can_add_field_to_form(): void
+    {
+        $admin = $this->createAdminUser();
+        $this->actingAs($admin, 'sanctum');
+
+        $form = Form::factory()->create();
+
+        $fieldData = [
+            'label' => 'Email Address',
+            'name' => 'email',
+            'type' => 'email',
+            'is_required' => true,
+            'sort_order' => 1,
+        ];
+
+        $response = $this->postJson("/api/v1/admin/ja/forms/{$form->id}/fields", $fieldData);
+
+        TestHelpers::assertApiSuccess($response, 201);
+    }
+
+    /**
+     * Test admin can update form field.
+     */
+    public function test_admin_can_update_form_field(): void
+    {
+        $admin = $this->createAdminUser();
+        $this->actingAs($admin, 'sanctum');
+
+        $form = Form::factory()->create();
+        $field = FormField::factory()->create(['form_id' => $form->id]);
+
+        $response = $this->putJson("/api/v1/admin/ja/forms/{$form->id}/fields/{$field->id}", [
+            'label' => 'Updated Label',
+        ]);
+
+        TestHelpers::assertApiSuccess($response);
+    }
+
+    /**
+     * Test admin can delete form field.
+     */
+    public function test_admin_can_delete_form_field(): void
+    {
+        $admin = $this->createAdminUser();
+        $this->actingAs($admin, 'sanctum');
+
+        $form = Form::factory()->create();
+        $field = FormField::factory()->create(['form_id' => $form->id]);
+
+        $response = $this->deleteJson("/api/v1/admin/ja/forms/{$form->id}/fields/{$field->id}");
+
+        TestHelpers::assertApiSuccess($response);
+    }
+
+    /**
+     * Test admin can duplicate form.
+     */
+    public function test_admin_can_duplicate_form(): void
+    {
+        $admin = $this->createAdminUser();
+        $this->actingAs($admin, 'sanctum');
+
+        $form = Form::factory()->create();
+        FormField::factory()->count(2)->create(['form_id' => $form->id]);
+
+        $response = $this->postJson("/api/v1/admin/ja/forms/{$form->id}/duplicate");
+
+        TestHelpers::assertApiSuccess($response, 201);
+    }
+
+    /**
+     * Test admin can view form submissions.
+     */
+    public function test_admin_can_view_form_submissions(): void
+    {
+        $admin = $this->createAdminUser();
+        $this->actingAs($admin, 'sanctum');
+
+        $form = Form::factory()->create();
+        FormSubmission::factory()->count(3)->create(['form_id' => $form->id]);
+
+        $response = $this->getJson("/api/v1/admin/ja/forms/{$form->id}/submissions");
+
+        TestHelpers::assertApiSuccess($response);
+    }
+
+    /**
+     * Test public can view active form.
+     */
+    public function test_public_can_view_active_form(): void
+    {
+        $form = Form::factory()->create(['is_active' => true]);
+
+        $response = $this->getJson("/api/v1/cms/forms/{$form->slug}");
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'name' => $form->name,
+        ]);
+    }
+
+    /**
+     * Test public can submit form.
+     */
+    public function test_public_can_submit_form(): void
+    {
+        $form = Form::factory()->create(['is_active' => true]);
+        FormField::factory()->create([
+            'form_id' => $form->id,
+            'name' => 'name',
+            'type' => 'text',
+            'is_required' => true,
+        ]);
+        FormField::factory()->create([
+            'form_id' => $form->id,
+            'name' => 'email',
+            'type' => 'email',
+            'is_required' => true,
+        ]);
+
+        $response = $this->postJson("/api/v1/cms/forms/{$form->slug}/submit", [
+            'name' => 'John Doe',
+            'email' => 'john@example.com',
+        ]);
+
+        TestHelpers::assertApiSuccess($response, 201);
+    }
+
+    /**
+     * Test form submission validates required fields.
+     */
+    public function test_form_submission_validates_required_fields(): void
+    {
+        $form = Form::factory()->create(['is_active' => true]);
+        FormField::factory()->create([
+            'form_id' => $form->id,
+            'name' => 'email',
+            'type' => 'email',
+            'is_required' => true,
+        ]);
+
+        $response = $this->postJson("/api/v1/cms/forms/{$form->slug}/submit", []);
+
+        TestHelpers::assertApiValidationError($response);
+    }
+
+    /**
+     * Test unauthenticated user cannot manage forms.
+     */
+    public function test_unauthenticated_user_cannot_manage_forms(): void
+    {
+        $response = $this->postJson('/api/v1/admin/ja/forms', [
+            'name' => 'Test Form',
+        ]);
+
+        $response->assertStatus(401);
+    }
+
+    /**
+     * Test user without permission cannot manage forms.
+     */
+    public function test_user_without_permission_cannot_manage_forms(): void
+    {
+        $user = $this->createUser();
+        $this->actingAs($user, 'sanctum');
+
+        $response = $this->postJson('/api/v1/admin/ja/forms', [
+            'name' => 'Test Form',
+        ]);
+
+        $response->assertStatus(403);
+    }
+}

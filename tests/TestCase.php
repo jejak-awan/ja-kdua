@@ -31,6 +31,16 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
+        // Initialize session for tests that need it (login, etc.)
+        $this->withSession([]);
+
+        // Add viaRemember macro to RequestGuard for AuthenticateSession compatibility
+        // RequestGuard (used by Sanctum) doesn't have viaRemember() method by default
+        // but AuthenticateSession middleware calls it
+        \Illuminate\Auth\RequestGuard::macro('viaRemember', function () {
+            return false; // Token-based auth never uses "remember me"
+        });
+
         // Seed permissions and roles
         $this->seedPermissionsAndRoles();
     }

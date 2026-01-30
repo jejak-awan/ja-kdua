@@ -17,6 +17,12 @@ class SecurityService
     // Account lockout settings
     protected $accountLockMinutes = 15;
 
+    // Progressive blocking settings
+    protected $maxFailedAttempts;
+    protected $baseBlockMinutes;
+    protected $maxBlockMinutes = 60; // Maximum block duration in minutes
+    protected $offenseResetHours = 24; // Reset offense count after this many hours
+
     public function __construct()
     {
         $this->maxFailedAttempts = (int) \App\Models\Setting::get('login_attempts_limit', 5);

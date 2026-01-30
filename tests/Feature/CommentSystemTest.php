@@ -17,14 +17,21 @@ class CommentSystemTest extends TestCase
      */
     public function test_user_can_post_comment_on_published_content(): void
     {
+        // Mock CaptchaService to always return true
+        $this->mock(\App\Services\CaptchaService::class, function ($mock) {
+            $mock->shouldReceive('verify')->andReturn(true);
+        });
+
         $user = $this->createUser();
         $content = Content::factory()->published()->create();
 
-        // Controller expects 'name' and 'email' for guest comments
+        // Controller expects 'name' and 'email' for guest comments, plus captcha_token/captcha_input
         $response = $this->postJson("/api/v1/cms/contents/{$content->id}/comments", [
             'body' => 'This is a test comment',
             'name' => $user->name,
             'email' => $user->email,
+            'captcha_token' => 'test-token', // Will be mocked
+            'captcha_input' => 'test-answer',
         ]);
 
         TestHelpers::assertApiSuccess($response, 201);
@@ -126,7 +133,7 @@ class CommentSystemTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $response = $this->putJson("/api/v1/admin/cms/comments/{$comment->id}/approve");
+        $response = $this->putJson("/api/v1/admin/ja/comments/{$comment->id}/approve");
 
         TestHelpers::assertApiSuccess($response);
         $this->assertDatabaseHas('comments', [
@@ -151,7 +158,7 @@ class CommentSystemTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $response = $this->putJson("/api/v1/admin/cms/comments/{$comment->id}/reject");
+        $response = $this->putJson("/api/v1/admin/ja/comments/{$comment->id}/reject");
 
         TestHelpers::assertApiSuccess($response);
         $this->assertDatabaseHas('comments', [
@@ -176,7 +183,7 @@ class CommentSystemTest extends TestCase
             'status' => 'approved',
         ]);
 
-        $response = $this->deleteJson("/api/v1/admin/cms/comments/{$comment->id}");
+        $response = $this->deleteJson("/api/v1/admin/ja/comments/{$comment->id}");
 
         TestHelpers::assertApiSuccess($response);
         $this->assertSoftDeleted('comments', [

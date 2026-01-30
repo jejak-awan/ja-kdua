@@ -301,9 +301,12 @@ class AuthController extends BaseApiController
         $user->setRelation('permissions', $user->getAllPermissions());
 
         // Ensure session is started if it wasn't handled by single-session logic above
+        // Only regenerate session if one exists (supports both SPA and pure API clients)
         if (! \Illuminate\Support\Facades\Auth::check()) {
              \Illuminate\Support\Facades\Auth::login($user, $request->remember ?? false);
-             $request->session()->regenerate();
+             if ($request->hasSession()) {
+                 $request->session()->regenerate();
+             }
         }
 
         // Pure session-based auth - no token needed

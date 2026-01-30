@@ -23,7 +23,7 @@ class FormSubmissionFactory extends Factory
     {
         return [
             'form_id' => Form::factory(),
-            'user_id' => User::factory()->nullable(),
+            'user_id' => null,
             'data' => [
                 'name' => fake()->name(),
                 'email' => fake()->safeEmail(),

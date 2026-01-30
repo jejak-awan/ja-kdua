@@ -30,7 +30,7 @@ class WebhookTest extends TestCase
         Webhook::factory()->count(5)->create();
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/cms/webhooks');
+            ->getJson('/api/v1/admin/ja/webhooks');
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonStructure([
@@ -57,7 +57,7 @@ class WebhookTest extends TestCase
         Webhook::factory()->count(2)->create(['event' => 'content.updated']);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/cms/webhooks?event=content.created');
+            ->getJson('/api/v1/admin/ja/webhooks?event=content.created');
 
         TestHelpers::assertApiSuccess($response);
         $this->assertCount(3, $response->json('data'));
@@ -72,7 +72,7 @@ class WebhookTest extends TestCase
         Webhook::factory()->count(2)->create(['is_active' => false]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/cms/webhooks?is_active=1');
+            ->getJson('/api/v1/admin/ja/webhooks?is_active=1');
 
         TestHelpers::assertApiSuccess($response);
         $this->assertCount(3, $response->json('data'));
@@ -100,7 +100,7 @@ class WebhookTest extends TestCase
         ];
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->postJson('/api/v1/admin/cms/webhooks', $webhookData);
+            ->postJson('/api/v1/admin/ja/webhooks', $webhookData);
 
         TestHelpers::assertApiSuccess($response, 201);
         $response->assertJsonFragment([
@@ -122,7 +122,7 @@ class WebhookTest extends TestCase
     public function test_webhook_creation_requires_required_fields(): void
     {
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->postJson('/api/v1/admin/cms/webhooks', []);
+            ->postJson('/api/v1/admin/ja/webhooks', []);
 
         TestHelpers::assertApiValidationError($response);
         $response->assertJsonValidationErrors(['name', 'url', 'event']);
@@ -134,7 +134,7 @@ class WebhookTest extends TestCase
     public function test_webhook_url_must_be_valid(): void
     {
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->postJson('/api/v1/admin/cms/webhooks', [
+            ->postJson('/api/v1/admin/ja/webhooks', [
                 'name' => 'Test Webhook',
                 'url' => 'invalid-url',
                 'event' => 'content.created',
@@ -155,7 +155,7 @@ class WebhookTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson("/api/v1/admin/cms/webhooks/{$webhook->id}");
+            ->getJson("/api/v1/admin/ja/webhooks/{$webhook->id}");
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonFragment([
@@ -178,7 +178,7 @@ class WebhookTest extends TestCase
         ];
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->putJson("/api/v1/admin/cms/webhooks/{$webhook->id}", $updateData);
+            ->putJson("/api/v1/admin/ja/webhooks/{$webhook->id}", $updateData);
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonFragment([
@@ -202,7 +202,7 @@ class WebhookTest extends TestCase
         $webhook = Webhook::factory()->create();
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->deleteJson("/api/v1/admin/cms/webhooks/{$webhook->id}");
+            ->deleteJson("/api/v1/admin/ja/webhooks/{$webhook->id}");
 
         TestHelpers::assertApiSuccess($response);
 
@@ -226,7 +226,7 @@ class WebhookTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->postJson("/api/v1/admin/cms/webhooks/{$webhook->id}/test");
+            ->postJson("/api/v1/admin/ja/webhooks/{$webhook->id}/test");
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJson([
@@ -252,7 +252,7 @@ class WebhookTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/cms/webhooks/statistics');
+            ->getJson('/api/v1/admin/ja/webhooks/statistics');
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonStructure([
@@ -335,10 +335,10 @@ class WebhookTest extends TestCase
      */
     public function test_unauthenticated_user_cannot_access_webhooks(): void
     {
-        $response = $this->getJson('/api/v1/admin/cms/webhooks');
+        $response = $this->getJson('/api/v1/admin/ja/webhooks');
         $response->assertStatus(401);
 
-        $response = $this->postJson('/api/v1/admin/cms/webhooks', []);
+        $response = $this->postJson('/api/v1/admin/ja/webhooks', []);
         $response->assertStatus(401);
     }
 
@@ -350,7 +350,7 @@ class WebhookTest extends TestCase
         $user = $this->createUser();
 
         $response = $this->actingAs($user, 'sanctum')
-            ->getJson('/api/v1/admin/cms/webhooks');
+            ->getJson('/api/v1/admin/ja/webhooks');
 
         $response->assertStatus(403);
     }
