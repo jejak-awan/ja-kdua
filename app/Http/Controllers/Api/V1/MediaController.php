@@ -11,6 +11,9 @@ use App\Services\MediaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @OA\Tag(name="Media")
+ */
 class MediaController extends BaseApiController
 {
     protected MediaService $mediaService;
@@ -103,6 +106,18 @@ class MediaController extends BaseApiController
         return $this->paginated($media, 'Media retrieved successfully');
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/v1/media/statistics",
+     *     summary="Get media statistics",
+     *     tags={"Media"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Statistics retrieved successfully"
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function statistics(Request $request)
     {
         $query = Media::query();
@@ -136,6 +151,32 @@ class MediaController extends BaseApiController
         ], 'Media statistics retrieved successfully');
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/media/upload",
+     *     summary="Upload a single media file",
+     *     tags={"Media"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"file"},
+     *                 @OA\Property(property="file", type="string", format="binary"),
+     *                 @OA\Property(property="folder_id", type="integer"),
+     *                 @OA\Property(property="alt", type="string"),
+     *                 @OA\Property(property="caption", type="string")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Media uploaded successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/SuccessResponse")
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function upload(Request $request)
     {
         if (! $request->user()->can('upload media') && ! $request->user()->can('manage media')) {
@@ -268,6 +309,24 @@ class MediaController extends BaseApiController
         ], 'Media uploaded successfully', 201);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/v1/media/{media}",
+     *     summary="Get media details",
+     *     tags={"Media"},
+     *     @OA\Parameter(
+     *         name="media",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Media details retrieved"
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function show(Media $media)
     {
         // Scope check
@@ -294,6 +353,31 @@ class MediaController extends BaseApiController
         return $this->success($usageInfo, 'Media usage retrieved successfully');
     }
 
+    /**
+     * @OA\Put(
+     *     path="/api/v1/media/{media}",
+     *     summary="Update media metadata",
+     *     tags={"Media"},
+     *     @OA\Parameter(
+     *         name="media",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="alt", type="string"),
+     *             @OA\Property(property="caption", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Media updated successfully"
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function update(Request $request, Media $media)
     {
         $user = $request->user();
@@ -350,6 +434,31 @@ class MediaController extends BaseApiController
         return $this->success($media->load(['folder', 'usages', 'tags']), 'Media updated successfully');
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/media/{media}",
+     *     summary="Delete media",
+     *     tags={"Media"},
+     *     @OA\Parameter(
+     *         name="media",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="permanent",
+     *         in="query",
+     *         description="Skip trash if true",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Media deleted successfully"
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function destroy(Request $request, Media $media)
     {
         \Illuminate\Support\Facades\Log::info('MediaController::destroy called', [

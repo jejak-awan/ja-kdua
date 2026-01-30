@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @OA\Tag(name="File Manager")
+ */
 class FileManagerController extends BaseApiController
 {
     /**
@@ -223,6 +226,27 @@ class FileManagerController extends BaseApiController
         return response()->download($fullPath);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/file-manager/upload",
+     *     summary="Upload file to specific path",
+     *     tags={"File Manager"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"file"},
+     *                 @OA\Property(property="file", type="string", format="binary"),
+     *                 @OA\Property(property="disk", type="string"),
+     *                 @OA\Property(property="path", type="string")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Uploaded"),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function upload(Request $request)
     {
         if (! $request->user()->can('manage files')) {
@@ -500,6 +524,24 @@ class FileManagerController extends BaseApiController
         return $this->success(null, 'Folder moved to trash');
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/file-manager/folder",
+     *     summary="Create new folder",
+     *     tags={"File Manager"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name"},
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="disk", type="string"),
+     *             @OA\Property(property="path", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Created"),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function createFolder(Request $request)
     {
         if (! $request->user()->can('manage files')) {

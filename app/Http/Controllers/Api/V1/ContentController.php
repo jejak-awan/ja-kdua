@@ -8,6 +8,9 @@ use App\Services\ContentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
+/**
+ * @OA\Tag(name="Content")
+ */
 class ContentController extends BaseApiController
 {
     protected ContentService $contentService;
@@ -28,6 +31,24 @@ class ContentController extends BaseApiController
         return $this->success($result['data'], 'Contents retrieved successfully');
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/v1/content/{slug}",
+     *     summary="Get published content by slug",
+     *     tags={"Content"},
+     *     @OA\Parameter(
+     *         name="slug",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Content details"
+     *     ),
+     *     @OA\Response(response=404, description="Not found")
+     * )
+     */
     public function show(\Illuminate\Http\Request $request, $slug)
     {
         $content = Content::with(['author', 'category', 'tags', 'menuItems.menu', 'comments' => function ($q) {
@@ -160,6 +181,15 @@ class ContentController extends BaseApiController
         return $this->success($content, 'Content retrieved successfully');
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/v1/contents/stats",
+     *     summary="Get content statistics",
+     *     tags={"Content"},
+     *     @OA\Response(response=200, description="Stats"),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function stats(Request $request)
     {
         if (! $request->user()->can('view content')) {
@@ -185,6 +215,25 @@ class ContentController extends BaseApiController
         return $this->success($stats, 'Content statistics retrieved successfully');
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/contents",
+     *     summary="Create new content",
+     *     tags={"Content"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"title", "status", "type"},
+     *             @OA\Property(property="title", type="string"),
+     *             @OA\Property(property="status", type="string", enum={"draft", "pending", "published"}),
+     *             @OA\Property(property="type", type="string", enum={"post", "page"}),
+     *             @OA\Property(property="body", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Created"),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function store(Request $request)
     {
         try {
@@ -259,6 +308,17 @@ class ContentController extends BaseApiController
         return $this->success($content->load(['author', 'category', 'tags', 'customFields.customField']), 'Content created successfully', 201);
     }
 
+    /**
+     * @OA\Put(
+     *     path="/api/v1/contents/{content}",
+     *     summary="Update content",
+     *     tags={"Content"},
+     *     @OA\Parameter(name="content", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(type="object")),
+     *     @OA\Response(response=200, description="Updated"),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function update(Request $request, Content $content)
     {
         // Check if content is locked by another user
@@ -499,6 +559,16 @@ class ContentController extends BaseApiController
         }
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/contents/{content}",
+     *     summary="Delete content",
+     *     tags={"Content"},
+     *     @OA\Parameter(name="content", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Deleted"),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function destroy(Content $content)
     {
         $this->contentService->delete($content);

@@ -6,8 +6,45 @@ use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * @OA\Tag(name="Tags")
+ */
 class TagController extends BaseApiController
 {
+    /**
+     * @OA\Get(
+     *     path="/api/v1/tags",
+     *     summary="List all tags",
+     *     tags={"Tags"},
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Search by name or slug",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="usage",
+     *         in="query",
+     *         description="Filter by usage (used, unused, media)",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"used", "unused", "media"})
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Results per page",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Tags retrieved successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/SuccessResponse")
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function index(Request $request)
     {
         $query = Tag::orderBy('name');
@@ -54,6 +91,28 @@ class TagController extends BaseApiController
         return $this->success($tags, 'Tags retrieved successfully');
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/tags",
+     *     summary="Create a new tag",
+     *     tags={"Tags"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name", "slug"},
+     *             @OA\Property(property="name", type="string", example="Laravel"),
+     *             @OA\Property(property="slug", type="string", example="laravel"),
+     *             @OA\Property(property="description", type="string", example="Posts about Laravel framework")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Tag created successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/SuccessResponse")
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -78,6 +137,24 @@ class TagController extends BaseApiController
         return $this->success($tag, 'Tag created successfully', 201);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/v1/tags/{tag}",
+     *     summary="Get tag details",
+     *     tags={"Tags"},
+     *     @OA\Parameter(
+     *         name="tag",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Tag retrieved successfully"
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function show(Tag $tag)
     {
         // Scope check
@@ -90,6 +167,32 @@ class TagController extends BaseApiController
         return $this->success($tag->load('contents'), 'Tag retrieved successfully');
     }
 
+    /**
+     * @OA\Put(
+     *     path="/api/v1/tags/{tag}",
+     *     summary="Update a tag",
+     *     tags={"Tags"},
+     *     @OA\Parameter(
+     *         name="tag",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="slug", type="string"),
+     *             @OA\Property(property="description", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Tag updated successfully"
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function update(Request $request, Tag $tag)
     {
         // Ownership check
@@ -114,6 +217,24 @@ class TagController extends BaseApiController
         return $this->success($tag, 'Tag updated successfully');
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/tags/{tag}",
+     *     summary="Delete a tag",
+     *     tags={"Tags"},
+     *     @OA\Parameter(
+     *         name="tag",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Tag deleted successfully"
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function destroy(Tag $tag)
     {
         // Ownership check
@@ -133,6 +254,23 @@ class TagController extends BaseApiController
         return $this->success(null, 'Tag deleted successfully');
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/tags/bulk-delete",
+     *     summary="Bulk delete tags",
+     *     tags={"Tags"},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             @OA\Property(property="ids", type="array", @OA\Items(type="integer"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Bulk deletion processed"
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function bulkDelete(Request $request)
     {
         $validated = $request->validate([
@@ -155,6 +293,18 @@ class TagController extends BaseApiController
         return $this->success(['deleted_count' => $count], 'Tags deleted successfully');
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/v1/tags/statistics",
+     *     summary="Get tag statistics",
+     *     tags={"Tags"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Statistics retrieved successfully"
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function statistics(Request $request)
     {
         $cacheKey = 'tags_statistics';
