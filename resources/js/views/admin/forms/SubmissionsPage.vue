@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="relative min-h-[500px]">
         <!-- Header with Back Button -->
         <div class="mb-6 flex items-center justify-between">
             <div class="flex items-center gap-4">
@@ -11,45 +11,55 @@
                     <p class="text-sm text-muted-foreground">{{ form?.name || '-' }}</p>
                 </div>
             </div>
-            <Button variant="outline" @click="exportSubmissions">
-                <Download class="w-4 h-4 mr-2" />
-                {{ $t('features.forms.actions.export') }}
-            </Button>
+            <div class="flex items-center gap-2">
+                <Button variant="outline" @click="exportSubmissions">
+                    <Download class="w-4 h-4 mr-2" />
+                    {{ $t('features.forms.actions.export') }}
+                </Button>
+            </div>
         </div>
 
         <!-- Statistics Cards -->
         <div v-if="statistics" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <Card 
-                class="p-4 cursor-pointer hover:bg-primary/5 transition-colors" 
+                class="p-4 cursor-pointer hover:bg-primary/5 transition-all duration-75" 
                 @click="statusFilter = 'all'"
                 :class="{ 'ring-2 ring-primary/50': statusFilter === 'all' }"
             >
-                <p class="text-2xl font-bold text-primary">{{ statistics.total || 0 }}</p>
-                <p class="text-sm text-muted-foreground">{{ $t('features.forms.stats.total') }}</p>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-bold text-primary">{{ statistics.total || 0 }}</span>
+                    <span class="text-sm text-muted-foreground">{{ $t('features.forms.stats.total') }}</span>
+                </div>
             </Card>
             <Card 
-                class="p-4 cursor-pointer hover:bg-green-500/5 transition-colors border-green-500/20" 
+                class="p-4 cursor-pointer hover:bg-green-500/5 transition-all duration-75 border-green-500/20" 
                 @click="statusFilter = 'new'"
                 :class="{ 'ring-2 ring-green-500/50': statusFilter === 'new' }"
             >
-                <p class="text-2xl font-bold text-green-500">{{ statistics.new || 0 }}</p>
-                <p class="text-sm text-green-500/70">{{ $t('features.forms.stats.new') }}</p>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-bold text-green-500">{{ statistics.new || 0 }}</span>
+                    <span class="text-sm text-green-500/70">{{ $t('features.forms.stats.new') }}</span>
+                </div>
             </Card>
             <Card 
-                class="p-4 cursor-pointer hover:bg-yellow-500/5 transition-colors border-yellow-500/20" 
+                class="p-4 cursor-pointer hover:bg-yellow-500/5 transition-all duration-75 border-yellow-500/20" 
                 @click="statusFilter = 'read'"
                 :class="{ 'ring-2 ring-yellow-500/50': statusFilter === 'read' }"
             >
-                <p class="text-2xl font-bold text-yellow-500">{{ statistics.read || 0 }}</p>
-                <p class="text-sm text-yellow-500/70">{{ $t('features.forms.stats.read') }}</p>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-bold text-yellow-500">{{ statistics.read || 0 }}</span>
+                    <span class="text-sm text-yellow-500/70">{{ $t('features.forms.stats.read') }}</span>
+                </div>
             </Card>
             <Card 
-                class="p-4 cursor-pointer hover:bg-muted/50 transition-colors" 
+                class="p-4 cursor-pointer hover:bg-muted/50 transition-all duration-75" 
                 @click="statusFilter = 'archived'"
                 :class="{ 'ring-2 ring-muted-foreground/50': statusFilter === 'archived' }"
             >
-                <p class="text-2xl font-bold text-muted-foreground">{{ statistics.archived || 0 }}</p>
-                <p class="text-sm text-muted-foreground">{{ $t('features.forms.stats.archived') }}</p>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-bold text-muted-foreground">{{ statistics.archived || 0 }}</span>
+                    <span class="text-sm text-muted-foreground">{{ $t('features.forms.stats.archived') }}</span>
+                </div>
             </Card>
         </div>
 
@@ -81,124 +91,137 @@
             </div>
         </Card>
 
-        <!-- Loading -->
-        <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
-            <Loader2 class="w-8 h-8 mx-auto animate-spin text-muted-foreground" />
-            <p class="text-muted-foreground mt-2">{{ $t('features.forms.messages.loading') }}</p>
+        <!-- Bulk Actions Toolbar -->
+        <Transition
+            enter-active-class="transition-[opacity,transform] duration-100"
+            enter-from-class="opacity-0 translate-y-2"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition-[opacity,transform] duration-75"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 translate-y-2"
+        >
+            <div v-show="selectedRowsCount > 0" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-background border border-border px-6 py-3 rounded-full shadow-2xl ring-4 ring-primary/5">
+                <span class="text-sm font-medium text-foreground whitespace-nowrap">
+                    {{ selectedRowsCount }} {{ $t('features.forms.submissions.title') }}
+                </span>
+                <div class="h-4 w-px bg-border mx-2"></div>
+                <div class="flex items-center gap-1">
+                    <Button variant="ghost" size="sm" class="text-amber-500 hover:text-amber-600 hover:bg-amber-500/10" @click="handleBulkMarkRead">
+                        <Check class="w-4 h-4 mr-2" />
+                        {{ $t('features.forms.submissions.actions.markRead') }}
+                    </Button>
+                    <Button variant="ghost" size="sm" class="text-purple-500 hover:text-purple-600 hover:bg-purple-500/10" @click="handleBulkArchive">
+                        <Archive class="w-4 h-4 mr-2" />
+                        {{ $t('features.forms.submissions.actions.archive') }}
+                    </Button>
+                    <Button variant="ghost" size="sm" class="text-destructive hover:bg-destructive/10" @click="handleBulkDelete">
+                        <Trash2 class="w-4 h-4 mr-2" />
+                        {{ $t('common.actions.delete') }}
+                    </Button>
+                    <Button variant="ghost" size="sm" @click="table.resetRowSelection()">
+                        {{ $t('common.actions.cancel') }}
+                    </Button>
+                </div>
+            </div>
+        </Transition>
+
+        <!-- Main Content Area -->
+        <div class="relative">
+            <!-- Loading Overlay (Satset style: non-blocking) -->
+            <div v-if="loading && submissions.length > 0" class="absolute inset-x-0 -top-1 z-20">
+                <div class="h-1 w-full bg-primary/10 overflow-hidden">
+                    <div class="h-full bg-primary animate-progress-loading w-1/3"></div>
+                </div>
+            </div>
+
+            <!-- Loading Spinner (Initial load) -->
+            <div v-if="loading && submissions.length === 0" class="bg-card border border-border rounded-lg p-12 text-center">
+                <Loader2 class="w-8 h-8 mx-auto animate-spin text-muted-foreground" />
+                <p class="text-muted-foreground mt-2">{{ $t('features.forms.messages.loading') }}</p>
+            </div>
+
+            <!-- Empty State -->
+            <Card v-else-if="submissions.length === 0" class="p-12 text-center">
+                <FileText class="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
+                <p class="mt-4 text-muted-foreground">{{ $t('features.forms.submissions.empty') }}</p>
+            </Card>
+
+            <!-- Submissions Table -->
+            <Card v-else class="overflow-hidden border-border bg-card" :class="{ 'opacity-50 pointer-events-none': loading }">
+                <div class="overflow-x-auto">
+                    <Table>
+                        <TableHeader class="bg-muted/50 border-b border-border">
+                            <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+                                <TableHead 
+                                    v-for="header in headerGroup.headers" 
+                                    :key="header.id"
+                                    class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                                >
+                                    <FlexRender 
+                                        v-if="!header.isPlaceholder"
+                                        :render="header.column.columnDef.header"
+                                        :props="header.getContext()"
+                                    />
+                                </TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow 
+                                v-for="row in table.getRowModel().rows" 
+                                :key="row.id" 
+                                class="group hover:bg-muted/30 cursor-pointer border-b border-border/50 last:border-0"
+                                :class="{ 'bg-primary/5': row.getIsSelected() }"
+                                @click="viewSubmission(row.original)"
+                            >
+                                <TableCell 
+                                    v-for="cell in row.getVisibleCells()" 
+                                    :key="cell.id"
+                                    class="px-4 py-4"
+                                >
+                                    <FlexRender 
+                                        :render="cell.column.columnDef.cell"
+                                        :props="cell.getContext()"
+                                    />
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </div>
+            </Card>
         </div>
 
-        <!-- Empty State -->
-        <Card v-else-if="filteredSubmissions.length === 0" class="p-12 text-center">
-            <FileText class="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-            <p class="mt-4 text-muted-foreground">{{ $t('features.forms.submissions.empty') }}</p>
-        </Card>
-
-        <!-- Submissions Table -->
-        <Card v-else class="overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-muted/50">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Status</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.forms.submissions.submitted') }}</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.forms.submissions.formData') }}</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.forms.submissions.ipAddress') }}</th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-muted-foreground">{{ $t('common.actions.title') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-border">
-                        <tr 
-                            v-for="submission in filteredSubmissions" 
-                            :key="submission.id" 
-                            class="hover:bg-muted/30 transition-colors cursor-pointer"
-                            @click="viewSubmission(submission)"
-                        >
-                            <td class="px-4 py-4">
-                                <Badge
-                                    :class="{
-                                        'bg-green-500/10 text-green-500 border-green-500/20': submission.status === 'new',
-                                        'bg-yellow-500/10 text-yellow-500 border-yellow-500/20': submission.status === 'read',
-                                        'bg-muted text-muted-foreground': submission.status === 'archived'
-                                    }"
-                                >
-                                    {{ getStatusLabel(submission.status) }}
-                                </Badge>
-                            </td>
-                            <td class="px-4 py-4 text-sm text-muted-foreground">
-                                {{ formatDate(submission.created_at) }}
-                            </td>
-                            <td class="px-4 py-4">
-                                <div class="flex flex-wrap gap-2 max-w-md">
-                                    <span v-for="(value, key) in getFirstFields(submission.data)" :key="key" class="text-xs bg-muted px-2 py-1 rounded">
-                                        <span class="font-medium">{{ key }}:</span> {{ formatValue(value) }}
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="px-4 py-4 text-sm text-muted-foreground">
-                                {{ submission.ip_address || '-' }}
-                            </td>
-                            <td class="px-4 py-4">
-                                <div class="flex items-center justify-center space-x-1">
-                                    <Button
-                                        v-if="submission.status === 'new'"
-                                        @click.stop="markAsRead(submission)"
-                                        variant="ghost"
-                                        size="icon"
-                                        class="h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10"
-                                        :title="$t('features.forms.stats.read')"
-                                    >
-                                        <Check class="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                        v-if="submission.status !== 'archived'"
-                                        @click.stop="archiveSubmission(submission)"
-                                        variant="ghost"
-                                        size="icon"
-                                        class="h-8 w-8 text-purple-500 hover:text-purple-600 hover:bg-purple-500/10"
-                                        :title="$t('common.actions.archive')"
-                                    >
-                                        <Archive class="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                        @click.stop="deleteSubmission(submission)"
-                                        variant="ghost"
-                                        size="icon"
-                                        class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                        :title="$t('common.actions.delete')"
-                                    >
-                                        <Trash2 class="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </Card>
-
         <!-- Pagination -->
-        <Pagination
-            v-if="pagination && pagination.total > 0"
-            :current-page="pagination.current_page"
-            :total-items="pagination.total"
-            :per-page="Number(pagination.per_page || 15)"
-            :show-page-numbers="true"
-            @page-change="loadPage"
-            @update:per-page="(val) => { pagination.per_page = val; loadPage(1); }"
-            class="mt-4"
-        />
+        <div class="py-4 border-t border-border mt-auto">
+            <Pagination
+                v-if="pagination && pagination.total > 0"
+                :current-page="pagination.current_page"
+                :total-items="pagination.total"
+                :per-page="Number(pagination.per_page || 15)"
+                :show-page-numbers="true"
+                @page-change="loadPage"
+                @update:per-page="(val) => { pagination.per_page = val; loadPage(1); }"
+            />
+        </div>
 
         <!-- Detail Dialog -->
         <Dialog v-model:open="showDetail">
-            <DialogContent class="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogContent class="max-w-2xl max-h-[80vh] overflow-y-auto duration-100">
                 <DialogHeader>
                     <DialogTitle>{{ $t('features.forms.submissions.detailTitle') }}</DialogTitle>
                 </DialogHeader>
                 <div v-if="selectedSubmission" class="space-y-4">
                     <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div>
+                        <div class="flex items-center gap-2">
                             <span class="font-medium text-foreground">{{ $t('features.forms.submissions.status') }}:</span>
-                            <Badge class="ml-2">{{ getStatusLabel(selectedSubmission.status) }}</Badge>
+                            <Badge
+                                :class="{
+                                    'bg-green-500/10 text-green-500 border-green-500/20': selectedSubmission.status === 'new',
+                                    'bg-yellow-500/10 text-yellow-500 border-yellow-500/20': selectedSubmission.status === 'read',
+                                    'bg-muted text-muted-foreground': selectedSubmission.status === 'archived'
+                                }"
+                            >
+                                {{ getStatusLabel(selectedSubmission.status) }}
+                            </Badge>
                         </div>
                         <div>
                             <span class="font-medium text-foreground">{{ $t('features.forms.submissions.submitted') }}:</span>
@@ -206,7 +229,7 @@
                         </div>
                         <div>
                             <span class="font-medium text-foreground">{{ $t('features.forms.submissions.ipAddress') }}:</span>
-                            <span class="ml-2 text-muted-foreground">{{ selectedSubmission.ip_address || '-' }}</span>
+                            <span class="ml-2 text-muted-foreground font-mono">{{ selectedSubmission.ip_address || '-' }}</span>
                         </div>
                         <div v-if="selectedSubmission.user">
                             <span class="font-medium text-foreground">{{ $t('features.forms.submissions.user') }}:</span>
@@ -215,23 +238,34 @@
                     </div>
                     <div class="border-t border-border pt-4">
                         <h4 class="font-semibold text-foreground mb-3">{{ $t('features.forms.submissions.formData') }}</h4>
-                        <dl class="space-y-3">
-                            <div v-for="(value, key) in selectedSubmission.data" :key="key" class="border-b border-border pb-2">
-                                <dt class="text-sm font-medium text-foreground">{{ key }}</dt>
-                                <dd class="mt-1 text-sm text-muted-foreground">{{ formatValue(value) }}</dd>
-                            </div>
-                        </dl>
+                        <div class="bg-muted/50 rounded-lg border border-border overflow-hidden">
+                            <dl class="divide-y divide-border/50">
+                                <div v-for="(value, key) in selectedSubmission.data" :key="key" class="p-3 grid grid-cols-3 gap-4 hover:bg-muted/80 duration-75">
+                                    <dt class="text-sm font-medium text-foreground flex items-center">{{ key }}</dt>
+                                    <dd class="text-sm text-muted-foreground col-span-2 break-words">{{ formatValue(value) }}</dd>
+                                </div>
+                            </dl>
+                        </div>
                     </div>
                 </div>
             </DialogContent>
         </Dialog>
+
+        <!-- Back to Top -->
+        <BackToTop :show="scrolled" @click="scrollToTop" class="fixed bottom-6 right-6" />
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { h, ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+import { 
+    useVueTable, 
+    getCoreRowModel, 
+    createColumnHelper,
+    FlexRender
+} from '@tanstack/vue-table';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
@@ -249,6 +283,14 @@ import Dialog from '../../../components/ui/dialog.vue';
 import DialogContent from '../../../components/ui/dialog-content.vue';
 import DialogHeader from '../../../components/ui/dialog-header.vue';
 import DialogTitle from '../../../components/ui/dialog-title.vue';
+import Checkbox from '../../../components/ui/checkbox.vue';
+import Table from '../../../components/ui/table.vue';
+import TableHeader from '../../../components/ui/table-header.vue';
+import TableBody from '../../../components/ui/table-body.vue';
+import TableRow from '../../../components/ui/table-row.vue';
+import TableCell from '../../../components/ui/table-cell.vue';
+import TableHead from '../../../components/ui/table-head.vue';
+import BackToTop from '../../../components/ui/back-to-top.vue';
 import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
 import Download from 'lucide-vue-next/dist/esm/icons/download.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
@@ -257,6 +299,9 @@ import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 import Archive from 'lucide-vue-next/dist/esm/icons/archive.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import ArrowUp from 'lucide-vue-next/dist/esm/icons/arrow-up.js';
+import ArrowDown from 'lucide-vue-next/dist/esm/icons/arrow-down.js';
+import ArrowUpDown from 'lucide-vue-next/dist/esm/icons/arrow-up-down.js';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -275,21 +320,158 @@ const dateFrom = ref('');
 const dateTo = ref('');
 const selectedSubmission = ref<any>(null);
 const showDetail = ref(false);
+const rowSelection = ref({});
+const sorting = ref([{ id: 'created_at', desc: true }]);
 
 const formId = computed(() => route.params.id);
 
-const filteredSubmissions = computed(() => {
-    let result = submissions.value;
-    if (search.value) {
-        const query = search.value.toLowerCase();
-        result = result.filter(s => {
-            const dataStr = JSON.stringify(s.data).toLowerCase();
-            return dataStr.includes(query);
-        });
-    }
-    return result;
+const renderSortIcon = (isSorted: string | boolean) => {
+    if (isSorted === 'asc') return ArrowUp;
+    if (isSorted === 'desc') return ArrowDown;
+    return ArrowUpDown;
+};
+
+// --- TanStack Table Setup ---
+const columnHelper = createColumnHelper<any>();
+
+const columns = [
+    columnHelper.display({
+        id: 'select',
+        header: ({ table }) => h(Checkbox, {
+            checked: table.getIsAllPageRowsSelected(),
+            'onUpdate:checked': (value) => table.toggleAllPageRowsSelected(!!value),
+            ariaLabel: 'Select all',
+            onClick: (e: MouseEvent) => e.stopPropagation(),
+        }),
+        cell: ({ row }) => h(Checkbox, {
+            checked: row.getIsSelected(),
+            'onUpdate:checked': (value) => row.toggleSelected(!!value),
+            ariaLabel: 'Select row',
+            onClick: (e: MouseEvent) => e.stopPropagation(),
+        }),
+        size: 40,
+    }),
+    columnHelper.accessor('status', {
+        header: ({ column }) => h(Button, {
+            variant: 'ghost',
+            size: 'sm',
+            onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+            class: '-ml-3 h-8 data-[state=open]:bg-accent',
+        }, () => [
+            'Status',
+            h(renderSortIcon(column.getIsSorted()), { class: 'ml-2 h-4 w-4' })
+        ]),
+        cell: info => h(Badge, {
+            class: {
+                'bg-green-500/10 text-green-500 border-green-500/20': info.getValue() === 'new',
+                'bg-yellow-500/10 text-yellow-500 border-yellow-500/20': info.getValue() === 'read',
+                'bg-muted text-muted-foreground': info.getValue() === 'archived'
+            }
+        }, () => getStatusLabel(info.getValue())),
+    }),
+    columnHelper.accessor('created_at', {
+        id: 'created_at',
+        header: ({ column }) => h(Button, {
+            variant: 'ghost',
+            size: 'sm',
+            onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+            class: '-ml-3 h-8 data-[state=open]:bg-accent',
+        }, () => [
+            t('features.forms.submissions.submitted'),
+            h(renderSortIcon(column.getIsSorted()), { class: 'ml-2 h-4 w-4' })
+        ]),
+        cell: info => h('span', { class: 'text-sm text-muted-foreground font-mono' }, formatDate(info.getValue())),
+    }),
+    columnHelper.accessor('data', {
+        header: () => t('features.forms.submissions.formData'),
+        cell: info => h('div', { class: 'flex flex-wrap gap-2 max-w-md' }, 
+            Object.entries(getFirstFields(info.getValue())).map(([key, value]) => 
+                h('span', { class: 'text-xs bg-muted/80 text-foreground border border-border/40 px-2 py-0.5 rounded-sm' }, [
+                    h('span', { class: 'font-semibold text-muted-foreground' }, `${key}: `),
+                    formatValue(value)
+                ])
+            )
+        ),
+        enableSorting: false,
+    }),
+    columnHelper.accessor('ip_address', {
+        header: ({ column }) => h(Button, {
+            variant: 'ghost',
+            size: 'sm',
+            onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+            class: '-ml-3 h-8 data-[state=open]:bg-accent',
+        }, () => [
+            t('features.forms.submissions.ipAddress'),
+            h(renderSortIcon(column.getIsSorted()), { class: 'ml-2 h-4 w-4' })
+        ]),
+        cell: info => h('span', { class: 'text-sm text-muted-foreground font-mono' }, info.getValue() || '-'),
+    }),
+    columnHelper.display({
+        id: 'actions',
+        header: () => h('div', { class: 'text-center' }, t('common.actions.title')),
+        cell: info => {
+            const submission = info.row.original;
+            return h('div', { class: 'flex items-center justify-center space-x-1' }, [
+                submission.status === 'new' ? h(Button, {
+                    variant: 'ghost',
+                    size: 'icon',
+                    class: 'h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 transition-none',
+                    title: t('features.forms.stats.read'),
+                    onClick: (e: MouseEvent) => {
+                        e.stopPropagation();
+                        markAsRead(submission);
+                    }
+                }, () => h(Check, { class: 'w-4 h-4' })) : null,
+                submission.status !== 'archived' ? h(Button, {
+                    variant: 'ghost',
+                    size: 'icon',
+                    class: 'h-8 w-8 text-purple-500 hover:text-purple-600 hover:bg-purple-500/10 transition-none',
+                    title: t('common.actions.archive'),
+                    onClick: (e: MouseEvent) => {
+                        e.stopPropagation();
+                        archiveSubmission(submission);
+                    }
+                }, () => h(Archive, { class: 'w-4 h-4' })) : null,
+                h(Button, {
+                    variant: 'ghost',
+                    size: 'icon',
+                    class: 'h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 transition-none',
+                    title: t('common.actions.delete'),
+                    onClick: (e: MouseEvent) => {
+                        e.stopPropagation();
+                        deleteSubmission(submission);
+                    }
+                }, () => h(Trash2, { class: 'w-4 h-4' }))
+            ]);
+        }
+    })
+];
+
+const table = useVueTable({
+    get data() { return submissions.value },
+    columns,
+    state: {
+        get rowSelection() { return rowSelection.value },
+        get sorting() { return sorting.value },
+    },
+    onRowSelectionChange: (updaterOrValue) => {
+        rowSelection.value = typeof updaterOrValue === 'function' 
+            ? updaterOrValue(rowSelection.value) 
+            : updaterOrValue;
+    },
+    onSortingChange: (updaterOrValue) => {
+        sorting.value = typeof updaterOrValue === 'function' 
+            ? updaterOrValue(sorting.value) 
+            : updaterOrValue;
+        fetchSubmissions(1);
+    },
+    getCoreRowModel: getCoreRowModel(),
+    manualSorting: true,
 });
 
+const selectedRowsCount = computed(() => Object.keys(rowSelection.value).length);
+
+// --- API Methods ---
 const fetchForm = async () => {
     try {
         const response = await api.get(`/admin/ja/forms/${formId.value}`);
@@ -302,15 +484,26 @@ const fetchForm = async () => {
 const fetchSubmissions = async (page = 1) => {
     try {
         loading.value = true;
+        
+        let sortBy = 'created_at';
+        let sortOrder = 'desc';
+        
+        if (sorting.value.length > 0) {
+            sortBy = sorting.value[0].id;
+            sortOrder = sorting.value[0].desc ? 'desc' : 'asc';
+        }
+
         const params = {
             page,
             per_page: pagination.value?.per_page || 15,
+            search: search.value,
+            sort_by: sortBy,
+            sort_order: sortOrder,
             ...(statusFilter.value && statusFilter.value !== 'all' && { status: statusFilter.value }),
             ...(dateFrom.value && { date_from: dateFrom.value }),
             ...(dateTo.value && { date_to: dateTo.value })
         };
         const response = await api.get(`/admin/ja/forms/${formId.value}/submissions`, { params });
-        // API returns: { success, message, data: { data: [...], current_page, total, per_page, ... } }
         const paginatedData = response.data?.data || response.data;
         submissions.value = paginatedData?.data || [];
         pagination.value = {
@@ -319,6 +512,7 @@ const fetchSubmissions = async (page = 1) => {
             per_page: paginatedData?.per_page || 15,
             last_page: paginatedData?.last_page || 1
         };
+        table.resetRowSelection();
     } catch (error: any) {
         console.error('Error fetching submissions:', error);
     } finally {
@@ -386,16 +580,93 @@ const deleteSubmission = async (submission: any) => {
         submissions.value = submissions.value.filter(s => s.id !== submission.id);
         toast.success.default(t('features.forms.submissions.messages.deleteSuccess'));
         fetchStatistics();
+        table.resetRowSelection();
     } catch (error: any) {
         console.error('Error deleting submission:', error);
         toast.error.fromResponse(error);
     }
 };
 
+// --- Bulk Actions ---
+const handleBulkMarkRead = async () => {
+    const selectedRows = table.getSelectedRowModel().rows;
+    const selectedIds = selectedRows.map(row => row.original.id);
+    
+    try {
+        await Promise.all(selectedIds.map(id => api.put(`/admin/ja/form-submissions/${id}/read`)));
+        toast.success.default(t('features.forms.submissions.messages.bulkReadSuccess', { count: selectedIds.length }));
+        fetchSubmissions(pagination.value?.current_page || 1);
+        fetchStatistics();
+    } catch (error: any) {
+        console.error('Error in bulk mark read:', error);
+        toast.error.fromResponse(error);
+    }
+};
+
+const handleBulkArchive = async () => {
+    const selectedRows = table.getSelectedRowModel().rows;
+    const selectedIds = selectedRows.map(row => row.original.id);
+    
+    const confirmed = await confirm({
+        title: t('features.forms.submissions.actions.archive'),
+        message: t('features.forms.submissions.messages.bulkArchiveConfirm', { count: selectedIds.length }),
+        variant: 'warning',
+        confirmText: t('features.forms.submissions.actions.archive'),
+    });
+
+    if (!confirmed) return;
+
+    try {
+        await Promise.all(selectedIds.map(id => api.put(`/admin/ja/form-submissions/${id}/archive`)));
+        toast.success.default(t('features.forms.submissions.messages.bulkArchiveSuccess', { count: selectedIds.length }));
+        fetchSubmissions(pagination.value?.current_page || 1);
+        fetchStatistics();
+    } catch (error: any) {
+        console.error('Error in bulk archive:', error);
+        toast.error.fromResponse(error);
+    }
+};
+
+const handleBulkDelete = async () => {
+    const selectedRows = table.getSelectedRowModel().rows;
+    const selectedIds = selectedRows.map(row => row.original.id);
+    
+    const confirmed = await confirm({
+        title: t('common.actions.delete'),
+        message: t('features.forms.submissions.messages.bulkDeleteConfirm', { count: selectedIds.length }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
+
+    try {
+        await Promise.all(selectedIds.map(id => api.delete(`/admin/ja/form-submissions/${id}`)));
+        toast.success.default(t('features.forms.submissions.messages.bulkDeleteSuccess', { count: selectedIds.length }));
+        fetchSubmissions(pagination.value?.current_page || 1);
+        fetchStatistics();
+    } catch (error: any) {
+        console.error('Error in bulk delete:', error);
+        toast.error.fromResponse(error);
+    }
+};
+
 const exportSubmissions = async () => {
     try {
+        let sortBy = 'created_at';
+        let sortOrder = 'desc';
+        
+        if (sorting.value.length > 0) {
+            sortBy = sorting.value[0].id;
+            sortOrder = sorting.value[0].desc ? 'desc' : 'asc';
+        }
+
         const params = new URLSearchParams({
-            format: 'csv',
+            format: 'xlsx',
+            search: search.value,
+            sort_by: sortBy,
+            sort_order: sortOrder,
+            ...(statusFilter.value && statusFilter.value !== 'all' && { status: statusFilter.value }),
             ...(dateFrom.value && { date_from: dateFrom.value }),
             ...(dateTo.value && { date_to: dateTo.value })
         });
@@ -403,7 +674,7 @@ const exportSubmissions = async () => {
         const url = `${baseUrl}/api/v1/admin/ja/forms/${formId.value}/submissions/export?${params.toString()}`;
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `submissions-${formId.value}.csv`);
+        link.setAttribute('download', `submissions-${formId.value}.xlsx`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -414,6 +685,7 @@ const exportSubmissions = async () => {
     }
 };
 
+// --- Helper Functions ---
 const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
         new: t('features.forms.stats.new'),
@@ -442,6 +714,25 @@ const getFirstFields = (data: any) => {
     return Object.fromEntries(entries.slice(0, 3));
 };
 
+// --- Scroll Handling ---
+const scrolled = ref(false);
+const handleScroll = () => {
+    scrolled.value = window.scrollY > 300;
+};
+
+const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+};
+
+// --- Watchers with Debounce ---
+let searchDebounceTimer: any = null;
+watch(search, (newVal) => {
+    if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+        fetchSubmissions(1);
+    }, 300);
+});
+
 watch([statusFilter, dateFrom, dateTo], () => {
     fetchSubmissions(1);
 });
@@ -450,5 +741,28 @@ onMounted(() => {
     fetchForm();
     fetchSubmissions();
     fetchStatistics();
+    window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
 });
 </script>
+
+<style scoped>
+.animate-progress-loading {
+    animation: progress-loading 1s infinite linear;
+    transform-origin: 0% 50%;
+}
+
+@keyframes progress-loading {
+    0% { transform: translateX(-100%) scaleX(0.2); }
+    50% { transform: translateX(0%) scaleX(0.5); }
+    100% { transform: translateX(100%) scaleX(0.2); }
+}
+
+[dir="rtl"] .fixed.bottom-6.right-6 {
+    right: auto;
+    left: 24px;
+}
+</style>

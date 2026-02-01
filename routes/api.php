@@ -92,7 +92,7 @@ Route::prefix('v1')->group(function () {
 
         // Forms (public submission - with stricter rate limiting: 10 requests per minute)
         Route::get('/forms/{slug}', function ($slug) {
-            $form = \App\Models\Form::where('slug', $slug)->where('is_active', true)->with('fields')->firstOrFail();
+            $form = \App\Models\Form::where('slug', $slug)->where('is_active', true)->firstOrFail();
 
             return response()->json($form);
         })->middleware('throttle:10,1'); // 10 form views per minute

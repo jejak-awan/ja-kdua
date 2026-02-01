@@ -20,12 +20,14 @@ class Form extends Model
         'success_message',
         'redirect_url',
         'settings',
+        'blocks',
         'is_active',
         'submission_count',
     ];
 
     protected $casts = [
         'settings' => 'array',
+        'blocks' => 'array',
         'is_active' => 'boolean',
         'submission_count' => 'integer',
     ];

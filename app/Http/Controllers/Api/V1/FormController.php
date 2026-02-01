@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Form;
-use App\Models\FormField;
 use Illuminate\Http\Request;
 
 class FormController extends BaseApiController
 {
     public function index(Request $request)
     {
-        $query = Form::with('fields');
+        $query = Form::query();
 
         // Multi-tenancy scoping
         if (! $request->user()->can('manage forms')) {
@@ -45,20 +44,15 @@ class FormController extends BaseApiController
             'success_message' => 'nullable|string',
             'redirect_url' => 'nullable|url',
             'settings' => 'nullable|array',
+            'blocks' => 'nullable|array',
+            'is_active' => 'boolean',
         ]);
 
         $validated['author_id'] = $request->user()->id;
 
         $form = Form::create($validated);
 
-        // Add fields if provided
-        if ($request->has('fields')) {
-            foreach ($request->fields as $fieldData) {
-                $form->fields()->create($fieldData);
-            }
-        }
-
-        return $this->success($form->load('fields'), 'Form created successfully', 201);
+        return $this->success($form, 'Form created successfully', 201);
     }
 
     public function show(Request $request, Form $form)
@@ -67,7 +61,7 @@ class FormController extends BaseApiController
             return $this->forbidden('You do not have permission to view this form');
         }
 
-        return $this->success($form->load('fields'), 'Form retrieved successfully');
+        return $this->success($form, 'Form retrieved successfully');
     }
 
     public function update(Request $request, Form $form)
@@ -83,39 +77,13 @@ class FormController extends BaseApiController
             'success_message' => 'nullable|string',
             'redirect_url' => 'nullable|url',
             'settings' => 'nullable|array',
+            'blocks' => 'nullable|array',
             'is_active' => 'boolean',
         ]);
 
         $form->update($validated);
 
-        // Sync fields
-        if ($request->has('fields')) {
-            $existingFieldIds = $form->fields()->pluck('id')->toArray();
-            $requestFieldIds = [];
-
-            foreach ($request->fields as $fieldData) {
-                if (isset($fieldData['id']) && in_array($fieldData['id'], $existingFieldIds)) {
-                    // Update existing
-                    $requestFieldIds[] = $fieldData['id'];
-                    $field = FormField::find($fieldData['id']);
-                    $field->update($fieldData);
-                } else {
-                    // Create new and track ID
-                    // Ensure form_id is set
-                    $fieldData['form_id'] = $form->id;
-                    $newField = $form->fields()->create($fieldData);
-                    $requestFieldIds[] = $newField->id;
-                }
-            }
-
-            // Delete fields not in request
-            $toDelete = array_diff($existingFieldIds, $requestFieldIds);
-            if (! empty($toDelete)) {
-                FormField::whereIn('id', $toDelete)->delete();
-            }
-        }
-
-        return $this->success($form->load('fields'), 'Form updated successfully');
+        return $this->success($form, 'Form updated successfully');
     }
 
     public function destroy(Request $request, Form $form)
@@ -164,75 +132,6 @@ class FormController extends BaseApiController
         return $this->success(null, 'Form permanently deleted');
     }
 
-    public function addField(Request $request, Form $form)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'label' => 'required|string|max:255',
-            'type' => 'required|in:text,email,textarea,number,select,checkbox,radio,file,date,url,tel',
-            'placeholder' => 'nullable|string',
-            'help_text' => 'nullable|string',
-            'options' => 'nullable|array',
-            'validation_rules' => 'nullable|array',
-            'is_required' => 'boolean',
-            'sort_order' => 'integer',
-        ]);
-
-        $field = $form->fields()->create($validated);
-
-        return $this->success($field, 'Form field created successfully', 201);
-    }
-
-    public function updateField(Request $request, Form $form, FormField $formField)
-    {
-        if ($formField->form_id !== $form->id) {
-            return $this->validationError(['field' => ['Field does not belong to this form']], 'Field does not belong to this form');
-        }
-
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'label' => 'sometimes|required|string|max:255',
-            'type' => 'sometimes|required|in:text,email,textarea,number,select,checkbox,radio,file,date,url,tel',
-            'placeholder' => 'nullable|string',
-            'help_text' => 'nullable|string',
-            'options' => 'nullable|array',
-            'validation_rules' => 'nullable|array',
-            'is_required' => 'boolean',
-            'sort_order' => 'integer',
-        ]);
-
-        $formField->update($validated);
-
-        return $this->success($formField, 'Form field updated successfully');
-    }
-
-    public function deleteField(Form $form, FormField $formField)
-    {
-        if ($formField->form_id !== $form->id) {
-            return $this->validationError(['field' => ['Field does not belong to this form']], 'Field does not belong to this form');
-        }
-
-        $formField->delete();
-
-        return $this->success(null, 'Field deleted successfully');
-    }
-
-    public function reorderFields(Request $request, Form $form)
-    {
-        $request->validate([
-            'fields' => 'required|array',
-            'fields.*.id' => 'required|exists:form_fields,id',
-            'fields.*.sort_order' => 'required|integer',
-        ]);
-
-        foreach ($request->fields as $fieldData) {
-            FormField::where('id', $fieldData['id'])
-                ->where('form_id', $form->id)
-                ->update(['sort_order' => $fieldData['sort_order']]);
-        }
-
-        return $this->success(null, 'Fields reordered successfully');
-    }
 
     public function submit(Request $request, Form $form)
     {
@@ -240,10 +139,10 @@ class FormController extends BaseApiController
             return $this->validationError(['form' => ['Form is not active']], 'Form is not active');
         }
 
-        // Build validation rules from form fields
+        // Build validation rules from blocks
         $rules = [];
-        foreach ($form->fields as $field) {
-            $rules[$field->name] = $field->getValidationRules();
+        if ($form->blocks && count($form->blocks) > 0) {
+            $rules = $this->extractRulesFromBlocks($form->blocks);
         }
 
         // Check for captcha if enabled for contact forms
@@ -299,6 +198,51 @@ class FormController extends BaseApiController
             'form' => $form->name,
             'submission_id' => $submission->id,
         ]);
+    }
+
+    protected function extractRulesFromBlocks($blocks)
+    {
+        $rules = [];
+        $formBlocks = ['form_input', 'form_textarea', 'form_select', 'form_checkbox', 'form_radio'];
+
+        foreach ($blocks as $block) {
+            $type = $block['type'] ?? '';
+            $settings = $block['settings'] ?? [];
+
+            if (in_array($type, $formBlocks)) {
+                $fieldId = $settings['field_id'] ?? null;
+                if ($fieldId) {
+                    $fieldRules = [];
+                    
+                    // Basic required check
+                    if (isset($settings['is_required']) && $settings['is_required']) {
+                        $fieldRules[] = 'required';
+                    } else {
+                        $fieldRules[] = 'nullable';
+                    }
+
+                    // Type specific rules
+                    if ($type === 'form_input') {
+                        $inputType = $settings['type'] ?? 'text';
+                        if ($inputType === 'email') $fieldRules[] = 'email';
+                        if ($inputType === 'number') $fieldRules[] = 'numeric';
+                        $fieldRules[] = 'string';
+                        $fieldRules[] = 'max:255';
+                    } elseif ($type === 'form_textarea') {
+                        $fieldRules[] = 'string';
+                    }
+
+                    $rules[$fieldId] = $fieldRules;
+                }
+            }
+
+            // Recurse into children
+            if (isset($block['children']) && is_array($block['children'])) {
+                $rules = array_merge($rules, $this->extractRulesFromBlocks($block['children']));
+            }
+        }
+
+        return $rules;
     }
 
     public function duplicate(Request $request, Form $form)

@@ -1,7 +1,12 @@
 import type { User } from './auth';
+import type { BlockInstance } from './builder';
 
+/**
+ * @deprecated Legacy form field interface. Use visual builder blocks instead.
+ * Kept for backward compatibility with existing data and migrations.
+ */
 export interface FormField {
-    id: string | number;
+    id?: string | number;
     name: string;
     type: string;
     label: string;
@@ -11,6 +16,7 @@ export interface FormField {
     options?: any[];
     validation_rules?: string | Record<string, any>;
     is_required?: boolean;
+    help_text?: string;
     order?: number;
     settings?: Record<string, any>;
 }
@@ -20,8 +26,12 @@ export interface Form {
     name: string;
     slug: string;
     description?: string | null;
+    success_message?: string | null;
+    redirect_url?: string | null;
     is_active: boolean;
-    fields: FormField[];
+    /** @deprecated Use blocks instead */
+    fields?: FormField[];
+    blocks?: BlockInstance[];
     submission_count?: number;
     settings?: Record<string, any>;
     deleted_at?: string | null;

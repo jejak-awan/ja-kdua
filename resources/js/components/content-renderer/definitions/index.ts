@@ -100,6 +100,13 @@ import FullwidthPostContent from './FullwidthPostContent';
 import FullwidthPostSlider from './FullwidthPostSlider';
 import FullwidthPostTitle from './FullwidthPostTitle';
 
+// Form Builder
+import FormInput from './FormInput';
+import FormTextarea from './FormTextarea';
+import FormSelect from './FormSelect';
+import FormCheckbox from './FormCheckbox';
+import FormRadio from './FormRadio';
+
 import type { BlockDefinition } from '@/types/builder';
 
 export default [
@@ -203,5 +210,12 @@ export default [
     FullwidthMenu,
     FullwidthPostContent,
     FullwidthPostSlider,
-    FullwidthPostTitle
+    FullwidthPostTitle,
+
+    // Form Builder
+    FormInput,
+    FormTextarea,
+    FormSelect,
+    FormCheckbox,
+    FormRadio
 ] as BlockDefinition[];

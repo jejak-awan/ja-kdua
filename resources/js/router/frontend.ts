@@ -66,6 +66,12 @@ const frontendRoutes: RouteRecordRaw[] = [
                     title: 'Search',
                 }
             },
+            {
+                path: 'f/:slug',
+                name: 'form.public',
+                component: () => import('@/views/frontend/FormView.vue'),
+                props: true,
+            },
             // Dynamic content route (must be last in children)
             {
                 path: ':slug',

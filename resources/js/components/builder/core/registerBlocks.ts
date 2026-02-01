@@ -79,6 +79,13 @@ export function registerBlockComponents() {
     ModuleRegistry.registerComponent('signup', defineAsyncComponent(() => import('../../../shared/blocks/SignupBlock.vue')))
     ModuleRegistry.registerComponent('newsletter', defineAsyncComponent(() => import('../../../shared/blocks/NewsletterBlock.vue')))
 
+    // Form Builder Fields
+    ModuleRegistry.registerComponent('form_input', defineAsyncComponent(() => import('../../../shared/blocks/FormInputBlock.vue')))
+    ModuleRegistry.registerComponent('form_textarea', defineAsyncComponent(() => import('../../../shared/blocks/FormTextareaBlock.vue')))
+    ModuleRegistry.registerComponent('form_select', defineAsyncComponent(() => import('../../../shared/blocks/FormSelectBlock.vue')))
+    ModuleRegistry.registerComponent('form_checkbox', defineAsyncComponent(() => import('../../../shared/blocks/FormCheckboxBlock.vue')))
+    ModuleRegistry.registerComponent('form_radio', defineAsyncComponent(() => import('../../../shared/blocks/FormRadioBlock.vue')))
+
     // Dynamic
     ModuleRegistry.registerComponent('blog', defineAsyncComponent(() => import('../../../shared/blocks/BlogBlock.vue')))
     ModuleRegistry.registerComponent('portfolio', defineAsyncComponent(() => import('../../../shared/blocks/PortfolioBlock.vue')))

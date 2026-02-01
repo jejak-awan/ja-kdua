@@ -39,14 +39,23 @@
         "submitted": "Diserahkan",
         "empty": "Tidak ada submisi ditemukan",
         "actions": {
-            "delete": "Hapus Submisi"
+            "delete": "Hapus Submisi",
+            "bulkAction": "Tindakan Massal",
+            "markRead": "Tandai Dibaca",
+            "archive": "Arsipkan",
+            "deleteSelected": "Hapus Terpilih"
         },
         "messages": {
             "deleteConfirm": "Anda yakin ingin menghapus submisi ini?",
             "deleteSuccess": "Submisi berhasil dihapus",
             "deleteFailed": "Gagal menghapus submisi",
             "exportSuccess": "Submisi berhasil diekspor",
-            "exportFailed": "Gagal mengekspor submisi"
+            "exportFailed": "Gagal mengekspor submisi",
+            "bulkDeleteConfirm": "Anda yakin ingin menghapus {count} submisi terpilih?",
+            "bulkArchiveConfirm": "Anda yakin ingin mengarsipkan {count} submisi terpilih?",
+            "bulkReadSuccess": "{count} submisi ditandai sebagai sudah dibaca",
+            "bulkArchiveSuccess": "{count} submisi berhasil diarsipkan",
+            "bulkDeleteSuccess": "{count} submisi berhasil dihapus"
         }
     },
     "modal": {
@@ -65,39 +74,6 @@
             "description": "Deskripsi formulir...",
             "successMessage": "Terima kasih atas kiriman Anda!",
             "redirectUrl": "https://example.com/terima-kasih"
-        }
-    },
-    "fieldModal": {
-        "createTitle": "Tambah Bidang Baru",
-        "editTitle": "Edit Bidang",
-        "fieldType": "Tipe Bidang",
-        "fieldName": "Nama Bidang",
-        "fieldNamePlaceholder": "nama_bidang",
-        "fieldNameHelp": "Hanya huruf kecil, angka, dan garis bawah",
-        "fieldLabel": "Label Bidang",
-        "fieldLabelPlaceholder": "Label Bidang",
-        "placeholder": "Placeholder",
-        "placeholderHint": "Masukkan teks placeholder...",
-        "helpText": "Teks Bantuan",
-        "helpTextPlaceholder": "Teks bantuan untuk ditampilkan di bawah bidang...",
-        "options": "Opsi",
-        "addOption": "Tambah Opsi",
-        "required": "Bidang wajib diisi",
-        "addField": "Tambah Bidang",
-        "updateField": "Perbarui Bidang",
-        "optionRequired": "Silakan tambahkan setidaknya satu opsi untuk tipe bidang ini.",
-        "types": {
-            "text": "Teks",
-            "email": "Email",
-            "textarea": "Area Teks",
-            "number": "Angka",
-            "select": "Pilihan",
-            "radio": "Radio",
-            "checkbox": "Kotak Centang",
-            "file": "Unggah File",
-            "date": "Tanggal",
-            "url": "URL",
-            "tel": "Telepon"
         }
     },
     "messages": {

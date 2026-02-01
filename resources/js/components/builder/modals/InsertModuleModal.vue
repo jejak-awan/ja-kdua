@@ -206,6 +206,10 @@ import User from 'lucide-vue-next/dist/esm/icons/user.js';
 import Hash from 'lucide-vue-next/dist/esm/icons/hash.js';
 import Percent from 'lucide-vue-next/dist/esm/icons/percent.js';
 import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import SquareCheck from 'lucide-vue-next/dist/esm/icons/square-check.js';
+import Disc from 'lucide-vue-next/dist/esm/icons/disc.js';
+import TextAlignStart from 'lucide-vue-next/dist/esm/icons/text-align-start.js';
 import { BaseModal, BaseInput, Tabs, TabsList, TabsTrigger } from '../ui';
 import ModuleRegistry from '../core/ModuleRegistry';
 import { 
@@ -226,7 +230,8 @@ const icons: Record<string, any> = {
   MapPin, Music, SplitSquareHorizontal, Film, Layers, FileText, Phone,
   Share2, Award, LayoutGrid, CreditCard, Menu, Folder,
   Box, BarChart2, Newspaper, MessageCircle, Timer,
-  Download, Mail, Calendar, Bookmark, User, Hash, Percent, Sparkles
+  Download, Mail, Calendar, Bookmark, User, Hash, Percent, Sparkles,
+  ChevronDown, SquareCheck, Disc, TextAlignStart
 };
 
 // Emits

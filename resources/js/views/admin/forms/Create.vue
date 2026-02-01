@@ -6,19 +6,17 @@
                 <h1 class="text-2xl font-bold text-foreground">{{ $t('features.forms.modal.createTitle') }}</h1>
                 <p class="mt-1 text-sm text-muted-foreground">{{ $t('features.forms.title') }}</p>
             </div>
-            <router-link
-                :to="{ name: 'forms' }"
-            >
+            <router-link :to="{ name: 'forms' }">
                 <Button variant="ghost" size="sm">
                     ← {{ $t('common.actions.back') }}
                 </Button>
             </router-link>
         </div>
 
-        <!-- Form -->
+        <!-- Form Content -->
         <div class="bg-card border border-border rounded-lg overflow-hidden">
-            <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
-                <!-- Basic Information -->
+            <!-- Form Settings -->
+            <div class="p-6 space-y-6 border-b border-border">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-foreground mb-1">
@@ -60,7 +58,7 @@
                     </label>
                     <Textarea
                         v-model="formData.description"
-                        rows="3"
+                        rows="2"
                         :placeholder="$t('features.forms.modal.placeholders.description')"
                     />
                 </div>
@@ -92,70 +90,57 @@
 
                 <!-- Status -->
                 <div class="flex items-center space-x-2">
-                        <Checkbox
-                            id="is_active"
-                            v-model:checked="formData.is_active"
-                        />
-                        <label for="is_active" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                            {{ $t('features.forms.modal.isActive') }}
-                        </label>
-                    </div>
+                    <Checkbox
+                        id="is_active"
+                        v-model:checked="formData.is_active"
+                    />
+                    <label for="is_active" class="text-sm font-medium leading-none">
+                        {{ $t('features.forms.modal.isActive') }}
+                    </label>
+                </div>
+            </div>
 
-                <!-- Fields Builder -->
-                <div class="border-t border-border pt-6">
-                    <div class="flex justify-between items-center mb-4">
+            <!-- Visual Builder Section -->
+            <div class="p-6 pt-4">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
                         <h3 class="text-lg font-semibold text-foreground">{{ $t('features.forms.modal.formFields') }}</h3>
-                        <Button
-                            type="button"
-                            @click="showFieldModal = true; editingField = null"
-                            size="sm"
-                        >
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            {{ $t('features.forms.actions.addField') }}
-                        </Button>
+                        <p class="text-xs text-muted-foreground mt-1">
+                            Drag and drop form fields using the visual builder below
+                        </p>
                     </div>
+                </div>
 
-                    <FieldBuilder
-                        :fields="formData.fields || []"
-                        @add-field="handleAddField"
-                        @update-field="handleUpdateField"
-                        @delete-field="handleDeleteField"
-                        @reorder-fields="handleReorderFields"
+                <!-- Visual Builder -->
+                <div class="border border-border rounded-lg overflow-hidden h-[600px] relative bg-slate-50 dark:bg-slate-900/20">
+                    <Builder 
+                        ref="builderRef"
+                        v-model="formData.blocks"
+                        mode="page"
                     />
                 </div>
+            </div>
 
-                <!-- Actions -->
-                <div class="flex justify-end space-x-3 pt-6 border-t border-border">
-                    <router-link
-                        :to="{ name: 'forms' }"
-                    >
-                        <Button variant="outline">
-                            {{ $t('common.actions.cancel') }}
-                        </Button>
-                    </router-link>
-                    <Button
-                        type="submit"
-                        :disabled="saving || !isValid"
-                    >
-                        <svg v-if="saving" class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        {{ saving ? $t('common.messages.loading.creating') : $t('features.forms.actions.createForm') }}
+            <!-- Actions -->
+            <div class="flex justify-end space-x-3 p-6 pt-0">
+                <router-link :to="{ name: 'forms' }">
+                    <Button type="button" variant="outline">
+                        {{ $t('common.actions.cancel') }}
                     </Button>
-                </div>
-            </form>
+                </router-link>
+                <Button
+                    type="button"
+                    :disabled="saving || !isValid"
+                    @click="handleSubmit"
+                >
+                    <svg v-if="saving" class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {{ saving ? $t('common.messages.loading.creating') : $t('features.forms.actions.createForm') }}
+                </Button>
+            </div>
         </div>
-
-        <!-- Field Modal -->
-        <FieldModal
-            v-if="showFieldModal"
-            :field="editingField"
-            @close="showFieldModal = false; editingField = null"
-            @save="handleFieldSave"
-        />
     </div>
 </template>
 
@@ -163,16 +148,16 @@
 import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import type { BlockInstance } from '@/types/builder';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { useFormValidation } from '../../../composables/useFormValidation';
 import { formBuilderSchema } from '../../../schemas';
-import FieldBuilder from '../../../components/forms/FieldBuilder.vue';
-import FieldModal from '../../../components/forms/FieldModal.vue';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
 import Textarea from '../../../components/ui/textarea.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
+import Builder from '../../../components/builder/Builder.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -180,8 +165,7 @@ const toast = useToast();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(formBuilderSchema);
 
 const saving = ref(false);
-const showFieldModal = ref(false);
-const editingField = ref<any>(null);
+const builderRef = ref(null);
 
 const formData = reactive({
     name: '',
@@ -190,7 +174,21 @@ const formData = reactive({
     success_message: '',
     redirect_url: '',
     is_active: true,
-    fields: [] as any[]
+    blocks: [
+        {
+            id: `row-${Date.now()}`,
+            type: 'row',
+            settings: {},
+            children: [
+                {
+                    id: `col-${Date.now()}`,
+                    type: 'column',
+                    settings: { flexGrow: 1 },
+                    children: []
+                }
+            ]
+        }
+    ] as BlockInstance[]
 });
 
 const isValid = computed(() => {
@@ -229,16 +227,7 @@ const handleSubmit = async () => {
             success_message: formData.success_message,
             redirect_url: formData.redirect_url,
             is_active: formData.is_active,
-            fields: formData.fields.map((field, index) => ({
-                name: field.name,
-                label: field.label,
-                type: field.type,
-                placeholder: field.placeholder,
-                help_text: field.help_text,
-                options: field.options || [],
-                is_required: field.is_required || false,
-                sort_order: index
-            }))
+            blocks: formData.blocks
         };
         await api.post('/admin/ja/forms', payload);
         toast.success.create('Form');
@@ -252,42 +241,5 @@ const handleSubmit = async () => {
     } finally {
         saving.value = false;
     }
-};
-
-const handleAddField = () => {
-    showFieldModal.value = true;
-    editingField.value = null;
-};
-
-const handleUpdateField = (field: any) => {
-    editingField.value = { ...field };
-    showFieldModal.value = true;
-};
-
-const handleDeleteField = (fieldId: string | number | undefined) => {
-    if (!fieldId) return;
-    formData.fields = formData.fields.filter((f: any) => f.id !== fieldId);
-};
-
-const handleReorderFields = (fields: any[]) => {
-    formData.fields = fields;
-};
-
-const handleFieldSave = (field: any) => {
-    if (field.id) {
-        const index = formData.fields.findIndex((f: any) => f.id === field.id);
-        if (index !== -1) {
-            formData.fields[index] = field;
-        }
-    } else {
-        const newField = {
-            ...field,
-            id: `temp-${Date.now()}`,
-            sort_order: formData.fields.length
-        };
-        formData.fields.push(newField);
-    }
-    showFieldModal.value = false;
-    editingField.value = null;
 };
 </script>

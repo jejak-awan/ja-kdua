@@ -146,7 +146,7 @@
                     <div class="flex items-center justify-between text-sm text-muted-foreground mb-4">
                         <div class="flex items-center">
                             <Tag class="w-4 h-4 mr-1" />
-                            {{ $t('features.forms.stats.fields', { count: form.fields?.length || 0 }) }}
+                            {{ $t('features.forms.stats.fields', { count: countFormFields(form) }) }}
                         </div>
                         <div class="flex items-center">
                             <FileText class="w-4 h-4 mr-1" />
@@ -262,7 +262,7 @@
                                 <code class="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">{{ form.slug }}</code>
                             </td>
                             <td class="px-4 py-4 text-center">
-                                <span class="text-sm text-muted-foreground">{{ form.fields?.length || 0 }}</span>
+                                <span class="text-sm text-muted-foreground">{{ countFormFields(form) }}</span>
                             </td>
                             <td class="px-4 py-4 text-center">
                                 <Button variant="link" size="sm" class="h-auto p-0" @click="viewSubmissions(form)">
@@ -409,6 +409,27 @@ const filteredForms = computed(() => {
 
     return result;
 });
+
+// Count form field blocks (form_input, form_textarea, form_select, etc.) recursively
+const countFormFields = (form: Form): number => {
+    const formBlockTypes = ['form_input', 'form_textarea', 'form_select', 'form_checkbox', 'form_radio'];
+    let count = 0;
+    
+    const countBlocks = (blocks: any[]) => {
+        if (!blocks || !Array.isArray(blocks)) return;
+        for (const block of blocks) {
+            if (formBlockTypes.includes(block.type)) {
+                count++;
+            }
+            if (block.children && Array.isArray(block.children)) {
+                countBlocks(block.children);
+            }
+        }
+    };
+    
+    countBlocks(form.blocks || []);
+    return count;
+};
 
 const fetchForms = async () => {
     try {

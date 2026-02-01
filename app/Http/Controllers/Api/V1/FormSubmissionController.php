@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\V1;
 use App\Models\Form;
 use App\Models\FormSubmission;
 use Illuminate\Http\Request;
+use App\Exports\FormSubmissionsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FormSubmissionController extends BaseApiController
 {
@@ -39,6 +41,14 @@ class FormSubmissionController extends BaseApiController
             $query->where('status', $request->status);
         }
 
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('data', 'like', "%{$search}%")
+                  ->orWhere('ip_address', 'like', "%{$search}%");
+            });
+        }
+
         if ($request->has('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
@@ -47,8 +57,20 @@ class FormSubmissionController extends BaseApiController
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
+        // Sorting logic
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortOrder = $request->input('sort_order', 'desc');
+        
+        // Validate sort column to prevent SQL injection or errors
+        $allowedSortColumns = ['status', 'created_at', 'ip_address'];
+        if (in_array($sortBy, $allowedSortColumns)) {
+            $query->orderBy($sortBy, $sortOrder);
+        } else {
+            $query->latest(); // Default to created_at desc
+        }
+
         $perPage = min($request->input('per_page', 15), 100);
-        $submissions = $query->latest()->paginate($perPage);
+        $submissions = $query->paginate($perPage);
 
         return $this->paginated($submissions, 'Form submissions retrieved successfully');
     }
@@ -101,9 +123,16 @@ class FormSubmissionController extends BaseApiController
 
     public function export(Request $request, Form $form)
     {
-        $query = $form->submissions()
-            ->where('status', '!=', 'archived')
-            ->latest();
+        $query = $form->submissions();
+
+        // Search filter
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('data', 'like', "%{$search}%")
+                  ->orWhere('ip_address', 'like', "%{$search}%");
+            });
+        }
 
         // Date range filter
         if ($request->has('date_from')) {
@@ -113,77 +142,40 @@ class FormSubmissionController extends BaseApiController
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $submissions = $query->get();
+        // Status filter (match index logic)
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
 
-        // Build export data
-        $data = [];
-        $headers = ['ID', 'Submitted At', 'IP Address', 'Status'];
+        // Sort logic
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortOrder = $request->input('sort_order', 'desc');
+        $allowedSortColumns = ['status', 'created_at', 'ip_address'];
+        if (in_array($sortBy, $allowedSortColumns)) {
+            $query->orderBy($sortBy, $sortOrder);
+        } else {
+            $query->latest();
+        }
 
-        // Collect all possible field keys from submissions
+        // Collect field keys for headers
+        $submissions = (clone $query)->get();
         $fieldKeys = [];
         foreach ($submissions as $submission) {
             if (is_array($submission->data)) {
                 $fieldKeys = array_merge($fieldKeys, array_keys($submission->data));
             }
         }
-        $fieldKeys = array_unique($fieldKeys);
-        $headers = array_merge($headers, $fieldKeys);
+        $fieldKeys = array_values(array_unique($fieldKeys));
 
-        foreach ($submissions as $submission) {
-            $row = [
-                'ID' => $submission->id,
-                'Submitted At' => $submission->created_at->format('Y-m-d H:i:s'),
-                'IP Address' => $submission->ip_address,
-                'Status' => $submission->status,
-            ];
+        $timestamp = now()->format('Y-m-d_H-i-s');
+        $filename = str_replace(' ', '_', $form->name) . "_submissions_{$timestamp}";
+        $format = $request->input('format', 'xlsx');
 
-            // Add all field values
-            foreach ($fieldKeys as $key) {
-                $value = $submission->data[$key] ?? '';
-                $row[$key] = is_array($value) ? implode(', ', $value) : $value;
-            }
-
-            $data[] = $row;
+        if ($format === 'csv') {
+            return Excel::download(new FormSubmissionsExport($query, $fieldKeys), "{$filename}.csv", \Maatwebsite\Excel\Excel::CSV);
         }
 
-        // Return as CSV if requested
-        if ($request->input('format') === 'csv') {
-            $filename = str_replace(' ', '_', $form->name).'_submissions_'.now()->format('Y-m-d').'.csv';
-
-            $callback = function () use ($headers, $data) {
-                $handle = fopen('php://output', 'w');
-
-                // BOM for Excel UTF-8
-                fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
-
-                // Write headers
-                fputcsv($handle, $headers);
-
-                // Write data rows
-                foreach ($data as $row) {
-                    $orderedRow = [];
-                    foreach ($headers as $header) {
-                        $orderedRow[] = $row[$header] ?? '';
-                    }
-                    fputcsv($handle, $orderedRow);
-                }
-
-                fclose($handle);
-            };
-
-            return response()->stream($callback, 200, [
-                'Content-Type' => 'text/csv; charset=UTF-8',
-                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
-            ]);
-        }
-
-        // Default: return JSON
-        return $this->success([
-            'form' => $form->name,
-            'total' => $submissions->count(),
-            'headers' => $headers,
-            'data' => $data,
-        ], 'Form submissions exported successfully');
+        return Excel::download(new FormSubmissionsExport($query, $fieldKeys), "{$filename}.xlsx");
     }
 
     public function statistics(Request $request, ?Form $form = null)
