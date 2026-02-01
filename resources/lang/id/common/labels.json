@@ -5,9 +5,7 @@
     "confirmPassword": "Konfirmasi Kata Sandi",
     "title": "Judul",
     "description": "Deskripsi",
-    "status": "Status",
     "date": "Tanggal",
-    "time": "Waktu",
     "createdAt": "Dibuat Pada",
     "updatedAt": "Diperbarui Pada",
     "author": "Penulis",
@@ -67,6 +65,8 @@
     "loading": "Memuat",
     "warning": "Peringatan",
     "trash": "Sampah",
+    "status": "Status",
+    "help": "Bantuan",
     "app": {
         "name": "JA CMS"
     }

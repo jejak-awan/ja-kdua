@@ -5,9 +5,7 @@
     "confirmPassword": "Confirm Password",
     "title": "Title",
     "description": "Description",
-    "status": "Status",
     "date": "Date",
-    "time": "Time",
     "createdAt": "Created At",
     "updatedAt": "Updated At",
     "author": "Author",
@@ -67,6 +65,8 @@
     "loading": "Loading",
     "warning": "Warning",
     "trash": "Trash",
+    "status": "Status",
+    "help": "Help",
     "app": {
         "name": "JA CMS"
     }

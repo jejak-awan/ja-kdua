@@ -28,7 +28,8 @@
             "positionPlaceholder": "sidebar, footer, etc.",
             "content": "Content",
             "active": "Active",
-            "saving": "Saving..."
+            "saving": "Saving...",
+            "locationPlaceholder": "sidebar, footer, dll."
         }
     }
 }

@@ -108,10 +108,15 @@
             "phone": "+1234567890",
             "bio": "User biography",
             "website": "https://example.com",
-            "location": "City, Country"
+            "location": "City, Country",
+            "passwordCurrent": "Kata sandi"
         },
         "hints": {
             "passwordUpdate": "Leave empty if you don't want to change password"
-        }
+        },
+        "titleCreate": "Buat Pengguna",
+        "titleEdit": "Ubah Pengguna",
+        "namePlaceholder": "Nama lengkap",
+        "emailPlaceholder": "user{'@'}teladan.com"
     }
 }

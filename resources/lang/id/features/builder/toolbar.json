@@ -1,0 +1,87 @@
+{
+    "toolbar": {
+        "templates": "Templat Halaman",
+        "pages": "Halaman",
+        "selectPage": "Pilih Halaman",
+        "wireframeView": "Tampilan Wireframe",
+        "switchLanguage": "Ganti Bahasa",
+        "undo": "Batalkan",
+        "redo": "Ulangi",
+        "save": "Simpan",
+        "preferences": "Preferensi",
+        "shortcuts": "Pintasan Keyboard",
+        "resetLayout": "Reset Tata Letak",
+        "saveDraft": "Simpan Draf",
+        "draft": "Draf",
+        "update": "Perbarui",
+        "publish": "Terbitkan",
+        "devices": {
+            "desktop": "Tampilan Desktop",
+            "tablet": "Tampilan Tablet",
+            "mobile": "Tampilan Mobile",
+            "auto": "Otomatis (Adaptif)"
+        },
+        "toggleTheme": "Ganti Tema",
+        "theme": "Tema",
+        "switchTheme": "Ganti Tema",
+        "fullscreen": "Tampilan Penuh",
+        "exitFullscreen": "Tampilan Normal",
+        "close": "Tutup",
+        "more": "Opsi Lainnya"
+    },
+    "sidebars": {
+        "layers": "Layer",
+        "pages": "Halaman",
+        "history": "Riwayat",
+        "layouts": "Tata Letak",
+        "settings": "Pengaturan",
+        "global_variables": "Variabel Global",
+        "theme": "Tema",
+        "presets": "Preset",
+        "portability": "Impor/Ekspor",
+        "help": "Bantuan",
+        "preferences": "Preferensi",
+        "templates": "Templates"
+    },
+    "items": {
+        "layout": "Tata Letak",
+        "edit": "Ubah",
+        "duplicate": "Duplikat",
+        "delete": "Hapus",
+        "drag": "Tahan untuk Geser",
+        "info": "Info Item",
+        "more": "Opsi Lainnya",
+        "copyStyles": "Salin Gaya Item"
+    },
+    "tabs": {
+        "content": "Konten",
+        "design": "Desain",
+        "advanced": "Lanjutan"
+    },
+    "rightPanel": {
+        "searchPlaceholder": "Cari pengaturan...",
+        "responsiveMode": "Mode Responsif",
+        "noSettings": "Tidak ada pengaturan yang tersedia untuk tab ini.",
+        "back": "Kembali",
+        "close": "Tutup",
+        "collapse": "Tutup Panel",
+        "settings": "Pengaturan"
+    },
+    "breakpoints": {
+        "desktop": "Desktop",
+        "tablet": "Tablet",
+        "mobile": "Ponsel",
+        "hover": "Hover",
+        "phoneWide": "Ponsel Lebar",
+        "tabletWide": "Tablet Lebar",
+        "widescreen": "Layar Lebar",
+        "ultraWide": "Ultra Lebar"
+    },
+    "presets": {
+        "title": "Preset Desain",
+        "newFromCurrent": "Preset Baru Dari Gaya Saat Ini",
+        "addNew": "Tambah Preset Baru",
+        "defaultPreset": "Preset Default",
+        "basedOn": "Berdasarkan: {name}"
+    }
+}

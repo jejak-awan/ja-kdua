@@ -1,0 +1,87 @@
+{
+    "toolbar": {
+        "templates": "Page Templates",
+        "pages": "Pages",
+        "selectPage": "Select Page",
+        "wireframeView": "Wireframe View",
+        "switchLanguage": "Switch Language",
+        "undo": "Undo",
+        "redo": "Redo",
+        "save": "Save",
+        "preferences": "Preferences",
+        "shortcuts": "Keyboard Shortcuts",
+        "resetLayout": "Reset Layout",
+        "saveDraft": "Save as Draft",
+        "draft": "Draft",
+        "update": "Update",
+        "publish": "Publish",
+        "devices": {
+            "desktop": "Desktop View",
+            "tablet": "Tablet View",
+            "mobile": "Mobile View",
+            "auto": "Auto (Responsive)"
+        },
+        "toggleTheme": "Toggle Theme",
+        "theme": "Theme",
+        "switchTheme": "Switch Theme",
+        "fullscreen": "Full View",
+        "exitFullscreen": "Normal View",
+        "close": "Close",
+        "more": "More Options"
+    },
+    "sidebars": {
+        "layers": "Layers",
+        "pages": "Pages",
+        "history": "History",
+        "layouts": "Layouts",
+        "settings": "Settings",
+        "global_variables": "Global Variables",
+        "theme": "Theme",
+        "templates": "Templates",
+        "presets": "Presets",
+        "portability": "Import/Export",
+        "help": "Help",
+        "preferences": "Preferences"
+    },
+    "items": {
+        "layout": "Layout",
+        "edit": "Edit",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "drag": "Drag to Move",
+        "info": "Item Info",
+        "more": "More Options",
+        "copyStyles": "Copy Item Styles"
+    },
+    "tabs": {
+        "content": "Content",
+        "design": "Design",
+        "advanced": "Advanced"
+    },
+    "rightPanel": {
+        "searchPlaceholder": "Search settings...",
+        "responsiveMode": "Responsive Mode",
+        "noSettings": "No settings available for this tab.",
+        "back": "Back",
+        "close": "Close",
+        "collapse": "Collapse Panel",
+        "settings": "Settings"
+    },
+    "breakpoints": {
+        "desktop": "Desktop",
+        "tablet": "Tablet",
+        "mobile": "Phone",
+        "hover": "Hover",
+        "phoneWide": "Phone Wide",
+        "tabletWide": "Tablet Wide",
+        "widescreen": "Widescreen",
+        "ultraWide": "Ultra Wide"
+    },
+    "presets": {
+        "title": "Design Presets",
+        "newFromCurrent": "New Preset From Current Styles",
+        "addNew": "Add New Preset",
+        "defaultPreset": "Default Preset",
+        "basedOn": "Based on: {name}"
+    }
+}

@@ -7,6 +7,10 @@
         <p class="text-muted-foreground mt-1 text-sm">{{ $t('features.scheduled_tasks.description') }}</p>
       </div>
       <div class="flex gap-2">
+        <Button variant="outline" size="sm" @click="showHelp = !showHelp">
+          <BadgeInfo class="w-4 h-4 mr-2" />
+          {{ $t('common.labels.help') }}
+        </Button>
         <Button v-if="isSuperAdmin" variant="outline" @click="openRunCommandDialog">
           <Terminal class="w-4 h-4 mr-2" />
           {{ $t('features.command_runner.run') }}
@@ -17,6 +21,59 @@
         </Button>
       </div>
     </div>
+
+    <!-- Inline Help Guide -->
+    <Transition
+      enter-active-class="transition ease-out duration-200"
+      enter-from-class="opacity-0 -translate-y-2"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition ease-in duration-150"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-2"
+    >
+      <div v-if="showHelp" class="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div class="flex items-start gap-3">
+          <Info class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+          <div class="flex-1 space-y-3">
+            <div>
+              <h3 class="font-semibold text-blue-900 dark:text-blue-100">{{ $t('features.scheduled_tasks.help.title') }}</h3>
+              <p class="text-sm text-blue-800 dark:text-blue-200 mt-1">{{ $t('features.scheduled_tasks.help.intro') }}</p>
+            </div>
+            
+            <div class="space-y-2">
+              <h4 class="text-sm font-medium text-blue-900 dark:text-blue-100">{{ $t('features.scheduled_tasks.help.requirements_title') }}</h4>
+              <ul class="text-sm text-blue-800 dark:text-blue-200 list-disc list-inside space-y-1">
+                <li>{{ $t('features.scheduled_tasks.help.req_1') }}</li>
+                <li>{{ $t('features.scheduled_tasks.help.req_2') }}</li>
+                <li>{{ $t('features.scheduled_tasks.help.req_3') }}</li>
+              </ul>
+            </div>
+
+            <div class="space-y-2">
+              <h4 class="text-sm font-medium text-blue-900 dark:text-blue-100">{{ $t('features.scheduled_tasks.help.cron_title') }}</h4>
+              <p class="text-sm text-blue-800 dark:text-blue-200">{{ $t('features.scheduled_tasks.help.cron_desc') }}</p>
+              <div class="flex items-center gap-2 bg-slate-900 dark:bg-slate-950 rounded-md p-3 font-mono text-sm">
+                <code class="text-green-400 flex-1 overflow-x-auto">* * * * * cd {{ appPath }} && php artisan schedule:run >> /dev/null 2>&1</code>
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  class="h-8 w-8 text-slate-400 hover:text-white flex-shrink-0"
+                  @click="copyCronScript"
+                  :title="$t('common.actions.copy')"
+                >
+                  <Check v-if="cronCopied" class="w-4 h-4 text-green-400" />
+                  <Copy v-else class="w-4 h-4" />
+                </Button>
+              </div>
+              <p class="text-xs text-blue-700 dark:text-blue-300">{{ $t('features.scheduled_tasks.help.cron_hint') }}</p>
+            </div>
+          </div>
+          <Button variant="ghost" size="icon" class="h-6 w-6 text-blue-600 dark:text-blue-400 flex-shrink-0" @click="showHelp = false">
+            <X class="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </Transition>
 
     <!-- Filter Bar -->
     <div class="bg-card border border-border rounded-lg p-4 sticky top-0 z-10 shadow-sm backdrop-blur-xl bg-card/80">
@@ -152,6 +209,9 @@
                     :variant="task.is_active ? 'default' : 'secondary'"
                     @click="toggleActive(task)"
                     class="h-6 text-[10px] font-bold px-2"
+                    :title="task.is_active 
+                      ? $t('features.scheduled_tasks.tooltips.click_to_deactivate') 
+                      : $t('features.scheduled_tasks.tooltips.click_to_activate')"
                   >
                     {{ task.is_active ? $t('common.labels.active') : $t('common.labels.inactive') }}
                   </Button>
@@ -426,6 +486,11 @@ import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import Calendar from 'lucide-vue-next/dist/esm/icons/calendar.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Terminal from 'lucide-vue-next/dist/esm/icons/terminal.js';
+import BadgeInfo from 'lucide-vue-next/dist/esm/icons/badge-info.js';
+import Info from 'lucide-vue-next/dist/esm/icons/info.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 
 interface ScheduledTask {
   id: number;
@@ -486,6 +551,11 @@ const allowedCommands = ref<AllowedCommand[]>([]);
 const cronPreset = ref('');
 const errors = ref<Record<string, string | string[]>>({});
 
+// Help guide state
+const showHelp = ref(false);
+const cronCopied = ref(false);
+const appPath = ref('/var/www/ja-cms'); // Fallback default
+
 // Ad-hoc Command State
 const adhocCommand = ref<AdhocCommand>({ command: '', parameters: '' });
 const adhocOutput = ref('');
@@ -538,6 +608,21 @@ const commandHints: Record<string, string> = {
 const commandHint = computed(() => {
   return commandHints[adhocCommand.value.command] || '';
 });
+
+// Copy cron script to clipboard
+const copyCronScript = async () => {
+  const cronScript = `* * * * * cd ${appPath.value} && php artisan schedule:run >> /dev/null 2>&1`;
+  try {
+    await navigator.clipboard.writeText(cronScript);
+    cronCopied.value = true;
+    toast.success.action(t('common.messages.copied'));
+    setTimeout(() => {
+      cronCopied.value = false;
+    }, 2000);
+  } catch (err) {
+    console.error('Failed to copy cron script:', err);
+  }
+};
 
 // Selection & Bulk Actions
 const selectedTasks = ref<number[]>([]);
@@ -630,7 +715,12 @@ async function fetchTasks(page = 1) : Promise<void> {
 async function fetchAllowedCommands() : Promise<void> {
   try {
     const response = await api.get('/admin/ja/scheduled-tasks/allowed-commands');
-    allowedCommands.value = response.data.data;
+    if (response.data.data.commands) {
+        allowedCommands.value = response.data.data.commands;
+        appPath.value = response.data.data.base_path;
+    } else {
+        allowedCommands.value = response.data.data;
+    }
   } catch (error: any) {
     console.error('Failed to fetch allowed commands:', error);
   }
@@ -786,9 +876,17 @@ async function runTask(task: ScheduledTask) {
 
 async function toggleActive(task: ScheduledTask) : Promise<void> {
   try {
+    const newState = !task.is_active;
     await api.put(`/admin/ja/scheduled-tasks/${task.id}`, {
-      is_active: !task.is_active
+      is_active: newState
     });
+    
+    // Show success feedback
+    if (newState) {
+      toast.success.action(t('features.scheduled_tasks.messages.activated') || 'Task activated');
+    } else {
+      toast.success.action(t('features.scheduled_tasks.messages.deactivated') || 'Task deactivated');
+    }
     
     await fetchTasks(pagination.value.current_page);
   } catch (error: any) {
@@ -845,35 +943,19 @@ function openRunCommandDialog() {
 async function runAdhocCommand() {
   if (!adhocCommand.value.command) return;
 
-  const fullCommand = adhocCommand.value.parameters 
-    ? `${adhocCommand.value.command} ${adhocCommand.value.parameters}`
-    : adhocCommand.value.command;
-
   try {
     adhocExecuting.value = true;
     adhocOutput.value = '';
 
-    // Create a temporary task
-    const createResponse = await api.post('/admin/ja/scheduled-tasks', {
-      name: `Temp Command - ${Date.now()}`,
-      command: fullCommand,
-      schedule: '0 0 1 1 *', // Default invalid schedule
-      description: 'Temporary task created by command runner',
-      is_active: false
+    // Run the command via dedicated ad-hoc endpoint
+    const response = await api.post('/admin/ja/scheduled-tasks/run-adhoc', {
+      command: adhocCommand.value.command,
+      parameters: adhocCommand.value.parameters
     });
 
-    const taskId = createResponse.data.data.id;
-
-    // Run the task
-    const runResponse = await api.post(`/admin/ja/scheduled-tasks/${taskId}/run`);
-
-    adhocOutput.value = runResponse.data.data.output || 'No output';
+    adhocOutput.value = response.data.data.output || 'No output';
     
-    // Delete temporary task
-    await api.delete(`/admin/ja/scheduled-tasks/${taskId}`);
-    
-    // Check exit code if available, but for now just show output
-    if(runResponse.data.data.exit_code !== 0) {
+    if(response.data.data.exit_code !== 0) {
          // handle error visual if needed, but text is likely enough
     }
 

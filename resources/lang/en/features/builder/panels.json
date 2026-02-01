@@ -1,0 +1,227 @@
+{
+    "panels": {
+        "layers": {
+            "empty": "No layers yet. Add some modules!"
+        },
+        "pages": {
+            "searchPlaceholder": "Search pages...",
+            "empty": "No pages found.",
+            "addNew": "Add New Page",
+            "promptTitle": "Enter page title:",
+            "actions": {
+                "edit": "Edit",
+                "delete": "Delete"
+            }
+        },
+        "templates": {
+            "searchPlaceholder": "Search templates...",
+            "loading": "Loading templates...",
+            "empty": "No templates found.",
+            "addNew": "Add New Template",
+            "promptTitle": "Enter template name:",
+            "assignmentTitle": "Assignment Rules",
+            "applyTo": "Apply To",
+            "contentType": "Content Type",
+            "category": "Category"
+        },
+        "theme": {
+            "loading": "Loading theme settings...",
+            "noActive": "No active theme found.",
+            "save": "Save Theme Settings",
+            "settings": "Settings",
+            "selectHint": "Select a theme from the left to configure its properties.",
+            "activate": "Activate Theme"
+        },
+        "history": {
+            "initial": "Initial State",
+            "change": "Change made",
+            "current": "Current",
+            "sessionStart": "Session Start",
+            "action": "Action #{index}"
+        },
+        "globalVariables": {
+            "numbers": "Numbers",
+            "color": {
+                "label": "Color",
+                "alpha": "Alpha",
+                "hex": "Hex",
+                "rgb": "RGB",
+                "hsl": "HSL",
+                "gradient": "Gradient",
+                "solid": "Solid",
+                "transparent": "Transparent"
+            },
+            "text": "Text",
+            "images": "Images",
+            "links": "Links",
+            "colors": "Colors",
+            "fonts": "Fonts",
+            "table": {
+                "name": "Name",
+                "value": "Value",
+                "string": "String",
+                "image": "Image",
+                "url": "Url",
+                "color": "Color"
+            },
+            "placeholders": {
+                "name": "Name",
+                "none": "none",
+                "empty": "No {category} variables added yet."
+            },
+            "actions": {
+                "addNumber": "Add Global Number",
+                "addString": "Add Global String",
+                "addImage": "Add Global Image",
+                "addLink": "Add Global Link",
+                "addColor": "Add Global Color",
+                "addFont": "Add Global Font",
+                "addGeneric": "Add Global {category}",
+                "selectImage": "Select Image",
+                "select": "Select",
+                "cancel": "Cancel Changes",
+                "save": "Save Variables"
+            },
+            "messages": {
+                "fillName": "Please fill in the name for all {type} variables.",
+                "discardConfirm": "Are you sure you want to discard unsaved changes?",
+                "saveSuccess": "Global variables saved successfully.",
+                "saveError": "Failed to save variables.",
+                "invalidHex": "Invalid color hex: {value} for {name}"
+            }
+        },
+        "preferences": {
+            "interface": "Interface",
+            "darkMode": "Dark Mode",
+            "editor": "Editor",
+            "showGrid": "Show Grid",
+            "snapToObjects": "Snap to Objects",
+            "system": "System",
+            "autoSave": "Auto Save",
+            "version": "Builder v{version}",
+            "build": "Build {date}"
+        },
+        "help": {
+            "shortcuts": "Keyboard Shortcuts",
+            "labels": {
+                "save": "Save Changes",
+                "undo": "Undo",
+                "redo": "Redo",
+                "delete": "Delete Module",
+                "duplicate": "Duplicate",
+                "copy": "Copy Styles",
+                "paste": "Paste Styles"
+            },
+            "footer": {
+                "docs": "View Documentation",
+                "support": "Contact Support"
+            }
+        },
+        "layouts": {
+            "presets": {
+                "hero": "Hero Header",
+                "features": "Feature Grid",
+                "contact": "Contact Section",
+                "pricing": "Pricing Table",
+                "testimonials": "Testimonials",
+                "footer": "Footer Simple"
+            },
+            "search": "Search Templates...",
+            "emptyTitle": "No templates found",
+            "emptyDesc": "Try adjusting your search or category."
+        },
+        "presets": {
+            "title": "Select Preset",
+            "empty": "No presets found. Save a module as a preset to see it here.",
+            "yourPresets": "Your Presets",
+            "categories": {
+                "buttons": "Button Styles",
+                "cards": "Card Styles"
+            },
+            "items": {
+                "primaryRounded": "Primary Rounded",
+                "outlineSharp": "Outline Sharp",
+                "gradientPill": "Gradient Pill",
+                "shadowHover": "Shadow Hover",
+                "borderMinimal": "Border Minimal",
+                "glassmorphism": "Glassmorphism"
+            },
+            "actions": {
+                "apply": "Apply",
+                "delete": "Delete"
+            },
+            "saveModal": {
+                "title": "Save as Preset",
+                "description": "Save this module configuration to reuse it later across your site.",
+                "nameLabel": "Preset Name",
+                "placeholder": "e.g. Primary Rounded Button",
+                "saveBtn": "Save Preset"
+            }
+        },
+        "portability": {
+            "tabs": {
+                "export": "Export",
+                "import": "Import"
+            },
+            "export": {
+                "helper": "Copy this JSON to export your current layout.",
+                "copy": "Copy to Clipboard",
+                "file": "Export File"
+            },
+            "import": {
+                "helper": "Paste JSON here to import a layout.",
+                "placeholder": "Paste JSON here...",
+                "button": "Import Layout",
+                "success": "Import successful!",
+                "invalid": "Invalid JSON"
+            }
+        },
+        "pageSettings": {
+            "title": "Page Settings",
+            "sections": {
+                "general": "General",
+                "taxonomy": "Taxonomy",
+                "media": "Media",
+                "excerpt": "Excerpt",
+                "seo": "SEO",
+                "advanced": "Advanced"
+            },
+            "fields": {
+                "title": "Page Title",
+                "slug": "Slug",
+                "status": "Status",
+                "type": "Type",
+                "featuredImage": "Featured Image"
+            },
+            "placeholders": {
+                "title": "Page Title",
+                "slug": "URL Slug",
+                "selectImage": "Select Image",
+                "untitled": "Untitled Page"
+            },
+            "status": {
+                "draft": "Draft",
+                "published": "Published",
+                "pending": "Pending",
+                "archived": "Archived",
+                "private": "Private"
+            }
+        },
+        "globalDesign": {
+            "colors": "Global Colors",
+            "typography": "Typography",
+            "fields": {
+                "headingFont": "Heading Font",
+                "bodyFont": "Body Font"
+            },
+            "presets": {
+                "primary": "Primary",
+                "secondary": "Secondary",
+                "dark": "Dark",
+                "light": "Light"
+            }
+        },
+        "comingSoon": "coming soon",
+        "fallbackTitle": "Panel"
+    }
+}

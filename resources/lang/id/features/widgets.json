@@ -28,7 +28,8 @@
             "locationPlaceholder": "sidebar, footer, dll.",
             "content": "Konten",
             "active": "Aktif",
-            "saving": "Menyimpan..."
+            "saving": "Menyimpan...",
+            "positionPlaceholder": "sidebar, footer, etc."
         }
     }
 }

@@ -47,7 +47,11 @@
         "deletePermanently": "Apakah Anda yakin ingin menghapus {item} secara permanen? Tindakan ini tidak dapat dibatalkan.",
         "bulkAction": "Apakah Anda yakin ingin {action} {count} item terpilih?",
         "restore": "Apakah Anda yakin ingin memulihkan {item} ini?",
-        "emptyTrash": "Apakah Anda yakin ingin menghapus semua item di sampah secara permanen? Tindakan ini tidak dapat dibatalkan."
+        "emptyTrash": "Apakah Anda yakin ingin menghapus semua item di sampah secara permanen? Tindakan ini tidak dapat dibatalkan.",
+        "yes": "Ya, Lanjutkan",
+        "no": "Batal",
+        "warning": "Peringatan",
+        "danger": "Bahaya"
     },
     "loading": {
         "default": "Memuat...",
@@ -83,6 +87,12 @@
         "success": "Berhasil",
         "error": "Error",
         "warning": "Peringatan",
-        "info": "Info"
+        "info": "Info",
+        "saved": "Data berhasil disimpan.",
+        "deleted": "Data berhasil dihapus.",
+        "created": "Data berhasil dibuat.",
+        "updated": "Data berhasil diperbarui.",
+        "action_failed": "Gagal melakukan aksi.",
+        "permission_denied": "Anda tidak memiliki izin untuk melakukan aksi ini."
     }
 }

@@ -1,0 +1,436 @@
+{
+    "fields": {
+        "actions": {
+            "reset": "Reset",
+            "copy": "Copy",
+            "info": "Help",
+            "responsive": "Mobile Settings",
+            "manageGlobal": "Manage My Global URLs",
+            "copyAttributes": "Copy {label} Attributes",
+            "resetAttributes": "Reset {label} Attributes",
+            "extendAttributes": "Extend {label} Attributes",
+            "findReplace": "Find & Replace",
+            "remove": "Remove",
+            "edit": "Edit",
+            "upload": "Upload",
+            "select": "Select",
+            "cancel": "Cancel",
+            "apply": "Apply",
+            "savePreset": "Save as Preset",
+            "dynamicData": "Dynamic Data",
+            "more": "Opsi Lainnya"
+        },
+        "inherited": "Inherited",
+        "dynamicContent": "Dynamic Content",
+        "dynamicTypes": {
+            "globalUrls": "My Global URLs",
+            "customField": "Custom Field",
+            "currentPostLink": "Current Post Link",
+            "authorPageLink": "Author Page Link",
+            "homepageLink": "Homepage Link",
+            "postLink": "Post Link",
+            "pageLink": "Page Link",
+            "mediaLink": "Media Link",
+            "projectLink": "Project Link"
+        },
+        "common": {
+            "no_results": "No results found",
+            "search": "Search...",
+            "all": "All",
+            "width": "Width",
+            "widthPlaceholder": "e.g. 50%",
+            "height": "Height",
+            "heightPlaceholder": "e.g. 300px",
+            "color": "Color",
+            "style": "Style",
+            "position": "Position",
+            "opacity": "Opacity",
+            "image": "Image",
+            "video": "Video",
+            "icon": "Icon",
+            "text": "Text",
+            "link": "Link",
+            "margin": "Margin",
+            "padding": "Padding",
+            "border": "Border",
+            "shadow": "Shadow",
+            "background": "Background",
+            "filters": "Filters",
+            "transform": "Transform",
+            "animation": "Animation"
+        },
+        "layoutTypes": {
+            "flex": "Flex",
+            "grid": "Grid"
+        },
+        "color": {
+            "hex": "Hex",
+            "var": "Var",
+            "placeholder": "Enter or select variable",
+            "noMatches": "No matches",
+            "openPicker": "Open Color Picker",
+            "inherited": "Inherited: "
+        },
+        "types": {
+            "row": "Row",
+            "element": "Module",
+            "item": "Item"
+        },
+        "contextMenu": {
+            "undo": "Undo",
+            "redo": "Redo",
+            "duplicate": "Duplicate {type}",
+            "delete": "Delete {type}",
+            "addElement": "Add Element",
+            "copy": "Copy {type}",
+            "paste": "Paste",
+            "copyStyles": "Copy Styles",
+            "pasteStyles": "Paste Styles",
+            "resetStyles": "Reset Styles",
+            "goToParent": "Go to Parent",
+            "goToLayer": "Go to Layer",
+            "renameLabel": "Rename Label",
+            "enable": "Enable",
+            "disable": "Disable",
+            "saveToLibrary": "Save to Library",
+            "canvasSettings": "Canvas Settings",
+            "exportCanvas": "Export Canvas",
+            "editCanvas": "Edit Canvas",
+            "makeMainCanvas": "Make Main Canvas",
+            "duplicateCanvas": "Duplicate Canvas",
+            "deleteCanvas": "Delete Canvas"
+        },
+        "background": {
+            "tabs": {
+                "color": "Background Color",
+                "gradient": "Background Gradient",
+                "image": "Background Image",
+                "video": "Background Video",
+                "pattern": "Background Pattern",
+                "mask": "Background Mask"
+            },
+            "color": {
+                "label": "Background Color",
+                "add": "Add Background Color",
+                "inherited": "Inherited"
+            },
+            "proportional": "Proportional",
+            "gradient": {
+                "label": "Gradient Stops",
+                "add": "Add Background Gradient",
+                "type": {
+                    "label": "Gradient Type",
+                    "options": {
+                        "linear": "Linear",
+                        "circular": "Circular",
+                        "elliptical": "Elliptical",
+                        "conical": "Conical"
+                    }
+                },
+                "direction": "Gradient Direction",
+                "repeat": "Repeat Gradient",
+                "length": "Gradient Length",
+                "stops": "Gradient Stops",
+                "placeAbove": "Place Gradient Above Background Image",
+                "selectedStop": "Selected Stop",
+                "typeInfo": "Pick the shape of your gradient: Linear, Circular, Elliptical, or Conical.",
+                "directionInfo": "Adjust the angle or orientation of your linear/conical gradient. You can use degrees, radians, turns, or CSS variables.",
+                "repeatInfo": "If enabled, defined gradient stops will be repeated until the outer boundary of the background is reached.",
+                "lengthInfo": "Define the length you want your gradient to span in a unit of your choice. If the length of the gradient is at any time less than the size of the container, the last color stop in the gradient will fill the remaining space."
+            },
+            "image": {
+                "label": "Background Image",
+                "add": "Add Background Image",
+                "parallax": "Use Parallax Effect",
+                "parallaxMethod": {
+                    "label": "Parallax Method",
+                    "options": {
+                        "true": "True Parallax",
+                        "css": "CSS"
+                    }
+                },
+                "size": {
+                    "label": "Background Image Size",
+                    "options": {
+                        "cover": "Cover",
+                        "fit": "Fit",
+                        "actual": "Actual Size",
+                        "auto": "Auto",
+                        "stretch": "Stretch to Fill",
+                        "custom": "Custom Size"
+                    }
+                },
+                "position": {
+                    "label": "Background Image Position",
+                    "options": {
+                        "topLeft": "Top Left",
+                        "topCenter": "Top Center",
+                        "topRight": "Top Right",
+                        "centerLeft": "Center Left",
+                        "center": "Center",
+                        "centerRight": "Center Right",
+                        "bottomLeft": "Bottom Left",
+                        "bottomCenter": "Bottom Center",
+                        "bottomRight": "Bottom Right"
+                    }
+                },
+                "repeat": {
+                    "label": "Background Image Repeat",
+                    "options": {
+                        "repeat": "Repeat",
+                        "repeatX": "Repeat X (horizontal)",
+                        "repeatY": "Repeat Y (vertical)",
+                        "space": "Space",
+                        "round": "Round",
+                        "noRepeat": "No Repeat"
+                    }
+                },
+                "attachment": {
+                    "label": "Background Image Attachment",
+                    "options": {
+                        "scroll": "Scroll",
+                        "fixed": "Fixed"
+                    }
+                },
+                "blendMode": "Background Image Blend",
+                "blend": "Background Image Blend"
+            },
+            "video": {
+                "label": "Background Video",
+                "mp4": "Background Video MP4",
+                "webm": "Background Video Webm",
+                "width": "Background Video Width",
+                "height": "Background Video Height",
+                "pauseOnPlay": "Pause Video When Another Video Plays",
+                "pauseNotInView": "Pause Video While Not In View",
+                "loop": "Loop Video",
+                "mute": "Mute Video",
+                "overlay": "Video Overlay Color",
+                "add": "Add Background Video"
+            },
+            "pattern": {
+                "label": "Background Pattern",
+                "add": "Add Background Pattern",
+                "color": "Pattern Color",
+                "transform": "Pattern Transform",
+                "options": {
+                    "polka-dots": "Polka Dots",
+                    "checkerboard": "Checkerboard",
+                    "diagonal-stripes": "Diagonal Stripes",
+                    "zig-zag": "Zig Zag",
+                    "cubes": "Cubes",
+                    "honeycomb": "Honeycomb",
+                    "triangles": "Triangles",
+                    "confetti": "Confetti",
+                    "grid": "Grid",
+                    "dots-small": "Small Dots",
+                    "topo": "Topography",
+                    "crosshatch": "Crosshatch",
+                    "3d-diamonds": "3D Diamonds",
+                    "ogees": "Ogees",
+                    "pinwheel": "Pinwheel",
+                    "scallops": "Scallops",
+                    "shippo": "Shippo",
+                    "waves": "Waves"
+                },
+                "flipH": "Flip Horizontal",
+                "flipV": "Flip Vertical",
+                "rotate": "90° Rotate",
+                "invert": "Invert Colors",
+                "size": {
+                    "label": "Pattern Size",
+                    "width": "Pattern Width",
+                    "height": "Pattern Height",
+                    "options": {
+                        "cover": "Cover",
+                        "contain": "Fit",
+                        "actual": "Actual Size",
+                        "auto": "Auto",
+                        "stretch": "Stretch to Fill",
+                        "custom": "Custom Size"
+                    }
+                },
+                "repeat": {
+                    "label": "Pattern Repeat",
+                    "options": {
+                        "repeat": "Repeat",
+                        "repeatX": "Repeat X (horizontal)",
+                        "repeatY": "Repeat Y (vertical)",
+                        "space": "Space",
+                        "round": "Round",
+                        "noRepeat": "No Repeat"
+                    }
+                },
+                "repeatOrigin": {
+                    "label": "Pattern Repeat Origin",
+                    "options": {
+                        "topLeft": "Top Left",
+                        "topCenter": "Top Center",
+                        "topRight": "Top Right",
+                        "centerLeft": "Center Left",
+                        "center": "Center",
+                        "centerRight": "Center Right",
+                        "bottomLeft": "Bottom Left",
+                        "bottomCenter": "Bottom Center",
+                        "bottomRight": "Bottom Right"
+                    }
+                },
+                "horizontalOffset": "Pattern Horizontal Offset",
+                "verticalOffset": "Pattern Vertical Offset",
+                "blendMode": {
+                    "label": "Pattern Blend Mode"
+                }
+            },
+            "transform": {
+                "tabs": {
+                    "scale": "Scale",
+                    "translate": "Move",
+                    "rotate": "Rotate",
+                    "skew": "Skew"
+                }
+            },
+            "mask": {
+                "label": "Background Mask",
+                "add": "Add Background Mask",
+                "color": "Mask Color",
+                "transform": "Mask Transform",
+                "flipH": "Flip Horizontal",
+                "flipV": "Flip Vertical",
+                "rotate": "90° Rotate",
+                "invert": "Invert Colors",
+                "size": {
+                    "label": "Mask Size",
+                    "width": "Mask Width",
+                    "height": "Mask Height",
+                    "options": {
+                        "cover": "Cover",
+                        "contain": "Fit",
+                        "actual": "Actual Size",
+                        "auto": "Auto",
+                        "stretch": "Stretch to Fill",
+                        "custom": "Custom Size"
+                    }
+                },
+                "position": {
+                    "label": "Mask Position"
+                },
+                "aspectRatio": {
+                    "label": "Mask Aspect Ratio",
+                    "options": {
+                        "square": "Square",
+                        "landscape": "Landscape",
+                        "portrait": "Portrait"
+                    }
+                },
+                "proportional": "Proportional",
+                "options": {
+                    "arch": "Arch",
+                    "wave": "Wave",
+                    "diagonal": "Diagonal",
+                    "blob": "Blob",
+                    "blob-variant": "Blob Variant",
+                    "squircle": "Squircle",
+                    "hexagon": "Hexagon",
+                    "angled-cut": "Angled Cut",
+                    "chevron-edge": "Chevron Edge",
+                    "brush-stroke": "Brush Stroke",
+                    "slanted-bars-mask": "Slanted Bars",
+                    "honeycomb-mask": "Honeycomb",
+                    "pill-shape": "Pill Shape",
+                    "bean": "Bean",
+                    "chevrons": "Chevrons",
+                    "corner-blob": "Corner Blob",
+                    "corner-square": "Corner Square",
+                    "ellipse": "Ellipse",
+                    "triangle": "Triangle"
+                },
+                "blend_mode": {
+                    "label": "Mask Blend Mode"
+                }
+            },
+            "animation": {
+                "empty": "Select an animation style to see options."
+            }
+        },
+        "border": {
+            "width": "Width",
+            "color": "Color",
+            "style": "Style",
+            "radius": {
+                "label": "Rounded Corners",
+                "tl": "TL",
+                "tr": "TR",
+                "bl": "BL",
+                "br": "BR"
+            },
+            "styleOptions": {
+                "solid": "Solid",
+                "dashed": "Dashed",
+                "dotted": "Dotted",
+                "double": "Double",
+                "none": "None"
+            },
+            "styles": {
+                "label": "Border Styles",
+                "sides": {
+                    "all": "All",
+                    "top": "Top",
+                    "right": "Right",
+                    "bottom": "Bottom",
+                    "left": "Left"
+                },
+                "options": {
+                    "solid": "Solid",
+                    "dashed": "Dashed",
+                    "dotted": "Dotted",
+                    "double": "Double",
+                    "none": "None"
+                }
+            }
+        },
+        "shadow": {
+            "label": "Box Shadow",
+            "presets": {
+                "label": "Shadow Presets",
+                "none": "None",
+                "outerSmall": "Outer Small",
+                "outerLarge": "Outer Large",
+                "offsetBottom": "Offset Bottom",
+                "diagonal": "Diagonal",
+                "spread": "Spread",
+                "insetSmall": "Inset Small",
+                "insetLarge": "Inset Large"
+            },
+            "controls": {
+                "horizontal": "Horizontal Position",
+                "vertical": "Vertical Position",
+                "blur": "Blur Strength",
+                "spread": "Spread Strength",
+                "color": "Shadow Color",
+                "inset": "Inset Shadow"
+            }
+        },
+        "spacing": {
+            "link": "Link Values",
+            "sides": {
+                "top": "Top",
+                "right": "Right",
+                "bottom": "Bottom",
+                "left": "Left"
+            }
+        },
+        "children": {
+            "empty": "No {type} found.",
+            "add": "Add {type}",
+            "applyTemplate": "Insert from Library"
+        },
+        "icon": {
+            "search": "Search icons...",
+            "searchLarge": "Search among all icons...",
+            "filter": "Filter Icons",
+            "expand": "Expand Modal",
+            "noResults": "No icons found matching your search.",
+            "pickIcon": "Select Icon"
+        }
+    }
+}

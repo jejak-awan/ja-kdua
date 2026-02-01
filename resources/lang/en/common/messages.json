@@ -47,7 +47,11 @@
         "deletePermanently": "Are you sure you want to permanently delete this {item}? This action cannot be undone.",
         "bulkAction": "Are you sure you want to {action} {count} selected items?",
         "restore": "Are you sure you want to restore this {item}?",
-        "emptyTrash": "Are you sure you want to permanently delete all items in the trash? This action cannot be undone."
+        "emptyTrash": "Are you sure you want to permanently delete all items in the trash? This action cannot be undone.",
+        "yes": "Yes, Continue",
+        "no": "Cancel",
+        "warning": "Warning",
+        "danger": "Danger"
     },
     "loading": {
         "default": "Loading...",
@@ -83,6 +87,12 @@
         "success": "Success",
         "error": "Error",
         "warning": "Warning",
-        "info": "Info"
+        "info": "Info",
+        "saved": "Data saved successfully.",
+        "deleted": "Data deleted successfully.",
+        "created": "Data created successfully.",
+        "updated": "Data updated successfully.",
+        "action_failed": "Failed to perform action.",
+        "permission_denied": "You do not have permission to perform this action."
     }
 }

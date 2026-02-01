@@ -1,0 +1,523 @@
+{
+    "settings": {
+        "groups": {
+            "sizing": "Ukuran",
+            "filters": {
+                "label": "Filter"
+            },
+            "transform": {
+                "label": "Transformasi",
+                "tabs": {
+                    "scale": "Skala",
+                    "translate": "Geser",
+                    "rotate": "Putar",
+                    "skew": "Miring"
+                }
+            },
+            "visibility": "Visibilitas",
+            "position": "Posisi",
+            "transitions": "Transisi",
+            "animation": {
+                "label": "Animasi",
+                "empty": "Pilih gaya animasi untuk melihat opsi."
+            },
+            "typography": "Tipografi",
+            "spacing": "Jarak",
+            "border": "Border",
+            "boxShadow": "Bayangan Kotak",
+            "elements": "Elemen",
+            "css": "CSS",
+            "conditions": "Kondisi",
+            "attributes": "Atribut",
+            "interactions": "Interaksi",
+            "scroll_effects": "Efek Gulir",
+            "query": "Query",
+            "cardStyle": "Gaya Kartu",
+            "titleTypography": "Tipografi Judul",
+            "categoryTypography": "Tipografi Kategori",
+            "metaTypography": "Tipografi Meta",
+            "excerptTypography": "Tipografi Kutipan",
+            "filterTypography": "Tipografi Filter",
+            "labelTypography": "Tipografi Label",
+            "buttonStyle": "Gaya Tombol",
+            "avatarSettings": "Pengaturan Avatar",
+            "labels": "Label",
+            "imageStyle": "Gaya Gambar",
+            "filter": "Filter",
+            "display": "Tampilan",
+            "hover": "Efek Hover",
+            "navigation": "Navigasi",
+            "postTitleTypography": "Tipografi Judul Post",
+            "captionTypography": "Tipografi Keterangan",
+            "linkTypography": "Tipografi Link"
+        },
+        "meta_query": {
+            "add": "Tambah Meta Query",
+            "key": "Kunci Meta",
+            "key_placeholder": "Masukkan kunci meta",
+            "value": "Nilai Meta",
+            "value_placeholder": "Masukkan nilai meta",
+            "compare": "Bandingkan",
+            "type": "Tipe"
+        },
+        "layout": {
+            "layout_type": {
+                "label": "Gaya Layout"
+            },
+            "gap_x": {
+                "label": "Jarak Horizontal"
+            },
+            "gap_y": {
+                "label": "Jarak Vertikal"
+            },
+            "direction": {
+                "label": "Arah Layout"
+            },
+            "justify_content": {
+                "label": "Justifikasi Konten"
+            },
+            "align_items": {
+                "label": "Perataan Item"
+            },
+            "flex_wrap": {
+                "label": "Bungkus Layout"
+            },
+            "align_content": {
+                "label": "Perataan Konten"
+            },
+            "grid_direction": {
+                "label": "Arah Grid"
+            },
+            "grid_density": {
+                "label": "Kepadatan Grid"
+            },
+            "justify_items": {
+                "label": "Justifikasi Item"
+            },
+            "place_items": {
+                "label": "Penempatan Item"
+            },
+            "column_widths": {
+                "label": "Lebar Kolom",
+                "options": {
+                    "equal": "Kolom Lebar Tetap (Sama)",
+                    "equal_min": "Kolom Lebar Minimal (Sama)",
+                    "auto": "Kolom Lebar Otomatis",
+                    "manual": "Kolom Lebar Manual"
+                }
+            },
+            "column_count": {
+                "label": "Jumlah Kolom"
+            },
+            "column_min_width": {
+                "label": "Lebar Minimal Kolom"
+            },
+            "grid_template_columns": {
+                "label": "Template Grid Kolom"
+            },
+            "collapse_empty": {
+                "label": "Sembunyikan Kolom Kosong"
+            },
+            "auto_columns": {
+                "label": "Kolom Otomatis"
+            },
+            "row_heights": {
+                "label": "Tinggi Baris"
+            },
+            "row_count": {
+                "label": "Jumlah Baris"
+            },
+            "auto_rows": {
+                "label": "Baris Otomatis"
+            }
+        },
+        "fields": {
+            "width": "Lebar",
+            "max_width": "Lebar Maksimal",
+            "height": "Tinggi",
+            "min_height": "Tinggi Minimal",
+            "fontSize": "Ukuran Font",
+            "fontWeight": "Ketebalan Font",
+            "textColor": "Warna Teks",
+            "lineHeight": "Tinggi Baris",
+            "alignment": "Perataan",
+            "padding": "Padding",
+            "margin": "Margin",
+            "border": "Border",
+            "boxShadow": "Bayangan Kotak",
+            "animation_effect": "Efek Animasi",
+            "animation_duration": "Durasi (ms)",
+            "animation_delay": "Jeda (ms)",
+            "animation_repeat": "Ulangi",
+            "opacity": "Opasitas",
+            "blur": "Kabur",
+            "brightness": "Kecerahan",
+            "contrast": "Kontras",
+            "grayscale": "Skala Abu-abu",
+            "sepia": "Sepia",
+            "saturate": "Saturasi",
+            "hue_rotate": "Rotasi Hue",
+            "invert": "Invert",
+            "blend_mode": "Mode Campuran",
+            "visibility_desktop": "Tampilkan di Desktop",
+            "visibility_tablet": "Tampilkan di Tablet",
+            "visibility_mobile": "Tampilkan di Ponsel",
+            "overflow": "Overflow",
+            "position": "Posisi",
+            "z_index": "Indeks Z",
+            "cssClass": "Kelas CSS",
+            "cssId": "ID CSS",
+            "link_url": "URL Tautan",
+            "link_target": "Target Tautan",
+            "admin_label": "Label Admin",
+            "order": "Urutan Tampilan",
+            "scale": "Skala",
+            "translateX": "Geser X",
+            "translateY": "Geser Y",
+            "rotateX": "Rotasi X",
+            "rotateY": "Rotasi Y",
+            "rotateZ": "Rotasi Z",
+            "skewX": "Miring X",
+            "skewY": "Miring Y",
+            "origin": "Asal Transformasi",
+            "animation_curve": "Kurva Kecepatan Animasi",
+            "size_type": "Tipe Ukuran",
+            "column_class": "Kelas Kolom",
+            "font": "Font",
+            "fontStyle": "Gaya Font",
+            "textTransform": "Transformasi Teks",
+            "textDecoration": "Dekorasi Teks",
+            "letterSpacing": "Jarak Huruf",
+            "wordSpacing": "Jarak Kata",
+            "textAlign": "Perataan Teks",
+            "transition": "Transisi",
+            "transition_duration": "Durasi Transisi",
+            "transition_delay": "Tunda Transisi",
+            "transition_curve": "Kurva Kecepatan Transisi",
+            "backgroundPatternColor": "Warna Pola",
+            "backgroundPatternRotate": "Putar Pola",
+            "backgroundPatternInvert": "Balikkan Warna Pola",
+            "backgroundPatternFlipH": "Balik Horizontal Pola",
+            "backgroundPatternFlipV": "Balik Vertikal Pola",
+            "backgroundPatternSize": "Ukuran Pola",
+            "backgroundPatternWidth": "Lebar Pola",
+            "backgroundPatternHeight": "Tinggi Pola",
+            "backgroundPatternRepeat": "Ulangi Pola",
+            "backgroundPatternRepeatOrigin": "Asal Pengulangan",
+            "backgroundPatternBlendMode": "Mode Campuran Pola",
+            "backgroundMaskColor": "Warna Masker",
+            "backgroundMaskRotate": "Putar Masker",
+            "backgroundMaskInvert": "Balikkan Warna Masker",
+            "backgroundMaskFlipH": "Balik Horizontal Masker",
+            "backgroundMaskFlipV": "Balik Vertikal Masker",
+            "backgroundMaskAspectRatio": "Rasio Aspek Masker",
+            "backgroundMaskSize": "Ukuran Masker",
+            "backgroundMaskWidth": "Lebar Masker",
+            "backgroundMaskHeight": "Tinggi Masker",
+            "backgroundMaskRepeat": "Ulangi Masker",
+            "backgroundMaskRepeatOrigin": "Asal Pengulangan Masker",
+            "backgroundMaskBlendMode": "Mode Campuran Masker",
+            "disable_on": "Nonaktifkan Di",
+            "overflow_x": "Overflow Horizontal",
+            "overflow_y": "Overflow Vertikal",
+            "sticky_position": "Posisi Lengket",
+            "motion_effects_child": "Terapkan Efek Gerak Ke Elemen Anak",
+            "scroll_effects": "Efek Transformasi Gulir",
+            "motion_trigger": "Pemicu Efek Gerak",
+            "fullWidth": "Full Width",
+            "loop": "Loop Element"
+        },
+        "options": {
+            "link_target": {
+                "_self": "Di Tab Saat Ini",
+                "_blank": "Di Tab Baru"
+            },
+            "animation_effect": {
+                "": "Tidak Ada",
+                "animate-fade-in": "Fade In",
+                "animate-fade-in-up": "Fade In Up",
+                "animate-fade-in-down": "Fade In Down",
+                "animate-fade-in-left": "Fade In Left",
+                "animate-fade-in-right": "Fade In Right",
+                "animate-zoom-in": "Zoom In",
+                "animate-bounce": "Bounce",
+                "animate-pulse": "Pulse"
+            },
+            "animation_repeat": {
+                "1": "Sekali",
+                "infinite": "Selamanya"
+            },
+            "transition_curve": {
+                "ease": "Ease",
+                "ease-in": "Ease-In",
+                "ease-out": "Ease-Out",
+                "ease-in-out": "Ease-In-Out",
+                "linear": "Linear",
+                "auto": "Otomatis"
+            },
+            "blend_mode": {
+                "normal": "Normal",
+                "multiply": "Multiply",
+                "screen": "Screen",
+                "overlay": "Overlay",
+                "darken": "Darken",
+                "lighten": "Lighten",
+                "color-dodge": "Color Dodge",
+                "color-burn": "Color Burn",
+                "hard-light": "Hard Light",
+                "soft-light": "Soft Light",
+                "difference": "Difference",
+                "exclusion": "Exclusion",
+                "hue": "Hue",
+                "saturation": "Saturation",
+                "color": "Warna",
+                "luminosity": "Luminosity"
+            },
+            "size_type": {
+                "auto": "Otomatis",
+                "custom": "Kustom"
+            },
+            "overflow": {
+                "visible": "Terlihat",
+                "scroll": "Gulir",
+                "hidden": "Tersembunyi",
+                "auto": "Otomatis"
+            },
+            "sticky_position": {
+                "none": "Jangan Menempel",
+                "top": "Tempel ke Atas",
+                "bottom": "Tempel ke Bawah",
+                "top-bottom": "Tempel ke Atas dan Bawah"
+            },
+            "motion_trigger": {
+                "middle": "Tengah Elemen",
+                "top": "Atas Elemen",
+                "bottom": "Bawah Elemen"
+            }
+        },
+        "section": {
+            "link_url": {
+                "label": "URL Tautan Bagian"
+            },
+            "link_target": {
+                "label": "Target Tautan Bagian"
+            }
+        },
+        "blog": {
+            "postsPerPage": {
+                "label": "Post Per Halaman"
+            },
+            "category": {
+                "label": "Filter Kategori"
+            },
+            "orderBy": {
+                "label": "Urutkan Berdasarkan"
+            },
+            "order": {
+                "label": "Urutan"
+            },
+            "showImage": {
+                "label": "Tampilkan Gambar Unggulan"
+            },
+            "showExcerpt": {
+                "label": "Tampilkan Kutipan"
+            },
+            "showDate": {
+                "label": "Tampilkan Tanggal"
+            },
+            "showAuthor": {
+                "label": "Tampilkan Penulis"
+            },
+            "showCategory": {
+                "label": "Tampilkan Kategori"
+            },
+            "layout": {
+                "label": "Gaya Tata Letak"
+            },
+            "columns": {
+                "label": "Kolom"
+            },
+            "gap": {
+                "label": "Jarak"
+            },
+            "imageAspectRatio": {
+                "label": "Rasio Aspek Gambar"
+            },
+            "cardBackgroundColor": {
+                "label": "Latar Belakang Kartu"
+            }
+        },
+        "portfolio": {
+            "itemsPerPage": {
+                "label": "Item Per Halaman"
+            },
+            "showFilter": {
+                "label": "Tampilkan Filter"
+            },
+            "filterStyle": {
+                "label": "Gaya Filter"
+            },
+            "showTitle": {
+                "label": "Tampilkan Judul"
+            },
+            "showCategory": {
+                "label": "Tampilkan Kategori"
+            },
+            "hoverEffect": {
+                "label": "Efek Hover"
+            },
+            "overlayColor": {
+                "label": "Warna Overlay"
+            },
+            "columns": {
+                "label": "Kolom"
+            },
+            "gap": {
+                "label": "Jarak"
+            },
+            "imageAspectRatio": {
+                "label": "Rasio Aspek"
+            }
+        },
+        "postslider": {
+            "totalPosts": {
+                "label": "Jumlah Post"
+            },
+            "showImage": {
+                "label": "Tampilkan Gambar"
+            },
+            "showExcerpt": {
+                "label": "Tampilkan Kutipan"
+            },
+            "showMeta": {
+                "label": "Tampilkan Meta"
+            },
+            "showArrows": {
+                "label": "Tampilkan Panah"
+            },
+            "showDots": {
+                "label": "Tampilkan Titik"
+            },
+            "autoplay": {
+                "label": "Putar Otomatis"
+            },
+            "autoplaySpeed": {
+                "label": "Kecepatan Putar Otomatis"
+            },
+            "height": {
+                "label": "Tinggi"
+            },
+            "overlayEnabled": {
+                "label": "Aktifkan Overlay"
+            },
+            "overlayColor": {
+                "label": "Warna Overlay"
+            },
+            "buttonBackgroundColor": {
+                "label": "Latar Belakang Tombol"
+            }
+        },
+        "comments": {
+            "title": {
+                "label": "Judul"
+            },
+            "showForm": {
+                "label": "Tampilkan Formulir Komentar"
+            },
+            "showAvatar": {
+                "label": "Tampilkan Avatar"
+            },
+            "showReplyButton": {
+                "label": "Tampilkan Tombol Balas"
+            },
+            "namePlaceholder": {
+                "label": "Placeholder Nama"
+            },
+            "emailPlaceholder": {
+                "label": "Placeholder Email"
+            },
+            "commentPlaceholder": {
+                "label": "Placeholder Komentar"
+            },
+            "submitText": {
+                "label": "Teks Tombol Kirim"
+            },
+            "avatarSize": {
+                "label": "Ukuran Avatar"
+            }
+        },
+        "postnavigation": {
+            "style": {
+                "label": "Gaya"
+            },
+            "showThumbnails": {
+                "label": "Tampilkan Thumbnail"
+            },
+            "showLabels": {
+                "label": "Tampilkan Label"
+            },
+            "prevLabel": {
+                "label": "Label Sebelumnya"
+            },
+            "nextLabel": {
+                "label": "Label Berikutnya"
+            }
+        },
+        "relatedposts": {
+            "title": {
+                "label": "Judul"
+            },
+            "postsCount": {
+                "label": "Jumlah Post"
+            },
+            "showImage": {
+                "label": "Tampilkan Gambar"
+            },
+            "showExcerpt": {
+                "label": "Tampilkan Kutipan"
+            },
+            "showMeta": {
+                "label": "Tampilkan Meta"
+            },
+            "columns": {
+                "label": "Kolom"
+            }
+        },
+        "posttitle": {
+            "tag": {
+                "label": "Tag"
+            }
+        },
+        "postmeta": {
+            "showAuthor": {
+                "label": "Tampilkan Penulis"
+            },
+            "showDate": {
+                "label": "Tampilkan Tanggal"
+            },
+            "showCategory": {
+                "label": "Tampilkan Kategori"
+            },
+            "showReadTime": {
+                "label": "Tampilkan Waktu Baca"
+            },
+            "showComments": {
+                "label": "Tampilkan Komentar"
+            },
+            "separator": {
+                "label": "Pemisah"
+            }
+        },
+        "featuredimage": {
+            "showCaption": {
+                "label": "Tampilkan Keterangan"
+            },
+            "aspectRatio": {
+                "label": "Rasio Aspek"
+            },
+            "objectFit": {
+                "label": "Kesesuaian Objek"
+            }
+        }
+    }
+}

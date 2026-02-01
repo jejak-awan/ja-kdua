@@ -6,6 +6,7 @@ import navigation from './common/navigation.json';
 import pagination from './common/pagination.json';
 import status from './common/status.json';
 import time from './common/time.json';
+
 import auth from './features/auth.json';
 import content from './features/content.json';
 import comments from './features/comments.json';
@@ -14,8 +15,8 @@ import dashboard from './features/dashboard.json';
 import users from './features/users.json';
 import security from './features/security.json';
 import redis from './features/redis.json';
-import settings from './features/settings.json';
-import autosave from './features/autosave.json';
+import settings from './features/settings/index.js';
+
 import file_manager from './features/file_manager.json';
 import newsletter from './features/newsletter.json';
 import notifications from './features/notifications.json';
@@ -33,7 +34,7 @@ import menus from './features/menus.json';
 import activityLogs from './features/activity_logs.json';
 import loginHistory from './features/login_history.json';
 import logsDashboard from './features/logs_dashboard.json';
-import securityAlerts from './features/security_alerts.json';
+
 import search from './features/search.json';
 import frontend from './features/frontend.json';
 import errors from './features/errors.json';
@@ -42,13 +43,19 @@ import content_templates from './features/content_templates.json';
 import system from './features/system.json';
 import profile from './features/profile.json';
 import content_studio from './features/content_studio.json';
+import autosave from './features/autosave.json';
+import securityAlerts from './features/security_alerts.json';
+
 
 import scheduled_tasks from './features/scheduled_tasks.json';
 import command_runner from './features/command_runner.json';
 import email_templates from './features/email_templates.json';
 import editor from './features/editor.json';
+import builder from './features/builder/index.js';
 
 export default {
+    // Builder translations at root level for backward compatibility with builder.* namespace
+    builder,
     common: {
         actions,
         labels,
@@ -79,7 +86,7 @@ export default {
         settings,
         categories,
         tags,
-        autosave,
+
         roles,
         themes,
         forms,
@@ -87,7 +94,7 @@ export default {
         activityLogs,
         login_history: loginHistory,
         logs_dashboard: logsDashboard,
-        security_alerts: securityAlerts,
+
         search,
         frontend,
         errors,
@@ -96,6 +103,9 @@ export default {
         system,
         profile,
         content_studio,
+        autosave,
+        security_alerts: securityAlerts,
+
         scheduled_tasks,
         command_runner,
         email_templates,

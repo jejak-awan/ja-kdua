@@ -21,10 +21,10 @@ class ScheduledTaskController extends BaseApiController
 
     public function allowedCommands()
     {
-        return $this->success(
-            ScheduledTask::getAllowedCommands(),
-            'Allowed commands retrieved'
-        );
+        return $this->success([
+            'commands' => ScheduledTask::getAllowedCommands(),
+            'base_path' => base_path(),
+        ], 'Allowed commands retrieved');
     }
 
     /**
@@ -247,5 +247,53 @@ class ScheduledTaskController extends BaseApiController
             'task' => $task,
             'next_run_at' => $task->getNextRunAt()?->format('Y-m-d H:i:s'),
         ], 'Task details retrieved');
+    }
+
+    /**
+     * Run an ad-hoc command without creating a permanent task record
+     */
+    public function runAdhoc(Request $request)
+    {
+        $validated = $request->validate([
+            'command' => 'required|string|max:500',
+            'parameters' => 'nullable|string|max:500',
+        ]);
+
+        $fullCommand = $validated['parameters'] 
+            ? "{$validated['command']} {$validated['parameters']}"
+            : $validated['command'];
+
+        // Security check
+        if (! ScheduledTask::isCommandAllowed($validated['command'])) {
+            return $this->error('Command not allowed', 403, [], 'COMMAND_NOT_ALLOWED');
+        }
+
+        // Permission check
+        if (! auth()->user()->can('manage scheduled tasks')) {
+            return $this->forbidden('Insufficient permissions context.');
+        }
+
+        try {
+            Log::info('Executing ad-hoc command', [
+                'command' => $fullCommand,
+                'user_id' => auth()->id(),
+            ]);
+
+            $exitCode = Artisan::call($fullCommand);
+            $output = Artisan::output();
+
+            return $this->success([
+                'output' => $output,
+                'exit_code' => $exitCode,
+            ], 'Command executed successfully');
+
+        } catch (\Exception $e) {
+            Log::error('Ad-hoc command execution failed', [
+                'command' => $fullCommand,
+                'error' => $e->getMessage(),
+            ]);
+
+            return $this->error('Execution failed: '.$e->getMessage(), 500);
+        }
     }
 }

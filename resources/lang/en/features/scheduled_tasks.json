@@ -43,6 +43,23 @@
         "updated": "Task updated successfully",
         "deleted": "Task deleted successfully",
         "executed": "Task executed successfully",
-        "toggled": "Task status updated"
+        "toggled": "Task status updated",
+        "activated": "Task activated",
+        "deactivated": "Task deactivated"
+    },
+    "tooltips": {
+        "click_to_activate": "Click to activate - Task will run automatically based on schedule",
+        "click_to_deactivate": "Click to deactivate - Task will not run automatically"
+    },
+    "help": {
+        "title": "How Scheduled Tasks Work",
+        "intro": "Scheduled tasks allow you to automate routine commands like cache clearing, backups, and maintenance jobs.",
+        "requirements_title": "Requirements for Automatic Execution:",
+        "req_1": "Task must be set to Active (click the status button)",
+        "req_2": "Valid cron schedule must be configured",
+        "req_3": "Server cron job must be running (see below)",
+        "cron_title": "Server Cron Setup",
+        "cron_desc": "Add this line to your server's crontab (run 'crontab -e'):",
+        "cron_hint": "This command tells your server to check for scheduled tasks every minute."
     }
 }

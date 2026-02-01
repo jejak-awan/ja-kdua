@@ -1,0 +1,436 @@
+{
+    "fields": {
+        "actions": {
+            "reset": "Atur Ulang",
+            "copy": "Salin",
+            "info": "Bantuan",
+            "dynamicData": "Data Dinamis",
+            "responsive": "Pengaturan Ponsel",
+            "more": "Opsi Lainnya",
+            "copyAttributes": "Salin Atribut {label}",
+            "resetAttributes": "Atur Ulang Atribut {label}",
+            "manageGlobal": "Kelola URL Global Saya",
+            "extendAttributes": "Perluas Atribut {label}",
+            "findReplace": "Cari & Ganti",
+            "remove": "Hapus",
+            "edit": "Ubah",
+            "upload": "Unggah",
+            "select": "Pilih",
+            "cancel": "Batal",
+            "apply": "Terapkan",
+            "savePreset": "Simpan sebagai Preset"
+        },
+        "inherited": "Turunan",
+        "dynamicContent": "Konten Dinamis",
+        "dynamicTypes": {
+            "globalUrls": "URL Global Saya",
+            "customField": "Field Kustom",
+            "currentPostLink": "Tautan Postingan Saat Ini",
+            "authorPageLink": "Tautan Halaman Penulis",
+            "homepageLink": "Tautan Beranda",
+            "postLink": "Tautan Postingan",
+            "pageLink": "Tautan Halaman",
+            "mediaLink": "Tautan Media",
+            "projectLink": "Tautan Proyek"
+        },
+        "common": {
+            "no_results": "Tidak ada hasil",
+            "search": "Cari...",
+            "all": "Semua",
+            "width": "Lebar",
+            "widthPlaceholder": "misal 50%",
+            "height": "Tinggi",
+            "heightPlaceholder": "misal 300px",
+            "color": "Warna",
+            "style": "Gaya",
+            "position": "Posisi",
+            "opacity": "Opasitas",
+            "image": "Gambar",
+            "video": "Video",
+            "icon": "Ikon",
+            "text": "Teks",
+            "link": "Tautan",
+            "margin": "Margin",
+            "padding": "Padding",
+            "border": "Border",
+            "shadow": "Bayangan",
+            "background": "Latar Belakang",
+            "filters": "Filter",
+            "transform": "Transformasi",
+            "animation": "Animasi"
+        },
+        "layoutTypes": {
+            "flex": "Flex",
+            "grid": "Grid"
+        },
+        "color": {
+            "hex": "Hex",
+            "var": "Var",
+            "placeholder": "Masukkan atau pilih variabel",
+            "noMatches": "Tidak ada kecocokan",
+            "openPicker": "Buka Pemilih Warna",
+            "inherited": "Turunan: "
+        },
+        "types": {
+            "row": "Baris",
+            "element": "Modul",
+            "item": "Item"
+        },
+        "contextMenu": {
+            "undo": "Batalkan",
+            "redo": "Ulangi",
+            "duplicate": "Duplikat {type}",
+            "delete": "Hapus {type}",
+            "addElement": "Tambah Elemen",
+            "copy": "Salin {type}",
+            "paste": "Tempel",
+            "copyStyles": "Salin Gaya",
+            "pasteStyles": "Tempel Gaya",
+            "resetStyles": "Reset Gaya",
+            "goToParent": "Ke Parent",
+            "goToLayer": "Ke Layer",
+            "renameLabel": "Ubah Label",
+            "enable": "Aktifkan",
+            "disable": "Nonaktifkan",
+            "saveToLibrary": "Simpan ke Pustaka",
+            "canvasSettings": "Pengaturan Canvas",
+            "exportCanvas": "Ekspor Canvas",
+            "editCanvas": "Edit Canvas",
+            "makeMainCanvas": "Jadikan Canvas Utama",
+            "duplicateCanvas": "Duplikat Canvas",
+            "deleteCanvas": "Hapus Canvas"
+        },
+        "background": {
+            "tabs": {
+                "color": "Warna Latar Belakang",
+                "gradient": "Gradasi Latar Belakang",
+                "image": "Gambar Latar Belakang",
+                "video": "Video Latar Belakang",
+                "pattern": "Pola Latar Belakang",
+                "mask": "Masker Latar Belakang"
+            },
+            "color": {
+                "label": "Warna Latar Belakang",
+                "add": "Tambah Warna Latar",
+                "inherited": "Turunan"
+            },
+            "proportional": "Proporsional",
+            "gradient": {
+                "label": "Stop Gradasi",
+                "add": "Tambah Gradasi Latar",
+                "type": {
+                    "label": "Tipe Gradasi",
+                    "options": {
+                        "linear": "Linear",
+                        "circular": "Melingkar",
+                        "elliptical": "Elips",
+                        "conical": "Kerucut"
+                    }
+                },
+                "direction": "Arah Gradasi",
+                "repeat": "Ulangi Gradasi",
+                "length": "Panjang Gradasi",
+                "stops": "Stop Gradasi",
+                "placeAbove": "Tempatkan Gradasi Di Atas Gambar",
+                "selectedStop": "Stop Terpilih",
+                "typeInfo": "Pilih bentuk gradasi Anda: Linear, Melingkar, Elips, atau Kerucut.",
+                "directionInfo": "Sesuaikan sudut atau orientasi gradasi linear/kerucut Anda. Anda dapat menggunakan derajat, radian, putaran, atau variabel CSS.",
+                "repeatInfo": "Jika diaktifkan, stop gradasi yang ditentukan akan diulang hingga batas luar latar belakang tercapai.",
+                "lengthInfo": "Tentukan panjang gradasi yang Anda inginkan dalam satuan pilihan Anda. Jika panjang gradasi kurang dari ukuran kontainer, stop warna terakhir dalam gradasi akan mengisi ruang yang tersisa."
+            },
+            "image": {
+                "label": "Gambar Latar Belakang",
+                "add": "Tambah Gambar Latar",
+                "parallax": "Gunakan Efek Paralaks",
+                "parallaxMethod": {
+                    "label": "Metode Paralaks",
+                    "options": {
+                        "true": "Paralaks Sejati (True Parallax)",
+                        "css": "Paralaks CSS"
+                    }
+                },
+                "size": {
+                    "label": "Ukuran Gambar",
+                    "options": {
+                        "cover": "Penuhi (Cover)",
+                        "fit": "Pas (Fit)",
+                        "actual": "Ukuran Asli (Actual Size)",
+                        "auto": "Otomatis (Auto)",
+                        "stretch": "Regangkan (Stretch to Fill)",
+                        "custom": "Ukuran Kustom (Custom Size)"
+                    }
+                },
+                "position": {
+                    "label": "Posisi Gambar",
+                    "options": {
+                        "topLeft": "Kiri Atas",
+                        "topCenter": "Tengah Atas",
+                        "topRight": "Kanan Atas",
+                        "centerLeft": "Kiri Tengah",
+                        "center": "Tengah",
+                        "centerRight": "Kanan Tengah",
+                        "bottomLeft": "Kiri Bawah",
+                        "bottomCenter": "Tengah Bawah",
+                        "bottomRight": "Kanan Bawah"
+                    }
+                },
+                "repeat": {
+                    "label": "Pengulangan Gambar",
+                    "options": {
+                        "repeat": "Ulangi (Repeat)",
+                        "repeatX": "Ulangi X (Horizontal)",
+                        "repeatY": "Ulangi Y (Vertical)",
+                        "space": "Spasi (Space)",
+                        "round": "Bulat (Round)",
+                        "noRepeat": "Jangan Ulangi (No Repeat)"
+                    }
+                },
+                "attachment": {
+                    "label": "Lampiran Gambar",
+                    "options": {
+                        "scroll": "Gulir (Scroll)",
+                        "fixed": "Tetap (Fixed)"
+                    }
+                },
+                "blend": "Mode Campuran Gambar",
+                "blendMode": "Background Image Blend"
+            },
+            "video": {
+                "label": "Video Latar Belakang",
+                "mp4": "Video Latar MP4",
+                "webm": "Video Latar Webm",
+                "width": "Lebar Video",
+                "height": "Tinggi Video",
+                "pauseOnPlay": "Jeda Video Saat Video Lain Diputar",
+                "pauseNotInView": "Jeda Video Saat Tidak Terlihat",
+                "loop": "Ulangi Video",
+                "mute": "Bisukan Video",
+                "overlay": "Warna Hamparan Video",
+                "add": "Tambah Video Latar Belakang"
+            },
+            "pattern": {
+                "label": "Pola Latar Belakang",
+                "add": "Tambah Pola Latar",
+                "color": "Warna Pola",
+                "transform": "Transformasi Pola",
+                "options": {
+                    "polka-dots": "Bintik Polka",
+                    "checkerboard": "Papan Catur",
+                    "diagonal-stripes": "Garis Diagonal",
+                    "zig-zag": "Zig Zag",
+                    "cubes": "Kubus",
+                    "honeycomb": "Sarang Lebah",
+                    "triangles": "Segitiga",
+                    "confetti": "Konfeti",
+                    "grid": "Kisi (Grid)",
+                    "dots-small": "Bintik Kecil",
+                    "topo": "Topografi",
+                    "crosshatch": "Arsiran (Crosshatch)",
+                    "3d-diamonds": "Berlian 3D",
+                    "ogees": "Ogee",
+                    "pinwheel": "Kincir",
+                    "scallops": "Kerang",
+                    "shippo": "Shippo",
+                    "waves": "Gelombang"
+                },
+                "flipH": "Balik Horizontal",
+                "flipV": "Balik Vertikal",
+                "rotate": "Putar 90°",
+                "invert": "Balikkan Warna (Invert)",
+                "size": {
+                    "label": "Ukuran Pola",
+                    "width": "Lebar Pola",
+                    "height": "Tinggi Pola",
+                    "options": {
+                        "cover": "Cover",
+                        "contain": "Fit",
+                        "actual": "Actual Size",
+                        "auto": "Auto",
+                        "stretch": "Stretch to Fill",
+                        "custom": "Custom Size"
+                    }
+                },
+                "repeat": {
+                    "label": "Pengulangan Pola",
+                    "options": {
+                        "repeat": "Ulangi (Repeat)",
+                        "repeatX": "Ulangi X (Horizontal)",
+                        "repeatY": "Ulangi Y (Vertical)",
+                        "space": "Spasi (Space)",
+                        "round": "Bulat (Round)",
+                        "noRepeat": "Jangan Ulangi (No Repeat)"
+                    }
+                },
+                "repeatOrigin": {
+                    "label": "Asal Pengulangan Pola",
+                    "options": {
+                        "topLeft": "Kiri Atas",
+                        "topCenter": "Tengah Atas",
+                        "topRight": "Kanan Atas",
+                        "centerLeft": "Kiri Tengah",
+                        "center": "Tengah",
+                        "centerRight": "Kanan Tengah",
+                        "bottomLeft": "Kiri Bawah",
+                        "bottomCenter": "Tengah Bawah",
+                        "bottomRight": "Kanan Bawah"
+                    }
+                },
+                "horizontalOffset": "Offset Horizontal Pola",
+                "verticalOffset": "Offset Vertikal Pola",
+                "blendMode": {
+                    "label": "Mode Campuran Pola"
+                }
+            },
+            "mask": {
+                "label": "Masker Latar Belakang",
+                "add": "Tambah Masker Latar",
+                "color": "Warna Masker",
+                "transform": "Transformasi Masker",
+                "flipH": "Balik Horizontal",
+                "flipV": "Balik Vertikal",
+                "rotate": "Putar 90°",
+                "invert": "Balikkan Warna (Invert)",
+                "size": {
+                    "label": "Ukuran Masker",
+                    "width": "Lebar Masker",
+                    "height": "Tinggi Masker",
+                    "options": {
+                        "cover": "Cover",
+                        "contain": "Fit",
+                        "actual": "Actual Size",
+                        "auto": "Auto",
+                        "stretch": "Stretch to Fill",
+                        "custom": "Custom Size"
+                    }
+                },
+                "position": {
+                    "label": "Posisi Masker"
+                },
+                "aspectRatio": {
+                    "label": "Rasio Aspek Masker",
+                    "options": {
+                        "square": "Kotak (Square)",
+                        "landscape": "Lanskap (Landscape)",
+                        "portrait": "Potret (Portrait)"
+                    }
+                },
+                "options": {
+                    "arch": "Lengkungan (Arch)",
+                    "wave": "Gelombang (Wave)",
+                    "diagonal": "Diagonal",
+                    "blob": "Blob (Organik)",
+                    "blob-variant": "Variasi Blob",
+                    "squircle": "Squircle",
+                    "hexagon": "Segienam (Hexagon)",
+                    "angled-cut": "Potongan Miring",
+                    "chevron-edge": "Tepi Chevron",
+                    "brush-stroke": "Sapuan Kuas",
+                    "slanted-bars-mask": "Batang Miring",
+                    "honeycomb-mask": "Sarang Lebah",
+                    "pill-shape": "Bentuk Pil",
+                    "bean": "Kacang",
+                    "chevrons": "Chevron",
+                    "corner-blob": "Blob Sudut",
+                    "corner-square": "Kotak Sudut",
+                    "ellipse": "Elips (Ellipse)",
+                    "triangle": "Segitiga (Triangle)"
+                },
+                "blend_mode": {
+                    "label": "Mode Campuran Masker"
+                },
+                "proportional": "Proportional"
+            },
+            "animation": {
+                "empty": "Pilih gaya animasi untuk melihat opsi."
+            },
+            "transform": {
+                "tabs": {
+                    "scale": "Scale",
+                    "translate": "Move",
+                    "rotate": "Rotate",
+                    "skew": "Skew"
+                }
+            }
+        },
+        "border": {
+            "width": "Lebar",
+            "color": "Warna",
+            "style": "Gaya",
+            "radius": {
+                "label": "Sudut Melengkung",
+                "tl": "KA",
+                "tr": "KnA",
+                "bl": "KB",
+                "br": "KnB"
+            },
+            "styleOptions": {
+                "solid": "Solid",
+                "dashed": "Putus-putus",
+                "dotted": "Titik-titik",
+                "double": "Ganda",
+                "none": "Tidak Ada"
+            },
+            "styles": {
+                "label": "Gaya Batas",
+                "sides": {
+                    "all": "Semua",
+                    "top": "Atas",
+                    "right": "Kanan",
+                    "bottom": "Bawah",
+                    "left": "Kiri"
+                },
+                "options": {
+                    "solid": "Solid",
+                    "dashed": "Putus-putus",
+                    "dotted": "Titik-titik",
+                    "double": "Ganda",
+                    "none": "Tidak Ada"
+                }
+            }
+        },
+        "shadow": {
+            "label": "Bayangan Kotak",
+            "presets": {
+                "label": "Preset Bayangan",
+                "none": "Tidak Ada",
+                "outerSmall": "Luar Kecil",
+                "outerLarge": "Luar Besar",
+                "offsetBottom": "Offset Bawah",
+                "diagonal": "Diagonal",
+                "spread": "Menyebar",
+                "insetSmall": "Dalam Kecil",
+                "insetLarge": "Dalam Besar"
+            },
+            "controls": {
+                "horizontal": "Posisi Horizontal",
+                "vertical": "Posisi Vertikal",
+                "blur": "Kekuatan Kabur",
+                "spread": "Kekuatan Sebaran",
+                "color": "Warna Bayangan",
+                "inset": "Bayangan Dalam (Inset)"
+            }
+        },
+        "spacing": {
+            "link": "Tautkan Nilai",
+            "sides": {
+                "top": "Atas",
+                "right": "Kanan",
+                "bottom": "Bawah",
+                "left": "Kiri"
+            }
+        },
+        "children": {
+            "empty": "Tidak ada {type} ditemukan.",
+            "add": "Tambah {type}",
+            "applyTemplate": "Sisipkan dari Pustaka"
+        },
+        "icon": {
+            "search": "Cari ikon...",
+            "searchLarge": "Cari di antara semua ikon...",
+            "filter": "Filter Ikon",
+            "expand": "Perluas Modal",
+            "noResults": "Tidak ada ikon yang ditemukan.",
+            "pickIcon": "Pilih Ikon"
+        }
+    }
+}

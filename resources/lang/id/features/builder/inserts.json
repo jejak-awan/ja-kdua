@@ -1,0 +1,143 @@
+{
+    "insertModal": {
+        "title": "Sisipkan Modul Atau Baris",
+        "searchPlaceholder": "Cari modul",
+        "noResults": "Tidak ada modul yang cocok dengan \"{query}\"",
+        "libraryEmpty": "Belum ada tata letak yang tersimpan.",
+        "tabs": {
+            "module": "Modul",
+            "row": "Baris",
+            "section": "Bagian",
+            "library": "Pustaka",
+            "presets": "Preset"
+        },
+        "layoutGroups": {
+            "equal": "Kolom Sama",
+            "offset": "Kolom Offset",
+            "multi-row": "Multi-Baris",
+            "multiRow": "Multi-Baris",
+            "multiCol": "Multi-Kolom",
+            "grid-multi-row": "Grid Multi-Baris",
+            "masonry": "Masonry",
+            "sidebar": "Sidebar"
+        }
+    },
+    "insertRowModal": {
+        "title": "Sisipkan Baris",
+        "libraryPlaceholder": "Fitur pustaka segera hadir."
+    },
+    "insertSectionModal": {
+        "title": "Sisipkan Bagian",
+        "tabs": {
+            "section": "Bagian Baru"
+        }
+    },
+    "structureTemplateModal": {
+        "title": "Sisipkan dari Pustaka",
+        "noResults": "Tidak ada templat yang tersedia untuk konteks ini."
+    },
+    "pageTemplateModal": {
+        "title": "Impor Templat Halaman",
+        "warning": "Peringatan: Mengimpor templat akan mengganti seluruh konten saat ini."
+    },
+    "categories": {
+        "structure": "Struktur",
+        "basic": "Dasar",
+        "media": "Media",
+        "forms": "Formulir",
+        "content": "Konten",
+        "interactive": "Interaktif",
+        "dynamic": "Dinamis",
+        "fullwidth": "Lebar Penuh"
+    },
+    "actions": {
+        "add": "Tambah {name}",
+        "addSection": "Tambah Bagian Baru"
+    },
+    "canvas": {
+        "empty": "Mulai halaman Anda dengan menambahkan bagian baru."
+    },
+    "module": "Modul",
+    "common": {
+        "select": "Pilih...",
+        "none": "Tidak Ada",
+        "delete": "Hapus",
+        "search": "Cari...",
+        "close": "Tutup",
+        "cancel": "Cancel",
+        "save": "Save",
+        "width": "Width",
+        "height": "Height",
+        "normal": "Normal"
+    },
+    "advanced": {
+        "conditions": {
+            "add": "Tambah Kondisi",
+            "pickerTitle": "Pilih Kondisi",
+            "search": "Cari kondisi..."
+        },
+        "attributes": {
+            "add": "Tambah Atribut",
+            "custom": "Masukkan Atribut Kustom"
+        },
+        "css": {
+            "info": "Tulis CSS bebas menggunakan kata kunci {selector} untuk menargetkan modul ini. Contoh: {example}",
+            "elementsInfo": "Targetkan selektor yang telah ditentukan dalam elemen ini tanpa perlu menuliskan nama selektor. Contoh: {example}"
+        },
+        "interactions": {
+            "add": "Tambah Interaksi"
+        },
+        "scroll": {
+            "configure": "Konfigurasikan pengaturan {type} Anda di bawah ini.",
+            "tabDisabled": "Aktifkan {type} untuk melihat opsi.",
+            "level": "Intensitas"
+        }
+    },
+    "builder": {
+        "settings": {
+            "accordion": {
+                "openHeaderBackgroundColor": {
+                    "label": "Warna Latar Belakang Toggle Terbuka"
+                },
+                "headerBackgroundColor": {
+                    "label": "Warna Latar Belakang Toggle Tertutup"
+                },
+                "openHeaderTextColor": {
+                    "label": "Warna Teks Judul Terbuka"
+                },
+                "iconColor": {
+                    "label": "Warna Ikon"
+                },
+                "iconSize": {
+                    "label": "Ukuran Ikon"
+                },
+                "itemGap": {
+                    "label": "Jarak Antar Item"
+                },
+                "headerPadding": {
+                    "label": "Padding Header"
+                },
+                "contentPadding": {
+                    "label": "Padding Konten"
+                },
+                "contentBackgroundColor": {
+                    "label": "Warna Latar Belakang Konten"
+                }
+            },
+            "accordion_item": {
+                "openHeaderBackgroundColor": {
+                    "label": "Warna Latar Belakang Toggle Terbuka"
+                },
+                "headerBackgroundColor": {
+                    "label": "Warna Latar Belakang Toggle Tertutup"
+                },
+                "openHeaderTextColor": {
+                    "label": "Warna Teks Judul Terbuka"
+                },
+                "iconColor": {
+                    "label": "Warna Ikon"
+                }
+            }
+        }
+    }
+}

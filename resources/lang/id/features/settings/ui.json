@@ -1,0 +1,91 @@
+{
+    "title": "Pengaturan",
+    "description": "Kelola pengaturan aplikasi Anda",
+    "loading": "Memuat pengaturan...",
+    "noSettings": "Tidak ada pengaturan ditemukan di tab ini.",
+    "tabs": {
+        "general": "Umum",
+        "email": "Email",
+        "seo": "SEO",
+        "security": "Keamanan",
+        "comments": "Diskusi",
+        "performance": "Performa",
+        "media": "Media",
+        "ai": "Bantuan AI"
+    },
+    "groups": {
+        "ai": {
+            "title": "Bantuan AI",
+            "description": "Konfigurasi fitur AI untuk pembuatan konten."
+        },
+        "siteInfo": {
+            "title": "Informasi Situs",
+            "description": "Informasi dasar tentang situs web Anda"
+        },
+        "localization": {
+            "title": "Lokalisasi",
+            "description": "Pengaturan regional dan preferensi format"
+        },
+        "smtp": {
+            "title": "Konfigurasi SMTP",
+            "description": "Pengaturan koneksi server email"
+        },
+        "identity": {
+            "title": "Identitas Email",
+            "description": "Informasi pengirim default untuk email keluar"
+        },
+        "meta": {
+            "title": "Tag Meta",
+            "description": "Informasi meta default untuk mesin pencari"
+        },
+        "searchEngines": {
+            "title": "Mesin Pencari",
+            "description": "Integrasi dengan Google dan alat mesin pencari"
+        },
+        "authentication": {
+            "title": "Autentikasi & 2FA",
+            "description": "Pengaturan pendaftaran pengguna dan autentikasi dua faktor"
+        },
+        "password": {
+            "title": "Kebijakan Kata Sandi",
+            "description": "Persyaratan kekuatan dan kompleksitas kata sandi"
+        },
+        "session": {
+            "title": "Manajemen Sesi",
+            "description": "Kontrol durasi dan batasan sesi login"
+        },
+        "access": {
+            "title": "Pembatasan Akses",
+            "description": "Pengaturan untuk membatasi akses mencurigakan"
+        },
+        "captcha": {
+            "title": "Perlindungan Anti-Bot",
+            "description": "Verifikasi captcha untuk mencegah serangan otomatis"
+        },
+        "upload": {
+            "title": "Pengaturan Unggahan",
+            "description": "Batas unggahan file dan tipe file yang diizinkan"
+        },
+        "imageProcessing": {
+            "title": "Pemrosesan Gambar",
+            "description": "Pengaturan pembuatan thumbnail dan watermark"
+        },
+        "discussion": {
+            "title": "Pengaturan Diskusi",
+            "description": "Konfigurasi sistem komentar"
+        },
+        "moderation": {
+            "title": "Moderasi",
+            "description": "Keamanan konten dan perlindungan spam"
+        }
+    },
+    "enabled": "Aktif",
+    "disabled": "Nonaktif",
+    "current": "Saat ini",
+    "reset": "Atur Ulang",
+    "save": "Simpan Pengaturan",
+    "saving": "Menyimpan...",
+    "saved": "Pengaturan berhasil disimpan",
+    "failed": "Gagal menyimpan pengaturan",
+    "jsonPlaceholder": "Masukkan format JSON yang valid"
+}

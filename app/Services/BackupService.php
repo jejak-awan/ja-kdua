@@ -424,11 +424,17 @@ class BackupService
      */
     public function updateScheduleSettings(array $settings): array
     {
-        $validKeys = ['backup_schedule_enabled', 'backup_schedule_frequency', 'backup_schedule_time', 'backup_retention_days', 'backup_max_count'];
+        $typeMap = [
+            'backup_schedule_enabled' => 'boolean',
+            'backup_schedule_frequency' => 'string',
+            'backup_schedule_time' => 'string',
+            'backup_retention_days' => 'integer',
+            'backup_max_count' => 'integer',
+        ];
 
         foreach ($settings as $key => $value) {
-            if (in_array($key, $validKeys)) {
-                \App\Models\Setting::set($key, $value, 'string', 'backup');
+            if (isset($typeMap[$key])) {
+                \App\Models\Setting::set($key, $value, $typeMap[$key], 'backup');
             }
         }
 

@@ -505,6 +505,7 @@ Route::prefix('v1')->group(function () {
 
         // Scheduled Tasks - Custom routes MUST come BEFORE apiResource
         Route::get('scheduled-tasks/allowed-commands', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'allowedCommands'])->middleware('permission:manage scheduled tasks');
+        Route::post('scheduled-tasks/run-adhoc', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'runAdhoc'])->middleware('permission:manage scheduled tasks');
         Route::post('scheduled-tasks/{id}/run', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'run'])->middleware('permission:manage scheduled tasks');
         Route::apiResource('scheduled-tasks', App\Http\Controllers\Api\V1\ScheduledTaskController::class)->middleware('permission:manage scheduled tasks');
 

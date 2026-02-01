@@ -1,0 +1,227 @@
+{
+    "panels": {
+        "layers": {
+            "empty": "Belum ada layer. Tambahkan beberapa modul!"
+        },
+        "pages": {
+            "searchPlaceholder": "Cari halaman...",
+            "empty": "Halaman tidak ditemukan.",
+            "addNew": "Tambah Halaman Baru",
+            "promptTitle": "Masukkan judul halaman:",
+            "actions": {
+                "edit": "Edit",
+                "delete": "Hapus"
+            }
+        },
+        "history": {
+            "initial": "Status Awal",
+            "change": "Perubahan dibuat",
+            "current": "Saat Ini",
+            "sessionStart": "Sesi Dimulai",
+            "action": "Aksi #{index}"
+        },
+        "globalVariables": {
+            "numbers": "Angka",
+            "color": {
+                "label": "Warna",
+                "alpha": "Alpha",
+                "hex": "Hex",
+                "rgb": "RGB",
+                "hsl": "HSL",
+                "gradient": "Gradasi",
+                "solid": "Solid",
+                "transparent": "Transparan"
+            },
+            "text": "Teks",
+            "images": "Gambar",
+            "links": "Tautan",
+            "colors": "Warna",
+            "fonts": "Font",
+            "table": {
+                "name": "Nama",
+                "value": "Nilai",
+                "string": "String",
+                "image": "Gambar",
+                "url": "Url",
+                "color": "Warna"
+            },
+            "placeholders": {
+                "name": "Nama",
+                "none": "kosong",
+                "empty": "Belum ada variabel {category} yang ditambahkan."
+            },
+            "actions": {
+                "addNumber": "Tambah Angka Global",
+                "addString": "Tambah String Global",
+                "addImage": "Tambah Gambar Global",
+                "addLink": "Tambah Tautan Global",
+                "addColor": "Tambah Warna Global",
+                "addFont": "Tambah Font Global",
+                "addGeneric": "Tambah {category} Global",
+                "selectImage": "Pilih Gambar",
+                "select": "Pilih",
+                "cancel": "Batalkan Perubahan",
+                "save": "Simpan Variabel"
+            },
+            "messages": {
+                "fillName": "Silakan isi nama untuk variabel {type} yang ada terlebih dahulu.",
+                "discardConfirm": "Apakah Anda yakin ingin membatalkan perubahan?",
+                "saveSuccess": "Variabel global berhasil disimpan!",
+                "saveError": "Gagal menyimpan variabel.",
+                "invalidHex": "Kode hex tidak valid: {value} untuk {name}"
+            }
+        },
+        "preferences": {
+            "interface": "Antarmuka",
+            "darkMode": "Mode Gelap",
+            "editor": "Editor",
+            "showGrid": "Tampilkan Grid",
+            "snapToObjects": "Tempel ke Objek",
+            "system": "Sistem",
+            "autoSave": "Simpan Otomatis",
+            "version": "Builder v{version}",
+            "build": "Build {date}"
+        },
+        "help": {
+            "shortcuts": "Pintasan Keyboard",
+            "labels": {
+                "save": "Simpan Perubahan",
+                "undo": "Urungkan",
+                "redo": "Ulangi",
+                "delete": "Hapus Modul",
+                "duplicate": "Duplikat",
+                "copy": "Salin Gaya",
+                "paste": "Tempel Gaya"
+            },
+            "footer": {
+                "docs": "Lihat Dokumentasi",
+                "support": "Hubungi Dukungan"
+            }
+        },
+        "layouts": {
+            "presets": {
+                "hero": "Header Hero",
+                "features": "Grid Fitur",
+                "contact": "Bagian Kontak",
+                "pricing": "Tabel Harga",
+                "testimonials": "Testimoni",
+                "footer": "Footer Sederhana"
+            },
+            "search": "Cari Templat...",
+            "emptyTitle": "Tidak ada templat ditemukan",
+            "emptyDesc": "Coba sesuaikan pencarian atau kategori Anda."
+        },
+        "presets": {
+            "title": "Pilih Preset",
+            "empty": "Tidak ada preset ditemukan. Simpan modul sebagai preset untuk melihatnya di sini.",
+            "yourPresets": "Preset Anda",
+            "categories": {
+                "buttons": "Gaya Tombol",
+                "cards": "Gaya Kartu"
+            },
+            "items": {
+                "primaryRounded": "Utama Bulat",
+                "outlineSharp": "Garis Tepi Tajam",
+                "gradientPill": "Gradasi Pil",
+                "shadowHover": "Bayangan Melayang",
+                "borderMinimal": "Bingkai Minimalis",
+                "glassmorphism": "Efek Kaca"
+            },
+            "actions": {
+                "apply": "Terapkan",
+                "delete": "Hapus"
+            },
+            "saveModal": {
+                "title": "Simpan sebagai Preset",
+                "description": "Simpan konfigurasi modul ini untuk digunakan kembali nanti di seluruh situs Anda.",
+                "nameLabel": "Nama Preset",
+                "placeholder": "misal: Tombol Bulat Utama",
+                "saveBtn": "Simpan Preset"
+            }
+        },
+        "portability": {
+            "tabs": {
+                "export": "Ekspor",
+                "import": "Impor"
+            },
+            "export": {
+                "helper": "Salin JSON ini untuk mengekspor tata letak Anda saat ini.",
+                "copy": "Salin ke Papan Klip",
+                "file": "Ekspor File"
+            },
+            "import": {
+                "helper": "Tempel JSON di sini untuk mengimpor tata letak.",
+                "placeholder": "Tempel JSON di sini...",
+                "button": "Impor Tata Letak",
+                "success": "Impor berhasil!",
+                "invalid": "JSON tidak valid"
+            }
+        },
+        "pageSettings": {
+            "title": "Pengaturan Halaman",
+            "sections": {
+                "general": "Umum",
+                "taxonomy": "Taksonomi",
+                "media": "Media",
+                "excerpt": "Kutipan",
+                "seo": "SEO",
+                "advanced": "Lanjut"
+            },
+            "fields": {
+                "title": "Judul Halaman",
+                "slug": "Slug",
+                "status": "Status",
+                "type": "Tipe",
+                "featuredImage": "Gambar Unggulan"
+            },
+            "placeholders": {
+                "title": "Judul Halaman",
+                "slug": "URL Slug",
+                "selectImage": "Pilih Gambar",
+                "untitled": "Halaman Tanpa Judul"
+            },
+            "status": {
+                "draft": "Draf",
+                "published": "Diterbitkan",
+                "pending": "Menunggu",
+                "archived": "Diarsipkan",
+                "private": "Privat"
+            }
+        },
+        "globalDesign": {
+            "colors": "Warna Global",
+            "typography": "Tipografi",
+            "fields": {
+                "headingFont": "Font Judul",
+                "bodyFont": "Font Konten"
+            },
+            "presets": {
+                "primary": "Utama",
+                "secondary": "Sekunder",
+                "dark": "Gelap",
+                "light": "Terang"
+            }
+        },
+        "comingSoon": "segera hadir",
+        "fallbackTitle": "Panel",
+        "templates": {
+            "searchPlaceholder": "Search templates...",
+            "loading": "Loading templates...",
+            "empty": "No templates found.",
+            "addNew": "Add New Template",
+            "promptTitle": "Enter template name:",
+            "assignmentTitle": "Assignment Rules",
+            "applyTo": "Apply To",
+            "contentType": "Content Type",
+            "category": "Category"
+        },
+        "theme": {
+            "loading": "Loading theme settings...",
+            "noActive": "No active theme found.",
+            "save": "Save Theme Settings",
+            "settings": "Settings",
+            "selectHint": "Select a theme from the left to configure its properties.",
+            "activate": "Activate Theme"
+        }
+    }
+}

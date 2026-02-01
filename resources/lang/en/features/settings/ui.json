@@ -1,0 +1,91 @@
+{
+    "title": "Settings",
+    "description": "Manage your application settings",
+    "loading": "Loading settings...",
+    "noSettings": "No settings found in this tab.",
+    "tabs": {
+        "general": "General",
+        "email": "Email",
+        "seo": "SEO",
+        "security": "Security",
+        "comments": "Discussion",
+        "performance": "Performance",
+        "media": "Media",
+        "ai": "AI Assistance"
+    },
+    "groups": {
+        "ai": {
+            "title": "AI Assistance",
+            "description": "Configure AI features for content generation."
+        },
+        "siteInfo": {
+            "title": "Site Information",
+            "description": "Basic information about your website"
+        },
+        "localization": {
+            "title": "Localization",
+            "description": "Regional settings and formatting preferences"
+        },
+        "smtp": {
+            "title": "SMTP Configuration",
+            "description": "Mail server connection settings"
+        },
+        "identity": {
+            "title": "Email Identity",
+            "description": "Default sender information for outgoing emails"
+        },
+        "meta": {
+            "title": "Meta Tags",
+            "description": "Default meta information for search engines"
+        },
+        "searchEngines": {
+            "title": "Search Engines",
+            "description": "Integration with Google and search engine tools"
+        },
+        "authentication": {
+            "title": "Authentication & 2FA",
+            "description": "User registration and two-factor authentication settings"
+        },
+        "password": {
+            "title": "Password Policy",
+            "description": "Password strength and complexity requirements"
+        },
+        "session": {
+            "title": "Session Management",
+            "description": "Control login session duration and limits"
+        },
+        "access": {
+            "title": "Access Restriction",
+            "description": "Settings to restrict suspicious access"
+        },
+        "captcha": {
+            "title": "Anti-Bot Protection",
+            "description": "Captcha verification to prevent automated attacks"
+        },
+        "upload": {
+            "title": "Upload Settings",
+            "description": "File upload limits and allowed file types"
+        },
+        "imageProcessing": {
+            "title": "Image Processing",
+            "description": "Thumbnail generation and watermark settings"
+        },
+        "discussion": {
+            "title": "Discussion Settings",
+            "description": "Configure comment system behavior"
+        },
+        "moderation": {
+            "title": "Moderation",
+            "description": "Content safety and spam protection"
+        }
+    },
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "current": "Current",
+    "reset": "Reset",
+    "save": "Save Settings",
+    "saving": "Saving...",
+    "saved": "Settings saved successfully",
+    "failed": "Failed to save settings",
+    "jsonPlaceholder": "Enter valid JSON format"
+}

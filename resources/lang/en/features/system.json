@@ -84,7 +84,9 @@
             "message": "Message",
             "type": "Type",
             "recipients": "Recipients",
-            "sent_at": "Sent At"
+            "sent_at": "Sent At",
+            "send": "Kirim Notifikasi",
+            "sending": "Mengirim..."
         },
         "messages": {
             "sent": "Notification has been queued for delivery.",

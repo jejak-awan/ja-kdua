@@ -1,0 +1,143 @@
+{
+    "insertModal": {
+        "title": "Insert Module Or Row",
+        "searchPlaceholder": "Search for a module",
+        "noResults": "No modules found matching \"{query}\"",
+        "libraryEmpty": "No saved layouts yet.",
+        "tabs": {
+            "module": "Module",
+            "row": "Row",
+            "section": "Section",
+            "library": "Library",
+            "presets": "Preset"
+        },
+        "layoutGroups": {
+            "equal": "Equal Columns",
+            "offset": "Offset Columns",
+            "multi-row": "Multi-Row",
+            "multiRow": "Multi-Row",
+            "multiCol": "Multi-Column",
+            "grid-multi-row": "Grid Multi-Row",
+            "masonry": "Masonry",
+            "sidebar": "Sidebar"
+        }
+    },
+    "insertRowModal": {
+        "title": "Insert Row",
+        "libraryPlaceholder": "Library features coming soon."
+    },
+    "insertSectionModal": {
+        "title": "Insert Section",
+        "tabs": {
+            "section": "New Section"
+        }
+    },
+    "structureTemplateModal": {
+        "title": "Insert from Library",
+        "noResults": "No templates available for this context."
+    },
+    "pageTemplateModal": {
+        "title": "Import Page Template",
+        "warning": "Warning: Importing a template will replace all current content."
+    },
+    "categories": {
+        "structure": "Structure",
+        "basic": "Basic",
+        "media": "Media",
+        "content": "Content",
+        "interactive": "Interactive",
+        "forms": "Forms",
+        "dynamic": "Dynamic",
+        "fullwidth": "Fullwidth"
+    },
+    "actions": {
+        "add": "Add {name}",
+        "addSection": "Add New Section"
+    },
+    "canvas": {
+        "empty": "Start your page by adding a section."
+    },
+    "module": "Module",
+    "common": {
+        "cancel": "Cancel",
+        "save": "Save",
+        "select": "Select...",
+        "none": "None",
+        "delete": "Delete",
+        "width": "Width",
+        "height": "Height",
+        "normal": "Normal",
+        "search": "Search...",
+        "close": "Close"
+    },
+    "advanced": {
+        "conditions": {
+            "add": "Add Condition",
+            "pickerTitle": "Select Condition",
+            "search": "Search conditions..."
+        },
+        "attributes": {
+            "add": "Add Attribute",
+            "custom": "Enter Custom Attribute"
+        },
+        "css": {
+            "info": "Write free-form css using the keyword {selector} to target this module. i.e. {example}",
+            "elementsInfo": "Target predefined selectors within this element without the need to write out selectors name. i.e. {example}"
+        },
+        "interactions": {
+            "add": "Add Interaction"
+        },
+        "scroll": {
+            "configure": "Configure your {type} settings below.",
+            "tabDisabled": "Enable {type} to see options.",
+            "level": "Intensity"
+        }
+    },
+    "builder": {
+        "settings": {
+            "accordion": {
+                "openHeaderBackgroundColor": {
+                    "label": "Open Toggle Background Color"
+                },
+                "headerBackgroundColor": {
+                    "label": "Closed Toggle Background Color"
+                },
+                "openHeaderTextColor": {
+                    "label": "Open Title Text Color"
+                },
+                "iconColor": {
+                    "label": "Icon Color"
+                },
+                "iconSize": {
+                    "label": "Icon Size"
+                },
+                "itemGap": {
+                    "label": "Spacing Between Items"
+                },
+                "headerPadding": {
+                    "label": "Header Padding"
+                },
+                "contentPadding": {
+                    "label": "Content Padding"
+                },
+                "contentBackgroundColor": {
+                    "label": "Content Background Color"
+                }
+            },
+            "accordion_item": {
+                "openHeaderBackgroundColor": {
+                    "label": "Open Toggle Background Color"
+                },
+                "headerBackgroundColor": {
+                    "label": "Closed Toggle Background Color"
+                },
+                "openHeaderTextColor": {
+                    "label": "Open Title Text Color"
+                },
+                "iconColor": {
+                    "label": "Icon Color"
+                }
+            }
+        }
+    }
+}

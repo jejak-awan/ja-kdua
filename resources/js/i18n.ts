@@ -2,22 +2,6 @@ import { createI18n } from 'vue-i18n';
 import config from '../lang/config';
 import en from '../lang/en/index.js';
 import id from '../lang/id/index.js';
-import builderTranslations from './components/builder/lang/index.js';
-/**
- * Deep merge utility for translation objects
- */
-const deepMerge = <T extends Record<string, any>>(target: T, ...sources: Record<string, any>[]): T => {
-    for (const source of sources) {
-        for (const key in source) {
-            if (source[key] instanceof Object && key in target && target[key] instanceof Object) {
-                deepMerge(target[key], source[key]);
-            } else {
-                (target as any)[key] = source[key];
-            }
-        }
-    }
-    return target;
-};
 
 /**
  * Detect the best locale to use
@@ -46,10 +30,11 @@ const detectLocale = (): string => {
 
 const detectedLocale = detectLocale();
 
-// Merge global messages with builder-specific translations
+// Messages now include builder translations directly from main lang
+// No need for separate merge - builder is exported at root level in lang/*/index.ts
 const messages = {
-    en: deepMerge({}, en, builderTranslations.en),
-    id: deepMerge({}, id, builderTranslations.id)
+    en,
+    id
 };
 
 const i18n = createI18n({

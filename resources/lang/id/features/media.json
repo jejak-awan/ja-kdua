@@ -18,7 +18,8 @@
         "images": "Gambar",
         "videos": "Video",
         "documents": "Dokumen",
-        "other": "Lainnya"
+        "other": "Lainnya",
+        "trash": "Trash"
     },
     "filter": {
         "allTypes": "Semua Tipe",
@@ -54,7 +55,9 @@
         "save": "Simpan Perubahan",
         "open": "Buka",
         "clearSelection": "Hapus Pilihan",
-        "refresh": "Muat Ulang"
+        "refresh": "Muat Ulang",
+        "restore": "Restore",
+        "deletePermanent": "Delete Permanently"
     },
     "views": {
         "grid": "Tampilan Grid",
@@ -96,7 +99,12 @@
         "updateFailed": "Gagal memperbarui media",
         "createFolderSuccess": "Folder berhasil dibuat",
         "createFolderFailed": "Gagal membuat folder",
-        "fileTooLarge": "File {name} terlalu besar. Ukuran maksimum adalah 10MB."
+        "fileTooLarge": "File {name} terlalu besar. Ukuran maksimum adalah 10MB.",
+        "deletePermanentConfirm": "Are you sure you want to PERMANENTLY delete {count} media file(s)? This action cannot be undone.",
+        "deletePermanentSingleConfirm": "Are you sure you want to PERMANENTLY delete \"{name}\"? This action cannot be undone.",
+        "emptyTrashConfirm": "Are you sure you want to empty the trash? All files will be permanently deleted.",
+        "restoreSuccess": "Successfully restored {count} media file(s)",
+        "restoreFailed": "Failed to restore media"
     },
     "modals": {
         "updateAlt": {
