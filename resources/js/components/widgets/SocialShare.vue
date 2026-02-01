@@ -63,12 +63,8 @@
         :title="copied ? 'Tersalin!' : 'Salin Link'"
         :class="[buttonClasses, copied ? 'bg-green-600' : 'bg-muted hover:bg-muted', 'text-white transition-colors']"
       >
-        <svg v-if="!copied" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-        </svg>
-        <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-        </svg>
+        <Copy v-if="!copied" class="w-5 h-5" />
+        <Check v-else class="w-5 h-5" />
         <span v-if="!compact" class="ml-2">{{ copied ? 'Tersalin!' : 'Salin Link' }}</span>
       </button>
     </div>
@@ -83,6 +79,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useSocialShare } from '@/composables/useSocialShare';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 
 const props = withDefaults(defineProps<{
   url?: string;

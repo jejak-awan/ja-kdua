@@ -59,7 +59,7 @@
 <script setup lang="ts">
 import { computed, inject, watch, onMounted } from 'vue'
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';import { useI18n } from 'vue-i18n'
-// @ts-ignore
+// @ts-expect-error: Internal type mismatch
 import draggable from 'vuedraggable'
 import ModuleWrapper from './ModuleWrapper.vue'
 import CanvasGridView from './CanvasGridView.vue'

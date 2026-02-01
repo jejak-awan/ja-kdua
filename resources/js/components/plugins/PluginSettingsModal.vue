@@ -5,9 +5,7 @@
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">{{ t('features.developer.plugins.modal.settings_title', { name: plugin?.name }) }}</h3>
                     <button @click="$emit('close')" class="text-muted-foreground hover:text-muted-foreground">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <X class="w-6 h-6" />
                     </button>
                 </div>
                 <div class="p-6">
@@ -23,6 +21,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
 
 const { t } = useI18n();
 

@@ -8,7 +8,7 @@
       <div class="pref-item">
         <span class="pref-label">{{ t('builder.toolbar.switchLanguage') }}</span>
         <BaseDropdown align="right" width="auto">
-          <template #trigger="{ open }">
+          <template #trigger>
             <button class="pref-value-btn">
               {{ currentLocaleName }}
               <ChevronDown :size="14" />

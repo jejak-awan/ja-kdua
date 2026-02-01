@@ -5,13 +5,15 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Doughnut } from 'vue-chartjs';
+import type {
+    ChartOptions,
+    ChartData
+} from 'chart.js';
 import {
     Chart as ChartJS,
     ArcElement,
     Tooltip,
-    Legend,
-    ChartOptions,
-    ChartData
+    Legend
 } from 'chart.js';
 
 ChartJS.register(ArcElement, Tooltip, Legend);

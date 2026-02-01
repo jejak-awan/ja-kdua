@@ -9,9 +9,7 @@
                     class="h-9 w-9"
                 >
                     <router-link to="/admin/logs-dashboard">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
+                        <ArrowLeft class="w-5 h-5" />
                     </router-link>
                 </Button>
                 <h1 class="text-2xl font-bold text-foreground">{{ t('features.system.logs.title') }}</h1>
@@ -57,9 +55,7 @@
                                     size="icon"
                                     class="h-8 w-8 text-primary hover:text-primary/80"
                                 >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
+                                    <Download class="w-5 h-5" />
                                 </Button>
                             </div>
                         </Button>
@@ -92,9 +88,7 @@
                     </div>
                     <div class="p-6">
                         <div v-if="!selectedLogFile" class="text-center py-12">
-                            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
+                            <FileText class="mx-auto h-12 w-12 text-muted-foreground" />
                             <p class="mt-4 text-muted-foreground">{{ t('features.system.logs.empty') }}</p>
                         </div>
                         <div v-else-if="loadingLog" class="text-center py-12">
@@ -118,6 +112,9 @@ import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
 import { parseResponse, ensureArray, parseSingleResponse } from '@/utils/responseParser';
 import { Button, Input } from '@/components/ui';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 
 interface LogFile {
     name: string;

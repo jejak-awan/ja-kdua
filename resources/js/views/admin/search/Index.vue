@@ -16,9 +16,7 @@
                     :placeholder="t('features.search.placeholder')"
                     class="w-full pl-10 pr-4 py-3 border border-input rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 >
-                <svg class="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <Search class="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
             </div>
         </div>
 
@@ -45,9 +43,7 @@
         </div>
 
         <div v-else-if="results.length === 0 && query" class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <Search class="mx-auto h-12 w-12 text-muted-foreground" />
             <p class="mt-4 text-muted-foreground">{{ t('features.search.empty') }}</p>
         </div>
 
@@ -75,9 +71,7 @@
                                     <span v-if="result.author">{{ result.author }}</span>
                                 </div>
                             </div>
-                            <svg class="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
+                                <ChevronRight class="w-5 h-5 text-muted-foreground" />
                         </div>
                     </div>
                 </div>
@@ -85,9 +79,7 @@
         </div>
 
         <div v-else class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <Search class="mx-auto h-12 w-12 text-muted-foreground" />
             <p class="mt-4 text-muted-foreground">{{ t('features.search.initial') }}</p>
         </div>
     </div>
@@ -97,6 +89,8 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
 import api from '../../../services/api';
 
 const { t } = useI18n();

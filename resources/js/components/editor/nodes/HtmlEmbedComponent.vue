@@ -160,7 +160,7 @@ const sanitizedHtml = computed(() => {
         FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'] // Event handlers
     }
 
-    // @ts-ignore
+    // @ts-expect-error: Internal type mismatch
     return DOMPurify.sanitize(html, config)
 })
 

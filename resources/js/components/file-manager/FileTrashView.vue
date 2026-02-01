@@ -50,7 +50,7 @@
         </div>
         
         <div v-else class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-4">
-            <div v-for="item in trashItems" :key="item.path" v-memo="[item.name, item.type]" class="group relative bg-background border border-border/40 rounded-xl overflow-hidden hover:border-primary/30 transition-colors duration-300 hover:bg-accent/5">
+            <div v-for="item in trashItems" :key="item.path" class="group relative bg-background border border-border/40 rounded-xl overflow-hidden hover:border-primary/30 transition-colors duration-300 hover:bg-accent/5">
                 <div class="aspect-square flex flex-col items-center justify-center bg-muted/5 group-hover:bg-muted/10 transition-colors relative">
                     <Folder v-if="item.type === 'folder'" class="w-10 h-10 text-blue-500/70" />
                     <FileText v-else class="w-10 h-10 text-muted-foreground/50" />

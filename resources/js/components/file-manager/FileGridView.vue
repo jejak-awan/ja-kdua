@@ -4,7 +4,6 @@
         <div
             v-for="folder in paginatedFolders"
             :key="folder.path"
-            v-memo="[isSelected(folder.path), folder.name, dropTarget === folder.path]"
             class="group relative"
         >
             <ContextMenu>
@@ -56,7 +55,6 @@
         <div
             v-for="file in paginatedFiles"
             :key="file.path"
-            v-memo="[isSelected(file.path), file.name]"
             class="group relative"
         >
             <ContextMenu>

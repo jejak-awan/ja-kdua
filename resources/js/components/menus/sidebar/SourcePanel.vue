@@ -210,7 +210,7 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
 import api from '../../../services/api';
-// @ts-ignore
+// @ts-expect-error: Internal type mismatch
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import { useMenuContext } from '../../../composables/useMenu';
 import { menuItemRegistry } from '../registry';

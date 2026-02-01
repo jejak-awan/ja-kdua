@@ -9,7 +9,7 @@
     <!-- Free-Form CSS Tab -->
     <div v-if="activeTab === 'free'" class="tab-content">
       <div class="info-box mb-4">
-        {{ $t('builder.advanced.css.info', 'Write free-form css using the keyword {selector} to target this module. i.e. {example}', { selector: 'selector', example: 'selector h1 { color: red; }' }) }}
+        {{ $t('builder.advanced.css.info', { selector: 'selector', example: 'selector h1 { color: red; }' }) }}
       </div>
       <div class="control-row">
         <BaseLabel class="mb-2">CSS</BaseLabel>
@@ -34,7 +34,7 @@
     <!-- Module Elements Tab -->
     <div v-if="activeTab === 'elements'" class="tab-content">
       <div class="info-box mb-4">
-        {{ $t('builder.advanced.css.elementsInfo', 'Target predefined selectors within this element without the need to write out selectors name. i.e. {example}', { example: 'color: red instead of h1 { color: red; }' }) }}
+        {{ $t('builder.advanced.css.elementsInfo', { example: 'color: red instead of h1 { color: red; }' }) }}
       </div>
       
       <div v-for="element in elements" :key="element.id" class="element-row mb-4">

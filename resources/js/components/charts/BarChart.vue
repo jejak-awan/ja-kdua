@@ -5,6 +5,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Bar } from 'vue-chartjs';
+import type {
+    ChartOptions,
+    ChartData
+} from 'chart.js';
 import {
     Chart as ChartJS,
     Title,
@@ -12,9 +16,7 @@ import {
     Legend,
     BarElement,
     CategoryScale,
-    LinearScale,
-    ChartOptions,
-    ChartData
+    LinearScale
 } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);

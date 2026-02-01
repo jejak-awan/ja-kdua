@@ -95,7 +95,8 @@
 
                                 <select
                                     v-if="setting.key === 'cache_driver'"
-                                    v-model="formData[setting.key]"
+                                    :value="formData[setting.key]"
+                                    @change="(e) => updateField(setting.key, (e.target as HTMLSelectElement).value)"
                                     class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
                                     :class="{ 'border-destructive': errors?.[setting.key] }"
                                 >
@@ -108,7 +109,12 @@
                                 <div v-else-if="setting.key === 'enable_cache'">
                                     <label class="flex items-center cursor-pointer">
                                         <div class="relative">
-                                            <input v-model="formData[setting.key]" type="checkbox" class="sr-only peer">
+                                            <input 
+                                                :checked="formData[setting.key]" 
+                                                @change="(e) => updateField(setting.key, (e.target as HTMLInputElement).checked)"
+                                                type="checkbox" 
+                                                class="sr-only peer"
+                                            >
                                             <div class="w-11 h-6 bg-muted rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:shadow-md peer-checked:bg-success"></div>
                                         </div>
                                         <span class="ml-3 text-sm text-foreground">
@@ -119,7 +125,8 @@
 
                                 <input
                                     v-else-if="setting.key === 'cache_ttl'"
-                                    v-model.number="formData[setting.key]"
+                                    :value="formData[setting.key]"
+                                    @input="(e) => updateField(setting.key, parseInt((e.target as HTMLInputElement).value))"
                                     type="number"
                                     class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
                                     :class="{ 'border-destructive': errors?.[setting.key] }"
@@ -188,18 +195,23 @@
                     <!-- Enable CDN -->
                     <div v-if="cdnEnabledSetting">
                         <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ $t('features.settings.labels.' + cdnEnabledSetting.key) }}
+                            {{ $t('features.settings.labels.' + (cdnEnabledSetting?.key || '')) }}
                         </label>
-                        <p v-if="cdnEnabledSetting.description" class="text-xs text-muted-foreground mb-3">
-                            {{ $t('features.settings.descriptions.' + cdnEnabledSetting.key) }}
+                        <p v-if="cdnEnabledSetting?.description" class="text-xs text-muted-foreground mb-3">
+                            {{ $t('features.settings.descriptions.' + (cdnEnabledSetting?.key || '')) }}
                         </p>
                         <label class="flex items-center cursor-pointer">
                             <div class="relative">
-                                <input v-model="formData[cdnEnabledSetting.key]" type="checkbox" class="sr-only peer">
+                                <input 
+                                    :checked="Boolean(formData[cdnEnabledSetting?.key || ''])" 
+                                    @change="(e) => updateField(cdnEnabledSetting?.key || '', (e.target as HTMLInputElement).checked)"
+                                    type="checkbox" 
+                                    class="sr-only peer"
+                                >
                                 <div class="w-11 h-6 bg-muted rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:shadow-md peer-checked:bg-success"></div>
                             </div>
                             <span class="ml-3 text-sm text-foreground">
-                                {{ formData[cdnEnabledSetting.key] ? $t('features.settings.enabled') : $t('features.settings.disabled') }}
+                                {{ formData[cdnEnabledSetting?.key || ''] ? $t('features.settings.enabled') : $t('features.settings.disabled') }}
                             </span>
                         </label>
                     </div>
@@ -213,7 +225,8 @@
                             Select your CDN provider for optimized configuration
                         </p>
                         <select
-                            v-model="formData[cdnPresetSetting.key]"
+                            :value="formData[cdnPresetSetting?.key || '']"
+                            @change="(e) => updateField(cdnPresetSetting?.key || '', (e.target as HTMLSelectElement).value)"
                             :disabled="!formData.enable_cdn"
                             class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         >
@@ -227,20 +240,21 @@
                     <!-- CDN URL -->
                     <div v-if="cdnUrlSetting" class="md:col-span-2">
                         <label class="block text-sm font-medium text-foreground mb-1" :class="{'opacity-50': !formData.enable_cdn}">
-                            {{ $t('features.settings.labels.' + cdnUrlSetting.key) }}
+                            {{ $t('features.settings.labels.' + (cdnUrlSetting?.key || '')) }}
                         </label>
-                        <p v-if="cdnUrlSetting.description" class="text-xs text-muted-foreground mb-2" :class="{'opacity-50': !formData.enable_cdn}">
-                            {{ $t('features.settings.descriptions.' + cdnUrlSetting.key) }}
+                        <p v-if="cdnUrlSetting?.description" class="text-xs text-muted-foreground mb-2" :class="{'opacity-50': !formData.enable_cdn}">
+                            {{ $t('features.settings.descriptions.' + (cdnUrlSetting?.key || '')) }}
                         </p>
                         <input
-                            v-model="formData[cdnUrlSetting.key]"
+                            :value="formData[cdnUrlSetting?.key || '']"
+                            @input="(e) => updateField(cdnUrlSetting?.key || '', (e.target as HTMLInputElement).value)"
                             type="text"
                             :disabled="!formData.enable_cdn"
                             class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             :placeholder="!formData.enable_cdn ? 'Enable CDN to configure URL' : 'https://cdn.example.com'"
-                            :class="{ 'border-destructive': errors?.[cdnUrlSetting.key] }"
+                            :class="{ 'border-destructive': errors?.[cdnUrlSetting?.key || ''] }"
                         >
-                        <p v-if="errors?.[cdnUrlSetting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors?.[cdnUrlSetting.key]) ? errors?.[cdnUrlSetting.key][0] : errors?.[cdnUrlSetting.key] }}</p>
+                        <p v-if="errors?.[cdnUrlSetting?.key || '']" class="text-sm text-destructive mt-1">{{ Array.isArray(errors?.[cdnUrlSetting?.key || '']) ? errors?.[cdnUrlSetting?.key || ''][0] : errors?.[cdnUrlSetting?.key || ''] }}</p>
                         <p v-if="formData.cdn_preset === 'bunny'" class="text-xs text-primary mt-1">
                             Tip: Use your BunnyCDN Pull Zone URL (e.g. https://my-zone.b-cdn.net)
                         </p>
@@ -255,13 +269,14 @@
                             Comma-separated list of directories to serve via CDN
                         </p>
                         <input
-                            v-model="formData[cdnIncludedDirsSetting.key]"
+                            :value="formData[cdnIncludedDirsSetting?.key || '']"
+                            @input="(e) => updateField(cdnIncludedDirsSetting?.key || '', (e.target as HTMLInputElement).value)"
                             type="text"
                             :disabled="!formData.enable_cdn"
                             class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            :class="{ 'border-destructive': errors?.[cdnIncludedDirsSetting.key] }"
+                            :class="{ 'border-destructive': errors?.[cdnIncludedDirsSetting?.key || ''] }"
                         >
-                        <p v-if="errors?.[cdnIncludedDirsSetting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors?.[cdnIncludedDirsSetting.key]) ? errors?.[cdnIncludedDirsSetting.key][0] : errors?.[cdnIncludedDirsSetting.key] }}</p>
+                        <p v-if="errors?.[cdnIncludedDirsSetting?.key || '']" class="text-sm text-destructive mt-1">{{ Array.isArray(errors?.[cdnIncludedDirsSetting?.key || '']) ? errors?.[cdnIncludedDirsSetting?.key || ''][0] : errors?.[cdnIncludedDirsSetting?.key || ''] }}</p>
                     </div>
 
                     <!-- Excluded Extensions -->
@@ -273,13 +288,14 @@
                             File extensions to exclude from CDN
                         </p>
                         <input
-                            v-model="formData[cdnExcludedExtsSetting.key]"
+                            :value="formData[cdnExcludedExtsSetting?.key || '']"
+                            @input="(e) => updateField(cdnExcludedExtsSetting?.key || '', (e.target as HTMLInputElement).value)"
                             type="text"
                             :disabled="!formData.enable_cdn"
                             class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            :class="{ 'border-destructive': errors?.[cdnExcludedExtsSetting.key] }"
+                            :class="{ 'border-destructive': errors?.[cdnExcludedExtsSetting?.key || ''] }"
                         >
-                        <p v-if="errors?.[cdnExcludedExtsSetting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors?.[cdnExcludedExtsSetting.key]) ? errors?.[cdnExcludedExtsSetting.key][0] : errors?.[cdnExcludedExtsSetting.key] }}</p>
+                        <p v-if="errors?.[cdnExcludedExtsSetting?.key || '']" class="text-sm text-destructive mt-1">{{ Array.isArray(errors?.[cdnExcludedExtsSetting?.key || '']) ? errors?.[cdnExcludedExtsSetting?.key || ''][0] : errors?.[cdnExcludedExtsSetting?.key || ''] }}</p>
                     </div>
                 </div>
             </div>
@@ -328,14 +344,16 @@
 
                             <input
                                 v-if="setting.type === 'string'"
-                                v-model="formData[setting.key]"
+                                :value="formData[setting.key]"
+                                @input="(e) => updateField(setting.key, (e.target as HTMLInputElement).value)"
                                 type="text"
                                  class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
                                 :class="{ 'border-destructive': errors?.[setting.key] }"
                             >
                             <input
                                 v-else-if="setting.type === 'integer'"
-                                v-model.number="formData[setting.key]"
+                                :value="formData[setting.key]"
+                                @input="(e) => updateField(setting.key, parseInt((e.target as HTMLInputElement).value))"
                                 type="number"
                                 class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
                                 :class="{ 'border-destructive': errors?.[setting.key] }"
@@ -343,7 +361,12 @@
                             <div v-else-if="setting.type === 'boolean'">
                                 <label class="flex items-center cursor-pointer">
                                     <div class="relative">
-                                        <input v-model="formData[setting.key]" type="checkbox" class="sr-only peer">
+                                        <input 
+                                            :checked="formData[setting.key]" 
+                                            @change="(e) => updateField(setting.key, (e.target as HTMLInputElement).checked)"
+                                            type="checkbox" 
+                                            class="sr-only peer"
+                                        >
                                         <div class="w-11 h-6 bg-muted rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:shadow-md peer-checked:bg-success"></div>
                                     </div>
                                     <span class="ml-3 text-sm text-foreground">
@@ -401,7 +424,15 @@ const props = withDefaults(defineProps<Props>(), {
     errors: () => ({})
 });
 
-defineEmits(['clear-cache', 'warm-cache'])
+const emit = defineEmits<{
+    (e: 'update:formData', value: Record<string, any>): void;
+    (e: 'clear-cache'): void;
+    (e: 'warm-cache'): void;
+}>()
+
+const updateField = (key: string, value: any) => {
+    emit('update:formData', { ...props.formData, [key]: value })
+}
 
 // Collapsible section states
 const sections = ref<SectionState>({

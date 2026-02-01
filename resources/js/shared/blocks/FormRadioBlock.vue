@@ -1,6 +1,6 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ mode: blockMode, settings, device: blockDevice }">
+    <template #default="{ settings, device: blockDevice }">
       <div 
         class="form-field-block"
         :style="[getLayoutStyles(settings, blockDevice)]"

@@ -12,7 +12,8 @@
             <SettingField
                 v-for="setting in group.settings"
                 :key="setting.id"
-                v-model="formData[setting.key]"
+                :model-value="formData[setting.key]"
+                @update:model-value="(value) => updateField(setting.key, value)"
                 :field-key="setting.key"
                 :label="$t('features.settings.labels.' + setting.key)"
                 :description="$t('features.settings.descriptions.' + setting.key)"
@@ -106,4 +107,12 @@ const discussionSettingsGrouped = computed(() => {
     
     return groups.filter(group => group.settings.length > 0)
 })
+
+const emit = defineEmits<{
+    (e: 'update:formData', value: Record<string, any>): void;
+}>()
+
+const updateField = (key: string, value: any) => {
+    emit('update:formData', { ...props.formData, [key]: value })
+}
 </script>

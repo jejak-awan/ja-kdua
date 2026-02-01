@@ -15,28 +15,18 @@
             : 'flex items-center text-muted-foreground hover:text-foreground dark:hover:text-foreground transition-colors'"
           :aria-current="index === breadcrumbs.length - 1 ? 'page' : undefined"
         >
-          <svg :class="compact ? 'h-3.5 w-3.5' : 'h-4 w-4'" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-          </svg>
+          <Home :class="compact ? 'h-3.5 w-3.5' : 'h-4 w-4'" />
           <span v-if="crumb.label && !compact" class="ml-1">{{ crumb.label }}</span>
         </router-link>
 
         <!-- Regular breadcrumb items -->
         <template v-else>
           <!-- Separator -->
-          <svg
+          <ChevronRight
             :class="compact 
               ? 'flex-shrink-0 h-3 w-3 text-muted-foreground mx-1' 
               : 'flex-shrink-0 h-4 w-4 text-muted-foreground mx-2'"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-              clip-rule="evenodd"
-            />
-          </svg>
+          />
 
           <!-- Link or Text -->
           <router-link
@@ -68,6 +58,8 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useBreadcrumbs } from '@/composables/useBreadcrumbs';
 import { useTheme } from '@/composables/useTheme';
+import Home from 'lucide-vue-next/dist/esm/icons/house.js';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
 
 const props = withDefaults(defineProps<{
   compact?: boolean;

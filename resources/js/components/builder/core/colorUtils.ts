@@ -39,12 +39,13 @@ export function rgbToHex(r: number, g: number, b: number): string {
 
 // RGB to HSV
 export function rgbToHsv(r: number, g: number, b: number): HSV {
-    r /= 255, g /= 255, b /= 255
+    r /= 255; g /= 255; b /= 255;
     const max = Math.max(r, g, b), min = Math.min(r, g, b)
-    let h: number, s: number, v: number = max
+    let h: number
+    const v: number = max
 
     const d = max - min
-    s = max === 0 ? 0 : d / max
+    const s = max === 0 ? 0 : d / max
 
     if (max === min) {
         h = 0 // achromatic
@@ -71,13 +72,13 @@ export function hsvToRgb(h: number, s: number, v: number): RGB {
     const t = v * (1 - (1 - f) * s)
 
     switch (i % 6) {
-        case 0: r = v, g = t, b = p; break
-        case 1: r = q, g = v, b = p; break
-        case 2: r = p, g = v, b = t; break
-        case 3: r = p, g = q, b = v; break
-        case 4: r = t, g = p, b = v; break
-        case 5: r = v, g = p, b = q; break
-        default: r = 0, g = 0, b = 0
+        case 0: r = v; g = t; b = p; break
+        case 1: r = q; g = v; b = p; break
+        case 2: r = p; g = v; b = t; break
+        case 3: r = p; g = q; b = v; break
+        case 4: r = t; g = p; b = v; break
+        case 5: r = v; g = p; b = q; break
+        default: r = 0; g = 0; b = 0
     }
 
     return {

@@ -3,7 +3,7 @@
  * Usage: <img v-lazy="imageSrc" alt="..." />
  */
 
-import { DirectiveBinding, ObjectDirective } from "vue";
+import type { DirectiveBinding, ObjectDirective } from "vue";
 
 const observerOptions: IntersectionObserverInit = {
     root: null,

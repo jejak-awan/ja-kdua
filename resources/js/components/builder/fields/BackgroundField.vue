@@ -2183,7 +2183,7 @@ const getSyncedDimensionData = (key: string, value: any, suffix: string) => {
 }
 
 const colorPreviewStyle = computed(() => {
-    lastUpdate.value
+    void lastUpdate.value
     const val = getResolvedValue('backgroundColor')
     return {
         backgroundColor: val || 'transparent'
@@ -2192,7 +2192,7 @@ const colorPreviewStyle = computed(() => {
 
 const gradientPreviewStyle = computed(() => {
     // Track moduleSettings for reactivity
-    const trigger = lastUpdate.value
+    void lastUpdate.value
     const gradient = getResolvedValue('backgroundGradient')
     if (!gradient) return {}
 
@@ -2203,7 +2203,7 @@ const gradientPreviewStyle = computed(() => {
 
 const imagePreviewStyle = computed(() => {
     // Track moduleSettings for reactivity
-    const trigger = lastUpdate.value
+    void lastUpdate.value
     const imageUrl = getResolvedValue('backgroundImage')
     if (!imageUrl) return {}
 

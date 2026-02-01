@@ -8,7 +8,7 @@
     :aria-label="settings.aria_label || 'Contact Form'"
     :style="cardStyles"
   >
-    <template #default="{ settings: blockSettings, device: blockDevice }">
+    <template #default="{ settings: blockSettings }">
       <div 
         class="contact-form-container mx-auto" 
         :style="containerStyles"

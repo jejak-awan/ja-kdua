@@ -22,7 +22,7 @@ import { type Component } from 'vue';
 import Button from '@/components/ui/button.vue';
 
 interface Props {
-  icon: object | Function | string | Component;
+  icon: object | ((...args: any[]) => any) | string | Component;
   variant?: 'primary' | 'secondary' | 'ghost'; // custom variants mapped to shred
   size?: 'sm' | 'md' | 'lg';
   active?: boolean;

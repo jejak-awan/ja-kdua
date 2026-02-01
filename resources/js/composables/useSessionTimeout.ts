@@ -12,7 +12,7 @@ export function useSessionTimeout() {
     const authStore = useAuthStore();
 
     // Session configuration (in seconds)
-    // @ts-ignore
+    // @ts-expect-error: Internal type mismatch
     const SESSION_LIFETIME = parseInt(import.meta.env.VITE_SESSION_LIFETIME || '28800'); // 8 hours default
     const WARNING_TIME = 300; // Show warning 5 minutes before expiry
 

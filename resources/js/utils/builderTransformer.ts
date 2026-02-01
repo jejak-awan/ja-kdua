@@ -3,7 +3,7 @@
  * Handles conversion between Classic HTML and Builder Blocks
  */
 
-import { BlockInstance } from '../types/builder';
+import type { BlockInstance } from '../types/builder';
 
 const generateId = (): string => `module-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 

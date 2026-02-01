@@ -80,9 +80,9 @@ export function useAutoSave(form: Ref<any>, contentId: Ref<number | null | strin
     // Auto-save function
     const performAutoSave = async () => {
         // Don't save if session terminated, no changes, already saving, or disabled
-        // @ts-ignore - window.__isSessionTerminated is global
+        // @ts-expect-error: Internal type mismatch - window.__isSessionTerminated is global
         if (window.__isSessionTerminated || !hasChanges.value || isSaving.value || !getEnabled()) {
-            // @ts-ignore
+            // @ts-expect-error: Internal type mismatch
             if (window.__isSessionTerminated) stopAutoSave();
             return;
         }

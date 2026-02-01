@@ -11,7 +11,8 @@
             <SettingField
                 v-for="setting in group.settings"
                 :key="setting.id"
-                v-model="formData[setting.key]"
+                :model-value="formData[setting.key]"
+                @update:model-value="(value) => updateField(setting.key, value)"
                 :field-key="setting.key"
                 :label="$t('features.settings.labels.' + setting.key)"
                 :description="$t('features.settings.descriptions.' + setting.key)"
@@ -130,7 +131,15 @@ interface Props {
 
 const props = defineProps<Props>()
 
-defineEmits(['validate-config', 'test-connection'])
+const emit = defineEmits<{
+    (e: 'update:formData', value: Record<string, any>): void;
+    (e: 'validate-config'): void;
+    (e: 'test-connection'): void;
+}>()
+
+const updateField = (key: string, value: any) => {
+    emit('update:formData', { ...props.formData, [key]: value })
+}
 
 const { t } = useI18n()
 

@@ -50,7 +50,7 @@
             <!-- Pass children to the block component via slot -->
             <template v-if="hasChildren && !instance.isGhost">
               <draggable
-                v-model="module.children"
+                v-model="childrenModel"
                 item-key="id"
                 :group="childType"
                 class="children-container"
@@ -216,6 +216,15 @@ const animationStyles = computed(() => {
 })
 
 // Computed
+const childrenModel = computed({
+  get: () => props.module.children || [],
+  set: (val) => {
+    if (builder) {
+      builder.updateModule(props.module.id, { children: val })
+    }
+  }
+})
+
 const isSelected = computed(() => 
   !props.isGhost && builder?.selectedModuleId.value === props.module.id
 )

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import axios, { AxiosError, AxiosResponse, isCancel } from 'axios';
+import type { AxiosError, AxiosResponse} from 'axios';
+import axios, { isCancel } from 'axios';
 import api, { getCsrfCookie } from '../services/api';
 import type { User, Role, AuthState, AuthResponse, LoginCredentials, RegisterData, ResetPasswordData } from '../types/auth';
 

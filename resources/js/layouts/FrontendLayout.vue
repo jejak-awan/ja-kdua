@@ -68,9 +68,7 @@
       :class="layoutStyle === 'framed' ? 'bg-primary text-primary-foreground' : 'bg-primary/90 text-primary-foreground backdrop-blur-sm hover:bg-primary'"
       title="Back to Top"
     >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-      </svg>
+      <ArrowUp class="w-5 h-5" />
     </button>
 </div>
 </template>
@@ -81,6 +79,7 @@ import { useRoute } from 'vue-router'
 import { useTheme } from '@/composables/useTheme'
 import ThemePageResolver from '@/components/shared/ThemePageResolver.vue'
 import Breadcrumbs from '@/components/layout/Breadcrumbs.vue'
+import ArrowUp from 'lucide-vue-next/dist/esm/icons/arrow-up.js'
 
 const route = useRoute()
 const { activeTheme, loadActiveTheme, getSetting } = useTheme()
@@ -93,8 +92,6 @@ const layoutStyle = computed(() => getSetting('layout_style', 'full') as string)
 const containerMaxWidth = computed(() => getSetting('container_max_width', 1400) as number)
 const boxedBgColor = computed(() => getSetting('boxed_bg_color', '#f1f5f9') as string)
 const boxedShadow = computed(() => getSetting('boxed_shadow', 'lg') as string)
-// @ts-ignore - framedPadding unused but kept for parity
-const framedPadding = computed(() => getSetting('framed_padding', 16) as number)
 
 // ROOT CLASSES (Outer most div)
 const rootClasses = computed(() => {

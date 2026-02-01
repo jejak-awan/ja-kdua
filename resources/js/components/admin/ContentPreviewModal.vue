@@ -17,14 +17,15 @@
                                     v-for="device in devices"
                                     :key="device.name"
                                     @click="selectedDevice = device.name"
+                                    :title="device.label"
                                     :class="[
-                                        'px-3 py-1 text-sm rounded',
+                                        'px-3 py-1 text-sm rounded transition-all flex items-center justify-center',
                                         selectedDevice === device.name
-                                            ? 'bg-primary text-primary-foreground'
+                                            ? 'bg-primary text-primary-foreground shadow-sm'
                                             : 'bg-secondary text-foreground hover:bg-accent'
                                     ]"
                                 >
-                                    {{ device.label }}
+                                    <component :is="device.icon" class="w-4 h-4" />
                                 </button>
                             </div>
                         </div>
@@ -38,11 +39,9 @@
                             </button>
                             <button
                                 @click="handleClose"
-                                class="p-2 text-muted-foreground hover:text-muted-foreground"
+                                class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
                             >
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+                                <X class="w-6 h-6" />
                             </button>
                         </div>
                     </div>
@@ -60,6 +59,10 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue';
 import { useTheme } from '@/composables/useTheme';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import Monitor from 'lucide-vue-next/dist/esm/icons/monitor.js';
+import Tablet from 'lucide-vue-next/dist/esm/icons/tablet.js';
+import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
 
 interface Author {
     name: string;
@@ -86,6 +89,7 @@ interface Device {
     name: string;
     label: string;
     width: string;
+    icon: any;
 }
 
 const props = withDefaults(defineProps<{
@@ -107,9 +111,9 @@ const { activeTheme, themeSettings } = useTheme();
 const selectedDevice = ref<string>('desktop');
 
 const devices: Device[] = [
-    { name: 'desktop', label: 'Desktop', width: '100%' },
-    { name: 'tablet', label: 'Tablet', width: '768px' },
-    { name: 'mobile', label: 'Mobile', width: '375px' },
+    { name: 'desktop', label: 'Desktop', width: '100%', icon: Monitor },
+    { name: 'tablet', label: 'Tablet', width: '768px', icon: Tablet },
+    { name: 'mobile', label: 'Mobile', width: '375px', icon: Smartphone },
 ];
 
 const deviceClass = computed(() => {

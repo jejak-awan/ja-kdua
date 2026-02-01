@@ -216,7 +216,9 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         let newValue = value
 
         if (typeof current === 'object' && current !== null && !Array.isArray(current) &&
-            (current.hasOwnProperty('desktop') || current.hasOwnProperty('tablet') || current.hasOwnProperty('mobile'))) {
+            (Object.prototype.hasOwnProperty.call(current, 'desktop') ||
+                Object.prototype.hasOwnProperty.call(current, 'tablet') ||
+                Object.prototype.hasOwnProperty.call(current, 'mobile'))) {
             newValue = { ...current, [device.value]: value }
         }
 

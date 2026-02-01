@@ -30,9 +30,7 @@
             />
           </div>
           <div v-else class="relative h-48 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
-            <svg class="w-12 h-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <Image class="w-12 h-12 text-muted-foreground" />
           </div>
           
           <!-- Content -->
@@ -57,15 +55,11 @@
             <!-- Meta -->
             <div class="flex items-center justify-between text-xs text-muted-foreground">
               <span v-if="post.author" class="flex items-center">
-                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                </svg>
+                <User class="w-4 h-4 mr-1" />
                 {{ post.author.name }}
               </span>
               <span v-if="post.published_at" class="flex items-center">
-                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                </svg>
+                <Calendar class="w-4 h-4 mr-1" />
                 {{ formatDate(post.published_at) }}
               </span>
             </div>
@@ -83,6 +77,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import api from '@/services/api';
+import Image from 'lucide-vue-next/dist/esm/icons/image.js';
+import User from 'lucide-vue-next/dist/esm/icons/user.js';
+import Calendar from 'lucide-vue-next/dist/esm/icons/calendar.js';
 
 interface Post {
     id: number;

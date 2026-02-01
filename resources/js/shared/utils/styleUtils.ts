@@ -569,7 +569,8 @@ export function hexToHsl(hex: string): { h: number; s: number; l: number } {
     const b = parseInt(hex.substring(4, 6), 16) / 255
 
     const max = Math.max(r, g, b), min = Math.min(r, g, b)
-    let h: number, s: number, l: number = (max + min) / 2
+    const l: number = (max + min) / 2
+    let h: number, s: number
 
     if (max === min) {
         h = s = 0

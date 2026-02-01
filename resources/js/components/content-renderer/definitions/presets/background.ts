@@ -231,7 +231,7 @@ export const getBackgroundStyle = (settings: ModuleSettings) => {
                 style.backgroundAttachment = settings.bgAttachment || 'scroll';
             }
             break;
-        case 'gradient':
+        case 'gradient': {
             const direction = settings.gradientDirection || 'to right';
             if (direction === 'radial') {
                 style.backgroundImage = `radial-gradient(circle, ${settings.gradientStart}, ${settings.gradientEnd})`;
@@ -239,6 +239,7 @@ export const getBackgroundStyle = (settings: ModuleSettings) => {
                 style.backgroundImage = `linear-gradient(${direction}, ${settings.gradientStart}, ${settings.gradientEnd})`;
             }
             break;
+        }
     }
 
     return style;

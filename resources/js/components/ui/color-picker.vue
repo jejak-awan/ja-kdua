@@ -268,6 +268,7 @@ const pickEyeDropper = async () => {
             Object.assign(hsv, newHsv);
         }
     } catch (e) {
+        console.warn('Eyedropper failed:', e);
     }
 };
 

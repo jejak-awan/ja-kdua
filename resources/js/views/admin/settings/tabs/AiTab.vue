@@ -13,7 +13,8 @@
                     type="boolean"
                     :label="$t('features.settings.ai.enable_ai', 'Enable AI Features')"
                     :description="$t('features.settings.ai.enable_ai_desc', 'Enable or disable AI assistance in the editor.')"
-                    v-model="formData.ai_enabled"
+                    v-model="localFormData.ai_enabled"
+                    @update:model-value="v => updateField('ai_enabled', v)"
                     :error="errors?.ai_enabled"
                 />
                 
@@ -25,7 +26,11 @@
                     <p class="text-xs text-muted-foreground mb-2">
                         {{ $t('features.settings.ai.default_provider_desc', 'Select which AI provider to use by default.') }}
                     </p>
-                    <Select v-model="formData.ai_default_provider" :disabled="!formData.ai_enabled">
+                    <Select 
+                        :model-value="localFormData.ai_default_provider" 
+                        @update:model-value="v => updateField('ai_default_provider', v)"
+                        :disabled="!localFormData.ai_enabled"
+                    >
                         <SelectTrigger>
                             <SelectValue :placeholder="$t('features.settings.ai.default_provider')" />
                         </SelectTrigger>
@@ -81,7 +86,8 @@
                                 <Input 
                                     :type="showKey[provider.id] ? 'text' : 'password'"
                                     :placeholder="$t('features.settings.ai.api_key_placeholder', 'Enter API Key')"
-                                    v-model="formData[`${provider.id}_api_key`]"
+                                    :model-value="localFormData[`${provider.id}_api_key`]"
+                                    @update:model-value="v => updateField(`${provider.id}_api_key`, v)"
                                     class="pr-10"
                                 />
                                 <button 
@@ -105,8 +111,9 @@
                             </label>
                             <div class="flex gap-2">
                                 <Select 
-                                    v-model="formData[`${provider.id}_model`]" 
-                                    :disabled="!formData[`${provider.id}_api_key`] || loadingModels[provider.id]"
+                                    :model-value="localFormData[`${provider.id}_model`]" 
+                                    @update:model-value="v => updateField(`${provider.id}_model`, v)"
+                                    :disabled="!localFormData[`${provider.id}_api_key`] || loadingModels[provider.id]"
                                     @update:open="(open) => { if(open) fetchModels(provider.id) }"
                                 >
                                     <SelectTrigger class="w-full">
@@ -156,7 +163,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
@@ -205,6 +212,21 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const emit = defineEmits<{
+    (e: 'update:formData', value: Record<string, any>): void;
+}>();
+
+const localFormData = ref({ ...props.formData });
+
+// Sync local state when prop changes
+watch(() => props.formData, (newVal) => {
+    localFormData.value = { ...newVal };
+}, { deep: true });
+
+const updateField = (key: string, value: any) => {
+    localFormData.value[key] = value;
+    emit('update:formData', { ...localFormData.value });
+};
 
 const toast = useToast();
 const providers = ref<Provider[]>([]);
@@ -230,8 +252,8 @@ const fetchProviders = async () => {
         providers.value = response.data.data;
         
         // Ensure default provider is set
-        if (!props.formData.ai_default_provider && providers.value.length > 0) {
-            props.formData.ai_default_provider = 'gemini';
+        if (!localFormData.value.ai_default_provider && providers.value.length > 0) {
+            updateField('ai_default_provider', 'gemini');
         }
     } catch (error: any) {
         console.error('Failed to fetch AI providers', error);

@@ -95,7 +95,7 @@
                                          <p class="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">{{ article.excerpt }}</p>
                                          <div class="mt-auto pt-2 text-xs font-bold text-primary flex items-center gap-1">
                                             Read More 
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                                            <ArrowRight class="w-3 h-3" />
                                          </div>
                                      </div>
                                  </article>
@@ -113,6 +113,7 @@
 import { ref, onMounted, computed } from 'vue'
 import api from '@/services/api'
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue'
+import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js'
 
 import type { Content } from '@/types/cms'
 

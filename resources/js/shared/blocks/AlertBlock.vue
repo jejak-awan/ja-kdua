@@ -36,16 +36,18 @@
               @blur="onTitleBlur($event)"
               class="mb-2 transition-colors duration-300"
               :style="getTypographyStyles(settings, 'title_', blockDevice)"
-              v-html="getVal(settings, 'title', blockDevice) || (mode === 'edit' ? 'Alert Title' : '')"
-            />
+            >
+              <div v-html="getVal(settings, 'title', blockDevice) || (mode === 'edit' ? 'Alert Title' : '')"></div>
+            </AlertTitle>
             
             <AlertDescription 
               :contenteditable="mode === 'edit'"
               @blur="onMessageBlur($event)"
               class="transition-colors duration-300"
               :style="getTypographyStyles(settings, 'message_', blockDevice)"
-              v-html="getVal(settings, 'message', blockDevice) || (mode === 'edit' ? 'Alert message goes here...' : '')"
-            />
+            >
+              <div v-html="getVal(settings, 'message', blockDevice) || (mode === 'edit' ? 'Alert message goes here...' : '')"></div>
+            </AlertDescription>
           </div>
 
           <button 

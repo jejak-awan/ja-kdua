@@ -46,21 +46,18 @@
           variant="secondary"
           class="rating-number font-black text-lg h-9 px-4 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border-none" 
           :style="textStyles"
-          v-text="ratingValue.toFixed(1)"
-        ></Badge>
+        >{{ ratingValue.toFixed(1) }}</Badge>
         
         <div v-if="getVal(settings, 'showReviewCount', device) !== false" class="review-count-wrapper flex items-center gap-1.5 text-slate-400 dark:text-slate-500 font-medium text-sm">
           <span class="opacity-30 font-bold ml-1">(</span>
           <span 
             class="review-number outline-none"
             :style="reviewStyles"
-            v-text="reviewCount"
-          ></span>
+          >{{ reviewCount }}</span>
           <span 
             class="review-label outline-none"
             :style="reviewStyles"
-            v-text="reviewText"
-          ></span>
+          >{{ reviewText }}</span>
           <span class="opacity-30 font-bold">)</span>
         </div>
       </div>

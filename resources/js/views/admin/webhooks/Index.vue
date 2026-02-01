@@ -6,9 +6,7 @@
                 @click="showCreateModal = true"
                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
             >
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
+                <Plus class="w-5 h-5 mr-2" />
                 {{ t('features.developer.webhooks.create') }}
             </button>
         </div>
@@ -18,9 +16,7 @@
             <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
+                        <Zap class="h-8 w-8 text-indigo-600" />
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-muted-foreground">{{ t('features.developer.webhooks.stats.total') }}</p>
@@ -31,9 +27,7 @@
             <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <CheckCircle class="h-8 w-8 text-green-600" />
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-muted-foreground">{{ t('features.developer.webhooks.stats.active') }}</p>
@@ -44,9 +38,7 @@
             <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
+                        <BarChart3 class="h-8 w-8 text-blue-600" />
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-muted-foreground">{{ t('features.developer.webhooks.stats.total_calls') }}</p>
@@ -57,9 +49,7 @@
             <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <AlertCircle class="h-8 w-8 text-red-600" />
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-muted-foreground">{{ t('features.developer.webhooks.stats.failed_calls') }}</p>
@@ -187,6 +177,11 @@ import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
 import WebhookModal from '../../../components/webhooks/WebhookModal.vue';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
+import CheckCircle from 'lucide-vue-next/dist/esm/icons/circle-check.js';
+import BarChart3 from 'lucide-vue-next/dist/esm/icons/chart-bar.js';
+import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();

@@ -392,7 +392,6 @@ const handleModuleInsert = (type: string, payload: any) => {
 }
 
 const handleStructureTemplateInsert = (payload: any) => {
-    structureTemplateTargetId.value = structureTemplateTargetId.value
     insertRow(payload)
     showStructureTemplateModal.value = false
 }
@@ -623,12 +622,13 @@ const handleContextMenuAction = async (action: string, id?: string, mode = 'modu
         case 'copy-style': builder.copyStyles(id); break
         case 'paste-style': builder.pasteStyles(id); break
         case 'reset-styles': builder.resetModuleStyles?.(id); break
-        case 'parent':
+        case 'parent': {
             const parent = builder.findParentById(builder.blocks.value, id)
             if (parent) {
                 builder.selectModule(parent.id)
             }
             break
+        }
         case 'go-to-layer':
             activePanel.value = 'layers'
             setTimeout(() => {
@@ -640,7 +640,7 @@ const handleContextMenuAction = async (action: string, id?: string, mode = 'modu
                 }
             }, 100)
             break
-        case 'rename':
+        case 'rename': {
             const currentModule = builder.findModule(id)
             const newLabel = await builder.prompt({
                 title: t('builder.contextMenu.renameLabel'),
@@ -652,13 +652,15 @@ const handleContextMenuAction = async (action: string, id?: string, mode = 'modu
                 builder.updateModuleSettings(id, { _label: newLabel })
             }
             break
-        case 'toggle-visibility':
+        }
+        case 'toggle-visibility': {
             const module = builder.findModule(id)
             if (module) {
                 const isDisabled = module.settings?.disabled === true
                 builder.updateModuleSettings(id, { disabled: !isDisabled })
             }
             break
+        }
         case 'save-to-library':
             builder.openSavePresetModal?.(id)
             break

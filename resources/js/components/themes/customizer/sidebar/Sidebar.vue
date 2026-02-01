@@ -19,13 +19,10 @@
                     class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
                     :title="isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'"
                 >
-                    <svg 
+                    <ChevronsLeft 
                         class="w-5 h-5 transition-transform duration-300" 
                         :class="{'rotate-180': isCollapsed}" 
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                    </svg>
+                    />
                 </button>
 
                  <!-- Actions (Hidden when collapsed) -->
@@ -37,7 +34,7 @@
                             class="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
                             title="Undo"
                         >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                            <Undo2 class="w-4 h-4" />
                         </button>
                         <div class="w-px h-4 bg-border"></div>
                         <button 
@@ -46,7 +43,7 @@
                             class="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
                             title="Redo"
                         >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" /></svg>
+                            <Redo2 class="w-4 h-4" />
                         </button>
                     </div>
 
@@ -55,14 +52,14 @@
                         class="p-2 text-muted-foreground hover:text-primary transition-colors rounded-full hover:bg-muted"
                         title="Reset Default"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        <RotateCcw class="w-4 h-4" />
                     </button>
                     <button 
                         @click="$emit('close')"
                         class="p-2 text-muted-foreground hover:text-destructive transition-colors rounded-full hover:bg-muted"
                         title="Close"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        <X class="w-5 h-5" />
                     </button>
                 </div>
             </div>
@@ -72,10 +69,7 @@
         <div v-show="!isCollapsed" class="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar animate-in fade-in slide-in-from-left-4 duration-300">
 <!-- Loading State -->
             <div v-if="loading" class="flex items-center justify-center py-12">
-                <svg class="w-8 h-8 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <LoaderCircle class="w-8 h-8 text-primary animate-spin" />
             </div>
 
             <!-- Settings Sections -->
@@ -86,15 +80,10 @@
                         class="w-full flex items-center justify-between py-2 text-sm font-medium hover:text-primary transition-colors border-b group"
                     >
                         <span class="group-hover:translate-x-1 transition-transform">{{ section.label }}</span>
-                        <svg 
+                        <ChevronDown 
                             class="w-4 h-4 transition-transform duration-200"
                             :class="{ 'rotate-180': expandedSections.includes(section.id) }"
-                            fill="none" 
-                            viewBox="0 0 24 24" 
-                            stroke="currentColor"
-                        >
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
+                        />
                     </button>
 
                     <div 
@@ -105,7 +94,8 @@
                             v-for="setting in section.settings" 
                             :key="setting.key"
                             :setting="setting"
-                            v-model="formValues[setting.key]"
+                            :model-value="formValues[setting.key]"
+                            @update:model-value="(val) => updateField(setting.key, val)"
                             @change="$emit('change')"
                             @pick-media="openMediaPicker(setting.key)"
                         />
@@ -144,10 +134,7 @@
                 :disabled="saving || !isDirty"
                 class="w-full h-10 flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-muted transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                <svg v-if="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <LoaderCircle v-if="saving" class="w-4 h-4 animate-spin" />
                 <span>{{ saving ? 'Saving Changes...' : 'Save Configuration' }}</span>
             </button>
         </div>
@@ -166,6 +153,15 @@
 import { ref } from 'vue';
 import SettingControl from './SettingControl.vue';
 import MediaPicker from '@/components/media/MediaPicker.vue';
+
+import ChevronsLeft from 'lucide-vue-next/dist/esm/icons/chevrons-left.js';
+import Undo2 from 'lucide-vue-next/dist/esm/icons/undo-2.js';
+import Redo2 from 'lucide-vue-next/dist/esm/icons/redo-2.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import LoaderCircle from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+
 import type { ThemeSection } from '@/types/theme';
 
 const props = withDefaults(defineProps<{
@@ -190,6 +186,7 @@ const props = withDefaults(defineProps<{
 });
 
 const emit = defineEmits<{
+    (e: 'update:formValues', value: Record<string, any>): void;
     (e: 'update:customCss', value: string): void;
     (e: 'change'): void;
     (e: 'undo'): void;
@@ -213,6 +210,11 @@ const toggleSection = (id: string) => {
     }
 };
 
+const updateField = (key: string, value: any) => {
+    emit('change');
+    emit('update:formValues', { ...props.formValues, [key]: value });
+};
+
 const openMediaPicker = (fieldKey: string) => {
     activeMediaField.value = fieldKey;
     showMediaPicker.value = true;
@@ -220,9 +222,7 @@ const openMediaPicker = (fieldKey: string) => {
 
 const handleMediaSelect = (media: any) => {
     if (activeMediaField.value) {
-        // Mutate formValues directly as it's a reactive prop object from parent
-        props.formValues[activeMediaField.value] = media.url;
-        emit('change');
+        updateField(activeMediaField.value, media.url);
     }
     showMediaPicker.value = false;
     activeMediaField.value = null;

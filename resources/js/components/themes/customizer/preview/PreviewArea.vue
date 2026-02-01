@@ -22,7 +22,7 @@
             class="p-2 text-muted-foreground hover:text-primary hover:bg-muted rounded-md transition-colors flex items-center gap-2 bg-background border hover:border-primary/50"
             title="Refresh Preview"
         >
-            <svg class="w-4 h-4" :class="{'animate-spin': isRefreshing}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            <RotateCcw class="w-4 h-4" :class="{'animate-spin': isRefreshing}" />
             <span class="text-xs font-medium">Refresh</span>
         </button>
     </div>
@@ -46,8 +46,8 @@
                     <!-- Fake standard status bar elements -->
                     <div class="text-[10px] font-medium text-slate-400">9:41</div>
                     <div class="flex gap-1.5">
-                        <div class="w-3 h-3 text-slate-400"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2z" /></svg></div>
-                        <div class="w-3 h-3 text-slate-400"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z" /></svg></div>
+                        <Wifi class="w-3 h-3 text-slate-400" />
+                        <BatteryFull class="w-3 h-3 text-slate-400" />
                     </div>
                  </div>
 
@@ -67,6 +67,9 @@ import { ref, computed } from 'vue';
 import MonitorIcon from 'lucide-vue-next/dist/esm/icons/monitor.js';
 import TabletIcon from 'lucide-vue-next/dist/esm/icons/tablet.js';
 import SmartphoneIcon from 'lucide-vue-next/dist/esm/icons/smartphone.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import Wifi from 'lucide-vue-next/dist/esm/icons/wifi.js';
+import BatteryFull from 'lucide-vue-next/dist/esm/icons/battery-full.js';
 import ThemePreview from '../../ThemePreview.vue';
 import type { Theme } from '@/types/theme';
 

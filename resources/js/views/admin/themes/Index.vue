@@ -31,9 +31,7 @@
         </div>
 
         <div v-if="themes.length === 0" class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-            </svg>
+            <Palette class="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 class="mt-2 text-sm font-medium text-foreground">{{ $t('features.themes.list.empty') }}</h3>
             <p class="mt-1 text-sm text-muted-foreground">{{ $t('features.themes.list.emptySubtitle') }}</p>
             <div class="mt-6">
@@ -61,9 +59,7 @@
                         class="w-full h-full object-cover"
                     >
                     <div v-else class="w-full h-full flex items-center justify-center text-muted-foreground">
-                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                        <Image class="w-16 h-16" />
                     </div>
                     
                     <!-- Status Badge -->
@@ -136,9 +132,7 @@
                             @click="openCustomizer(theme)"
                             class="flex-1"
                         >
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                            </svg>
+                            <Palette class="w-4 h-4 mr-2" />
                             {{ $t('features.themes.actions.customize') }}
                         </Button>
                         <Button
@@ -146,9 +140,7 @@
                             @click="activateTheme(theme)"
                             class="flex-1"
                         >
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
+                            <Check class="w-4 h-4 mr-2" />
                             {{ $t('features.themes.actions.activate') }}
                         </Button>
                         
@@ -159,10 +151,7 @@
                             size="icon"
                             :title="$t('features.themes.actions.preview')"
                         >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
+                            <Eye class="w-4 h-4" />
                         </Button>
                         <Button
                             @click="validateTheme(theme)"
@@ -170,9 +159,7 @@
                             size="icon"
                             :title="$t('features.themes.actions.validate')"
                         >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                            <CheckCircle class="w-4 h-4" />
                         </Button>
                     </div>
                 </div>
@@ -192,9 +179,7 @@
                         @click="showPreviewModal = false"
                         class="text-muted-foreground hover:text-muted-foreground"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <X class="w-6 h-6" />
                     </button>
                 </div>
                 <div class="flex-1 overflow-hidden">
@@ -230,6 +215,12 @@ import api from '../../../services/api';
 import toast from '../../../services/toast';
 import { useConfirm } from '../../../composables/useConfirm';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
+import Image from 'lucide-vue-next/dist/esm/icons/image.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import CheckCircle from 'lucide-vue-next/dist/esm/icons/circle-check.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import ThemePreview from '../../../components/themes/ThemePreview.vue';
 import ThemeCustomizer from '../../../components/themes/ThemeCustomizer.vue';
 

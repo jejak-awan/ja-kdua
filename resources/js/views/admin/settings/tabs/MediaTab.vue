@@ -49,9 +49,12 @@ const { confirm } = useConfirm()
 
 const props = defineProps<Props>()
 
+const emit = defineEmits<{
+    (e: 'update:formData', value: Record<string, any>): void;
+}>()
+
 const updateField = (key: string, value: any) => {
-    // Direct mutation for stable input performance
-    props.formData[key] = value
+    emit('update:formData', { ...props.formData, [key]: value })
 }
 
 const UploadIcon = {

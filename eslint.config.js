@@ -42,6 +42,18 @@ export default [
             // TS Rules
             '@typescript-eslint/no-explicit-any': 'warn',
             '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+            '@typescript-eslint/consistent-type-imports': ['warn', {
+                prefer: 'type-imports',
+                disallowTypeAnnotations: false,
+            }],
+
+            // Import Rules
+            'no-restricted-imports': ['error', {
+                paths: [{
+                    name: 'lucide-vue-next',
+                    message: 'Import dari lucide-vue-next/dist/esm/icons/[icon-name].js untuk tree-shaking',
+                }],
+            }],
 
             // General
             'no-console': ['warn', { allow: ['warn', 'error'] }],

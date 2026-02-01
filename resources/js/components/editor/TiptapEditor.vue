@@ -384,7 +384,7 @@ const handleContextMenu = (e: MouseEvent) => {
     if (items.length === 0) return
 
     contextMenu.position = { x: e.clientX, y: e.clientY }
-    // @ts-ignore
+    // @ts-expect-error: Internal type mismatch
     contextMenu.items = items
     contextMenu.show = true
 }

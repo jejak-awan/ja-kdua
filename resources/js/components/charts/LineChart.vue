@@ -5,6 +5,11 @@
 <script setup lang="ts">
 import { computed, ref, watchEffect } from 'vue';
 import { Line } from 'vue-chartjs';
+import type {
+    ChartOptions,
+    ChartData,
+    ScriptableContext
+} from 'chart.js';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -14,10 +19,7 @@ import {
     Title,
     Tooltip,
     Legend,
-    Filler,
-    ChartOptions,
-    ChartData,
-    ScriptableContext
+    Filler
 } from 'chart.js';
 import { useDarkMode } from '@/composables/useDarkMode';
 

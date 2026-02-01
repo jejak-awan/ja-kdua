@@ -154,7 +154,7 @@
       <ColorPickerModal 
         v-if="showPicker"
         :model-value="value || '#ffffff'"
-        :initial-mode="inputMode as 'hex' | 'css_var' | undefined"
+        :initial-mode="modalMode"
         @update:model-value="handleModalUpdate"
         @close="showPicker = false"
       />
@@ -173,7 +173,8 @@ import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import Pipette from 'lucide-vue-next/dist/esm/icons/pipette.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
-import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';import { IconButton, BaseColorSlider } from '../ui'
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import { IconButton, BaseColorSlider } from '../ui'
 
 const ColorPickerModal = defineAsyncComponent(() => import('../modals/ColorPickerModal.vue'))
 const { t } = useI18n()
@@ -201,6 +202,8 @@ const showModeDropdown = ref(false)
 const modeDropdownRef = ref(null)
 const mainInputRef = ref(null)
 const hexInputRef = ref(null)
+
+const modalMode = computed(() => inputMode.value as 'hex' | 'css_var' | undefined)
 
 // Check if color has a value
 const hasColorValue = computed(() => {

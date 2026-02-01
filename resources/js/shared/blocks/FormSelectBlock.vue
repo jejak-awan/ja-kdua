@@ -1,6 +1,6 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ mode: blockMode, settings, device: blockDevice }">
+    <template #default="{ settings, device: blockDevice }">
       <div 
         class="form-field-block"
         :style="[getLayoutStyles(settings, blockDevice)]"
@@ -26,9 +26,7 @@
             </option>
           </select>
           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
-            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
-              <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-            </svg>
+            <ChevronDown class="h-4 w-4" />
           </div>
         </div>
 
@@ -44,6 +42,7 @@
 import { inject, computed } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { getVal, getLayoutStyles } from '../utils/styleUtils'
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js'
 import type { BlockProps } from '../../types/builder'
 
 const props = defineProps<BlockProps>()

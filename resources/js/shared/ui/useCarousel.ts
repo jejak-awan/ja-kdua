@@ -1,6 +1,6 @@
 import type { UnwrapRef } from 'vue';
 import { inject } from 'vue';
-import emblaCarouselVue from 'embla-carousel-vue';
+import type emblaCarouselVue from 'embla-carousel-vue';
 
 export type CarouselApi = any;
 

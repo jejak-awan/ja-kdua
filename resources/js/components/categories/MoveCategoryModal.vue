@@ -11,9 +11,7 @@
                         @click="$emit('close')"
                         class="text-muted-foreground hover:text-muted-foreground"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <X class="w-6 h-6" />
                     </button>
                 </div>
 
@@ -67,6 +65,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { DialogFooter } from '@/components/ui';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import { useToast } from '@/composables/useToast';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { moveCategorySchema } from '@/schemas';

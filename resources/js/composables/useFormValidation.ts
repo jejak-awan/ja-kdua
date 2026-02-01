@@ -1,6 +1,7 @@
-import { ref, Ref } from 'vue';
+import type { Ref } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ZodSchema, ZodError } from 'zod';
+import type { ZodSchema, ZodError } from 'zod';
 
 type ValidationRule = string | Record<string, any> | ((value: any, formData: any) => boolean | string);
 type ValidatorFunction = (value: any, formData?: any) => boolean | string;

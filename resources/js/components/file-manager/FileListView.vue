@@ -26,7 +26,6 @@
                 <ContextMenu v-for="folder in paginatedFolders" :key="folder.path">
                     <ContextMenuTrigger as-child>
                         <tr 
-                            v-memo="[isSelected(folder.path), folder.name, folder.updated_at]"
                             class="hover:bg-muted/10 cursor-pointer group transition-colors duration-200"
                             :class="{ 'bg-primary/5 text-foreground font-medium': isSelected(folder.path) }"
                             @click="selectItem(folder); navigateToPath(folder.path)"
@@ -59,7 +58,6 @@
                 <ContextMenu v-for="file in paginatedFiles" :key="file.path">
                     <ContextMenuTrigger as-child>
                         <tr 
-                            v-memo="[isSelected(file.path), file.name, file.updated_at, file.size]"
                             class="hover:bg-muted/30 cursor-pointer group transition-colors duration-200"
                             :class="{ 'bg-primary/5 text-foreground font-medium': isSelected(file.path) }"
                             @click="selectItem(file); $emit('preview', file)"

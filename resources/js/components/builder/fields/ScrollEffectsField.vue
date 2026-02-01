@@ -26,7 +26,7 @@
         <!-- Placeholder for actual motion controls like range sliders, etc. -->
         <!-- In a real implementation, each motion type would have its own set of sliders (Entrance, Middle, Exit) -->
         <div class="info-box text-xs">
-          {{ $t('builder.advanced.scroll.configure', 'Configure your {type} settings below.', { type: activeTabLabel }) }}
+          {{ $t('builder.advanced.scroll.configure', { type: activeTabLabel }) }}
         </div>
         
         <div class="grid grid-cols-1 gap-4">
@@ -38,7 +38,7 @@
         </div>
       </div>
       <div v-else class="text-center py-4 text-xs text-muted italic">
-        {{ $t('builder.advanced.scroll.tabDisabled', 'Enable {type} to see options.', { type: activeTabLabel }) }}
+        {{ $t('builder.advanced.scroll.tabDisabled', { type: activeTabLabel }) }}
       </div>
     </div>
   </div>

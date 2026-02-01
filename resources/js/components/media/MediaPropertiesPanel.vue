@@ -127,7 +127,7 @@
                             type="text"
                             placeholder="Add tags..."
                             @keydown.enter.prevent="addTag"
-                            @keydown.comma.prevent="addTag"
+                            @keydown="onTagKeydown"
                              class="bg-background h-8 text-xs"
                         />
                     </div>
@@ -290,6 +290,13 @@ watch(activeMedia, (media) => {
         initialForm.value = JSON.parse(JSON.stringify(form.value));
     }
 }, { immediate: true });
+
+const onTagKeydown = (e: KeyboardEvent) => {
+    if (e.key === ',') {
+        e.preventDefault();
+        addTag();
+    }
+};
 
 const addTag = () => {
     const val = tagInput.value.trim().replace(/,$/, '');

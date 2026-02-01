@@ -18,17 +18,19 @@
              <template v-if="mode === 'edit'">
                 <slot />
                 <!-- Fallback placeholders if no children -->
-                <CarouselItem v-if="!module.children?.length" v-for="i in 3" :key="i" class="pl-4" :class="slideBasisClass">
-                    <div class="slide-placeholder h-[300px] flex flex-col items-center justify-center p-12 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] text-slate-400 gap-4 transition-colors hover:border-primary/50 group-hover:bg-slate-50/50 dark:group-hover:bg-slate-900/50">
-                        <div class="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-900 flex items-center justify-center shadow-sm">
-                            <Layers class="w-8 h-8 opacity-40 text-primary" />
-                        </div>
-                        <div class="text-center">
-                            <span class="font-black text-slate-600 dark:text-slate-400 block tracking-tight">Slide {{ i }}</span>
-                            <small class="opacity-60 font-medium tracking-wide">Drop components here</small>
-                        </div>
-                    </div>
-                </CarouselItem>
+                <template v-if="!module.children?.length">
+                  <CarouselItem v-for="i in 3" :key="i" class="pl-4" :class="slideBasisClass">
+                      <div class="slide-placeholder h-[300px] flex flex-col items-center justify-center p-12 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] text-slate-400 gap-4 transition-colors hover:border-primary/50 group-hover:bg-slate-50/50 dark:group-hover:bg-slate-900/50">
+                          <div class="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-900 flex items-center justify-center shadow-sm">
+                              <Layers class="w-8 h-8 opacity-40 text-primary" />
+                          </div>
+                          <div class="text-center">
+                              <span class="font-black text-slate-600 dark:text-slate-400 block tracking-tight">Slide {{ i }}</span>
+                              <small class="opacity-60 font-medium tracking-wide">Drop components here</small>
+                          </div>
+                      </div>
+                  </CarouselItem>
+                </template>
              </template>
 
              <!-- Renderer Mode -->

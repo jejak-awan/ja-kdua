@@ -75,29 +75,33 @@ export class ConditionEvaluator {
                 if (condition === 'guest') return !user;
                 return true;
 
-            case 'role':
+            case 'role': {
                 if (!user || !user.roles) return condition === 'is_not';
                 const hasRole = user.roles.some(r => r.name === value || r.slug === value);
                 return condition === 'is' ? hasRole : !hasRole;
+            }
 
             case 'post_type':
                 if (!post) return false;
                 return condition === 'is' ? post.post_type === value : post.post_type !== value;
 
-            case 'post_category':
+            case 'post_category': {
                 if (!post || !post.categories) return false;
                 const hasCat = post.categories.some(c => c.slug === value || c.name === value || String(c.id) === String(value));
                 return condition === 'is' ? hasCat : !hasCat;
+            }
 
-            case 'post_tag':
+            case 'post_tag': {
                 if (!post || !post.tags) return false;
                 const hasTag = post.tags.some(t => t.slug === value || t.name === value || String(t.id) === String(value));
                 return condition === 'is' ? hasTag : !hasTag;
+            }
 
-            case 'author':
+            case 'author': {
                 if (!post || !post.author) return false;
                 const isAuthor = String(post.author.id) === String(value) || post.author.user_nicename === value;
                 return condition === 'is' ? isAuthor : !isAuthor;
+            }
 
             case 'date_time': {
                 const now = new Date();
@@ -122,23 +126,25 @@ export class ConditionEvaluator {
             case 'search_results':
                 return new URLSearchParams(window.location.search).has('s');
 
-            case 'post_meta':
+            case 'post_meta': {
                 if (!post || !post.meta || !key) return false;
                 const metaValue = post.meta[key];
                 if (condition === 'is') return String(metaValue) === String(value);
                 if (condition === 'is_not') return String(metaValue) !== String(value);
                 if (condition === 'contains') return String(metaValue).includes(String(value));
                 return true;
+            }
 
-            case 'url_param':
+            case 'url_param': {
                 if (!key) return true;
                 const params = new URLSearchParams(window.location.search);
                 const paramValue = params.get(key);
                 if (condition === 'exists') return params.has(key);
                 if (condition === 'is') return paramValue === String(value);
                 return true;
+            }
 
-            case 'cookie':
+            case 'cookie': {
                 if (!key) return true;
                 const cookies = document.cookie.split(';').reduce((acc: Record<string, string>, c) => {
                     const [k, v] = c.split('=').map(s => s.trim());
@@ -149,6 +155,7 @@ export class ConditionEvaluator {
                 if (condition === 'exists') return key in cookies;
                 if (condition === 'is') return cookieValue === String(value);
                 return true;
+            }
 
             case 'browser': {
                 const ua = navigator.userAgent.toLowerCase();

@@ -27,9 +27,7 @@
                 <!-- Export Dropdown -->
                 <div class="relative" ref="exportDropdownRef">
                     <Button variant="outline" @click="toggleExportMenu" :disabled="exporting">
-                        <svg v-if="!exporting" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
+                        <Download v-if="!exporting" class="w-4 h-4 mr-2" />
                         <Loader2 v-else class="w-4 h-4 mr-2 animate-spin" />
                         {{ exporting ? $t('features.analytics.export.exporting') : $t('features.analytics.export.button') }}
                     </Button>
@@ -299,6 +297,7 @@ import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import Monitor from 'lucide-vue-next/dist/esm/icons/monitor.js';
 import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
 import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
 
 const { t } = useI18n();
 const toast = useToast();

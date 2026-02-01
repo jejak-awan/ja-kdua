@@ -10,7 +10,7 @@
                     :title="tool.title"
                     class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded"
                 >
-                    <svg v-if="tool.icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" v-html="tool.icon"></svg>
+                    <component v-if="tool.icon" :is="tool.icon" class="w-5 h-5" />
                     <span v-else>{{ tool.label }}</span>
                 </button>
             </div>
@@ -61,11 +61,21 @@ import hljs from 'highlight.js';
 import 'highlight.js/styles/github.min.css';
 import { Button } from '@/components/ui';
 
+import Bold from 'lucide-vue-next/dist/esm/icons/bold.js';
+import Italic from 'lucide-vue-next/dist/esm/icons/italic.js';
+import Link from 'lucide-vue-next/dist/esm/icons/link.js';
+import Image from 'lucide-vue-next/dist/esm/icons/image.js';
+import List from 'lucide-vue-next/dist/esm/icons/list.js';
+import Quote from 'lucide-vue-next/dist/esm/icons/quote.js';
+import Heading2 from 'lucide-vue-next/dist/esm/icons/heading-2.js';
+import Code from 'lucide-vue-next/dist/esm/icons/code.js';
+import SquareCode from 'lucide-vue-next/dist/esm/icons/square-code.js';
+
 interface ToolbarItem {
     action: string;
     syntax: string;
     title: string;
-    icon?: string;
+    icon?: any;
     label?: string;
 }
 
@@ -96,15 +106,15 @@ const showPreview = ref(false);
 const splitView = ref(false);
 
 const toolbar: ToolbarItem[] = [
-    { action: 'bold', syntax: '**text**', title: 'Bold', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h8a4 4 0 014 4 4 4 0 01-4 4H6z"></path>' },
-    { action: 'italic', syntax: '*text*', title: 'Italic', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>' },
-    { action: 'heading', syntax: '## Heading', title: 'Heading', label: 'H' },
-    { action: 'link', syntax: '[text](url)', title: 'Link', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>' },
-    { action: 'image', syntax: '![alt](url)', title: 'Image', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>' },
-    { action: 'code', syntax: '`code`', title: 'Inline Code', label: '</>' },
-    { action: 'codeblock', syntax: '```\ncode\n```', title: 'Code Block', label: '{}' },
-    { action: 'list', syntax: '- item', title: 'List', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>' },
-    { action: 'quote', syntax: '> quote', title: 'Quote', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>' },
+    { action: 'bold', syntax: '**text**', title: 'Bold', icon: Bold },
+    { action: 'italic', syntax: '*text*', title: 'Italic', icon: Italic },
+    { action: 'heading', syntax: '## Heading', title: 'Heading', icon: Heading2 },
+    { action: 'link', syntax: '[text](url)', title: 'Link', icon: Link },
+    { action: 'image', syntax: '![alt](url)', title: 'Image', icon: Image },
+    { action: 'code', syntax: '`code`', title: 'Inline Code', icon: Code },
+    { action: 'codeblock', syntax: '```\ncode\n```', title: 'Code Block', icon: SquareCode },
+    { action: 'list', syntax: '- item', title: 'List', icon: List },
+    { action: 'quote', syntax: '> quote', title: 'Quote', icon: Quote },
 ];
 
 const renderedPreview = computed(() => {

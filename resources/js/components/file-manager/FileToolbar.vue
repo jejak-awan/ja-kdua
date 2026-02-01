@@ -102,8 +102,7 @@
                     </TooltipContent>
                 </Tooltip>
             </div>
-
-        </div>
+</div>
 
         <!-- Bulk Actions Panel (Relocated) -->
         <div v-if="selectedItems.length > 0" class="mt-2 pt-2 border-t border-border/40 animate-in fade-in slide-in-from-top-1 duration-200">

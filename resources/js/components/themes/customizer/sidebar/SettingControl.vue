@@ -43,7 +43,7 @@
                 </option>
             </select>
             <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-muted-foreground">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
+                <ChevronsUpDown class="w-4 h-4" />
             </div>
         </div>
         
@@ -94,10 +94,10 @@
                 <img :src="modelValue" class="w-full h-full object-contain p-2" alt="Preview">
                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <button @click="$emit('pick-media')" class="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition-colors" title="Change Image">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        <Pencil class="w-4 h-4" />
                     </button>
                     <button @click="handleInput(''); $emit('change')" class="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition-colors" title="Remove">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        <Trash2 class="w-4 h-4" />
                     </button>
                 </div>
             </div>
@@ -106,7 +106,7 @@
                 @click="$emit('pick-media')"
                 class="w-full h-20 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors bg-muted/10 hover:bg-muted/20"
             >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <Image class="w-5 h-5" />
                 <span class="text-[10px] font-medium">Select Media</span>
             </button>
         </div>
@@ -130,6 +130,10 @@
 
 <script setup lang="ts">
 import type { ThemeSetting } from '@/types/theme';
+import ChevronsUpDown from 'lucide-vue-next/dist/esm/icons/chevrons-up-down.js';
+import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Image from 'lucide-vue-next/dist/esm/icons/image.js';
 
 const props = defineProps<{
     setting: ThemeSetting;

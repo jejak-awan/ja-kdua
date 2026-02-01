@@ -20,19 +20,7 @@
             <!-- Icon -->
             <div class="flex items-center justify-center pt-8 pb-4">
               <div class="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
-                <svg
-                  class="h-8 w-8 text-amber-600 dark:text-amber-400 animate-pulse"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <Clock class="h-8 w-8 text-amber-600 dark:text-amber-400 animate-pulse" />
               </div>
             </div>
 
@@ -64,19 +52,7 @@
               <!-- Warning Message -->
               <div class="mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4">
                 <div class="flex">
-                  <svg
-                    class="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 mr-3 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                  <Info class="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 mr-3 flex-shrink-0" />
                   <div class="text-sm text-amber-800 dark:text-amber-400">
                     <p class="font-medium mb-1">Pekerjaan yang belum disimpan akan hilang</p>
                     <p class="text-amber-700 dark:text-amber-500">
@@ -93,40 +69,14 @@
                   :disabled="extending"
                   class="flex-1 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <svg
+                  <Loader2
                     v-if="extending"
                     class="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
-                    <path
-                      class="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  <svg
+                  />
+                  <RotateCcw
                     v-else
                     class="h-5 w-5 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
+                  />
                   {{ extending ? 'Memperpanjang...' : 'Perpanjang Sesi' }}
                 </button>
                 
@@ -134,14 +84,7 @@
                   @click="logout"
                   class="flex-1 inline-flex items-center justify-center px-6 py-3 border border-input text-base font-medium rounded-lg text-foreground bg-card hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
                 >
-                  <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
+                  <LogOut class="h-5 w-5 mr-2" />
                   Logout Sekarang
                 </button>
               </div>
@@ -160,6 +103,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
+import Info from 'lucide-vue-next/dist/esm/icons/info.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import LogOut from 'lucide-vue-next/dist/esm/icons/log-out.js';
 
 const props = withDefaults(defineProps<{
   isVisible?: boolean;

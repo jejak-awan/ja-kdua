@@ -146,7 +146,7 @@ import {
     IconPicker
 } from '@/components/ui';
 
-// @ts-ignore
+// @ts-expect-error: Internal type mismatch
 import MediaPicker from '@/components/media/MediaPicker.vue';
 
 const { t } = useI18n();

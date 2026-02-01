@@ -16,9 +16,7 @@
 
             <div class="bg-card border border-border rounded-lg p-6">
                 <div class="text-center mb-6">
-                    <svg class="mx-auto h-12 w-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
+                    <Mail class="mx-auto h-12 w-12 text-indigo-600" />
                     <p class="mt-4 text-sm text-muted-foreground">
                         {{ t('features.auth.verifyEmail.resendPrompt') }}
                     </p>
@@ -47,9 +45,7 @@
             </div>
 
             <div v-if="verified" class="bg-green-500/20 border border-green-200 rounded-lg p-6 text-center">
-                <svg class="mx-auto h-12 w-12 text-green-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <CheckCircle class="mx-auto h-12 w-12 text-green-600 mb-4" />
                 <p class="text-green-800 font-medium">{{ t('features.auth.verifyEmail.success') }}</p>
                 <p class="text-sm text-green-600 mt-2">{{ t('features.auth.verifyEmail.redirecting') }}</p>
             </div>
@@ -62,6 +58,8 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
+import CheckCircle from 'lucide-vue-next/dist/esm/icons/circle-check.js';
 
 const { t } = useI18n();
 const router = useRouter();

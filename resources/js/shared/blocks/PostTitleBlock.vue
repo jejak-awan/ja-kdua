@@ -16,8 +16,7 @@
         :style="titleStyles"
         :contenteditable="mode === 'edit'"
         @blur="updateTitle"
-        v-text="displayTitle"
-      ></component>
+      >{{ displayTitle }}</component>
     </div>
   </BaseBlock>
 </template>

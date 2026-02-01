@@ -14,13 +14,9 @@
             >
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-12 h-12 rounded-full bg-indigo-500/20 dark:bg-indigo-500/10 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
+                        <ClipboardList class="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
                     </div>
-                    <svg class="w-5 h-5 text-muted-foreground group-hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
+                    <ChevronRight class="w-5 h-5 text-muted-foreground group-hover:text-primary" />
                 </div>
                 <h3 class="font-semibold text-foreground mb-1">{{ t('features.logs_dashboard.cards.activity.title') }}</h3>
                 <p class="text-sm text-muted-foreground mb-3">{{ t('features.logs_dashboard.cards.activity.description') }}</p>
@@ -37,13 +33,9 @@
             >
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-12 h-12 rounded-full bg-red-500/20 dark:bg-red-500/10 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
+                        <ShieldAlert class="w-6 h-6 text-red-500 dark:text-red-400" />
                     </div>
-                    <svg class="w-5 h-5 text-muted-foreground group-hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
+                    <ChevronRight class="w-5 h-5 text-muted-foreground group-hover:text-primary" />
                 </div>
                 <h3 class="font-semibold text-foreground mb-1">{{ t('features.logs_dashboard.cards.security.title') }}</h3>
                 <p class="text-sm text-muted-foreground mb-3">{{ t('features.logs_dashboard.cards.security.description') }}</p>
@@ -60,13 +52,9 @@
             >
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-12 h-12 rounded-full bg-green-500/20 dark:bg-green-500/10 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
+                        <Users class="w-6 h-6 text-green-500 dark:text-green-400" />
                     </div>
-                    <svg class="w-5 h-5 text-muted-foreground group-hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
+                    <ChevronRight class="w-5 h-5 text-muted-foreground group-hover:text-primary" />
                 </div>
                 <h3 class="font-semibold text-foreground mb-1">{{ t('features.logs_dashboard.cards.login.title') }}</h3>
                 <p class="text-sm text-muted-foreground mb-3">{{ t('features.logs_dashboard.cards.login.description') }}</p>
@@ -83,13 +71,9 @@
             >
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-12 h-12 rounded-full bg-yellow-500/20 dark:bg-yellow-500/10 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-yellow-500 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                        </svg>
+                        <Cpu class="w-6 h-6 text-yellow-500 dark:text-yellow-400" />
                     </div>
-                    <svg class="w-5 h-5 text-muted-foreground group-hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
+                    <ChevronRight class="w-5 h-5 text-muted-foreground group-hover:text-primary" />
                 </div>
                 <h3 class="font-semibold text-foreground mb-1">{{ t('features.logs_dashboard.cards.system.title') }}</h3>
                 <p class="text-sm text-muted-foreground mb-3">{{ t('features.logs_dashboard.cards.system.description') }}</p>
@@ -155,6 +139,11 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
+import ClipboardList from 'lucide-vue-next/dist/esm/icons/clipboard-list.js';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
+import ShieldAlert from 'lucide-vue-next/dist/esm/icons/shield-alert.js';
+import Users from 'lucide-vue-next/dist/esm/icons/users.js';
+import Cpu from 'lucide-vue-next/dist/esm/icons/cpu.js';
 
 interface ActivityStats {
     total?: number;

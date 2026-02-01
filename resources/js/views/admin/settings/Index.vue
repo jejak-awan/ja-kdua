@@ -44,7 +44,7 @@
                     <SecurityTab
                         v-else-if="activeTab === 'security'"
                         :settings="settings"
-                        :form-data="formData"
+                        v-model:form-data="formData"
                         :errors="errors"
                     />
 
@@ -52,7 +52,7 @@
                     <DiscussionTab
                         v-else-if="activeTab === 'comments'"
                         :settings="settings"
-                        :form-data="formData"
+                        v-model:form-data="formData"
                         :errors="errors"
                     />
 
@@ -60,7 +60,7 @@
                     <PerformanceTab
                         v-else-if="activeTab === 'performance'"
                         :settings="settings"
-                        :form-data="formData"
+                        v-model:form-data="formData"
                         :errors="errors"
                         :cache-status="cacheStatus"
                         :clearing-cache="clearingCache"
@@ -73,7 +73,7 @@
                     <EmailTab
                         v-else-if="activeTab === 'email'"
                         :settings="settings"
-                        :form-data="formData"
+                        v-model:form-data="formData"
                         :errors="errors"
                         :validating-config="validatingConfig"
                         :config-validation="configValidation"
@@ -87,7 +87,7 @@
                     <SeoTab
                         v-else-if="activeTab === 'seo'"
                         :settings="settings"
-                        :form-data="formData"
+                        v-model:form-data="formData"
                         :errors="errors"
                     />
 
@@ -95,7 +95,7 @@
                     <MediaTab
                         v-else-if="activeTab === 'media'"
                         :settings="settings"
-                        :form-data="formData"
+                        v-model:form-data="formData"
                         :errors="errors"
                     />
 
@@ -103,7 +103,7 @@
                     <AiTab
                         v-else-if="activeTab === 'ai'"
                         :settings="settings"
-                        :form-data="formData"
+                        v-model:form-data="formData"
                         :errors="errors"
                     />
 

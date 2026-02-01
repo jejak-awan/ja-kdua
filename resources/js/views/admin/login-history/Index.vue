@@ -3,9 +3,7 @@
         <div class="mb-6 flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <router-link to="/admin/logs-dashboard" class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
+                    <ArrowLeft class="w-5 h-5" />
                 </router-link>
                 <div>
                     <h1 class="text-2xl font-bold text-foreground">{{ t('features.login_history.title') }}</h1>
@@ -100,9 +98,7 @@
                         @click="exportHistory"
                         :disabled="exporting"
                     >
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
+                        <Download class="w-4 h-4 mr-2" />
                         {{ exporting ? t('features.login_history.export.exporting') : t('features.login_history.export.button') }}
                     </Button>
                 </div>
@@ -133,12 +129,8 @@
                                         : 'bg-red-500/20 text-red-500'
                                 ]"
                             >
-                                <svg v-if="entry.status === 'success'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                                <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+                                <Check v-if="entry.status === 'success'" class="w-5 h-5" />
+                                <X v-else class="w-5 h-5" />
                             </div>
                             <!-- Details -->
                             <div>
@@ -185,6 +177,11 @@ import {
     SelectTrigger,
     SelectValue
 } from '@/components/ui';
+
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
 
 interface User {
     id: number;

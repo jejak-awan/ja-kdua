@@ -8,9 +8,7 @@
                     @click="$emit('toggle-sidebar')"
                     class="lg:hidden text-muted-foreground hover:text-foreground"
                 >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
+                    <Menu class="w-6 h-6" />
                 </button>
 
                 <!-- Breadcrumb (Desktop Only) -->
@@ -27,7 +25,7 @@
                         data-slot="search-trigger"
                         class="hidden md:flex items-center w-64 px-3 py-2 text-sm text-muted-foreground bg-transparent border border-border/40 rounded-lg hover:bg-muted/5 hover:text-foreground"
                     >
-                        <component :is="getIcon('search')" class="mr-2 opacity-50" />
+                        <Search class="mr-2 w-4 h-4 opacity-50" />
                         <span>{{ t('common.actions.search') }}...</span>
                         <kbd class="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded-md border-border/40 bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 uppercase">
                             <span class="text-[10px]">Ctrl</span>
@@ -40,9 +38,7 @@
                         @click="showGlobalSearch = true"
                         class="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-xl hover:bg-accent"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+                        <Search class="w-5 h-5" />
                     </button>
 
                     <!-- Global Search Component -->
@@ -57,9 +53,7 @@
                         @click="toggleNotifications"
                         class="relative p-2 text-muted-foreground hover:text-foreground dark:hover:text-foreground"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
+                        <Bell class="w-6 h-6" />
                         <span
                             v-if="unreadNotificationsCount > 0"
                             class="absolute top-0 right-0 block h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center"
@@ -144,9 +138,7 @@
                             <p class="text-sm font-medium text-foreground">{{ user?.name || t('common.labels.user') }}</p>
                             <p class="text-xs text-muted-foreground">{{ user?.email || '' }}</p>
                         </div>
-                        <svg class="w-4 h-4 text-muted-foreground" :class="{ 'rotate-180': showUserMenu }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
+                        <ChevronDown class="w-4 h-4 text-muted-foreground transition-transform" :class="{ 'rotate-180': showUserMenu }" />
                     </button>
 
                     <!-- User Dropdown -->
@@ -166,9 +158,7 @@
                                 @click="showUserMenu = false"
                                 class="flex items-center px-4 py-2 text-sm text-foreground hover:bg-accent"
                             >
-                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
+                                <UserIcon class="w-4 h-4 mr-3" />
                                 {{ t('common.labels.myProfile') }}
                             </router-link>
                             <router-link
@@ -177,10 +167,7 @@
                                 @click="showUserMenu = false"
                                 class="flex items-center px-4 py-2 text-sm text-foreground hover:bg-accent"
                             >
-                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
+                                <Settings class="w-4 h-4 mr-3" />
                                 {{ t('common.labels.settings') }}
                             </router-link>
                         </div>
@@ -196,7 +183,7 @@
                             >
                                 <span class="mr-3 text-base leading-none">{{ getLanguageFlag(lang) }}</span>
                                 <span class="flex-1 text-left">{{ lang.native_name }}</span>
-                                <component :is="getIcon('check')" v-if="currentLanguage?.code === lang.code" class="ml-auto text-primary" />
+                                <Check v-if="currentLanguage?.code === lang.code" class="ml-auto w-4 h-4 text-primary" />
                             </button>
                         </div>
                         <div class="border-t border-border">
@@ -204,9 +191,7 @@
                                 @click="handleLogout"
                                 class="flex items-center w-full px-4 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
                             >
-                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
+                                <LogOut class="w-4 h-4 mr-3" />
                                 {{ t('common.navigation.menu.logout') }}
                             </button>
                         </div>
@@ -232,7 +217,16 @@ import api from '@/services/api';
 import Breadcrumbs from '@/components/layout/Breadcrumbs.vue';
 import DarkModeToggle from '@/components/shared/DarkModeToggle.vue';
 import GlobalSearch from '@/components/shared/GlobalSearch.vue';
-import { getIcon } from '@/utils/icons';
+
+import Menu from 'lucide-vue-next/dist/esm/icons/menu.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Bell from 'lucide-vue-next/dist/esm/icons/bell.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import UserIcon from 'lucide-vue-next/dist/esm/icons/user.js';
+import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
+import LogOut from 'lucide-vue-next/dist/esm/icons/log-out.js';
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+
 import type { User } from '@/types/auth';
 
 interface Notification {
