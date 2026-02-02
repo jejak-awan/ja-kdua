@@ -103,28 +103,28 @@ export const commonIcons: string[] = [
     'ChevronUp', 'ChevronDown', 'ChevronLeft', 'ChevronRight',
     'ChevronsUp', 'ChevronsDown', 'ChevronsLeft', 'ChevronsRight',
     'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
-    'ArrowUpCircle', 'ArrowDownCircle', 'ArrowLeftCircle', 'ArrowRightCircle',
+    'CircleArrowUp', 'CircleArrowDown', 'CircleArrowLeft', 'CircleArrowRight',
     'MoveUp', 'MoveDown', 'MoveLeft', 'MoveRight',
 
     // Basic Actions
     'Plus', 'Minus', 'X', 'Check', 'Search', 'Settings', 'Home', 'User',
-    'Bell', 'Calendar', 'Camera', 'Video', 'Mail', 'Trash2', 'Edit3',
+    'Bell', 'Calendar', 'Camera', 'Video', 'Mail', 'Trash2', 'PenTool',
     'ExternalLink', 'Link', 'Share2', 'Download', 'Upload', 'RefreshCw',
 
     // Shapes & Symbols
-    'Circle', 'Square', 'Triangle', 'Star', 'Heart', 'Shield', 'HelpCircle',
-    'AlertCircle', 'Info', 'CheckCircle2', 'PlusCircle', 'XCircle',
+    'Circle', 'Square', 'Triangle', 'Star', 'Heart', 'Shield', 'CircleHelp',
+    'CircleAlert', 'Info', 'CircleCheckBig', 'CirclePlus', 'CircleX',
 
     // Interface
-    'Menu', 'Grid', 'Layout', 'Columns', 'Rows', 'Maximize2', 'Minimize2',
-    'Eye', 'EyeOff', 'Lock', 'Unlock', 'Key', 'Flag', 'MapPin', 'Clock'
+    'Menu', 'Grid2X2', 'LayoutDashboard', 'Columns', 'Rows', 'Maximize2', 'Minimize2',
+    'Eye', 'EyeOff', 'Lock', 'LockOpen', 'Key', 'Flag', 'MapPin', 'Clock'
 ]
 
 export const categories: IconCategory[] = [
     {
         id: 'navigation',
         label: 'Navigation',
-        icons: ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ChevronUp', 'ChevronDown', 'ChevronLeft', 'ChevronRight', 'ChevronsUp', 'ChevronsDown', 'ChevronsLeft', 'ChevronsRight', 'MoveUp', 'MoveDown', 'MoveLeft', 'MoveRight', 'ArrowBigUp', 'ArrowBigDown', 'ArrowUpCircle', 'ArrowDownCircle']
+        icons: ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ChevronUp', 'ChevronDown', 'ChevronLeft', 'ChevronRight', 'ChevronsUp', 'ChevronsDown', 'ChevronsLeft', 'ChevronsRight', 'MoveUp', 'MoveDown', 'MoveLeft', 'MoveRight', 'ArrowBigUp', 'ArrowBigDown', 'CircleArrowUp', 'CircleArrowDown']
     },
     {
         id: 'communication',
@@ -139,16 +139,16 @@ export const categories: IconCategory[] = [
     {
         id: 'interface',
         label: 'Interface',
-        icons: ['Menu', 'Grid', 'Layout', 'Settings', 'Search', 'Filter', 'Maximize2', 'Minimize2', 'Layers', 'GripHorizontal', 'MoreHorizontal', 'Sliders']
+        icons: ['Menu', 'Grid2X2', 'LayoutDashboard', 'Settings', 'Search', 'ListFilter', 'Maximize2', 'Minimize2', 'Layers', 'GripHorizontal', 'Ellipsis', 'SlidersHorizontal']
     },
     {
         id: 'actions',
         label: 'Actions',
-        icons: ['Plus', 'Minus', 'X', 'Check', 'Trash2', 'Edit3', 'Save', 'Copy', 'RefreshCw', 'Download', 'Upload', 'Power', 'LogOut', 'ExternalLink']
+        icons: ['Plus', 'Minus', 'X', 'Check', 'Trash2', 'PenTool', 'Save', 'Copy', 'RefreshCw', 'Download', 'Upload', 'Power', 'LogOut', 'ExternalLink']
     },
     {
         id: 'status',
         label: 'Status & Help',
-        icons: ['HelpCircle', 'Info', 'AlertCircle', 'AlertTriangle', 'Shield', 'ShieldCheck', 'ShieldAlert', 'CheckCircle2', 'PlusCircle', 'XCircle', 'Circle', 'Lock', 'Unlock']
+        icons: ['CircleHelp', 'Info', 'CircleAlert', 'TriangleAlert', 'Shield', 'ShieldCheck', 'ShieldAlert', 'CircleCheckBig', 'CirclePlus', 'CircleX', 'Circle', 'Lock', 'LockOpen']
     }
 ]

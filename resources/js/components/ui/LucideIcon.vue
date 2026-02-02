@@ -51,33 +51,70 @@ const toPascalCase = (str: string): string => {
   return str.replace(/(^|[-_])(\w)/g, (_, __, c) => c.toUpperCase());
 };
 
-// Load icon dynamically from per-icon file
+// Common icon aliases for backward compatibility (Renamed in Lucide v0.4xx+)
+const ICON_ALIASES: Record<string, string> = {
+    'HelpCircle': 'CircleHelp',
+    'AlertCircle': 'CircleAlert',
+    'PlusCircle': 'CirclePlus',
+    'XCircle': 'CircleX',
+    'CheckCircle2': 'CircleCheckBig',
+    'Circle2': 'Circle',
+    'MoreHorizontal': 'Ellipsis',
+    'MoreVertical': 'EllipsisVertical',
+    'ArrowUpCircle': 'CircleArrowUp',
+    'ArrowDownCircle': 'CircleArrowDown',
+    'ArrowLeftCircle': 'CircleArrowLeft',
+    'ArrowRightCircle': 'CircleArrowRight',
+    'Edit3': 'PenTool',
+    'Edit': 'Pen',
+    'Filter': 'ListFilter',
+    'Sort': 'ArrowUpDown',
+    'Grid': 'Grid2X2',
+    'Layout': 'LayoutDashboard'
+};
+
+// Load icon dynamically - using main entry point for reliability with manual chunks
 watch(() => props.name, async (name) => {
   if (!name) {
     iconComponent.value = null;
     return;
   }
   
-  const kebabName = toKebabCase(name);
-  const pascalName = toPascalCase(name);
+  let targetName = toPascalCase(name);
+  if (ICON_ALIASES[targetName]) {
+      targetName = ICON_ALIASES[targetName];
+  }
+  
+  const pascalName = targetName;
   
   // Check cache first
-  if (iconCache.has(kebabName)) {
-    iconComponent.value = iconCache.get(kebabName) || null;
+  if (iconCache.has(pascalName)) {
+    iconComponent.value = iconCache.get(pascalName) || null;
     return;
   }
   
   try {
-    // Dynamic import from per-icon file - enables tree-shaking
-    const module = await import(`lucide-vue-next/dist/esm/icons/${kebabName}.js`);
-    const icon = module.default || module[pascalName];
+    // Import from main package - since we bundle all icons into vendor-icons, 
+    // this is efficient and more reliable than direct file imports in production.
+    const module = await import('lucide-vue-next');
+    const icon = module[pascalName as keyof typeof module];
     
     if (icon) {
-      iconCache.set(kebabName, icon);
-      iconComponent.value = icon;
+      iconCache.set(pascalName, icon as any);
+      iconComponent.value = icon as any;
     } else {
-      logger.warning(`LucideIcon: Icon "${name}" not found`);
-      iconComponent.value = null;
+      // Fallback: try kebab-case if PascalCase fails (some older icon lists might use kebab)
+      const kebabName = toKebabCase(name);
+      const kebabPascalName = toPascalCase(kebabName);
+      const kebabIcon = module[kebabPascalName as keyof typeof module];
+      
+      if (kebabIcon) {
+          iconCache.set(pascalName, kebabIcon as any);
+          iconComponent.value = kebabIcon as any;
+      } else {
+          logger.warning(`LucideIcon: Icon "${name}" not found in lucide-vue-next`);
+          iconComponent.value = null;
+      }
     }
   } catch (error) {
     logger.warning(`LucideIcon: Failed to load icon "${name}"`, error);

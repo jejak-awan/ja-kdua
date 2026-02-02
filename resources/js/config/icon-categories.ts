@@ -1,11 +1,11 @@
 export const iconCategories: Record<string, string[]> = {
     'General': [
         'Home', 'Menu', 'Search', 'Settings', 'User', 'Users', 'Bell', 'Calendar',
-        'Clock', 'Heart', 'Star', 'MoreHorizontal', 'MoreVertical', 'Plus', 'Minus',
-        'X', 'Check', 'Trash', 'Edit', 'Filter', 'Sort'
+        'Clock', 'Heart', 'Star', 'Ellipsis', 'EllipsisVertical', 'Plus', 'Minus',
+        'X', 'Check', 'Trash2', 'Pen', 'ListFilter', 'ArrowUpDown'
     ],
     'Communication': [
-        'Mail', 'MessageSquare', 'MessageCircle', 'Phone', 'Send', 'Share', 'Share2',
+        'Mail', 'MessageSquare', 'MessageCircle', 'Phone', 'Send', 'Share2',
         'Inbox', 'BellRing', 'Megaphone', 'AtSign'
     ],
     'Media': [
@@ -19,7 +19,7 @@ export const iconCategories: Record<string, string[]> = {
     'Arrows': [
         'ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown',
         'ChevronRight', 'ChevronLeft', 'ChevronUp', 'ChevronDown',
-        'ChevronRightSquare', 'ChevronLeftSquare',
+        'SquareChevronRight', 'SquareChevronLeft',
         'ArrowUpRight', 'ArrowDownRight', 'RefreshCw', 'RotateCw'
     ],
     'Files': [
