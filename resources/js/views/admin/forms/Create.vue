@@ -238,16 +238,7 @@ const formData = reactive({
                     id: `col-${Date.now()}`,
                     type: 'column',
                     settings: { flexGrow: 1 },
-                    children: [
-                        {
-                            id: `form-${Date.now()}`,
-                            type: 'contactform',
-                            settings: {
-                                adminLabel: 'Main Form Container'
-                            },
-                            children: []
-                        }
-                    ]
+                    children: []
                 }
             ]
         }
