@@ -30,7 +30,7 @@ const NewsletterModule: ModuleDefinition = {
     icon: 'Mail',
     category: 'forms',
 
-    children: null,
+    children: ['*'],
 
     defaults: {
         title: 'Subscribe to our Newsletter',

@@ -30,7 +30,7 @@ const ContactFormModule: ModuleDefinition = {
     icon: 'Mail',
     category: 'forms',
 
-    children: null,
+    children: ['*'],
 
     defaults: {
         title: 'Contact Us',

@@ -28,7 +28,7 @@ const LoginModule: ModuleDefinition = {
     icon: 'LogIn',
     category: 'forms',
 
-    children: null,
+    children: ['*'],
 
     defaults: {
         title: 'Login',

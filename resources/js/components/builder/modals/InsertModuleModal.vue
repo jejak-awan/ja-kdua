@@ -279,13 +279,16 @@ const suggestedModules = computed(() => {
   
   // Check for specialized contexts (primarily forms for now)
   const isFormContext = targetPath.some((m: any) => 
-    ['contactform', 'login', 'signup', 'newsletter'].includes(m.type)
+    (m.type && ['contactform', 'login', 'signup', 'newsletter'].includes(m.type)) ||
+    (m.type && builder.getModuleDefinition?.(m.type as string)?.category === 'forms')
   );
 
   if (isFormContext) {
     // Form-related components
-    const formFields = ['form_input', 'form_textarea', 'form_select', 'form_checkbox', 'form_radio', 'button'];
-    return ModuleRegistry.getAll().filter(m => formFields.includes(m.name));
+    return ModuleRegistry.getAll().filter(m => 
+        m.category === 'forms' || 
+        (m.name && ['button', 'text', 'heading'].includes(m.name))
+    ).filter(m => m.name && !['contactform', 'login', 'signup', 'newsletter'].includes(m.name));
   }
 
   return [];

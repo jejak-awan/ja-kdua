@@ -30,7 +30,7 @@ const SignupModule: ModuleDefinition = {
     icon: 'UserPlus',
     category: 'forms',
 
-    children: null,
+    children: ['*'],
 
     defaults: {
         title: 'Create Account',
