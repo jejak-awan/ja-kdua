@@ -1,149 +1,193 @@
 <template>
     <div class="space-y-6">
-        <!-- Header -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-foreground">{{ $t('features.forms.modal.editTitle') }}</h1>
-                <p class="mt-1 text-sm text-muted-foreground">{{ $t('features.forms.title') }}</p>
-            </div>
-            <router-link :to="{ name: 'forms' }">
-                <Button variant="ghost" size="sm">
-                    ← {{ $t('common.actions.back') }}
-                </Button>
-            </router-link>
-        </div>
-
-        <!-- Loading State -->
-        <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
-            <p class="text-muted-foreground">{{ $t('common.messages.loading.default') }}</p>
-        </div>
-
-        <!-- Form Content -->
-        <div v-else class="bg-card border border-border rounded-lg overflow-hidden">
-            <!-- Form Settings -->
-            <div class="p-6 space-y-6 border-b border-border">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Header & Main Metadata -->
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <router-link :to="{ name: 'forms' }">
+                        <Button variant="ghost" size="icon" class="rounded-full h-8 w-8">
+                            <span class="sr-only">Back</span>
+                            <ArrowLeft class="h-4 w-4" />
+                        </Button>
+                    </router-link>
                     <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ $t('features.forms.modal.formName') }} <span class="text-destructive">*</span>
+                        <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ $t('features.forms.modal.editTitle') }}</h1>
+                        <p class="text-sm text-muted-foreground">{{ $t('features.forms.title') }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <Button
+                        type="button"
+                        variant="default"
+                        :disabled="saving || !isDirty"
+                        @click="handleSubmit"
+                        class="shadow-sm border-b-2 border-primary/20 active:border-b-0 translate-y-[-2px] active:translate-y-0 transition-all font-semibold"
+                    >
+                        <Loader2 v-if="saving" class="animate-spin mr-2 h-4 w-4" />
+                        <Save v-else class="mr-2 h-4 w-4" />
+                        {{ saving ? $t('common.messages.loading.saving') : $t('features.forms.actions.update') }}
+                    </Button>
+                </div>
+            </div>
+
+            <div v-if="loading" class="bg-card border border-border rounded-xl p-12 text-center animate-pulse">
+                <Loader2 class="h-8 w-8 animate-spin mx-auto text-primary mb-2" />
+                <p class="text-muted-foreground">{{ $t('common.messages.loading.default') }}</p>
+            </div>
+
+            <!-- Essential Meta Card -->
+            <div v-else class="bg-card border border-border rounded-xl p-5 shadow-sm">
+                <div class="grid grid-cols-1 md:grid-cols-4 items-end gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] uppercase tracking-wider font-bold text-muted-foreground mb-1.5 ml-0.5">
+                            {{ $t('features.forms.modal.formName') }} <span class="text-destructive font-normal">*</span>
                         </label>
                         <Input
                             v-model="formData.name"
                             type="text"
                             required
+                            class="bg-background/50 border-border focus:ring-primary/20 h-11"
                             :placeholder="$t('features.forms.modal.placeholders.name')"
                             :class="{ 'border-destructive focus-visible:ring-destructive': errors.name }"
                         />
-                        <p v-if="errors.name" class="text-sm text-destructive mt-1">
+                        <p v-if="errors.name" class="text-xs text-destructive mt-1 ml-0.5">
                             {{ Array.isArray(errors.name) ? errors.name[0] : errors.name }}
                         </p>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ $t('features.forms.modal.slug') }} <span class="text-destructive">*</span>
+                        <label class="block text-[11px] uppercase tracking-wider font-bold text-muted-foreground mb-1.5 ml-0.5">
+                            {{ $t('features.forms.modal.slug') }} <span class="text-destructive font-normal">*</span>
                         </label>
-                        <Input
-                            v-model="formData.slug"
-                            type="text"
-                            required
-                            :placeholder="$t('features.forms.modal.placeholders.slug')"
-                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.slug }"
-                        />
-                        <p v-if="errors.slug" class="text-sm text-destructive mt-1">
+                        <div class="relative">
+                            <Input
+                                v-model="formData.slug"
+                                type="text"
+                                required
+                                class="bg-background/50 border-border focus:ring-primary/20 pl-7 h-11"
+                                :placeholder="$t('features.forms.modal.placeholders.slug')"
+                                :class="{ 'border-destructive focus-visible:ring-destructive': errors.slug }"
+                            />
+                            <LinkIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                        </div>
+                        <p v-if="errors.slug" class="text-xs text-destructive mt-1 ml-0.5">
                             {{ Array.isArray(errors.slug) ? errors.slug[0] : errors.slug }}
                         </p>
                     </div>
-                </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-foreground mb-1">
-                        {{ $t('features.forms.modal.description') }}
-                    </label>
-                    <Textarea
-                        v-model="formData.description"
-                        rows="2"
-                        :placeholder="$t('features.forms.modal.placeholders.description')"
-                    />
-                </div>
-
-                <!-- Success Message & Redirect -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ $t('features.forms.modal.successMessage') }}
+                    <div class="flex items-center space-x-2 h-11 pb-2">
+                        <Checkbox
+                            id="is_active"
+                            v-model:checked="formData.is_active"
+                        />
+                        <label for="is_active" class="text-sm font-medium leading-none cursor-pointer">
+                            {{ $t('features.forms.modal.isActive') }}
                         </label>
-                        <Input
-                            v-model="formData.success_message"
-                            type="text"
-                            :placeholder="$t('features.forms.modal.placeholders.successMessage')"
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="!loading">
+            <!-- Tabs Navigation -->
+            <Tabs defaultValue="fields" class="w-full">
+                <div class="flex items-center justify-between mb-2">
+                    <TabsList class="bg-muted/50 p-1 rounded-lg">
+                        <TabsTrigger value="fields" class="px-6 py-2 rounded-md transition-all active:scale-95">
+                            <LayoutDashboard class="h-4 w-4 mr-2" />
+                            {{ $t('features.forms.modal.tabs.fields') }}
+                        </TabsTrigger>
+                        <TabsTrigger value="settings" class="px-6 py-2 rounded-md transition-all active:scale-95">
+                            <Settings2 class="h-4 w-4 mr-2" />
+                            {{ $t('features.forms.modal.tabs.settings') }}
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
+
+                <!-- Visual Builder Tab -->
+                <TabsContent value="fields" class="mt-0 focus-visible:ring-0">
+                    <div class="border border-border rounded-xl overflow-hidden h-[750px] relative bg-slate-50 dark:bg-slate-900/20 shadow-inner">
+                        <Builder 
+                            ref="builderRef"
+                            v-model="formData.blocks"
+                            mode="page"
                         />
                     </div>
+                </TabsContent>
 
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ $t('features.forms.modal.redirectUrl') }}
-                        </label>
-                        <Input
-                            v-model="formData.redirect_url"
-                            type="url"
-                            :placeholder="$t('features.forms.modal.placeholders.redirectUrl')"
-                        />
+                <!-- Advanced Settings Tab -->
+                <TabsContent value="settings" class="mt-0 focus-visible:ring-0">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-card border border-border rounded-xl p-6 space-y-8 shadow-sm">
+                            <div class="space-y-4">
+                                <h3 class="text-lg font-semibold border-b pb-2 mb-4">{{ $t('features.forms.modal.description') }}</h3>
+                                <div>
+                                    <Textarea
+                                        v-model="formData.description"
+                                        rows="4"
+                                        class="bg-background/50 border-border focus:ring-primary/20"
+                                        :placeholder="$t('features.forms.modal.placeholders.description')"
+                                    />
+                                    <p class="text-xs text-muted-foreground mt-2 italic">Briefly describe the purpose of this form for internal reference.</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-6 pt-2">
+                                <h3 class="text-lg font-semibold border-b pb-2 mb-4">{{ $t('features.forms.modal.submissionBehavior') }}</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-semibold text-foreground">
+                                            {{ $t('features.forms.modal.successMessage') }}
+                                        </label>
+                                        <Input
+                                            v-model="formData.success_message"
+                                            type="text"
+                                            class="bg-background/50 border-border focus:ring-primary/20"
+                                            :placeholder="$t('features.forms.modal.placeholders.successMessage')"
+                                        />
+                                        <p class="text-[11px] text-muted-foreground italic">Displayed after a successful form submission.</p>
+                                    </div>
+                
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-semibold text-foreground">
+                                            {{ $t('features.forms.modal.redirectUrl') }}
+                                        </label>
+                                        <div class="relative">
+                                            <Input
+                                                v-model="formData.redirect_url"
+                                                type="url"
+                                                class="bg-background/50 border-border focus:ring-primary/20 pl-8"
+                                                :placeholder="$t('features.forms.modal.placeholders.redirectUrl')"
+                                            />
+                                            <Globe class="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                                        </div>
+                                        <p class="text-[11px] text-muted-foreground italic">Optional: Redirect user to this URL after submission.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="bg-primary/5 border border-primary/20 rounded-xl p-5 shadow-sm space-y-4">
+                                <h3 class="font-bold flex items-center text-primary">
+                                    <Info class="h-4 w-4 mr-2" />
+                                    {{ $t('features.forms.modal.publishingTips.title') }}
+                                </h3>
+                                <ul class="text-xs space-y-3 text-muted-foreground leading-relaxed">
+                                    <li class="flex items-start gap-2">
+                                        <div class="h-1 w-1 bg-primary rounded-full mt-1.5 shrink-0" />
+                                        {{ $t('features.forms.modal.publishingTips.edit') }}
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <div class="h-1 w-1 bg-primary rounded-full mt-1.5 shrink-0" />
+                                        {{ $t('features.forms.modal.publishingTips.mobile') }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Status -->
-                <div class="flex items-center space-x-2">
-                    <Checkbox
-                        id="is_active"
-                        v-model:checked="formData.is_active"
-                    />
-                    <label for="is_active" class="text-sm font-medium leading-none">
-                        {{ $t('features.forms.modal.isActive') }}
-                    </label>
-                </div>
-            </div>
-
-            <!-- Visual Builder Section -->
-            <div class="p-6 pt-4">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="text-lg font-semibold text-foreground">{{ $t('features.forms.modal.formFields') }}</h3>
-                        <p class="text-xs text-muted-foreground mt-1">
-                            Drag and drop form fields using the visual builder below
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Visual Builder -->
-                <div class="border border-border rounded-lg overflow-hidden h-[600px] relative bg-slate-50 dark:bg-slate-900/20">
-                    <Builder 
-                        ref="builderRef"
-                        v-model="formData.blocks"
-                        mode="page"
-                    />
-                </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex justify-end space-x-3 p-6 pt-0">
-                <router-link :to="{ name: 'forms' }">
-                    <Button type="button" variant="outline">
-                        {{ $t('common.actions.cancel') }}
-                    </Button>
-                </router-link>
-                <Button
-                    type="button"
-                    :disabled="saving || !isDirty"
-                    @click="handleSubmit"
-                >
-                    <svg v-if="saving" class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    {{ saving ? $t('common.messages.loading.saving') : $t('features.forms.actions.update') }}
-                </Button>
-            </div>
+                </TabsContent>
+            </Tabs>
         </div>
     </div>
 </template>
@@ -158,7 +202,17 @@ import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { useFormValidation } from '../../../composables/useFormValidation';
 import { formBuilderSchema } from '../../../schemas';
-import { Button, Checkbox, Input, Textarea } from '@/components/ui';
+import { Button, Checkbox, Input, Textarea, Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui';
+import { 
+    ArrowLeft, 
+    Link as LinkIcon, 
+    Save, 
+    Loader2, 
+    LayoutDashboard, 
+    Settings2, 
+    Globe, 
+    Info 
+} from 'lucide-vue-next';
 
 import Builder from '../../../components/builder/Builder.vue';
 

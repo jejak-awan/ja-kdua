@@ -74,6 +74,18 @@
             "description": "Form description...",
             "successMessage": "Thank you for your submission!",
             "redirectUrl": "https://example.com/thank-you"
+        },
+        "tabs": {
+            "fields": "Designer",
+            "settings": "Settings"
+        },
+        "submissionBehavior": "Submission Behavior",
+        "publishingTips": {
+            "title": "Publishing Tips",
+            "slug": "Ensure your Slug is unique for SEO and routing.",
+            "fields": "Add at least one Input Field or specialized form module.",
+            "mobile": "Check the Mobile View in the designer for responsiveness.",
+            "edit": "Editing a form will affect all pages where this form is embedded."
         }
     },
     "messages": {

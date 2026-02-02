@@ -74,6 +74,18 @@
             "description": "Deskripsi formulir...",
             "successMessage": "Terima kasih atas kiriman Anda!",
             "redirectUrl": "https://example.com/terima-kasih"
+        },
+        "tabs": {
+            "fields": "Desainer",
+            "settings": "Pengaturan"
+        },
+        "submissionBehavior": "Perilaku Pengiriman",
+        "publishingTips": {
+            "title": "Tips Publikasi",
+            "slug": "Pastikan Slug unik untuk SEO dan perutean.",
+            "fields": "Tambahkan setidaknya satu Bidang Input atau modul formulir khusus.",
+            "mobile": "Periksa Tampilan Seluler di desainer untuk responsivitas.",
+            "edit": "Mengedit formulir akan memengaruhi semua halaman tempat formulir ini disematkan."
         }
     },
     "messages": {
