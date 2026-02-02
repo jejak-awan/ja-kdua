@@ -31,7 +31,7 @@
             </div>
 
             <!-- Essential Meta Card -->
-            <div class="bg-card border border-border rounded-xl p-5 shadow-sm">
+            <Card class="p-5 border-border/60 shadow-none mb-6">
                 <div class="grid grid-cols-1 md:grid-cols-4 items-end gap-6">
                     <div class="md:col-span-2">
                         <label class="block text-[11px] uppercase tracking-wider font-bold text-muted-foreground mb-1.5 ml-0.5">
@@ -81,7 +81,7 @@
                         </label>
                     </div>
                 </div>
-            </div>
+            </Card>
         </div>
 
         <!-- Tabs Navigation -->
@@ -113,7 +113,7 @@
             <!-- Advanced Settings Tab -->
             <TabsContent value="settings" class="mt-0 focus-visible:ring-0">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-card border border-border rounded-xl p-6 space-y-8 shadow-sm">
+                    <Card class="lg:col-span-2 p-6 space-y-8 border-border/60 shadow-none">
                         <div class="space-y-4">
                             <h3 class="text-lg font-semibold border-b pb-2 mb-4">{{ $t('features.forms.modal.description') }}</h3>
                             <div>
@@ -160,10 +160,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </Card>
 
                     <div class="space-y-6">
-                        <div class="bg-primary/5 border border-primary/20 rounded-xl p-5 shadow-sm space-y-4">
+                        <Card class="p-6 border-border/60 shadow-none h-fit space-y-4">
                             <h3 class="font-bold flex items-center text-primary">
                                 <Info class="h-4 w-4 mr-2" />
                                 {{ $t('features.forms.modal.publishingTips.title') }}
@@ -182,7 +182,7 @@
                                     {{ $t('features.forms.modal.publishingTips.mobile') }}
                                 </li>
                             </ul>
-                        </div>
+                        </Card>
                     </div>
                 </div>
             </TabsContent>
@@ -199,7 +199,7 @@ import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { useFormValidation } from '../../../composables/useFormValidation';
 import { formBuilderSchema } from '../../../schemas';
-import { Button, Checkbox, Input, Textarea, Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui';
+import { Button, Card, Checkbox, Input, Textarea, Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui';
 import { 
     ArrowLeft, 
     Save, 
