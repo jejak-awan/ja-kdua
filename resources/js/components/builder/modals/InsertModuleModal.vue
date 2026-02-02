@@ -241,7 +241,7 @@ const emit = defineEmits<{
 }>();
 
 // Props/Injections
-const builder = inject<BuilderInstance>('builder');
+const builder = inject<any>('builder'); // Using any to avoid complicated type casting for extended builder object
 
 // State
 const activeTab = ref('module');
@@ -267,6 +267,30 @@ const allGroups = computed(() => [
   { id: 'sidebar', type: 'grid', title: 'Sidebar', items: sidebarPresets }
 ]);
 
+// Context-aware suggestions
+const suggestedModules = computed(() => {
+  if (!builder?.insertTargetId?.value) return [];
+  
+  const targetId = builder.insertTargetId.value;
+  const blocks = builder.blocks?.value || [];
+  
+  // Find full path of the insert target
+  const targetPath = builder.findModule ? builder.getModulePath(blocks, targetId) : [];
+  
+  // Check for specialized contexts (primarily forms for now)
+  const isFormContext = targetPath.some((m: any) => 
+    ['contactform', 'login', 'signup', 'newsletter'].includes(m.type)
+  );
+
+  if (isFormContext) {
+    // Form-related components
+    const formFields = ['form_input', 'form_textarea', 'form_select', 'form_checkbox', 'form_radio', 'button'];
+    return ModuleRegistry.getAll().filter(m => formFields.includes(m.name));
+  }
+
+  return [];
+});
+
 // Modules
 const modules = computed(() => ModuleRegistry.getContentModules());
 
@@ -284,13 +308,20 @@ const groupedModules = computed(() => {
 
   // Group by category
   const groups: Record<string, any[]> = {};
+  
+  // Add suggested first if no search is active
+  if (!searchQuery.value && suggestedModules.value.length > 0) {
+    groups[t('builder.categories.suggested')] = suggestedModules.value;
+  }
+
   filtered.forEach((module: any) => {
-     const catKey = module.category.toLowerCase();
-     const cat = t('builder.categories.' + catKey);
-     if (!groups[cat]) {
-       groups[cat] = [];
+     const catKey = (module.category || 'content').toLowerCase();
+     const catTitle = te('builder.categories.' + catKey) ? t('builder.categories.' + catKey) : (module.category || 'Content');
+     
+     if (!groups[catTitle]) {
+       groups[catTitle] = [];
      }
-     groups[cat].push(module);
+     groups[catTitle].push(module);
   });
   
   return groups;
@@ -303,12 +334,12 @@ const presets = computed(() => builder?.presets?.value || []);
 const filteredPresets = computed(() => {
   if (!searchQuery.value) return presets.value;
   const query = searchQuery.value.toLowerCase();
-  return presets.value.filter(p => p.name.toLowerCase().includes(query));
+  return presets.value.filter((p: any) => p.name.toLowerCase().includes(query));
 });
 
 const groupedPresets = computed(() => {
   const groups: Record<string, any[]> = {};
-  filteredPresets.value.forEach(preset => {
+  filteredPresets.value.forEach((preset: any) => {
     const type = preset.type.charAt(0).toUpperCase() + preset.type.slice(1);
     if (!groups[type]) groups[type] = [];
     groups[type].push(preset);

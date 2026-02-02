@@ -41,6 +41,7 @@
         "warning": "Peringatan: Mengimpor templat akan mengganti seluruh konten saat ini."
     },
     "categories": {
+        "suggested": "Disarankan",
         "structure": "Struktur",
         "basic": "Dasar",
         "media": "Media",
@@ -48,7 +49,8 @@
         "content": "Konten",
         "interactive": "Interaktif",
         "dynamic": "Dinamis",
-        "fullwidth": "Lebar Penuh"
+        "fullwidth": "Lebar Penuh",
+        "internal": "Internal"
     },
     "actions": {
         "add": "Tambah {name}",

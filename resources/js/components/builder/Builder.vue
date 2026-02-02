@@ -284,7 +284,16 @@ const builder = {
   sidebarVisible,
   activePanel,
   globalAction,
-} as any as BuilderInstance & { darkMode: Ref<boolean>; sidebarVisible: Ref<boolean>; activePanel: Ref<string | null>; globalAction: Ref<string | null> }
+  insertTargetId,
+  insertTargetIndex
+} as any as BuilderInstance & { 
+  darkMode: Ref<boolean>; 
+  sidebarVisible: Ref<boolean>; 
+  activePanel: Ref<string | null>; 
+  globalAction: Ref<string|null>;
+  insertTargetId: Ref<string|null>;
+  insertTargetIndex: Ref<number>;
+}
 
 // Provide builder for child components
 provide('builder', builder)

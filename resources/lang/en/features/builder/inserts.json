@@ -41,6 +41,7 @@
         "warning": "Warning: Importing a template will replace all current content."
     },
     "categories": {
+        "suggested": "Suggested",
         "structure": "Structure",
         "basic": "Basic",
         "media": "Media",
@@ -48,7 +49,8 @@
         "interactive": "Interactive",
         "forms": "Forms",
         "dynamic": "Dynamic",
-        "fullwidth": "Fullwidth"
+        "fullwidth": "Fullwidth",
+        "internal": "Internal"
     },
     "actions": {
         "add": "Add {name}",
