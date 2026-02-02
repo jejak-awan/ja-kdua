@@ -1,7 +1,8 @@
 <template>
-    <div>
-        <!-- Header -->
-        <div class="mb-6 flex justify-between items-center">
+    <TooltipProvider>
+        <div>
+            <!-- Header -->
+            <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.forms.title') }}</h1>
             <router-link :to="{ name: 'forms.create' }">
                 <Button>
@@ -143,14 +144,28 @@
                         {{ form.description }}
                     </p>
 
-                    <div class="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                        <div class="flex items-center">
-                            <Tag class="w-4 h-4 mr-1" />
-                            {{ $t('features.forms.stats.fields', { count: countFormFields(form) }) }}
+                    <div class="grid grid-cols-2 gap-y-2 text-sm text-muted-foreground mb-4 border-t border-border/40 pt-4">
+                        <div class="flex items-center" :title="$t('features.forms.stats.fields', { count: countFormFields(form) })">
+                            <Tag class="w-4 h-4 mr-2 opacity-70" />
+                            <span>{{ $t('features.forms.stats.fields', { count: countFormFields(form) }) }}</span>
                         </div>
-                        <div class="flex items-center">
-                            <FileText class="w-4 h-4 mr-1" />
-                            {{ $t('features.forms.stats.submissions', { count: form.submission_count || 0 }) }}
+                        <div class="flex items-center" :title="$t('features.forms.stats.views', { count: form.view_count || 0 })">
+                            <Eye class="w-4 h-4 mr-2 opacity-70" />
+                            <span>{{ $t('features.forms.stats.views', { count: form.view_count || 0 }) }}</span>
+                        </div>
+                        <div class="flex items-center" :title="$t('features.forms.stats.starts', { count: form.start_count || 0 })">
+                            <MousePointer2 class="w-4 h-4 mr-2 opacity-70" />
+                            <span>{{ $t('features.forms.stats.starts', { count: form.start_count || 0 }) }}</span>
+                        </div>
+                        <div class="flex items-center font-medium text-foreground" :title="$t('features.forms.stats.submissions', { count: form.submission_count || 0 })">
+                            <MessageSquare class="w-4 h-4 mr-2 opacity-70" />
+                            <span>{{ $t('features.forms.stats.submissions', { count: form.submission_count || 0 }) }}</span>
+                        </div>
+                        <div class="col-span-2 flex items-center pt-1" :title="$t('features.forms.stats.conversion', { rate: calculateConversion(form) })">
+                             <TrendingUp class="w-4 h-4 mr-2 opacity-70 text-emerald-500" />
+                             <span class="text-xs font-semibold text-emerald-600">
+                                {{ $t('features.forms.stats.conversion', { rate: calculateConversion(form) }) }}
+                             </span>
                         </div>
                     </div>
 
@@ -163,45 +178,102 @@
                             <Inbox class="w-4 h-4 mr-1" />
                             {{ $t('features.forms.actions.submissions') }}
                         </Button>
-                        <Button
-                            @click="toggleFormStatus(form)"
-                            variant="ghost"
-                            size="icon"
-                            class="h-8 w-8"
-                        >
-                            <Ban v-if="form.is_active" class="w-4 h-4" />
-                            <Check v-else class="w-4 h-4" />
-                        </Button>
-                        <Button
-                            v-if="!form.deleted_at"
-                            @click="deleteForm(form)"
-                            variant="ghost"
-                            size="icon"
-                            class="h-8 w-8 text-destructive hover:text-destructive"
-                            :title="$t('common.actions.delete')"
-                        >
-                            <Trash2 class="w-4 h-4" />
-                        </Button>
-                        <Button
-                            v-if="form.deleted_at"
-                            @click="restoreForm(form)"
-                            variant="ghost"
-                            size="icon"
-                            class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-                            :title="$t('common.actions.restore')"
-                        >
-                            <RotateCcw class="w-4 h-4" />
-                        </Button>
-                        <Button
-                            v-if="form.deleted_at"
-                            @click="forceDeleteForm(form)"
-                            variant="ghost"
-                            size="icon"
-                            class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                            :title="$t('common.actions.forceDelete')"
-                        >
-                            <Trash2 class="w-4 h-4" />
-                        </Button>
+                        <Tooltip>
+                            <TooltipTrigger as-child>
+                                <Button
+                                    @click="openDuplicateDialog(form)"
+                                    variant="ghost"
+                                    size="icon"
+                                    class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50"
+                                >
+                                    <Copy class="w-4 h-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{{ $t('features.forms.actions.duplicate') }}</p>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger as-child>
+                                <Button
+                                    @click="toggleFormStatus(form)"
+                                    variant="ghost"
+                                    size="icon"
+                                    class="h-8 w-8"
+                                >
+                                    <Ban v-if="form.is_active" class="w-4 h-4" />
+                                    <Check v-else class="w-4 h-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{{ form.is_active ? $t('common.actions.deactivate') : $t('common.actions.activate') }}</p>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger as-child>
+                                <Button
+                                    @click="openShareDialog(form)"
+                                    variant="ghost"
+                                    size="icon"
+                                    class="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                                >
+                                    <Share2 class="w-4 h-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{{ $t('features.forms.actions.share') }}</p>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip v-if="!form.deleted_at">
+                            <TooltipTrigger as-child>
+                                <Button
+                                    @click="deleteForm(form)"
+                                    variant="ghost"
+                                    size="icon"
+                                    class="h-8 w-8 text-destructive hover:text-destructive"
+                                >
+                                    <Trash2 class="w-4 h-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{{ $t('common.actions.delete') }}</p>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip v-if="form.deleted_at">
+                            <TooltipTrigger as-child>
+                                <Button
+                                    @click="restoreForm(form)"
+                                    variant="ghost"
+                                    size="icon"
+                                    class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                                >
+                                    <RotateCcw class="w-4 h-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{{ $t('common.actions.restore') }}</p>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip v-if="form.deleted_at">
+                            <TooltipTrigger as-child>
+                                <Button
+                                    @click="forceDeleteForm(form)"
+                                    variant="ghost"
+                                    size="icon"
+                                    class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                >
+                                    <Trash2 class="w-4 h-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{{ $t('common.actions.forceDelete') }}</p>
+                            </TooltipContent>
+                        </Tooltip>
                     </div>
                 </div>
             </Card>
@@ -225,11 +297,20 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
                                 {{ $t('features.forms.modal.slug') }}
                             </th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
+                            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground">
                                 {{ $t('features.forms.stats.fields', { count: '' }).replace('{count}', '').trim() }}
                             </th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
+                            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                {{ $t('features.forms.stats.views', { count: '' }).replace(/^[0-9\s]+/, '').trim() }}
+                            </th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                {{ $t('features.forms.stats.starts', { count: '' }).replace(/^[0-9\s]+/, '').trim() }}
+                            </th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                 {{ $t('features.forms.actions.submissions') }}
+                            </th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                {{ $t('features.forms.stats.conversion', { rate: '' }).replace(/^[0-9%/\s]+/, '').trim() }}
                             </th>
                             <th class="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
                                 Status
@@ -261,13 +342,24 @@
                             <td class="px-4 py-4">
                                 <code class="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">{{ form.slug }}</code>
                             </td>
-                            <td class="px-4 py-4 text-center">
+                            <td class="px-4 py-4 text-right">
                                 <span class="text-sm text-muted-foreground">{{ countFormFields(form) }}</span>
                             </td>
-                            <td class="px-4 py-4 text-center">
-                                <Button variant="link" size="sm" class="h-auto p-0" @click="viewSubmissions(form)">
+                            <td class="px-4 py-4 text-right font-mono text-xs">
+                                {{ form.view_count || 0 }}
+                            </td>
+                            <td class="px-4 py-4 text-right font-mono text-xs">
+                                {{ form.start_count || 0 }}
+                            </td>
+                            <td class="px-4 py-4 text-right">
+                                <span class="font-medium px-2 py-0.5 rounded-full bg-primary/5 text-primary tracking-tight">
                                     {{ form.submission_count || 0 }}
-                                </Button>
+                                </span>
+                            </td>
+                            <td class="px-4 py-4 text-right">
+                                <span class="text-xs font-bold text-emerald-600">
+                                    {{ calculateConversion(form) }}%
+                                </span>
                             </td>
                             <td class="px-4 py-4 text-center">
                                 <Badge
@@ -278,52 +370,124 @@
                             </td>
                             <td class="px-4 py-4">
                                 <div class="flex items-center justify-center space-x-1">
-                                    <Button @click="editForm(form)" variant="ghost" size="icon" class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10" :title="$t('common.actions.edit')">
-                                        <Pencil class="w-4 h-4" />
-                                    </Button>
-                                    <Button @click="viewSubmissions(form)" variant="ghost" size="icon" class="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10" :title="$t('features.forms.actions.submissions')">
-                                        <Inbox class="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                        @click="toggleFormStatus(form)"
-                                        variant="ghost"
-                                        size="icon"
-                                        :class="form.is_active ? 'h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10' : 'h-8 w-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10'"
-                                        :title="form.is_active ? $t('common.actions.deactivate') : $t('common.actions.activate')"
-                                    >
-                                        <Ban v-if="form.is_active" class="w-4 h-4" />
-                                        <Check v-else class="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                        v-if="!form.deleted_at"
-                                        @click="deleteForm(form)"
-                                        variant="ghost"
-                                        size="icon"
-                                        class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                        :title="$t('common.actions.delete')"
-                                    >
-                                        <Trash2 class="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                        v-if="form.deleted_at"
-                                        @click="restoreForm(form)"
-                                        variant="ghost"
-                                        size="icon"
-                                        class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-                                        :title="$t('common.actions.restore')"
-                                    >
-                                        <RotateCcw class="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                        v-if="form.deleted_at"
-                                        @click="forceDeleteForm(form)"
-                                        variant="ghost"
-                                        size="icon"
-                                        class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                        :title="$t('common.actions.forceDelete')"
-                                    >
-                                        <Trash2 class="w-4 h-4" />
-                                    </Button>
+                                    <Tooltip>
+                                        <TooltipTrigger as-child>
+                                            <Button @click="editForm(form)" variant="ghost" size="icon" class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10">
+                                                <Pencil class="w-4 h-4" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{{ $t('common.actions.edit') }}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+
+                                    <Tooltip>
+                                        <TooltipTrigger as-child>
+                                            <Button @click="viewSubmissions(form)" variant="ghost" size="icon" class="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10">
+                                                <Inbox class="w-4 h-4" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{{ $t('features.forms.actions.submissions') }}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+
+                                    <Tooltip>
+                                        <TooltipTrigger as-child>
+                                            <Button
+                                                @click="openDuplicateDialog(form)"
+                                                variant="ghost"
+                                                size="icon"
+                                                class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50"
+                                            >
+                                                <Copy class="w-4 h-4" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{{ $t('features.forms.actions.duplicate') }}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+
+                                    <Tooltip>
+                                        <TooltipTrigger as-child>
+                                            <Button
+                                                @click="toggleFormStatus(form)"
+                                                variant="ghost"
+                                                size="icon"
+                                                :class="form.is_active ? 'h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10' : 'h-8 w-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10'"
+                                            >
+                                                <Ban v-if="form.is_active" class="w-4 h-4" />
+                                                <Check v-else class="w-4 h-4" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{{ form.is_active ? $t('common.actions.deactivate') : $t('common.actions.activate') }}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+
+                                    <Tooltip>
+                                        <TooltipTrigger as-child>
+                                            <Button
+                                                @click="openShareDialog(form)"
+                                                variant="ghost"
+                                                size="icon"
+                                                class="h-8 w-8 text-sky-500 hover:text-sky-600 hover:bg-sky-50"
+                                            >
+                                                <Share2 class="w-4 h-4" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{{ $t('features.forms.actions.share') }}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+
+                                    <Tooltip v-if="!form.deleted_at">
+                                        <TooltipTrigger as-child>
+                                            <Button
+                                                @click="deleteForm(form)"
+                                                variant="ghost"
+                                                size="icon"
+                                                class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                            >
+                                                <Trash2 class="w-4 h-4" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{{ $t('common.actions.delete') }}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+
+                                    <Tooltip v-if="form.deleted_at">
+                                        <TooltipTrigger as-child>
+                                            <Button
+                                                @click="restoreForm(form)"
+                                                variant="ghost"
+                                                size="icon"
+                                                class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                                            >
+                                                <RotateCcw class="w-4 h-4" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{{ $t('common.actions.restore') }}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+
+                                    <Tooltip v-if="form.deleted_at">
+                                        <TooltipTrigger as-child>
+                                            <Button
+                                                @click="forceDeleteForm(form)"
+                                                variant="ghost"
+                                                size="icon"
+                                                class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                            >
+                                                <Trash2 class="w-4 h-4" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{{ $t('common.actions.forceDelete') }}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
                                 </div>
                             </td>
                         </tr>
@@ -338,7 +502,95 @@
             :form="selectedForm"
             @close="selectedForm = null"
         />
-    </div>
+
+        <!-- Share Dialog -->
+        <Dialog v-model:open="showShareDialog">
+            <DialogContent class="max-w-md">
+                <DialogHeader>
+                    <DialogTitle>{{ $t('features.forms.actions.share') || 'Share Form' }}</DialogTitle>
+                    <DialogDescription>
+                        {{ sharingForm?.name }}
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div class="space-y-6 py-4">
+                    <!-- Public Link -->
+                    <div class="space-y-2">
+                        <Label class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Public URL</Label>
+                        <div class="flex gap-2">
+                            <Input :value="publicUrl" readonly class="flex-1 bg-muted/30" />
+                            <Button size="icon" variant="outline" @click="copyToClipboard(publicUrl)">
+                                <Copy class="w-4 h-4" />
+                            </Button>
+                        </div>
+                    </div>
+
+                    <!-- Embed Code -->
+                    <div class="space-y-2">
+                        <Label class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Embed Tag (for Page Builder)</Label>
+                        <div class="flex gap-2">
+                            <Input :value="embedCode" readonly class="flex-1 bg-muted/30" />
+                            <Button size="icon" variant="outline" @click="copyToClipboard(embedCode)">
+                                <Copy class="w-4 h-4" />
+                            </Button>
+                        </div>
+                        <p class="text-[11px] text-muted-foreground">Paste this tag into any custom HTML block or use the Form Picker block.</p>
+                    </div>
+                </div>
+
+                <DialogFooter>
+                    <Button variant="outline" @click="showShareDialog = false">{{ $t('common.actions.close') }}</Button>
+                    <Button @click="visitPublicPage">
+                        <ExternalLink class="w-4 h-4 mr-2" />
+                        Visit Page
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        <!-- Duplicate Choice Dialog -->
+        <Dialog v-model:open="showDuplicateDialog">
+            <DialogContent class="max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Duplikat Formulir</DialogTitle>
+                    <DialogDescription>
+                        Pilih tipe duplikasi untuk formulir <strong>{{ duplicatingForm?.name }}</strong>.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div class="grid gap-4 py-4">
+                    <Button 
+                        variant="outline" 
+                        class="h-auto py-4 flex flex-col items-start text-left gap-1 hover:bg-primary/5 hover:border-primary/50"
+                        @click="handleDuplicate(false)"
+                    >
+                        <span class="font-bold flex items-center gap-2">
+                            <Tag class="w-4 h-4 text-primary" />
+                            Hanya Struktur Form
+                        </span>
+                        <span class="text-xs text-muted-foreground">Menduplikat field dan pengaturan tanpa data isian.</span>
+                    </Button>
+
+                    <Button 
+                        variant="outline" 
+                        class="h-auto py-4 flex flex-col items-start text-left gap-1 hover:bg-indigo-50 hover:border-indigo-200"
+                        @click="handleDuplicate(true)"
+                    >
+                        <span class="font-bold flex items-center gap-2">
+                            <Inbox class="w-4 h-4 text-indigo-500" />
+                            Form dengan Data Submission
+                        </span>
+                        <span class="text-xs text-muted-foreground">Menduplikat form beserta seluruh data responden ({{ duplicatingForm?.submission_count || 0 }} data).</span>
+                    </Button>
+                </div>
+
+                <DialogFooter>
+                    <Button variant="ghost" @click="showDuplicateDialog = false">Batal</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+        </div>
+    </TooltipProvider>
 </template>
 
 <script setup lang="ts">
@@ -351,7 +603,7 @@ import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import Submissions from './Submissions.vue';
-import { Badge, Button, Card, Checkbox, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
+import { Badge, Button, Card, Checkbox, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Label, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui';
 
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
@@ -366,6 +618,9 @@ import Ban from 'lucide-vue-next/dist/esm/icons/ban.js';
 import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import Share2 from 'lucide-vue-next/dist/esm/icons/share-2.js';
+import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
+import ExternalLink from 'lucide-vue-next/dist/esm/icons/external-link.js';
 
 import type { Form } from '@/types/forms';
 
@@ -382,6 +637,11 @@ const statusFilter = ref('all');
 const trashedFilter = ref('without');
 const selectedForm = ref<Form | null>(null);
 const viewMode = ref('card');
+const showShareDialog = ref(false);
+const sharingForm = ref<Form | null>(null);
+const showDuplicateDialog = ref(false);
+const duplicatingForm = ref<Form | null>(null);
+const duplicating = ref(false);
 
 const filteredForms = computed(() => {
     let result = forms.value;
@@ -422,6 +682,33 @@ const countFormFields = (form: Form): number => {
     
     countBlocks(form.blocks || []);
     return count;
+};
+
+const openShareDialog = (form: Form) => {
+    sharingForm.value = form;
+    showShareDialog.value = true;
+};
+
+const publicUrl = computed(() => {
+    if (!sharingForm.value) return '';
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/f/${sharingForm.value.slug}`;
+});
+
+const embedCode = computed(() => {
+    if (!sharingForm.value) return '';
+    return `[form slug="${sharingForm.value.slug}"]`;
+});
+
+const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success.action('Copied to clipboard');
+};
+
+const visitPublicPage = () => {
+    if (publicUrl.value) {
+        window.open(publicUrl.value, '_blank');
+    }
 };
 
 const fetchForms = async () => {
@@ -515,14 +802,27 @@ const bulkDelete = async () => {
     }
 };
 
-const duplicateForm = async (form: Form) => {
+const openDuplicateDialog = (form: Form) => {
+    duplicatingForm.value = form;
+    showDuplicateDialog.value = true;
+};
+
+const handleDuplicate = async (withSubmissions: boolean) => {
+    if (!duplicatingForm.value) return;
+    
     try {
-        await api.post(`/admin/ja/forms/${form.id}/duplicate`);
+        duplicating.value = true;
+        await api.post(`/admin/ja/forms/${duplicatingForm.value.id}/duplicate`, {
+            with_submissions: withSubmissions
+        });
         toast.success.duplicate('Form');
+        showDuplicateDialog.value = false;
         fetchForms();
     } catch (error: any) {
         logger.error('Failed to duplicate form:', error);
         toast.error.fromResponse(error);
+    } finally {
+        duplicating.value = false;
     }
 };
 
@@ -637,6 +937,11 @@ const performBulkAction = async (action: any) => {
         toast.error.fromResponse(error);
     }
 };
+
+const calculateConversion = (form: any) => {
+    if (!form.view_count || form.view_count === 0) return 0
+    return Math.round((form.submission_count / form.view_count) * 100)
+}
 
 onMounted(() => {
     fetchForms();

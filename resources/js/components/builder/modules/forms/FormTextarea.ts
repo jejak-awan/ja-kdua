@@ -20,6 +20,7 @@ import {
     adminLabelSettings,
     layoutSettings
 } from '@/components/builder/modules/commonSettings';
+import { formVisibilitySettings } from './formLogicSettings';
 
 /**
  * Form Textarea Module Definition
@@ -56,6 +57,7 @@ const FormTextareaModule: ModuleDefinition = {
                     { name: 'is_required', type: 'toggle', label: 'Required' },
                 ]
             },
+            formVisibilitySettings,
             adminLabelSettings('Textarea Field')
         ],
         design: [

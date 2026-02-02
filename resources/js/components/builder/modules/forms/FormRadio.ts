@@ -20,6 +20,7 @@ import {
     adminLabelSettings,
     layoutSettings
 } from '@/components/builder/modules/commonSettings';
+import { formVisibilitySettings } from './formLogicSettings';
 
 /**
  * Form Radio Module Definition
@@ -66,6 +67,7 @@ const FormRadioModule: ModuleDefinition = {
                     { name: 'is_required', type: 'toggle', label: 'Required' },
                 ]
             },
+            formVisibilitySettings,
             adminLabelSettings('Radio Field')
         ],
         design: [

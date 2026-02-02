@@ -4,8 +4,11 @@
         "create": "New Form",
         "createFirst": "Create Your First Form",
         "submissions": "Submissions",
+        "analysis": "Analysis",
         "export": "Export",
         "edit": "Edit",
+        "duplicate": "Duplicate",
+        "share": "Share",
         "delete": "Delete",
         "cancel": "Cancel",
         "save": "Save",
@@ -22,6 +25,9 @@
     "stats": {
         "fields": "{count} Fields",
         "submissions": "{count} Submissions",
+        "views": "{count} Views",
+        "starts": "{count} Starts",
+        "conversion": "{rate}% Conversion",
         "total": "Total",
         "new": "New",
         "read": "Read",
@@ -56,6 +62,22 @@
             "bulkReadSuccess": "{count} submissions marked as read",
             "bulkArchiveSuccess": "{count} submissions archived successfully",
             "bulkDeleteSuccess": "{count} submissions deleted successfully"
+        },
+        "analytics": {
+            "title": "Form Data Analysis",
+            "backToSubmissions": "Back to Submissions",
+            "print": "Print Report",
+            "exportPdf": "Export Report (PDF)",
+            "trend": "Submissions Trend",
+            "dataBreakdown": "Data Breakdown",
+            "selectField": "Select field to analyze",
+            "noChartableFields": "No chartable fields found in this form.",
+            "chartType": "Chart Type",
+            "line": "Line",
+            "bar": "Bar",
+            "last7Days": "Last 7 Days",
+            "last30Days": "Last 30 Days",
+            "last90Days": "Last 90 Days"
         }
     },
     "modal": {

@@ -207,6 +207,11 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('../views/admin/forms/SubmissionsPage.vue'),
             },
             {
+                path: 'forms/:id/analytics',
+                name: 'forms.analytics',
+                component: () => import('../views/admin/forms/AnalyticsPage.vue'),
+            },
+            {
                 path: 'tags',
                 name: 'tags',
                 component: () => import('../views/admin/content-studio/tags/Index.vue'),

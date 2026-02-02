@@ -27,22 +27,26 @@
                     <option value="is">Is</option>
                     <option value="is_not">Is Not</option>
                     <option value="contains">Contains</option>
+                    <option value="empty" v-if="condition.type === 'form_field'">Is Empty</option>
+                    <option value="not_empty" v-if="condition.type === 'form_field'">Is Not Empty</option>
+                    <option value="gt" v-if="condition.type === 'form_field'">Greater Than</option>
+                    <option value="lt" v-if="condition.type === 'form_field'">Less Than</option>
                     <option value="exists" v-if="['url_param', 'cookie'].includes(condition.type)">Exists</option>
                 </select>
             </div>
 
-            <div v-if="['post_meta', 'url_param', 'cookie'].includes(condition.type)" class="editor-row mb-3">
-                <BaseLabel class="mb-1 text-[10px] uppercase opacity-60">Key (Meta/Param/Cookie Name)</BaseLabel>
+            <div v-if="['post_meta', 'url_param', 'cookie', 'form_field'].includes(condition.type)" class="editor-row mb-3">
+                <BaseLabel class="mb-1 text-[10px] uppercase opacity-60">{{ condition.type === 'form_field' ? 'Field ID' : 'Key (Meta/Param/Cookie Name)' }}</BaseLabel>
                 <input 
                     type="text" 
                     class="builder-input w-full" 
                     v-model="condition.key" 
-                    placeholder="e.g. promo_code"
+                    :placeholder="condition.type === 'form_field' ? 'e.g. first_name' : 'e.g. promo_code'"
                     @input="updateValue"
                 >
             </div>
 
-            <div v-if="condition.condition !== 'exists'" class="editor-row">
+            <div v-if="!['exists', 'empty', 'not_empty', 'logged_in', 'guest'].includes(condition.condition)" class="editor-row">
                 <BaseLabel class="mb-1 text-[10px] uppercase opacity-60">Value</BaseLabel>
                 <input 
                     type="text" 
@@ -146,6 +150,12 @@ const pickerTrigger = ref<HTMLElement | null>(null)
 const searchQuery = ref('')
 
 const conditionGroups: Record<string, ConditionGroup> = {
+  form: {
+    label: 'Form Interaction',
+    items: [
+      { id: 'form_field', label: 'Form Field Value' }
+    ]
+  },
   post_info: {
     label: 'Post Info',
     items: [

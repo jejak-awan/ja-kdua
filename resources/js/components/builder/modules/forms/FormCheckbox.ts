@@ -20,6 +20,7 @@ import {
     adminLabelSettings,
     layoutSettings
 } from '@/components/builder/modules/commonSettings';
+import { formVisibilitySettings } from './formLogicSettings';
 
 /**
  * Form Checkbox Module Definition
@@ -77,6 +78,7 @@ const FormCheckboxModule: ModuleDefinition = {
                     { name: 'is_required', type: 'toggle', label: 'Required' },
                 ]
             },
+            formVisibilitySettings,
             adminLabelSettings('Checkbox Field')
         ],
         design: [

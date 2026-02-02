@@ -2,20 +2,40 @@
     <div class="relative min-h-[500px]">
         <!-- Header with Back Button -->
         <div class="mb-6 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <Button variant="ghost" size="icon" @click="$router.back()">
-                    <ArrowLeft class="w-5 h-5" />
-                </Button>
-                <div>
-                    <h1 class="text-2xl font-bold text-foreground">{{ $t('features.forms.submissions.title') }}</h1>
-                    <p class="text-sm text-muted-foreground">{{ form?.name || '-' }}</p>
-                </div>
+            <div>
+                <h1 class="text-2xl font-bold text-foreground">{{ $t('features.forms.submissions.title') }}</h1>
+                <p class="text-sm text-muted-foreground">{{ form?.name || '-' }}</p>
             </div>
             <div class="flex items-center gap-2">
-                <Button variant="outline" @click="exportSubmissions">
-                    <Download class="w-4 h-4 mr-2" />
-                    {{ $t('features.forms.actions.export') }}
+                <Button variant="outline" @click="$router.push({ name: 'forms' })">
+                    <ArrowLeft class="w-4 h-4 mr-2" />
+                    {{ $t('common.actions.back') }}
                 </Button>
+                <Button variant="outline" @click="$router.push({ name: 'forms.analytics', params: { id: formId } })">
+                    <TrendingUp class="w-4 h-4 mr-2" />
+                    {{ $t('features.forms.actions.analysis') }}
+                </Button>
+                <Popover>
+                    <PopoverTrigger as-child>
+                        <Button variant="outline">
+                            <Download class="w-4 h-4 mr-2" />
+                            {{ $t('features.forms.actions.export') }}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent class="w-48 p-2" align="end">
+                        <div class="grid gap-1">
+                            <Button variant="ghost" class="w-full justify-start text-left h-9 px-3" @click="exportSubmissions('xlsx')">
+                                <span class="mr-2 text-lg">📊</span> Excel (.xlsx)
+                            </Button>
+                            <Button variant="ghost" class="w-full justify-start text-left h-9 px-3" @click="exportSubmissions('csv')">
+                                <span class="mr-2 text-lg">📝</span> CSV (.csv)
+                            </Button>
+                            <Button variant="ghost" class="w-full justify-start text-left h-9 px-3" @click="exportSubmissions('pdf')">
+                                <span class="mr-2 text-lg">📕</span> PDF (.pdf)
+                            </Button>
+                        </div>
+                    </PopoverContent>
+                </Popover>
             </div>
         </div>
 
@@ -206,8 +226,14 @@
         <!-- Detail Dialog -->
         <Dialog v-model:open="showDetail">
             <DialogContent class="max-w-2xl max-h-[80vh] overflow-y-auto duration-100">
-                <DialogHeader>
+                <DialogHeader class="flex flex-row items-center justify-between space-y-0">
                     <DialogTitle>{{ $t('features.forms.submissions.detailTitle') }}</DialogTitle>
+                    <div class="flex items-center gap-2 mr-6">
+                        <Button variant="outline" size="sm" @click="exportPdf(selectedSubmission)" class="h-8">
+                            <Download class="w-4 h-4 mr-2" />
+                            PDF
+                        </Button>
+                    </div>
                 </DialogHeader>
                 <div v-if="selectedSubmission" class="space-y-4">
                     <div class="grid grid-cols-2 gap-4 text-sm">
@@ -268,12 +294,14 @@ import {
     FlexRender
 } from '@tanstack/vue-table';
 import api from '../../../services/api';
+import { parseSingleResponse, ensureArray } from '@/utils/responseParser';
 import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
-import { BackToTop, Badge, Button, Card, Checkbox, Dialog, DialogContent, DialogHeader, DialogTitle, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
+import { BackToTop, Badge, Button, Card, Checkbox, Dialog, DialogContent, DialogHeader, DialogTitle, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Popover, PopoverTrigger, PopoverContent } from '@/components/ui';
 
 import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
 import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import TrendingUp from 'lucide-vue-next/dist/esm/icons/trending-up.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
@@ -504,9 +532,9 @@ const fetchSubmissions = async (page = 1) => {
 const fetchStatistics = async () => {
     try {
         const response = await api.get(`/admin/ja/forms/${formId.value}/submissions/statistics`);
-        statistics.value = response.data?.data || response.data;
-    } catch (error: any) {
-        logger.error('Error fetching statistics:', error);
+        statistics.value = parseSingleResponse(response);
+    } catch (error) {
+        logger.error('Failed to fetch statistics:', error);
     }
 };
 
@@ -632,7 +660,7 @@ const handleBulkDelete = async () => {
     }
 };
 
-const exportSubmissions = async () => {
+const exportSubmissions = async (format = 'xlsx') => {
     try {
         let sortBy = 'created_at';
         let sortOrder = 'desc';
@@ -643,7 +671,7 @@ const exportSubmissions = async () => {
         }
 
         const params = new URLSearchParams({
-            format: 'xlsx',
+            format,
             search: search.value,
             sort_by: sortBy,
             sort_order: sortOrder,
@@ -655,7 +683,7 @@ const exportSubmissions = async () => {
         const url = `${baseUrl}/api/v1/admin/ja/forms/${formId.value}/submissions/export?${params.toString()}`;
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `submissions-${formId.value}.xlsx`);
+        link.setAttribute('download', `submissions-${formId.value}.${format}`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -663,6 +691,18 @@ const exportSubmissions = async () => {
     } catch (error: any) {
         logger.error('Error exporting submissions:', error);
         toast.error.fromResponse(error);
+    }
+};
+
+const exportPdf = (submission: any) => {
+    if (!submission) return;
+    try {
+        const baseUrl = import.meta.env.VITE_API_URL || '';
+        const exportUrl = `${baseUrl}/api/v1/admin/ja/form-submissions/${submission.id}/export-pdf`;
+        window.open(exportUrl, '_blank');
+    } catch (error: any) {
+        logger.error('Failed to export PDF:', error);
+        toast.error.default('Failed to export PDF');
     }
 };
 

@@ -31,7 +31,7 @@
         </Button>
       </div>
 
-      <div v-else class="flex justify-end pt-4">
+      <div v-else-if="!isMultiStep" class="flex justify-end pt-4">
         <Button type="submit" :disabled="submitting" size="lg">
           <Loader2 v-if="submitting" class="w-4 h-4 animate-spin mr-2" />
           {{ submitting ? 'Submitting...' : (form.settings?.submit_button_text || 'Submit') }}
@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, reactive, onMounted, provide, computed } from 'vue'
+import { ref, reactive, onMounted, provide, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
 import type { Form } from '@/types/forms'
@@ -56,9 +56,12 @@ import { Button } from '@/shared/ui'
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js'
 import Check from 'lucide-vue-next/dist/esm/icons/check.js'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   slug: string
-}>()
+  previewMode?: boolean
+}>(), {
+  previewMode: false
+})
 
 const router = useRouter()
 const form = ref<Form | null>(null)
@@ -68,6 +71,17 @@ const success = ref(false)
 const error = ref<string | null>(null)
 
 const formData = reactive<Record<string, any>>({})
+const currentStep = ref(0)
+const hasStarted = ref(false)
+
+const trackEvent = async (event: 'view' | 'start') => {
+  if (props.previewMode) return
+  try {
+    await api.post(`/cms/forms/${props.slug}/track`, { event })
+  } catch (err) {
+    // Silent fail for analytics tracking
+  }
+}
 
 // Provide form state to child blocks
 provide('formState', formData)
@@ -75,9 +89,34 @@ provide('updateFormValue', (fieldId: string, value: any) => {
   formData[fieldId] = value
 })
 
+const steps = computed(() => {
+    if (!form.value?.blocks) return []
+    return form.value.blocks.filter((b: any) => b.type === 'form_step')
+})
+
+const isMultiStep = computed(() => steps.value.length > 0)
+
+provide('currentStep', currentStep)
+provide('totalSteps', computed(() => steps.value.length))
+provide('goToNextStep', () => {
+    if (currentStep.value < steps.value.length - 1) {
+        currentStep.value++
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+})
+provide('goToPrevStep', () => {
+    if (currentStep.value > 0) {
+        currentStep.value--
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+})
+provide('submitButtonText', computed(() => form.value?.settings?.submit_button_text || 'Submit'))
+
 const renderingContext = computed(() => ({
   form: form.value,
-  data: formData
+  data: formData,
+  currentStep: currentStep.value,
+  isMultiStep: isMultiStep.value
 }))
 
 const fetchForm = async () => {
@@ -94,7 +133,19 @@ const fetchForm = async () => {
   }
 }
 
+watch(formData, () => {
+  if (!hasStarted.value && Object.keys(formData).length > 0) {
+    hasStarted.value = true
+    trackEvent('start')
+  }
+}, { deep: true })
+
 const handleSubmit = async () => {
+  if (props.previewMode) {
+    alert('Form submission is disabled in preview mode.')
+    return
+  }
+
   submitting.value = true
   error.value = null
   
@@ -124,5 +175,10 @@ const handleRedirect = () => {
   }
 }
 
-onMounted(fetchForm)
+onMounted(async () => {
+  await fetchForm()
+  if (form.value) {
+    trackEvent('view')
+  }
+})
 </script>

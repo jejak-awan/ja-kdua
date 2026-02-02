@@ -53,5 +53,7 @@
     "verifying": "Verifying...",
     "disabling": "Disabling...",
     "regenerating": "Regenerating...",
-    "continue": "Continue"
+    "continue": "Continue",
+    "hide": "Hide",
+    "show": "Show"
 }

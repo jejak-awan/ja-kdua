@@ -60,10 +60,28 @@
                     />
                 </div>
                 <div class="mt-4 flex justify-end">
-                    <Button variant="outline" @click="exportSubmissions">
-                        <Download class="w-4 h-4 mr-2" />
-                        {{ t('features.forms.actions.export') }}
-                    </Button>
+                    <Popover>
+                        <PopoverTrigger as-child>
+                            <Button variant="outline">
+                                <Download class="w-4 h-4 mr-2" />
+                                {{ t('features.forms.actions.export') }}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent class="w-40 p-2" align="end">
+                            <div class="grid gap-1">
+                                <Button variant="ghost" class="w-full justify-start text-left h-8 px-2" @click="exportSubmissions('xlsx')">
+                                    <span class="mr-2">📊</span> Excel (.xlsx)
+                                </Button>
+                                <Button variant="ghost" class="w-full justify-start text-left h-8 px-2" @click="exportSubmissions('csv')">
+                                    <span class="mr-2">📝</span> CSV (.csv)
+                                </Button>
+                                <Button variant="ghost" class="w-full justify-start text-left h-8 px-2" @click="exportSubmissions('pdf')">
+                                    <span class="mr-2">📕</span> PDF (.pdf)
+                                </Button>
+                                <!-- PDF Bulk Export (Future) -->
+                            </div>
+                        </PopoverContent>
+                    </Popover>
                 </div>
             </Card>
 
@@ -158,9 +176,15 @@
                 <Card class="relative top-20 mx-auto p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-bold text-foreground">{{ t('features.forms.submissions.detailTitle') }}</h3>
-                        <Button variant="ghost" size="icon" @click="selectedSubmission = null">
-                            <X class="w-5 h-5" />
-                        </Button>
+                        <div class="flex items-center gap-2">
+                            <Button variant="outline" size="sm" @click="exportPdf(selectedSubmission)">
+                                <Download class="w-4 h-4 mr-2" />
+                                Export PDF
+                            </Button>
+                            <Button variant="ghost" size="icon" @click="selectedSubmission = null">
+                                <X class="w-5 h-5" />
+                            </Button>
+                        </div>
                     </div>
 
                     <div class="space-y-4">
@@ -208,7 +232,7 @@ import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
-import { Badge, Button, Card, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
+import { Badge, Button, Card, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Popover, PopoverTrigger, PopoverContent } from '@/components/ui';
 
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import Download from 'lucide-vue-next/dist/esm/icons/download.js';
@@ -319,10 +343,10 @@ const deleteSubmission = async (submission: FormSubmission) => {
     }
 };
 
-const exportSubmissions = async () => {
+const exportSubmissions = async (format = 'xlsx') => {
     try {
         const params = new URLSearchParams({
-            format: 'csv',
+            format,
             ...(dateFrom.value && { date_from: dateFrom.value }),
             ...(dateTo.value && { date_to: dateTo.value })
         });
@@ -340,6 +364,19 @@ const exportSubmissions = async () => {
     } catch (error: any) {
         logger.error('Failed to export submissions:', error);
         toast.error.fromResponse(error);
+    }
+};
+
+const exportPdf = (submission: FormSubmission | null) => {
+    if (!submission) return;
+    try {
+        const baseUrl = import.meta.env.VITE_API_URL || '';
+        const exportUrl = `${baseUrl}/api/v1/admin/ja/form-submissions/${submission.id}/export-pdf`;
+        
+        window.open(exportUrl, '_blank');
+    } catch (error: any) {
+        logger.error('Failed to export PDF:', error);
+        toast.error.default('Failed to export PDF');
     }
 };
 

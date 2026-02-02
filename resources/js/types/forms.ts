@@ -33,6 +33,8 @@ export interface Form {
     fields?: FormField[];
     blocks?: BlockInstance[];
     submission_count?: number;
+    view_count?: number;
+    start_count?: number;
     settings?: Record<string, unknown>;
     deleted_at?: string | null;
     created_at?: string;

@@ -106,6 +106,9 @@ import FormTextarea from './FormTextarea';
 import FormSelect from './FormSelect';
 import FormCheckbox from './FormCheckbox';
 import FormRadio from './FormRadio';
+import FormPicker from './FormPicker';
+import FormStep from './FormStep';
+import FormProgressBar from './FormProgressBar';
 
 import type { BlockDefinition } from '@/types/builder';
 
@@ -217,5 +220,8 @@ export default [
     FormTextarea,
     FormSelect,
     FormCheckbox,
-    FormRadio
+    FormRadio,
+    FormPicker,
+    FormStep,
+    FormProgressBar
 ] as BlockDefinition[];

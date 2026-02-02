@@ -20,6 +20,7 @@ import {
     adminLabelSettings,
     layoutSettings
 } from '@/components/builder/modules/commonSettings';
+import { formVisibilitySettings } from './formLogicSettings';
 
 /**
  * Form Select Module Definition
@@ -67,6 +68,7 @@ const FormSelectModule: ModuleDefinition = {
                     { name: 'is_required', type: 'toggle', label: 'Required' },
                 ]
             },
+            formVisibilitySettings,
             adminLabelSettings('Select Field')
         ],
         design: [

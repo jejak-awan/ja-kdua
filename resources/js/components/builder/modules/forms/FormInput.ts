@@ -20,6 +20,7 @@ import {
     adminLabelSettings,
     layoutSettings
 } from '@/components/builder/modules/commonSettings';
+import { formVisibilitySettings } from './formLogicSettings';
 
 /**
  * Form Input Module Definition
@@ -77,6 +78,7 @@ const FormInputModule: ModuleDefinition = {
                     { name: 'is_required', type: 'toggle', label: 'Required' },
                 ]
             },
+            formVisibilitySettings,
             adminLabelSettings('Input Field')
         ],
         design: [

@@ -53,5 +53,7 @@
     "verifying": "Memverifikasi...",
     "disabling": "Menonaktifkan...",
     "regenerating": "Membuat ulang...",
-    "continue": "Lanjutkan"
+    "continue": "Lanjutkan",
+    "hide": "Sembunyikan",
+    "show": "Tampilkan"
 }

@@ -96,13 +96,27 @@ class AppServiceProvider extends ServiceProvider
                 // Merge terms
                 $termOptions = $categories->merge($tags)->values()->all();
 
+                // 7. Forms (for FormPicker)
+                $forms = \App\Models\Form::where('is_active', true)
+                    ->select('id', 'name', 'slug')
+                    ->latest()
+                    ->get();
+                
+                $formOptions = $forms->map(function($form) {
+                    return [
+                        'label' => $form->name,
+                        'value' => $form->slug
+                    ];
+                })->all();
+
                 $view->with('jaCmsData', [
                     'postTypes' => $postTypeOptions,
                     'roles' => $roleOptions,
                     'taxonomies' => $taxonomyOptions,
                     'users' => $userOptions,
                     'posts' => $postOptions,
-                    'terms' => $termOptions
+                    'terms' => $termOptions,
+                    'forms' => $formOptions
                 ]);
 
             } catch (\Exception $e) {

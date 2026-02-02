@@ -4,8 +4,11 @@
         "create": "Formulir Baru",
         "createFirst": "Buat Formulir Pertama Anda",
         "submissions": "Submisi",
+        "analysis": "Analisis",
         "export": "Ekspor",
         "edit": "Edit",
+        "duplicate": "Duplikat",
+        "share": "Bagikan",
         "delete": "Hapus",
         "cancel": "Batal",
         "save": "Simpan",
@@ -22,6 +25,9 @@
     "stats": {
         "fields": "{count} Bidang",
         "submissions": "{count} Submisi",
+        "views": "{count} Dilihat",
+        "starts": "{count} Dimulai",
+        "conversion": "{rate}% Konversi",
         "total": "Total",
         "new": "Baru",
         "read": "Dibaca",
@@ -56,6 +62,22 @@
             "bulkReadSuccess": "{count} submisi ditandai sebagai sudah dibaca",
             "bulkArchiveSuccess": "{count} submisi berhasil diarsipkan",
             "bulkDeleteSuccess": "{count} submisi berhasil dihapus"
+        },
+        "analytics": {
+            "title": "Analisis Data Formulir",
+            "backToSubmissions": "Kembali ke Submisi",
+            "print": "Cetak Laporan",
+            "exportPdf": "Ekspor Laporan (PDF)",
+            "trend": "Tren Submisi",
+            "dataBreakdown": "Rincian Data",
+            "selectField": "Pilih bidang untuk dianalisis",
+            "noChartableFields": "Tidak ada bidang yang dapat digrafikkan di formulir ini.",
+            "chartType": "Tipe Grafik",
+            "line": "Garis",
+            "bar": "Batang",
+            "last7Days": "7 Hari Terakhir",
+            "last30Days": "30 Hari Terakhir",
+            "last90Days": "90 Hari Terakhir"
         }
     },
     "modal": {

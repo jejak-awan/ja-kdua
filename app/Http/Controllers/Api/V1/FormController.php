@@ -133,6 +133,23 @@ class FormController extends BaseApiController
     }
 
 
+    public function track(Request $request, Form $form)
+    {
+        $request->validate([
+            'event' => 'required|in:view,start',
+        ]);
+
+        $event = $request->event;
+
+        if ($event === 'view') {
+            $form->incrementViewCount();
+        } elseif ($event === 'start') {
+            $form->incrementStartCount();
+        }
+
+        return $this->success(null, 'Event tracked successfully');
+    }
+
     public function submit(Request $request, Form $form)
     {
         if (! $form->is_active) {
@@ -251,11 +268,19 @@ class FormController extends BaseApiController
             return $this->forbidden('You do not have permission to duplicate this form');
         }
 
-        $newForm = $form->replicate(['slug', 'name']);
+        $withSubmissions = $request->boolean('with_submissions');
+
+        $newForm = $form->replicate(['slug', 'name', 'submission_count', 'view_count', 'start_count']);
         $newForm->name = $form->name.' (Copy)';
         $newForm->slug = $form->slug.'-copy-'.time();
         $newForm->is_active = false;
-        $newForm->author_id = $request->user()->id; // Assign to current user
+        $newForm->author_id = $request->user()->id;
+        
+        // Reset stats if not duplicating submissions
+        $newForm->submission_count = $withSubmissions ? $form->submission_count : 0;
+        $newForm->view_count = 0;
+        $newForm->start_count = 0;
+        
         $newForm->save();
 
         // Duplicate fields
@@ -263,6 +288,15 @@ class FormController extends BaseApiController
             $newField = $field->replicate();
             $newField->form_id = $newForm->id;
             $newField->save();
+        }
+
+        // Duplicate submissions if requested
+        if ($withSubmissions) {
+            foreach ($form->submissions as $submission) {
+                $newSubmission = $submission->replicate();
+                $newSubmission->form_id = $newForm->id;
+                $newSubmission->save();
+            }
         }
 
         return $this->success($newForm->load('fields'), 'Form duplicated successfully', 201);

@@ -45,12 +45,10 @@ export class ConditionEvaluator {
      */
     static evaluate(block: BlockInstance, context: RenderingContext = {}): boolean {
         // If no visibility settings, show by default
-        if (!block.settings?.visibility_rules || !Array.isArray(block.settings.visibility_rules)) {
+        const rules = (block.settings?.visibility_rules || block.settings?.conditions) as VisibilityRule[];
+        if (!rules || !Array.isArray(rules) || rules.length === 0) {
             return true;
         }
-
-        const rules = block.settings.visibility_rules as VisibilityRule[];
-        if (rules.length === 0) return true;
 
         // Logic mode: 'all' (AND) or 'any' (OR)
         const mode = block.settings.visibility_mode || 'all';
@@ -174,6 +172,29 @@ export class ConditionEvaluator {
                 if (value === 'linux') return pf.includes('linux');
                 if (value === 'ios') return /iphone|ipad|ipod/.test(ua);
                 if (value === 'android') return /android/.test(ua);
+                return true;
+            }
+
+            case 'form_field': {
+                if (!context.data || !key) return true;
+                const fieldValue = context.data[key];
+
+                if (condition === 'is') return String(fieldValue) === String(value);
+                if (condition === 'is_not') return String(fieldValue) !== String(value);
+                if (condition === 'contains') return String(fieldValue).includes(String(value));
+                if (condition === 'empty') return !fieldValue || fieldValue.length === 0;
+                if (condition === 'not_empty') return !!fieldValue && fieldValue.length > 0;
+
+                // Numeric comparisons if value is number
+                const numField = Number(fieldValue);
+                const numValue = Number(value);
+                if (!isNaN(numField) && !isNaN(numValue)) {
+                    if (condition === 'gt') return numField > numValue;
+                    if (condition === 'lt') return numField < numValue;
+                    if (condition === 'gte') return numField >= numValue;
+                    if (condition === 'lte') return numField <= numValue;
+                }
+
                 return true;
             }
 

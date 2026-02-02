@@ -23,6 +23,8 @@ class Form extends Model
         'blocks',
         'is_active',
         'submission_count',
+        'view_count',
+        'start_count',
     ];
 
     protected $casts = [
@@ -30,6 +32,8 @@ class Form extends Model
         'blocks' => 'array',
         'is_active' => 'boolean',
         'submission_count' => 'integer',
+        'view_count' => 'integer',
+        'start_count' => 'integer',
     ];
 
     public function author(): BelongsTo
@@ -47,9 +51,35 @@ class Form extends Model
         return $this->hasMany(FormSubmission::class)->latest();
     }
 
+    public function analytics(): HasMany
+    {
+        return $this->hasMany(FormAnalytics::class);
+    }
+
+    public function incrementViewCount()
+    {
+        $this->increment('view_count');
+        $this->updateDailyStats('views');
+    }
+
+    public function incrementStartCount()
+    {
+        $this->increment('start_count');
+        $this->updateDailyStats('starts');
+    }
+
     public function incrementSubmissionCount()
     {
         $this->increment('submission_count');
+        $this->updateDailyStats('submissions');
+    }
+
+    protected function updateDailyStats($field)
+    {
+        $this->analytics()->updateOrCreate(
+            ['date' => now()->toDateString()],
+            [$field => \DB::raw("$field + 1")]
+        );
     }
 
     public function getUnreadSubmissionsCount()

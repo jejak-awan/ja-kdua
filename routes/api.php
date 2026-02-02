@@ -98,6 +98,7 @@ Route::prefix('v1')->group(function () {
         })->middleware('throttle:10,1'); // 10 form views per minute
 
         Route::post('/forms/{form:slug}/submit', [App\Http\Controllers\Api\V1\FormController::class, 'submit'])->middleware('throttle:10,1');
+        Route::post('/forms/{form:slug}/track', [App\Http\Controllers\Api\V1\FormController::class, 'track'])->middleware('throttle:30,1');
 
         // Search (public - with rate limiting: 30 requests per minute)
         Route::get('/search', [App\Http\Controllers\Api\V1\SearchController::class, 'search'])->middleware('throttle:30,1');
@@ -409,6 +410,7 @@ Route::prefix('v1')->group(function () {
         // Form Submissions
         Route::get('forms/{form}/submissions', [App\Http\Controllers\Api\V1\FormSubmissionController::class, 'index'])->middleware('permission:manage forms');
         Route::get('form-submissions', [App\Http\Controllers\Api\V1\FormSubmissionController::class, 'index'])->middleware('permission:manage forms');
+        Route::get('/form-submissions/{formSubmission}/export-pdf', [App\Http\Controllers\Api\V1\FormSubmissionController::class, 'exportPdf'])->middleware('permission:manage forms');
         Route::get('form-submissions/{formSubmission}', [App\Http\Controllers\Api\V1\FormSubmissionController::class, 'show'])->middleware('permission:manage forms');
         Route::put('form-submissions/{formSubmission}/read', [App\Http\Controllers\Api\V1\FormSubmissionController::class, 'markAsRead'])->middleware('permission:manage forms');
         Route::put('form-submissions/{formSubmission}/archive', [App\Http\Controllers\Api\V1\FormSubmissionController::class, 'archive'])->middleware('permission:manage forms');
