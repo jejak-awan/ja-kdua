@@ -40,7 +40,7 @@ const viewportStyle = computed(() => {
   const width = widths[props.device]
   
   const styles: Record<string, any> = {
-    transform: `scale(${props.zoom / 100})`,
+    transform: `scale(${props.zoom / 100}) translateZ(0)`, // translateZ forces containing block
     transformOrigin: 'top center',
     willChange: 'transform, width'
   }
@@ -77,8 +77,11 @@ const viewportStyle = computed(() => {
   box-shadow: var(--shadow-lg);
   min-height: calc(100% - 2 * var(--spacing-lg));
   height: auto;
-  overflow: hidden; /* Clip content to viewport bounds */
-  box-sizing: content-box; /* Ensure border is outside the defined width */
+  overflow: hidden; /* Clip content strictly */
+  box-sizing: content-box; 
+  position: relative; /* Ensure z-index works */
+  z-index: 1; /* Create stacking context */
+  contain: content; /* Strict isolation */
 }
 
 /* Device-specific frames */
