@@ -520,6 +520,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         resetLayout,
         findModule: (id: string) => findModuleById(blocks.value, id),
         findParentById: (items: BlockInstance[], id: string) => findParentById(items, id),
+        getModulePath: (items: BlockInstance[], id: string) => getModulePath(items, id),
 
         // Registry
         definitions,
