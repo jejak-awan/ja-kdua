@@ -4,18 +4,18 @@
         <div class="space-y-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <router-link :to="{ name: 'forms' }">
-                        <Button variant="ghost" size="icon" class="rounded-full h-8 w-8">
-                            <span class="sr-only">Back</span>
-                            <ArrowLeft class="h-4 w-4" />
-                        </Button>
-                    </router-link>
                     <div>
                         <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ $t('features.forms.modal.editTitle') }}</h1>
                         <p class="text-sm text-muted-foreground">{{ $t('features.forms.title') }}</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-3">
+                    <router-link :to="{ name: 'forms' }">
+                        <Button variant="outline" type="button" class="shadow-sm">
+                            {{ $t('common.actions.cancel') }}
+                        </Button>
+                    </router-link>
+
                     <Button
                         type="button"
                         variant="default"
