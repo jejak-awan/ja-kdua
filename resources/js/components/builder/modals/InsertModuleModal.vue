@@ -157,7 +157,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject, onMounted } from 'vue';
+import { ref, computed, inject, onMounted, type Component } from 'vue';
 import { useI18n } from 'vue-i18n';
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
@@ -210,8 +210,8 @@ import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import SquareCheck from 'lucide-vue-next/dist/esm/icons/square-check.js';
 import Disc from 'lucide-vue-next/dist/esm/icons/disc.js';
 import TextAlignStart from 'lucide-vue-next/dist/esm/icons/text-align-start.js';
-import { BaseModal, BaseInput, Tabs, TabsList, TabsTrigger } from '../ui';
-import ModuleRegistry from '../core/ModuleRegistry';
+import { BaseModal, BaseInput, Tabs, TabsList, TabsTrigger } from '@/components/builder/ui';
+import ModuleRegistry from '@/components/builder/core/ModuleRegistry';
 import { 
     equalLayouts, 
     offsetLayouts, 
@@ -220,8 +220,8 @@ import {
     gridMultiRowPresets,
     masonryPresets,
     sidebarPresets
-} from '../constants/layouts.js';
-import type { BuilderInstance } from '../../../types/builder';
+} from '@/components/builder/constants/layouts.js';
+import type { BuilderInstance } from '@/types/builder';
 
 const icons: Record<string, any> = { 
   X, Search, Type, Heading, Image, MousePointer, Video, Layout,
@@ -317,8 +317,10 @@ const groupedPresets = computed(() => {
 });
 
 // Methods
-const getIcon = (iconName: string) => {
-  return icons[iconName] || icons.Layout;
+const getIcon = (icon?: string | Component) => {
+  if (!icon) return icons.Layout;
+  if (typeof icon === 'string') return icons[icon] || icons.Layout;
+  return icon;
 };
 
 const selectModule = (name: string) => {
@@ -333,9 +335,9 @@ const selectPreset = (preset: any) => {
   emit('insert', 'preset', preset);
 };
 
-const handleTabChange = (tabId: string) => {
-  activeTab.value = tabId;
-  if (tabId === 'presets' && presets.value.length === 0) {
+const handleTabChange = (tabId: string | number) => {
+  activeTab.value = tabId.toString();
+  if (activeTab.value === 'presets' && presets.value.length === 0) {
     builder?.fetchPresets();
   }
 };

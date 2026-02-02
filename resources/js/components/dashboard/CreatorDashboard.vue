@@ -198,6 +198,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useI18n } from 'vue-i18n';
@@ -322,8 +323,8 @@ const fetchStats = async () => {
                  topContent.value = ensureArray<TopContentItem>(data.topContent);
             }
         }
-    } catch (error) {
-        console.error('Failed to fetch creator stats:', error);
+    } catch (error: any) {
+        logger.error('Failed to fetch creator stats:', error);
     } finally {
         loading.value = false;
     }

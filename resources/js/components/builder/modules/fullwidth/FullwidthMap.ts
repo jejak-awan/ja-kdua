@@ -18,7 +18,7 @@ import {
     attributesSettings,
     layoutSettings,
     adminLabelSettings,
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Fullwidth Map Module Definition

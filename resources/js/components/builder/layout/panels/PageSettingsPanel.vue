@@ -389,6 +389,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, inject, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
@@ -404,7 +405,7 @@ import MenuSquare from 'lucide-vue-next/dist/esm/icons/square-menu.js';
 import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
 import MediaPicker from '@/components/media/MediaPicker.vue';
 import api from '@/services/api';
-import type { BuilderInstance } from '../../../../types/builder';
+import type { BuilderInstance } from '@/types/builder';
 
 // Define loose interfaces for Content as it can be dynamic
 interface Tag {
@@ -515,7 +516,7 @@ const fetchMenuParentItems = async (menuId: number | string) => {
       menuParentItems.value = flatItems;
     }
   } catch (error) {
-    console.error('Failed to fetch menu items:', error);
+    logger.error('Failed to fetch menu items:', error);
   } finally {
     loadingParentItems.value = false;
   }

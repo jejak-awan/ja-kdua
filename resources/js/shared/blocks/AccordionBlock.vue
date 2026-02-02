@@ -4,7 +4,7 @@
     :mode="mode" 
     :device="device"
     class="accordion-block transition-colors duration-300"
-    :id="settings.html_id"
+    :id="(settings.html_id as string)"
     :aria-label="settings.aria_label || 'Accordion'"
     :style="cardStyles"
   >
@@ -70,7 +70,7 @@
 import { computed, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../ui'
-import LucideIcon from '../../components/ui/LucideIcon.vue'
+import { LucideIcon } from '@/components/ui';
 import { getVal, getLayoutStyles, getTypographyStyles } from '../utils/styleUtils'
 import type { BlockInstance, BlockProps } from '@/types/builder'
 
@@ -79,8 +79,8 @@ const props = withDefaults(defineProps<BlockProps>(), {
   device: 'desktop'
 })
 
-const settings = computed(() => props.settings || props.module?.settings || {})
-const items = computed<any[]>(() => settings.value.items || [])
+const settings = computed(() => (props.settings || props.module?.settings || {}) as Record<string, any>)
+const items = computed<any[]>(() => (settings.value.items as any[]) || [])
 const openIndices = ref<number[]>([])
 
 const toggle = (index: number) => {

@@ -357,6 +357,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
@@ -512,7 +513,7 @@ const fetchUsers = async () => {
             pagination.value = paginationData;
         }
     } catch (error: any) {
-        console.error('Failed to fetch users:', error);
+        logger.error('Failed to fetch users:', error);
         toast.error.action(error);
     } finally {
         loading.value = false;
@@ -529,7 +530,7 @@ const fetchStats = async () => {
             stats.value = response.data.data;
         }
     } catch (error: any) {
-        console.error('Failed to fetch stats:', error);
+        logger.error('Failed to fetch stats:', error);
     }
 };
 
@@ -571,7 +572,7 @@ const fetchRoles = async () => {
             roles.value = Array.from(uniqueRoles.values());
         }
     } catch (error: any) {
-        console.error('Failed to fetch roles:', error);
+        logger.error('Failed to fetch roles:', error);
     }
 };
 
@@ -611,7 +612,7 @@ const deleteUser = async (user: User) => {
         await fetchUsers();
         toast.success.delete('User');
     } catch (error: any) {
-        console.error('Failed to delete user:', error);
+        logger.error('Failed to delete user:', error);
         toast.error.delete(error, 'User');
     }
 };
@@ -633,7 +634,7 @@ const forceLogoutUser = async (user: User) => {
         
         toast.success.action('User forced logout');
     } catch (error: any) {
-        console.error('Failed to force logout user:', error);
+        logger.error('Failed to force logout user:', error);
         toast.error.action(error);
     }
 };
@@ -644,7 +645,7 @@ const verifyUser = async (user: User) => {
         toast.success.action('User verified');
         await fetchUsers();
     } catch (error: any) {
-        console.error('Failed to verify user:', error);
+        logger.error('Failed to verify user:', error);
         toast.error.action(error);
     }
 };
@@ -664,7 +665,7 @@ const restoreUser = async (user: User) => {
         toast.success.action('User restored');
         await fetchUsers();
     } catch (error: any) {
-        console.error('Failed to restore user:', error);
+        logger.error('Failed to restore user:', error);
         toast.error.action(error);
     }
 };
@@ -684,7 +685,7 @@ const forceDeleteUser = async (user: User) => {
         toast.success.action('User permanently deleted');
         await fetchUsers();
     } catch (error: any) {
-        console.error('Failed to force delete user:', error);
+        logger.error('Failed to force delete user:', error);
         toast.error.action(error);
     }
 };
@@ -770,7 +771,7 @@ const bulkAction = async (action: string) => {
         
         toast.success.action('Bulk action successful');
     } catch (error: any) {
-        console.error('Bulk action failed:', error);
+        logger.error('Bulk action failed:', error);
         toast.error.action(error);
     }
 };

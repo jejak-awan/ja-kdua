@@ -14,7 +14,7 @@
             <BaseNumberInput 
               v-model="radius[corner]" 
               :label="t(`builder.fields.border.radius.${corner}`)"
-              :placeholder="String(placeholderValue?.radius?.[corner] ?? 0)"
+              :placeholder="String((placeholderValue?.radius?.[corner] as number | string) ?? 0)"
               @update:model-value="updateRadius(corner)"
             />
         </div>
@@ -45,14 +45,14 @@
       
       <!-- Helpers for active side style -->
       <div class="style-inputs flex flex-col gap-3">
-<!-- Width -->
+         <!-- Width -->
          <div class="input-row">
             <BaseLabel>{{ t('builder.fields.border.width') }}</BaseLabel>
             <BaseSliderInput 
               v-model.number="currentStyle.width" 
               :min="0" 
               :max="50" 
-              :placeholder-value="placeholderValue?.styles?.[activeSide]?.width ?? placeholderValue?.styles?.all?.width ?? null"
+              :placeholder-value="((placeholderValue?.styles?.[activeSide]?.width as number | string) ?? (placeholderValue?.styles?.all?.width as number | string) ?? undefined) as number | undefined"
               @update:model-value="updateStyle('width')"
               unit="px"
             />
@@ -63,8 +63,8 @@
              <BaseLabel>{{ t('builder.fields.border.color') }}</BaseLabel>
              <ColorField 
                :value="currentStyle.color" 
-               :placeholder-value="placeholderValue?.styles?.[activeSide]?.color ?? placeholderValue?.styles?.all?.color ?? null"
-               @update:value="(val) => { currentStyle.color = val; updateStyle('color', val) }" 
+               :placeholder-value="(placeholderValue?.styles?.[activeSide]?.color as string) ?? (placeholderValue?.styles?.all?.color as string) ?? null"
+               @update:value="(val: string) => { currentStyle.color = val; updateStyle('color', val) }" 
              />
          </div>
 
@@ -94,17 +94,19 @@ import Square from 'lucide-vue-next/dist/esm/icons/square.js';
 import ArrowUp from 'lucide-vue-next/dist/esm/icons/arrow-up.js';
 import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js';
 import ArrowDown from 'lucide-vue-next/dist/esm/icons/arrow-down.js';
-import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';import { 
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
+import { 
   BaseCollapsible, 
   BaseLabel, 
   BaseSegmentedControl, 
   BaseSliderInput, 
   BaseNumberInput
-} from '../ui'
+} from '@/components/builder/ui'
 import ColorField from './ColorField.vue'
+import type { SettingDefinition } from '@/types/builder'
 
 const props = defineProps<{
-  field: any;
+  field: SettingDefinition;
   value: {
     radius: { tl: number | string; tr: number | string; bl: number | string; br: number | string; linked: boolean };
     styles: Record<string, { width: number | string; color: string; style: string }>;
@@ -127,9 +129,7 @@ const sides = [
 
 const mappedSides = computed(() => {
     return sides.map(s => ({
-        label: s.label, // Ideally translated too? But symbols OK for now or hardcoded. 'All', 'Top' etc. are icons mostly. Context?
-        // Note: The BaseSegmentedControl uses label for title/tooltip mostly if icon is present.
-        // We can translate specific side names if needed.
+        label: s.label,
         value: s.id,
         icon: s.icon,
         iconOnly: true

@@ -150,6 +150,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -224,7 +225,7 @@ const fetchTemplate = async () => {
         };
         initialForm.value = JSON.parse(JSON.stringify(form.value));
     } catch (error: any) {
-        console.error('Failed to fetch template:', error);
+        logger.error('Failed to fetch template:', error);
         toast.error.load(error);
         router.push({ name: 'email-templates' });
     } finally {
@@ -240,7 +241,7 @@ const previewTemplate = async () => {
             previewWindow.document.write(response.data.html);
         }
     } catch (error: any) {
-        console.error('Failed to preview template:', error);
+        logger.error('Failed to preview template:', error);
         toast.error.default(t('features.email_templates.form.previewFailed'));
     }
 };
@@ -250,7 +251,7 @@ const handleSendTest = async () => {
         await api.post(`/admin/ja/email-templates/${templateId}/send-test`);
         toast.success.action(t('features.email_templates.form.testSent'));
     } catch (error: any) {
-        console.error('Failed to send test email:', error);
+        logger.error('Failed to send test email:', error);
         toast.error.default(error.response?.data?.message || t('features.email_templates.form.testFailed'));
     }
 };

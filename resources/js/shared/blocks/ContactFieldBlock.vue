@@ -69,7 +69,7 @@ const props = withDefaults(defineProps<BlockProps>(), {
 })
 
 const builder = inject<BuilderInstance>('builder', null as any)
-const settings = computed(() => props.settings || props.module?.settings || {})
+const settings = computed(() => (props.settings || props.module?.settings || {}) as Record<string, any>)
 const currentDevice = computed(() => props.device || builder?.device?.value || 'desktop')
 
 const isFullWidth = computed(() => getResponsiveValue(settings.value, 'fullWidth', currentDevice.value) === true)

@@ -69,7 +69,7 @@
           :icon="icons[mode.icon] || mode.icon"
           :active="device === mode.id && builder.deviceModeType.value === 'manual'"
           :title="t('builder.toolbar.devices.' + mode.id)"
-          @click="builder.setDeviceMode(mode.id)"
+          @click="setDeviceMode(mode.id)"
         />
       </div>
 
@@ -103,7 +103,7 @@
                 :key="mode.id"
                 class="dropdown-item"
                 :class="{ 'active': mode.id === device && builder.deviceModeType.value === 'manual' }"
-                @click="builder.setDeviceMode(mode.id); close()"
+                @click="setDeviceMode(mode.id); close()"
               >
                 <div class="flex items-center gap-2">
                     <component :is="icons[mode.icon] || mode.icon" class="w-4 h-4" />
@@ -178,17 +178,18 @@ import Maximize from 'lucide-vue-next/dist/esm/icons/maximize.js';
 import Minimize from 'lucide-vue-next/dist/esm/icons/minimize.js';
 import ChevronsLeft from 'lucide-vue-next/dist/esm/icons/chevrons-left.js';
 import Wand2 from 'lucide-vue-next/dist/esm/icons/wand-sparkles.js';
-import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';import { useI18n } from 'vue-i18n'
-import { DEVICE_MODES } from '../core/constants'
-import { IconButton, BaseDropdown, BaseDivider } from '../ui'
-import AdminLogo from '../../layouts/AdminLogo.vue'
-import type { BuilderInstance } from '../../../types/builder'
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js'
+import { useI18n } from 'vue-i18n'
+import { DEVICE_MODES } from '@/components/builder/core/constants'
+import { IconButton, BaseDropdown, BaseDivider } from '@/components/builder/ui'
+import AdminLogo from '@/components/layouts/AdminLogo.vue'
+import type { BuilderInstance } from '@/types/builder'
 
 // Icons mapping for dynamic components
 const icons: Record<string, any> = { Monitor, Tablet, Smartphone, Wand2 }
 
 // Inject builder state
-const builder = inject<BuilderInstance>('builder') as any // Full typed builder can be complex, using any for now but adding .value
+const builder = inject<BuilderInstance>('builder')!
 
 // Props & Emits
 const props = defineProps<{
@@ -215,6 +216,10 @@ const currentDeviceIcon = computed(() => {
     const mode = deviceModes.find(m => m.id === device.value)
     return mode ? (mode.icon as string) : 'Monitor'
 })
+
+const setDeviceMode = (modeId: string) => {
+    builder.setDeviceMode(modeId as 'desktop' | 'tablet' | 'mobile')
+}
 
 // Zoom Options
 const zoomOptions = [50, 75, 100, 125, 150]

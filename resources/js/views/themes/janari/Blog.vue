@@ -110,6 +110,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue'
 import api from '@/services/api'
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue'
@@ -189,8 +190,8 @@ const fetchPosts = async () => {
             image: post.featured_image || '/images/fallback/blog-1.png',
             published_at: post.published_at
         }));
-    } catch (err) {
-        console.error('Failed to fetch posts:', err);
+    } catch (error: unknown) {
+        logger.error('Failed to fetch posts:', error);
         // Fallback or empty state
         articles.value = [];
     }
@@ -201,9 +202,14 @@ onMounted(async () => {
     // Try to get the "blog" CMS page first
     const response = await api.get('/cms/contents/blog')
     pageData.value = response.data.data
-  } catch (error: any) {
-    if (error.response?.status !== 404) {
-      console.error('Failed to fetch blog page:', error)
+  } catch (error: unknown) {
+    if (typeof error === 'object' && error !== null && 'response' in error) {
+      const err = error as { response?: { status?: number } };
+      if (err.response?.status !== 404) {
+        logger.error('Failed to fetch blog page:', error);
+      }
+    } else {
+      logger.error('Failed to fetch blog page:', error);
     }
   } finally {
     // If no builder content found, fetch default blog posts

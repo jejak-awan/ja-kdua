@@ -26,42 +26,31 @@ export default defineConfig({
             output: {
                 manualChunks: (id) => {
                     // 1. Lucide icons - bundle ALL icons together to prevent waterfall loading
-                    // This prevents 30+ separate HTTP requests for icons
                     if (id.includes('lucide-vue-next')) {
                         return 'vendor-icons';
                     }
 
-                    // 2. Tiptap and related extensions 
-                    if (id.includes('@tiptap') || id.includes('prosemirror') || id.includes('lowlight') || id.includes('dompurify')) {
-                        return 'vendor-tiptap';
-                    }
-
-                    // 3. UI Framework components (Radix)
+                    // 2. UI Framework components (Radix)
                     if (id.includes('radix-vue') || id.includes('class-variance-authority')) {
                         return 'vendor-ui-framework';
                     }
 
-                    // 4. FullCalendar
+                    // 3. FullCalendar
                     if (id.includes('@fullcalendar')) {
                         return 'vendor-ui-calendar';
                     }
 
-                    // 5. Chart.js
+                    // 4. Chart.js
                     if (id.includes('chart.js')) {
                         return 'vendor-ui-charts';
                     }
 
-                    // 6. Utility libraries
+                    // 5. Utility libraries
                     if (id.includes('axios') || id.includes('lodash') || id.includes('zod') || id.includes('dayjs')) {
                         return 'vendor-utils';
                     }
 
-                    // 7. Builder Fields - Group frequently used fields to reduce waterfall
-                    if (id.includes('resources/js/components/builder/fields/')) {
-                        return 'vendor-builder-fields';
-                    }
-
-                    // 8. Vue core (Put last to avoid catching everything with 'vue' in path)
+                    // 6. Vue core (Put last to avoid catching everything with 'vue' in path)
                     if (id.includes('node_modules/vue/') ||
                         id.includes('node_modules/vue-router/') ||
                         id.includes('node_modules/pinia/') ||

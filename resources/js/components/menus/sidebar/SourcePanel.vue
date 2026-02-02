@@ -206,28 +206,28 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
 import api from '../../../services/api';
-// @ts-expect-error: Internal type mismatch
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import { useMenuContext } from '../../../composables/useMenu';
 import { menuItemRegistry } from '../registry';
 
 // UI Components
-import Card from '../../ui/card.vue';
-import CardHeader from '../../ui/card-header.vue';
-import CardTitle from '../../ui/card-title.vue';
-import CardContent from '../../ui/card-content.vue';
-import Accordion from '../../ui/accordion.vue';
-import AccordionContent from '../../ui/accordion-content.vue';
-import AccordionItem from '../../ui/accordion-item.vue';
-import AccordionTrigger from '../../ui/accordion-trigger.vue';
-import Badge from '../../ui/badge.vue';
-import Button from '../../ui/button.vue';
-import Input from '../../ui/input.vue';
-import Label from '../../ui/label.vue';
+import Card from '../../ui/Card.vue';
+import CardHeader from '../../ui/CardHeader.vue';
+import CardTitle from '../../ui/CardTitle.vue';
+import CardContent from '../../ui/CardContent.vue';
+import Accordion from '../../ui/Accordion.vue';
+import AccordionContent from '../../ui/AccordionContent.vue';
+import AccordionItem from '../../ui/AccordionItem.vue';
+import AccordionTrigger from '../../ui/AccordionTrigger.vue';
+import Badge from '../../ui/Badge.vue';
+import Button from '../../ui/Button.vue';
+import Input from '../../ui/Input.vue';
+import Label from '../../ui/Label.vue';
 import SourceItem from './SourceItem.vue';
 
 import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
@@ -266,7 +266,7 @@ const fetchPages = async () => {
         const { data } = parseResponse(response);
         pages.value = ensureArray(data);
     } catch (error) {
-        console.error('Failed to fetch pages:', error);
+        logger.error('Failed to fetch pages:', error);
     } finally {
         loadingPages.value = false;
     }
@@ -279,7 +279,7 @@ const fetchPosts = async () => {
         const { data } = parseResponse(response);
         posts.value = ensureArray(data);
     } catch (error) {
-        console.error('Failed to fetch posts:', error);
+        logger.error('Failed to fetch posts:', error);
     } finally {
         loadingPosts.value = false;
     }
@@ -292,7 +292,7 @@ const fetchCategories = async () => {
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
     } catch (error) {
-        console.error('Failed to fetch categories:', error);
+        logger.error('Failed to fetch categories:', error);
     } finally {
         loadingCategories.value = false;
     }

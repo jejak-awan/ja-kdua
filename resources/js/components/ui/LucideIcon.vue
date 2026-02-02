@@ -10,6 +10,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { computed, shallowRef, watch, type HTMLAttributes, type Component } from 'vue'
 
 const props = withDefaults(defineProps<{
@@ -75,11 +76,11 @@ watch(() => props.name, async (name) => {
       iconCache.set(kebabName, icon);
       iconComponent.value = icon;
     } else {
-      console.warn(`LucideIcon: Icon "${name}" not found`);
+      logger.warning(`LucideIcon: Icon "${name}" not found`);
       iconComponent.value = null;
     }
   } catch (error) {
-    console.warn(`LucideIcon: Failed to load icon "${name}"`, error);
+    logger.warning(`LucideIcon: Failed to load icon "${name}"`, error);
     iconComponent.value = null;
   }
 }, { immediate: true });

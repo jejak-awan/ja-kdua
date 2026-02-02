@@ -202,21 +202,14 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
-import Pagination from '../../../components/ui/pagination.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Card from '../../../components/ui/card.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
+import { Badge, Button, Card, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
+
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import Download from 'lucide-vue-next/dist/esm/icons/download.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
@@ -260,7 +253,7 @@ const fetchSubmissions = async (page = 1) => {
         submissions.value = (response.data.data || response.data) as FormSubmission[];
         pagination.value = response.data;
     } catch (error: any) {
-        console.error('Error fetching submissions:', error);
+        logger.error('Error fetching submissions:', error);
     } finally {
         loading.value = false;
     }
@@ -271,7 +264,7 @@ const fetchStatistics = async () => {
         const response = await api.get(`/admin/ja/forms/${props.form.id}/submissions/statistics`);
         statistics.value = (response.data?.data || response.data) as FormStatistics;
     } catch (error: any) {
-        console.error('Error fetching statistics:', error);
+        logger.error('Error fetching statistics:', error);
     }
 };
 
@@ -287,7 +280,7 @@ const viewSubmission = async (submission: FormSubmission) => {
             markAsRead(submission, false);
         }
     } catch (error: any) {
-        console.error('Error fetching submission details:', error);
+        logger.error('Error fetching submission details:', error);
         selectedSubmission.value = submission;
     }
 };
@@ -302,7 +295,7 @@ const markAsRead = async (submission: FormSubmission, refresh = true) => {
             submission.status = 'read';
         }
     } catch (error: any) {
-        console.error('Error marking submission as read:', error);
+        logger.error('Error marking submission as read:', error);
     }
 };
 
@@ -321,7 +314,7 @@ const deleteSubmission = async (submission: FormSubmission) => {
         toast.success.default(t('features.forms.submissions.messages.deleteSuccess'));
         fetchSubmissions();
     } catch (error: any) {
-        console.error('Failed to delete submission:', error);
+        logger.error('Failed to delete submission:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -345,7 +338,7 @@ const exportSubmissions = async () => {
         document.body.removeChild(link);
         toast.success.default(t('features.forms.submissions.messages.exportSuccess'));
     } catch (error: any) {
-        console.error('Failed to export submissions:', error);
+        logger.error('Failed to export submissions:', error);
         toast.error.fromResponse(error);
     }
 };

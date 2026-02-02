@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import type { RouteRecordRaw } from 'vue-router';
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
@@ -472,7 +473,7 @@ router.beforeEach((to, from, next) => {
 
 // Global error handler
 router.onError((error) => {
-    console.error('Router error:', error);
+    logger.error('Router error:', error);
 
     // For runtime router errors, use the modal to avoid full page fallback if possible
     const { showError } = useSystemError();

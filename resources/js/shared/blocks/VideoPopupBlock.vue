@@ -53,6 +53,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { computed } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Card, Button } from '../ui'
@@ -80,7 +81,7 @@ const openPopup = () => {
     if (props.mode === 'edit') return
     const videoUrl = settings.value.videoUrl
     if (!videoUrl) return
-    console.log('Opening video popup:', videoUrl)
+    logger.info('Opening video popup:', videoUrl)
 }
 
 const cardStyles = computed(() => {

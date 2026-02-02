@@ -7,12 +7,13 @@
                     <h3 class="text-lg font-semibold">
                         {{ t('features.categories.move.title') }}
                     </h3>
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         @click="$emit('close')"
-                        class="text-muted-foreground hover:text-muted-foreground"
                     >
-                        <X class="w-6 h-6" />
-                    </button>
+                        <X class="w-5 h-5" />
+                    </Button>
                 </div>
 
                 <!-- Content -->
@@ -42,19 +43,18 @@
 
                 <!-- Footer -->
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <button
+                    <Button
+                        variant="outline"
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
                         {{ t('features.categories.move.cancel') }}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         @click="handleSubmit"
                         :disabled="saving"
-                        class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                     >
                         {{ saving ? t('features.categories.move.moving') : t('features.categories.move.submit') }}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
@@ -64,8 +64,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { DialogFooter } from '@/components/ui';
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import { Button } from '@/components/ui';
 import { useToast } from '@/composables/useToast';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { moveCategorySchema } from '@/schemas';

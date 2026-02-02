@@ -134,6 +134,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -370,7 +371,7 @@ const fetchContent = async () => {
         // Lock content on edit
         await lockContent();
     } catch (error: any) {
-        console.error('Failed to fetch content:', error);
+        logger.error('Failed to fetch content:', error);
         toast.error.load(error);
         router.push({ name: 'content-studio' });
     } finally {
@@ -394,7 +395,7 @@ const lockContent = async () => {
         }
         lockInterval.value = setInterval(checkLockStatus, 30000);
     } catch (error: any) {
-        console.error('Failed to lock content:', error);
+        logger.error('Failed to lock content:', error);
     }
 };
 
@@ -406,7 +407,7 @@ const checkLockStatus = async () => {
             lockStatus.value = data;
         }
     } catch (error: any) {
-        console.error('Failed to check lock status:', error);
+        logger.error('Failed to check lock status:', error);
     }
 };
 
@@ -418,7 +419,7 @@ const handleUnlock = async () => {
             clearInterval(lockInterval.value);
         }
     } catch (error: any) {
-        console.error('Failed to unlock content:', error);
+        logger.error('Failed to unlock content:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -453,7 +454,7 @@ const fetchCategories = async () => {
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch categories:', error);
+        logger.error('Failed to fetch categories:', error);
         categories.value = [];
     }
 };
@@ -468,7 +469,7 @@ const fetchTags = async (query = '') => {
         const { data } = parseResponse(response);
         tags.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch tags:', error);
+        logger.error('Failed to fetch tags:', error);
     }
 };
 
@@ -478,7 +479,7 @@ const fetchMenus = async () => {
         const data = response.data?.data || response.data || [];
         menus.value = Array.isArray(data) ? data : [];
     } catch (error: any) {
-        console.error('Failed to fetch menus:', error);
+        logger.error('Failed to fetch menus:', error);
     }
 };
 
@@ -563,7 +564,7 @@ const handleSubmit = async (status: string | null = null) => {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {
-            console.error('Failed to update content:', error);
+            logger.error('Failed to update content:', error);
             toast.error.fromResponse(error);
         }
     } finally {

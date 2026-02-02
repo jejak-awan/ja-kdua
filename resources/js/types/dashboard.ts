@@ -25,8 +25,8 @@ export interface UserStats {
 
 export interface TrafficItem {
     period: string;
-    visits: number;
-    [key: string]: any;
+    visits: number | Record<string, unknown>; // Support dynamic visit objects from API
+    [key: string]: unknown;
 }
 
 export interface SystemStats {
@@ -59,11 +59,11 @@ export type TopContentItem = {
 export type TrafficDataPoint = {
     period: string;
     visits: number;
-    [key: string]: any;
+    [key: string]: unknown;
 };
 
 export type StatusDataPoint = {
     label: string;
     count: number;
-    [key: string]: any;
+    [key: string]: unknown;
 };

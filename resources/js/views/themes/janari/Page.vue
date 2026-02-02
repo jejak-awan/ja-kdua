@@ -49,6 +49,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/services/api';
@@ -82,7 +83,7 @@ const fetchPage = async () => {
     const response = await api.get(`/cms/contents/${slug}`);
     pageData.value = response.data.data || response.data;
   } catch (error) {
-    console.error('Failed to load page:', error);
+    logger.error('Failed to load page:', error);
     pageData.value = null;
   } finally {
     loading.value = false;

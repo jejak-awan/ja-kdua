@@ -73,7 +73,7 @@ import Library from 'lucide-vue-next/dist/esm/icons/library.js';
 import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 import Save from 'lucide-vue-next/dist/esm/icons/save.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
-import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';import { IconButton, BaseDropdown, BaseDivider } from '../ui'
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';import { IconButton, BaseDropdown, BaseDivider } from '@/components/builder/ui'
 import type { BuilderInstance } from '@/types/builder'
 
 const props = withDefaults(defineProps<{

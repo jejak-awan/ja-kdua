@@ -17,7 +17,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     layoutSettings
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Login Module Definition

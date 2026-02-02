@@ -198,8 +198,8 @@ import ContextMenu from './ui/ContextMenu.vue'
 // Core
 import { useBuilder } from './core'
 import { useCmsStore } from '@/stores/cms'
-import { throttle, debounce } from '../../shared/utils/performance'
-import type { BlockInstance, BuilderInstance, Canvas as ICanvas } from '../../types/builder'
+import { throttle, debounce } from '@/shared/utils/performance'
+import type { BlockInstance, BuilderInstance, Canvas as ICanvas } from '@/types/builder'
 
 // Register Module Definitions (side-effect import)
 import './modules'

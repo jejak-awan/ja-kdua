@@ -43,7 +43,7 @@ const emit = defineEmits<{
     (e: 'openProperties'): void;
 }>();
 
-const shouldShow = ({ editor }: any) => {
+const shouldShow = ({ editor }: { editor: any }) => {
     return editor.isActive('image') || editor.isActive('video');
 };
 

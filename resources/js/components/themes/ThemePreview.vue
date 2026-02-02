@@ -17,6 +17,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, watch } from 'vue';
 import type { Theme } from '@/types/theme';
 
@@ -135,7 +136,7 @@ const injectThemeStyles = () => {
         style.textContent = css;
         iframeDoc.head.appendChild(style);
     } catch (error) {
-        console.warn('Failed to inject theme styles into preview:', error);
+        logger.warning('Failed to inject theme styles into preview:', error);
     }
 };
 

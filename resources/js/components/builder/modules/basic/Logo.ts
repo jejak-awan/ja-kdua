@@ -18,7 +18,7 @@ import {
     adminLabelSettings,
     layoutSettings,
     linkSettings
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Logo Module Definition

@@ -258,6 +258,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, watch, onMounted, computed } from 'vue';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
@@ -404,7 +405,7 @@ const fetchMedia = async () => {
         }
         
     } catch (error) {
-        console.error('Failed to fetch media:', error);
+        logger.error('Failed to fetch media:', error);
     } finally {
         loading.value = false;
     }

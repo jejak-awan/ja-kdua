@@ -11,7 +11,7 @@
             <template v-if="multiple && Array.isArray(value) && value.length">
               <div class="selected-tags">
                 <span 
-                  v-for="val in value" 
+                  v-for="val in (value as any[])" 
                   :key="val" 
                   class="select-tag"
                   @click.stop="removeValue(val)"
@@ -49,7 +49,7 @@
                     <div class="group-header">{{ getGroupLabel(groupName) }}</div>
                     <div 
                       v-for="option in groupOpts" 
-                      :key="option.value"
+                      :key="String(option.value)"
                       class="dropdown-item"
                       :class="{ 'active': isSelected(option.value) }"
                       @click.stop="handleSelect(option, close)"
@@ -64,7 +64,7 @@
             <template v-else>
                 <div 
                   v-for="option in filteredOptions" 
-                  :key="option.value"
+                  :key="String(option.value)"
                   class="dropdown-item"
                   :class="{ 'active': isSelected(option.value) }"
                   @click.stop="handleSelect(option, close)"
@@ -86,16 +86,17 @@
 
 <script setup lang="ts">
 import { computed, inject, ref, watch } from 'vue'
-import type { BlockInstance, BuilderInstance } from '../../../types/builder'
+import type { BlockInstance, BuilderInstance, SettingDefinition, SettingOption } from '@/types/builder'
 import { useI18n } from 'vue-i18n'
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
-import Search from 'lucide-vue-next/dist/esm/icons/search.js';import { BaseDropdown } from '../ui'
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import { BaseDropdown } from '@/components/builder/ui'
 
 const props = defineProps<{
-  field: any;
-  value: string | number | string[] | number[];
+  field: SettingDefinition;
+  value: string | number | string[] | number[] | null | undefined;
   placeholderValue?: string | number | null;
   multiple?: boolean;
   searchable?: boolean;
@@ -105,7 +106,7 @@ const emit = defineEmits(['update:value'])
 
 const { t, te } = useI18n()
 const module = inject<BlockInstance>('module', {} as BlockInstance)
-const dropdownRef = ref<any>(null)
+const dropdownRef = ref<{ isOpen: boolean } | null>(null)
 const searchQuery = ref('')
 const searchInput = ref<HTMLInputElement | null>(null)
 
@@ -117,11 +118,11 @@ const rawOptions = computed(() => {
     if (typeof options === 'string' && options.startsWith('dynamic:')) {
         const key = options.replace('dynamic:', '')
         const dynamicData = (window as any).jaCmsData || {}
-        return dynamicData[key] || []
+        return (dynamicData[key] || []) as SettingOption[]
     }
 
     // Default to static array
-    return Array.isArray(options) ? options : []
+    return (Array.isArray(options) ? options : []) as SettingOption[]
 })
 
 const builder = inject<BuilderInstance>('builder')
@@ -168,7 +169,7 @@ const groupedOptions = computed(() => {
     if (!groupKey) return null
 
     // Group options
-    const groups: Record<string, any[]> = {}
+    const groups: Record<string, SettingOption[]> = {}
     filteredOptions.value.forEach((opt: any) => {
         const key = opt[groupKey] || 'Other'
         if (!groups[key]) groups[key] = []
@@ -197,12 +198,12 @@ const hasValue = computed(() => {
   return props.value !== '' && props.value !== null && props.value !== undefined
 })
 
-const getOptionLabel = (option: any) => {
+const getOptionLabel = (option: SettingOption | string | number) => {
   // If option is just a string (simple array of strings), return it
-  if (typeof option !== 'object') return String(option)
+  if (typeof option !== 'object' || option === null) return String(option)
     
   const type = module.type
-  const name = props.field.name
+  const name = props.field.key || (props.field as any).name
   const val = option.value
 
   // 1. Module specific
@@ -219,14 +220,14 @@ const getOptionLabel = (option: any) => {
 }
 
 const getLabelForValue = (val: string | number) => {
-    const option = (rawOptions.value as any[]).find((o: any) => o.value === val)
+    const option = rawOptions.value.find((o) => o.value === val)
     return option ? getOptionLabel(option) : String(val)
 }
 
 const translatedSelectedLabel = computed(() => {
   if (!hasValue.value) {
-      if (props.placeholderValue !== null) {
-         const inherited = (rawOptions.value as any[]).find((opt: any) => opt.value === props.placeholderValue)
+      if (props.placeholderValue !== null && props.placeholderValue !== undefined) {
+         const inherited = rawOptions.value.find((opt) => opt.value === props.placeholderValue)
          if (inherited) return getOptionLabel(inherited)
       }
       return t('builder.common.select') || 'Select...'
@@ -236,20 +237,20 @@ const translatedSelectedLabel = computed(() => {
   return getLabelForValue(props.value as string | number)
 })
 
-const isSelected = (val: string | number) => {
+const isSelected = (val: string | number | boolean | null) => {
   if (props.multiple) {
-    return Array.isArray(props.value) && (props.value as any[]).includes(val as any)
+    return Array.isArray(props.value) && (props.value as any[]).includes(val)
   }
   return props.value === val
 }
 
-const handleSelect = (option: any, close: () => void) => {
+const handleSelect = (option: SettingOption, close: () => void) => {
   if (props.multiple) {
     let newValue = Array.isArray(props.value) ? [...props.value] : []
-    const index = newValue.indexOf(option.value)
+    const index = (newValue as any[]).indexOf(option.value)
     
     if (index === -1) {
-      (newValue as any).push(option.value)
+      (newValue as any[]).push(option.value)
     } else {
       newValue.splice(index, 1)
     }
@@ -265,7 +266,7 @@ const handleSelect = (option: any, close: () => void) => {
 const removeValue = (val: string | number) => {
     if (!props.multiple) return
     let newValue = Array.isArray(props.value) ? [...props.value] : []
-    const index = newValue.indexOf(val as any)
+    const index = (newValue as any[]).indexOf(val)
     if (index !== -1) {
         newValue.splice(index, 1)
         emit('update:value', newValue)

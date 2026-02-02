@@ -398,6 +398,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, nextTick, onMounted, inject, watch, defineAsyncComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
@@ -412,28 +413,21 @@ import draggable from 'vuedraggable';
 import { 
     BaseCollapsible, BaseInput, BaseSlider, IconButton, BaseButton, BaseColorSlider,
     Select, SelectTrigger, SelectValue, SelectContent, SelectItem
-} from '../../ui';
+} from '@/components/builder/ui';
 import MediaPicker from '@/components/media/MediaPicker.vue';
-import type { BuilderInstance } from '../../../../types/builder';
+import type { BuilderInstance } from '@/types/builder';
 
-const ColorPickerModal = defineAsyncComponent(() => import('../../modals/ColorPickerModal.vue'));
+const ColorPickerModal = defineAsyncComponent(() => import('@/components/builder/modals/ColorPickerModal.vue'));
 
-interface GlobalVariable {
-    id: string;
-    name: string;
-    value: any;
-    unit?: string;
-    hex?: string; // For colors
-    opacity?: number; // For colors
-    family?: string; // For fonts
-    type?: string;
-}
+// Using the imported GlobalVariable now from builder.ts
+import type { GlobalVariable } from '@/types/builder';
 
 const { t } = useI18n();
 const builder = inject<BuilderInstance>('builder');
 
-// Safe access to globalVariables
 const globalVariables = builder?.globalVariables;
+const activePanel = builder?.activePanel;
+const globalAction = builder?.globalAction;
 const globalNumbers = globalVariables?.globalNumbers;
 const globalText = globalVariables?.globalText;
 const globalImages = globalVariables?.globalImages;
@@ -513,7 +507,7 @@ const editingColorIndex = ref<number | null>(null);
 
 const editingColorValue = computed(() => {
     if (editingColorIndex.value !== null && globalColors?.value && globalColors.value[editingColorIndex.value]) {
-        return globalColors.value[editingColorIndex.value].value;
+        return globalColors.value[editingColorIndex.value].value as string;
     }
     return '';
 });
@@ -572,14 +566,15 @@ onMounted(() => {
     originalState.value = getSnapshot();
     
     // Check for pending action
-    if (builder?.globalAction?.value) {
-        handleGlobalAction(builder.globalAction.value);
+    if (builder) {
+        builder.activePanel.value = 'global_variables';
+        builder.globalAction.value = { type: 'add_color', payload: { timestamp: Date.now() } };
     }
 });
 
 // Watch for global actions
-if (builder?.globalAction) {
-    watch(() => builder.globalAction?.value, (action) => {
+if (globalAction) {
+    watch(() => globalAction.value, (action) => {
         if (action) handleGlobalAction(action);
     });
 }
@@ -650,7 +645,7 @@ const saveVariables = async () => {
         if (builder?.saveGlobalVariables) await builder.saveGlobalVariables();
         alert(t('builder.panels.globalVariables.messages.saveSuccess'));
     } catch (error) {
-        console.error('Failed to save variables:', error);
+        logger.error('Failed to save variables:', error);
         alert(t('builder.panels.globalVariables.messages.saveError'));
     }
 };

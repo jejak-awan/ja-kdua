@@ -12,11 +12,11 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import type { BuilderInstance } from '../../../types/builder'
-import SelectField from './SelectField.vue'
+import type { BuilderInstance, SettingDefinition } from '@/types/builder'
+import SelectField from '@/components/builder/fields/SelectField.vue'
 
 const props = defineProps<{
-  field: any;
+  field?: SettingDefinition;
   value?: string;
   placeholderValue?: string;
 }>()
@@ -55,8 +55,9 @@ const fontField = computed(() => {
 
   return {
     ...props.field,
+    type: 'select',
     options
-  }
+  } as SettingDefinition
 })
 </script>
 

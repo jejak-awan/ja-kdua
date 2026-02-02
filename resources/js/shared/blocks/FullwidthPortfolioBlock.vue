@@ -95,9 +95,9 @@ const columns = computed(() => {
 const portfolioItems = computed(() => {
     if (props.module.children && props.module.children.length > 0) {
         return props.module.children.map(child => ({
-            title: child.settings?.title || 'Project Title',
-            category: child.settings?.category || 'Category',
-            image: child.settings?.image
+            title: (child.settings?.title as string) || 'Project Title',
+            category: (child.settings?.category as string) || 'Category',
+            image: (child.settings?.image as string) || null
         }))
     }
     return Array.from({ length: 8 }, (_, i) => ({ 

@@ -157,6 +157,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, reactive, computed, onMounted, onUnmounted, nextTick, type Ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -245,7 +246,7 @@ onMounted(async () => {
         const settings = response.data?.data || response.data;
         registrationEnabled.value = settings.enable_registration === true;
     } catch (error) {
-        console.error('Failed to fetch public settings:', error);
+        logger.error('Failed to fetch public settings:', error);
         // Keep hidden if we can't check (fail-closed for security)
         registrationEnabled.value = false;
     }
@@ -345,7 +346,7 @@ const verifyTwoFactor = async () => {
         }
 
     } catch (e) {
-        console.error('2FA Error:', e);
+        logger.error('2FA Error:', e);
         message.value = t('features.auth.messages.error');
         messageType.value = 'error';
     } finally {
@@ -449,7 +450,7 @@ const handleLogin = async () => {
             }
         }
     } catch (error) {
-        console.error('Login error:', error);
+        logger.error('Login error:', error);
         message.value = t('features.auth.messages.error');
         messageType.value = 'error';
         rateLimited.value = false;

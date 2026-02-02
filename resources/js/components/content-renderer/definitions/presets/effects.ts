@@ -264,7 +264,7 @@ export const getFilterStyle = (settings: ModuleSettings) => {
 export const getTransformStyle = (settings: ModuleSettings) => {
     const transforms: string[] = [];
 
-    if (settings.scale !== 100) transforms.push(`scale(${settings.scale / 100})`);
+    if ((settings.scale as number) !== 100) transforms.push(`scale(${(settings.scale as number) / 100})`);
     if (settings.rotate) transforms.push(`rotate(${settings.rotate}deg)`);
     if (settings.skewX) transforms.push(`skewX(${settings.skewX}deg)`);
     if (settings.skewY) transforms.push(`skewY(${settings.skewY}deg)`);

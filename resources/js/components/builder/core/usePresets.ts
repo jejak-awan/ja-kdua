@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { ref } from 'vue'
 import api from '@/services/api'
 import { useToast } from '@/composables/useToast'
@@ -6,14 +7,14 @@ export interface Preset {
     id: number | string;
     type: string;
     name: string;
-    settings: any;
+    settings: Record<string, unknown>;
     created_at?: string;
     updated_at?: string;
 }
 
 export interface PresetModule {
     type: string;
-    settings: any;
+    settings: Record<string, unknown>;
 }
 
 export function usePresets() {
@@ -33,7 +34,7 @@ export function usePresets() {
             const data = response.data?.data || response.data
             presets.value = Array.isArray(data) ? data : (data.data || [])
         } catch (err) {
-            console.error('Failed to fetch presets:', err)
+            logger.error('Failed to fetch presets:', err)
         } finally {
             loading.value = false
         }
@@ -59,7 +60,7 @@ export function usePresets() {
                 return newPreset
             }
         } catch (err: any) {
-            toast.error.action(err)
+            toast.error.fromResponse(err)
             throw err
         }
     }
@@ -77,7 +78,7 @@ export function usePresets() {
                 return true
             }
         } catch (err: any) {
-            toast.error.action(err)
+            toast.error.fromResponse(err)
             return false
         }
     }

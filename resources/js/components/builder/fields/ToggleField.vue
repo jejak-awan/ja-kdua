@@ -1,20 +1,21 @@
 <template>
   <BaseToggle 
-    :model-value="value" 
+    :model-value="!!value" 
     :label="''"
     @update:model-value="$emit('update:value', $event)"
   />
 </template>
 
 <script setup lang="ts">
-import { BaseToggle } from '../ui'
+import { BaseToggle } from '@/components/builder/ui'
+import type { SettingDefinition } from '@/types/builder'
 
 const props = defineProps<{
-  field: any;
+  field: SettingDefinition;
   value?: boolean;
 }>()
 
-const emit = defineEmits<{
+defineEmits<{
   (e: 'update:value', val: boolean): void;
 }>()
 </script>

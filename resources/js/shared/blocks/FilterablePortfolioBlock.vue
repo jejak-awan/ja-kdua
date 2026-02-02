@@ -70,7 +70,7 @@
 import { computed, ref, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Button, Badge, Card } from '../ui'
-import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';import LucideIcon from '../../components/ui/LucideIcon.vue'
+import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';import { LucideIcon } from '@/components/ui';
 import { 
   getVal,
   getLayoutStyles,

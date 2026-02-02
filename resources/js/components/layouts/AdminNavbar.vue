@@ -208,6 +208,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -325,7 +326,7 @@ const fetchNotifications = async () => {
         
         notifications.value = data;
     } catch (error) {
-        console.error('Failed to fetch notifications:', error);
+        logger.error('Failed to fetch notifications:', error);
         notifications.value = [];
     } finally {
         loadingNotifications.value = false;
@@ -338,7 +339,7 @@ const handleNotificationClick = async (notification: Notification) => {
             await api.put(`/admin/ja/notifications/${notification.id}/read`);
             notification.read_at = new Date().toISOString();
         } catch (error) {
-            console.error('Failed to mark notification as read:', error);
+            logger.error('Failed to mark notification as read:', error);
         }
     }
     showNotificationsDropdown.value = false;

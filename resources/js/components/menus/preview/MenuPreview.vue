@@ -206,13 +206,13 @@ const iconMap: Record<string, Component> = {
 import type { MenuItem } from '../../../types/menu';
 
 // UI Components
-import Dialog from '../../ui/dialog.vue';
-import DialogContent from '../../ui/dialog-content.vue';
-import DialogHeader from '../../ui/dialog-header.vue';
-import DialogTitle from '../../ui/dialog-title.vue';
-import DialogDescription from '../../ui/dialog-description.vue';
-import DialogFooter from '../../ui/dialog-footer.vue';
-import Button from '../../ui/button.vue';
+import Dialog from '../../ui/Dialog.vue';
+import DialogContent from '../../ui/DialogContent.vue';
+import DialogHeader from '../../ui/DialogHeader.vue';
+import DialogTitle from '../../ui/DialogTitle.vue';
+import DialogDescription from '../../ui/DialogDescription.vue';
+import DialogFooter from '../../ui/DialogFooter.vue';
+import Button from '../../ui/Button.vue';
 
 const { t } = useI18n();
 

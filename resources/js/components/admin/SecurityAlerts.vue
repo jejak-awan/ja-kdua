@@ -62,7 +62,7 @@ interface Alert {
     title: string;
     message: string;
     severity: 'critical' | 'warning' | 'info';
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 const { t } = useI18n();
@@ -75,7 +75,7 @@ const fetchAlerts = async () => {
     try {
         const response = await api.get('/admin/ja/security/alerts');
         alerts.value = response.data?.data?.alerts || [];
-    } catch (error) {
+    } catch (error: any) {
         console.debug('Failed to fetch security alerts:', error);
     }
 };

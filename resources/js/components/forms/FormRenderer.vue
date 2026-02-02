@@ -46,6 +46,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, reactive, onMounted, provide, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
@@ -87,7 +88,7 @@ const fetchForm = async () => {
     // Initialize form data with default values if any
   } catch (err: any) {
     error.value = 'Failed to load form.'
-    console.error(err)
+    logger.error(err instanceof Error ? err.message : String(err), { error: err })
   } finally {
     loading.value = false
   }

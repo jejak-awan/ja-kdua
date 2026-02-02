@@ -52,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { inject, computed } from 'vue';
 import Folder from 'lucide-vue-next/dist/esm/icons/folder.js';
 import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';
@@ -139,7 +140,7 @@ const onDrop = async (event: DragEvent, targetFolder: FolderItem) => {
         if (sourcePath === targetFolder.path) return;
         await moveItem(sourcePath, targetFolder.path, type);
     } catch (e) {
-        console.error('Drop failed', e);
+        logger.error('Drop failed', e);
     } finally {
         dropTarget.value = null;
     }

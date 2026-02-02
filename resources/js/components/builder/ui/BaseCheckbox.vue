@@ -18,8 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import Checkbox from '@/components/ui/checkbox.vue';
-import Label from '@/components/ui/label.vue';
+import { Checkbox, Label } from '@/components/ui';
 
 interface Props {
   modelValue?: boolean;

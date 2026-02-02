@@ -60,18 +60,20 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
-import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';import { BaseSlider, BaseDropdown } from '../ui'
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import { BaseSlider, BaseDropdown } from '@/components/builder/ui'
+import type { SettingDefinition } from '@/types/builder'
 
 const props = defineProps<{
-  field: any;
+  field: SettingDefinition;
   value: string;
   placeholderValue?: string | null;
-  units?: any[] | null;
+  units?: string[] | null;
 }>()
 
 const activeUnits = computed(() => {
     if (props.units) return props.units
-    if (props.field?.options) return props.field.options
+    if (props.field?.options) return props.field.options as string[]
     return ['px', '%', 'em', 'rem', 'vw', 'vh', 'auto']
 })
 
@@ -104,7 +106,7 @@ const displayValue = computed({
         return numericValue.value
     },
     set: (val: any) => {
-        const lowerVal = (val as string).toLowerCase()
+        const lowerVal = String(val).toLowerCase()
         if (keywords.includes(lowerVal)) {
             unit.value = lowerVal
             numericValue.value = 0

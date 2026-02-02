@@ -81,7 +81,7 @@
       <button class="toolbar-btn" @click="editor.chain().focus().setTextAlign('justify').run()" :class="{ active: editor.isActive({ textAlign: 'justify' }) }" title="Justify">
         <AlignJustify :size="14" />
       </button>
-</div>
+    </div>
 
     <!-- Row 2: Secondary / Insert -->
     <div class="toolbar-row">
@@ -120,13 +120,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { Editor } from '@tiptap/vue-3'
 import Bold from 'lucide-vue-next/dist/esm/icons/bold.js';
 import Italic from 'lucide-vue-next/dist/esm/icons/italic.js';
 import UnderlineIcon from 'lucide-vue-next/dist/esm/icons/underline.js';
 import Strikethrough from 'lucide-vue-next/dist/esm/icons/strikethrough.js';
 import RemoveFormatting from 'lucide-vue-next/dist/esm/icons/remove-formatting.js';
 import List from 'lucide-vue-next/dist/esm/icons/list.js';
-import ListOrdered from 'lucide-vue-next/dist/esm/icons/list-ordered.js';
 import AlignLeft from 'lucide-vue-next/dist/esm/icons/align-start-horizontal.js';
 import AlignCenter from 'lucide-vue-next/dist/esm/icons/align-center-horizontal.js';
 import AlignRight from 'lucide-vue-next/dist/esm/icons/align-end-horizontal.js';
@@ -138,10 +138,11 @@ import Quote from 'lucide-vue-next/dist/esm/icons/quote.js';
 import Minus from 'lucide-vue-next/dist/esm/icons/minus.js';
 import Undo from 'lucide-vue-next/dist/esm/icons/undo.js';
 import Redo from 'lucide-vue-next/dist/esm/icons/redo.js';
-import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';import { BaseDropdown } from '../ui'
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import { BaseDropdown } from '@/components/builder/ui'
 
 const props = defineProps<{
-  editor: any;
+  editor: Editor;
 }>()
 
 const activeNodeName = computed(() => {

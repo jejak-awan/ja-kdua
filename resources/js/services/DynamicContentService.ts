@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { ref, type Ref } from 'vue';
 import type { RenderingContext } from './ConditionEvaluator';
 
@@ -31,7 +32,7 @@ class DynamicContentService {
         try {
             return source.handler(context);
         } catch (e) {
-            console.warn(`Failed to resolve dynamic content: ${sourceId}`, e);
+            logger.warning(`Failed to resolve dynamic content: ${sourceId}`, e);
             return null;
         }
     }

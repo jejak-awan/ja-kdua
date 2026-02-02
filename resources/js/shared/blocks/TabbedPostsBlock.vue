@@ -87,7 +87,7 @@ const parseCategories = () => {
         cats = cats.split(',').map((c: string) => c.trim()).filter(Boolean)
     }
     
-    if (!cats || cats.length === 0) {
+    if (!cats || (cats as any[]).length === 0) {
          tabs.value = [
              { id: 'tech', label: 'Technology' },
              { id: 'life', label: 'Lifestyle' },

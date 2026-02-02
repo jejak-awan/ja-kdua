@@ -147,13 +147,14 @@ import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
 import SlidersHorizontal from 'lucide-vue-next/dist/esm/icons/sliders-horizontal.js';
 import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 import Library from 'lucide-vue-next/dist/esm/icons/library.js';
-import ChevronsRight from 'lucide-vue-next/dist/esm/icons/chevrons-right.js';import { SETTINGS_TABS } from '../core/constants'
-import ModuleRegistry from '../core/ModuleRegistry'
-import SettingsPanel from '../settings/SettingsPanel.vue'
-import ResponsiveBreakpointsModal from '../modals/ResponsiveBreakpointsModal.vue'
-import { IconButton, BaseInput, BaseDropdown, BaseDivider } from '../ui'
-import DesignPresetsSelector from '../settings/DesignPresetsSelector.vue'
-import ThemeSettingsPanel from './panels/ThemeSettingsPanel.vue'
+import ChevronsRight from 'lucide-vue-next/dist/esm/icons/chevrons-right.js';
+import { SETTINGS_TABS } from '@/components/builder/core/constants'
+import ModuleRegistry from '@/components/builder/core/ModuleRegistry'
+import SettingsPanel from '@/components/builder/settings/SettingsPanel.vue'
+import ResponsiveBreakpointsModal from '@/components/builder/modals/ResponsiveBreakpointsModal.vue'
+import { IconButton, BaseInput, BaseDropdown, BaseDivider } from '@/components/builder/ui'
+import DesignPresetsSelector from '@/components/builder/settings/DesignPresetsSelector.vue'
+import ThemeSettingsPanel from '@/components/builder/layout/panels/ThemeSettingsPanel.vue'
 import type { BuilderInstance, BlockInstance } from '../../../types/builder'
 
 const { t, te } = useI18n()

@@ -7,17 +7,17 @@
     >
       <div class="group-fields">
         <div 
-          v-for="subField in field.fields" 
-          :key="subField.name" 
+          v-for="subField in (field.fields as SettingDefinition[])" 
+          :key="subField.key || (subField as any).name" 
           v-show="isFieldVisible(subField)"
           class="sub-field-row"
         >
           <FieldRenderer
             :field="subField"
-            :value="getFieldValue(subField.name)"
+            :value="getFieldValue(subField.key || (subField as any).name)"
             :module="module"
             :device="device"
-            @update="(val) => updateField(subField.name, val)"
+            @update="(val: any) => updateField(subField.key || (subField as any).name, val)"
           />
         </div>
       </div>
@@ -28,13 +28,14 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { BaseCollapsible } from '../ui'
-import FieldRenderer from './FieldRenderer.vue'
-import type { BlockInstance, BuilderInstance } from '../../../types/builder'
+import { BaseCollapsible, BaseButton } from '@/components/builder/ui'
+import ModuleActions from '@/components/builder/fields/ModuleActions.vue'
+import FieldRenderer from '@/components/builder/fields/FieldRenderer.vue'
+import type { BlockInstance, BuilderInstance, SettingDefinition } from '@/types/builder'
 
 const props = defineProps<{
-  field: any;
-  value: any;
+  field: SettingDefinition;
+  value: Record<string, any>;
   module: BlockInstance;
   device?: string;
   isNested?: boolean;
@@ -45,7 +46,7 @@ const { t, te } = useI18n()
 
 const translatedLabel = computed(() => {
   const type = props.module.type
-  const name = props.field.name
+  const name = props.field.key || (props.field as any).name
 
   if (te(`builder.settings.${type}.${name}.label`)) {
     return t(`builder.settings.${type}.${name}.label`)
@@ -55,7 +56,7 @@ const translatedLabel = computed(() => {
     return t(`builder.settings.fields.${name}`)
   }
 
-  return props.field.label
+  return props.field.label || name
 })
 
 const getFieldValue = (name: string) => {
@@ -66,18 +67,26 @@ const updateField = (name: string, value: any) => {
   builder?.updateModuleSettings(props.module.id, { [name]: value })
 }
 
-const isFieldVisible = (f: any) => {
+const isFieldVisible = (f: SettingDefinition) => {
   if (!f.show_if) return true
   
-  const dependencyName = f.show_if.field
-  const dependencyValue = getFieldValue(dependencyName)
-  const expectedValue = f.show_if.value
+  const conditions = Array.isArray(f.show_if) ? f.show_if : [f.show_if]
   
-  if (Array.isArray(expectedValue)) {
-    return expectedValue.includes(dependencyValue)
-  }
-  
-  return dependencyValue === expectedValue
+  return conditions.every(c => {
+      const condition = c as { field: string; value: unknown; operator?: string };
+      const dependencyName = condition.field;
+      const dependencyValue = getFieldValue(dependencyName);
+      const expectedValue = condition.value;
+      const operator = condition.operator || 'eq';
+
+      switch (operator) {
+          case 'eq': 
+              if (Array.isArray(expectedValue)) return expectedValue.includes(dependencyValue)
+              return dependencyValue === expectedValue
+          case 'neq': return dependencyValue !== expectedValue
+          default: return dependencyValue === expectedValue
+      }
+  })
 }
 </script>
 

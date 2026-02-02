@@ -35,13 +35,14 @@ import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
 import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
 import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
 import Share2 from 'lucide-vue-next/dist/esm/icons/share-2.js';
-import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
-import Settings2 from 'lucide-vue-next/dist/esm/icons/settings.js';
+import CircleQuestion from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
+import Settings2 from 'lucide-vue-next/dist/esm/icons/settings-2.js';
 import Database from 'lucide-vue-next/dist/esm/icons/database.js';
-import Grid from 'lucide-vue-next/dist/esm/icons/grid-2x2.js';import { inject, computed } from 'vue'
+import Grid from 'lucide-vue-next/dist/esm/icons/grid-2x2.js';
+import { inject, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { SIDEBAR_PANELS } from '../core/constants'
-import type { BuilderInstance } from '../../../types/builder'
+import { SIDEBAR_PANELS } from '@/components/builder/core/constants'
+import type { BuilderInstance } from '@/types/builder'
 
 // Props
 interface Props {
@@ -62,10 +63,11 @@ const { t } = useI18n()
 // Icons map
 const icons: Record<string, any> = {
   Layers, FileText, Clock, Layout, Settings, Palette,
-  Sparkles, Share2, HelpCircle, Settings2, Database, Grid
+  Sparkles, Share2, HelpCircle: CircleQuestion, Settings2, Database, Grid
 }
 
-const builder = inject<BuilderInstance>('builder')
+// Inject builder state
+const builder = inject<BuilderInstance>('builder')!
 const panels = SIDEBAR_PANELS
 
 const filteredPanels = computed(() => {

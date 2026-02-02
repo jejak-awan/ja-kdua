@@ -112,6 +112,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -298,7 +299,7 @@ const fetchCategories = async () => {
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch categories:', error);
+        logger.error('Failed to fetch categories:', error);
         categories.value = [];
     }
 };
@@ -313,7 +314,7 @@ const fetchTags = async (query = '') => {
         const { data } = parseResponse(response);
         tags.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch tags:', error);
+        logger.error('Failed to fetch tags:', error);
     }
 };
 
@@ -323,7 +324,7 @@ const fetchMenus = async () => {
         const { data } = parseResponse(response);
         menus.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch menus:', error);
+        logger.error('Failed to fetch menus:', error);
     }
 };
 
@@ -410,7 +411,7 @@ const handleSubmit = async (status: string | null = null) => {
                 originalError: error
             };
         } else {
-            console.error('Failed to create content:', error);
+            logger.error('Failed to create content:', error);
             toast.error.fromResponse(error);
         }
     } finally {
@@ -459,7 +460,7 @@ const resolveConflict = async (action: 'unique' | 'force_delete') => {
             // Retry submission
             await handleSubmit(form.value.status);
         } catch (error: any) {
-            console.error('Failed to force delete conflicting item:', error);
+            logger.error('Failed to force delete conflicting item:', error);
             toast.error.action({ message: 'Failed to remove conflicting item. Please rename your current page.' });
         } finally {
             loading.value = false;

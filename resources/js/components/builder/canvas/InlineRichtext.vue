@@ -143,7 +143,7 @@ watch(() => props.modelValue, (newVal) => {
 
 .inline-richtext-toolbar {
   position: fixed;
-  z-index: 9999;
+  z-index: 100001 !important;
   background: var(--builder-bg-primary);
   border: 1px solid var(--builder-border);
   border-radius: var(--border-radius-md);

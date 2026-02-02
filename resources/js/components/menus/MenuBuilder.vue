@@ -258,6 +258,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -274,19 +275,19 @@ import ItemPropertiesPanel from './properties/ItemPropertiesPanel.vue';
 import MenuPreview from './preview/MenuPreview.vue';
 
 // UI Components
-import Card from '../ui/card.vue';
-import CardHeader from '../ui/card-header.vue';
-import CardTitle from '../ui/card-title.vue';
-import CardContent from '../ui/card-content.vue';
-import Badge from '../ui/badge.vue';
-import Button from '../ui/button.vue';
-import Input from '../ui/input.vue';
-import Label from '../ui/label.vue';
-import Select from '../ui/select.vue';
-import SelectTrigger from '../ui/select-trigger.vue';
-import SelectValue from '../ui/select-value.vue';
-import SelectContent from '../ui/select-content.vue';
-import SelectItem from '../ui/select-item.vue';
+import Card from '../ui/Card.vue';
+import CardHeader from '../ui/CardHeader.vue';
+import CardTitle from '../ui/CardTitle.vue';
+import CardContent from '../ui/CardContent.vue';
+import Badge from '../ui/Badge.vue';
+import Button from '../ui/Button.vue';
+import Input from '../ui/Input.vue';
+import Label from '../ui/Label.vue';
+import Select from '../ui/Select.vue';
+import SelectTrigger from '../ui/SelectTrigger.vue';
+import SelectValue from '../ui/SelectValue.vue';
+import SelectContent from '../ui/SelectContent.vue';
+import SelectItem from '../ui/SelectItem.vue';
 
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import Save from 'lucide-vue-next/dist/esm/icons/save.js';
@@ -429,7 +430,7 @@ const fetchLocations = async () => {
         }));
         locations.value.unshift({ value: 'none', label: 'None' });
     } catch (error) {
-        console.error('Failed to fetch locations:', error);
+        logger.error('Failed to fetch locations:', error);
     }
 };
 

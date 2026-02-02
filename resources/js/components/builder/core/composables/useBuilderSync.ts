@@ -1,10 +1,12 @@
+import { logger } from '@/utils/logger';
 import api from '@/services/api'
 import { triggerRef } from 'vue'
 import ModuleRegistry from '../ModuleRegistry'
-import type { BuilderState, PageMetadata, BlockInstance } from '../../../../types/builder'
+import type { BuilderState, PageMetadata, BlockInstance } from '@/types/builder'
 import type { HistoryManager } from './useBuilderModules'
+import type { GlobalVariablesManager } from '../useGlobalVariables'
 
-export function useBuilderSync(state: BuilderState, historyManager: HistoryManager, globalVariables: any) {
+export function useBuilderSync(state: BuilderState, historyManager: HistoryManager, globalVariables: GlobalVariablesManager) {
     const {
         blocks,
         content,
@@ -42,8 +44,8 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
                 slug: p.slug,
                 status: p.status
             }))
-        } catch (error) {
-            console.error('Failed to fetch pages:', error)
+        } catch (error: unknown) {
+            logger.error('Failed to fetch pages:', error instanceof Error ? error.message : String(error));
         } finally {
             pagesLoading.value = false
         }
@@ -128,8 +130,8 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
                 }
             }
             return data
-        } catch (error: any) {
-            console.error('Failed to load content for builder:', error)
+        } catch (error: unknown) {
+            logger.error('Failed to load content for builder:', error instanceof Error ? error.message : String(error));
             throw error
         }
     }
@@ -139,8 +141,8 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         try {
             await loadContent(id)
             currentPageId.value = typeof id === 'string' ? parseInt(id) : id
-        } catch (error) {
-            console.error('Failed to switch page:', error)
+        } catch (error: unknown) {
+            logger.error('Failed to switch page:', error instanceof Error ? error.message : String(error));
         }
     }
 
@@ -164,9 +166,15 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
                 await setCurrentPage(newPage.id)
             }
             return newPage
-        } catch (error: any) {
-            const message = error.response?.data?.message || error.message || 'Failed to create page'
-            console.error('Failed to create page:', error)
+        } catch (error: unknown) {
+            let message = 'Failed to create page'
+            if (error && typeof error === 'object' && 'response' in error) {
+                const err = error as { response?: { data?: { message?: string } }; message?: string };
+                message = err.response?.data?.message || err.message || message
+            } else if (error instanceof Error) {
+                message = error.message
+            }
+            logger.error('Failed to create page:', error instanceof Error ? error.message : String(error));
             throw new Error(message)
         }
     }
@@ -179,8 +187,9 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
             const numericId = typeof id === 'string' ? parseInt(id) : id
             if (currentPageId.value === numericId) {
                 if (pages.value.length > 0) {
-                    if (pages.value[0].id) {
-                        await setCurrentPage(pages.value[0].id)
+                    const firstPage = pages.value[0]
+                    if (firstPage.id !== null && firstPage.id !== undefined) {
+                        await setCurrentPage(firstPage.id)
                     }
                 } else {
                     blocks.value = []
@@ -193,8 +202,8 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
                 }
             }
             return true
-        } catch (error) {
-            console.error('Failed to delete page:', error)
+        } catch (error: unknown) {
+            logger.error('Failed to delete page:', error instanceof Error ? error.message : String(error));
             throw error
         }
     }
@@ -214,8 +223,8 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
             const response = await api.put(`/admin/ja/contents/${content.value.id}`, payload)
             markAsSaved()
             return response.data
-        } catch (error: any) {
-            console.error('Failed to save content from builder:', error)
+        } catch (error: unknown) {
+            logger.error('Failed to save content from builder:', error instanceof Error ? error.message : String(error));
             throw error
         }
     }
@@ -226,8 +235,8 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
             try {
                 const response = await api.put(`/admin/ja/contents/${content.value.id}`, { global_variables: vars })
                 return response.data
-            } catch (error: any) {
-                console.error('Failed to save global variables to content:', error)
+            } catch (error: unknown) {
+                logger.error('Failed to save global variables to content:', error instanceof Error ? error.message : String(error));
                 throw error
             }
         }
@@ -238,8 +247,8 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
                 const response = await api.put(`/admin/ja/themes/${activeTheme.value}/settings`, { settings: newSettings })
                 themeSettings.value = newSettings
                 return response.data
-            } catch (error: any) {
-                console.error('Failed to save global variables to theme:', error)
+            } catch (error: unknown) {
+                logger.error('Failed to save global variables to theme:', error instanceof Error ? error.message : String(error));
                 throw error
             }
         }
@@ -260,8 +269,8 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
             categories.value = ensureArray(catsRes)
             availableTags.value = ensureArray(tagsRes)
             menus.value = ensureArray(menusRes)
-        } catch (error) {
-            console.error('Failed to fetch builder metadata:', error)
+        } catch (error: unknown) {
+            logger.error('Failed to fetch builder metadata:', error instanceof Error ? error.message : String(error));
         }
     }
 
@@ -271,8 +280,8 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
             const response = await api.get('/admin/ja/themes')
             const data = response.data?.data || response.data
             availableThemes.value = Array.isArray(data) ? data : (data.data || [])
-        } catch (error) {
-            console.error('Failed to fetch themes:', error)
+        } catch (error: unknown) {
+            logger.error('Failed to fetch themes:', error instanceof Error ? error.message : String(error));
         } finally {
             loadingThemes.value = false
         }
@@ -285,9 +294,9 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
             if (autoSave.value && content.value.id) {
                 try {
                     await saveContent()
-                    console.log('[Auto-save] Content saved')
-                } catch (e) {
-                    console.error('[Auto-save] Failed:', e)
+                    logger.info('[Auto-save] Content saved')
+                } catch (e: unknown) {
+                    logger.error('[Auto-save] Failed:', e instanceof Error ? e.message : String(e));
                 }
             }
         }, 60000)
@@ -304,8 +313,8 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         try {
             await api.put(`/admin/ja/themes/${themeSlug}/settings`, { settings })
             themeSettings.value = { ...settings }
-        } catch (error) {
-            console.error('Failed to update theme settings:', error)
+        } catch (error: unknown) {
+            logger.error('Failed to update theme settings:', error instanceof Error ? error.message : String(error));
             throw error
         }
     }
@@ -317,8 +326,8 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
             })
             const data = response.data?.data || response.data
             return data.data || data || []
-        } catch (error) {
-            console.error('Failed to fetch templates:', error)
+        } catch (error: unknown) {
+            logger.error('Failed to fetch templates:', error instanceof Error ? error.message : String(error));
             return []
         }
     }
@@ -335,8 +344,8 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
             }
             const response = await api.post('/admin/ja/contents', payload)
             return response.data?.data || response.data
-        } catch (error) {
-            console.error('Failed to create template:', error)
+        } catch (error: unknown) {
+            logger.error('Failed to create template:', error instanceof Error ? error.message : String(error));
             throw error
         }
     }
@@ -345,8 +354,8 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         try {
             await api.delete(`/admin/ja/contents/${id}`)
             return true
-        } catch (error) {
-            console.error('Failed to delete template:', error)
+        } catch (error: unknown) {
+            logger.error('Failed to delete template:', error instanceof Error ? error.message : String(error));
             throw error
         }
     }
@@ -355,8 +364,8 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         try {
             const response = await api.put(`/admin/ja/contents/${id}`, { meta })
             return response.data?.data || response.data
-        } catch (error) {
-            console.error('Failed to update content meta:', error)
+        } catch (error: unknown) {
+            logger.error('Failed to update content meta:', error instanceof Error ? error.message : String(error));
             throw error
         }
     }

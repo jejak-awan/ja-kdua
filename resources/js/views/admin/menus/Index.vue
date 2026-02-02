@@ -51,6 +51,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
@@ -59,12 +60,14 @@ import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
 import MenuBuilder from '../../../components/menus/MenuBuilder.vue';
 import MenuModal from '../../../components/menus/MenuModal.vue';
-import Button from '../../../components/ui/button.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
+import { 
+    Button, 
+    Select, 
+    SelectTrigger, 
+    SelectValue, 
+    SelectContent, 
+    SelectItem 
+} from '@/components/ui';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
@@ -134,7 +137,7 @@ const fetchMenus = async () => {
             selectedMenuId.value = null;
         }
     } catch (error: any) {
-        console.error('Failed to fetch menus:', error);
+        logger.error('Failed to fetch menus:', error);
         toast.error.action(t('features.menus.messages.loadingFailed') || 'Failed to load menus');
     } finally {
         isLoading.value = false;
@@ -190,7 +193,7 @@ const deleteCurrentMenu = async () => {
         selectedMenuId.value = null;
         await fetchMenus();
     } catch (error: any) {
-        console.error('Error deleting menu:', error);
+        logger.error('Error deleting menu:', error);
         toast.error.delete(error, t('features.menus.title'));
     }
 };
@@ -212,7 +215,7 @@ const restoreCurrentMenu = async () => {
         toast.success.restore('Menu');
         await fetchMenus();
     } catch (error: any) {
-         console.error('Error restoring menu:', error);
+         logger.error('Error restoring menu:', error);
         toast.error.fromResponse(error);
     }
 };

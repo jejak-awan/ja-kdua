@@ -100,6 +100,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue'
@@ -134,7 +135,7 @@ onMounted(async () => {
     const response = await api.get('/cms/contents/about')
     pageData.value = response.data.data
   } catch (error) {
-    console.error('Failed to fetch about page:', error)
+    logger.error('Failed to fetch about page:', error)
   } finally {
     loading.value = false
   }

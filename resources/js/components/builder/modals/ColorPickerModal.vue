@@ -290,9 +290,9 @@
                   v-for="color in globalColors" 
                   :key="color.id"
                   class="color-sq"
-                  :style="{ backgroundColor: color.value }"
+                  :style="{ backgroundColor: (color.value as string) }"
                   :title="color.name"
-                  @click="selectPreset(color.value)"
+                  @click="selectPreset(color.value as string)"
               >
                   <div class="global-corner"></div>
               </div>
@@ -308,9 +308,9 @@
                   v-for="color in globalColors" 
                   :key="color.id"
                   class="global-list-item"
-                  @click="selectPreset(color.value)"
+                  @click="selectPreset(color.value as string)"
               >
-                  <div class="color-preview-sm" :style="{ backgroundColor: color.value }">
+                  <div class="color-preview-sm" :style="{ backgroundColor: (color.value as string) }">
                       <div class="global-corner-sm"></div>
                   </div>
                   <span class="color-name">{{ color.name }}</span>
@@ -344,11 +344,11 @@ import List from 'lucide-vue-next/dist/esm/icons/list.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
 import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
-import { parseColor, hsvToRgb, rgbToHex, rgbToHsv, hexToRgb } from '../core/colorUtils';
-import { themeVariables, toCssVarName } from '../core/cssVariables';
-import { BaseModal, BaseColorSlider } from '../ui';
-import { MATERIAL_COLORS } from '../core/MaterialColors';
-import type { BuilderInstance } from '../../../types/builder';
+import { parseColor, hsvToRgb, rgbToHex, rgbToHsv, hexToRgb } from '@/components/builder/core/colorUtils';
+import { themeVariables, toCssVarName } from '@/components/builder/core/cssVariables';
+import { BaseModal, BaseColorSlider } from '@/components/builder/ui';
+import { MATERIAL_COLORS } from '@/components/builder/core/MaterialColors';
+import type { BuilderInstance } from '@/types/builder';
 
 // Props
 interface Props {

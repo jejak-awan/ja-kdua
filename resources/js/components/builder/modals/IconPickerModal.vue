@@ -79,9 +79,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
-import { BaseModal, BaseInput, BaseButton } from '../ui';
-import LucideIcon from '../../ui/LucideIcon.vue';
-import { allIcons, categories } from '../../../shared/assets/icons';
+import { BaseModal, BaseInput, BaseButton } from '@/components/builder/ui';
+import { LucideIcon } from '@/components/ui';
+import { allIcons, categories } from '@/shared/assets/icons';
 
 interface Props {
   value?: string;

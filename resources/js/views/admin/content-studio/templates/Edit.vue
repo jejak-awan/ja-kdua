@@ -147,6 +147,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -156,19 +157,8 @@ import { useFormValidation } from '../../../../composables/useFormValidation';
 import { contentTemplateSchema } from '../../../../schemas';
 import { parseSingleResponse } from '../../../../utils/responseParser';
 import type { ContentTemplate } from '../../../../types/cms';
-import Card from '../../../../components/ui/card.vue';
-import CardHeader from '../../../../components/ui/card-header.vue';
-import CardTitle from '../../../../components/ui/card-title.vue';
-import CardContent from '../../../../components/ui/card-content.vue';
-import Button from '../../../../components/ui/button.vue';
-import Input from '../../../../components/ui/input.vue';
-import Label from '../../../../components/ui/label.vue';
-import Textarea from '../../../../components/ui/textarea.vue';
-import Select from '../../../../components/ui/select.vue';
-import SelectTrigger from '../../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../../components/ui/select-value.vue';
-import SelectContent from '../../../../components/ui/select-content.vue';
-import SelectItem from '../../../../components/ui/select-item.vue';
+import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea } from '@/components/ui';
+
 import TiptapEditor from '@/components/editor/TiptapEditor.vue';
 import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js';
 import Save from 'lucide-vue-next/dist/esm/icons/save.js';
@@ -221,7 +211,7 @@ const fetchTemplate = async () => {
         // Save initial state for dirty checking
         initialForm.value = JSON.parse(JSON.stringify(form.value));
     } catch (error: any) {
-        console.error('Failed to fetch template:', error);
+        logger.error('Failed to fetch template:', error);
         toast.error.load(error);
         router.push({ name: 'content-studio', query: { tab: 'templates' } });
     } finally {

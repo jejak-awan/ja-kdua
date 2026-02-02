@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -12,7 +13,6 @@ export function useSessionTimeout() {
     const authStore = useAuthStore();
 
     // Session configuration (in seconds)
-    // @ts-expect-error: Internal type mismatch
     const SESSION_LIFETIME = parseInt(import.meta.env.VITE_SESSION_LIFETIME || '28800'); // 8 hours default
     const WARNING_TIME = 300; // Show warning 5 minutes before expiry
 
@@ -230,7 +230,7 @@ export function useSessionTimeout() {
             startWarningTimer();
 
         } catch (error) {
-            console.error('Failed to extend session:', error);
+            logger.error('Failed to extend session:', error);
             // If extend fails, likely session already expired
             handleTimeout();
         }

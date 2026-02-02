@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onBeforeUnmount, reactive, nextTick } from 'vue';
+import { ref, watch, onBeforeUnmount, reactive, nextTick, type Component } from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3';
 import { useI18n } from 'vue-i18n';
 import StarterKit from '@tiptap/starter-kit';
@@ -111,6 +111,8 @@ import { CodeBlockWithCopyExtension } from '@/components/editor/extensions/CodeB
 import { HtmlEmbed } from '@/components/editor/extensions/HtmlEmbedExtension';
 import { Icon } from '@/components/editor/extensions/IconExtension';
 
+import type { Media } from '@/types/media';
+
 import { createLowlight } from 'lowlight';
 import javascript from 'highlight.js/lib/languages/javascript';
 import typescript from 'highlight.js/lib/languages/typescript';
@@ -140,26 +142,32 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     modelValue: '',
     placeholder: 'Start writing...'
-})
+});
 
 const emit = defineEmits<{
     (e: 'update:modelValue', value: string): void;
-}>()
+}>();
 
-const showMediaPicker = ref(false)
-const showTableDialog = ref(false)
-const showHtmlView = ref(false)
-const htmlContent = ref('')
+const showMediaPicker = ref(false);
+const showTableDialog = ref(false);
+const showHtmlView = ref(false);
+const htmlContent = ref('');
 
 // Properties Popover State
-const showPropertiesModal = ref(false)
-const selectedNodeForProperties = ref<any>(null)
-const propertiesAnchor = ref<HTMLElement | null>(null)
+interface SelectedNode {
+    type: string;
+    pos: number;
+    attrs: Record<string, unknown>;
+}
+
+const showPropertiesModal = ref(false);
+const selectedNodeForProperties = ref<SelectedNode | null>(null);
+const propertiesAnchor = ref<HTMLElement | null>(null);
 
 // Context Menu State
 interface ContextMenuItem {
     label?: string;
-    icon?: any;
+    icon?: Component;
     action?: string;
     type?: string;
 }
@@ -170,7 +178,7 @@ const contextMenu = reactive({
     y: 0,
     items: [] as ContextMenuItem[],
     position: { x: 0, y: 0 }
-})
+});
 
 // Create lowlight instance
 const { t } = useI18n()
@@ -254,57 +262,56 @@ const editor = useEditor({
 
 // Sync content
 watch(() => props.modelValue, (newValue) => {
-    const isSame = editor.value?.getHTML() === newValue
+    const isSame = editor.value?.getHTML() === newValue;
     if (editor.value && !isSame) {
-        editor.value.commands.setContent(newValue, { emitUpdate: false })
+        editor.value.commands.setContent(newValue, { emitUpdate: false });
     }
-})
+});
 
-// Media Handlers
-function handleMediaSelect(media: any) {
-    const url = media?.url || media?.path || media?.file_url
+function handleMediaSelect(media: Media) {
+    const url = media?.url || media?.path;
     if (url && editor.value) {
         editor.value.chain().focus().setImage({ 
             src: url, 
             alt: media?.alt || media?.name || '' 
-        }).run()
+        }).run();
     }
-    showMediaPicker.value = false
+    showMediaPicker.value = false;
 }
 
 function openProperties() {
     if (!editor.value) return;
     
-    let type = 'image'
-    if (editor.value.isActive('video')) type = 'video'
-    else if (editor.value.isActive('htmlEmbed')) type = 'htmlEmbed'
-    else if (editor.value.isActive('icon')) type = 'icon'
+    let type = 'image';
+    if (editor.value.isActive('video')) type = 'video';
+    else if (editor.value.isActive('htmlEmbed')) type = 'htmlEmbed';
+    else if (editor.value.isActive('icon')) type = 'icon';
 
     // Get current selection position
-    const { from } = editor.value.state.selection
+    const { from } = editor.value.state.selection;
 
     selectedNodeForProperties.value = {
         type,
         pos: from,
-        attrs: editor.value.getAttributes(type)
-    }
+        attrs: editor.value.getAttributes(type) as Record<string, unknown>
+    };
     
     // Get DOM element for anchoring
-    const dom = editor.value.view.nodeDOM(from)
-    propertiesAnchor.value = dom instanceof HTMLElement ? dom : null
+    const dom = editor.value.view.nodeDOM(from);
+    propertiesAnchor.value = dom instanceof HTMLElement ? dom : null;
     
-    showPropertiesModal.value = true
+    showPropertiesModal.value = true;
 }
 
-function saveMediaProperties(properties: any) {
+function saveMediaProperties(properties: Record<string, unknown>) {
     if (!editor.value || !selectedNodeForProperties.value) return;
     
-    const { pos } = selectedNodeForProperties.value
+    const { pos } = selectedNodeForProperties.value;
     // Use setNodeMarkup to update specific node by position, keeping focus in popover
     editor.value.chain().command(({ tr }) => {
-        tr.setNodeMarkup(pos, undefined, properties)
-        return true
-    }).run()
+        tr.setNodeMarkup(pos, undefined, properties as any);
+        return true;
+    }).run();
 }
 
 // Table Handlers
@@ -384,7 +391,6 @@ const handleContextMenu = (e: MouseEvent) => {
     if (items.length === 0) return
 
     contextMenu.position = { x: e.clientX, y: e.clientY }
-    // @ts-expect-error: Internal type mismatch
     contextMenu.items = items
     contextMenu.show = true
 }

@@ -257,6 +257,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { h, ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -269,28 +270,8 @@ import {
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
-import Card from '../../../components/ui/card.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
-import Pagination from '../../../components/ui/pagination.vue';
-import Dialog from '../../../components/ui/dialog.vue';
-import DialogContent from '../../../components/ui/dialog-content.vue';
-import DialogHeader from '../../../components/ui/dialog-header.vue';
-import DialogTitle from '../../../components/ui/dialog-title.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
-import Table from '../../../components/ui/table.vue';
-import TableHeader from '../../../components/ui/table-header.vue';
-import TableBody from '../../../components/ui/table-body.vue';
-import TableRow from '../../../components/ui/table-row.vue';
-import TableCell from '../../../components/ui/table-cell.vue';
-import TableHead from '../../../components/ui/table-head.vue';
-import BackToTop from '../../../components/ui/back-to-top.vue';
+import { BackToTop, Badge, Button, Card, Checkbox, Dialog, DialogContent, DialogHeader, DialogTitle, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
+
 import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
 import Download from 'lucide-vue-next/dist/esm/icons/download.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
@@ -477,7 +458,7 @@ const fetchForm = async () => {
         const response = await api.get(`/admin/ja/forms/${formId.value}`);
         form.value = response.data?.data || response.data;
     } catch (error: any) {
-        console.error('Error fetching form:', error);
+        logger.error('Error fetching form:', error);
     }
 };
 
@@ -514,7 +495,7 @@ const fetchSubmissions = async (page = 1) => {
         };
         table.resetRowSelection();
     } catch (error: any) {
-        console.error('Error fetching submissions:', error);
+        logger.error('Error fetching submissions:', error);
     } finally {
         loading.value = false;
     }
@@ -525,7 +506,7 @@ const fetchStatistics = async () => {
         const response = await api.get(`/admin/ja/forms/${formId.value}/submissions/statistics`);
         statistics.value = response.data?.data || response.data;
     } catch (error: any) {
-        console.error('Error fetching statistics:', error);
+        logger.error('Error fetching statistics:', error);
     }
 };
 
@@ -551,7 +532,7 @@ const markAsRead = async (submission: any, refresh = true) => {
             submission.status = 'read';
         }
     } catch (error: any) {
-        console.error('Error marking as read:', error);
+        logger.error('Error marking as read:', error);
     }
 };
 
@@ -561,7 +542,7 @@ const archiveSubmission = async (submission: any) => {
         fetchSubmissions(pagination.value?.current_page || 1);
         fetchStatistics();
     } catch (error: any) {
-        console.error('Error archiving submission:', error);
+        logger.error('Error archiving submission:', error);
     }
 };
 
@@ -582,7 +563,7 @@ const deleteSubmission = async (submission: any) => {
         fetchStatistics();
         table.resetRowSelection();
     } catch (error: any) {
-        console.error('Error deleting submission:', error);
+        logger.error('Error deleting submission:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -598,7 +579,7 @@ const handleBulkMarkRead = async () => {
         fetchSubmissions(pagination.value?.current_page || 1);
         fetchStatistics();
     } catch (error: any) {
-        console.error('Error in bulk mark read:', error);
+        logger.error('Error in bulk mark read:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -622,7 +603,7 @@ const handleBulkArchive = async () => {
         fetchSubmissions(pagination.value?.current_page || 1);
         fetchStatistics();
     } catch (error: any) {
-        console.error('Error in bulk archive:', error);
+        logger.error('Error in bulk archive:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -646,7 +627,7 @@ const handleBulkDelete = async () => {
         fetchSubmissions(pagination.value?.current_page || 1);
         fetchStatistics();
     } catch (error: any) {
-        console.error('Error in bulk delete:', error);
+        logger.error('Error in bulk delete:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -680,7 +661,7 @@ const exportSubmissions = async () => {
         document.body.removeChild(link);
         toast.success.default(t('features.forms.submissions.messages.exportSuccess'));
     } catch (error: any) {
-        console.error('Error exporting submissions:', error);
+        logger.error('Error exporting submissions:', error);
         toast.error.fromResponse(error);
     }
 };

@@ -3,7 +3,7 @@
  * Total: 82 modules
  */
 
-import ModuleRegistry from '../core/ModuleRegistry'
+import ModuleRegistry from '@/components/builder/core/ModuleRegistry'
 
 // Bulk import all modules using glob
 const moduleFiles = import.meta.glob([

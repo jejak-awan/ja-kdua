@@ -26,7 +26,7 @@
     <!-- Extra Actions (Media / AI) -->
     <div class="extra-actions">
         <button class="action-btn" @click="$emit('add-media')">
-            <Image :size="12" /> Add Media
+            <LucideImage :size="12" /> Add Media
         </button>
         <button class="action-btn ai-btn">
              <Sparkles :size="12" /> Generate with AI
@@ -56,8 +56,12 @@
 
 <script setup lang="ts">
 import { ref, watch, onBeforeUnmount, onMounted } from 'vue'
-import Image from 'lucide-vue-next/dist/esm/icons/image.js';
-import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';import { Editor, EditorContent } from '@tiptap/vue-3'
+import LucideImage from 'lucide-vue-next/dist/esm/icons/image.js';
+import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
+import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import { BaseLabel, BaseToggle } from '@/components/builder/ui'
+import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { Underline } from '@tiptap/extension-underline'
 import { TextStyle } from '@tiptap/extension-text-style'
@@ -66,9 +70,11 @@ import { TextAlign } from '@tiptap/extension-text-align'
 import { Link } from '@tiptap/extension-link'
 import { Image as ImageExt } from '@tiptap/extension-image'
 
-import RichtextToolbar from './RichtextToolbar.vue'
+import RichtextToolbar from '@/components/builder/fields/RichtextToolbar.vue'
+import type { SettingDefinition } from '@/types/builder'
 
 const props = defineProps<{
+  field?: SettingDefinition;
   value?: string;
   label?: string;
 }>()
@@ -77,7 +83,7 @@ const emit = defineEmits(['update:value', 'add-media'])
 
 const mode = ref('visual') // visual | text
 const isFocused = ref(false)
-const rawHtml = ref(props.value)
+const rawHtml = ref(props.value || '')
 const editor = ref<Editor | undefined>()
 
 // Initialize Tiptap
@@ -136,7 +142,6 @@ const setMode = (m: string) => {
 }
 
 const updateFromRaw = () => {
-    // Debounce emission if needed, but for now direct
     emit('update:value', rawHtml.value)
 }
 </script>

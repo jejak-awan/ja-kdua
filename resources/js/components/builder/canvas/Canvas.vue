@@ -58,13 +58,14 @@
 
 <script setup lang="ts">
 import { computed, inject, watch, onMounted } from 'vue'
-import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';import { useI18n } from 'vue-i18n'
-// @ts-expect-error: Internal type mismatch
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js'
+import { useI18n } from 'vue-i18n'
 import draggable from 'vuedraggable'
 import ModuleWrapper from './ModuleWrapper.vue'
 import CanvasGridView from './CanvasGridView.vue'
 import ThemePageResolver from '@/components/shared/ThemePageResolver.vue'
-import type { BuilderInstance, BlockInstance } from '../../../types/builder'
+import type { BuilderInstance, BlockInstance } from '@/types/builder'
+import type { ThemeData } from '@/types/theme'
 
 // Inject builder
 const builder = inject<BuilderInstance>('builder')
@@ -114,12 +115,13 @@ const injectThemeStyles = () => {
     const variables: string[] = []
     const builderOverrides: string[] = []
     const settings = builder.themeSettings.value || {}
-    const manifest = (builder.themeData.value as any).manifest || {}
+    const themeDataValue = builder.themeData.value as ThemeData
+    const manifest = themeDataValue?.manifest || {}
     const themeSlug = builder.activeTheme.value || 'janari'
 
     if (manifest.settings_schema) {
         Object.keys(manifest.settings_schema).forEach(key => {
-            const schema = manifest.settings_schema[key]
+            const schema = manifest.settings_schema![key]
             const value = settings[key] !== undefined ? settings[key] : schema.default
             
             if (value === undefined || value === null) return
@@ -179,9 +181,8 @@ const injectThemeStyles = () => {
     `
     styleTag.textContent = cssContent
 
-    const themeData = builder.themeData.value as any
-    if (themeData.assets && themeData.assets.css) {
-        themeData.assets.css.forEach((cssFile: string, index: number) => {
+    if (themeDataValue?.assets && themeDataValue.assets.css) {
+        themeDataValue.assets.css.forEach((cssFile: string, index: number) => {
             const linkId = `builder-theme-asset-${index}`
             if (!document.getElementById(linkId)) {
                 const link = document.createElement('link')

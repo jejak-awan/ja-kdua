@@ -85,6 +85,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
@@ -173,7 +174,7 @@ const handleResize = async () => {
         toast.success.action(t('features.media.modals.resize.success') || 'Image resized successfully');
         emit('resized');
     } catch (error: any) {
-        console.error('Failed to resize media:', error);
+        logger.error('Failed to resize media:', error);
         toast.error.fromResponse(error);
     } finally {
         resizing.value = false;

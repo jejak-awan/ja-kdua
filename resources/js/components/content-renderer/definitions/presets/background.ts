@@ -157,7 +157,7 @@ export const backgroundSettings: SettingDefinition[] = [
         type: 'color',
         label: 'Overlay Color',
         default: 'rgba(0, 0, 0, 0.5)',
-        condition: (settings) => settings.overlayEnabled,
+        condition: (settings) => !!settings.overlayEnabled,
         tab: 'style'
     },
     {
@@ -168,7 +168,7 @@ export const backgroundSettings: SettingDefinition[] = [
         max: 100,
         step: 5,
         default: 50,
-        condition: (settings) => settings.overlayEnabled,
+        condition: (settings) => !!settings.overlayEnabled,
         tab: 'style'
     }
 ];

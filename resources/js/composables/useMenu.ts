@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { ref, computed, watch, provide, inject, type InjectionKey, type Ref } from 'vue';
 import api from '../services/api';
 import { parseResponse, ensureArray, parseSingleResponse } from '../utils/responseParser';
@@ -65,7 +66,7 @@ const fetchMenuByLocation = async (location: string) => {
         menus.value[location] = parseSingleResponse(response) as Menu;
     } catch (err) {
         // Silent fail for frontend menus to avoid crashing app
-        console.warn(`Failed to fetch menu for location: ${location}`, err);
+        logger.warning(`Failed to fetch menu for location: ${location}`, err);
     }
 };
 
@@ -457,7 +458,7 @@ export function useMenu(menuId?: Ref<number | string | null>) {
             takeSnapshot();
 
         } catch (err) {
-            console.error('Failed to fetch menu:', err);
+            logger.error('Failed to fetch menu:', err);
             error.value = err;
         } finally {
             isLoading.value = false;
@@ -491,7 +492,7 @@ export function useMenu(menuId?: Ref<number | string | null>) {
 
             return true;
         } catch (err) {
-            console.error('Failed to save menu:', err);
+            logger.error('Failed to save menu:', err);
             error.value = err;
             return false;
         } finally {

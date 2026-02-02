@@ -76,13 +76,15 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CheckCircle from 'lucide-vue-next/dist/esm/icons/circle-check.js';
 import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
-import Check from 'lucide-vue-next/dist/esm/icons/check.js';import api from '../../services/api'
-import Button from '../ui/button.vue'
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import api from '@/services/api'
+import { Button } from '@/components/ui'
 
 const { t } = useI18n()
 
@@ -108,7 +110,7 @@ const generateCaptcha = async () => {
         verified.value = false
         error.value = ''
     } catch (e) {
-        console.error('Failed to generate captcha:', e)
+        logger.error('Failed to generate captcha:', e)
         error.value = 'Failed to load captcha'
     }
 }
@@ -132,7 +134,7 @@ const verify = async () => {
              answer.value = '' // Clear incorrect answer
         } else {
              error.value = 'Validation failed'
-             console.error('Image captcha error:', e)
+             logger.error('Image captcha error:', e)
         }
     }
 }

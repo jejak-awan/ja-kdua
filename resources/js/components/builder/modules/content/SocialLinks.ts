@@ -18,7 +18,7 @@ import {
     attributesSettings,
     adminLabelSettings,
     layoutSettings
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Social Links Module Definition

@@ -105,6 +105,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -162,7 +163,7 @@ const fetchLogFiles = async () : Promise<void> => {
         const { data } = parseResponse<LogFile[]>(response);
         logFiles.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch log files:', error);
+        logger.error('Failed to fetch log files:', error);
         logFiles.value = [];
     }
 };
@@ -175,7 +176,7 @@ const selectLogFile = async (logFile: LogFile) : Promise<void> => {
         const data = parseSingleResponse<LogResponse>(response) || { content: '' };
         logContent.value = data.content || '';
     } catch (error: any) {
-        console.error('Failed to fetch log content:', error);
+        logger.error('Failed to fetch log content:', error);
         logContent.value = t('features.system.logs.failed_load') || 'Failed to load log content';
     } finally {
         loadingLog.value = false;
@@ -202,7 +203,7 @@ const downloadLog = async (logFile: LogFile) : Promise<void> => {
         link.remove();
         window.URL.revokeObjectURL(url);
     } catch (error: any) {
-        console.error('Failed to download logs:', error.message);
+        logger.error('Failed to download logs:', error.message);
         toast.error.fromResponse(error);
     }
 };
@@ -224,7 +225,7 @@ const clearLogs = async () : Promise<void> => {
         logContent.value = '';
         fetchLogFiles();
     } catch (error: any) {
-        console.error('Failed to clear logs:', error.message);
+        logger.error('Failed to clear logs:', error.message);
         toast.error.fromResponse(error);
     } finally {
         clearing.value = false;

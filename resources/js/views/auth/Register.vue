@@ -94,6 +94,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -171,7 +172,7 @@ onMounted(async () => {
             return;
         }
     } catch (error) {
-        console.error('Failed to check registration status:', error);
+        logger.error('Failed to check registration status:', error);
         // Allow registration if we can't check settings (fail-open)
     } finally {
         checkingSettings.value = false;

@@ -342,6 +342,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -350,16 +351,8 @@ import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import Submissions from './Submissions.vue';
-import Card from '../../../components/ui/card.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
+import { Badge, Button, Card, Checkbox, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
+
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import LayoutGrid from 'lucide-vue-next/dist/esm/icons/layout-grid.js';
@@ -444,7 +437,7 @@ const fetchForms = async () => {
         const { data } = parseResponse<Form>(response);
         forms.value = ensureArray<Form>(data);
     } catch (error: any) {
-        console.error('Error fetching forms:', error);
+        logger.error('Error fetching forms:', error);
         forms.value = [];
     } finally {
         loading.value = false;
@@ -471,7 +464,7 @@ const toggleFormStatus = async (form: Form) => {
         }
         toast.success.action(t('common.messages.success.updated', { item: 'Form status' }));
     } catch (error: any) {
-        console.error('Error toggling form status:', error);
+        logger.error('Error toggling form status:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -491,7 +484,7 @@ const deleteForm = async (form: Form) => {
         toast.success.delete('Form');
         fetchForms();
     } catch (error: any) {
-        console.error('Failed to delete form:', error);
+        logger.error('Failed to delete form:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -517,7 +510,7 @@ const bulkDelete = async () => {
         selectedIds.value = [];
         fetchForms();
     } catch (error: any) {
-        console.error('Failed to bulk delete forms:', error);
+        logger.error('Failed to bulk delete forms:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -528,7 +521,7 @@ const duplicateForm = async (form: Form) => {
         toast.success.duplicate('Form');
         fetchForms();
     } catch (error: any) {
-        console.error('Failed to duplicate form:', error);
+        logger.error('Failed to duplicate form:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -548,7 +541,7 @@ const restoreForm = async (form: Form) => {
         toast.success.restore('Form');
         fetchForms();
     } catch (error: any) {
-        console.error('Failed to restore form:', error);
+        logger.error('Failed to restore form:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -568,7 +561,7 @@ const forceDeleteForm = async (form: Form) => {
         toast.success.action(t('common.messages.success.deleted', { item: 'Form' }));
         fetchForms();
     } catch (error: any) {
-        console.error('Failed to force delete form:', error);
+        logger.error('Failed to force delete form:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -640,7 +633,7 @@ const performBulkAction = async (action: any) => {
         selectedIds.value = [];
         fetchForms();
     } catch (error: any) {
-        console.error('Failed to bulk action forms:', error);
+        logger.error('Failed to bulk action forms:', error);
         toast.error.fromResponse(error);
     }
 };

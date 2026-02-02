@@ -1,5 +1,5 @@
-import * as SharedStyles from '../../shared/utils/styleUtils'
-import { generateUUID as sharedGenerateUUID } from '../../shared/utils/uuid'
+import * as SharedStyles from '@/shared/utils/styleUtils'
+import { generateUUID as sharedGenerateUUID } from '@/shared/utils/uuid'
 
 /**
  * Content Renderer Utilities - Proxying to Shared Logic

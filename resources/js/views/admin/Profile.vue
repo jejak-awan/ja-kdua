@@ -168,17 +168,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, type Ref } from 'vue';
+import { logger } from '@/utils/logger';
+import { ref, onMounted, computed, defineAsyncComponent, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../services/api';
-import toast from '../../services/toast';
-import { useAuthStore } from '../../stores/auth';
-// TODO: Migrate components
-import LoginHistory from '../../components/admin/LoginHistory.vue';
-// TODO: Migrate components
-import TwoFactorSettings from '../../components/admin/TwoFactorSettings.vue';
-// TODO: Migrate components
-import MediaPicker from '@/components/media/MediaPicker.vue';
+import api from '@/services/api';
+import toast from '@/services/toast';
+import { useAuthStore } from '@/stores/auth';
+import { isAxiosError } from 'axios';
+
+// Standardized Async Components
+const LoginHistory = defineAsyncComponent(() => import('@/components/admin/LoginHistory.vue'));
+const TwoFactorSettings = defineAsyncComponent(() => import('@/components/admin/TwoFactorSettings.vue'));
+const MediaPicker = defineAsyncComponent(() => import('@/components/media/MediaPicker.vue'));
 
 // Shadcn Components
 // Shadcn Components
@@ -198,7 +199,8 @@ import {
     Textarea,
     Avatar,
     AvatarImage,
-    AvatarFallback
+    AvatarFallback,
+    Separator
 } from '@/components/ui';
 
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
@@ -208,10 +210,6 @@ import KeyRound from 'lucide-vue-next/dist/esm/icons/key-round.js';
 import ShieldCheck from 'lucide-vue-next/dist/esm/icons/shield-check.js';
 import History from 'lucide-vue-next/dist/esm/icons/history.js';
 
-// Simple Separator Component (Functional)
-const Separator = { // Minimal local component or just use div
-  template: '<div class="h-px bg-border w-full" />'
-}
 
 interface ProfileForm {
     name: string;
@@ -240,7 +238,7 @@ const profileForm: Ref<ProfileForm> = ref({
     avatar: null,
 });
 
-const initialProfileForm: Ref<ProfileForm | null> = ref<any>(null);
+const initialProfileForm = ref<ProfileForm | null>(null);
 
 const passwordForm = ref({
     current_password: '',
@@ -286,8 +284,8 @@ const fetchProfile = async () => {
             };
             initialProfileForm.value = JSON.parse(JSON.stringify(profileForm.value));
         }
-    } catch (error: any) {
-        console.error('Error fetching profile:', error);
+    } catch (error: unknown) {
+        logger.error('Error fetching profile:', error);
         toast.error(t('common.messages.error.default'));
     }
 };
@@ -299,8 +297,11 @@ const updateProfile = async () => {
         toast.success(t('features.profile.messages.updateSuccess'));
         await authStore.fetchUser();
         await fetchProfile(); // Re-fetch to update initial state
-    } catch (error: any) {
-        const msg = error.response?.data?.message || t('features.profile.messages.updateFailed');
+    } catch (error: unknown) {
+        let msg = t('features.profile.messages.updateFailed');
+        if (isAxiosError(error)) {
+            msg = error.response?.data?.message || msg;
+        }
         toast.error(msg);
     } finally {
         saving.value = false;
@@ -317,8 +318,11 @@ const updatePassword = async () => {
             password: '',
             password_confirmation: '',
         };
-    } catch (error: any) {
-        const msg = error.response?.data?.message || t('features.profile.messages.passwordFailed');
+    } catch (error: unknown) {
+        let msg = t('features.profile.messages.passwordFailed');
+        if (isAxiosError(error)) {
+            msg = error.response?.data?.message || msg;
+        }
         toast.error(msg);
     } finally {
         changingPassword.value = false;

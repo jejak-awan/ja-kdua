@@ -93,7 +93,9 @@
 <script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import Droplets from 'lucide-vue-next/dist/esm/icons/droplets.js';import { BaseLabel, BaseSliderInput, BaseCollapsible } from '../ui'
+import Droplets from 'lucide-vue-next/dist/esm/icons/droplets.js';
+import { BaseLabel, BaseSliderInput, BaseCollapsible, BaseSegmentedControl } from '@/components/builder/ui'
+import type { SettingDefinition } from '@/types/builder'
 
 interface FilterState {
   opacity: number;
@@ -109,9 +111,9 @@ interface FilterState {
 }
 
 const props = defineProps<{
-  field: any;
-  value: FilterState;
-  placeholderValue?: FilterState | null;
+  field?: SettingDefinition;
+  value: Record<string, any>;
+  placeholderValue?: any;
 }>()
 
 const emit = defineEmits(['update:value'])

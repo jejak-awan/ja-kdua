@@ -6,7 +6,7 @@
       :min="field.min"
       :max="field.max"
       :step="field.step || 1"
-      :placeholder="value ? '' : (placeholderValue !== null ? String(placeholderValue) : '')"
+      :placeholder="value !== undefined && value !== null ? '' : (placeholderValue !== null && placeholderValue !== undefined ? String(placeholderValue) : '')"
       class="number-input-base"
     >
       <template #suffix v-if="showUnit">
@@ -24,12 +24,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { CSS_UNITS } from '../core/constants'
-import { BaseInput } from '../ui'
+import { CSS_UNITS } from '@/components/builder/core/constants'
+import { BaseInput } from '@/components/builder/ui'
+import type { SettingDefinition } from '@/types/builder'
 
 const props = defineProps<{
-  field: any;
-  value: number;
+  field: SettingDefinition;
+  value?: number | null;
   unit?: string;
   placeholderValue?: number | null;
 }>()
@@ -37,12 +38,12 @@ const props = defineProps<{
 const emit = defineEmits(['update:value', 'update:unit'])
 
 const internalValue = computed({
-  get: () => props.value,
-  set: (val) => emit('update:value', Number(val))
+  get: () => props.value ?? '',
+  set: (val: string | number) => emit('update:value', val === '' ? null : Number(val))
 })
 
-const showUnit = computed(() => props.field.unit !== false)
-const units = computed(() => props.field.units || CSS_UNITS)
+const showUnit = computed(() => (props.field.unit as unknown) !== false)
+const units = computed(() => (props.field.units as string[]) || CSS_UNITS)
 </script>
 
 <style scoped>

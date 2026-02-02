@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import type { BuilderInstance } from '../../../types/builder'
+import type { BuilderInstance } from '@/types/builder'
 
 interface Props {
   device?: 'desktop' | 'tablet' | 'mobile';

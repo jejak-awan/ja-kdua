@@ -19,7 +19,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     layoutSettings
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Team Member Module Definition

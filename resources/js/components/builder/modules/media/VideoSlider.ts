@@ -19,7 +19,7 @@ import {
     attributesSettings,
     layoutSettings,
     adminLabelSettings,
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Video Slider Module Definition

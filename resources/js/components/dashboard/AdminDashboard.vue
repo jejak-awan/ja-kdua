@@ -124,9 +124,9 @@
                         </div>
                         <LineChart
                             v-else-if="visitsDesktop.length > 0"
-                            :data="visitsDesktop"
+                            :data="(visitsDesktop as any[])"
                             label="Desktop"
-                            :compare-data="visitsMobile"
+                            :compare-data="(visitsMobile as any[])"
                             compare-label="Mobile"
                         />
                          <div v-else class="h-full flex flex-col items-center justify-center text-muted-foreground space-y-2">
@@ -164,6 +164,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
@@ -223,8 +224,11 @@ const refreshDashboard = async () => {
             recentActivityWidget.value?.fetchActivities()
         ]);
     } catch (error: any) {
-        if (error.code !== 'ERR_CANCELED' && error.response?.status !== 401) {
-            console.error('Failed to refresh dashboard:', error);
+        if (error && typeof error === 'object' && 'code' in error && 'response' in error) {
+            const err = error as { code: string; response?: { status: number } };
+            if (err.code !== 'ERR_CANCELED' && err.response?.status !== 401) {
+                logger.error('Failed to refresh dashboard:', error);
+            }
         }
     } finally {
         loadingVisits.value = false;
@@ -278,8 +282,11 @@ const fetchStats = async () => {
             }
         }
     } catch (error: any) {
-        if (error.code !== 'ERR_CANCELED' && error.response?.status !== 401) {
-            console.error('Failed to fetch statistics:', error);
+        if (error && typeof error === 'object' && 'code' in error && 'response' in error) {
+            const err = error as { code: string; response?: { status: number } };
+            if (err.code !== 'ERR_CANCELED' && err.response?.status !== 401) {
+                logger.error('Failed to fetch statistics:', error);
+            }
         }
     }
 };
@@ -297,15 +304,15 @@ const fetchTraffic = async () => {
             
             visitsDesktop.value = traffic.map(item => ({
                 period: item.period,
-                visits: item.desktop_visits || item.visits || 0
+                visits: typeof item.visits === 'number' ? item.visits : Number(item.desktop_visits || 0)
             }));
             
             visitsMobile.value = traffic.map(item => ({
                 period: item.period,
-                visits: item.mobile_visits || 0
+                visits: typeof item.visits === 'number' ? 0 : Number(item.mobile_visits || 0)
             }));
         } catch (error: any) {
-             console.error('Failed to fetch traffic:', error);
+             logger.error('Failed to fetch traffic:', error);
         } finally {
             loadingVisits.value = false;
         }
@@ -331,20 +338,23 @@ const fetchTraffic = async () => {
         if (totalVisits.length > 0) {
             visitsDesktop.value = totalVisits.map(item => ({
                 period: item.period,
-                visits: Math.round((item.visits || 0) * 0.4) 
+                visits: Math.round(((item.visits as number) || 0) * 0.4) 
             }));
 
             visitsMobile.value = totalVisits.map(item => ({
                 period: item.period,
-                visits: Math.round((item.visits || 0) * 0.6)
+                visits: Math.round(((item.visits as number) || 0) * 0.6)
             }));
         } else {
              visitsDesktop.value = [];
              visitsMobile.value = [];
         }
     } catch (error: any) {
-        if (error.code !== 'ERR_CANCELED' && error.response?.status !== 401) {
-            console.error('Failed to fetch traffic samples:', error);
+        if (error && typeof error === 'object' && 'code' in error && 'response' in error) {
+            const err = error as { code: string; response?: { status: number } };
+            if (err.code !== 'ERR_CANCELED' && err.response?.status !== 401) {
+                logger.error('Failed to fetch traffic samples:', error);
+            }
         }
     } finally {
         loadingVisits.value = false;

@@ -158,9 +158,9 @@
 <script setup lang="ts">
 import { ref, computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { BaseModal, BaseInput } from '../ui';
+import { BaseModal, BaseInput } from '@/components/builder/ui';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
-import ModuleRegistry from '../core/ModuleRegistry';
+import ModuleRegistry from '@/components/builder/core/ModuleRegistry';
 import { 
     equalLayouts, 
     offsetLayouts, 
@@ -169,9 +169,9 @@ import {
     gridMultiRowPresets,
     masonryPresets,
     sidebarPresets
-} from '../constants/layouts.js';
-import { sectionTemplates } from '../templates/SectionTemplates.js';
-import { pageTemplates } from '../templates/PageTemplates.js';
+} from '@/components/builder/constants/layouts.js';
+import { sectionTemplates } from '@/components/builder/templates/SectionTemplates.js';
+import { pageTemplates } from '@/components/builder/templates/PageTemplates.js';
 import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
 import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
 import Users from 'lucide-vue-next/dist/esm/icons/users.js';
@@ -179,7 +179,7 @@ import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
 import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 import Megaphone from 'lucide-vue-next/dist/esm/icons/megaphone.js';
 import LayoutTemplate from 'lucide-vue-next/dist/esm/icons/layout-template.js';
-import type { BuilderInstance, BlockInstance } from '../../../types/builder';
+import type { BuilderInstance, BlockInstance } from '@/types/builder';
 
 interface Props {
   targetIndex?: number;

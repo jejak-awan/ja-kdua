@@ -13,7 +13,7 @@
       :collision-padding="20"
       sticky="always"
       :class="cn(
-        'p-0 overflow-hidden border-slate-200 dark:border-slate-800 shadow-xl z-[999]',
+        'p-0 overflow-hidden border-slate-200 dark:border-slate-800 shadow-xl !z-[100001]',
         props.class
       )"
       :style="{ width: typeof width === 'number' ? `${width}px` : width }"

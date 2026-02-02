@@ -36,6 +36,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -58,7 +59,7 @@ const fetchPlugins = async () => {
         const { data } = parseResponse(response);
         plugins.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch plugins:', error);
+        logger.error('Failed to fetch plugins:', error);
         toast.error.default(t('features.developer.plugins.messages.failed_fetch')); // Keep generic message or use fromResponse if applicable, but fetch usually generic
     } finally {
         loading.value = false;
@@ -77,7 +78,7 @@ const togglePlugin = async (plugin: any) => {
             toast.success.action(t('features.developer.plugins.messages.activated'));
         }
     } catch (error: any) {
-        console.error('Failed to toggle plugin:', error);
+        logger.error('Failed to toggle plugin:', error);
         toast.error.fromResponse(error);
     }
 };

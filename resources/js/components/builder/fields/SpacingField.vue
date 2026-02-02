@@ -28,7 +28,7 @@
     </div>
 
     <!-- Unit Selector -->
-    <div class="unit-selector-wrapper" v-if="field.units && field.units.length > 0">
+    <div class="unit-selector-wrapper" v-if="hasUnits">
       <BaseSegmentedControl
         :model-value="localValue.unit"
         @update:model-value="updateUnit"
@@ -42,12 +42,14 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import Link2 from 'lucide-vue-next/dist/esm/icons/link.js';import { BaseLabel, BaseInput, BaseSegmentedControl } from '../ui'
+import Link2 from 'lucide-vue-next/dist/esm/icons/link.js';
+import { BaseLabel, BaseInput, BaseSegmentedControl } from '@/components/builder/ui'
+import type { SettingDefinition } from '@/types/builder'
 
 const { t } = useI18n()
 
 const props = defineProps<{
-  field: any;
+  field: SettingDefinition;
   value: Record<string, any> | string;
   placeholderValue?: Record<string, any> | null;
 }>()
@@ -59,18 +61,20 @@ const sideKeys = ['top', 'right', 'bottom', 'left']
 const localValue = ref<Record<string, any>>({ top: 0, right: 0, bottom: 0, left: 0, unit: 'px' })
 const isLinked = ref(false)
 
+const hasUnits = computed(() => Array.isArray(props.field.units) && props.field.units.length > 0)
+
 const unitOptions = computed(() => {
-    return (props.field.units || []).map((u: string) => ({ label: u, value: u }))
+    return (props.field.units as string[] || []).map((u: string) => ({ label: u, value: u }))
 })
 
 // Sync with prop
 watch(() => props.value, (newVal) => {
   if (typeof newVal === 'object' && newVal !== null) { localValue.value = { 
-        top: newVal.top ?? 0, 
-        right: newVal.right ?? 0, 
-        bottom: newVal.bottom ?? 0, 
-        left: newVal.left ?? 0,
-        unit: newVal.unit || 'px'
+        top: (newVal as any).top ?? 0, 
+        right: (newVal as any).right ?? 0, 
+        bottom: (newVal as any).bottom ?? 0, 
+        left: (newVal as any).left ?? 0,
+        unit: (newVal as any).unit || 'px'
     }
   } else {
     localValue.value = { top: 0, right: 0, bottom: 0, left: 0, unit: 'px' }

@@ -21,7 +21,7 @@ import {
     interactionsSettings,
     scrollEffectsSettings,
     attributesSettings
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Row Module Definition

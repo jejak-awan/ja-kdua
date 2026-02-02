@@ -103,6 +103,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
@@ -135,7 +136,7 @@ const fetchTemplates = async () => {
         const { data } = parseResponse(response);
         templates.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch templates:', error);
+        logger.error('Failed to fetch templates:', error);
         templates.value = [];
     } finally {
         loading.value = false;
@@ -150,7 +151,7 @@ const previewTemplate = async (template: any) => {
             previewWindow.document.write(response.data.html || response.data);
         }
     } catch (error: any) {
-        console.error('Failed to preview template:', error);
+        logger.error('Failed to preview template:', error);
         toast.error('Error', 'Failed to preview template');
     }
 };
@@ -160,7 +161,7 @@ const sendTestEmail = async (template: any) => {
         await api.post(`/admin/ja/email-templates/${template.id}/send-test`);
         toast.success('Test email sent successfully');
     } catch (error: any) {
-        console.error('Failed to send test email:', error);
+        logger.error('Failed to send test email:', error);
         toast.error('Error', error.response?.data?.message || 'Failed to send test email');
     }
 };
@@ -180,7 +181,7 @@ const handleDelete = async (template: any) => {
         toast.success('Template deleted successfully');
         fetchTemplates();
     } catch (error: any) {
-        console.error('Failed to delete template:', error);
+        logger.error('Failed to delete template:', error);
         toast.error('Error', 'Failed to delete template');
     }
 };

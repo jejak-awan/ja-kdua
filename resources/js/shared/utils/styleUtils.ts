@@ -124,7 +124,7 @@ export function getVal(settings: ModuleSettings, key: string, device: string = '
         for (const k of tryKeys) {
             if (backgroundProps[k]) {
                 const subKey = backgroundProps[k]
-                const val = getResponsiveValue(bgObj, subKey, device)
+                const val = getResponsiveValue(bgObj as ModuleSettings, subKey, device)
                 if (val !== undefined && val !== null && val !== '') return val
             }
         }
@@ -663,7 +663,7 @@ export function getAnimationStyles(settings: ModuleSettings, device: string = 'd
 export function getVisibilityStyles(settings: ModuleSettings, device: string = 'desktop'): Record<string, any> {
     const css: Record<string, any> = {}
 
-    const visibility = settings.visibility
+    const visibility = settings.visibility as { desktop?: boolean; tablet?: boolean; mobile?: boolean } | undefined
     if (visibility && !Array.isArray(getVal(settings, 'disable_on', device))) {
         const desktop = visibility.desktop !== false
         const tablet = visibility.tablet !== undefined ? visibility.tablet !== false : desktop

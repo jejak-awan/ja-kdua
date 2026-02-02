@@ -198,6 +198,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -314,7 +315,7 @@ const fetchTags = async (page = 1) => {
             }
         }
     } catch (error: any) {
-        console.error('Failed to fetch tags:', error);
+        logger.error('Failed to fetch tags:', error);
     } finally {
         loading.value = false;
     }
@@ -367,7 +368,7 @@ const bulkDelete = async () => {
         await fetchTags(pagination.value.current_page);
         toast.success.delete('Tags');
     } catch (error: any) {
-        console.error('Bulk delete failed:', error);
+        logger.error('Bulk delete failed:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -402,7 +403,7 @@ const deleteTag = async (tag: Tag) => {
         await fetchTags();
         toast.success.delete('Tag');
     } catch (error: any) {
-        console.error('Failed to delete tag:', error);
+        logger.error('Failed to delete tag:', error);
         toast.error.delete(error, 'Tag');
     }
 };

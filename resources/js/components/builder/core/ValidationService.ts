@@ -1,11 +1,11 @@
 import { getSchemaForBlock } from './schemas'
-import SanitizationService from '../../../shared/utils/SanitizationService'
-import type { ModuleSettings } from '../../../types/builder'
+import SanitizationService from '@/shared/utils/SanitizationService'
+import type { ModuleSettings } from '@/types/builder'
 
 export interface ValidationResult {
     success: boolean;
     data: ModuleSettings;
-    errors: any | null;
+    errors: unknown | null;
 }
 
 export const ValidationService = {

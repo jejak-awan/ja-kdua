@@ -149,23 +149,15 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
 import RedirectModal from '../../../components/redirects/RedirectModal.vue';
-import Card from '../../../components/ui/card.vue';
-import CardContent from '../../../components/ui/card-content.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Table from '../../../components/ui/table.vue';
-import TableHeader from '../../../components/ui/table-header.vue';
-import TableRow from '../../../components/ui/table-row.vue';
-import TableHead from '../../../components/ui/table-head.vue';
-import TableBody from '../../../components/ui/table-body.vue';
-import TableCell from '../../../components/ui/table-cell.vue';
+import { Badge, Button, Card, CardContent, Input, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
+
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
@@ -218,7 +210,7 @@ const fetchRedirects = async () => {
             };
         }
     } catch (error: any) {
-        console.error('Failed to fetch redirects:', error);
+        logger.error('Failed to fetch redirects:', error);
     } finally {
         loading.value = false;
     }
@@ -244,7 +236,7 @@ const deleteRedirect = async (redirect: any) => {
         toast.success.delete(t('features.redirects.title'));
         fetchRedirects();
     } catch (error: any) {
-        console.error('Failed to delete redirect:', error);
+        logger.error('Failed to delete redirect:', error);
         toast.error.delete(error, t('features.redirects.title'));
     }
 };

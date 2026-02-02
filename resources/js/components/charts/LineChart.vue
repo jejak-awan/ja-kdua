@@ -37,7 +37,7 @@ ChartJS.register(
 interface ChartItem {
     period: string;
     visits: number;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 const props = withDefaults(defineProps<{
@@ -91,7 +91,7 @@ const colors = computed(() => {
 });
 
 const chartData = computed<ChartData<'line'>>(() => {
-    const datasets: any[] = [
+    const datasets: ChartData<'line'>['datasets'] = [
         // Primary Dataset
         {
             label: props.label,

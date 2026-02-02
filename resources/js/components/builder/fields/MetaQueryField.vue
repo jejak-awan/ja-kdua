@@ -107,11 +107,9 @@
 <script setup lang="ts">
 import { ref, computed, watch, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
-import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
-import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
-import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
-import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';import { BaseButton, BaseInput, BaseDropdown } from '../ui'
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import { BaseButton, BaseInput, BaseDropdown } from '@/components/builder/ui'
+import type { SettingDefinition } from '@/types/builder'
 
 interface MetaQueryItem {
   key: string;
@@ -121,7 +119,7 @@ interface MetaQueryItem {
 }
 
 const props = defineProps<{
-  field: any;
+  field?: SettingDefinition;
   value: MetaQueryItem[];
 }>()
 

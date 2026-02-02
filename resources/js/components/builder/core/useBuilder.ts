@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { watch, computed, ref, type Ref, type ComputedRef } from 'vue'
 import ModuleRegistry from './ModuleRegistry'
 import api from '@/services/api'
@@ -7,8 +8,9 @@ import { useGlobalVariables } from './useGlobalVariables'
 import type {
     BlockInstance,
     BuilderOptions,
-    BuilderInstance
-} from '../../../types/builder'
+    BuilderInstance,
+    BlockDefinition
+} from '@/types/builder'
 
 // Sub-composables
 import { useBuilderState } from './composables/useBuilderState'
@@ -72,8 +74,8 @@ export default function useBuilder(initialData = { blocks: [] as BlockInstance[]
 
                 applyThemeStyles()
             }
-        } catch (error) {
-            console.error('Failed to load theme for builder:', error)
+        } catch (error: unknown) {
+            logger.error('Failed to load theme for builder:', error instanceof Error ? error.message : String(error));
         }
     }
 
@@ -91,8 +93,8 @@ export default function useBuilder(initialData = { blocks: [] as BlockInstance[]
         try {
             await savePreset(module, name)
             uiManager.closeSavePresetModal()
-        } catch (error) {
-            console.error('Failed to save preset:', error)
+        } catch (error: unknown) {
+            logger.error('Failed to save preset:', error instanceof Error ? error.message : String(error));
         } finally {
             state.savePresetModal.value.loading = false
         }
@@ -107,11 +109,17 @@ export default function useBuilder(initialData = { blocks: [] as BlockInstance[]
 
     if (state.mode.value === 'site') {
         syncManager.fetchPages().then(() => {
-            if (state.pages.value.length > 0 && !state.currentPageId.value) {
+            if (state.pages.value.length > 0 && !state.currentPageId.value && state.pages.value[0].id) {
                 syncManager.setCurrentPage(state.pages.value[0].id)
             }
         })
     }
+
+    // UI state
+    const activePanel = ref<string | null>(null)
+    const sidebarVisible = ref(true)
+    const darkMode = ref(false)
+    const globalAction = ref<{ type: string; payload: any } | null>(null)
 
     // ============================================
     // RETURN (EXACT SAME INTERFACE)
@@ -137,11 +145,14 @@ export default function useBuilder(initialData = { blocks: [] as BlockInstance[]
         // UI/Canvas Methods
         ...uiManager,
 
+        activePanel,
+        sidebarVisible,
+        darkMode,
+
         // Registry/Helper integration
         getModuleDefinition: (type: string) => ModuleRegistry.get(type),
         globalVariables,
         saveGlobalVariables: syncManager.saveGlobalVariables,
-        globalAction: state.globalAction,
         loadTheme,
         handleSavePreset,
         updateThemeSettings: syncManager.updateThemeSettings,
@@ -163,7 +174,7 @@ export default function useBuilder(initialData = { blocks: [] as BlockInstance[]
         savePreset,
         // Missing Props for Interface Compliance
         definitions: computed(() => {
-            const defs: Record<string, any> = {};
+            const defs: Record<string, BlockDefinition> = {};
             ModuleRegistry.getAll().forEach(m => { if (m.name) defs[m.name] = m });
             return defs;
         }),

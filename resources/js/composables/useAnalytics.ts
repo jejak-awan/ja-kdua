@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import api from '../services/api';
 
 /**
@@ -17,7 +18,7 @@ export function useAnalytics() {
             });
         } catch (e) {
             // Silently fail - analytics should not break the app
-            console.warn('Analytics tracking failed:', e);
+            logger.warning('Analytics tracking failed:', e);
         }
     };
 
@@ -81,7 +82,7 @@ export function useAnalytics() {
         try {
             await api.post('/analytics/track/batch', { events });
         } catch (e) {
-            console.warn('Analytics batch tracking failed:', e);
+            logger.warning('Analytics batch tracking failed:', e);
         }
     };
 

@@ -39,8 +39,7 @@
 
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
-import Input from '@/components/ui/input.vue';
-import Textarea from '@/components/ui/textarea.vue';
+import { Input, Textarea } from '@/components/ui';
 
 interface Props {
   modelValue?: string | number;

@@ -48,7 +48,7 @@
 import { computed, inject, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Input, Button } from '../ui'
-import LucideIcon from '../../components/ui/LucideIcon.vue'
+import { LucideIcon } from '@/components/ui';
 import { 
   getVal,
   getLayoutStyles,

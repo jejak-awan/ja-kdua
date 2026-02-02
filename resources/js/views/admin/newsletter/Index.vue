@@ -189,29 +189,15 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
-import Card from '../../../components/ui/card.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
-import Table from '../../../components/ui/table.vue';
-import TableHeader from '../../../components/ui/table-header.vue';
-import TableRow from '../../../components/ui/table-row.vue';
-import TableHead from '../../../components/ui/table-head.vue';
-import TableBody from '../../../components/ui/table-body.vue';
-import TableCell from '../../../components/ui/table-cell.vue';
-import Pagination from '../../../components/ui/pagination.vue';
+import { Badge, Button, Card, Checkbox, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
+
 import Download from 'lucide-vue-next/dist/esm/icons/download.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
@@ -251,7 +237,7 @@ const fetchSubscribers = async () => {
             pagination.value = pag;
         }
     } catch (error: any) {
-        console.error('Failed to fetch subscribers:', error);
+        logger.error('Failed to fetch subscribers:', error);
     } finally {
         loading.value = false;
     }
@@ -297,7 +283,7 @@ const deleteSubscriber = async (subscriber: any) => {
         }
         fetchSubscribers();
     } catch (error: any) {
-        console.error('Failed to delete subscriber:', error);
+        logger.error('Failed to delete subscriber:', error);
         toast.error.delete(error, 'Subscriber');
     }
 };
@@ -317,7 +303,7 @@ const restoreSubscriber = async (subscriber: any) => {
         toast.success.restore('Subscriber');
         fetchSubscribers();
     } catch (error: any) {
-         console.error('Failed to restore subscriber:', error);
+         logger.error('Failed to restore subscriber:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -338,7 +324,7 @@ const exportCsv = async () => {
         link.remove();
         toast.success.action(t('common.messages.success.exported'));
     } catch (error: any) {
-        console.error('Failed to export subscribers:', error);
+        logger.error('Failed to export subscribers:', error);
         toast.error.fromResponse(error);
     }
 };

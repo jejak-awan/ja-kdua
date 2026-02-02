@@ -31,8 +31,7 @@ import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
 import Info from 'lucide-vue-next/dist/esm/icons/info.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
-import BaseModal from '../ui/BaseModal.vue';
-import { BaseButton } from '../ui';
+import { BaseModal, BaseButton } from '@/components/builder/ui';
 
 interface Props {
   isOpen?: boolean;
@@ -40,7 +39,7 @@ interface Props {
   message?: string;
   confirmText?: string;
   cancelText?: string;
-  type?: 'danger' | 'warning' | 'info' | 'delete';
+  type?: 'danger' | 'warning' | 'info' | 'delete' | 'error' | string;
 }
 
 const props = withDefaults(defineProps<Props>(), {

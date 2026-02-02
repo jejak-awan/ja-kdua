@@ -94,10 +94,12 @@ import Move from 'lucide-vue-next/dist/esm/icons/move.js';
 import Maximize from 'lucide-vue-next/dist/esm/icons/maximize.js';
 import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
 import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
-import GitMerge from 'lucide-vue-next/dist/esm/icons/git-merge.js';import { BaseLabel, BaseSliderInput, BaseCollapsible, BaseSegmentedControl } from '../ui'
+import GitMerge from 'lucide-vue-next/dist/esm/icons/git-merge.js';
+import { BaseLabel, BaseSliderInput, BaseCollapsible, BaseSegmentedControl } from '@/components/builder/ui'
+import type { SettingDefinition } from '@/types/builder'
 
 const props = defineProps<{
-  field: any;
+  field?: SettingDefinition;
   value: Record<string, any>;
   placeholderValue?: any;
 }>()

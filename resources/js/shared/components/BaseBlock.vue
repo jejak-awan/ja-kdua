@@ -75,7 +75,7 @@ const builder = inject<BuilderInstance>('builder')
 const detectedDevice = useResponsiveDevice()
 const device = computed(() => props.device || detectedDevice.value)
 
-const settings = computed(() => props.settings || props.module?.settings || {})
+const settings = computed(() => (props.settings || props.module?.settings || {}) as Record<string, any>)
 const isSelected = computed(() => props.mode === 'edit' && builder?.selectedModuleId.value === props.module.id)
 
 const wrapperStyles = computed(() => {

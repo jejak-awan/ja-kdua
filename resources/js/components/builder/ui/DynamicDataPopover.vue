@@ -75,6 +75,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
   import { ref, computed, onMounted, inject, type Ref } from 'vue';
   import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
@@ -134,7 +135,7 @@ import SearchX from 'lucide-vue-next/dist/esm/icons/search-x.js';
       const response = await api.get('/admin/ja/builder/dynamic-sources', { params });
       dataGroups.value = response.data?.data || response.data || {};
     } catch (err) {
-      console.error('Failed to fetch dynamic sources:', err);
+      logger.error('Failed to fetch dynamic sources:', err);
       error.value = 'Failed to load dynamic data sources';
       // Fallback to default sources
       dataGroups.value = getDefaultSources();

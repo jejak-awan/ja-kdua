@@ -149,6 +149,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed, watch, defineAsyncComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -163,6 +164,7 @@ import {
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
 import { useCmsStore } from '@/stores/cms';
+import type { CacheStatus, QueueStatus, EmailLog } from '@/types/settings';
 import SettingsIcon from 'lucide-vue-next/dist/esm/icons/settings.js';
 import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
 import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
@@ -186,7 +188,7 @@ const EmailTestSection = defineAsyncComponent(() => import('./EmailTestSection.v
 interface Setting {
     id: number | string;
     key: string;
-    value: any;
+    value: unknown;
     type: string;
     group: string;
     description?: string;
@@ -211,8 +213,8 @@ const validTabs = ['general', 'email', 'seo', 'security', 'performance', 'media'
 const initialTab = validTabs.includes(route.query.tab as string) ? (route.query.tab as string) : 'general';
 const activeTab = ref(initialTab);
 const settings = ref<Setting[]>([]);
-const formData = ref<Record<string, any>>({});
-const initialFormData = ref<Record<string, any>>({}); // Track initial state
+const formData = ref<Record<string, unknown>>({});
+const initialFormData = ref<Record<string, unknown>>({}); // Track initial state
 const errors = ref<Record<string, string[]>>({});
 
 const isDirty = computed(() => {
@@ -228,23 +230,23 @@ const isDirty = computed(() => {
 
 // Email testing state
 const validatingConfig = ref(false);
-const configValidation = ref<any>(null);
+const configValidation = ref<{ valid: boolean; errors: string[]; warnings: string[] } | null>(null);
 const testingConnection = ref(false);
-const connectionResult = ref<any>(null);
+const connectionResult = ref<{ connected: boolean; host: string; port: string; error?: string } | null>(null);
 const sendingTestEmail = ref(false);
-const testEmailResult = ref<any>(null);
+const testEmailResult = ref<{ success: boolean; message: string } | null>(null);
 const testEmail = ref({
     to: '',
     subject: '',
     message: '',
 });
 const loadingQueueStatus = ref(false);
-const queueStatus = ref<any>(null);
+const queueStatus = ref<QueueStatus | null>(null);
 const loadingLogs = ref(false);
-const emailLogs = ref<any[]>([]);
+const emailLogs = ref<EmailLog[]>([]);
 
 // Cache Management State
-const cacheStatus = ref<any>(null);
+const cacheStatus = ref<CacheStatus | null>(null);
 const clearingCache = ref(false);
 const warmingCache = ref(false);
 
@@ -289,7 +291,7 @@ const fetchSettings = async () => {
         settings.value = ensureArray(data);
 
         // Inject missing CDN settings with defaults
-        const ensureSetting = (key: string, value: any, type: string, group: string, description = '') => {
+        const ensureSetting = (key: string, value: unknown, type: string, group: string, description = '') => {
             if (!settings.value.find(s => s.key === key)) {
                 settings.value.push({
                     id: 'temp_' + key,
@@ -336,7 +338,7 @@ const fetchSettings = async () => {
         ensureSetting('gemini_api_key', '', 'password', 'ai');
 
         initializeFormData();
-    } catch (error: any) {
+    } catch {
         settings.value = [];
     } finally {
         loading.value = false;
@@ -352,7 +354,7 @@ const initializeFormData = () => {
         if (setting.type === 'boolean') {
             value = value === '1' || value === 1 || value === 'true' || value === true;
         } else if (setting.type === 'integer') {
-            value = value ? parseInt(value) : null;
+            value = value ? parseInt(String(value)) : null;
         } else if (setting.type === 'json') {
             if (typeof value === 'string') {
                 try {
@@ -413,11 +415,16 @@ const handleSubmit = async () => {
             getCacheStatus();
         }
         initialFormData.value = JSON.parse(JSON.stringify(formData.value));
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-             errors.value = error.response.data.errors || {};
+    } catch (error: unknown) {
+        if (typeof error === 'object' && error !== null && 'response' in error) {
+            const err = error as { response?: { status: number; data?: { errors?: Record<string, string[]> } } };
+            if (err.response?.status === 422) {
+                errors.value = err.response.data?.errors || {};
+            } else {
+                toast.error.fromResponse(error);
+            }
         } else {
-             toast.error.fromResponse(error);
+            toast.error.fromResponse(error);
         }
     } finally {
         saving.value = false;
@@ -430,12 +437,16 @@ const validateEmailConfig = async () => {
     configValidation.value = null;
     try {
         const response = await api.get('/admin/ja/email-test/validate-config');
-        const { data } = parseResponse(response);
-        configValidation.value = data;
-    } catch (error: any) {
+        configValidation.value = parseSingleResponse<{ valid: boolean; errors: string[]; warnings: string[] }>(response);
+    } catch (error: unknown) {
+        let errorMsg = t('features.settings.emailTest.failed');
+        if (typeof error === 'object' && error !== null && 'response' in error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            errorMsg = err.response?.data?.message || errorMsg;
+        }
         configValidation.value = {
             valid: false,
-            errors: [error.response?.data?.message || t('features.settings.emailTest.failed')],
+            errors: [errorMsg],
             warnings: [],
         };
     } finally {
@@ -448,14 +459,18 @@ const testSmtpConnection = async () => {
     connectionResult.value = null;
     try {
         const response = await api.post('/admin/ja/email-test/test-connection');
-        const { data } = parseResponse(response);
-        connectionResult.value = data;
-    } catch (error: any) {
+        connectionResult.value = parseSingleResponse<{ connected: boolean; host: string; port: string; error?: string }>(response);
+    } catch (error: unknown) {
+        let errorMsg = t('features.settings.emailTest.failed');
+        if (typeof error === 'object' && error !== null && 'response' in error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            errorMsg = err.response?.data?.message || errorMsg;
+        }
         connectionResult.value = {
             connected: false,
             host: 'unknown',
             port: 'unknown',
-            error: error.response?.data?.message || t('features.settings.emailTest.failed'),
+            error: errorMsg,
         };
     } finally {
         testingConnection.value = false;
@@ -489,10 +504,15 @@ const sendTestEmail = async () => {
         testEmail.value.message = '';
         // Refresh logs
         await getRecentLogs();
-    } catch (error: any) {
+    } catch (error: unknown) {
+        let errorMsg = t('features.settings.emailTest.sendFailed');
+        if (typeof error === 'object' && error !== null && 'response' in error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            errorMsg = err.response?.data?.message || errorMsg;
+        }
         testEmailResult.value = {
             success: false,
-            message: error.response?.data?.message || t('features.settings.emailTest.sendFailed'),
+            message: errorMsg,
         };
     } finally {
         sendingTestEmail.value = false;
@@ -503,9 +523,8 @@ const getQueueStatus = async () => {
     loadingQueueStatus.value = true;
     try {
         const response = await api.get('/admin/ja/email-test/queue-status');
-        const { data } = parseResponse(response);
-        queueStatus.value = data;
-    } catch (error: any) {
+        queueStatus.value = parseSingleResponse<QueueStatus>(response);
+    } catch {
         queueStatus.value = {
             driver: 'unknown',
             connection: 'unknown',
@@ -521,9 +540,9 @@ const getRecentLogs = async () => {
     loadingLogs.value = true;
     try {
         const response = await api.get('/admin/ja/email-test/recent-logs?limit=10');
-        const { data } = parseResponse(response);
-        emailLogs.value = (data as any).logs || [];
-    } catch (error: any) {
+        const parsed = parseSingleResponse<{ logs: EmailLog[] }>(response);
+        emailLogs.value = parsed?.logs || [];
+    } catch {
         emailLogs.value = [];
     } finally {
         loadingLogs.value = false;
@@ -534,9 +553,9 @@ const getRecentLogs = async () => {
 const getCacheStatus = async () => {
     try {
         const response = await api.get('/admin/ja/system/cache-status');
-        cacheStatus.value = parseSingleResponse<any>(response);
-    } catch (error: any) {
-        console.error('Failed to get cache status:', error);
+        cacheStatus.value = parseSingleResponse<CacheStatus>(response);
+    } catch (error: unknown) {
+        logger.error('Failed to get cache status:', error);
     }
 };
 
@@ -555,7 +574,7 @@ const clearSystemCache = async () => {
         await api.post('/admin/ja/system/cache/clear');
         toast.success.action(t('features.settings.cache.cleared'));
         getCacheStatus();
-    } catch (error: any) {
+    } catch (error: unknown) {
         toast.error.fromResponse(error);
     } finally {
         clearingCache.value = false;
@@ -568,7 +587,7 @@ const warmSystemCache = async () => {
         await api.post('/admin/ja/system/cache/warm');
         toast.success.action(t('features.settings.cache.warmed'));
         getCacheStatus();
-    } catch (error: any) {
+    } catch (error: unknown) {
         toast.error.fromResponse(error);
     } finally {
         warmingCache.value = false;

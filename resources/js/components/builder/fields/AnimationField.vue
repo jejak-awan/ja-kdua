@@ -82,7 +82,9 @@
 <script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import PlayCircle from 'lucide-vue-next/dist/esm/icons/circle-play.js';import { BaseLabel, BaseSliderInput, BaseCollapsible } from '../ui'
+import PlayCircle from 'lucide-vue-next/dist/esm/icons/circle-play.js';
+import { BaseLabel, BaseSliderInput, BaseCollapsible, BaseSegmentedControl } from '@/components/builder/ui'
+import type { SettingDefinition } from '@/types/builder'
 
 interface AnimationState {
   effect: string;
@@ -93,9 +95,9 @@ interface AnimationState {
 }
 
 const props = defineProps<{
-  field: any;
-  value: AnimationState;
-  placeholderValue?: AnimationState | null;
+  field?: SettingDefinition;
+  value: Record<string, any>;
+  placeholderValue?: any;
 }>()
 
 const emit = defineEmits(['update:value'])

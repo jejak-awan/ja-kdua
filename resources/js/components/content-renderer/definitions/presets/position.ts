@@ -89,7 +89,7 @@ export const positionSettings: SettingDefinition[] = [
         type: 'text',
         label: 'Top',
         default: 'auto',
-        condition: (settings: ModuleSettings) => ['absolute', 'fixed', 'sticky'].includes(settings.position),
+        condition: (settings: ModuleSettings) => ['absolute', 'fixed', 'sticky'].includes(settings.position as string),
         tab: 'advanced'
     },
     {
@@ -97,7 +97,7 @@ export const positionSettings: SettingDefinition[] = [
         type: 'text',
         label: 'Right',
         default: 'auto',
-        condition: (settings: ModuleSettings) => ['absolute', 'fixed'].includes(settings.position),
+        condition: (settings: ModuleSettings) => ['absolute', 'fixed'].includes(settings.position as string),
         tab: 'advanced'
     },
     {
@@ -105,7 +105,7 @@ export const positionSettings: SettingDefinition[] = [
         type: 'text',
         label: 'Bottom',
         default: 'auto',
-        condition: (settings: ModuleSettings) => ['absolute', 'fixed'].includes(settings.position),
+        condition: (settings: ModuleSettings) => ['absolute', 'fixed'].includes(settings.position as string),
         tab: 'advanced'
     },
     {
@@ -113,7 +113,7 @@ export const positionSettings: SettingDefinition[] = [
         type: 'text',
         label: 'Left',
         default: 'auto',
-        condition: (settings: ModuleSettings) => ['absolute', 'fixed'].includes(settings.position),
+        condition: (settings: ModuleSettings) => ['absolute', 'fixed'].includes(settings.position as string),
         tab: 'advanced'
     }
 ];
@@ -230,7 +230,7 @@ export const flexSettings: SettingDefinition[] = [
         step: 4,
         unit: 'px',
         default: 0,
-        condition: (settings: ModuleSettings) => ['flex', 'grid'].includes(settings.display),
+        condition: (settings: ModuleSettings) => ['flex', 'grid'].includes(settings.display as string),
         tab: 'style'
     }
 ];

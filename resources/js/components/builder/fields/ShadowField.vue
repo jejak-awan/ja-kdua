@@ -29,7 +29,7 @@
 
         <!-- Manual Controls -->
         <div v-if="localValue.preset !== 'none'" class="manual-controls flex flex-col gap-4 mt-4">
-<div class="control-row">
+            <div class="control-row">
                 <BaseLabel>{{ t('builder.fields.shadow.controls.horizontal') }}</BaseLabel>
                 <BaseSliderInput v-model.number="localValue.horizontal" :min="-100" :max="100" :placeholder-value="placeholderValue?.horizontal" unit="px" />
             </div>
@@ -54,7 +54,7 @@
                  <ColorField 
                    :value="localValue.color" 
                    :placeholder-value="placeholderValue?.color"
-                   @update:value="(val) => localValue.color = val" 
+                   @update:value="(val: string) => localValue.color = val" 
                  />
             </div>
 
@@ -69,23 +69,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, inject, reactive, computed } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Ban from 'lucide-vue-next/dist/esm/icons/ban.js';
-import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';import { BaseLabel, BaseSliderInput, BaseToggle, BaseCollapsible } from '../ui'
-import ColorField from './ColorField.vue'
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import { BaseLabel, BaseSliderInput, BaseToggle, BaseCollapsible } from '@/components/builder/ui'
+import ColorField from '@/components/builder/fields/ColorField.vue'
+import type { SettingDefinition } from '@/types/builder'
+
+
+interface ShadowValue {
+  preset: string;
+  horizontal: number; 
+  vertical: number; 
+  blur: number; 
+  spread: number; 
+  color: string; 
+  inset: boolean;
+}
 
 const props = defineProps<{
-  field: any;
-  value: {
-    preset: string;
-    horizontal: number; 
-    vertical: number; 
-    blur: number; 
-    spread: number; 
-    color: string; 
-    inset: boolean;
-  };
+  field: SettingDefinition;
+  value: ShadowValue;
   placeholderValue?: any;
 }>()
 
@@ -115,15 +120,12 @@ const presets = computed(() => ({
         values: { horizontal: 0, vertical: 15, blur: 25, spread: -10, color: 'rgba(0,0,0,0.3)', inset: false } 
     },
     diagonal: { 
-        label: 'Diagonal', // Need translation? Maybe 'Diagonal' key? Or reuse common.
-        // Assuming generic presets. 'Diagonal' isn't in common.json presets. 
-        // I'll keep 'Diagonal' hardcoded or add key.
-        // Or Map to 'md' if appropriate? No.
+        label: 'Diagonal', 
         style: { boxShadow: '10px 10px 20px -5px rgba(0,0,0,0.25)' }, 
         values: { horizontal: 10, vertical: 10, blur: 20, spread: -5, color: 'rgba(0,0,0,0.25)', inset: false } 
     },
     spread: { 
-        label: 'Spread', // Need translation
+        label: 'Spread', 
         style: { boxShadow: '0 0 0 10px rgba(0,0,0,0.1)' }, 
         values: { horizontal: 0, vertical: 0, blur: 0, spread: 10, color: 'rgba(0,0,0,0.1)', inset: false } 
     },

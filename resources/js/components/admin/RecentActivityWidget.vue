@@ -77,6 +77,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -103,13 +104,13 @@ interface Activity {
     user_id?: number | null;
     user?: {
         name: string;
-        [key: string]: any;
+        [key: string]: unknown;
     } | null;
     action?: string;
     type?: string;
     description: string;
     created_at: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 const { t } = useI18n();
@@ -119,7 +120,7 @@ const loading = ref(false);
 const refreshInterval = ref<ReturnType<typeof setInterval> | null>(null);
 
 const fetchActivities = async () => {
-    if ((window as any).__isSessionTerminated) {
+    if ((window as unknown as { __isSessionTerminated?: boolean }).__isSessionTerminated) {
         if (refreshInterval.value) {
             clearInterval(refreshInterval.value);
             refreshInterval.value = null;
@@ -136,8 +137,11 @@ const fetchActivities = async () => {
         const { data } = parseResponse(response);
         activities.value = (data as Activity[]) || [];
     } catch (error: any) {
-        if (error.code !== 'ERR_CANCELED' && error.response?.status !== 401) {
-            console.error('Failed to fetch recent activities:', error);
+        if (error && typeof error === 'object' && 'code' in error && 'response' in error) {
+            const err = error as { code: string; response?: { status: number } };
+            if (err.code !== 'ERR_CANCELED' && err.response?.status !== 401) {
+                logger.error('Failed to fetch recent activities:', error);
+            }
         }
     } finally {
         loading.value = false;

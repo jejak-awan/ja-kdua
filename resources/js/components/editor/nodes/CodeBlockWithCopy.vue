@@ -26,6 +26,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed } from 'vue'
 import { NodeViewWrapper, NodeViewContent, nodeViewProps } from '@tiptap/vue-3'
 import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
@@ -52,7 +53,7 @@ function copyCode() {
             copied.value = false
         }, 2000)
     }).catch(err => {
-        console.error('Failed to copy:', err)
+        logger.error('Failed to copy:', err)
     })
 }
 </script>

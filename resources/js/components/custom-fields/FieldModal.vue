@@ -154,6 +154,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -312,7 +313,7 @@ const handleSubmit = async () => {
         }
         emit('saved');
     } catch (error: any) {
-        console.error('Failed to save field:', error);
+        logger.error('Failed to save field:', error);
         toast.error.fromResponse(error);
     } finally {
         saving.value = false;

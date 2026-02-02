@@ -34,7 +34,7 @@ const props = defineProps<{
     editor: Editor | undefined;
 }>();
 
-const shouldShow = ({ editor }: any) => {
+const shouldShow = ({ editor }: { editor: any }) => {
     // Don't show if image or video is selected (we will have a different bubble for that)
     if (editor.isActive('image') || editor.isActive('video') || editor.isActive('htmlEmbed') || editor.isActive('icon')) {
         return false;

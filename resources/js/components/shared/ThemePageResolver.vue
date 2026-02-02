@@ -13,6 +13,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { shallowRef, watch, markRaw, ref, type Component } from 'vue'
 import { useTheme } from '@/composables/useTheme'
 
@@ -45,9 +46,9 @@ async function resolveView() {
   }
   
   if (!loader) {
-    console.warn(`[ThemeResolver] View '${pageName}' not found. Tried:`, { targetPath, fallbackPath, themeSlug });
+    logger.warning(`[ThemeResolver] View '${pageName}' not found. Tried:`, { targetPath, fallbackPath, themeSlug });
     if (pageName !== 'components/Header' && pageName !== 'components/Footer') {
-         console.warn(`[ThemeResolver] View '${pageName}' not found in theme.`)
+         logger.warning(`[ThemeResolver] View '${pageName}' not found in theme.`)
     }
     isNotFound.value = true
     isLoading.value = false
@@ -55,12 +56,12 @@ async function resolveView() {
   }
   
   try {
-    console.log(`[ThemeResolver] Loading component: ${pageName} from theme ${themeSlug}`);
+    logger.info(`[ThemeResolver] Loading component: ${pageName} from theme ${themeSlug}`);
     const mod = await loader()
     resolvedComponent.value = markRaw(mod.default)
-    console.log(`[ThemeResolver] Successfully resolved: ${pageName}`);
+    logger.info(`[ThemeResolver] Successfully resolved: ${pageName}`);
   } catch (err) {
-    console.error(`[ThemeResolver] Failed to load view '${pageName}'`, err)
+    logger.error(`[ThemeResolver] Failed to load view '${pageName}'`, err)
     isNotFound.value = true // Treat load error as not found to avoid infinite spinner
   } finally {
     isLoading.value = false

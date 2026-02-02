@@ -177,6 +177,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -234,7 +235,7 @@ const fetchRevisions = async () => {
             }
         }
     } catch (error: any) {
-        console.error('Failed to fetch revisions:', error);
+        logger.error('Failed to fetch revisions:', error);
     } finally {
         loading.value = false;
     }
@@ -245,7 +246,7 @@ const viewRevision = async (revision: any) => {
         const response = await api.get(`/admin/ja/contents/${contentId}/revisions/${revision.id}`);
         viewingRevision.value = response.data.data || response.data;
     } catch (error: any) {
-        console.error('Failed to fetch revision detail:', error);
+        logger.error('Failed to fetch revision detail:', error);
         viewingRevision.value = revision;
     }
 };
@@ -267,7 +268,7 @@ const restoreRevision = async (revision: any) => {
         toast.success(t('common.messages.success.restored', { item: `v${revision.version}` }));
         router.push({ name: 'contents.edit', params: { id: contentId } });
     } catch (error: any) {
-        console.error('Failed to restore revision:', error);
+        logger.error('Failed to restore revision:', error);
         toast.error(t('common.messages.toast.error'), error.response?.data?.message || t('features.content.messages.restoreFailed'));
     }
 };

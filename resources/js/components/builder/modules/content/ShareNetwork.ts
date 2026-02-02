@@ -13,7 +13,7 @@ import {
     interactionsSettings,
     scrollEffectsSettings,
     attributesSettings
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Share Network Module Definition

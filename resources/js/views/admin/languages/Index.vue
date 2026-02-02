@@ -222,6 +222,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -229,28 +230,8 @@ import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
 import { useFormValidation } from '../../../composables/useFormValidation';
 import { languageSchema } from '../../../schemas/common';
-import Card from '../../../components/ui/card.vue';
-import CardHeader from '../../../components/ui/card-header.vue';
-import CardTitle from '../../../components/ui/card-title.vue';
-import CardDescription from '../../../components/ui/card-description.vue';
-import CardContent from '../../../components/ui/card-content.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Label from '../../../components/ui/label.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
-import Dialog from '../../../components/ui/dialog.vue';
-import DialogContent from '../../../components/ui/dialog-content.vue';
-import DialogHeader from '../../../components/ui/dialog-header.vue';
-import DialogTitle from '../../../components/ui/dialog-title.vue';
-import DialogDescription from '../../../components/ui/dialog-description.vue';
-import DialogFooter from '../../../components/ui/dialog-footer.vue';
-import Table from '../../../components/ui/table.vue';
-import TableHeader from '../../../components/ui/table-header.vue';
-import TableRow from '../../../components/ui/table-row.vue';
-import TableHead from '../../../components/ui/table-head.vue';
-import TableBody from '../../../components/ui/table-body.vue';
-import TableCell from '../../../components/ui/table-cell.vue';
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Checkbox, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Label, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
+
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Upload from 'lucide-vue-next/dist/esm/icons/upload.js';
 import Download from 'lucide-vue-next/dist/esm/icons/download.js';
@@ -298,7 +279,7 @@ const fetchLanguages = async () => {
         const { data } = parseResponse(response);
         languages.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch languages:', error);
+        logger.error('Failed to fetch languages:', error);
         languages.value = [];
     } finally {
         loading.value = false;

@@ -376,6 +376,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -528,7 +529,7 @@ const fetchPermissions = async () => {
         permissions.value = sanitized;
         expandedCategories.value = Object.keys(sanitized).slice(0, 2);
     } catch (error: any) {
-        console.error('Failed to fetch permissions:', error);
+        logger.error('Failed to fetch permissions:', error);
     }
 };
 

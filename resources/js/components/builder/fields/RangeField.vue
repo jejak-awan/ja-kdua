@@ -1,7 +1,7 @@
 <template>
   <div class="range-field">
     <BaseSliderInput
-      :model-value="Number(value)"
+      :model-value="Number(value || 0)"
       :min="field.min"
       :max="field.max"
       :step="field.step"
@@ -13,10 +13,11 @@
 </template>
 
 <script setup lang="ts">
-import { BaseSliderInput } from '../ui'
+import { BaseSliderInput } from '@/components/builder/ui'
+import type { SettingDefinition } from '@/types/builder'
 
 const props = defineProps<{
-  field: any;
+  field: SettingDefinition;
   value?: number | string;
   placeholderValue?: number | string | null;
 }>()

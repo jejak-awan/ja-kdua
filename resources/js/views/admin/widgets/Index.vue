@@ -69,20 +69,14 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
-import Button from '../../../components/ui/button.vue';
-import Card from '../../../components/ui/card.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Table from '../../../components/ui/table.vue';
-import TableHeader from '../../../components/ui/table-header.vue';
-import TableRow from '../../../components/ui/table-row.vue';
-import TableHead from '../../../components/ui/table-head.vue';
-import TableBody from '../../../components/ui/table-body.vue';
-import TableCell from '../../../components/ui/table-cell.vue';
+import { Badge, Button, Card, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
+
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
@@ -108,7 +102,7 @@ const fetchWidgets = async () => {
         const { data } = parseResponse(response);
         widgets.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch widgets:', error);
+        logger.error('Failed to fetch widgets:', error);
     } finally {
         loading.value = false;
     }
@@ -134,7 +128,7 @@ const deleteWidget = async (widget: any) => {
         toast.success.delete(t('features.widgets.title'));
         fetchWidgets();
     } catch (error: any) {
-        console.error('Failed to delete widget:', error);
+        logger.error('Failed to delete widget:', error);
         toast.error.delete(error, t('features.widgets.title'));
     }
 };

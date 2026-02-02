@@ -71,8 +71,8 @@
 import { reactive, computed, onMounted } from 'vue';
 import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
-import { BaseModal, BaseInput, BaseToggle, BaseDropdown } from '../ui';
-import type { Canvas } from '../../../types/builder';
+import { BaseModal, BaseInput, BaseToggle, BaseDropdown } from '@/components/builder/ui';
+import type { Canvas } from '@/types/builder';
 
 interface Props {
   canvas: Canvas;

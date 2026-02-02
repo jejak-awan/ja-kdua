@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosError, type AxiosResponse } from 'axios';
 import router from '../router';
 import { SystemMonitor } from './SystemMonitor';
@@ -56,7 +57,7 @@ export const getCsrfCookie = async (): Promise<void> => {
     try {
         await axios.get('/sanctum/csrf-cookie', { withCredentials: true });
     } catch (error) {
-        console.error('Failed to get CSRF cookie:', error);
+        logger.error('Failed to get CSRF cookie:', error);
     }
 };
 
@@ -65,7 +66,7 @@ api.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         // BREAK CIRCUIT: If system is down, block all non-critical requests
         if (SystemMonitor.isRequestBlocked && !config.url?.includes('system/health')) {
-            console.debug('Request blocked by Circuit Breaker:', config.url);
+            logger.debug('Request blocked by Circuit Breaker:', { url: config.url });
             return Promise.reject(new axios.Cancel('System is undergoing maintenance'));
         }
 
@@ -97,7 +98,7 @@ api.interceptors.request.use(
 
         return config;
     },
-    (error: any) => {
+    (error: unknown) => {
         return Promise.reject(error);
     }
 );
@@ -135,7 +136,7 @@ api.interceptors.response.use(
                 // If LOGOUT fails with 419, it's fine (session is already gone), silence it
                 // We RESOLVE here to bypass the component's catch block entirely
                 if (url.includes('logout')) {
-                    return Promise.resolve({ data: { message: 'Logout Silenced: Session already dead' } } as any);
+                    return Promise.resolve({ data: { message: 'Logout Silenced: Session already dead' } } as AxiosResponse);
                 }
 
                 return Promise.reject(error);
@@ -172,7 +173,7 @@ api.interceptors.response.use(
                 // If LOGOUT fails with 401, it's fine (session is already gone), silence it
                 // We RESOLVE here to bypass the component's catch block entirely
                 if (url.includes('logout')) {
-                    return Promise.resolve({ data: { message: 'Logout Silenced: Already unauthorized' } } as any);
+                    return Promise.resolve({ data: { message: 'Logout Silenced: Already unauthorized' } } as AxiosResponse);
                 }
                 return Promise.reject(error);
             }
@@ -224,7 +225,7 @@ api.interceptors.response.use(
                 return Promise.reject(new axios.Cancel('Vapor Lock: 403 Session Terminated'));
             }
 
-            console.debug('403 Forbidden:', error.config?.url);
+            logger.debug('403 Forbidden:', { url: error.config?.url });
         }
 
         // Handle 429 Rate Limit - ensure retry_after is in response data

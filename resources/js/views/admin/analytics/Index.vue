@@ -274,6 +274,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -282,13 +283,8 @@ import { parseResponse, parseSingleResponse, ensureArray } from '../../../utils/
 import LineChart from '../../../components/charts/LineChart.vue';
 import DoughnutChart from '../../../components/charts/DoughnutChart.vue';
 import BarChart from '../../../components/charts/BarChart.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Card from '../../../components/ui/card.vue';
-import CardHeader from '../../../components/ui/card-header.vue';
-import CardTitle from '../../../components/ui/card-title.vue';
-import CardContent from '../../../components/ui/card-content.vue';
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from '@/components/ui';
+
 import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
 import Users from 'lucide-vue-next/dist/esm/icons/users.js';
 import BarChart3 from 'lucide-vue-next/dist/esm/icons/chart-bar-stacked.js';
@@ -383,7 +379,7 @@ const fetchAnalytics = async () => {
         referrers.value = ensureArray(parseResponse(referrersRes).data);
         realtime.value = parseSingleResponse(realtimeRes) || {};
     } catch (error: any) {
-        console.error('Failed to fetch analytics:', error);
+        logger.error('Failed to fetch analytics:', error);
     } finally {
         loading.value = false;
     }
@@ -416,7 +412,7 @@ const exportData = async (type: string) => {
         window.URL.revokeObjectURL(url);
         toast.success.action(t('features.analytics.export.success') || 'Export started');
     } catch (error: any) {
-        console.error('Failed to export:', error);
+        logger.error('Failed to export:', error);
         toast.error.fromResponse(error);
     } finally {
         exporting.value = false;
@@ -429,7 +425,7 @@ onMounted(() => {
         api.get('/admin/ja/analytics/realtime').then(res => {
             realtime.value = parseSingleResponse(res) || {};
         }).catch(err => {
-            console.error('Realtime fetch failed:', err);
+            logger.error('Realtime fetch failed:', err);
             if (err.response?.status === 401 || err.response?.status === 419) {
                 if (refreshInterval) clearInterval(refreshInterval);
             }

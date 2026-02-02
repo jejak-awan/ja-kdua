@@ -201,6 +201,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -280,21 +281,22 @@ const displayDisk = computed(() => {
     return usage;
 });
 
-const fetchSystemInfo = async () : Promise<void> => {
+const fetchSystemInfo = async (): Promise<void> => {
     loading.value = true;
     try {
         const response = await api.get('/admin/ja/system/info');
         systemInfo.value = parseSingleResponse<SystemInfo>(response) || {};
-        
+
         // Fetch cache status
         try {
             const cacheResponse = await api.get('/admin/ja/system/cache-status');
             cacheStatus.value = parseSingleResponse<CacheData>(cacheResponse)?.status || 'Active';
         } catch (error: any) {
+            logger.warning('Failed to fetch cache status:', error);
             cacheStatus.value = 'Active';
         }
     } catch (error: any) {
-        console.error('Failed to fetch system info:', error);
+        logger.error('Failed to fetch system info:', error);
     } finally {
         loading.value = false;
     }

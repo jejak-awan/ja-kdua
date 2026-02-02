@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -117,7 +118,7 @@ const fetchContents = async (page: number = 1) => {
         pagination.value = meta;
         
     } catch (error: any) {
-        console.error('Failed to fetch contents:', error);
+        logger.error('Failed to fetch contents:', error);
         toast.error.action(error);
         contents.value = [];
         pagination.value = null;
@@ -138,7 +139,7 @@ const fetchStats = async () => {
             trashed: 0
         };
     } catch (error: any) {
-        console.error('Failed to fetch stats:', error);
+        logger.error('Failed to fetch stats:', error);
     }
 };
 
@@ -226,7 +227,7 @@ const handleBulkAction = async (action: string) => {
         toast.success.update();
         bulkAction.value = '';
     } catch (error: any) {
-        console.error('Failed to perform bulk action:', error);
+        logger.error('Failed to perform bulk action:', error);
         toast.error.action(error);
     } finally {
         bulkAction.value = '';
@@ -249,7 +250,7 @@ const handleEmptyTrash = async () => {
         await fetchStats();
         toast.success.action(t('common.messages.success.deleted') || 'Trash emptied successfully');
     } catch (error: any) {
-        console.error('Failed to empty trash:', error);
+        logger.error('Failed to empty trash:', error);
         toast.error.action(error);
     }
 };
@@ -267,7 +268,7 @@ const handleDelete = async (content: Content) => {
         await fetchContents();
         await fetchStats();
     } catch (error: any) {
-        console.error('Failed to delete content:', error);
+        logger.error('Failed to delete content:', error);
         toast.error.delete(error, content.title);
     }
 };
@@ -288,7 +289,7 @@ const handleRestore = async (content: Content) => {
         await fetchStats();
         toast.success.action(t('common.messages.success.restored') || 'Content restored');
     } catch (error: any) {
-        console.error('Failed to restore content:', error);
+        logger.error('Failed to restore content:', error);
         toast.error.action(error);
     }
 };
@@ -306,7 +307,7 @@ const handleForceDelete = async (content: Content) => {
         await fetchContents();
         await fetchStats();
     } catch (error: any) {
-        console.error('Failed to force delete content:', error);
+        logger.error('Failed to force delete content:', error);
         toast.error.delete(error, content.title);
     }
 };
@@ -327,7 +328,7 @@ const handleDuplicate = async (content: Content) => {
         await fetchStats();
         toast.success.action(t('common.messages.success.duplicated') || 'Content duplicated');
     } catch (error: any) {
-        console.error('Failed to duplicate content:', error);
+        logger.error('Failed to duplicate content:', error);
         toast.error.action(error);
     }
 };
@@ -339,7 +340,7 @@ const handleApprove = async (content: Content) => {
         await fetchStats();
         toast.success.action(t('features.content.messages.approved') || 'Content approved');
     } catch (error: any) {
-        console.error('Failed to approve content:', error);
+        logger.error('Failed to approve content:', error);
         toast.error.action(error);
     }
 };
@@ -360,7 +361,7 @@ const handleReject = async (content: Content) => {
         await fetchStats();
         toast.success.action(t('features.content.messages.rejected') || 'Content rejected');
     } catch (error: any) {
-        console.error('Failed to reject content:', error);
+        logger.error('Failed to reject content:', error);
         toast.error.action(error);
     }
 };

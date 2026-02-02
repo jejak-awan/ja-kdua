@@ -80,6 +80,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
 // import { useI18n } from 'vue-i18n';
@@ -113,7 +114,7 @@ onMounted(async () => {
         const response = await api.get(`/cms/contents/${slug}`);
         post.value = response.data.data || response.data;
     } catch (error) {
-        console.error('Failed to load post:', error);
+        logger.error('Failed to load post:', error);
     } finally {
         loading.value = false;
         nextTick(() => {

@@ -52,10 +52,10 @@
 <script setup lang="ts">
 import { inject, computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';import FieldRenderer from '../fields/FieldRenderer.vue'
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';import FieldRenderer from '@/components/builder/fields/FieldRenderer.vue'
 import DesignPresetsSelector from './DesignPresetsSelector.vue'
 import SettingsGroup from './SettingsGroup.vue'
-import type { BuilderInstance, ModuleGroup, ModuleField, BlockInstance } from '@/types/builder'
+import type { BuilderInstance, ModuleGroup, ModuleField, BlockInstance, SettingDefinition } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   group: ModuleGroup;
@@ -84,12 +84,12 @@ const toggleNested = (id: string) => {
 }
 
 // Type Guards
-const isField = (item: ModuleField | ModuleGroup): item is ModuleField => {
-  return (item as ModuleField).name !== undefined
+const isField = (item: ModuleField): item is SettingDefinition => {
+  return (item as any).type !== undefined && (item as any).type !== 'group'
 }
 
-const getItemKey = (item: ModuleField | ModuleGroup) => {
-  return isField(item) ? item.name : item.id
+const getItemKey = (item: ModuleField) => {
+  return (item as any).name || (item as any).id || Math.random().toString()
 }
 
 // Computed
@@ -121,24 +121,29 @@ const updateField = (name: string, value: any) => {
   }
 }
 
-const isItemVisible = (item: ModuleField | ModuleGroup): boolean => {
+const isItemVisible = (item: ModuleField): boolean => {
   if (isField(item)) {
     return isFieldVisible(item)
   }
-  // For groups, check if all internal fields are hidden or if the group itself has a condition
-  if (item.condition) {
-    return item.condition(props.module.settings)
+  
+  // For groups, check if the group itself has a condition
+  const groupItem = item as ModuleGroup
+  if (groupItem.condition) {
+    return groupItem.condition(props.module.settings as Record<string, any>)
   }
   return true
 }
 
 const isFieldVisible = (field: ModuleField): boolean => {
-  if (Array.isArray(field.show_if)) return true // Simple bypass for complex/array conditions for now
+  if (!isField(field)) return true
   
-  const showIf = field.show_if as any
+  const setting = field as SettingDefinition
+  if (Array.isArray(setting.show_if)) return true 
+  
+  const showIf = setting.show_if as any
   if (!showIf || !showIf.field) return true
 
-  const dependencyName = showIf.field
+  const dependencyName = showIf.field as string
   
   // Find the dependency field in the same group to check its visibility recursively
   const dependencyField = props.group.fields.find((f: any) => f.name === dependencyName)

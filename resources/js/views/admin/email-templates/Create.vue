@@ -138,6 +138,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -201,7 +202,7 @@ const previewTemplate = async () => {
             previewWindow.document.write(response.data.html);
         }
     } catch (error: any) {
-        console.error('Failed to preview template:', error);
+        logger.error('Failed to preview template:', error);
         toast.error.default(t('features.email_templates.form.previewFailed'));
     }
 };

@@ -105,6 +105,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -241,7 +242,7 @@ const handleUpload = async () => {
         cleanupPreviews();
     } catch (error: any) {
         toast.error.fromResponse(error);
-        console.error('Failed to upload files:', error);
+        logger.error('Failed to upload files:', error);
     } finally {
         uploading.value = false;
     }

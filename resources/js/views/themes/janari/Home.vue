@@ -225,6 +225,7 @@ Content::published()
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue'
@@ -333,10 +334,15 @@ onMounted(async () => {
   try {
     const response = await api.get('/cms/contents/home')
     pageData.value = response.data.data
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Gracefully handle - fallback will render
-    if (error.response?.status !== 404 && error.response?.status !== 200) {
-      console.error('Failed to fetch home page:', error)
+    if (typeof error === 'object' && error !== null && 'response' in error) {
+      const err = error as { response?: { status?: number } };
+      if (err.response?.status !== 404 && err.response?.status !== 200) {
+        logger.error('Failed to fetch home page:', error);
+      }
+    } else {
+      logger.error('Failed to fetch home page:', error);
     }
   } finally {
     loading.value = false

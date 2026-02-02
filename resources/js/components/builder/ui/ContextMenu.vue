@@ -283,7 +283,7 @@ onUnmounted(() => {
 <style scoped>
 .context-menu {
     position: fixed;
-    z-index: 9999;
+    z-index: 100010 !important;
     background: var(--builder-bg-primary);
     border: 1px solid var(--builder-border);
     box-shadow: var(--shadow-xl);

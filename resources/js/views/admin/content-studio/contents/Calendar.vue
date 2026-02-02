@@ -48,6 +48,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -156,7 +157,7 @@ const handleEventDrop = async (info: any) => {
         });
         await fetchContents();
     } catch (error: any) {
-        console.error('Failed to reschedule content:', error);
+        logger.error('Failed to reschedule content:', error);
         toast.error(t('features.content.messages.rescheduleFailed'));
         info.revert();
     }
@@ -183,7 +184,7 @@ const fetchContents = async () => {
         const { data } = parseResponse(response);
         contents.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch contents:', error);
+        logger.error('Failed to fetch contents:', error);
         contents.value = [];
     }
 };
@@ -194,7 +195,7 @@ const fetchCategories = async () => {
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch categories:', error);
+        logger.error('Failed to fetch categories:', error);
         categories.value = [];
     }
 };

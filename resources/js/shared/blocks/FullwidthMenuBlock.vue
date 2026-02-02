@@ -28,7 +28,7 @@
         <ul class="menu-items flex list-none m-0 p-0 transition-colors duration-300" :style="menuItemsStyles">
           <li class="menu-item relative group" v-for="item in menuItems" :key="item.id">
             <a 
-              :href="mode === 'view' ? item.url : null" 
+              :href="mode === 'view' ? (item.url || undefined) : undefined" 
               class="menu-link block px-4 py-3 no-underline transition-colors duration-300 whitespace-nowrap" 
               :style="linkStyles"
               @click.prevent="handleLinkClick(item.url)"
@@ -103,8 +103,8 @@ const menuItems = computed(() => {
     if (props.module.children && props.module.children.length > 0) {
         return props.module.children.map(child => ({
             id: child.id,
-            label: child.settings?.label || 'Item',
-            url: child.settings?.url || '#'
+            label: (child.settings?.label as string) || 'Item',
+            url: (child.settings?.url as string) || '#'
         }))
     }
     return [

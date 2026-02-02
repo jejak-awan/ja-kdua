@@ -331,23 +331,15 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { useConfirm } from '../../../composables/useConfirm';
 import { useToast } from '../../../composables/useToast';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
-import Card from '../../../components/ui/card.vue';
-import Pagination from '../../../components/ui/pagination.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
+import { Badge, Button, Card, Checkbox, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
+
 import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
 import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
@@ -379,7 +371,7 @@ const fetchStatistics = async () => {
         const response = await api.get('/admin/ja/comments/statistics');
         statistics.value = (response.data?.data || response.data) as CommentStatistics;
     } catch (error: any) {
-        console.error('Failed to fetch statistics:', error);
+        logger.error('Failed to fetch statistics:', error);
     }
 };
 
@@ -434,7 +426,7 @@ const bulkAction = async (action: string) => {
         await fetchStatistics();
         toast.success.update('Action');
     } catch (error: any) {
-        console.error('Bulk action failed:', error);
+        logger.error('Bulk action failed:', error);
         toast.error.action(error);
     }
 };
@@ -458,7 +450,7 @@ const fetchComments = async () => {
             pagination.value = paginationData;
         }
     } catch (error: any) {
-        console.error('Failed to fetch comments:', error);
+        logger.error('Failed to fetch comments:', error);
     } finally {
         loading.value = false;
     }
@@ -477,7 +469,7 @@ const approveComment = async (comment: Comment) => {
         await fetchComments();
         toast.success.approve('Comment');
     } catch (error: any) {
-        console.error('Failed to approve comment:', error);
+        logger.error('Failed to approve comment:', error);
         toast.error.update(error, 'Comment');
     }
 };
@@ -489,7 +481,7 @@ const rejectComment = async (comment: Comment) => {
         await fetchStatistics();
         toast.success.reject('Comment');
     } catch (error: any) {
-        console.error('Failed to reject comment:', error);
+        logger.error('Failed to reject comment:', error);
         toast.error.update(error, 'Comment');
     }
 };
@@ -501,7 +493,7 @@ const markAsSpam = async (comment: Comment) => {
         await fetchStatistics();
         toast.success.markSpam('Comment');
     } catch (error: any) {
-        console.error('Failed to mark as spam:', error);
+        logger.error('Failed to mark as spam:', error);
         toast.error.update(error, 'Comment');
     }
 };
@@ -530,7 +522,7 @@ const deleteComment = async (comment: Comment) => {
         await fetchComments();
         toast.success.delete('Comment');
     } catch (error: any) {
-        console.error('Failed to delete comment:', error);
+        logger.error('Failed to delete comment:', error);
         toast.error.delete(error, 'Comment');
     }
 };

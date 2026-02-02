@@ -106,8 +106,8 @@ import { menuItemRegistry } from '../registry';
 import type { MenuItem } from '../../../types/menu';
 
 // UI Components
-import Badge from '../../ui/badge.vue';
-import Button from '../../ui/button.vue';
+import Badge from '../../ui/Badge.vue';
+import Button from '../../ui/Button.vue';
 
 import GripVertical from 'lucide-vue-next/dist/esm/icons/grip-vertical.js';
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';

@@ -57,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, computed, watch, type Component } from 'vue';
 import { useTheme } from '@/composables/useTheme';
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import Monitor from 'lucide-vue-next/dist/esm/icons/monitor.js';
@@ -66,12 +66,12 @@ import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
 
 interface Author {
     name: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface Category {
     name: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface Content {
@@ -82,14 +82,14 @@ interface Content {
     author?: Author | string;
     category?: Category | string;
     published_at?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface Device {
     name: string;
     label: string;
     width: string;
-    icon: any;
+    icon: Component;
 }
 
 const props = withDefaults(defineProps<{
@@ -107,6 +107,7 @@ const emit = defineEmits<{
     (e: 'publish'): void;
 }>();
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { activeTheme, themeSettings } = useTheme();
 const selectedDevice = ref<string>('desktop');
 

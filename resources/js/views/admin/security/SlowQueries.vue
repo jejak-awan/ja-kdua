@@ -129,6 +129,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
@@ -173,7 +174,7 @@ async function fetchQueries() {
       last_page: response.data.data.last_page || 1,
     };
   } catch (error: any) {
-    console.error('Failed to fetch slow queries:', error);
+    logger.error('Failed to fetch slow queries:', error);
   } finally {
     loading.value = false;
   }
@@ -184,7 +185,7 @@ async function fetchStats() {
     const response = await api.get('/admin/ja/security/slow-queries/statistics');
     stats.value = response.data.data || {};
   } catch (error: any) {
-    console.error('Failed to fetch stats:', error);
+    logger.error('Failed to fetch stats:', error);
   }
 }
 

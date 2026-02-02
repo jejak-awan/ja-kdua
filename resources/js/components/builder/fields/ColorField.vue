@@ -163,18 +163,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, defineAsyncComponent, inject, nextTick, onMounted, onUnmounted } from 'vue'
-import type { BuilderInstance } from '../../../types/builder'
+import { ref, computed, watch, defineAsyncComponent, inject, onMounted, onUnmounted } from 'vue'
+import type { BuilderInstance, SettingDefinition } from '@/types/builder'
 import { useI18n } from 'vue-i18n'
-import { parseColor, rgbToHex } from '../core/colorUtils'
-import { themeVariables, toCssVarName } from '../core/cssVariables'
+import { parseColor, rgbToHex } from '@/components/builder/core/colorUtils'
+import { themeVariables, toCssVarName } from '@/components/builder/core/cssVariables'
 import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import Pipette from 'lucide-vue-next/dist/esm/icons/pipette.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
-import { IconButton, BaseColorSlider } from '../ui'
+import { BaseColorSlider } from '@/components/builder/ui'
 
 const ColorPickerModal = defineAsyncComponent(() => import('../modals/ColorPickerModal.vue'))
 const { t } = useI18n()
@@ -182,7 +182,7 @@ const builder = inject<BuilderInstance>('builder')
 const { globalColors } = builder?.globalVariables || { globalColors: ref([]) }
 
 const props = defineProps<{
-  field?: any;
+  field?: SettingDefinition;
   value?: string;
   defaultValue?: string;
   placeholderValue?: string | null;
@@ -199,9 +199,9 @@ const hexDisplayValue = ref('')
 const cssVarValue = ref('')
 const showVarSuggestions = ref(false)
 const showModeDropdown = ref(false)
-const modeDropdownRef = ref(null)
-const mainInputRef = ref(null)
-const hexInputRef = ref(null)
+const modeDropdownRef = ref<HTMLElement | null>(null)
+const mainInputRef = ref<HTMLElement | null>(null)
+const hexInputRef = ref<HTMLElement | null>(null)
 
 const modalMode = computed(() => inputMode.value as 'hex' | 'css_var' | undefined)
 
@@ -259,7 +259,7 @@ const alphaTrackColor = computed(() => {
 const allSuggestions = computed(() => {
     const staticVars = themeVariables || []
     const colors = globalColors?.value || []
-    const dynamicVars = colors.map((c: any) => toCssVarName(c?.name || ''))
+    const dynamicVars = (colors as any[]).map((c: any) => toCssVarName(c?.name || ''))
     return [...new Set([...staticVars, ...dynamicVars])]
 })
 
@@ -341,10 +341,6 @@ const setMode = (mode: string) => {
 const modeDropdownStyle = ref({})
 const varSuggestionsStyle = ref({})
 
-// We don't need updateDropdownPositions logic if we aren't using Teleport + Fixed
-// But we might want some basic positioning if we used absolute.
-// For now, let's rely on CSS absolute positioning relative to parent.
-
 // Click Outside for Mode Dropdown
 const handleClickOutside = (event: MouseEvent) => {
     if (showModeDropdown.value && modeDropdownRef.value && !(modeDropdownRef.value as HTMLElement).contains(event.target as Node)) {
@@ -376,15 +372,6 @@ const emitUpdateVar = () => {
     if (val && val.startsWith('--')) {
         val = `var(${val})`
     }
-    
-    // Apply opacity if needed. But consistent with Modal:
-    // If we want color-mix, we apply it.
-    // Modal currently simplified to just var.
-    // Let's stick strictly to what Modal does: emit val.
-    // BUT the user asked for "same features", and previously Panel logic applied opacity.
-    // To match modal exactly: only update opacity if slider moves?
-    // Let's keep logic simple: strict sync with Modal's behavior which separates them?
-    // Actually, Modal emits var directly.
     
     emit('update:value', val)
 }
@@ -421,9 +408,6 @@ const processOpacityUpdate = (alpha: number) => {
         emit('update:value', newVal)
     } else {
         // Var mode
-        // If strict match to Modal (Step 1492): just return variable.
-        // But the Panel has an opacity input right there. It implies usage.
-        // We will adhere to standard logic: wrap in color-mix if alpha < 100.
         let v = cssVarValue.value
         if (v && v.startsWith('--')) v = `var(${v})`
         
@@ -483,14 +467,6 @@ defineExpose({ openPicker })
     display: flex;
     align-items: center;
     cursor: pointer;
-}
-
-/* Action buttons container */
-.color-actions {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    margin-right: 4px;
 }
 
 .mini-preview {
@@ -732,7 +708,7 @@ defineExpose({ openPicker })
   left: 0; 
   width: 100%; /* Match input width */
   min-width: 200px;
-  background-color: var(--builder-bg-background, #1f2937);
+  background-color: var(--builder-bg-background);
   border: 1px solid var(--builder-border);
   border-radius: 4px;
   max-height: 160px;

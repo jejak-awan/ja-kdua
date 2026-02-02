@@ -1,8 +1,9 @@
+import { logger } from '@/utils/logger';
 /**
  * Module Registry
  * Manages module definitions and their Vue components
  */
-import type { BlockInstance, ModuleSettings, ModuleDefinition } from '../../../types/builder'
+import type { BlockInstance, ModuleSettings, ModuleDefinition } from '@/types/builder'
 import type { Component } from 'vue'
 import ValidationService from './ValidationService';
 
@@ -21,7 +22,7 @@ class ModuleRegistry {
      */
     register(definition: ModuleDefinition): void {
         if (!definition.name) {
-            console.error('Module definition must have a name');
+            logger.error('Module definition must have a name');
             return;
         }
         this.modules.set(definition.name, definition);
@@ -105,7 +106,7 @@ class ModuleRegistry {
     createInstance(name: string, overrides: ModuleSettings = {}): BlockInstance | null {
         const definition = this.get(name);
         if (!definition) {
-            console.error(`Module "${name}" not found in registry`);
+            logger.error(`Module "${name}" not found in registry`);
             return null;
         }
 
@@ -116,7 +117,7 @@ class ModuleRegistry {
 
         const validation = ValidationService.validate(name, initialSettings);
         if (!validation.success) {
-            console.warn(`[ModuleRegistry] Created instance of ${name} has invalid settings:`, validation.errors);
+            logger.warning(`[ModuleRegistry] Created instance of ${name} has invalid settings:`, validation.errors);
         }
 
         const instance: BlockInstance = {

@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import BaseBlock from '../components/BaseBlock.vue'
-import LucideIcon from '../../components/ui/LucideIcon.vue'
+import { LucideIcon } from '@/components/ui';
 import { getVal, toCSS, getLayoutStyles, getTypographyStyles } from '../utils/styleUtils'
 import type { BlockProps } from '@/types/builder'
 

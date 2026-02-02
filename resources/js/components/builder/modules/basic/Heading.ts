@@ -21,7 +21,7 @@ import {
     attributesSettings,
     linkSettings,
     layoutSettings
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Heading Module Definition

@@ -124,21 +124,12 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import api from '../../../services/api';
 import { parseSingleResponse } from '../../../utils/responseParser';
-import Card from '../../../components/ui/card.vue';
-import CardHeader from '../../../components/ui/card-header.vue';
-import CardTitle from '../../../components/ui/card-title.vue';
-import CardContent from '../../../components/ui/card-content.vue';
-import Button from '../../../components/ui/button.vue';
-import Table from '../../../components/ui/table.vue';
-import TableHeader from '../../../components/ui/table-header.vue';
-import TableBody from '../../../components/ui/table-body.vue';
-import TableRow from '../../../components/ui/table-row.vue';
-import TableCell from '../../../components/ui/table-cell.vue';
-import TableHead from '../../../components/ui/table-head.vue';
-import Badge from '../../../components/ui/badge.vue';
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
+
 import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
 import Target from 'lucide-vue-next/dist/esm/icons/target.js';
 import XCircle from 'lucide-vue-next/dist/esm/icons/circle-x.js';
@@ -171,7 +162,7 @@ const fetchCacheStats = async () => {
             };
         }
     } catch (error: any) {
-        console.error('Failed to fetch cache stats:', error);
+        logger.error('Failed to fetch cache stats:', error);
         // Keep default values on error
         cacheStats.value = {
             status: 'Active',
@@ -197,7 +188,7 @@ const clearAllCache = async () => {
         toast.success('All cache cleared successfully');
         await fetchCacheStats();
     } catch (error: any) {
-        console.error('Failed to clear cache:', error);
+        logger.error('Failed to clear cache:', error);
         toast.error('Error', 'Failed to clear cache');
     } finally {
         clearing.value = false;
@@ -220,7 +211,7 @@ const clearContentCache = async () => {
         toast.success('Content cache cleared successfully');
         await fetchCacheStats();
     } catch (error: any) {
-        console.error('Failed to clear content cache:', error);
+        logger.error('Failed to clear content cache:', error);
         toast.error('Error', 'Failed to clear content cache');
     } finally {
         clearing.value = false;
@@ -234,7 +225,7 @@ const warmUpCache = async () => {
         toast.success('Cache warmed up successfully');
         await fetchCacheStats();
     } catch (error: any) {
-        console.error('Failed to warm up cache:', error);
+        logger.error('Failed to warm up cache:', error);
         toast.error('Error', 'Failed to warm up cache');
     } finally {
         warming.value = false;

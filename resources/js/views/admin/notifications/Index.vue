@@ -143,6 +143,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -156,18 +157,20 @@ import BellOff from 'lucide-vue-next/dist/esm/icons/bell-off.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 
 // UI Components
-import Card from '../../../components/ui/card.vue';
-import CardHeader from '../../../components/ui/card-header.vue';
-import CardTitle from '../../../components/ui/card-title.vue';
-import CardContent from '../../../components/ui/card-content.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
+import { 
+    Card, 
+    CardHeader, 
+    CardTitle, 
+    CardContent, 
+    Button, 
+    Input, 
+    Badge, 
+    Select, 
+    SelectTrigger, 
+    SelectValue, 
+    SelectContent, 
+    SelectItem 
+} from '@/components/ui';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
@@ -250,7 +253,7 @@ const fetchNotifications = async () => {
         
         notifications.value = data;
     } catch (error: any) {
-        console.error('Failed to fetch notifications:', error);
+        logger.error('Failed to fetch notifications:', error);
     } finally {
         loading.value = false;
     }
@@ -268,7 +271,7 @@ const markAsRead = async (notification: any) => {
         }
         
     } catch (error: any) {
-        console.error('Failed to mark notification as read:', error);
+        logger.error('Failed to mark notification as read:', error);
         toast.error.default(t('features.notifications.messages.markReadFailed'));
     }
 };
@@ -279,7 +282,7 @@ const markAllAsRead = async () => {
         toast.success.default(t('features.notifications.messages.markAllReadSuccess'));
         fetchNotifications();
     } catch (error: any) {
-        console.error('Failed to mark all notifications as read:', error);
+        logger.error('Failed to mark all notifications as read:', error);
         toast.error.default(t('features.notifications.messages.markAllReadFailed'));
     }
 };
@@ -302,7 +305,7 @@ const deleteNotification = async (notification: any) => {
         notifications.value = notifications.value.filter(n => n.id !== notification.id);
         
     } catch (error: any) {
-        console.error('Failed to delete notification:', error);
+        logger.error('Failed to delete notification:', error);
         toast.error.default(t('features.notifications.messages.deleteFailed'));
     }
 };

@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import Label from '@/components/ui/label.vue';
+import { Label } from '@/components/ui';
 
 interface Props {
   muted?: boolean;

@@ -12,13 +12,13 @@ export interface FormField {
     label: string;
     description?: string;
     placeholder?: string;
-    default_value?: any;
-    options?: any[];
-    validation_rules?: string | Record<string, any>;
+    default_value?: unknown;
+    options?: (string | number | Record<string, unknown>)[];
+    validation_rules?: string | Record<string, unknown>;
     is_required?: boolean;
     help_text?: string;
     order?: number;
-    settings?: Record<string, any>;
+    settings?: Record<string, unknown>;
 }
 
 export interface Form {
@@ -33,7 +33,7 @@ export interface Form {
     fields?: FormField[];
     blocks?: BlockInstance[];
     submission_count?: number;
-    settings?: Record<string, any>;
+    settings?: Record<string, unknown>;
     deleted_at?: string | null;
     created_at?: string;
     updated_at?: string;
@@ -42,7 +42,7 @@ export interface Form {
 export interface FormSubmission {
     id: number;
     form_id: number;
-    data: Record<string, any>;
+    data: Record<string, unknown>;
     ip_address?: string;
     user_agent?: string;
     status: 'new' | 'read' | 'archived';

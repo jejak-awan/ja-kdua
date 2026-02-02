@@ -1,6 +1,6 @@
 <template>
   <div class="field-actions" :class="{ 'is-active': showMenu }">
-<!-- Reset Field Button -->
+    <!-- Reset Field Button -->
     <div v-if="showReset" class="action-icon" :title="$t('builder.fields.actions.reset')" @click="$emit('reset')">
        <RotateCcw :size="14" />
     </div>
@@ -25,10 +25,7 @@
        <Layers :size="14" />
     </div>
 
-    <!-- Active Device Indicator (When not showResponsive, or inline) -->
-    <!-- The user wants to see the ACTIVE device icon. 
-         If showResponsive is true, we show Layers (which opens modal).
-         But we can ALSO show the specific device icon as an indicator if responsive is true. -->
+    <!-- Active Device Indicator -->
     <div 
         v-if="responsive && activeDevice && activeDevice !== 'desktop'" 
         class="action-icon active-device-indicator" 
@@ -37,12 +34,6 @@
     >
         <component :is="getDeviceIcon(activeDevice)" :size="12" />
     </div>
-
-
-    <!-- Legacy Device Toggle (Smartphone) - REMOVED/REPLACED by above -->
-    <!-- <div v-if="responsive && !showResponsive" class="action-icon" :title="$t('builder.fields.actions.responsive')">
-        <Smartphone :size="12" />
-    </div> -->
 
     <!-- More Options -->
     <div v-if="showContextMenu" class="action-icon relative">
@@ -70,7 +61,7 @@
 
 <script setup lang="ts">
 import { ref, inject } from 'vue'
-import type { BuilderInstance } from '../../../types/builder'
+import type { BuilderInstance } from '@/types/builder'
 import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
 import Database from 'lucide-vue-next/dist/esm/icons/database.js';
 import MoreVertical from 'lucide-vue-next/dist/esm/icons/ellipsis-vertical.js';
@@ -78,10 +69,11 @@ import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
 import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
 import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
 import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
-import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
 import Monitor from 'lucide-vue-next/dist/esm/icons/monitor.js';
 import Tablet from 'lucide-vue-next/dist/esm/icons/tablet.js';
-import MousePointer from 'lucide-vue-next/dist/esm/icons/mouse-pointer.js';const builder = inject<BuilderInstance>('builder')
+import MousePointer from 'lucide-vue-next/dist/esm/icons/mouse-pointer.js';
+
+const builder = inject<BuilderInstance>('builder')!
 
 const props = defineProps<{
   label: string;
@@ -110,8 +102,8 @@ const emit = defineEmits(['reset', 'responsive', 'select-dynamic-data', 'duplica
 
 const showMenu = ref(false)
 const showInfoPanel = ref(false)
-const contextMenuIconRef = ref<any>(null)
-const dropdownStyle = ref<Record<string, any>>({})
+const contextMenuIconRef = ref<{ $el?: HTMLElement } | null>(null)
+const dropdownStyle = ref<Record<string, string>>({})
 
 const toggleInfo = (e: Event) => {
     e.stopPropagation()
@@ -119,20 +111,18 @@ const toggleInfo = (e: Event) => {
     emit('toggle-info', showInfoPanel.value)
 }
 
-const updateDropdownPosition = (anchorEl: any) => {
+const updateDropdownPosition = (anchorEl: HTMLElement | null) => {
     if (!anchorEl) return
-    const el = anchorEl.$el || anchorEl
-    const rect = el.getBoundingClientRect()
+    const rect = anchorEl.getBoundingClientRect()
     dropdownStyle.value = {
         position: 'fixed',
         top: `${rect.bottom + 4}px`,
-        right: `${window.innerWidth - rect.right}px`,
-        zIndex: 99999
+        right: `${window.innerWidth - rect.right}px`
     }
 }
 
 const vClickOutside = {
-  mounted(el: any, binding: any) {
+  mounted(el: HTMLElement & { clickOutsideEvent?: (event: Event) => void }, binding: { value: (e: Event, el: HTMLElement) => void }) {
     el.clickOutsideEvent = function(event: Event) {
       if (!(el === event.target || el.contains(event.target as Node))) {
         binding.value(event, el);
@@ -140,11 +130,12 @@ const vClickOutside = {
     };
     document.body.addEventListener('click', el.clickOutsideEvent);
   },
-  unmounted(el: any) {
-    document.body.removeEventListener('click', el.clickOutsideEvent);
+  unmounted(el: HTMLElement & { clickOutsideEvent?: (event: Event) => void }) {
+    if (el.clickOutsideEvent) {
+        document.body.removeEventListener('click', el.clickOutsideEvent);
+    }
   }
 }
-
 
 const closeMenu = () => {
     showMenu.value = false
@@ -155,23 +146,21 @@ const toggleMenu = (e: Event) => {
     showMenu.value = !showMenu.value
 
     if (showMenu.value) {
-        updateDropdownPosition(contextMenuIconRef.value?.$el || contextMenuIconRef.value)
-    }
-}
-
-const openGlobalVariables = () => {
-    if (builder && (builder as any).activePanel) {
-        (builder as any).activePanel = 'global_variables'
+        const el = contextMenuIconRef.value?.$el || (contextMenuIconRef.value as unknown as HTMLElement)
+        updateDropdownPosition(el instanceof HTMLElement ? el : null)
     }
 }
 
 const copyAttributes = () => {
-    // TODO: Implement copy attributes
+    // Standardize: Link "Copy Attributes" to builder's copyStyles if a module is selected
+    if (builder && builder.selectedModule.value) {
+        builder.copyStyles(builder.selectedModule.value.id)
+    }
     closeMenu()
 }
 
 const extendAttributes = () => {
-    // TODO: Implement extend attributes
+    // TODO(agentic): [FEATURE] Implement extend attributes (styling inheritance)
     closeMenu()
 }
 
@@ -181,7 +170,7 @@ const resetField = () => {
 }
 
 const findReplace = () => {
-    // TODO: Implement find & replace
+    // TODO(agentic): [FEATURE] Implement global find & replace for field values
     closeMenu()
 }
 </script>
@@ -242,46 +231,12 @@ const findReplace = () => {
     padding: 4px 0;
 }
 
-.dynamic-data-menu {
-    width: 260px;
-}
-
 .context-menu {
     width: 280px;
     background: var(--builder-bg-primary);
     border: 1px solid var(--builder-border);
     box-shadow: var(--shadow-xl);
-}
-
-.dd-header {
-    padding: 8px 12px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--builder-text-muted);
-    text-transform: none;
-}
-
-.dd-action {
-    padding: 0 12px 8px 12px;
-}
-
-.dd-btn-primary {
-    display: block;
-    width: 100%;
-    background-color: var(--builder-accent);
-    color: white;
-    border: none;
-    padding: 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    text-align: center;
-    transition: background-color 0.15s;
-}
-
-.dd-btn-primary:hover {
-    background-color: var(--builder-accent-hover);
+    z-index: 100001 !important;
 }
 
 .menu-item {
@@ -306,25 +261,5 @@ const findReplace = () => {
     height: 1px;
     background-color: var(--builder-border);
     margin: 4px 0;
-}
-
-.field-info-panel {
-    width: 100%;
-    order: 10;
-    margin-top: 8px;
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--builder-text-secondary);
-}
-
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: all 0.2s ease;
-}
-
-.fade-slide-enter-from,
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(-5px);
 }
 </style>

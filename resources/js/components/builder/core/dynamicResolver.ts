@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 /**
  * Dynamic Tag Resolver Utility
  * Resolves @dynamic:{{tag}} patterns to actual values
@@ -7,7 +8,7 @@ import api from '@/services/api'
 
 interface DynamicContext {
     contentId?: string | number
-    loopItem?: Record<string, any>
+    loopItem?: Record<string, unknown>
 }
 
 interface CacheEntry {
@@ -82,8 +83,8 @@ export async function resolveTag(tag: string, context: DynamicContext = {}): Pro
         })
 
         return value
-    } catch (error) {
-        console.error('Failed to resolve dynamic tag:', error)
+    } catch (error: any) {
+        logger.error('Failed to resolve dynamic tag:', error)
         return tag // Return the tag itself as fallback
     }
 }
@@ -151,8 +152,8 @@ export async function resolveTags(tags: string[], context: DynamicContext = {}):
         }
 
         return results
-    } catch (error) {
-        console.error('Failed to resolve dynamic tags:', error)
+    } catch (error: any) {
+        logger.error('Failed to resolve dynamic tags:', error)
         // Return tags as-is
         for (const tag of uncachedTags) {
             results[tag] = tag

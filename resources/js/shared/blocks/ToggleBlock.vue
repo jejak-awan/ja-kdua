@@ -56,7 +56,7 @@
 import { computed } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../ui'
-import LucideIcon from '../../components/ui/LucideIcon.vue'
+import { LucideIcon } from '@/components/ui';
 import { getVal, getLayoutStyles, getTypographyStyles } from '../utils/styleUtils'
 import type { BlockInstance } from '@/types/builder'
 

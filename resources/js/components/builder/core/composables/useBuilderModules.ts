@@ -1,7 +1,8 @@
+import { logger } from '@/utils/logger';
 import { computed, triggerRef } from 'vue'
 import ModuleRegistry from '../ModuleRegistry'
 import ValidationService from '../ValidationService'
-import type { BlockInstance, BuilderState, ModuleSettings } from '../../../../types/builder'
+import type { BlockInstance, BuilderState, ModuleSettings, BuilderPreset } from '@/types/builder'
 
 export interface HistoryManager {
     takeSnapshot: (options?: { immediate?: boolean; delay?: number }) => void;
@@ -22,6 +23,42 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         markAsDirty
     } = state
     const { takeSnapshot } = historyManager
+
+    // Registry proxies
+    const definitions = computed(() => {
+        const defs: Record<string, any> = {}
+        ModuleRegistry.getAll().forEach(m => {
+            if (m.name) defs[m.name] = m
+        })
+        return defs
+    })
+
+    const moduleCategories = computed(() => {
+        const cats = new Set<string>()
+        ModuleRegistry.getAll().forEach(m => {
+            if (m.category) cats.add(m.category)
+        })
+        return Array.from(cats)
+    })
+
+    // We don't have async loading state for internal registry yet
+    const loadingModules = computed(() => false)
+
+    function registerModule(definition: any) {
+        ModuleRegistry.register(definition)
+    }
+
+    function getModuleDefinition(type: string) {
+        return ModuleRegistry.get(type)
+    }
+
+    async function fetchTemplates() {
+        return []
+    }
+
+    async function fetchWidgets() {
+        return []
+    }
 
     // ============================================
     // SELECTION
@@ -79,7 +116,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         return instance
     }
 
-    function insertFromPreset(preset: any, parentId: string | null = null, index: number = -1): BlockInstance | null {
+    function insertFromPreset(preset: BuilderPreset, parentId: string | null = null, index: number = -1): BlockInstance | null {
         const instance = ModuleRegistry.createInstance(preset.type)
         if (!instance) return null
 
@@ -168,7 +205,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         const validation = ValidationService.validate(module.type, tentativeSettings)
 
         if (!validation.success) {
-            console.warn(`[Validation] Failed for ${module.type}:`, validation.errors)
+            logger.warning(`[Validation] Failed for ${module.type}:`, validation.errors)
             return false
         }
 
@@ -190,7 +227,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
 
         const validation = ValidationService.validate(module.type, tentativeSettings)
         if (!validation.success) {
-            console.warn(`[Validation] Failed for ${module.type}:`, validation.errors)
+            logger.warning(`[Validation] Failed for ${module.type}:`, validation.errors)
             return false
         }
 
@@ -206,7 +243,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         return true
     }
 
-    function updateModuleSetting(id: string, key: string, value: any): boolean {
+    function updateModuleSetting(id: string, key: string, value: unknown): boolean {
         const module = findModuleById(blocks.value, id)
         if (!module) return false
 
@@ -226,7 +263,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         const validation = ValidationService.validate(module.type, tentativeSettings)
 
         if (!validation.success) {
-            console.warn(`[Validation] Failed for ${module.type} (field ${key}):`, validation.errors)
+            logger.warning(`[Validation] Failed for ${module.type} (field ${key}):`, validation.errors)
             return false
         }
 
@@ -237,7 +274,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         return true
     }
 
-    function applyPreset(id: string, preset: any): boolean {
+    function applyPreset(id: string, preset: BuilderPreset): boolean {
         const module = findModuleById(blocks.value, id)
         if (!module || !preset.settings) return false
 
@@ -277,19 +314,23 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         return true
     }
 
-    function updateRowLayout(rowId: string, layout: any): boolean {
+    function updateRowLayout(rowId: string, layout: string | { widths?: number[]; structure?: string; cols?: unknown } | Record<string, unknown>): boolean {
         const row = findModuleById(blocks.value, rowId)
         if (!row || row.type !== 'row') return false
 
         let newWidths: number[] = []
-        if (layout.cols) {
+
+        // Normalize layout
+        const layoutObj = (typeof layout === 'string' ? { structure: layout } : layout) as { structure?: string; widths?: number[]; cols?: unknown };
+
+        if (layoutObj.cols) {
             if (confirm('Switching to a complex nested layout will reset columns. Continue?')) {
                 row.children = []
             } else {
                 return false
             }
         } else {
-            newWidths = layout.widths || (typeof layout.structure === 'string' ? layout.structure.split('-').map(() => 1) : [1])
+            newWidths = layoutObj.widths || (typeof layoutObj.structure === 'string' ? layoutObj.structure.split('-').map(() => 1) : [1])
         }
 
         if (newWidths.length > 0) {
@@ -387,7 +428,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         const module = findModuleById(blocks.value, id)
         if (!module) return false
         if (!module.settings.design) module.settings.design = {}
-        module.settings.design = { ...module.settings.design, ...clipboard.value.data }
+        module.settings.design = { ...(module.settings.design as Record<string, any>), ...(clipboard.value.data as Record<string, any>) }
         triggerRef(blocks)
         markAsDirty()
         takeSnapshot({ immediate: true })
@@ -478,6 +519,15 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         pasteStyles,
         resetLayout,
         findModule: (id: string) => findModuleById(blocks.value, id),
-        findParentById: (items: BlockInstance[], id: string) => findParentById(items, id)
+        findParentById: (items: BlockInstance[], id: string) => findParentById(items, id),
+
+        // Registry
+        definitions,
+        moduleCategories,
+        loadingModules,
+        registerModule,
+        getModuleDefinition,
+        fetchTemplates,
+        fetchWidgets
     }
 }

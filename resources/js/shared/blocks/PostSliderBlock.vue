@@ -94,7 +94,7 @@ import CarouselNext from '../ui/CarouselNext.vue'
 import CarouselPrevious from '../ui/CarouselPrevious.vue'
 import { Badge, Button } from '../ui'
 import Autoplay from 'embla-carousel-autoplay'
-import LucideIcon from '../../components/ui/LucideIcon.vue'
+import { LucideIcon } from '@/components/ui';
 import { 
   getVal,
   getLayoutStyles,

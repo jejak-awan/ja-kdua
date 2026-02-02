@@ -85,6 +85,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '@/composables/useToast';
@@ -146,7 +147,7 @@ const fetchFolders = async () => {
         const data = response.data.data || response.data || [];
         folders.value = data.filter((f: MediaFolder) => !f.is_trashed);
     } catch (error) {
-        console.error('Failed to fetch folders:', error);
+        logger.error('Failed to fetch folders:', error);
     }
 };
 
@@ -160,7 +161,7 @@ const handleSubmit = async () => {
         emit('created');
         emit('close');
     } catch (error: any) {
-        console.error('Failed to create folder:', error);
+        logger.error('Failed to create folder:', error);
         toast.error.fromResponse(error);
     } finally {
         saving.value = false;

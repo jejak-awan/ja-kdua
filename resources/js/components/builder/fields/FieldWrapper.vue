@@ -39,8 +39,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import Info from 'lucide-vue-next/dist/esm/icons/info.js';import FieldActions from './FieldActions.vue'
+import { ref, inject } from 'vue'
+import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
+import FieldActions from './FieldActions.vue'
+import type { BuilderInstance } from '@/types/builder'
+
+const builder = inject<BuilderInstance>('builder')!
 
 const props = defineProps<{
   label: string;

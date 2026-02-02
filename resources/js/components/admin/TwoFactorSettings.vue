@@ -217,6 +217,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -259,14 +260,14 @@ interface TwoFactorStatus {
     backup_codes_count: number;
     enabled_at: string | null;
     global_enabled: boolean;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface GenerateResponse {
     secret: string;
     qr_code_url?: string;
     backup_codes?: string[];
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 const { t } = useI18n();
@@ -301,7 +302,7 @@ const fetchStatus = async () => {
         const data = parseSingleResponse(response);
         status.value = data as TwoFactorStatus;
     } catch (error) {
-        console.error('Error fetching 2FA status:', error);
+        logger.error('Error fetching 2FA status:', error);
     } finally {
         initializing.value = false;
     }
@@ -330,7 +331,12 @@ const generateSecret = async () => {
             backupCodes.value = data.backup_codes;
         }
     } catch (error: any) {
-        toast.error('Error', error.response?.data?.message || 'Failed to generate 2FA secret');
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            toast.error('Error', err.response?.data?.message || 'Failed to generate 2FA secret');
+        } else {
+            toast.error('Error', 'Failed to generate 2FA secret');
+        }
     } finally {
         generating.value = false;
     }
@@ -354,7 +360,12 @@ const enable2FA = async () => {
         secret.value = null;
         await fetchStatus();
     } catch (error: any) {
-        toast.error(t('common.status.failed'), error.response?.data?.message || t('features.auth.messages.error'));
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            toast.error(t('common.status.failed'), err.response?.data?.message || t('features.auth.messages.error'));
+        } else {
+            toast.error(t('common.status.failed'), t('features.auth.messages.error'));
+        }
     } finally {
         enabling.value = false;
     }
@@ -373,7 +384,12 @@ const disable2FA = async () => {
         backupCodes.value = [];
         await fetchStatus();
     } catch (error: any) {
-        toast.error(t('common.status.failed'), error.response?.data?.message || t('features.auth.messages.error'));
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            toast.error(t('common.status.failed'), err.response?.data?.message || t('features.auth.messages.error'));
+        } else {
+            toast.error(t('common.status.failed'), t('features.auth.messages.error'));
+        }
     } finally {
         disabling.value = false;
     }
@@ -395,7 +411,12 @@ const regenerateBackupCodes = async () => {
         showRegenPassword.value = false;
         await fetchStatus();
     } catch (error: any) {
-        toast.error(t('common.status.failed'), error.response?.data?.message || t('features.auth.messages.error'));
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            toast.error(t('common.status.failed'), err.response?.data?.message || t('features.auth.messages.error'));
+        } else {
+            toast.error(t('common.status.failed'), t('features.auth.messages.error'));
+        }
     } finally {
         regenerating.value = false;
     }
@@ -406,7 +427,7 @@ const copySecret = async () => {
     try {
         await navigator.clipboard.writeText(secret.value);
         toast.success(t('common.status.success'), t('features.auth.twoFactor.messages.copySuccess'));
-    } catch (error) {
+    } catch {
         toast.error(t('common.status.failed'), t('common.messages.error.default'));
     }
 };

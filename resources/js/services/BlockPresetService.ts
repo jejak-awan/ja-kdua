@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { ref, type Ref } from 'vue';
 
 export interface BlockPreset {
@@ -21,7 +22,7 @@ class BlockPresetService {
             const stored = localStorage.getItem('ja_builder_presets');
             return stored ? JSON.parse(stored) : {};
         } catch (e) {
-            console.error('Failed to load presets', e);
+            logger.error('Failed to load presets', e);
             return {};
         }
     }

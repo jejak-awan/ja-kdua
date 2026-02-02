@@ -170,6 +170,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -226,7 +227,7 @@ const fetchWebhooks = async () => {
             };
         }
         } catch (err) {
-            console.error('Failed to fetch webhooks:', err);
+            logger.error('Failed to fetch webhooks:', err);
     } finally {
         loading.value = false;
     }
@@ -242,7 +243,7 @@ const testWebhook = async (webhook: any) => {
         await api.post(`/admin/ja/webhooks/${webhook.id}/test`);
         toast.success.action(t('features.developer.webhooks.messages.test_success'));
     } catch (error: any) {
-        console.error('Failed to test webhook:', error);
+        logger.error('Failed to test webhook:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -262,7 +263,7 @@ const deleteWebhook = async (webhook: any) => {
         toast.success.delete('Webhook');
         fetchWebhooks();
     } catch (error: any) {
-        console.error('Failed to delete webhook:', error);
+        logger.error('Failed to delete webhook:', error);
         toast.error.delete(error, 'Webhook');
     }
 };

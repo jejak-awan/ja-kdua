@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { reactive } from 'vue'
 
 export interface BlockState {
@@ -57,7 +58,7 @@ class InteractionManager {
                 this.playAnimation(targetId, params.animationName);
                 break;
             default:
-                console.warn(`[InteractionManager] Unknown action: ${action}`);
+                logger.warning(`[InteractionManager] Unknown action: ${action}`);
         }
     }
 

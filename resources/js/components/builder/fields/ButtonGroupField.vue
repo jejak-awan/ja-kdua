@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import type { BlockInstance } from '../../../types/builder'
+import type { SettingDefinition } from '@/types/builder'
 import { useI18n } from 'vue-i18n'
 import AlignLeft from 'lucide-vue-next/dist/esm/icons/align-start-horizontal.js';
 import AlignCenter from 'lucide-vue-next/dist/esm/icons/align-center-horizontal.js';
@@ -34,7 +34,8 @@ import EyeOff from 'lucide-vue-next/dist/esm/icons/eye-off.js';
 import Lock from 'lucide-vue-next/dist/esm/icons/lock.js';
 import Unlock from 'lucide-vue-next/dist/esm/icons/lock-open.js';
 import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
-import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';import type { Component } from 'vue'
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import type { Component } from 'vue'
 
 const iconMap: Record<string, Component> = {
   AlignLeft, AlignCenter, AlignRight, AlignJustify, 
@@ -42,7 +43,7 @@ const iconMap: Record<string, Component> = {
   Type, Image, Video, Link, Mail, Globe, 
   Eye, EyeOff, Lock, Unlock, Settings, Trash2
 }
-import { BaseSegmentedControl } from '../ui'
+import { BaseSegmentedControl } from '@/components/builder/ui'
 
 interface FieldOption {
   value: string | number | boolean;
@@ -51,10 +52,7 @@ interface FieldOption {
 }
 
 const props = defineProps<{
-  field: {
-    name: string;
-    options: FieldOption[];
-  };
+  field: SettingDefinition;
   value: string | number | boolean;
 }>()
 
@@ -84,7 +82,7 @@ const getOptionLabel = (option: FieldOption) => {
 }
 
 const mappedOptions = computed(() => {
-  return (props.field.options || []).map((opt: FieldOption) => ({
+  return ((props.field.options as any) || []).map((opt: FieldOption) => ({
     ...opt,
     label: getOptionLabel(opt),
     icon: opt.icon ? iconMap[opt.icon] || iconMap.Grid : undefined,

@@ -67,12 +67,14 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CheckCircle from 'lucide-vue-next/dist/esm/icons/circle-check.js';
 import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
-import Check from 'lucide-vue-next/dist/esm/icons/check.js';import api from '../../services/api'
-import Button from '../ui/button.vue'
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import api from '@/services/api'
+import { Button } from '@/components/ui'
 
 const { t } = useI18n()
 
@@ -97,7 +99,7 @@ const generateCaptcha = async () => {
         verified.value = false
         error.value = ''
     } catch (e) {
-        console.error('Failed to generate captcha:', e)
+        logger.error('Failed to generate captcha:', e)
         error.value = 'Failed to load captcha'
     }
 }
@@ -120,11 +122,11 @@ const verify = async () => {
         if (e.response && e.response.status === 422) {
             error.value = t('features.auth.captcha.error') || 'Incorrect answer'
             // We just log a warning instead of error to avoid alarming developers
-            console.warn('Captcha verification failed:', e.response.data?.message || 'Invalid answer')
+            logger.warning('Captcha verification failed:', e.response.data?.message || 'Invalid answer')
         } else {
             // Other errors (500, etc)
             error.value = 'Validation failed'
-            console.error('Captcha system error:', e)
+            logger.error('Captcha system error:', e)
         }
     }
 }

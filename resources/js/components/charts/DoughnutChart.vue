@@ -19,7 +19,7 @@ import {
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface ChartItem {
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 const props = withDefaults(defineProps<{

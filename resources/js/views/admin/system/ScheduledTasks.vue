@@ -441,6 +441,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { debounce } from '@/utils/debounce';
@@ -620,7 +621,7 @@ const copyCronScript = async () => {
       cronCopied.value = false;
     }, 2000);
   } catch (err) {
-    console.error('Failed to copy cron script:', err);
+    logger.error('Failed to copy cron script:', err);
   }
 };
 
@@ -705,7 +706,7 @@ async function fetchTasks(page = 1) : Promise<void> {
     
     selectedTasks.value = [];
   } catch (error: any) {
-    console.error('Failed to fetch tasks:', error.message);
+    logger.error('Failed to fetch tasks:', error);
     toast.error.fromResponse(error);
   } finally {
     loading.value = false;
@@ -722,7 +723,7 @@ async function fetchAllowedCommands() : Promise<void> {
         allowedCommands.value = response.data.data;
     }
   } catch (error: any) {
-    console.error('Failed to fetch allowed commands:', error);
+    logger.error('Failed to fetch allowed commands:', error);
   }
 }
 
@@ -779,7 +780,7 @@ const handleBulkAction = async (action: string) => {
             bulkActionSelection.value = '';
             fetchTasks(pagination.value.current_page);
         } catch (error: any) {
-            console.error('Bulk action failed:', error);
+            logger.error('Bulk action failed:', error);
             toast.error.fromResponse(error);
         }
     }
@@ -835,11 +836,15 @@ async function saveTask() {
     dialogOpen.value = false;
     await fetchTasks(pagination.value.current_page);
   } catch (error: any) {
-    if (error.response?.status === 422) {
-      errors.value = error.response.data.errors || {};
-    } else {
-        console.error('Failed to save task:', error.response?.data?.message || error.message);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const err = error as { response?: { status: number; data?: { errors?: Record<string, string | string[]> } } };
+      if (err.response?.status === 422) {
+        errors.value = err.response.data?.errors || {};
+      } else {
         toast.error.fromResponse(error);
+      }
+    } else {
+      toast.error.fromResponse(error);
     }
   } finally {
     saving.value = false;
@@ -867,7 +872,7 @@ async function runTask(task: ScheduledTask) {
     
     await fetchTasks(pagination.value.current_page);
   } catch (error: any) {
-    console.error('Failed to run task:', error.response?.data?.message || error.message);
+    logger.error('Failed to run task:', error);
     toast.error.fromResponse(error);
   } finally {
     running.value = null;
@@ -890,7 +895,7 @@ async function toggleActive(task: ScheduledTask) : Promise<void> {
     
     await fetchTasks(pagination.value.current_page);
   } catch (error: any) {
-    console.error('Failed to toggle task:', error.message);
+    logger.error('Failed to toggle task:', error);
     toast.error.fromResponse(error);
   }
 }
@@ -915,7 +920,7 @@ async function confirmDelete(task: ScheduledTask) {
     toast.success.delete();
     await fetchTasks(pagination.value.current_page);
   } catch (error: any) {
-    console.error('Failed to delete task:', error.message);
+    logger.error('Failed to delete task:', error);
     toast.error.fromResponse(error);
   }
 }
@@ -960,8 +965,13 @@ async function runAdhocCommand() {
     }
 
   } catch (error: any) {
-    adhocOutput.value = error.response?.data?.message || error.message;
-    console.error('Failed to execute command:', error.message);
+    if (error && typeof error === 'object' && 'response' in error) {
+        const err = error as { response?: { data?: { message?: string } } };
+        adhocOutput.value = err.response?.data?.message || (error as any).message;
+    } else {
+        adhocOutput.value = (error as any).message;
+    }
+    logger.error('Failed to execute command:', error);
   } finally {
     adhocExecuting.value = false;
   }

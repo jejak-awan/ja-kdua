@@ -43,6 +43,15 @@ export interface GlobalFont {
     family: string;
 }
 
+export interface GlobalVariablesData {
+    globalNumbers?: GlobalNumber[];
+    globalText?: GlobalText[];
+    globalImages?: GlobalImage[];
+    globalLinks?: GlobalLink[];
+    globalColors?: GlobalColor[];
+    globalFonts?: GlobalFont[];
+}
+
 export function useGlobalVariables() {
     // State
     const globalNumbers = ref<GlobalNumber[]>([
@@ -113,7 +122,7 @@ export function useGlobalVariables() {
     }
 
     // reset/load methods could go here
-    const loadVariables = (data: any) => {
+    const loadVariables = (data: GlobalVariablesData) => {
         if (!data) return
         if (data.globalNumbers) globalNumbers.value = data.globalNumbers
         if (data.globalText) globalText.value = data.globalText
@@ -150,3 +159,5 @@ export function useGlobalVariables() {
         getVariables
     }
 }
+
+export type GlobalVariablesManager = ReturnType<typeof useGlobalVariables>;

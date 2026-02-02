@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 // Toast service for global toast notifications
 // Use this to show toasts from anywhere in the app
 
@@ -33,7 +34,7 @@ export const toast = {
             return instance.addToast(options);
         }
         // Fallback to console if toast not available
-        console.warn('Toast not initialized:', options);
+        logger.warning('Toast not initialized:', options);
         return null;
     },
 

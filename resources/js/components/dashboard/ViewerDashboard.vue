@@ -65,6 +65,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import api from '@/services/api';
@@ -86,7 +87,7 @@ interface ContentItem {
     id: number | string;
     title: string;
     created_at: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 const authStore = useAuthStore();
@@ -97,12 +98,12 @@ const fetchDashboard = async () => {
     loading.value = true;
     try {
         const response = await api.get('/dashboard/viewer');
-        const data = parseSingleResponse<any>(response);
-        if (data) {
-             recentContent.value = ensureArray(data.recentContent);
+        const data = parseSingleResponse<Record<string, unknown>>(response);
+        if (data && 'recentContent' in data) {
+             recentContent.value = ensureArray<ContentItem>(data.recentContent as ContentItem[]);
         }
-    } catch (error) {
-        console.error('Failed to fetch viewer dashboard:', error);
+    } catch (error: any) {
+        logger.error('Failed to fetch viewer dashboard:', error);
     } finally {
         loading.value = false;
     }

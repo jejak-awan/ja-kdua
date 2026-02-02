@@ -345,13 +345,13 @@ const { t } = useI18n();
 
 const props = defineProps<{
     open: boolean;
-    node: any;
+    node: { type: string; attrs: Record<string, any> } | null;
     anchor: HTMLElement | null;
 }>();
 
 const emit = defineEmits<{
     (e: 'update:open', value: boolean): void;
-    (e: 'save', attrs: any): void;
+    (e: 'save', attrs: Record<string, any>): void;
 }>();
 
 const constrainProportions = ref(true);
@@ -494,7 +494,7 @@ watch(form, () => {
 }, { deep: true });
 
 const emitChanges = () => {
-    const baseAttrs: any = {
+    const baseAttrs: Record<string, any> = {
         ...form.value,
         borderRadius: form.value.borderRadius ? ensureUnit(form.value.borderRadius) : null,
         borderWidth: form.value.borderWidth ? `${form.value.borderWidth}px` : '0px',

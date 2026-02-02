@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { defineStore } from 'pinia';
 import api from '../services/api';
 import { parseResponse, ensureArray } from '../utils/responseParser';
@@ -45,8 +46,8 @@ export const useCmsStore = defineStore('cms', {
                     this.settings = { ...this.settings, ...settingsData };
                     return settingsData;
                 }
-                catch (error) {
-                    console.error(`Error fetching ${group} settings:`, error);
+                catch (error: unknown) {
+                    logger.error(`Error fetching ${group} settings:`, error);
                     return {};
                 } finally {
                     this.loadingGroups = { ...this.loadingGroups, [group]: false };
@@ -64,8 +65,8 @@ export const useCmsStore = defineStore('cms', {
                 const settingsData = response.data?.data || {};
                 this.siteSettings = { ...this.siteSettings, ...settingsData };
                 return settingsData;
-            } catch (error) {
-                console.error('Error fetching public settings:', error);
+            } catch (error: unknown) {
+                logger.error('Error fetching public settings:', error);
                 return this.siteSettings;
             }
         },
@@ -77,8 +78,8 @@ export const useCmsStore = defineStore('cms', {
                 const { data } = parseResponse(response);
                 this.contents = ensureArray(data);
                 return { data: this.contents };
-            } catch (error) {
-                console.error('Error fetching contents:', error);
+            } catch (error: unknown) {
+                logger.error('Error fetching contents:', error);
                 this.contents = [];
                 return { data: [] };
             } finally {
@@ -92,8 +93,8 @@ export const useCmsStore = defineStore('cms', {
                 const response = await api.get(`/cms/contents/${slug}`);
                 this.currentContent = response.data;
                 return response.data;
-            } catch (error) {
-                console.error('Error fetching content:', error);
+            } catch (error: unknown) {
+                logger.error('Error fetching content:', error);
                 return null;
             } finally {
                 this.loading = false;
@@ -106,8 +107,8 @@ export const useCmsStore = defineStore('cms', {
                 const { data } = parseResponse(response);
                 this.categories = ensureArray(data);
                 return this.categories;
-            } catch (error) {
-                console.error('Error fetching categories:', error);
+            } catch (error: unknown) {
+                logger.error('Error fetching categories:', error);
                 this.categories = [];
                 return [];
             }
@@ -119,8 +120,8 @@ export const useCmsStore = defineStore('cms', {
                 const { data } = parseResponse(response);
                 this.tags = ensureArray(data);
                 return this.tags;
-            } catch (error) {
-                console.error('Error fetching tags:', error);
+            } catch (error: unknown) {
+                logger.error('Error fetching tags:', error);
                 this.tags = [];
                 return [];
             }
@@ -164,8 +165,9 @@ export const useCmsStore = defineStore('cms', {
                         this.setThemeMode(backendMode, false); // Don't sync back to backend
                     }
                 }
-            } catch (error: any) {
-                console.debug('Failed to load theme preferences:', error.message);
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : String(error);
+                logger.debug('Failed to load theme preferences:', { message });
             }
         },
 
@@ -173,8 +175,9 @@ export const useCmsStore = defineStore('cms', {
             if (!localStorage.getItem('auth_token')) return;
             try {
                 await api.put('/profile/preferences', { dark_mode: mode });
-            } catch (error: any) {
-                console.debug('Theme sync failed:', error.message);
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : String(error);
+                logger.debug('Theme sync failed:', { message });
             }
         },
 

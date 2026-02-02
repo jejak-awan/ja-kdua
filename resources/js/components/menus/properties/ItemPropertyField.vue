@@ -146,12 +146,11 @@ import {
     IconPicker
 } from '@/components/ui';
 
-// @ts-expect-error: Internal type mismatch
 import MediaPicker from '@/components/media/MediaPicker.vue';
 
 const { t } = useI18n();
 
-type PropertyValue = string | number | boolean | null | undefined;
+type PropertyValue = string | number | boolean | null | undefined | any[] | Record<string, any>;
 
 const emit = defineEmits<{
     (e: 'update', value: PropertyValue): void;

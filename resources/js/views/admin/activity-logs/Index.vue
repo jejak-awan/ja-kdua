@@ -222,6 +222,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -343,7 +344,7 @@ const fetchLogs = async (page: number = 1) => {
             };
         }
     } catch (error: any) {
-        console.error('Failed to fetch activity logs:', error.message);
+        logger.error('Failed to fetch activity logs:', error.message);
         toast.error.fromResponse(error);
     } finally {
         loading.value = false;
@@ -371,7 +372,7 @@ const clearLogs = async () => {
         toast.success.action(t('features.system.logs.messages.cleared'));
         fetchLogs();
     } catch (error: any) {
-        console.error('Failed to clear logs:', error.message);
+        logger.error('Failed to clear logs:', error.message);
         toast.error.fromResponse(error);
     }
 };
@@ -400,7 +401,7 @@ const exportLogs = async () => {
         window.URL.revokeObjectURL(url);
         toast.success.action(t('features.analytics.export.success') || 'Export started');
     } catch (error: any) {
-        console.error('Failed to export activity logs:', error.message);
+        logger.error('Failed to export activity logs:', error.message);
         toast.error.fromResponse(error);
     } finally {
         exporting.value = false;
@@ -413,7 +414,7 @@ const fetchUsers = async () => {
         const data = response.data?.data?.data || response.data?.data || response.data || [];
         users.value = Array.isArray(data) ? data : [];
     } catch (error: any) {
-        console.error('Failed to fetch users:', error);
+        logger.error('Failed to fetch users:', error);
         users.value = [];
     }
 };

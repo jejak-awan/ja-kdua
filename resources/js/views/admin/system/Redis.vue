@@ -494,6 +494,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
@@ -665,7 +666,7 @@ const loadSettings = async () : Promise<void> => {
     })
     initialSettingsForm.value = JSON.parse(JSON.stringify(settingsForm.value));
   } catch (error: any) {
-    console.error('Failed to load Redis settings:', error)
+    logger.error('Failed to load Redis settings:', error)
   }
 }
 
@@ -693,13 +694,16 @@ const saveSettings = async () : Promise<void> => {
       connectionStatus.value = null
     }, 3000)
   } catch (error: any) {
-    if (error.response?.status === 422) {
-      errors.value = error.response.data.errors || {}
-    } else {
-      toast.error.fromResponse(error)
-      connectionStatus.value = {
-        type: 'error',
-        message: error.response?.data?.message || t('features.redis.messages.saveFailed')
+    if (error && typeof error === 'object' && 'response' in error) {
+      const err = error as { response?: { status: number; data?: { errors?: Record<string, string | string[]> } } };
+      if (err.response?.status === 422) {
+        errors.value = err.response.data?.errors || {}
+      } else {
+        toast.error.fromResponse(error)
+        connectionStatus.value = {
+          type: 'error',
+          message: (err as any).response?.data?.message || t('features.redis.messages.saveFailed')
+        }
       }
     }
   } finally {
@@ -724,9 +728,14 @@ const testConnection = async () : Promise<void> => {
     }, 3000);
 
   } catch (error: any) {
+    let msg = t('features.redis.messages.testFailed');
+    if (error && typeof error === 'object' && 'response' in error) {
+      const err = error as { response?: { data?: { message?: string } } };
+      msg = err.response?.data?.message || msg;
+    }
     connectionStatus.value = {
       type: 'error',
-      message: `❌ ${error.response?.data?.message || t('features.redis.messages.testFailed')}`
+      message: `❌ ${msg}`
     }
   } finally {
     testing.value = false
@@ -739,7 +748,7 @@ const loadStats = async () : Promise<void> => {
     const response = await api.get('/admin/ja/redis/info')
     stats.value = response.data.data
   } catch (error: any) {
-    console.error('Failed to load Redis stats:', error)
+    logger.error('Failed to load Redis stats:', error)
   } finally {
     loadingStats.value = false
   }
@@ -750,7 +759,7 @@ const loadCacheStats = async () : Promise<void> => {
     const response = await api.get('/admin/ja/redis/cache-stats')
     cacheStats.value = response.data.data
   } catch (error: any) {
-    console.error('Failed to load cache stats:', error)
+    logger.error('Failed to load cache stats:', error)
   }
 }
 
@@ -760,7 +769,7 @@ const getCacheStatus = async () : Promise<void> => {
         const data = response.data.data
         cacheDriver.value = data.driver
     } catch (error: any) {
-        console.error('Failed to get global cache status:', error)
+        logger.error('Failed to get global cache status:', error)
     }
 }
 
@@ -801,10 +810,13 @@ const flushCache = async (type: string) : Promise<void> => {
     loadCacheStats()
   } catch (error: any) {
     // If it's a 401, we know what happened
-    if (error.response?.status === 401 && isDestructive) {
-       authStore.clearAuth()
-       window.location.href = '/login?message=session_cleared'
-       return
+    if (error && typeof error === 'object' && 'response' in error) {
+      const err = error as { response?: { status: number } };
+      if (err.response?.status === 401 && isDestructive) {
+         authStore.clearAuth()
+         window.location.href = '/login?message=session_cleared'
+         return
+      }
     }
     toast.error.fromResponse(error)
   } finally {
@@ -840,11 +852,14 @@ const warmCache = async () : Promise<void> => {
     window.location.href = '/login?message=session_cleared'
     
   } catch (error: any) {
-     if (error.response?.status === 401) {
-       authStore.clearAuth()
-       window.location.href = '/login?message=session_cleared'
-       return
-    }
+     if (error && typeof error === 'object' && 'response' in error) {
+       const err = error as { response?: { status: number } };
+       if (err.response?.status === 401) {
+         authStore.clearAuth()
+         window.location.href = '/login?message=session_cleared'
+         return
+       }
+     }
     toast.error.fromResponse(error)
   } finally {
     warming.value = false

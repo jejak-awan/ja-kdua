@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { shallowRef } from 'vue';
 import type { MenuItemDefinition, MenuItem, MenuItemSetting } from '@/types/menu';
 
@@ -16,7 +17,7 @@ class MenuItemRegistry {
      */
     register(definition: MenuItemDefinition) {
         if (!definition.name) {
-            console.error('Menu item definition must have a name');
+            logger.error('Menu item definition must have a name');
             return;
         }
         this.items.value.set(definition.name, definition);
@@ -64,7 +65,7 @@ class MenuItemRegistry {
     createInstance(type: string, overrides: Partial<MenuItem> = {}): MenuItem | null {
         const definition = this.get(type);
         if (!definition) {
-            console.warn(`Unknown menu item type: ${type}`);
+            logger.warning(`Unknown menu item type: ${type}`);
             return null;
         }
 

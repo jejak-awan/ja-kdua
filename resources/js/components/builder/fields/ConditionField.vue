@@ -108,12 +108,13 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted } from 'vue'
-import type { BlockInstance } from '../../../types/builder'
+import type { BlockInstance, SettingDefinition } from '@/types/builder'
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Settings2 from 'lucide-vue-next/dist/esm/icons/settings.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
-import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';import { BaseButton, BasePopover, IconButton, BaseLabel } from '../ui'
+import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
+import { BaseButton, BasePopover, IconButton, BaseLabel } from '@/components/builder/ui'
 
 interface ConditionItem {
   type: string;
@@ -129,7 +130,7 @@ interface ConditionGroup {
 }
 
 const props = defineProps<{
-  field: any;
+  field?: SettingDefinition;
   value: ConditionItem[];
   module: BlockInstance;
 }>()

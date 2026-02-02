@@ -79,7 +79,7 @@
 import { computed, inject } from 'vue'
 import User from 'lucide-vue-next/dist/esm/icons/user.js';import BaseBlock from '../components/BaseBlock.vue'
 import { Avatar, AvatarImage, AvatarFallback } from '../ui'
-import LucideIcon from '../../components/ui/LucideIcon.vue'
+import { LucideIcon } from '@/components/ui';
 import { 
   getVal, 
   getLayoutStyles, 

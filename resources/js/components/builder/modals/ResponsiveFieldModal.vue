@@ -193,11 +193,11 @@ import FlipVertical from 'lucide-vue-next/dist/esm/icons/flip-vertical.js';
 import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
 import Contrast from 'lucide-vue-next/dist/esm/icons/contrast.js';
 import { useI18n } from 'vue-i18n';
-import { BaseModal, BaseButton, BaseDropdown } from '../ui';
-import FieldActions from '../fields/FieldActions.vue';
-import { getBackgroundStyles } from '../../../shared/utils/styleUtils';
-import { BackgroundPatterns, BackgroundMasks } from '../../../shared/utils/AssetLibrary';
-import type { BuilderInstance, BlockInstance } from '../../../types/builder';
+import { BaseModal, BaseButton, BaseDropdown } from '@/components/builder/ui';
+import FieldActions from '@/components/builder/fields/FieldActions.vue';
+import { getBackgroundStyles } from '@/shared/utils/styleUtils';
+import { BackgroundPatterns, BackgroundMasks } from '@/shared/utils/AssetLibrary';
+import type { BuilderInstance, BlockInstance } from '@/types/builder';
 
 interface SubFieldGroup {
   match?: string;
@@ -392,7 +392,7 @@ const getModeValue = (id: string) => {
   const getVal = (deviceId: string) => {
     const suffix = deviceId === 'desktop' ? '' : (deviceId === 'mobile' ? '_mobile' : `_${deviceId}`);
     const fullParentKey = parentPath ? (parentPath + suffix) : (childKey + suffix);
-    const settingsObj = liveSettings.value[fullParentKey];
+    const settingsObj = (liveSettings.value as any)[fullParentKey];
     
     if (parentPath && childKey) {
       return settingsObj?.[childKey] ?? null;
@@ -410,7 +410,7 @@ const getGenericValue = (key: string, id: string) => {
   const getVal = (deviceId: string) => {
     const suffix = deviceId === 'desktop' ? '' : (deviceId === 'mobile' ? '_mobile' : `_${deviceId}`);
     const fullParentKey = parentPath ? (parentPath + suffix) : (childKey + suffix);
-    const settingsObj = liveSettings.value[fullParentKey];
+    const settingsObj = (liveSettings.value as any)[fullParentKey];
     
     if (parentPath && childKey) {
       return settingsObj?.[childKey] ?? null;

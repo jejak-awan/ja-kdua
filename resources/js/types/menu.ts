@@ -1,3 +1,5 @@
+import type { Component } from 'vue';
+
 export interface Menu {
     id: number | string;
     name: string;
@@ -45,7 +47,7 @@ export interface MenuItem {
 
     children?: MenuItem[];
     add_to_menu?: boolean; // UI only
-    [key: string]: any; // Keep any for dynamic properties since it's a plugin-based registry
+    [key: string]: string | number | boolean | null | undefined | MenuItem[] | Record<string, unknown>;
 }
 
 export interface MenuItemDTO {
@@ -79,10 +81,10 @@ export interface MenuItemSetting {
     type: 'text' | 'textarea' | 'select' | 'boolean' | 'number' | 'color' | 'icon_picker' | 'media' | 'data_select';
     label: string;
     required?: boolean;
-    default?: any;
+    default?: unknown;
     placeholder?: string;
     description?: string;
-    options?: { label: string; value: any }[];
+    options?: { label: string; value: string | number | boolean | null }[];
     group?: 'appearance' | 'mega_menu' | 'badge' | string;
     min?: number;
     max?: number;
@@ -101,7 +103,7 @@ export interface MenuItemDefinition {
     name: string;
     label: string;
     category: 'basic' | 'content' | 'structure' | string;
-    icon: any; // Component
+    icon: Component | string; // Component or icon name
     color: string;
     description: string;
     defaultTitle: string;

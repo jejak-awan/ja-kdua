@@ -11,8 +11,10 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue'
-import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';import api from '../../services/api'
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import api from '@/services/api'
 import SliderCaptcha from './SliderCaptcha.vue'
 import MathCaptcha from './MathCaptcha.vue'
 import ImageCaptcha from './ImageCaptcha.vue'
@@ -52,7 +54,7 @@ const fetchSettings = async () => {
         
         method.value = data.method
     } catch (e) {
-        console.error('Failed to fetch captcha settings:', e)
+        logger.error('Failed to fetch captcha settings:', e)
         enabled.value = false
     } finally {
         loading.value = false

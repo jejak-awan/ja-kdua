@@ -20,7 +20,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     layoutSettings
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Toggle Module Definition (Single collapsible)

@@ -112,6 +112,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import api from '@/services/api';
 import { Spinner, Pagination } from '@/components/ui';
@@ -123,7 +124,7 @@ interface LoginEntry {
     ip_address: string;
     user_agent: string;
     login_at: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface PaginatedHistory {
@@ -131,7 +132,7 @@ interface PaginatedHistory {
     current_page: number;
     total: number;
     per_page: number | string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 const history = ref<LoginEntry[]>([]);
@@ -161,7 +162,7 @@ const fetchHistory = async () => {
             }
         }
     } catch (error) {
-        console.error('Failed to fetch login history:', error);
+        logger.error('Failed to fetch login history:', error);
     } finally {
         loading.value = false;
     }

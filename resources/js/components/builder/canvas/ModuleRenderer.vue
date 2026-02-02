@@ -17,9 +17,11 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import ModuleRegistry from '../core/ModuleRegistry'
-import type { BlockInstance, BuilderInstance } from '../../../types/builder'
+import ModuleRegistry from '@/components/builder/core/ModuleRegistry'
+import type { BlockInstance, BuilderInstance } from '@/types/builder'
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js'
 
+const icons = { Plus }
 const props = defineProps<{
   module: BlockInstance
 }>()

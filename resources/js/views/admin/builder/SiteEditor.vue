@@ -34,6 +34,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, onUnmounted, provide } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from '@/services/toast'
@@ -68,7 +69,7 @@ const handleSave = async (status: any) => {
         toast.success(status === 'published' ? 'Site published successfully' : 'Site saved successfully')
     } catch (err) {
         toast.error('Failed to save site')
-        console.error(err)
+        logger.error(err instanceof Error ? err.message : 'Failed to save site', { error: err })
     }
 }
 
@@ -162,19 +163,4 @@ onUnmounted(() => {
    No, Teleport moves the DOM nodes, so the container will be empty anyway.
 */
 
-/* Ensure Dialog is above Fullscreen Builder */
-:global(.group[data-state="open"] .fixed.inset-0.z-50) {
-    z-index: 100000 !important; /* Overlay */
-}
-:global(.group[data-state="open"] .fixed.z-50) {
-    z-index: 100001 !important; /* Content */
-}
-/* Fallback for Shadcn Dialog classes if they differ */
-:global([role="dialog"]),
-:global([role="alertdialog"]) {
-    z-index: 100001 !important;
-}
-:global([data-state="open"].fixed.inset-0.bg-black\/80) {
-    z-index: 100000 !important;
-}
 </style>

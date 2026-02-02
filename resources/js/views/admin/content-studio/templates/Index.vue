@@ -196,6 +196,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -205,25 +206,8 @@ import { useToast } from '../../../../composables/useToast';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../../utils/responseParser';
 import { debounce } from '@/utils/debounce';
 import { useAuthStore } from '@/stores/auth';
-import Card from '../../../../components/ui/card.vue';
-import CardHeader from '../../../../components/ui/card-header.vue';
-import CardContent from '../../../../components/ui/card-content.vue';
-import Pagination from '../../../../components/ui/pagination.vue';
-import Button from '../../../../components/ui/button.vue';
-import Input from '../../../../components/ui/input.vue';
-import Table from '../../../../components/ui/table.vue';
-import TableHeader from '../../../../components/ui/table-header.vue';
-import TableBody from '../../../../components/ui/table-body.vue';
-import TableRow from '../../../../components/ui/table-row.vue';
-import TableCell from '../../../../components/ui/table-cell.vue';
-import TableHead from '../../../../components/ui/table-head.vue';
-import Badge from '../../../../components/ui/badge.vue';
-import Checkbox from '../../../../components/ui/checkbox.vue';
-import Select from '../../../../components/ui/select.vue';
-import SelectTrigger from '../../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../../components/ui/select-value.vue';
-import SelectContent from '../../../../components/ui/select-content.vue';
-import SelectItem from '../../../../components/ui/select-item.vue';
+import { Badge, Button, Card, CardContent, CardHeader, Checkbox, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
+
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
@@ -292,7 +276,7 @@ const fetchTemplates = async (page: number | string = 1) => {
         pagination.value = pag;
         selectedTemplates.value = []; // Reset selection on page change
     } catch (error: any) {
-        console.error('Failed to fetch templates:', error);
+        logger.error('Failed to fetch templates:', error);
         templates.value = [];
     } finally {
         loading.value = false;
@@ -308,7 +292,7 @@ const createFromTemplate = async (template: Template) => {
             router.push({ name: 'contents.edit', params: { id: content.id } });
         }
     } catch (error: any) {
-        console.error('Failed to create content from template:', error);
+        logger.error('Failed to create content from template:', error);
         toast.error.templateCreateContent(error);
     }
 };
@@ -336,7 +320,7 @@ const handleDelete = async (template: Template) => {
         }
         await fetchTemplates(pagination.value?.current_page || 1);
     } catch (error: any) {
-        console.error('Failed to delete template:', error);
+        logger.error('Failed to delete template:', error);
         toast.error.delete(error, 'Template');
     }
 };
@@ -356,7 +340,7 @@ const handleRestore = async (template: Template) => {
         toast.success.restore('Template');
         await fetchTemplates(pagination.value?.current_page || 1);
     } catch (error: any) {
-        console.error('Failed to restore template:', error);
+        logger.error('Failed to restore template:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -408,7 +392,7 @@ const handleBulkAction = async () => {
             bulkAction.value = '';
             toast.success.delete('Templates');
         } catch (error: any) {
-            console.error('Bulk action failed:', error);
+            logger.error('Bulk action failed:', error);
             toast.error.action(error);
         }
     } else if (action === 'restore') {
@@ -421,7 +405,7 @@ const handleBulkAction = async () => {
             bulkAction.value = '';
             toast.success.restore('Templates');
         } catch (error: any) {
-            console.error('Bulk action failed:', error);
+            logger.error('Bulk action failed:', error);
             toast.error.action(error);
         }
     }

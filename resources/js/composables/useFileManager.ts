@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '@/composables/useToast';
@@ -297,7 +298,7 @@ export function useFileManager() {
             folders.value = allFolders.value;
             filesCache.value.set(currentPath.value, files.value);
         } catch (error: any) {
-            console.error('Failed to fetch files:', error);
+            logger.error('Failed to fetch files:', error);
         } finally {
             loading.value = false;
         }
@@ -327,7 +328,7 @@ export function useFileManager() {
                 }
             }
         } catch (error) {
-            console.error('Failed to fetch folders:', error);
+            logger.error('Failed to fetch folders:', error);
         }
     };
 
@@ -338,7 +339,7 @@ export function useFileManager() {
                 availableFilters.value = response.data.data;
             }
         } catch (error) {
-            console.error('Failed to fetch file manager filters:', error);
+            logger.error('Failed to fetch file manager filters:', error);
         }
     };
 
@@ -507,7 +508,7 @@ export function useFileManager() {
             const response = await api.get('/admin/ja/file-manager/trash');
             trashItems.value = response.data?.data?.items || [];
         } catch (error) {
-            console.error('Failed to fetch trash:', error);
+            logger.error('Failed to fetch trash:', error);
         } finally {
             trashLoading.value = false;
         }

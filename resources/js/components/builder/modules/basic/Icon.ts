@@ -19,7 +19,7 @@ import {
     attributesSettings,
     layoutSettings,
     linkSettings
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Icon Module Definition

@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import ModuleRegistry from '../core/ModuleRegistry'
+import ModuleRegistry from '@/components/builder/core/ModuleRegistry'
 import SettingsGroup from './SettingsGroup.vue'
 import type { BlockInstance, ModuleDefinition } from '@/types/builder'
 
@@ -42,8 +42,15 @@ const moduleDefinition = computed<ModuleDefinition | undefined>(() =>
 // Get groups for current tab
 const groups = computed(() => {
   const def = moduleDefinition.value
-  if (!def?.settings?.[props.activeTab as keyof typeof def.settings]) return []
-  return def.settings[props.activeTab as keyof typeof def.settings]
+  if (!def?.settings) return []
+  
+  // Use Type Guard or cast to handle the Union type safely
+  if (Array.isArray(def.settings)) {
+    return props.activeTab === 'content' ? def.settings : []
+  }
+  
+  const settingsObj = def.settings as Record<string, any>
+  return settingsObj[props.activeTab] || []
 })
 
 // Filter groups by search query

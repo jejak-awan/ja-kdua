@@ -75,6 +75,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import Carousel from '../ui/Carousel.vue'
@@ -151,7 +152,7 @@ const containerStyles = computed(() => getLayoutStyles(settings.value, props.dev
 
 const handlePlay = (video: any) => {
     if (props.mode === 'edit') return
-    console.log('Playing video:', video)
+    logger.info('Playing video:', video)
 }
 
 const getThumb = (video: any) => {

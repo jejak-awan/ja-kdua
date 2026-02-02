@@ -19,7 +19,7 @@ import {
     attributesSettings,
     adminLabelSettings,
     layoutSettings
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Code Module Definition

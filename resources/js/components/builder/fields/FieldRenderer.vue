@@ -52,7 +52,7 @@
     >
       <PresetPopoverContent
         :type="module.type"
-        :field-name="field.name"
+        :field-name="field.key || (field as any).name"
         @action="handlePresetAction"
       />
     </BasePopover>
@@ -63,13 +63,13 @@
 import { computed, defineAsyncComponent, inject, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FieldWrapper from './FieldWrapper.vue'
-import BasePopover from '../ui/BasePopover.vue'
-import DynamicDataPopover from '../ui/DynamicDataPopover.vue'
-import PresetPopoverContent from '../ui/PresetPopoverContent.vue'
-import type { BlockInstance, BuilderInstance } from '../../../types/builder'
+import BasePopover from '@/components/builder/ui/BasePopover.vue'
+import DynamicDataPopover from '@/components/builder/ui/DynamicDataPopover.vue'
+import PresetPopoverContent from '@/components/builder/ui/PresetPopoverContent.vue'
+import type { BlockInstance, BuilderInstance, SettingDefinition } from '@/types/builder'
 
 // Inject builder
-const builder = inject<BuilderInstance>('builder')
+const builder = inject<BuilderInstance>('builder')!
 
 // Dynamic field component imports
 const fieldComponents: Record<string, any> = {
@@ -106,21 +106,9 @@ const fieldComponents: Record<string, any> = {
   group: defineAsyncComponent(() => import('./GroupField.vue'))
 }
 
-interface FieldConfig {
-  name: string;
-  type: string;
-  label: string;
-  description?: string;
-  responsive?: boolean;
-  show_if?: any;
-  options?: any;
-  default?: any;
-  [key: string]: any;
-}
-
 const props = defineProps<{
-  field: FieldConfig;
-  value?: any;
+  field: SettingDefinition;
+  value?: unknown;
   module: BlockInstance;
   device?: string | null;
 }>()
@@ -132,7 +120,7 @@ const { t, te } = useI18n()
 // Computed
 const translatedLabel = computed(() => {
   const type = props.module.type
-  const name = props.field.name
+  const name = (props.field.key || (props.field as any).name) as string
 
   if (te(`builder.settings.${type}.${name}.label`)) {
     return t(`builder.settings.${type}.${name}.label`)
@@ -142,12 +130,12 @@ const translatedLabel = computed(() => {
     return t(`builder.settings.fields.${name}`)
   }
 
-  return props.field.label
+  return (props.field.label || name) as string
 })
 
 const translatedDescription = computed(() => {
   const type = props.module.type
-  const name = props.field.name
+  const name = (props.field.key || (props.field as any).name) as string
 
   if (te(`builder.settings.${type}.${name}.description`)) {
     return t(`builder.settings.${type}.${name}.description`)
@@ -165,7 +153,7 @@ const translatedDescription = computed(() => {
     return t(`builder.info.common.${name}`)
   }
 
-  return props.field.description
+  return (props.field.description || '') as string
 })
 
 const currentDevice = computed(() => props.device || builder?.device.value || 'desktop')
@@ -176,7 +164,7 @@ const resolvedValue = computed(() => {
   }
   
   const suffix = currentDevice.value === 'mobile' ? '_mobile' : `_${currentDevice.value}`
-  const deviceKey = props.field.name + suffix
+  const deviceKey = (props.field.key || (props.field as any).name) + suffix
   return props.module.settings?.[deviceKey]
 })
 
@@ -186,8 +174,9 @@ const placeholderValue = computed(() => {
   }
 
   const settings: Record<string, any> = props.module.settings || {}
-  const desktopValue = settings[props.field.name]
-  const tabletValue = settings[props.field.name + '_tablet']
+  const name = (props.field.key || (props.field as any).name)
+  const desktopValue = settings[name]
+  const tabletValue = settings[name + '_tablet']
   
   if (currentDevice.value === 'tablet') {
     return desktopValue
@@ -204,7 +193,7 @@ const placeholderValue = computed(() => {
 const isVisible = computed(() => {
     if (!props.field.show_if) return true;
 
-    const checkCondition = (condition: any, settings: any): boolean => {
+    const checkCondition = (condition: any, settings: Record<string, unknown>): boolean => {
         if (condition.AND) {
             const basePass = checkSingleCondition(condition, settings);
             if (!basePass) return false;
@@ -213,7 +202,7 @@ const isVisible = computed(() => {
         return checkSingleCondition(condition, settings);
     }
     
-    const checkSingleCondition = (condition: any, settings: any): boolean => {
+    const checkSingleCondition = (condition: any, settings: Record<string, unknown>): boolean => {
         if (!condition || !condition.field) return true;
         const targetField = condition.field as string;
         const targetValue = condition.value;
@@ -240,11 +229,11 @@ const isVisible = computed(() => {
 
 // Dynamic Data State
 const isDynamicPopoverOpen = ref(false)
-const dynamicPopoverRect = ref<any>(null)
+const dynamicPopoverRect = ref<DOMRect | null>(null)
 
 // Preset Popover State
 const isPresetPopoverOpen = ref(false)
-const presetPopoverRect = ref<any>(null)
+const presetPopoverRect = ref<DOMRect | null>(null)
 
 const loopContextSource = computed(() => 'all')
 
@@ -266,7 +255,8 @@ const hasCustomValue = computed(() => {
     if (props.value === null || props.value === undefined || props.value === '') return false
     
     const moduleDef = builder?.getModuleDefinition(props.module.type)
-    const defaultValue = moduleDef?.defaults?.[props.field.name] ?? props.field.default
+    const name = (props.field.key || (props.field as any).name)
+    const defaultValue = moduleDef?.defaults?.[name] ?? props.field.default
     
     return JSON.stringify(props.value) !== JSON.stringify(defaultValue)
 })
@@ -278,16 +268,16 @@ const handleValueUpdate = (val: any) => {
   }
   
   const suffix = currentDevice.value === 'mobile' ? '_mobile' : `_${currentDevice.value}`
-  const deviceKey = props.field.name + suffix
+  const deviceKey = (props.field.key || (props.field as any).name) + suffix
   builder?.updateModuleSettings(props.module.id, { [deviceKey]: val })
 }
 
 const handleResponsiveClick = () => {
     builder?.openResponsiveModal({
         label: translatedLabel.value,
-        baseKey: props.field.name,
+        baseKey: (props.field.key || (props.field as any).name),
         type: props.field.type,
-        options: props.field.options,
+        options: props.field.options as any[] | Record<string, any>,
         module: props.module,
         settings: props.module.settings || {}
     })
@@ -299,7 +289,8 @@ const resetFullModule = () => {
 
 const resetSpecificField = () => {
     const moduleDef = builder?.getModuleDefinition(props.module.type)
-    const defaultValue = moduleDef?.defaults?.[props.field.name] ?? props.field.default
+    const name = (props.field.key || (props.field as any).name)
+    const defaultValue = moduleDef?.defaults?.[name] ?? props.field.default
     
     let valueToSet = defaultValue
     if (valueToSet === undefined) {
@@ -336,8 +327,9 @@ const handlePresetAction = (payload: { type: string, data: any }) => {
     if (type === 'addNew' || type === 'newFromCurrent') {
         builder?.openSavePresetModal?.(props.module.id)
     } else if (type === 'apply' && data) {
-        if (data.settings && data.settings[props.field.name] !== undefined) {
-            handleValueUpdate(data.settings[props.field.name])
+        const name = (props.field.key || (props.field as any).name)
+        if (data.settings && data.settings[name] !== undefined) {
+            handleValueUpdate(data.settings[name])
         }
     }
     isPresetPopoverOpen.value = false

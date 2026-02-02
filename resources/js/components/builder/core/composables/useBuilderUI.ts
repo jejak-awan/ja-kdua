@@ -1,8 +1,8 @@
 import { triggerRef } from 'vue'
-import type { BuilderState, Canvas } from '../../../../types/builder'
+import type { BuilderState, Canvas, ResponsiveModalState, ConfirmModalState, InputModalState, ModuleManager } from '@/types/builder'
 import type { HistoryManager } from './useBuilderModules'
 
-export function useBuilderUI(state: BuilderState, historyManager: HistoryManager, moduleManager: any) {
+export function useBuilderUI(state: BuilderState, historyManager: HistoryManager, moduleManager: ModuleManager) {
     const {
         canvases,
         activeCanvasId,
@@ -124,7 +124,7 @@ export function useBuilderUI(state: BuilderState, historyManager: HistoryManager
     // MODALS
     // ============================================
 
-    function openResponsiveModal(config: any): void {
+    function openResponsiveModal(config: ResponsiveModalState): void {
         responsiveModal.value = config
     }
 
@@ -145,7 +145,7 @@ export function useBuilderUI(state: BuilderState, historyManager: HistoryManager
         savePresetModal.value.moduleId = null
     }
 
-    function confirm(options: any = {}): Promise<boolean> {
+    function confirm(options: Partial<ConfirmModalState> = {}): Promise<boolean> {
         return new Promise((resolve) => {
             confirmModal.value = {
                 visible: true,
@@ -170,7 +170,7 @@ export function useBuilderUI(state: BuilderState, historyManager: HistoryManager
         }
     }
 
-    function prompt(options: any = {}): Promise<string | null> {
+    function prompt(options: Partial<InputModalState> = {}): Promise<string | null> {
         return new Promise((resolve) => {
             inputModal.value = {
                 visible: true,

@@ -70,6 +70,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -99,7 +100,7 @@ interface EmailLog {
     to: string;
     subject: string;
     sent_at: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 const { t } = useI18n();
@@ -124,26 +125,26 @@ const statusBadgeClass = computed(() => {
 const fetchStats = async () => {
   try {
     const response = await api.get('/admin/ja/system/statistics');
-    const data = parseSingleResponse(response) as any;
+    const data = parseSingleResponse(response) as { email?: EmailStats } | null;
     if (data && data.email) {
-      stats.value = data.email as EmailStats;
+      stats.value = data.email;
     }
   } catch (error) {
-    console.error('Failed to fetch email stats:', error);
+    logger.error('Failed to fetch email stats:', error);
   }
 };
 
 const fetchLogs = async () => {
   try {
     const response = await api.get('/admin/ja/email-test/recent-logs?limit=5');
-    const { data } = parseResponse(response) as any;
+    const { data } = parseResponse(response) as { data: { logs?: EmailLog[] } };
     if (data && Array.isArray(data.logs)) {
         logs.value = data.logs;
     } else {
         logs.value = [];
     }
   } catch (error) {
-    console.error('Failed to fetch email logs:', error);
+    logger.error('Failed to fetch email logs:', error);
   }
 };
 

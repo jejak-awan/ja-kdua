@@ -21,7 +21,7 @@
               <!-- Field Rendering Logic -->
               <div v-if="setting.type === 'color'" class="color-field-container">
                 <ColorField 
-                  :field="{ name: setting.key, type: 'color' }"
+                  :field="{ name: setting.key, type: 'color', label: setting.label || setting.key }"
                   :value="formValues[setting.key]"
                   @update:value="formValues[setting.key] = $event; handleInput()"
                   :placeholder-value="setting.default"
@@ -30,7 +30,7 @@
 
               <div v-else-if="setting.type === 'media' || setting.type === 'upload'" class="media-field-container">
                 <UploadField 
-                  :field="{ name: setting.key, type: 'upload' }"
+                  :field="{ name: setting.key, type: 'upload', label: setting.label || setting.key }"
                   :value="formValues[setting.key]"
                   @update:value="formValues[setting.key] = $event; handleInput()"
                   :placeholder-value="setting.default"
@@ -78,13 +78,14 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, inject, watch, onMounted, defineAsyncComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
-import type { BuilderInstance } from '../../../../types/builder';
+import type { BuilderInstance } from '@/types/builder';
 
-const ColorField = defineAsyncComponent(() => import('../../fields/ColorField.vue'));
-const UploadField = defineAsyncComponent(() => import('../../fields/UploadField.vue'));
+const ColorField = defineAsyncComponent(() => import('@/components/builder/fields/ColorField.vue'));
+const UploadField = defineAsyncComponent(() => import('@/components/builder/fields/UploadField.vue'));
 
 const { t } = useI18n();
 const builder = inject<BuilderInstance>('builder');
@@ -151,7 +152,7 @@ const saveSettings = async () => {
     await builder.updateThemeSettings(selectedThemeSlug.value, formValues.value);
     isDirty.value = false;
   } catch (error) {
-    console.error('Failed to save theme settings:', error);
+    logger.error('Failed to save theme settings:', error);
   } finally {
     saving.value = false;
   }

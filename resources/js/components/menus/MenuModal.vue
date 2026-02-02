@@ -58,23 +58,24 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, onMounted } from 'vue';
 
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
-import Dialog from '../ui/dialog.vue';
-import DialogContent from '../ui/dialog-content.vue';
-import DialogHeader from '../ui/dialog-header.vue';
-import DialogTitle from '../ui/dialog-title.vue';
-import DialogFooter from '../ui/dialog-footer.vue';
-import Button from '../ui/button.vue';
-import Input from '../ui/input.vue';
-import Label from '../ui/label.vue';
-import Select from '../ui/select.vue';
-import SelectTrigger from '../ui/select-trigger.vue';
-import SelectValue from '../ui/select-value.vue';
-import SelectContent from '../ui/select-content.vue';
-import SelectItem from '../ui/select-item.vue';
+import Dialog from '../ui/Dialog.vue';
+import DialogContent from '../ui/DialogContent.vue';
+import DialogHeader from '../ui/DialogHeader.vue';
+import DialogTitle from '../ui/DialogTitle.vue';
+import DialogFooter from '../ui/DialogFooter.vue';
+import Button from '../ui/Button.vue';
+import Input from '../ui/Input.vue';
+import Label from '../ui/Label.vue';
+import Select from '../ui/Select.vue';
+import SelectTrigger from '../ui/SelectTrigger.vue';
+import SelectValue from '../ui/SelectValue.vue';
+import SelectContent from '../ui/SelectContent.vue';
+import SelectItem from '../ui/SelectItem.vue';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import { useToast } from '../../composables/useToast';
 import { useFormValidation } from '../../composables/useFormValidation';
@@ -115,7 +116,7 @@ const fetchLocations = async () => {
             label: label as string
         }));
     } catch (error) {
-        console.error('Failed to fetch menu locations:', error);
+        logger.error('Failed to fetch menu locations:', error);
         toast.error.load(error);
     } finally {
         loadingLocations.value = false;

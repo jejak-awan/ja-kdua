@@ -108,8 +108,13 @@ const handleVerify = async (token: string, email: string) => {
             message.value = response.data.message || t('features.auth.verifyEmail.failed');
             messageType.value = 'error';
         }
-    } catch (error: any) {
-        message.value = error.response?.data?.message || t('features.auth.verifyEmail.failed');
+    } catch (error: unknown) {
+        if (typeof error === 'object' && error !== null && 'response' in error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            message.value = err.response?.data?.message || t('features.auth.verifyEmail.failed');
+        } else {
+            message.value = t('features.auth.verifyEmail.failed');
+        }
         messageType.value = 'error';
     } finally {
         loading.value = false;
@@ -144,8 +149,13 @@ const handleResend = async () => {
             message.value = response.data.message || t('features.auth.verifyEmail.failed');
             messageType.value = 'error';
         }
-    } catch (error: any) {
-        message.value = error.response?.data?.message || t('features.auth.verifyEmail.failed');
+    } catch (error: unknown) {
+        if (typeof error === 'object' && error !== null && 'response' in error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            message.value = err.response?.data?.message || t('features.auth.verifyEmail.failed');
+        } else {
+            message.value = t('features.auth.verifyEmail.failed');
+        }
         messageType.value = 'error';
     } finally {
         loading.value = false;

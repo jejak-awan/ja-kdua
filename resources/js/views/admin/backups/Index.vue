@@ -299,37 +299,15 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
-import Card from '../../../components/ui/card.vue';
-import CardHeader from '../../../components/ui/card-header.vue';
-import CardTitle from '../../../components/ui/card-title.vue';
-import CardContent from '../../../components/ui/card-content.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Table from '../../../components/ui/table.vue';
-import TableHeader from '../../../components/ui/table-header.vue';
-import TableBody from '../../../components/ui/table-body.vue';
-import TableRow from '../../../components/ui/table-row.vue';
-import TableCell from '../../../components/ui/table-cell.vue';
-import TableHead from '../../../components/ui/table-head.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Dialog from '../../../components/ui/dialog.vue';
-import DialogContent from '../../../components/ui/dialog-content.vue';
-import DialogHeader from '../../../components/ui/dialog-header.vue';
-import DialogTitle from '../../../components/ui/dialog-title.vue';
-import DialogFooter from '../../../components/ui/dialog-footer.vue';
-import Label from '../../../components/ui/label.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Checkbox, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
+
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import Database from 'lucide-vue-next/dist/esm/icons/database.js';
@@ -383,7 +361,7 @@ const copyPassword = async (id: number, password: string) => {
             copiedPasswords.value[id] = false;
         }, 2000);
     } catch (err) {
-        console.error('Failed to copy password:', err);
+        logger.error('Failed to copy password:', err);
     }
 };
 
@@ -422,7 +400,7 @@ const fetchBackups = async () => {
             };
         }
     } catch (error: any) {
-        console.error('Failed to fetch backups:', error);
+        logger.error('Failed to fetch backups:', error);
     } finally {
         loading.value = false;
     }
@@ -435,7 +413,7 @@ const createBackup = async () => {
         toast.success.action(t('features.system.backups.messages.created'));
         await fetchBackups();
     } catch (error: any) {
-        console.error('Failed to create backup:', error);
+        logger.error('Failed to create backup:', error);
         toast.error.fromResponse(error);
     } finally {
         creating.value = false;
@@ -455,7 +433,7 @@ const downloadBackup = async (backup: any) => {
         link.click();
         link.remove();
     } catch (error: any) {
-        console.error('Failed to download backup:', error);
+        logger.error('Failed to download backup:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -486,7 +464,7 @@ const restoreBackup = async (backup: any) => {
             window.location.reload();
         }, 1500);
     } catch (error: any) {
-        console.error('Failed to restore backup:', error);
+        logger.error('Failed to restore backup:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -506,7 +484,7 @@ const deleteBackup = async (backup: any) => {
         toast.success.delete();
         await fetchBackups();
     } catch (error: any) {
-        console.error('Failed to delete backup:', error);
+        logger.error('Failed to delete backup:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -527,7 +505,7 @@ const saveSchedule = async () => {
         await fetchBackups(); // Refresh statistics
         toast.success.save();
     } catch (error: any) {
-        console.error('Failed to save schedule:', error);
+        logger.error('Failed to save schedule:', error);
         toast.error.fromResponse(error);
     } finally {
         savingSchedule.value = false;

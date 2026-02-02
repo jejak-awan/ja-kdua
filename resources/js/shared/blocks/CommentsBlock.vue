@@ -96,10 +96,11 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Input, Button } from '../ui'
-import LucideIcon from '../../components/ui/LucideIcon.vue'
+import { LucideIcon } from '@/components/ui';
 import { 
   getVal,
   getLayoutStyles,
@@ -133,7 +134,7 @@ const updateField = (key: string, value: string) => {
 
 const handleReply = (commentId: number) => {
     if (props.mode === 'edit') return
-    console.log('Reply to comment:', commentId)
+    logger.info('Reply to comment:', commentId)
 }
 
 const containerStyles = computed(() => getLayoutStyles(settings.value, device.value))

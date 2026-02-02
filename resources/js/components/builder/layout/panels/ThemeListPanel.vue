@@ -29,7 +29,7 @@
         @click="selectTheme(theme.slug)"
       >
         <div class="theme-preview">
-          <img v-if="theme.preview" :src="theme.preview" :alt="theme.name" />
+          <img v-if="theme.preview && typeof theme.preview === 'string'" :src="theme.preview" :alt="theme.name" />
           <div v-else class="preview-placeholder">
             <Palette :size="32" />
           </div>
@@ -54,13 +54,14 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, inject, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
 import Check from 'lucide-vue-next/dist/esm/icons/check.js';
-import { BaseInput } from '../../ui';
-import type { BuilderInstance } from '../../../../types/builder';
+import { BaseInput } from '@/components/builder/ui';
+import type { BuilderInstance } from '@/types/builder';
 
 const { t } = useI18n();
 const builder = inject<BuilderInstance>('builder');
@@ -91,7 +92,7 @@ const activateTheme = async () => {
     try {
         await builder.loadTheme(selectedThemeSlug.value);
     } catch (error) {
-        console.error('Failed to activate theme:', error);
+        logger.error('Failed to activate theme:', error);
     }
 };
 

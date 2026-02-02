@@ -385,6 +385,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import type { CacheStatus } from '@/types/settings'
 
 interface Setting {
     id: number | string;
@@ -395,12 +396,6 @@ interface Setting {
     description?: string;
 }
 
-interface CacheStatus {
-    driver: string;
-    enabled: boolean;
-    keys: number | string;
-    size: string;
-}
 
 interface SectionState {
     cache: boolean;

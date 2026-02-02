@@ -37,10 +37,13 @@
 </template>
 
 <script setup lang="ts">
-import Ban from 'lucide-vue-next/dist/esm/icons/ban.js';import { useI18n } from 'vue-i18n'
-import { BackgroundPatterns } from '../../../shared/utils/AssetLibrary'
+import Ban from 'lucide-vue-next/dist/esm/icons/ban.js';
+import { useI18n } from 'vue-i18n'
+import { BackgroundPatterns } from '@/shared/utils/AssetLibrary'
+import type { SettingDefinition } from '@/types/builder'
 
 const props = defineProps<{
+  field?: SettingDefinition;
   value?: string;
 }>()
 

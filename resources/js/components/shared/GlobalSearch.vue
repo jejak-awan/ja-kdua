@@ -130,6 +130,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, watch, onMounted, onUnmounted, nextTick, type Component } from 'vue';
 import { useRouter, type RouteLocationRaw } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -429,7 +430,7 @@ const handleSearch = () => {
             suggestions.value = responseData.suggestions || [];
             isLoose.value = responseData.is_loose || false;
         } catch (error) {
-            console.error('Search error:', error);
+            logger.error('Search error:', error);
             results.value = [];
             suggestions.value = [];
         } finally {

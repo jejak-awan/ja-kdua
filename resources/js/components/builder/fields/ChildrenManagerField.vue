@@ -65,14 +65,15 @@
 
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue'
-import type { BlockInstance, BuilderInstance } from '../../../types/builder'
+import type { BlockInstance, BuilderInstance, SettingDefinition } from '@/types/builder'
 import { useI18n } from 'vue-i18n'
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
-import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';import { BaseButton } from '../ui'
+import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import { BaseButton } from '@/components/builder/ui'
 import ModuleActions from './ModuleActions.vue'
 
 const props = defineProps<{
-  field: any;
+  field: SettingDefinition;
   module: BlockInstance;
 }>()
 
@@ -111,7 +112,7 @@ const children = computed(() => {
 
 const getChildLabel = (child: BlockInstance) => {
     if (child.type === 'row') return t('builder.fields.types.row')
-    if (child.settings?.admin_label) return child.settings.admin_label
+    if (child.settings?.admin_label) return child.settings.admin_label as string
     
     // Try to translate module name
     if (te(`builder.modules.${child.type}`)) {
@@ -136,10 +137,6 @@ const duplicateChild = (child: BlockInstance) => {
 
 const deleteChild = (child: BlockInstance) => {
     builder?.removeModule(child.id)
-}
-
-const copyStyles = (child: BlockInstance) => {
-    // TODO: Implement copy styles
 }
 
 const addChild = () => {
@@ -257,45 +254,7 @@ const openStructureTemplate = () => {
   transform: translateY(-5px);
 }
 
-.action-icon {
-    color: var(--builder-text-muted);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2px;
-    transition: color 0.15s;
-}
-
-.action-icon:hover {
-    color: var(--builder-accent);
-}
-
-.delete-btn:hover {
-    color: #ef4444 !important;
-}
-
-.action-dropdown-menu {
-    padding: 4px;
-    min-width: 160px;
-}
-
-.dropdown-item {
-    width: 100%;
-    text-align: left;
-    padding: 8px 12px;
-    background: transparent;
-    border: none;
-    color: var(--builder-text-primary);
-    font-size: 13px;
-    cursor: pointer;
-    border-radius: 4px;
-}
-
-.dropdown-item:hover {
-    background: var(--builder-bg-secondary);
-}
-
+/* Dropdown Menu */
 .manager-actions {
     margin-top: 4px;
     display: flex;

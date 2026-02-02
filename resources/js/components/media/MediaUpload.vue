@@ -62,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import api from '@/services/api';
@@ -178,7 +179,7 @@ const handleFileSelect = async (event: Event) => {
                 return;
             }
         } catch (e) {
-            console.error('Failed to get image dimensions:', e);
+            logger.error('Failed to get image dimensions:', e);
         }
     }
 
@@ -239,7 +240,7 @@ const uploadFile = async () => {
             clearPreview();
         }, 3000);
     } catch (err: any) {
-        console.error('Upload error:', err);
+        logger.error('Upload error:', err);
         const backendError = err.response?.data?.errors?.file?.[0] || err.response?.data?.message || 'Failed to upload file';
         error.value = backendError;
     } finally {

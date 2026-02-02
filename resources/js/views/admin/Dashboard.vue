@@ -5,7 +5,7 @@
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent, type Component } from 'vue';
-import { useAuthStore } from '../../stores/auth';
+import { useAuthStore } from '@/stores/auth';
 
 const authStore = useAuthStore();
 

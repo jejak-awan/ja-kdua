@@ -16,12 +16,12 @@ export interface CustomField {
     type: string;
     description?: string | null;
     placeholder?: string | null;
-    default_value?: any;
-    options?: any[];
-    validation_rules?: string | Record<string, any>;
+    default_value?: unknown;
+    options?: (string | number | Record<string, unknown>)[];
+    validation_rules?: string | Record<string, unknown>;
     is_required?: boolean;
     order?: number;
-    settings?: Record<string, any>;
+    settings?: Record<string, unknown>;
     created_at?: string;
     updated_at?: string;
 

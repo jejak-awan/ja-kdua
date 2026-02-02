@@ -26,6 +26,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import api from '../../services/api';
 import Sidebar from './customizer/sidebar/Sidebar.vue';
@@ -79,7 +80,7 @@ const fetchMenus = async () => {
         }));
         availableMenus.value.unshift({ value: '', label: 'Select a Menu...' });
     } catch (error) {
-        console.error('Failed to fetch menus:', error);
+        logger.error('Failed to fetch menus:', error);
     }
 };
 
@@ -91,7 +92,7 @@ const fetchThemeDetails = async () => {
         fullTheme.value = data;
         loadSettings();
     } catch (error) {
-        console.error('Failed to fetch theme details:', error);
+        logger.error('Failed to fetch theme details:', error);
         toast.error('Error', 'Failed to load theme configuration.');
     } finally {
         loading.value = false;
@@ -256,7 +257,7 @@ const saveSettings = async () => {
         initialCss.value = customCss.value;
         emit('saved');
     } catch (error) {
-        console.error('Failed to save settings:', error);
+        logger.error('Failed to save settings:', error);
         toast.error('Error', 'Failed to save settings. Please try again.');
     } finally {
         saving.value = false;

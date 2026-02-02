@@ -46,15 +46,16 @@
 
 <script setup lang="ts">
 import { computed, ref, inject } from 'vue'
-import type { BuilderInstance } from '../../../types/builder'
+import type { BuilderInstance, SettingDefinition } from '@/types/builder'
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
-import Maximize2 from 'lucide-vue-next/dist/esm/icons/maximize.js';import { BaseInput, BaseButton } from '../ui'
-import LucideIcon from '../../ui/LucideIcon.vue'
-import { commonIcons, allIcons } from '../../../shared/assets/icons'
+import Maximize2 from 'lucide-vue-next/dist/esm/icons/maximize.js';
+import { BaseInput, BaseButton } from '@/components/builder/ui'
+import { LucideIcon } from '@/components/ui';
+import { commonIcons, allIcons } from '@/shared/assets/icons'
 
 const props = defineProps<{
-  field: any;
+  field?: SettingDefinition;
   value?: string;
   placeholderValue?: string | null;
 }>()

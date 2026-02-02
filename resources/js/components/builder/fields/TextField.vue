@@ -21,10 +21,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import Database from 'lucide-vue-next/dist/esm/icons/database.js';
-import X from 'lucide-vue-next/dist/esm/icons/x.js';import { BaseInput } from '../ui'
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import { BaseInput } from '@/components/builder/ui'
+import type { SettingDefinition } from '@/types/builder'
 
 const props = defineProps<{
-  field: any;
+  field: SettingDefinition;
   value?: string;
   placeholderValue?: string | null;
 }>()

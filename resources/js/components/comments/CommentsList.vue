@@ -37,12 +37,13 @@
                         
                         <!-- Actions -->
                         <div class="mt-2">
-                            <button 
-                                @click="activeReplyId = activeReplyId === comment.id ? null : comment.id"
-                                class="text-sm text-primary hover:underline font-medium flex items-center"
-                            >
-                                {{ $t('features.comments.reply') }}
-                            </button>
+                                <Button 
+                                    variant="link"
+                                    @click="activeReplyId = activeReplyId === comment.id ? null : comment.id"
+                                    class="p-0 h-auto font-medium"
+                                >
+                                    {{ $t('features.comments.reply') }}
+                                </Button>
                         </div>
 
                         <!-- Reply Form -->
@@ -53,12 +54,14 @@
                                 @submitted="handleReplySubmitted"
                                 class="border-l-4 border-primary/20 pl-4"
                             />
-                            <button 
+                            <Button 
+                                variant="ghost"
+                                size="sm"
                                 @click="activeReplyId = null"
-                                class="text-xs text-muted-foreground hover:text-foreground mt-2 ml-4"
+                                class="mt-2 ml-4 text-xs h-8"
                             >
                                 {{ $t('common.actions.cancel') }}
-                            </button>
+                            </Button>
                         </div>
                         
                         <!-- Replies -->
@@ -93,6 +96,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -100,7 +104,8 @@ import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import {
     Avatar,
     AvatarImage,
-    AvatarFallback
+    AvatarFallback,
+    Button
 } from '@/components/ui';
 import CommentForm from '@/components/comments/CommentForm.vue';
 
@@ -145,7 +150,7 @@ const fetchComments = async () => {
         const data = response.data?.data || response.data;
         comments.value = Array.isArray(data) ? data : [];
     } catch (error: any) {
-        console.error('Error fetching comments:', error);
+        logger.error('Error fetching comments:', error);
     } finally {
         loading.value = false;
     }

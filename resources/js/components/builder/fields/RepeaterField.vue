@@ -53,19 +53,20 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { BlockInstance } from '../../../types/builder'
+import type { BlockInstance, SettingDefinition } from '@/types/builder'
 import { useI18n } from 'vue-i18n'
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
-import GripVertical from 'lucide-vue-next/dist/esm/icons/grip-vertical.js';import FieldRenderer from './FieldRenderer.vue' // Recursive import
+import GripVertical from 'lucide-vue-next/dist/esm/icons/grip-vertical.js';
+import FieldRenderer from '@/components/builder/fields/FieldRenderer.vue'
 
 // Recursive component definition is handled automatically by Vue for local registration if loop is indirect.
 // But since FieldRenderer imports RepeaterField (via dynamic import), we should be fine.
 // Wait, FieldRenderer imports RepeaterField dynamically? I need to add that later.
 
 const props = defineProps<{
-  field: any;
+  field: SettingDefinition;
   value: any[];
   module: BlockInstance;
 }>()

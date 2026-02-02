@@ -86,6 +86,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -143,7 +144,7 @@ const performSearch = async () => {
         // Update URL
         router.replace({ query: { q: query.value } });
     } catch (error: any) {
-        console.error('Failed to search:', error);
+        logger.error('Failed to search:', error);
         results.value = [];
     } finally {
         loading.value = false;

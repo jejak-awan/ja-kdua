@@ -20,7 +20,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     layoutSettings
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Pricing Feature Module Definition

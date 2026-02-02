@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { reactive } from 'vue';
 
 export interface SystemState {
@@ -22,7 +23,7 @@ export const SystemMonitor = {
     triggerLockdown(reason: string = 'maintenance'): void {
         if (systemState.isSystemDown) return;
 
-        console.warn(`System Lockdown triggered: ${reason}`);
+        logger.warning(`System Lockdown triggered: ${reason}`);
         systemState.isSystemDown = true;
         systemState.downReason = reason;
 

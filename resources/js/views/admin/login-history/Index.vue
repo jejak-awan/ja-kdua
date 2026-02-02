@@ -162,6 +162,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -248,7 +249,7 @@ const fetchHistory = async (page: number = 1) : Promise<void> => {
         }
         history.value = data;
     } catch (error: any) {
-        console.error('Failed to fetch login history:', error.message);
+        logger.error('Failed to fetch login history:', error.message);
     } finally {
         loading.value = false;
     }
@@ -259,7 +260,7 @@ const fetchStatistics = async () : Promise<void> => {
         const response = await api.get('/admin/ja/login-history/statistics');
         statistics.value = response.data?.data || response.data;
     } catch (error: any) {
-        console.error('Failed to fetch statistics:', error);
+        logger.error('Failed to fetch statistics:', error);
     }
 };
 
@@ -269,7 +270,7 @@ const fetchUsers = async () : Promise<void> => {
         const data = response.data?.data?.data || response.data?.data || [];
         users.value = Array.isArray(data) ? data : [];
     } catch (error: any) {
-        console.error('Failed to fetch users:', error);
+        logger.error('Failed to fetch users:', error);
         users.value = [];
     }
 };
@@ -290,7 +291,7 @@ const clearLogs = async () : Promise<void> => {
         await fetchStatistics();
         toast.success.action(t('features.system.logs.messages.cleared') || 'Logs cleared successfully');
     } catch (error: any) {
-        console.error('Failed to clear logs:', error.message);
+        logger.error('Failed to clear logs:', error.message);
         toast.error.fromResponse(error);
     }
 };
@@ -318,7 +319,7 @@ const exportHistory = async () : Promise<void> => {
         window.URL.revokeObjectURL(url);
         toast.success.action(t('features.analytics.export.success') || 'Export started');
     } catch (error: any) {
-        console.error('Failed to export:', error.message);
+        logger.error('Failed to export:', error.message);
         toast.error.fromResponse(error);
     } finally {
         exporting.value = false;

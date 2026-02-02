@@ -73,6 +73,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue'
 import api from '@/services/api'
 import { useCmsStore } from '@/stores/cms'
@@ -143,7 +144,7 @@ onMounted(async () => {
     const response = await api.get('/cms/contents/contact')
     pageData.value = response.data.data
   } catch (error) {
-    console.warn('[Contact] Static fallback mode engaged due to fetch error:', error)
+    logger.warning('[Contact] Static fallback mode engaged due to fetch error:', error)
   } finally {
     loading.value = false
   }

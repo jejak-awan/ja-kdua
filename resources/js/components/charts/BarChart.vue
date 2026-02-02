@@ -22,7 +22,7 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface ChartItem {
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 const props = defineProps<{

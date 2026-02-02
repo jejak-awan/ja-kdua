@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '@/composables/useToast';
@@ -106,7 +107,7 @@ export function useMediaManager() {
             mediaList.value = ensureArray(data);
             if (paginationData) pagination.value = paginationData;
         } catch (error: any) {
-            // console.error('Failed to fetch media:', error);
+            // logger.error('Failed to fetch media:', error);
         } finally {
             loading.value = false;
         }
@@ -117,7 +118,7 @@ export function useMediaManager() {
             const response = await api.get('/admin/ja/media/statistics');
             statistics.value = response.data?.data || response.data;
         } catch (error: any) {
-            // console.error('Failed to fetch media statistics:', error);
+            // logger.error('Failed to fetch media statistics:', error);
         }
     };
 
@@ -139,7 +140,7 @@ export function useMediaManager() {
             };
             folders.value = flatten(treeFolders.value);
         } catch (error: any) {
-            // console.error('Failed to fetch folders:', error);
+            // logger.error('Failed to fetch folders:', error);
         }
     };
 
@@ -150,7 +151,7 @@ export function useMediaManager() {
             });
             tags.value = response.data.data || [];
         } catch (error) {
-            console.error('Failed to fetch tags:', error);
+            logger.error('Failed to fetch tags:', error);
         }
     };
 
@@ -161,7 +162,7 @@ export function useMediaManager() {
                 availableFilters.value = response.data.data;
             }
         } catch (error) {
-            console.error('Failed to fetch filters:', error);
+            logger.error('Failed to fetch filters:', error);
         }
     };
 

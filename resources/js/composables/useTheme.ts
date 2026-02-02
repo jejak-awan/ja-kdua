@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { ref, computed } from 'vue';
 import api from '../services/api';
 
@@ -90,7 +91,7 @@ export function useTheme() {
 
             applyThemeStyles();
         } catch (err: any) {
-            console.warn('Failed to load active theme:', err);
+            logger.warning('Failed to load active theme:', err);
             error.value = err.message || 'Failed to load theme';
             activeTheme.value = null;
             themeSettings.value = {};

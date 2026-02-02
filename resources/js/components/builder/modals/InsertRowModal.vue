@@ -134,10 +134,10 @@
 <script setup lang="ts">
 import { ref, computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { BaseModal, BaseInput } from '../ui';
+import { BaseModal, BaseInput } from '@/components/builder/ui';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
-import type { BuilderInstance } from '../../../types/builder';
+import type { BuilderInstance } from '@/types/builder';
 
 const icons = { Search, Layout };
 import { 
@@ -148,7 +148,7 @@ import {
     gridMultiRowPresets,
     masonryPresets,
     sidebarPresets
-} from '../constants/layouts.js';
+} from '@/components/builder/constants/layouts.js';
 
 interface Props {
   mode?: string;

@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { ref, computed, onMounted, onUnmounted, watch, type Ref, type ComputedRef } from 'vue';
 import api from '@/services/api';
 
@@ -57,7 +58,7 @@ export function useAutoSave(form: Ref<any>, contentId: Ref<number | null | strin
             const savedData = JSON.stringify(lastSavedData.value || {});
             hasChanges.value = currentData !== savedData;
         } catch (e) {
-            console.warn('AutoSave: Failed to compare changes', e);
+            logger.warning('AutoSave: Failed to compare changes', e);
             hasChanges.value = true; // Assume changed on error
         }
     };
@@ -80,9 +81,7 @@ export function useAutoSave(form: Ref<any>, contentId: Ref<number | null | strin
     // Auto-save function
     const performAutoSave = async () => {
         // Don't save if session terminated, no changes, already saving, or disabled
-        // @ts-expect-error: Internal type mismatch - window.__isSessionTerminated is global
         if (window.__isSessionTerminated || !hasChanges.value || isSaving.value || !getEnabled()) {
-            // @ts-expect-error: Internal type mismatch
             if (window.__isSessionTerminated) stopAutoSave();
             return;
         }
@@ -126,7 +125,7 @@ export function useAutoSave(form: Ref<any>, contentId: Ref<number | null | strin
                         contentId.value = response.data.data.id;
                     } else {
                         // Can't update primitive contentId, but that's okay
-                        console.warn('Auto-save created content but contentId is not reactive');
+                        logger.warning('Auto-save created content but contentId is not reactive');
                     }
                 }
             }
@@ -137,7 +136,7 @@ export function useAutoSave(form: Ref<any>, contentId: Ref<number | null | strin
             try {
                 lastSavedData.value = JSON.parse(JSON.stringify(form.value || {}));
             } catch (e) {
-                console.warn('AutoSave: Failed to update last saved state', e);
+                logger.warning('AutoSave: Failed to update last saved state', e);
             }
 
             // Callback
@@ -152,7 +151,7 @@ export function useAutoSave(form: Ref<any>, contentId: Ref<number | null | strin
                 }
             }, 3000);
         } catch (error) {
-            console.error('Auto-save failed:', error);
+            logger.error('Auto-save failed:', error);
             saveStatus.value = 'error';
 
             // Callback
@@ -227,7 +226,7 @@ export function useAutoSave(form: Ref<any>, contentId: Ref<number | null | strin
         try {
             lastSavedData.value = JSON.parse(JSON.stringify(form.value || {}));
         } catch (e) {
-            console.warn('AutoSave: Failed to clone initial state', e);
+            logger.warning('AutoSave: Failed to clone initial state', e);
             lastSavedData.value = {};
         }
 

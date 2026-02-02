@@ -16,8 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import Switch from '@/components/ui/switch.vue';
-import Label from '@/components/ui/label.vue';
+import { Switch, Label } from '@/components/ui';
 
 interface Props {
   modelValue?: boolean;

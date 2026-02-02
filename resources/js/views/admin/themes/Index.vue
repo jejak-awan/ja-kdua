@@ -210,6 +210,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import api from '../../../services/api';
 import toast from '../../../services/toast';
@@ -225,13 +226,7 @@ import ThemePreview from '../../../components/themes/ThemePreview.vue';
 import ThemeCustomizer from '../../../components/themes/ThemeCustomizer.vue';
 
 import { useI18n } from 'vue-i18n';
-import Button from '../../../components/ui/button.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
+import { Badge, Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
@@ -264,7 +259,7 @@ const fetchThemes = async () => {
         const { data } = parseResponse(response);
         themes.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch themes:', error);
+        logger.error('Failed to fetch themes:', error);
         themes.value = [];
     }
 };
@@ -277,7 +272,7 @@ const scanThemes = async () => {
         const count = response.data?.data?.count || 0;
         toast.success(t('features.themes.messages.scanSuccess', { count }));
     } catch (error: any) {
-        console.error('Failed to scan themes:', error);
+        logger.error('Failed to scan themes:', error);
         toast.error('Error', t('features.themes.messages.scanFailed'));
     } finally {
         scanning.value = false;
@@ -299,7 +294,7 @@ const activateTheme = async (theme: Theme) => {
         await fetchThemes();
         toast.success(t('features.themes.messages.activateSuccess'));
     } catch (error: any) {
-        console.error('Failed to activate theme:', error);
+        logger.error('Failed to activate theme:', error);
         toast.error(error instanceof Error ? error.message : 'Failed to activate theme');
     }
 };
@@ -314,13 +309,13 @@ const validateTheme = async (theme: Theme) => {
         } else {
             // Can be replaced with a modal or detailed toast if needed, 
             // but multiline toast might be tricky. Using error toast with detail.
-            console.error('Validation errors:', data.errors);
+            logger.error('Validation errors:', data.errors);
             toast.error(t('features.themes.messages.validateFailed'), data.errors.join(', '));
         }
         
         await fetchThemes();
     } catch (error: any) {
-        console.error('Failed to validate theme:', error);
+        logger.error('Failed to validate theme:', error);
         toast.error('Error', t('features.themes.messages.validateError'));
     }
 };

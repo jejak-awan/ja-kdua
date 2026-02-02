@@ -67,7 +67,7 @@
             </div>
 
             <ColorField 
-                :field="{ name: 'backgroundColor', label: t('builder.fields.background.color.label') }"
+                :field="{ name: 'backgroundColor', type: 'color', label: t('builder.fields.background.color.label') }"
                 :value="getResponsiveValue('backgroundColor')"
                 :placeholder-value="getResponsivePlaceholder('backgroundColor')"
                 :module="module"
@@ -127,7 +127,7 @@
             <template v-else>
                 <!-- Redundant sub-header removed as per user request -->
                 <GradientField 
-                    :field="{ name: 'backgroundGradient', label: t('builder.fields.background.gradient.label') }"
+                    :field="{ name: 'backgroundGradient', type: 'gradient', label: t('builder.fields.background.gradient.label') }"
                     :value="getResponsiveValue('backgroundGradient')"
                     :placeholder-value="getResponsivePlaceholder('backgroundGradient')"
                     :module="module"
@@ -156,7 +156,7 @@
                         </div>
                     </transition>
                     <ToggleField 
-                        :field="{ name: 'backgroundGradientShowAboveImage', label: t('builder.fields.background.gradient.placeAbove') }"
+                        :field="{ name: 'backgroundGradientShowAboveImage', type: 'boolean', label: t('builder.fields.background.gradient.placeAbove') }"
                         :value="getResolvedValue('backgroundGradientShowAboveImage') === true || getResolvedValue('backgroundGradientShowAboveImage') === 'true'"
                         :placeholder-value="getResponsivePlaceholder('backgroundGradientShowAboveImage') === true"
                         @update:value="updateSetting('backgroundGradientShowAboveImage', $event)"
@@ -222,7 +222,7 @@
             </MediaPicker>
 
             <UploadField 
-                :field="{ name: 'backgroundImage', label: t('builder.fields.background.image.label') }"
+                :field="{ name: 'backgroundImage', type: 'upload', label: t('builder.fields.background.image.label') }"
                 :value="getResponsiveValue('backgroundImage')"
                 :placeholder-value="getResponsivePlaceholder('backgroundImage')"
                 :module="module"
@@ -255,7 +255,7 @@
                     </div>
                 </transition>
                 <ToggleField 
-                    :field="{ name: 'parallax', label: t('builder.fields.background.image.parallax') }"
+                    :field="{ name: 'parallax', type: 'boolean', label: t('builder.fields.background.image.parallax') }"
                     :value="getResolvedValue('parallax') === true || getResolvedValue('parallax') === 'true'"
                     :placeholder-value="getResponsivePlaceholder('parallax') === true || getResponsivePlaceholder('parallax') === 'true'"
                     @update:value="updateSetting('parallax', $event)"
@@ -288,6 +288,7 @@
                 <SelectField 
                     :field="{ 
                         name: 'parallaxMethod', 
+                        type: 'select',
                         label: t('builder.fields.background.image.parallaxMethod.label'),
                         options: [
                             { label: t('builder.fields.background.image.parallaxMethod.options.true'), value: 'true' },
@@ -339,6 +340,7 @@
                     <SelectField 
                         :field="{ 
                             name: 'backgroundImageSize', 
+                            type: 'select',
                             label: t('builder.fields.background.image.size.label'),
                             options: [
                                 { label: t('builder.fields.background.image.size.options.cover'), value: 'cover' },
@@ -385,7 +387,7 @@
                                     </div>
                                 </transition>
                                 <DimensionField 
-                                    :field="{}"
+                                    :field="{ type: 'dimension' }"
                                     :value="getResolvedValue('backgroundImageWidth')"
                                     :placeholder-value="t('builder.fields.common.widthPlaceholder')"
                                     @update:value="updateSetting('backgroundImageWidth', $event)"
@@ -410,7 +412,7 @@
                                     </div>
                                 </transition>
                                 <DimensionField 
-                                    :field="{}"
+                                    :field="{ type: 'dimension' }"
                                     :value="getResolvedValue('backgroundImageHeight')"
                                     :placeholder-value="t('builder.fields.common.heightPlaceholder')"
                                     @update:value="updateSetting('backgroundImageHeight', $event)"
@@ -442,6 +444,7 @@
                     <SelectField 
                         :field="{ 
                             name: 'backgroundImagePosition', 
+                            type: 'select',
                             label: t('builder.fields.background.image.position.label'),
                             options: [
                                 { label: t('builder.fields.background.image.position.options.topLeft'), value: 'left top' },
@@ -491,6 +494,7 @@
                     <SelectField 
                         :field="{ 
                             name: 'backgroundImageRepeat', 
+                            type: 'select',
                             label: t('builder.fields.background.image.repeat.label'),
                             options: [
                                 { label: t('builder.fields.background.image.repeat.options.repeat'), value: 'repeat' },
@@ -533,6 +537,7 @@
                     <SelectField 
                         :field="{ 
                             name: 'backgroundImageAttachment', 
+                            type: 'select',
                             label: t('builder.fields.background.image.attachment.label'),
                             options: [
                                 { label: t('builder.fields.background.image.attachment.options.scroll'), value: 'scroll' },
@@ -586,6 +591,7 @@
                 <SelectField 
                     :field="{ 
                         name: 'backgroundImageBlendMode', 
+                        type: 'select',
                         label: t('builder.fields.background.image.blend'),
                         options: [
                             { label: t('builder.settings.options.blend_mode.normal'), value: 'normal' },
@@ -678,7 +684,7 @@
                 </MediaPicker>
 
                 <UploadField 
-                    :field="{ name: 'backgroundVideoMp4', label: t('builder.fields.background.video.mp4') }"
+                    :field="{ name: 'backgroundVideoMp4', type: 'upload', label: t('builder.fields.background.video.mp4') }"
                     :value="getResponsiveValue('backgroundVideoMp4')" 
                     @update:value="updateSetting('backgroundVideoMp4', $event)"
                     :allowed-extensions="['mp4', 'mov', 'm4v']"
@@ -726,7 +732,7 @@
                 </MediaPicker>
 
                 <UploadField 
-                    :field="{ name: 'backgroundVideoWebm', label: t('builder.fields.background.video.webm') }"
+                    :field="{ name: 'backgroundVideoWebm', type: 'upload', label: t('builder.fields.background.video.webm') }"
                     :value="getResponsiveValue('backgroundVideoWebm')" 
                     @update:value="updateSetting('backgroundVideoWebm', $event)"
                     :allowed-extensions="['webm']"
@@ -767,7 +773,7 @@
                         </div>
                     </transition>
                     <DimensionField 
-                        :field="{}"
+                        :field="{ type: 'dimension' }"
                         :value="getResolvedValue('backgroundVideoWidth')"
                         :placeholder-value="'100%'"
                         @update:value="updateSetting('backgroundVideoWidth', $event)"
@@ -792,7 +798,7 @@
                         </div>
                     </transition>
                     <DimensionField 
-                        :field="{}"
+                        :field="{ type: 'dimension' }"
                         :value="getResolvedValue('backgroundVideoHeight')"
                         @update:value="updateSetting('backgroundVideoHeight', $event)"
                     />
@@ -818,7 +824,7 @@
                     </div>
                 </transition>
                 <ToggleField 
-                    :field="{ name: 'pauseVideoOnPlay', label: t('builder.fields.background.video.pauseOnPlay') }"
+                    :field="{ name: 'pauseVideoOnPlay', type: 'boolean', label: t('builder.fields.background.video.pauseOnPlay') }"
                     :value="getResolvedValue('pauseVideoOnPlay') === true" 
                     @update:value="updateSetting('pauseVideoOnPlay', $event)"
                 />
@@ -843,7 +849,7 @@
                     </div>
                 </transition>
                 <ToggleField 
-                    :field="{ name: 'pauseVideoNotInView', label: t('builder.fields.background.video.pauseNotInView') }"
+                    :field="{ name: 'pauseVideoNotInView', type: 'boolean', label: t('builder.fields.background.video.pauseNotInView') }"
                     :value="getResolvedValue('pauseVideoNotInView') === true" 
                     @update:value="updateSetting('pauseVideoNotInView', $event)"
                 />
@@ -869,7 +875,7 @@
                 </div>
             </transition>
                 <ToggleField 
-                    :field="{ name: 'backgroundVideoLoop', label: t('builder.fields.background.video.loop') }"
+                    :field="{ name: 'backgroundVideoLoop', type: 'boolean', label: t('builder.fields.background.video.loop') }"
                     :value="getResolvedValue('backgroundVideoLoop') !== false" 
                     @update:value="updateSetting('backgroundVideoLoop', $event)"
                 />
@@ -895,7 +901,7 @@
                 </div>
             </transition>
                 <ToggleField 
-                    :field="{ name: 'backgroundVideoMute', label: t('builder.fields.background.video.mute') }"
+                    :field="{ name: 'backgroundVideoMute', type: 'boolean', label: t('builder.fields.background.video.mute') }"
                     :value="getResolvedValue('backgroundVideoMute') !== false" 
                     @update:value="updateSetting('backgroundVideoMute', $event)"
                 />
@@ -1112,7 +1118,7 @@
                         </div>
                     </transition>
                     <SelectField 
-                        :field="{ name: 'backgroundPatternSize', options: patternSizeOptions }"
+                        :field="{ name: 'backgroundPatternSize', type: 'select', options: patternSizeOptions }"
                         :value="getResolvedValue('backgroundPatternSize')"
                         @update:value="updateSetting('backgroundPatternSize', $event)"
                         :placeholder-value="'actual'"
@@ -1156,7 +1162,7 @@
                                     </div>
                                 </transition>
                                 <DimensionField 
-                                    :field="{}"
+                                    :field="{ type: 'dimension' }"
                                     :value="getResolvedValue('backgroundPatternWidth')"
                                     :placeholder-value="'auto'"
                                     @update:value="updateSetting('backgroundPatternWidth', $event)"
@@ -1181,7 +1187,7 @@
                                     </div>
                                 </transition>
                                 <DimensionField 
-                                    :field="{}"
+                                    :field="{ type: 'dimension' }"
                                     :value="getResolvedValue('backgroundPatternHeight')"
                                     :placeholder-value="'auto'"
                                     @update:value="updateSetting('backgroundPatternHeight', $event)"
@@ -1212,7 +1218,7 @@
                     </transition>
 
                     <SelectField 
-                        :field="{ name: 'backgroundPatternRepeatOrigin', options: patternRepeatOriginOptions }"
+                        :field="{ name: 'backgroundPatternRepeatOrigin', type: 'select', options: patternRepeatOriginOptions }"
                         :value="getResolvedValue('backgroundPatternRepeatOrigin')"
                         :placeholder-value="'center'"
                         @update:value="updateSetting('backgroundPatternRepeatOrigin', $event)"
@@ -1241,7 +1247,7 @@
                             </div>
                         </transition>
                         <DimensionField 
-                            :field="{}"
+                            :field="{ type: 'dimension' }"
                             :value="getResolvedValue('backgroundPatternHorizontalOffset')"
                             :placeholder-value="'0%'"
                             @update:value="updateSetting('backgroundPatternHorizontalOffset', $event)"
@@ -1268,7 +1274,7 @@
                             </div>
                         </transition>
                         <DimensionField 
-                            :field="{}"
+                            :field="{ type: 'dimension' }"
                             :value="getResolvedValue('backgroundPatternVerticalOffset')"
                             :placeholder-value="'0%'"
                             @update:value="updateSetting('backgroundPatternVerticalOffset', $event)"
@@ -1297,7 +1303,7 @@
                         </div>
                     </transition>
                     <SelectField 
-                        :field="{ name: 'backgroundPatternRepeat', options: patternRepeatOptions }"
+                        :field="{ name: 'backgroundPatternRepeat', type: 'select', options: patternRepeatOptions }"
                         :value="getResolvedValue('backgroundPatternRepeat')"
                         @update:value="updateSetting('backgroundPatternRepeat', $event)"
                         :placeholder-value="'repeat'"
@@ -1325,7 +1331,7 @@
                         </div>
                     </transition>
                     <SelectField 
-                        :field="{ name: 'backgroundPatternBlendMode', options: blendModeOptions }"
+                        :field="{ name: 'backgroundPatternBlendMode', type: 'select', options: blendModeOptions }"
                         :value="getResolvedValue('backgroundPatternBlendMode')"
                         @update:value="updateSetting('backgroundPatternBlendMode', $event)"
                         :placeholder-value="'normal'"
@@ -1513,7 +1519,7 @@
                         </div>
                     </transition>
                     <SelectField 
-                        :field="{ name: 'backgroundMaskSize', options: patternSizeOptions }"
+                        :field="{ name: 'backgroundMaskSize', type: 'select', options: patternSizeOptions }"
                         :value="getResolvedValue('backgroundMaskSize')"
                         @update:value="updateSetting('backgroundMaskSize', $event)"
                         :placeholder-value="'stretch'"
@@ -1557,7 +1563,7 @@
                                 </div>
                             </transition>
                             <DimensionField 
-                                :field="{}"
+                                :field="{ type: 'dimension' }"
                                 :value="getResolvedValue('backgroundMaskWidth')"
                                 :placeholder-value="'auto'"
                                 @update:value="updateSetting('backgroundMaskWidth', $event)"
@@ -1582,7 +1588,7 @@
                                 </div>
                             </transition>
                             <DimensionField 
-                                :field="{}"
+                                :field="{ type: 'dimension' }"
                                 :value="getResolvedValue('backgroundMaskHeight')"
                                 :placeholder-value="'auto'"
                                 @update:value="updateSetting('backgroundMaskHeight', $event)"
@@ -1611,7 +1617,7 @@
                         </div>
                     </transition>
                     <SelectField 
-                        :field="{ name: 'backgroundMaskPosition', options: imagePositionOptions }"
+                        :field="{ name: 'backgroundMaskPosition', type: 'select', options: imagePositionOptions }"
                         :value="getResolvedValue('backgroundMaskPosition')"
                         @update:value="updateSetting('backgroundMaskPosition', $event)"
                         :placeholder-value="'center'"
@@ -1669,7 +1675,7 @@
                         </div>
                     </transition>
                     <SelectField 
-                        :field="{ name: 'backgroundMaskBlendMode', options: blendModeOptions }"
+                        :field="{ name: 'backgroundMaskBlendMode', type: 'select', options: blendModeOptions }"
                         :value="getResolvedValue('backgroundMaskBlendMode')"
                         @update:value="updateSetting('backgroundMaskBlendMode', $event)"
                         :placeholder-value="'normal'"
@@ -1683,7 +1689,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, inject } from 'vue'
-import type { BlockInstance, BuilderInstance } from '../../../types/builder'
+import type { BlockInstance, BuilderInstance, SettingDefinition } from '@/types/builder'
 import { useI18n } from 'vue-i18n'
 import PaintBucket from 'lucide-vue-next/dist/esm/icons/paint-bucket.js';
 import Image from 'lucide-vue-next/dist/esm/icons/image.js';
@@ -1709,25 +1715,26 @@ import RectangleVertical from 'lucide-vue-next/dist/esm/icons/rectangle-vertical
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 import Ban from 'lucide-vue-next/dist/esm/icons/ban.js';
-import Contrast from 'lucide-vue-next/dist/esm/icons/contrast.js';import ColorField from './ColorField.vue'
-import GradientField from './GradientField.vue'
-import UploadField from './UploadField.vue'
-import ToggleField from './ToggleField.vue'
-import SelectField from './SelectField.vue'
-import TextField from './TextField.vue'
-import DimensionField from './DimensionField.vue'
-import PatternField from './PatternField.vue'
-import MaskField from './MaskField.vue'
-import { IconButton } from '../ui'
+import Contrast from 'lucide-vue-next/dist/esm/icons/contrast.js';
+import ColorField from '@/components/builder/fields/ColorField.vue'
+import GradientField from '@/components/builder/fields/GradientField.vue'
+import UploadField from '@/components/builder/fields/UploadField.vue'
+import ToggleField from '@/components/builder/fields/ToggleField.vue'
+import SelectField from '@/components/builder/fields/SelectField.vue'
+import TextField from '@/components/builder/fields/TextField.vue'
+import DimensionField from '@/components/builder/fields/DimensionField.vue'
+import PatternField from '@/components/builder/fields/PatternField.vue'
+import MaskField from '@/components/builder/fields/MaskField.vue'
+import { IconButton } from '@/components/builder/ui'
 import MediaPicker from '@/components/media/MediaPicker.vue'
-import ResponsiveFieldModal from '../modals/ResponsiveFieldModal.vue'
-import FieldActions from './FieldActions.vue'
-import { BaseDropdown } from '../ui'
-import { getHarmoniousGradientColors, getBackgroundStyles, generateGradientCSS } from '../../../shared/utils/styleUtils'
-import { BackgroundPatterns, BackgroundMasks } from '../../../shared/utils/AssetLibrary'
+import ResponsiveFieldModal from '@/components/builder/modals/ResponsiveFieldModal.vue'
+import FieldActions from '@/components/builder/fields/FieldActions.vue'
+import { BaseDropdown } from '@/components/builder/ui'
+import { getHarmoniousGradientColors, getBackgroundStyles, generateGradientCSS } from '@/shared/utils/styleUtils'
+import { BackgroundPatterns, BackgroundMasks } from '@/shared/utils/AssetLibrary'
 
 const props = defineProps<{
-  field: any
+  field?: SettingDefinition
   module: BlockInstance
   device?: string
 }>()
@@ -1758,7 +1765,7 @@ const responsiveModal = ref<ResponsiveModalState>({
     baseKey: '',
     type: 'color',
     options: null,
-    subFields: null
+    subFields: []
 })
 
 const showColorInfo = ref(false)
@@ -1829,7 +1836,7 @@ const getInfoContent = (baseKey: string) => {
     return null
 }
 
-const openResponsiveModal = (label: string, baseKey: string, type: string = 'color', options: any = null, subFields: any = null) => {
+const openResponsiveModal = (label: string, baseKey: string, type: string = 'color', options: any = null, subFields: any[] = []) => {
     responsiveModal.value = {
         show: true,
         label,
@@ -2064,7 +2071,7 @@ const currentDevice = computed(() => {
     return builder?.device.value || 'desktop'
 })
 
-const getResponsiveValue = (baseKey: string) => {
+const getResponsiveValue = (baseKey: string): any => {
     // builder?.device.value is a string (primitive) if accessed via useBuilder's return, 
     // but here we are using the computed wrapper locally.
     const dev = currentDevice.value
@@ -2074,7 +2081,7 @@ const getResponsiveValue = (baseKey: string) => {
     return (val === undefined || val === null) ? '' : val
 }
 
-const getResolvedValue = (baseKey: string) => {
+const getResolvedValue = (baseKey: string): any => {
     const val = getResponsiveValue(baseKey)
     if (val === '' && currentDevice.value !== 'desktop') {
         const placeholder = getResponsivePlaceholder(baseKey)
@@ -2103,7 +2110,7 @@ const getMaskOptionPreview = (mask: any) => {
     return rotateObj[aspectRatio] || rotateObj.landscape || rotateObj.square || ''
 }
 
-const getResponsivePlaceholder = (baseKey: string) => {
+const getResponsivePlaceholder = (baseKey: string): any => {
     if (currentDevice.value === 'desktop') return ''
     const settings = moduleSettings.value
     const desktopValue = settings[baseKey] || ''
@@ -2317,22 +2324,21 @@ const resetBackgroundColor = () => {
     updateSetting('backgroundColor', '')
 }
 
-const handleResponsiveUpdate = (data: any) => {
-    const finalData = {}
+const handleResponsiveUpdate = (data: Record<string, unknown>) => {
+    const finalData: Record<string, unknown> = {}
     const currentSettings = builder?.findModule(props.module.id)?.settings || {}
     
     Object.entries(data).forEach(([key, value]) => {
         lastUpdate.value++
         if (key.includes('.')) {
             // key is like "backgroundGradient_mobile.direction"
-            // ... (rest of logic unchanged, just need to integrate sync for flat keys)
             const [parentPath, childKey] = key.split('.')
             let existingParent = currentSettings[parentPath]
-            if (!existingParent || Object.keys(existingParent).length === 0) {
+            if (!existingParent || (typeof existingParent === 'object' && Object.keys(existingParent).length === 0)) {
                 const baseKey = parentPath.replace(/(_tablet|_mobile)$/, '')
                 existingParent = currentSettings[baseKey] || {}
             }
-            (finalData as any)[parentPath] = { ...existingParent, [childKey]: value }
+            (finalData as any)[parentPath] = { ...(existingParent as object), [childKey]: value }
         } else {
             // Flat keys - Check for unit sync
             const baseKey = key.replace(/(_tablet|_mobile)$/, '')
@@ -2342,7 +2348,7 @@ const handleResponsiveUpdate = (data: any) => {
         }
     })
 
-    builder?.updateModuleSettings(props.module.id, finalData)
+    builder?.updateModuleSettings(props.module.id, finalData as any)
 }
 
 const initDefaultGradient = () => {

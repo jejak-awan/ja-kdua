@@ -170,6 +170,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -178,23 +179,8 @@ import { useConfirm } from '../../../composables/useConfirm';
 import FieldGroupModal from '../../../components/custom-fields/FieldGroupModal.vue';
 import FieldModal from '../../../components/custom-fields/FieldModal.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
-import Card from '../../../components/ui/card.vue';
-import CardHeader from '../../../components/ui/card-header.vue';
-import CardTitle from '../../../components/ui/card-title.vue';
-import CardContent from '../../../components/ui/card-content.vue';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Table from '../../../components/ui/table.vue';
-import TableHeader from '../../../components/ui/table-header.vue';
-import TableBody from '../../../components/ui/table-body.vue';
-import TableRow from '../../../components/ui/table-row.vue';
-import TableCell from '../../../components/ui/table-cell.vue';
-import TableHead from '../../../components/ui/table-head.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Tabs from '../../../components/ui/tabs.vue';
-import TabsList from '../../../components/ui/tabs-list.vue';
-import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
-import TabsContent from '../../../components/ui/tabs-content.vue';
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui';
+
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
@@ -246,7 +232,7 @@ const fetchFieldGroups = async () => {
         const { data } = parseResponse<FieldGroup>(response);
         fieldGroups.value = ensureArray<FieldGroup>(data);
     } catch (error: any) {
-        console.error('Failed to fetch field groups:', error);
+        logger.error('Failed to fetch field groups:', error);
     } finally {
         loadingGroups.value = false;
     }
@@ -259,7 +245,7 @@ const fetchCustomFields = async () => {
         const { data } = parseResponse<CustomField>(response);
         customFields.value = ensureArray<CustomField>(data);
     } catch (error: any) {
-        console.error('Failed to fetch custom fields:', error);
+        logger.error('Failed to fetch custom fields:', error);
     } finally {
         loadingFields.value = false;
     }
@@ -286,7 +272,7 @@ const deleteGroup = async (group: any) => {
         toast.success.delete(t('features.developer.custom_fields.tabs.groups'));
         fetchFieldGroups();
     } catch (error: any) {
-        console.error('Failed to delete group:', error);
+        logger.error('Failed to delete group:', error);
         toast.error.delete(error, t('features.developer.custom_fields.tabs.groups'));
     }
 };
@@ -323,7 +309,7 @@ const deleteField = async (field: CustomField) => {
         toast.success.delete(t('features.developer.custom_fields.tabs.fields'));
         fetchCustomFields();
     } catch (error: any) {
-        console.error('Failed to delete field:', error);
+        logger.error('Failed to delete field:', error);
         toast.error.delete(error, t('features.developer.custom_fields.tabs.fields'));
     }
 };

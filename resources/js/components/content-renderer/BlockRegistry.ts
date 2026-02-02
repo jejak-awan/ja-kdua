@@ -1,6 +1,7 @@
+import { logger } from '@/utils/logger';
 import { shallowRef, type Ref, type Component } from 'vue';
 import blockDefinitions from './definitions';
-import type { BlockDefinition } from '../../types/builder';
+import type { BlockDefinition } from '@/types/builder';
 
 class BlockRegistry {
     private blocks: Ref<Map<string, BlockDefinition>>;
@@ -20,7 +21,7 @@ class BlockRegistry {
      */
     public register(definition: BlockDefinition): void {
         if (!definition.name) {
-            console.error('Block definition must have a name');
+            logger.error('Block definition must have a name');
             return;
         }
         this.blocks.value.set(definition.name, definition);

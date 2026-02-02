@@ -1,25 +1,17 @@
 import { ref, computed, watch, type Ref } from 'vue'
-import type { BlockInstance, Canvas, PageMetadata, BuilderOptions } from '../../../../types/builder'
-
-export interface ModalState {
-    visible: boolean;
-    title: string;
-    message: string;
-    resolve: ((value: any) => void) | null;
-}
-
-export interface ConfirmModalState extends ModalState {
-    confirmText: string;
-    cancelText: string;
-    type: 'warning' | 'info' | 'error';
-}
-
-export interface InputModalState extends ModalState {
-    placeholder: string;
-    initialValue: string;
-    confirmText: string;
-    cancelText: string;
-}
+import type {
+    BlockInstance,
+    Canvas,
+    PageMetadata,
+    BuilderOptions,
+    ConfirmModalState,
+    InputModalState,
+    SavePresetModalState,
+    ResponsiveModalState
+} from '@/types/builder'
+import type { ThemeData, ThemeSettings } from '@/types/theme'
+import type { Category, Tag } from '@/types/taxonomy'
+import type { Menu } from '@/types/menu'
 
 export function useBuilderState(initialData = { blocks: [] as BlockInstance[] }, options: BuilderOptions = {}) {
     const mode = ref(options.mode || 'site')
@@ -64,13 +56,13 @@ export function useBuilderState(initialData = { blocks: [] as BlockInstance[] },
     const isFullscreen = ref(false)
     const activeTheme = ref('janari')
     const selectedThemeSlug = ref<string | null>(null)
-    const themeData = ref<any>(null)
-    const themeSettings = ref<Record<string, any>>({})
+    const themeData = ref<ThemeData | null>(null)
+    const themeSettings = ref<ThemeSettings>({})
 
-    const responsiveModal = ref<any>(null)
-    const savePresetModal = ref({
+    const responsiveModal = ref<ResponsiveModalState | null>(null)
+    const savePresetModal = ref<SavePresetModalState>({
         visible: false,
-        moduleId: null as string | null,
+        moduleId: null,
         loading: false
     })
 
@@ -151,15 +143,15 @@ export function useBuilderState(initialData = { blocks: [] as BlockInstance[] },
     const maxHistory = 50
 
     // Pages
-    const pages = ref<any[]>([])
+    const pages = ref<PageMetadata[]>([])
     const currentPageId = ref<number | null>(null)
     const pagesLoading = ref(false)
 
     // Metadata
-    const categories = ref<any[]>([])
-    const availableTags = ref<any[]>([])
-    const menus = ref<any[]>([])
-    const availableThemes = ref<any[]>([])
+    const categories = ref<Category[]>([])
+    const availableTags = ref<Tag[]>([])
+    const menus = ref<Menu[]>([])
+    const availableThemes = ref<ThemeData[]>([])
     const loadingThemes = ref(false)
 
     // Clipboard State

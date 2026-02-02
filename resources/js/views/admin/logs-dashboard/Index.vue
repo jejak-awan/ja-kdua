@@ -136,6 +136,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -208,7 +209,7 @@ const fetchStats = async () => {
         const systemLogs = await api.get('/admin/ja/system/logs').catch(() => ({ data: {} }));
         stats.value.system = { files: (systemLogs.data?.data || []).length };
     } catch (error: any) {
-        console.error('Failed to fetch stats:', error);
+        logger.error('Failed to fetch stats:', error);
     }
 };
 
@@ -223,7 +224,7 @@ const fetchRecentLogs = async () => {
         const secData = securityResponse.data?.data?.data || securityResponse.data?.data || [];
         recentSecurity.value = Array.isArray(secData) ? secData : [];
     } catch (error: any) {
-        console.error('Failed to fetch recent logs:', error);
+        logger.error('Failed to fetch recent logs:', error);
     }
 };
 

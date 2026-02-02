@@ -291,7 +291,7 @@ const loadRecentActions = () => {
   if (stored) {
     try {
         recentActions.value = JSON.parse(stored);
-    } catch (e) {
+    } catch {
         recentActions.value = [];
     }
   }

@@ -106,14 +106,15 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, inject, onMounted, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
-import { BaseInput, BaseModal } from '../../ui';
-import type { BuilderInstance } from '../../../../types/builder';
+import { BaseInput, BaseModal } from '@/components/builder/ui';
+import type { BuilderInstance } from '@/types/builder';
 
 const { t } = useI18n();
 const builder = inject<BuilderInstance>('builder');
@@ -147,7 +148,7 @@ const fetchTemplates = async () => {
     const response = await builder.fetchTemplates();
     templates.value = response || [];
   } catch (error) {
-    console.error('Failed to fetch templates:', error);
+    logger.error('Failed to fetch templates:', error);
   } finally {
     loading.value = false;
   }
@@ -192,7 +193,7 @@ const handleCreate = async (type: string) => {
       await (builder as any).createTemplate({ name, type });
       fetchTemplates();
     } catch (error) {
-      console.error('Failed to create template:', error);
+      logger.error('Failed to create template:', error);
     }
   }
 };
@@ -217,7 +218,7 @@ const saveRules = async () => {
         showSettingsModal.value = false;
         fetchTemplates();
     } catch (error) {
-        console.error('Failed to save assignment rules:', error);
+        logger.error('Failed to save assignment rules:', error);
     }
 };
 
@@ -233,7 +234,7 @@ const handleDelete = async (template: any) => {
             await (builder as any).deleteTemplate(template.id);
             fetchTemplates();
         } catch (error) {
-            console.error('Delete failed:', error);
+            logger.error('Delete failed:', error);
         }
     }
 };

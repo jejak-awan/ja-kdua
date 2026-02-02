@@ -8,7 +8,7 @@ interface ErrorLog {
     user_agent: string;
     user_id?: number;
     data?: any;
-    level: 'info' | 'warning' | 'error' | 'critical';
+    level: 'debug' | 'info' | 'warning' | 'error' | 'critical';
 }
 
 class Logger {
@@ -40,6 +40,17 @@ class Logger {
     }
 
     public log(level: ErrorLog['level'], message: string, data: any = {}) {
+        // Also log to console in development
+        if (import.meta.env.DEV) {
+            const consoleMethod = level === 'critical' ? 'error' : (level === 'warning' ? 'warn' : (level === 'debug' ? 'debug' : 'log'));
+
+            if (Object.keys(data).length > 0) {
+                console[consoleMethod](`[${level.toUpperCase()}] ${message}`, data);
+            } else {
+                console[consoleMethod](`[${level.toUpperCase()}] ${message}`);
+            }
+        }
+
         const errorLog: ErrorLog = {
             message,
             level,
@@ -68,6 +79,10 @@ class Logger {
         this.log('info', message, data);
     }
 
+    public debug(message: string, data?: any) {
+        this.log('debug', message, data);
+    }
+
     public warning(message: string, data?: any) {
         this.log('warning', message, data);
     }
@@ -77,6 +92,9 @@ class Logger {
     }
 
     private async send(log: ErrorLog) {
+        // Don't send debug logs to backend
+        if (log.level === 'debug') return;
+
         // Prevent flood
         if (this.queue.length > 10) return;
 

@@ -84,10 +84,10 @@ import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 import Megaphone from 'lucide-vue-next/dist/esm/icons/megaphone.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import draggable from 'vuedraggable';
-import { sectionTemplates } from '../../templates/SectionTemplates.js';
-import { pageTemplates } from '../../templates/PageTemplates.js';
-import ModuleRegistry from '../../core/ModuleRegistry';
-import type { BuilderInstance, BlockInstance } from '../../../../types/builder';
+import { sectionTemplates } from '@/components/builder/templates/SectionTemplates.js';
+import { pageTemplates } from '@/components/builder/templates/PageTemplates.js';
+import ModuleRegistry from '@/components/builder/core/ModuleRegistry';
+import type { BuilderInstance, BlockInstance } from '@/types/builder';
 
 interface Template {
   id: string;

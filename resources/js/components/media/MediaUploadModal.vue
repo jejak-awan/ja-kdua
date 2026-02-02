@@ -102,6 +102,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '@/composables/useToast';
@@ -232,7 +233,7 @@ const handleUpload = async () => {
         selectedFiles.value = [];
         uploadProgress.value = 0;
     } catch (error: any) {
-        console.error('Upload error:', error);
+        logger.error('Upload error:', error);
         toast.error.fromResponse(error);
     } finally {
         uploading.value = false;

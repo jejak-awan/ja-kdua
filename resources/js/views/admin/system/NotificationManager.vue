@@ -259,6 +259,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, reactive, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -404,7 +405,7 @@ const formatDate = (date: string) => {
     return new Date(date).toLocaleString();
 };
 
-const fetchData = async () : Promise<void> => {
+const fetchData = async (): Promise<void> => {
     try {
         const [rolesRes, usersRes, healthRes] = await Promise.all([
             api.get('/admin/ja/roles'),
@@ -416,7 +417,7 @@ const fetchData = async () : Promise<void> => {
         const data = parseSingleResponse<any>(healthRes);
         queueHealth.value = data?.queue_health || null;
     } catch (error: any) {
-        console.error('Failed to fetch data:', error);
+        logger.error('Failed to fetch data:', error);
     }
 };
 
@@ -432,7 +433,7 @@ const fetchHistory = async (page = 1) : Promise<void> => {
         // Clear selection on page change or refresh
         selectedItems.value = [];
     } catch (error: any) {
-        console.error('Failed to fetch history:', error);
+        logger.error('Failed to fetch history:', error);
     }
 };
 
@@ -501,7 +502,7 @@ const handleBulkRevoke = async () => {
         selectedItems.value = [];
         fetchHistory(pagination.value?.current_page || 1);
     } catch (error: any) {
-        console.error('Failed to bulk revoke:', error);
+        logger.error('Failed to bulk revoke:', error);
         toast.error.validation(t('features.system.notifications.messages.failed'));
     } finally {
         bulkRevoking.value = false;
@@ -530,7 +531,7 @@ const handleRevoke = async (notification: Notification) => {
         toast.success.action(t('features.system.notifications.messages.revoked'));
         fetchHistory(pagination.value?.current_page || 1);
     } catch (error: any) {
-        console.error('Failed to revoke:', error);
+        logger.error('Failed to revoke:', error);
         toast.error.validation(t('features.system.notifications.messages.failed'));
     } finally {
         revoking.value = null;
@@ -572,7 +573,7 @@ const handleSend = async () => {
         // Refresh history
         fetchHistory();
     } catch (error: any) {
-        console.error('Failed to send:', error);
+        logger.error('Failed to send:', error);
         toast.error.validation(t('features.system.notifications.messages.failed'));
     } finally {
         sending.value = false;

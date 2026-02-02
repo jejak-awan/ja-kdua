@@ -189,6 +189,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -359,7 +360,7 @@ const fetchCategories = async (page = 1) => {
         
         selectedIds.value = [];
     } catch (error: any) {
-        console.error('Failed to fetch categories:', error);
+        logger.error('Failed to fetch categories:', error);
     } finally {
         loading.value = false;
     }
@@ -422,7 +423,7 @@ const deleteCategory = async (category: Category) => {
             fetchCategories(pagination.value.current_page);
             toast.success.delete('Category');
         } catch (error: any) {
-            console.error('Failed to delete category:', error);
+            logger.error('Failed to delete category:', error);
             toast.error.delete(error, 'Category');
         }
     }
@@ -467,7 +468,7 @@ const confirmBulkDelete = async () => {
             fetchCategories(pagination.value.current_page);
             toast.success.delete(`${count} Categories`);
         } catch (error: any) {
-           console.error('Bulk delete failed:', error);
+           logger.error('Bulk delete failed:', error);
            toast.error.action(error);
         }
     }

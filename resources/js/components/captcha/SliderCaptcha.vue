@@ -47,10 +47,12 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import GripVertical from 'lucide-vue-next/dist/esm/icons/grip-vertical.js';
-import CheckCircle from 'lucide-vue-next/dist/esm/icons/circle-check.js';import api from '../../services/api'
+import CheckCircle from 'lucide-vue-next/dist/esm/icons/circle-check.js';
+import api from '@/services/api'
 
 const { t } = useI18n()
 
@@ -79,7 +81,7 @@ const generateCaptcha = async () => {
         verified.value = false
         error.value = ''
     } catch (e) {
-        console.error('Failed to generate captcha:', e)
+        logger.error('Failed to generate captcha:', e)
         error.value = 'Failed to load captcha'
     }
 }
@@ -141,7 +143,7 @@ const endDrag = async (e?: MouseEvent | TouchEvent) => {
         progress.value = 0
         
         if (e.response?.status !== 422) {
-             console.error('Slider verification failed:', e)
+             logger.error('Slider verification failed:', e)
         }
         
         // Generate new captcha after failed attempt

@@ -226,6 +226,7 @@ type="range" v-model="filters.saturation" min="0" max="200"
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, shallowRef, computed, onUnmounted, markRaw, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
@@ -473,7 +474,7 @@ const applyCrop = () => {
         
         setMode('view'); 
     } else {
-        console.error("Failed to get cropped canvas");
+        logger.error("Failed to get cropped canvas");
     }
 };
 
@@ -623,7 +624,7 @@ const saveImage = async () => {
         emit('updated');
         emit('close');
     } catch (err: any) {
-        console.error("Failed to save", err);
+        logger.error("Failed to save", err);
         let msg = t('features.media.modals.editor.failed') || 'Failed to save image';
         if (err.response && err.response.data) {
             if (err.response.data.errors) {

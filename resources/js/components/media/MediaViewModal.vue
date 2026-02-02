@@ -257,6 +257,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, markRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '@/composables/useToast';
@@ -377,7 +378,7 @@ const fetchUsageDetail = async () => {
         const data = response.data.data || response.data || [];
         usageDetail.value = data;
     } catch (error) {
-        console.error('Failed to fetch usage detail:', error);
+        logger.error('Failed to fetch usage detail:', error);
         usageDetail.value = [];
     } finally {
         loadingUsage.value = false;
@@ -392,7 +393,7 @@ const generateThumbnail = async () => {
         toast.success.action(t('features.media.modals.view.thumbnailGenerated') || 'Thumbnail generated successfully');
         emit('updated');
     } catch (error: any) {
-        console.error('Failed to generate thumbnail:', error);
+        logger.error('Failed to generate thumbnail:', error);
         toast.error.fromResponse(error);
     } finally {
         generatingThumbnail.value = false;

@@ -115,20 +115,22 @@ import Upload from 'lucide-vue-next/dist/esm/icons/upload.js';
 import File from 'lucide-vue-next/dist/esm/icons/file.js';
 import Video from 'lucide-vue-next/dist/esm/icons/video.js';
 import LinkIcon from 'lucide-vue-next/dist/esm/icons/link.js';
-import Variable from 'lucide-vue-next/dist/esm/icons/variable.js';import MediaPicker from '@/components/media/MediaPicker.vue'
-import { BaseInput, IconButton } from '../ui'
-import { useToast } from '../../../composables/useToast'
-import type { BuilderInstance } from '../../../types/builder'
+import Variable from 'lucide-vue-next/dist/esm/icons/variable.js';
+import MediaPicker from '@/components/media/MediaPicker.vue'
+import { BaseInput, IconButton } from '@/components/builder/ui'
+import { useToast } from '@/composables/useToast'
+import type { BuilderInstance, SettingDefinition, GlobalVariable, BlockInstance } from '@/types/builder'
 import { toCssVarName } from '../core/cssVariables'
 import { useI18n } from 'vue-i18n'
 
 const props = withDefaults(defineProps<{
-  field: any;
+  field: SettingDefinition;
   value?: string;
   placeholderValue?: string;
   hidePreview?: boolean;
   allowedExtensions?: string[];
   maxSize?: number | null;
+  module?: BlockInstance;
   previewStyle?: Record<string, any>;
 }>(), {
   value: '',
@@ -143,7 +145,7 @@ const emit = defineEmits(['update:value'])
 const toast = useToast()
 const { t } = useI18n()
 const builder = inject<BuilderInstance>('builder')
-const { globalImages } = builder?.globalVariables || { globalImages: ref([]) }
+const globalImages = builder?.globalVariables?.globalImages || ref<GlobalVariable[]>([])
 
 // State
 const inputMode = ref('manual') // 'manual' | 'var'
@@ -166,8 +168,8 @@ const resolvedPreviewValue = computed(() => {
     if (val.startsWith('var(')) {
         // Resolve variable
         const varName = val.replace(/^var\(\s*(.+?)\s*\)$/, '$1')
-        const found = globalImages?.value.find((g: any) => toCssVarName(g.name) === varName)
-        return found ? found.value : '' // Return matched url or empty if not found
+        const found = globalImages.value.find((g: GlobalVariable) => toCssVarName(g.name) === varName)
+        return found ? (found.value as string) : '' // Return matched url or empty if not found
     }
     
     return val
@@ -178,7 +180,7 @@ const isImage = computed(() => {
   if (!val) return false
   const parts = val.split('.')
   if (parts.length < 2) return val.startsWith('data:image')
-  const ext = parts.pop().toLowerCase().split('?')[0]
+  const ext = parts.pop()?.toLowerCase().split('?')[0] || '' // Added fallback for pop()
   
   const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
   const isImg = imageExts.includes(ext) || val.startsWith('data:image')
@@ -194,7 +196,7 @@ const isVideo = computed(() => {
   if (!val) return false
   const parts = val.split('.')
   if (parts.length < 2) return val.startsWith('data:video')
-  const ext = parts.pop().toLowerCase().split('?')[0]
+  const ext = parts.pop()?.toLowerCase().split('?')[0] || '' // Added fallback for pop()
   
   const videoExts = ['mp4', 'webm', 'ogv', 'mov', 'm4v']
   const isVid = videoExts.includes(ext) || val.startsWith('data:video')
@@ -212,7 +214,7 @@ const isValidMedia = computed(() => {
   const parts = val.split('.')
   if (parts.length < 2) return true 
   
-  const ext = parts.pop().toLowerCase().split('?')[0]
+  const ext = parts.pop()?.toLowerCase().split('?')[0] || '' // Added fallback for pop()
   if (props.allowedExtensions && props.allowedExtensions.length > 0) {
     return props.allowedExtensions.includes(ext)
   }
@@ -221,11 +223,11 @@ const isValidMedia = computed(() => {
 
 // Suggestions
 const allSuggestions = computed(() => {
-    const images = globalImages?.value || []
-    return images.map((img: any) => ({
+    const images = globalImages.value || []
+    return images.map((img: GlobalVariable) => ({
         label: toCssVarName(img.name),
         value: toCssVarName(img.name),
-        url: img.value
+        url: img.value as string
     }))
 })
 

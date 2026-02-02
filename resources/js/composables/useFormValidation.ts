@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import type { Ref } from 'vue';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -126,7 +127,7 @@ export function useFormValidation<T extends Record<string, any>>(zodSchema: ZodS
      */
     const validateWithZod = (formData: T): boolean => {
         if (!zodSchema) {
-            console.warn('useFormValidation: No Zod schema provided');
+            logger.warning('useFormValidation: No Zod schema provided');
             return true;
         }
 
@@ -145,7 +146,7 @@ export function useFormValidation<T extends Record<string, any>>(zodSchema: ZodS
             validating.value = false;
             return true;
         } catch (error) {
-            console.error('Zod validation error:', error);
+            logger.error('Zod validation error:', error);
             validating.value = false;
             return true; // Allow form submission on schema error
         }

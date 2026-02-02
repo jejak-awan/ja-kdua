@@ -20,7 +20,7 @@ import {
     layoutSettings,
     typographySettings,
     linkSettings
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Divider Module Definition

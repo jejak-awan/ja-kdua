@@ -17,7 +17,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';const icons = { Plus }
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js'
+
+const icons = { Plus }
 
 interface Props {
   type?: 'section' | 'row' | 'column' | 'module';
@@ -57,7 +59,7 @@ const label = computed(() => {
   bottom: -15px; /* Fully centered on the border line */
   left: 50%;
   transform: translateX(-50%);
-  z-index: 9999; /* Maximum z-index to guarantee visibility above ALL borders/overlays */
+  z-index: 100001; /* Above the fullscreen builder (99999) */
   width: auto;
 }
 

@@ -22,6 +22,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { computed, ref } from 'vue'
 import { getVal } from '../utils/styleUtils'
 
@@ -79,7 +80,7 @@ const videoStyles = computed(() => {
 const onVideoLoaded = () => {
     if (videoRef.value) {
         videoRef.value.play().catch(err => {
-            console.warn('Background video autoplay failed:', err)
+            logger.warning('Background video autoplay failed:', err)
         })
     }
 }

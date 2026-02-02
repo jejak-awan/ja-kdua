@@ -507,6 +507,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTheme } from '@/composables/useTheme';
@@ -760,7 +761,7 @@ watch(currentMenuLocation, async (newLoc) => {
     const menu = menus.value[newLoc];
     if (!menu || !menu.items || menu.items.length === 0) {
         if (newLoc !== 'header') {
-            console.warn(`Menu location '${newLoc}' not found or empty. Falling back to 'header'.`);
+            logger.warning(`Menu location '${newLoc}' not found or empty. Falling back to 'header'.`);
             await fetchMenuByLocation('header');
         }
     }

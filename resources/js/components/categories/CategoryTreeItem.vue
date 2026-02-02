@@ -10,15 +10,10 @@
                         size="icon"
                         class="h-6 w-6 p-0"
                     >
-                        <svg
+                        <ChevronRight
                             class="w-4 h-4 transition-transform"
                             :class="{ 'rotate-90': expanded }"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
+                        />
                     </Button>
                     <div v-else class="w-5" />
                 </div>
@@ -83,6 +78,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
 import { Button, Badge } from '@/components/ui';
 
 interface Category {

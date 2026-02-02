@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { ref } from 'vue';
 
 export function useSocialShare() {
@@ -107,7 +108,7 @@ export function useSocialShare() {
 
             return successful;
         } catch (err) {
-            console.error('Failed to copy to clipboard:', err);
+            logger.error('Failed to copy to clipboard:', err);
             return false;
         }
     };
@@ -126,7 +127,7 @@ export function useSocialShare() {
                 return true;
             } catch (err) {
                 // User cancelled or error occurred
-                console.error('Native share failed:', err);
+                logger.error('Native share failed:', err);
                 return false;
             }
         }
@@ -153,7 +154,7 @@ export function useSocialShare() {
                 return data.count || 0;
             }
         } catch (err) {
-            console.error('Failed to fetch share count:', err);
+            logger.error('Failed to fetch share count:', err);
         }
         return 0;
     };
@@ -176,7 +177,7 @@ export function useSocialShare() {
                 }),
             });
         } catch (err) {
-            console.error('Failed to track share:', err);
+            logger.error('Failed to track share:', err);
         }
     };
 

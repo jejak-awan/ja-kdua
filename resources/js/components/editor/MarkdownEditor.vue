@@ -55,7 +55,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue';
+import { logger } from '@/utils/logger';
+import { ref, computed, watch, nextTick, type Component } from 'vue';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github.min.css';
@@ -75,7 +76,7 @@ interface ToolbarItem {
     action: string;
     syntax: string;
     title: string;
-    icon?: any;
+    icon?: Component;
     label?: string;
 }
 
@@ -122,7 +123,7 @@ const renderedPreview = computed(() => {
     try {
         return marked.parse(markdownContent.value);
     } catch (e) {
-        console.error('Markdown parsing error:', e);
+        logger.error('Markdown parsing error:', e);
         return markdownContent.value;
     }
 });

@@ -75,6 +75,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import api from '@/services/api';
 import Image from 'lucide-vue-next/dist/esm/icons/image.js';
@@ -126,7 +127,7 @@ const fetchRelated = async () => {
     const response = await api.get(`/cms/contents/${props.slug}/related`);
     related.value = response.data.data.slice(0, props.limit);
   } catch (error) {
-    console.error('Failed to fetch related posts:', error);
+    logger.error('Failed to fetch related posts:', error);
     related.value = [];
   } finally {
     loading.value = false;

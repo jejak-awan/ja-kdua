@@ -2,6 +2,7 @@ import type { Category, Tag } from './taxonomy';
 import type { Media } from './media';
 import type { Menu, MenuItem } from './menu';
 import type { SiteSettings } from './settings';
+import type { BlockInstance } from './builder';
 
 export * from './taxonomy';
 export * from './media';
@@ -25,7 +26,7 @@ export interface ContentForm {
     og_image?: string | null;
     comment_status?: boolean;
     is_featured?: boolean;
-    blocks?: any[]; // Keep any[] for now as blocks are dynamic, but better than any
+    blocks?: BlockInstance[];
     tags?: Tag[];
     menu_item?: MenuItem;
     menu_items?: MenuItem[];
@@ -61,7 +62,7 @@ export interface CMSState {
     currentContent: Content | null;
     loading: boolean;
     loadingGroups: Record<string, boolean>;
-    settingsPromises: Record<string, Promise<any>>;
+    settingsPromises: Record<string, Promise<unknown>>;
     themeMode: 'light' | 'dark' | 'system';
     isDarkMode: boolean;
 }

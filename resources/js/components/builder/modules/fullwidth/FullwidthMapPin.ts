@@ -7,7 +7,7 @@ import {
     interactionsSettings,
     scrollEffectsSettings,
     attributesSettings
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Fullwidth Map Pin Module Definition

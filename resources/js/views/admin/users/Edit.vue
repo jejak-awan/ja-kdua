@@ -245,6 +245,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -337,7 +338,7 @@ const fetchRoles = async () => {
         const { data } = parseResponse(response);
         availableRoles.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch roles:', error);
+        logger.error('Failed to fetch roles:', error);
     } finally {
         loadingRoles.value = false;
     }
@@ -374,7 +375,7 @@ const fetchUser = async () => {
         };
         initialForm.value = JSON.parse(JSON.stringify(form.value));
     } catch (error: any) {
-        console.error('Failed to fetch user:', error);
+        logger.error('Failed to fetch user:', error);
         toast.error.load(error);
         router.push({ name: 'users.index' });
     } finally {

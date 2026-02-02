@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { type Component } from 'vue';
-import Button from '@/components/ui/button.vue';
+import { Button } from '@/components/ui';
 
 interface Props {
   icon: object | ((...args: any[]) => any) | string | Component;

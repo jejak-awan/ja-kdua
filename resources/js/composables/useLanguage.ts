@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { ref, computed } from 'vue';
 import i18n, { setLocale as i18nSetLocale, getLocale as i18nGetLocale } from '../i18n';
 import api from '../services/api';
@@ -53,7 +54,7 @@ export function useLanguage() {
             const { data } = parseResponse(response);
             languages.value = ensureArray(data);
         } catch (error) {
-            console.error('Failed to load languages:', error);
+            logger.error('Failed to load languages:', error);
             languages.value = [];
         } finally {
             loading.value = false;

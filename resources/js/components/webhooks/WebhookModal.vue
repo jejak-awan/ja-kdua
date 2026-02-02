@@ -12,26 +12,25 @@
                         <label class="block text-sm font-medium text-foreground mb-1">
                             {{ t('features.developer.webhooks.modal.name_label') }} <span class="text-red-500">*</span>
                         </label>
-                        <input
+                        <Input
                             v-model="form.name"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                             :placeholder="t('features.developer.webhooks.modal.name_placeholder')"
-                        >
+                        />
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-foreground mb-1">
                             {{ t('features.developer.webhooks.modal.url_label') }} <span class="text-red-500">*</span>
                         </label>
-                        <input
+                        <Input
                             v-model="form.url"
                             type="url"
                             required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
+                            class="font-mono"
                             :placeholder="t('features.developer.webhooks.modal.url_placeholder')"
-                        >
+                        />
                     </div>
 
                     <div>
@@ -44,12 +43,13 @@
                                 :key="event"
                                 class="flex items-center"
                             >
-                                <input
-                                    type="checkbox"
-                                    :value="event"
-                                    v-model="form.events"
-                                    class="h-4 w-4 text-primary focus:ring-primary border-input rounded"
-                                >
+                                <Checkbox
+                                    :checked="form.events.includes(event)"
+                                    @update:checked="(checked) => {
+                                        if (checked) form.events.push(event);
+                                        else form.events = form.events.filter(e => e !== event);
+                                    }"
+                                />
                                 <span class="ml-2 text-sm text-foreground">{{ t('features.developer.webhooks.events.' + event) }}</span>
                             </label>
                         </div>
@@ -59,21 +59,20 @@
                         <label class="block text-sm font-medium text-foreground mb-1">
                             {{ t('features.developer.webhooks.modal.secret_label') }}
                         </label>
-                        <input
+                        <Input
                             v-model="form.secret"
                             type="text"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
+                            class="font-mono"
                             :placeholder="t('features.developer.webhooks.modal.secret_placeholder')"
-                        >
+                        />
                     </div>
 
                     <div class="flex items-center">
-                        <input
-                            v-model="form.is_active"
-                            type="checkbox"
+                        <Checkbox
+                            :checked="form.is_active"
+                            @update:checked="(val) => form.is_active = val"
                             id="is_active"
-                            class="h-4 w-4 text-primary focus:ring-primary border-input rounded"
-                        >
+                        />
                         <label for="is_active" class="ml-2 block text-sm text-foreground">
                             {{ t('features.developer.webhooks.modal.active_label') }}
                         </label>
@@ -97,6 +96,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -107,7 +107,9 @@ import {
     DialogHeader,
     DialogTitle,
     DialogFooter,
-    Button
+    Button,
+    Input,
+    Checkbox
 } from '@/components/ui';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 
@@ -205,7 +207,7 @@ const handleSubmit = async () => {
         }
         emit('saved');
     } catch (error: any) {
-        console.error('Failed to save webhook:', error);
+        logger.error('Failed to save webhook:', error);
         toast.error.fromResponse(error);
     } finally {
         saving.value = false;

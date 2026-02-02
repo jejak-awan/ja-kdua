@@ -13,3 +13,23 @@ export interface SiteSettings {
     contact_phone?: string;
     contact_address?: string;
 }
+
+export interface CacheStatus {
+    driver: string;
+    enabled: boolean;
+    keys: number | string;
+    size: string;
+}
+
+export interface QueueStatus {
+    driver: string;
+    connection: string;
+    pending_jobs: number | string;
+    failed_jobs: number | string;
+}
+
+export interface EmailLog {
+    to: string;
+    subject: string;
+    sent_at: string;
+}

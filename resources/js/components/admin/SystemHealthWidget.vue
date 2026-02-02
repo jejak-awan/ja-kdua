@@ -140,6 +140,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -237,7 +238,7 @@ const getProgressBarClass = (status?: string) => {
 };
 
 const fetchHealth = async () => {
-    if ((window as any).__isSessionTerminated) {
+    if ((window as unknown as { __isSessionTerminated?: boolean }).__isSessionTerminated) {
         if (refreshInterval.value) {
             clearInterval(refreshInterval.value);
             refreshInterval.value = null;
@@ -256,8 +257,11 @@ const fetchHealth = async () => {
             lastUpdated.value = new Date();
         }
     } catch (error: any) {
-        if (error.code !== 'ERR_CANCELED' && error.response?.status !== 401) {
-            console.error('Failed to fetch system health:', error);
+        if (error && typeof error === 'object' && 'code' in error && 'response' in error) {
+            const err = error as { code: string; response?: { status: number } };
+            if (err.code !== 'ERR_CANCELED' && err.response?.status !== 401) {
+                logger.error('Failed to fetch system health:', error);
+            }
         }
     } finally {
         loading.value = false;

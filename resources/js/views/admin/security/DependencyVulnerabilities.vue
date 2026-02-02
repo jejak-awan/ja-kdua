@@ -170,6 +170,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
@@ -226,7 +227,7 @@ async function fetchVulnerabilities() {
       last_page: response.data.data.last_page || 1,
     };
   } catch (error: any) {
-    console.error('Failed to fetch vulnerabilities:', error);
+    logger.error('Failed to fetch vulnerabilities:', error);
   } finally {
     loading.value = false;
   }
@@ -240,7 +241,7 @@ async function runAudit() {
     fetchVulnerabilities();
   } catch (error: any) {
     toast.error.fromResponse(error);
-    console.error(error);
+    logger.error(error instanceof Error ? error.message : String(error), { error: error });
   } finally {
     auditing.value = false;
   }

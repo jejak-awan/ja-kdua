@@ -153,10 +153,8 @@ import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { useFormValidation } from '../../../composables/useFormValidation';
 import { formBuilderSchema } from '../../../schemas';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Textarea from '../../../components/ui/textarea.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
+import { Button, Checkbox, Input, Textarea } from '@/components/ui';
+
 import Builder from '../../../components/builder/Builder.vue';
 
 const { t } = useI18n();

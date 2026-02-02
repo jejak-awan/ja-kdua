@@ -60,14 +60,15 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, inject, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Edit2 from 'lucide-vue-next/dist/esm/icons/pen-line.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
-import { BaseInput } from '../../ui';
-import type { BuilderInstance } from '../../../../types/builder';
+import { BaseInput } from '@/components/builder/ui';
+import type { BuilderInstance } from '@/types/builder';
 
 interface Page {
   id: number | string;
@@ -131,7 +132,7 @@ const handleDelete = async (page: Page) => {
             // await builder?.deletePage(page.id)
             await (builder as any)?.deletePage(page.id);
         } catch (error) {
-            console.error('Delete failed:', error);
+            logger.error('Delete failed:', error);
         }
     }
 };

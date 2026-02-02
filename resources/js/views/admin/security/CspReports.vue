@@ -188,6 +188,7 @@ Next
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 import { Button, Badge } from '@/components/ui';
 import api from '@/services/api';
@@ -250,7 +251,7 @@ async function fetchReports() {
     };
   } catch (error: any) {
     toast.error.fromResponse(error);
-    console.error(error);
+    logger.error(error instanceof Error ? error.message : String(error), { error: error });
   } finally {
     loading.value = false;
   }
@@ -261,7 +262,7 @@ async function fetchStatistics() {
     const response = await api.get('/admin/ja/security/csp-reports/statistics');
     stats.value = response.data.data;
   } catch (error: any) {
-    console.error('Failed to load statistics', error);
+    logger.error('Failed to load statistics', error);
   }
 }
 
@@ -316,7 +317,7 @@ async function bulkAction(action: string) {
     fetchStatistics();
   } catch (error: any) {
     toast.error.fromResponse(error);
-    console.error(error);
+    logger.error(error instanceof Error ? error.message : String(error), { error: error });
   }
 }
 

@@ -60,11 +60,12 @@
 
 <script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue'
-import type { BlockInstance } from '../../../types/builder'
+import type { BlockInstance, SettingDefinition } from '@/types/builder'
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Power from 'lucide-vue-next/dist/esm/icons/power.js';
 import ArrowDownUp from 'lucide-vue-next/dist/esm/icons/arrow-down-up.js';
-import BrainCircuit from 'lucide-vue-next/dist/esm/icons/brain-circuit.js';import { BaseSegmentedControl, BaseLabel, IconButton } from '../ui'
+import BrainCircuit from 'lucide-vue-next/dist/esm/icons/brain-circuit.js';
+import { BaseSegmentedControl, BaseLabel, IconButton } from '@/components/builder/ui'
 
 interface CSSState {
   free: string;
@@ -72,7 +73,7 @@ interface CSSState {
 }
 
 const props = defineProps<{
-  field: any;
+  field?: SettingDefinition;
   value: CSSState;
   module: BlockInstance;
 }>()

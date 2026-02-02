@@ -163,6 +163,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, watch } from 'vue';
 import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
@@ -256,7 +257,7 @@ const fetchProviders = async () => {
             updateField('ai_default_provider', 'gemini');
         }
     } catch (error: any) {
-        console.error('Failed to fetch AI providers', error);
+        logger.error('Failed to fetch AI providers', error);
     }
 };
 

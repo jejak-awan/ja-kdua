@@ -78,8 +78,8 @@ import Type from 'lucide-vue-next/dist/esm/icons/type.js';
 import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
 import Square from 'lucide-vue-next/dist/esm/icons/square.js';
 import MoreVertical from 'lucide-vue-next/dist/esm/icons/ellipsis-vertical.js';
-import ModuleRegistry from '../core/ModuleRegistry';
-import type { BuilderInstance, BlockInstance } from '../../../types/builder';
+import ModuleRegistry from '@/components/builder/core/ModuleRegistry';
+import type { BuilderInstance, BlockInstance } from '@/types/builder';
 
 // CRITICAL: Define name for recursion
 defineOptions({
@@ -128,7 +128,7 @@ watch(() => props.collapseSignal, () => {
 });
 
 const getTitle = (block: BlockInstance) => {
-  if (block.settings?.admin_label) return block.settings.admin_label;
+  if (block.settings?.admin_label) return block.settings.admin_label as string;
   if (te(`builder.modules.${block.type}`)) return t(`builder.modules.${block.type}`);
   const def = ModuleRegistry.get(block.type);
   return def?.title || block.type;

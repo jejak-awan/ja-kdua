@@ -114,6 +114,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed, nextTick } from 'vue';
 import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
 import CheckCircle2 from 'lucide-vue-next/dist/esm/icons/circle-check-big.js';
@@ -290,7 +291,7 @@ const fetchProviders = async () => {
             fetchModels();
         }
     } catch (e) {
-        console.error('Failed to init AI', e);
+        logger.error('Failed to init AI', e);
     }
 };
 
@@ -313,7 +314,7 @@ const fetchModels = async () => {
             selectedModel.value = models.value[provider][0].id;
         }
     } catch (e) {
-        console.error('Failed to load models', e);
+        logger.error('Failed to load models', e);
     } finally {
         loadingModels.value = false;
     }
@@ -337,8 +338,13 @@ const handleCommand = async (prompt: string) => {
             customPrompt.value = '';
         }
     } catch (error: any) {
-        console.error('AI Ops Error:', error);
-        toast.service.error('AI Error', error.response?.data?.message || 'Failed to generate content.');
+        logger.error('AI Ops Error:', error);
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            toast.service.error('AI Error', err.response?.data?.message || 'Failed to generate content.');
+        } else {
+            toast.service.error('AI Error', 'Failed to generate content.');
+        }
     } finally {
         loading.value = false;
     }

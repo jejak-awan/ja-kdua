@@ -14,13 +14,13 @@ export interface ThemeSetting {
     options?: ThemeOption[];
     placeholder?: string;
     description?: string;
-    default?: any;
+    default?: unknown;
 }
 
 export interface ThemeManifest {
     settings_schema?: Record<string, ThemeSetting>;
     menus?: Record<string, string>;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface Theme {
@@ -28,14 +28,14 @@ export interface Theme {
     name: string;
     slug: string;
     manifest?: ThemeManifest;
-    settings?: Record<string, any>;
+    settings?: Record<string, unknown>;
     custom_css?: string;
     css_variables?: string;
     assets?: {
         css?: string[];
         js?: string[];
     };
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface ThemeSection {
@@ -44,5 +44,5 @@ export interface ThemeSection {
     settings: (ThemeSetting & { key: string })[];
 }
 
-export type ThemeSettings = Record<string, any>;
+export type ThemeSettings = Record<string, unknown>;
 export type ThemeData = Theme;

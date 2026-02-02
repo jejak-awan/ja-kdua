@@ -80,7 +80,7 @@
                                     </div>
                                     <div class="flex justify-between">
                                         <span>{{ $t('features.settings.emailTest.failedJobs') }}:</span>
-                                        <span class="font-medium" :class="queueStatus.failed_jobs > 0 ? 'text-destructive' : 'text-foreground'">{{ queueStatus.failed_jobs }}</span>
+                                        <span class="font-medium" :class="Number(queueStatus.failed_jobs) > 0 ? 'text-destructive' : 'text-foreground'">{{ queueStatus.failed_jobs }}</span>
                                     </div>
                                 </div>
                                 <div v-else class="text-sm text-muted-foreground">
@@ -139,6 +139,7 @@ import {
     AccordionItem,
     AccordionTrigger
 } from '@/components/ui';
+import type { CacheStatus, QueueStatus, EmailLog } from '@/types/settings';
 
 interface TestEmail {
     to: string;
@@ -151,17 +152,6 @@ interface TestEmailResult {
     message: string;
 }
 
-interface QueueStatus {
-    driver: string;
-    pending_jobs: number;
-    failed_jobs: number;
-}
-
-interface EmailLog {
-    to: string;
-    subject: string;
-    sent_at: string;
-}
 
 interface Props {
     sendingTestEmail?: boolean;

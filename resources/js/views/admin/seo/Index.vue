@@ -230,28 +230,31 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
 
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
-import Card from '../../../components/ui/card.vue';
-import CardHeader from '../../../components/ui/card-header.vue';
-import CardTitle from '../../../components/ui/card-title.vue';
-import CardContent from '../../../components/ui/card-content.vue';
-import Button from '../../../components/ui/button.vue';
-import Textarea from '../../../components/ui/textarea.vue';
-import Label from '../../../components/ui/label.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import Tabs from '../../../components/ui/tabs.vue';
-import TabsList from '../../../components/ui/tabs-list.vue';
-import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
-import TabsContent from '../../../components/ui/tabs-content.vue';
+import { 
+    Card, 
+    CardHeader, 
+    CardTitle, 
+    CardContent, 
+    Button, 
+    Textarea, 
+    Label, 
+    Badge, 
+    Select, 
+    SelectTrigger, 
+    SelectValue, 
+    SelectContent, 
+    SelectItem,
+    Tabs,
+    TabsList,
+    TabsTrigger,
+    TabsContent
+} from '@/components/ui';
 import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
 import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
@@ -300,7 +303,7 @@ const fetchRobotsTxt = async () => {
         robotsContent.value = data.content || '';
         initialRobotsContent.value = robotsContent.value;
     } catch (error: any) {
-        console.error('Failed to fetch robots.txt:', error);
+        logger.error('Failed to fetch robots.txt:', error);
     }
 };
 
@@ -311,7 +314,7 @@ const saveRobotsTxt = async () => {
         initialRobotsContent.value = robotsContent.value;
         toast.success.save();
     } catch (error: any) {
-        console.error('Failed to save robots.txt:', error);
+        logger.error('Failed to save robots.txt:', error);
         toast.error.fromResponse(error);
     } finally {
         savingRobots.value = false;
@@ -324,7 +327,7 @@ const generateSitemap = async () => {
         await api.get('/admin/ja/seo/sitemap');
         toast.success.action(t('features.seo.sitemap.generated'));
     } catch (error: any) {
-        console.error('Failed to generate sitemap:', error);
+        logger.error('Failed to generate sitemap:', error);
         toast.error.fromResponse(error);
     } finally {
         generatingSitemap.value = false;
@@ -342,7 +345,7 @@ const fetchContents = async () => {
         const { data } = parseResponse(response);
         contents.value = ensureArray(data);
     } catch (error: any) {
-        console.error('Failed to fetch contents:', error);
+        logger.error('Failed to fetch contents:', error);
         contents.value = [];
     }
 };
@@ -355,7 +358,7 @@ const runAnalysis = async () => {
         const response = await api.get(`/admin/ja/contents/${selectedContentId.value}/seo-analysis`);
         analysisResults.value = parseSingleResponse<any>(response) || {};
     } catch (error: any) {
-        console.error('Failed to run SEO analysis:', error);
+        logger.error('Failed to run SEO analysis:', error);
         toast.error.fromResponse(error);
     } finally {
         analyzing.value = false;
@@ -371,7 +374,7 @@ const generateSchema = async () => {
         const schema = parseSingleResponse<any>(response) || {};
         schemaJson.value = JSON.stringify(schema, null, 2);
     } catch (error: any) {
-        console.error('Failed to generate schema:', error);
+        logger.error('Failed to generate schema:', error);
         toast.error.fromResponse(error);
     } finally {
         generatingSchema.value = false;

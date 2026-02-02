@@ -440,6 +440,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -465,7 +466,7 @@ import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
 import MenuSquare from 'lucide-vue-next/dist/esm/icons/square-menu.js';
 import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
-import FeaturedImage from './FeaturedImage.vue';
+import FeaturedImage from '@/components/content/FeaturedImage.vue';
 import MediaPicker from '@/components/media/MediaPicker.vue';
 import type { Content, ContentForm, Category, Tag, MenuItem, Menu } from '@/types/cms';
 
@@ -631,7 +632,7 @@ const fetchMenuParentItems = async (menuId: string | number) => {
              menuParentItems.value = flatItems;
         }
     } catch (error) {
-        console.error('Failed to fetch menu items:', error);
+        logger.error('Failed to fetch menu items:', error);
     } finally {
         loadingParentItems.value = false;
     }

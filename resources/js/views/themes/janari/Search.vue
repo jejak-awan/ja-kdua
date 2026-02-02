@@ -22,6 +22,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -54,7 +55,7 @@ const search = async () => {
     // Track search analytics
     trackSearch(searchQuery.value, results.value.length)
   } catch (error) {
-    console.error('Search failed:', error)
+    logger.error('Search failed:', error)
   } finally {
     loading.value = false
   }

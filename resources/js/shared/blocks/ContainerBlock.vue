@@ -63,7 +63,7 @@ const BlockRenderer = inject<any>('BlockRenderer', null)
 const innerStyles = computed(() => ({}))
 
 const overlayStyles = computed(() => ({
-  backgroundColor: settings.value.overlayColor || 'transparent'
+  backgroundColor: (settings.value.overlayColor as string) || 'transparent'
 }))
 
 const contentStyles = computed(() => {

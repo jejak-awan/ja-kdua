@@ -148,6 +148,7 @@
         <SelectField 
           :field="{ 
             name: 'type', 
+            type: 'select',
             label: 'Gradient Type', 
             options: [
               { label: 'Linear', value: 'linear' },
@@ -261,7 +262,7 @@
             {{ t('builder.fields.background.gradient.repeatInfo') }}
           </div>
         <ToggleField 
-            :field="{ name: 'repeat', label: t('builder.fields.background.gradient.repeat') }"
+            :field="{ name: 'repeat', type: 'boolean', label: t('builder.fields.background.gradient.repeat') }"
             :value="localSettings.repeat || false"
             @update:value="updateControl('repeat', $event)"
         />

@@ -33,6 +33,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger';
 import { onMounted, ref, watch } from 'vue';
 import { useAuthStore } from './stores/auth';
 import { useCmsStore } from './stores/cms';
@@ -40,12 +41,9 @@ import { useTheme } from './composables/useTheme';
 import { useSessionTimeout } from './composables/useSessionTimeout';
 import { useLanguage } from './composables/useLanguage';
 import { useConfirm } from './composables/useConfirm';
-import SessionTimeoutModal from './components/ui/SessionTimeoutModal.vue';
+import { SessionTimeoutModal, Toast, ConfirmModal, GlobalErrorModal } from '@/components/ui';
 import SystemOverlay from './components/shared/SystemOverlay.vue';
 import { SystemMonitor } from './services/SystemMonitor';
-import Toast from './components/ui/toast.vue';
-import ConfirmModal from './components/ui/ConfirmModal.vue';
-import GlobalErrorModal from './components/ui/GlobalErrorModal.vue';
 import { setToastInstance } from './services/toast';
 
 const authStore = useAuthStore();
@@ -108,7 +106,7 @@ onMounted(async () => {
 
         // Mismatched hash or missing chunk usually means new deployment
         if (e.message?.includes('Loading chunk') || e.message?.includes('CSS chunk') || e.message?.includes('HTML')) {
-            console.warn('Chunk mismatch detected. Triggering System Lockdown.', e);
+            logger.warning('Chunk mismatch detected. Triggering System Lockdown.', e);
             SystemMonitor.triggerLockdown('chunk_error');
         }
     };
@@ -117,7 +115,7 @@ onMounted(async () => {
     window.addEventListener('error', handleChunkError, true);
     window.addEventListener('unhandledrejection', (e: PromiseRejectionEvent) => {
         if (e.reason && (e.reason.message?.includes('Loading chunk') || e.reason.message?.includes('CSS chunk'))) {
-             console.warn('Unhandled chunk rejection. Triggering Safe Mode.', e.reason);
+             logger.warning('Unhandled chunk rejection. Triggering Safe Mode.', e.reason);
              SystemMonitor.triggerLockdown('chunk_error');
         }
     });
@@ -132,18 +130,18 @@ onMounted(async () => {
     
     // Initialize language (non-blocking)
     initializeLanguage().catch(err => {
-        console.warn('Language initialization failed:', err);
+        logger.warning('Language initialization failed:', err);
     });
     
     // Load active theme for frontend (non-blocking, don't wait)
     // Theme loading failure shouldn't prevent app from loading
     loadActiveTheme('frontend').catch(err => {
-        console.warn('Theme loading failed, continuing without theme:', err);
+        logger.warning('Theme loading failed, continuing without theme:', err);
     });
 
     // Fetch public site settings for dynamic branding
     cmsStore.fetchPublicSettings().catch(err => {
-        console.warn('Public settings fetch failed:', err);
+        logger.warning('Public settings fetch failed:', err);
     });
     
     if (authStore.isAuthenticated && !(window as any).__isSessionTerminated) {

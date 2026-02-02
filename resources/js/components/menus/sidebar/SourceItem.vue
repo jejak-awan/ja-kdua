@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import Button from '../../ui/button.vue';
+import Button from '../../ui/Button.vue';
 import GripVertical from 'lucide-vue-next/dist/esm/icons/grip-vertical.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';

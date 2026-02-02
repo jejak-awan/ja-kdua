@@ -74,11 +74,12 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
-import type { BlockInstance } from '../../../types/builder'
+import type { BlockInstance, SettingDefinition } from '@/types/builder'
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Settings2 from 'lucide-vue-next/dist/esm/icons/settings.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
-import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';import { BaseButton, IconButton, BaseLabel, BasePopover } from '../ui'
+import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
+import { BaseButton, IconButton, BaseLabel, BasePopover } from '@/components/builder/ui'
 
 interface AttributeItem {
   name: string;
@@ -86,9 +87,9 @@ interface AttributeItem {
 }
 
 const props = defineProps<{
-  field: any;
+  field?: SettingDefinition;
   value: AttributeItem[];
-  module?: any;
+  module?: BlockInstance;
 }>()
 
 const emit = defineEmits(['update:value'])

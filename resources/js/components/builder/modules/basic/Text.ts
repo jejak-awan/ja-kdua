@@ -22,7 +22,7 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     layoutSettings
-} from '../commonSettings';
+} from '@/components/builder/modules/commonSettings';
 
 /**
  * Text Module Definition
