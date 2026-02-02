@@ -594,6 +594,8 @@ const openContextMenu = (moduleId: string, event: MouseEvent, title = '', type =
     contextMenu.mode = mode
 }
 
+provide('openContextMenu', openContextMenu)
+
 const closeContextMenu = () => {
     contextMenu.visible = false
 }

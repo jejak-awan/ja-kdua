@@ -88,6 +88,7 @@ defineOptions({
 
 const icons = { ChevronRight, ChevronDown, MoreVertical };
 const builder = inject<BuilderInstance>('builder');
+const openContextMenu = inject<(id: string, e: MouseEvent, title?: string, type?: string) => void>('openContextMenu');
 
 interface Props {
   blocks: BlockInstance[];
@@ -144,7 +145,9 @@ const getIcon = (type: string) => {
 };
 
 const handleContextMenu = (e: MouseEvent, block: BlockInstance) => {
-    if (builder?.openContextMenu) {
+    if (openContextMenu) {
+        openContextMenu(block.id, e, getTitle(block), block.type);
+    } else if (builder?.openContextMenu) {
         builder.openContextMenu(block.id, e, getTitle(block), block.type);
     }
 };

@@ -69,6 +69,7 @@ import type { ThemeData } from '@/types/theme'
 
 // Inject builder
 const builder = inject<BuilderInstance>('builder')
+const openContextMenu = inject<(moduleId: string, event: MouseEvent, title?: string, type?: string, mode?: string) => void>('openContextMenu')
 const { t } = useI18n()
 
 // Computed
@@ -215,7 +216,9 @@ const addSection = () => {
 }
 
 const handleCanvasContextMenu = (e: MouseEvent) => {
-    if (builder?.openContextMenu) {
+    if (openContextMenu) {
+        openContextMenu('canvas', e, t('builder.fields.contextMenu.canvasSettings', 'Canvas Settings'), 'Main', 'canvas')
+    } else if (builder?.openContextMenu) {
         builder.openContextMenu('canvas', e, t('builder.fields.contextMenu.canvasSettings', 'Canvas Settings'), 'Main', 'canvas')
     }
 }

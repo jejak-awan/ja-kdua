@@ -165,6 +165,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 // Inject
 const builder = inject<BuilderInstance>('builder')
+const openContextMenu = inject<(id: string, e: MouseEvent, title?: string, type?: string) => void>('openContextMenu')
 const { t } = useI18n()
 
 // Virtualization State
@@ -348,7 +349,9 @@ const unhoverModule = () => {
 }
 
 const handleContextMenu = (e: MouseEvent) => {
-    if (builder?.openContextMenu) {
+    if (openContextMenu) {
+        openContextMenu(props.module.id, e, moduleTitle.value, props.module.type)
+    } else if (builder?.openContextMenu) {
         builder.openContextMenu(props.module.id, e, moduleTitle.value, props.module.type)
     }
 }
