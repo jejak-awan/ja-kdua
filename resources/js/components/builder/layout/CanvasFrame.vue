@@ -67,7 +67,7 @@ const viewportStyle = computed(() => {
   align-items: flex-start;
   width: 100%;
   height: 100%;
-  overflow-y: auto;
+  overflow: auto; /* Enable both X and Y scrolling */
   padding: var(--spacing-lg) 0;
 }
 
@@ -77,7 +77,7 @@ const viewportStyle = computed(() => {
   box-shadow: var(--shadow-lg);
   min-height: calc(100% - 2 * var(--spacing-lg));
   height: auto;
-  overflow: visible;
+  overflow: hidden; /* Clip content to viewport bounds */
   box-sizing: content-box; /* Ensure border is outside the defined width */
 }
 

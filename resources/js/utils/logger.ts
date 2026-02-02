@@ -13,8 +13,12 @@ interface ErrorLog {
 
 class Logger {
     private apiUrl = '/logs/frontend';
-    private isSending = false;
-    private queue: ErrorLog[] = [];
+    private queue: ErrorLog[] = []; // Kept for checking but technically unused now
+
+    // Rate Limiting Logic
+    private logCount = 0;
+    private lastResetTime = Date.now();
+    private lastLogSignature = '';
 
     constructor() {
         this.setupGlobalHandlers();
@@ -74,7 +78,6 @@ class Logger {
 
         this.send(errorLog);
     }
-
     public info(message: string, data?: any) {
         this.log('info', message, data);
     }
@@ -95,16 +98,38 @@ class Logger {
         // Don't send debug logs to backend
         if (log.level === 'debug') return;
 
-        // Prevent flood
-        if (this.queue.length > 10) return;
+        // Rate Limiting: Reset count every 60 seconds
+        if (Date.now() - this.lastResetTime > 60000) {
+            this.logCount = 0;
+            this.lastResetTime = Date.now();
+        }
+
+        // Limit to 20 logs per minute
+        if (this.logCount >= 20) {
+            if (this.logCount === 20) {
+                console.warn('[Logger] Rate limit exceeded. Further logs paused for 1 minute.');
+                this.logCount++;
+            }
+            return;
+        }
+
+        // Deduplication: Prevent sending the exact same error twice in a row
+        // (Use message + partial stack as signature)
+        const signature = `${log.message}|${log.stack?.substring(0, 100) || ''}`;
+        if (signature === this.lastLogSignature) {
+            return;
+        }
+        this.lastLogSignature = signature;
+
+        this.logCount++;
 
         try {
             await api.post(this.apiUrl, log);
         } catch (e) {
+            // Check if we are being rate limited by backend (429)
+            // If so, stop sending for a while? 
+            // The frontend rate limit should handle it, but fail safe:
             console.error('Failed to send log to backend', e);
-            // Fallback: Use Navigator.sendBeacon if axios fails (e.g. unload)
-            // const blob = new Blob([JSON.stringify(log)], { type: 'application/json' });
-            // navigator.sendBeacon(this.apiUrl, blob);
         }
     }
 }
