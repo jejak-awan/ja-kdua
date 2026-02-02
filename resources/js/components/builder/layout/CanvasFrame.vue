@@ -77,11 +77,12 @@ const viewportStyle = computed(() => {
   box-shadow: var(--shadow-lg);
   min-height: calc(100% - 2 * var(--spacing-lg));
   height: auto;
-  overflow: hidden; /* Clip content strictly */
+  overflow: hidden !important; /* Force clip */
+  clip-path: inset(0 round var(--border-radius-md)); /* Robust hardware clipping */
   box-sizing: content-box; 
-  position: relative; /* Ensure z-index works */
-  z-index: 1; /* Create stacking context */
-  contain: content; /* Strict isolation */
+  position: relative; 
+  z-index: 1; 
+  contain: content; 
 }
 
 /* Device-specific frames */
