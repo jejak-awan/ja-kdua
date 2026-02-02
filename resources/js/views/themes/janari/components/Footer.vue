@@ -1,7 +1,7 @@
 <template>
     <footer class="bg-card text-card-foreground mt-auto border-t border-border">
         <div class="container mx-auto px-4 py-16">
-            <div :class="['grid gap-12', isDesktop ? 'grid-cols-4' : 'grid-cols-1']">
+            <div :class="['grid gap-12', gridClass]">
                 <!-- Brand -->
                 <div class="space-y-4">
                     <div class="flex items-center gap-3">
@@ -108,7 +108,7 @@
                 </div>
             </div>
 
-            <div :class="['mt-16 pt-8 border-t border-border flex justify-between items-center gap-4', isDesktop ? 'flex-row' : 'flex-col']">
+            <div :class="['mt-16 pt-8 border-t border-border flex justify-between items-center gap-4', (isDesktop || isTablet) ? 'flex-row' : 'flex-col']">
                 <p class="text-muted-foreground text-sm">
                     {{ getSetting('footer_text', `© ${new Date().getFullYear()} Janari. All rights reserved.`) }}
                 </p>
@@ -155,6 +155,15 @@ const toast = useToast()
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(newsletterSchema)
 
 const isDesktop = computed(() => device.value === 'desktop');
+const isTablet = computed(() => device.value === 'tablet');
+
+// Grid logic: Desktop (4), Tablet (2), Mobile (1)
+const gridClass = computed(() => {
+    if (isDesktop.value) return 'grid-cols-4';
+    if (isTablet.value) return 'grid-cols-2';
+    return 'grid-cols-1';
+});
+
 const loading = ref(false)
 const email = ref('')
 
