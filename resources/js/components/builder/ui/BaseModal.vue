@@ -29,7 +29,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, type Ref } from 'vue';
+import { computed } from 'vue';
+import { useCmsStore } from '@/stores/cms';
 import {
   Dialog,
   DialogContent,
@@ -66,7 +67,7 @@ const emit = defineEmits<{
   (e: 'update:isOpen', value: boolean): void;
 }>();
 
-const darkMode = inject<Ref<boolean>>('darkMode', computed(() => false));
+const cmsStore = useCmsStore();
 
 const placementClass = computed(() => {
     switch (props.placement) {
@@ -82,7 +83,7 @@ const placementClass = computed(() => {
 const themeClasses = computed(() => {
     return [
         'ja-builder',
-        darkMode.value ? 'ja-builder--dark dark' : 'ja-builder--light'
+        cmsStore.isDarkMode ? 'ja-builder--dark dark' : 'ja-builder--light'
     ].join(' ');
 });
 

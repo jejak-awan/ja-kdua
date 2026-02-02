@@ -35,13 +35,19 @@ import Lock from 'lucide-vue-next/dist/esm/icons/lock.js';
 import Unlock from 'lucide-vue-next/dist/esm/icons/lock-open.js';
 import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
+import Tablet from 'lucide-vue-next/dist/esm/icons/tablet.js';
+import Monitor from 'lucide-vue-next/dist/esm/icons/monitor.js';
+import Minimize from 'lucide-vue-next/dist/esm/icons/minimize.js';
+import Maximize from 'lucide-vue-next/dist/esm/icons/maximize.js';
 import type { Component } from 'vue'
 
 const iconMap: Record<string, Component> = {
   AlignLeft, AlignCenter, AlignRight, AlignJustify, 
   Layout, Grid, List, Columns, Rows, Square, 
   Type, Image, Video, Link, Mail, Globe, 
-  Eye, EyeOff, Lock, Unlock, Settings, Trash2
+  Eye, EyeOff, Lock, Unlock, Settings, Trash2,
+  Smartphone, Tablet, Monitor, Minimize, Maximize
 }
 import { BaseSegmentedControl } from '@/components/builder/ui'
 

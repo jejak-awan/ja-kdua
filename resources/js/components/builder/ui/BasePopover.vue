@@ -13,6 +13,8 @@
       :collision-padding="20"
       sticky="always"
       :class="cn(
+        'ja-builder',
+        cmsStore.isDarkMode ? 'ja-builder--dark' : 'ja-builder--light',
         'p-0 overflow-hidden border-slate-200 dark:border-slate-800 shadow-xl !z-[100001]',
         props.class
       )"
@@ -41,6 +43,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useCmsStore } from '@/stores/cms';
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import { 
     Popover, 
@@ -87,6 +90,8 @@ const onOpenUpdate = (val: boolean) => {
     if (!val) emit('close');
     emit('update:isOpen', val);
 };
+
+const cmsStore = useCmsStore();
 
 const mappedAlign = computed(() => {
     if (props.align === 'left') return 'start';

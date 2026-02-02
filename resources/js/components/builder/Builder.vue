@@ -71,7 +71,7 @@
         v-if="showInsertRowModal"
         :mode="insertRowMode"
         @close="showInsertRowModal = false"
-        @insert="insertRow"
+        @insert="(type, payload) => insertRow(payload)"
         @update="updateRow"
       />
       <InsertSectionModal
@@ -197,6 +197,7 @@ import ContextMenu from './ui/ContextMenu.vue'
 
 // Core
 import { useBuilder } from './core'
+import ModuleRegistry from './core/ModuleRegistry'
 import { useCmsStore } from '@/stores/cms'
 import { throttle, debounce } from '@/shared/utils/performance'
 import type { BlockInstance, BuilderInstance, Canvas as ICanvas } from '@/types/builder'
@@ -397,15 +398,25 @@ const handleStructureTemplateInsert = (payload: any) => {
 }
 
 const insertRow = (layout: any) => {
+  
   const createSingleRow = (config: any, parentId = insertRowTargetId.value) => {
-    const row = builder.insertModule('row', parentId)
+    // Insert the row using builder (handles selection and basic insertion into tree)
+    const row = builder.insertModule('row', parentId);
+    
     if (row) {
+      // Ensure children is initialized
+      if (!row.children) row.children = [];
+
       if (config.cols) {
+        // Complex nested layout
         config.cols.forEach((colConfig: any) => {
-          const col = builder.insertModule('column', row.id)
+          const col = ModuleRegistry.createInstance('column');
           if (col) {
-            builder.updateModuleSettings(col.id, { flexGrow: colConfig.width })
+             col.settings = { ...col.settings, flexGrow: colConfig.width };
+             row.children!.push(col);
+
             if (colConfig.rows) {
+              // Now that col is in the tree, we can insert rows into it
               colConfig.rows.forEach((nestedRowConfig: any) => {
                 createSingleRow(nestedRowConfig, col.id)
               })
@@ -413,15 +424,29 @@ const insertRow = (layout: any) => {
           }
         })
       } else {
+        // Standard/Flat layout
         const structure = config.structure || config
         const widths = config.widths || (typeof structure === 'string' ? structure.split('-').map(() => 1) : [1])
+        
+        // Calculate and set explicit column structure for RowBlock
+        const totalWidth = widths.reduce((a: number, b: number) => a + b, 0)
+        const columnsStr = widths.map((w: number) => totalWidth > 0 ? `${w}/${totalWidth}` : '1/1').join('-')
+        
+        // Update row settings directly
+        row.settings = { ...row.settings, columns: columnsStr };
+
+        // Create and append columns explicitly (skipping insertModule for children to avoid overhead/race conditions)
         widths.forEach((width: number) => {
-          const col = builder.insertModule('column', row.id)
+          const col = ModuleRegistry.createInstance('column');
           if (col) {
-            builder.updateModuleSettings(col.id, { flexGrow: width })
+            col.settings = { ...col.settings, flexGrow: width };
+            row.children!.push(col);
           }
         })
       }
+      
+      // Take a final snapshot to save the fully constructed row
+      builder.takeSnapshot({ immediate: true });
     }
   }
 
