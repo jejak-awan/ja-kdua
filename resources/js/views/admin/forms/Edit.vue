@@ -1,5 +1,5 @@
 <template>
-    <div class="space-y-6">
+    <div class="space-y-6 pb-20">
         <!-- Header & Main Metadata -->
         <div class="space-y-4">
             <div class="flex items-center justify-between">
@@ -106,7 +106,7 @@
 
                 <!-- Visual Builder Tab -->
                 <TabsContent value="fields" class="mt-0 focus-visible:ring-0">
-                    <div class="border border-border rounded-xl overflow-hidden h-[750px] relative bg-slate-50 dark:bg-slate-900/20 shadow-inner">
+                    <div class="border border-border rounded-xl overflow-hidden h-[850px] relative bg-slate-50 dark:bg-slate-900/20 shadow-inner">
                         <Builder 
                             ref="builderRef"
                             v-model="formData.blocks"
