@@ -86,18 +86,18 @@
                         {{ $t('features.frontend.newsletter.description') }}
                     </p>
                     <form class="flex flex-col gap-2" @submit.prevent="submitNewsletter">
-                        <div class="flex gap-2">
+                        <div class="flex flex-wrap gap-2">
                             <input 
                                 v-model="email"
                                 type="email" 
                                 :placeholder="$t('features.frontend.newsletter.placeholder')" 
-                                class="flex-1 px-4 py-2 rounded-lg bg-background border border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
+                                class="flex-1 min-w-0 px-4 py-2 rounded-lg bg-background border border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
                                 :class="{ 'border-destructive focus:ring-destructive': errors.email }"
                             >
                             <button 
                                 type="submit" 
                                 :disabled="loading"
-                                class="p-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                                class="p-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 shrink-0"
                             >
                                 <Loader2 v-if="loading" class="w-5 h-5 animate-spin" />
                                 <ArrowRight v-else class="w-5 h-5" />
