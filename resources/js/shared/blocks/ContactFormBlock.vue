@@ -20,7 +20,7 @@
         </div>
         
         <!-- Fields Container -->
-        <form @submit.prevent="handleSubmit" class="form-grid grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <form @submit.prevent="handleSubmit" :class="['form-grid grid gap-6 mb-8', device === 'desktop' ? 'grid-cols-2' : 'grid-cols-1']">
           <!-- Builder Mode -->
           <template v-if="mode === 'edit'">
               <slot />

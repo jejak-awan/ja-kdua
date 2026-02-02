@@ -16,15 +16,15 @@
         
         <form 
             @submit.prevent="handleSubscribe" 
-            class="newsletter-form flex gap-3 max-w-lg mx-auto" 
-            :class="[layout === 'stacked' ? 'flex-col' : '']"
+            class="newsletter-form flex flex-wrap gap-3 max-w-lg mx-auto" 
+            :class="[layout === 'stacked' || device === 'mobile' ? 'flex-col' : '']"
             :style="containerStyles"
         >
           <div class="relative flex-1">
             <Mail class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
             <Input 
                 type="email" 
-                class="pl-10 h-12 rounded-xl"
+                class="pl-10 h-12 rounded-xl min-w-0"
                 :style="inputStyles"
                 :placeholder="blockSettings.placeholder || 'Enter your email'" 
                 required
@@ -32,7 +32,7 @@
           </div>
           <Button 
             type="submit" 
-            class="h-12 px-8 rounded-xl font-bold shadow-lg shadow-primary/20 transition-colors hover:-translate-y-1 active:translate-y-0" 
+            class="h-12 px-8 rounded-xl font-bold shadow-lg shadow-primary/20 transition-colors hover:-translate-y-1 active:translate-y-0 shrink-0" 
             :style="buttonStyles"
             :disabled="loading"
           >
