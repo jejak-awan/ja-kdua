@@ -95,8 +95,8 @@ class Logger {
     }
 
     private async send(log: ErrorLog) {
-        // Don't send debug logs to backend
-        if (log.level === 'debug') return;
+        // Don't send debug, info, or warning logs to backend to prevent flood
+        if (['debug', 'info', 'warning'].includes(log.level)) return;
 
         // Rate Limiting: Reset count every 60 seconds
         if (Date.now() - this.lastResetTime > 60000) {
