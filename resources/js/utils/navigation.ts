@@ -15,14 +15,15 @@ export const navigationGroups: Record<string, NavItem[]> = {
     // Content Management (5 items)
     content: [
         { name: 'studio', to: '/admin/studio', label: 'Contents', permission: 'view content' },
-        { name: 'forms', to: '/admin/forms', label: 'Forms', permission: 'view forms' },
         { name: 'media', to: '/admin/media', label: 'Media Library', permission: 'view media' },
         { name: 'file-manager', to: '/admin/file-manager', label: 'File Manager', permission: 'view files' },
         { name: 'comments', to: '/admin/comments', label: 'Comments', permission: 'view comments' },
+        { name: 'custom-fields', to: '/admin/custom-fields', label: 'Custom Fields', permission: 'manage content' },
     ],
 
-    // Marketing & SEO (4 items)
+    // Marketing & SEO (5 items)
     marketing: [
+        { name: 'forms', to: '/admin/forms', label: 'Forms', permission: 'view forms' },
         { name: 'newsletter', to: '/admin/newsletter', label: 'Newsletter', permission: 'view newsletter' },
         { name: 'email-templates', to: '/admin/email-templates', label: 'Email Templates', permission: 'manage settings' },
         { name: 'seo', to: '/admin/seo', label: 'SEO Tools', permission: 'manage settings' },
@@ -55,8 +56,6 @@ export const navigationGroups: Record<string, NavItem[]> = {
         { name: 'languages', to: '/admin/languages', label: 'Languages', permission: 'view settings' },
     ],
 
-
-
     // System (7 items) - Info Sistem at top as system dashboard
     system: [
         { name: 'system', to: '/admin/system', label: 'System Info', permission: 'view system' },
@@ -65,13 +64,11 @@ export const navigationGroups: Record<string, NavItem[]> = {
         { name: 'backups', to: '/admin/backups', label: 'Backups', permission: 'view backups' },
         { name: 'redis', to: '/admin/redis', label: 'Redis Cache', permission: 'manage settings' },
         { name: 'scheduled-tasks', to: '/admin/scheduled-tasks', label: 'Scheduled Tasks', permission: 'view scheduled tasks' },
-
     ],
 
-    // Developer (3 items)
+    // Developer (2 items)
     developer: [
         { name: 'webhooks', to: '/admin/webhooks', label: 'Webhooks', permission: 'manage settings' },
-        { name: 'custom-fields', to: '/admin/custom-fields', label: 'Custom Fields', permission: 'manage content' },
         { name: 'plugins', to: '/admin/plugins', label: 'Plugins', permission: 'view plugins' },
     ],
 };

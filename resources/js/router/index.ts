@@ -334,7 +334,7 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: 'custom-fields',
                 name: 'custom-fields',
-                component: () => import('../views/admin/dev/custom-fields/Index.vue'),
+                component: () => import('../views/admin/studio/custom-fields/Index.vue'),
             },
             {
                 path: 'file-manager',
