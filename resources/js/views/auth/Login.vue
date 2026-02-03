@@ -1,20 +1,79 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-muted/40 px-4 py-12 sm:px-6 lg:px-8">
-        <Card class="w-full max-w-md">
-            <!-- 2FA Verification Form -->
-            <div v-if="requiresTwoFactor">
-                <CardHeader class="space-y-1">
-                    <CardTitle class="text-2xl font-bold text-center tracking-tight">
-                        {{ t('features.auth.twoFactor.title') || 'Two-Factor Authentication' }}
-                    </CardTitle>
-                    <CardDescription class="text-center">
-                        {{ t('features.auth.twoFactor.subtitle') || 'Please enter the code from your authenticator app.' }}
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form class="space-y-4" @submit.prevent="verifyTwoFactor">
+    <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-background via-muted/20 to-background px-4 py-2 sm:px-6 lg:px-8">
+        <div class="w-full max-w-5xl flex flex-col md:flex-row bg-card rounded-3xl shadow-2xl shadow-primary/5 overflow-hidden border border-border/40 min-h-0 animate-fade-up">
+            
+            <!-- Left Column: Decorative Graphic -->
+            <div class="hidden md:flex md:w-1/2 relative overflow-hidden items-center justify-center p-6">
+                <!-- Premium Background Image -->
+                <div class="absolute inset-0 z-0">
+                    <img :src="authBg" alt="Decorative background" class="w-full h-full object-cover">
+                    <!-- Dark overlay for better contrast -->
+                    <div class="absolute inset-0 bg-black/10"></div>
+                </div>
+
+                <!-- Glassmorphism Container -->
+                <div class="relative z-10 w-full max-w-sm backdrop-blur-xl bg-background/30 p-6 rounded-[2rem] border border-white/20 shadow-2xl text-center flex flex-col items-center animate-fade-up">
+                    <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-2xl mb-4 animate-bounce" style="animation-duration: 4s">
+                        <img v-if="cmsStore.siteSettings?.site_logo" :src="cmsStore.siteSettings.site_logo" :alt="cmsStore.siteSettings.site_name" class="h-10 w-auto object-contain" />
+                        <LayoutTemplate v-else class="h-8 w-8 text-primary" />
+                    </div>
+                    
+                    <h3 class="text-2xl font-black text-white drop-shadow-md mb-2 tracking-tight">
+                        {{ cmsStore.siteSettings?.site_name || 'Mastering Content' }}
+                    </h3>
+                    <p class="text-white/80 text-base leading-relaxed font-medium drop-shadow-sm">
+                        {{ cmsStore.siteSettings?.site_description || t('features.auth.login.hero_subtitle') || 'The ultimate solution for managing your digital presence with speed, security, and elegance.' }}
+                    </p>
+                    
+                    <!-- Premium chips -->
+                    <div class="mt-6 flex flex-wrap justify-center gap-2">
+                        <div class="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-[10px] font-black text-white hover:bg-white/20 transition-colors shadow-lg cursor-default uppercase tracking-wider">
+                            Real-time SEO
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-[10px] font-black text-white hover:bg-white/20 transition-colors shadow-lg cursor-default uppercase tracking-wider">
+                            Multilingual
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-[10px] font-black text-white hover:bg-white/20 transition-colors shadow-lg cursor-default uppercase tracking-wider">
+                            Cloud Native
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Branding Tag -->
+                <div class="absolute bottom-6 text-center w-full z-10">
+                    <p class="text-[10px] text-white/40 font-black tracking-[0.2em] uppercase drop-shadow-sm">
+                        {{ cmsStore.siteSettings?.site_name || 'Janari Digital Solutions' }} &bull; {{ new Date().getFullYear() }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Column: Authentication Form -->
+            <div class="w-full md:w-1/2 p-3 sm:p-5 md:p-6 flex flex-col justify-center animate-fade">
+                <!-- Internal Branding -->
+                <div class="flex items-center gap-2 mb-3 group justify-center">
+                    <div class="bg-primary rounded-lg p-1.5 shadow-lg shadow-primary/20 transition-transform group-hover:scale-110">
+                        <img v-if="cmsStore.siteSettings?.site_logo" :src="cmsStore.siteSettings.site_logo" :alt="cmsStore.siteSettings.site_name" class="h-5 w-auto object-contain invert grayscale brightness-200" />
+                        <LayoutTemplate v-else class="h-5 w-5 text-primary-foreground" />
+                    </div>
+                    <span class="text-lg font-black tracking-tight text-foreground">{{ cmsStore.siteSettings?.site_name || 'Janari CMS' }}</span>
+                </div>
+
+                <!-- 2FA Verification Form -->
+                <div v-if="requiresTwoFactor">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-extrabold tracking-tight text-foreground">
+                            {{ t('features.auth.twoFactor.title') || 'Two-Factor' }}
+                        </h2>
+                        <p class="mt-2 text-muted-foreground">
+                            {{ t('features.auth.twoFactor.subtitle') || 'Enter the code from your app.' }}
+                        </p>
+                    </div>
+                    
+                    <form class="space-y-3" @submit.prevent="verifyTwoFactor">
                         <div class="space-y-2">
-                            <Label for="two-factor-code">{{ t('features.auth.twoFactor.codeLabel') || 'Verification Code' }}</Label>
+                            <Label for="two-factor-code" class="text-[10px] uppercase tracking-wider font-bold ml-1 text-muted-foreground/80">
+                                {{ t('features.auth.twoFactor.codeLabel') || 'Verification Code' }}
+                            </Label>
                             <Input
                                 id="two-factor-code"
                                 v-model="twoFactorCode"
@@ -24,42 +83,41 @@
                                 required
                                 autofocus
                                 placeholder="000000"
-                                class="text-center text-lg tracking-widest"
+                                class="text-center text-xl tracking-[0.5em] font-mono h-12 auth-input"
                                 maxlength="6"
                                 @input="twoFactorCode = twoFactorCode.replace(/\D/g, '')"
                             />
                         </div>
 
-                        <div v-if="message" class="rounded-md p-3 text-sm border" :class="messageType === 'error' ? 'bg-destructive/15 text-destructive border-destructive/20' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'">
+                        <div v-if="message" class="rounded-xl p-4 text-sm border animate-fade" :class="messageType === 'error' ? 'bg-destructive/10 text-destructive border-destructive/20' : 'bg-success/10 text-success border-success/20'">
                             {{ message }}
                         </div>
 
-                        <Button type="submit" class="w-full" :disabled="loading || twoFactorCode.length !== 6">
+                        <Button type="submit" class="w-full h-9 auth-button-gradient" :disabled="loading || twoFactorCode.length !== 6">
                             <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
-                            {{ loading ? t('features.auth.twoFactor.verifying') || 'Verifying...' : t('features.auth.twoFactor.verify') || 'Verify' }}
+                            {{ loading ? t('features.auth.twoFactor.verifying') || 'Verifying...' : t('features.auth.twoFactor.verify') || 'Verify Code' }}
                         </Button>
 
-                        <Button type="button" variant="ghost" class="w-full" @click="cancelTwoFactor">
+                        <Button type="button" variant="ghost" class="w-full h-8 hover:bg-muted/50 transition-colors text-xs" @click="cancelTwoFactor">
                             {{ t('common.actions.cancel') }}
                         </Button>
                     </form>
-                </CardContent>
-            </div>
+                </div>
 
-            <!-- Standard Login Form -->
-            <div v-else>
-                <CardHeader class="space-y-1">
-                    <CardTitle class="text-2xl font-bold text-center tracking-tight">
-                        {{ t('features.auth.login.title') }}
-                    </CardTitle>
-                    <CardDescription class="text-center">
-                        {{ t('features.auth.login.subtitle') || 'Enter your email to sign in to your account' }}
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form class="space-y-4" @submit.prevent="handleLogin">
-                        <div class="space-y-2">
-                            <Label for="email">{{ t('common.labels.email') }}</Label>
+                <!-- Standard Login Form -->
+                <div v-else>
+                    <div class="mb-3 text-center md:text-left">
+                        <h2 class="text-xl font-black tracking-tight text-foreground">
+                            Welcome back
+                        </h2>
+                        <p class="mt-0.5 text-muted-foreground text-[10px]">
+                            {{ t('features.auth.login.subtitle') || 'Enter your credentials to access your account' }}
+                        </p>
+                    </div>
+
+                    <form class="space-y-2" @submit.prevent="handleLogin">
+                        <div class="space-y-1">
+                            <Label for="email" class="text-[10px] uppercase tracking-wider font-bold ml-1 text-muted-foreground/80">{{ t('common.labels.email') }}</Label>
                             <Input
                                 id="email"
                                 v-model="form.email"
@@ -67,19 +125,20 @@
                                 type="email"
                                 autocomplete="email"
                                 required
-                                :class="errors.email ? 'border-destructive focus-visible:ring-destructive' : ''"
+                                class="auth-input h-9 text-sm"
+                                :class="errors.email ? 'border-destructive/50 ring-destructive/20 focus:border-destructive' : ''"
                                 :placeholder="t('features.auth.login.emailPlaceholder')"
                             />
-                            <p v-if="errors.email" class="text-sm text-destructive font-medium">
+                            <p v-if="errors.email" class="text-[10px] text-destructive font-medium ml-1">
                                 {{ Array.isArray(errors.email) ? errors.email[0] : errors.email }}
                             </p>
                         </div>
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between">
-                                <Label for="password">{{ t('common.labels.password') }}</Label>
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between ml-1">
+                                <Label for="password" class="text-[10px] uppercase tracking-wider font-bold text-muted-foreground/80">{{ t('common.labels.password') }}</Label>
                                 <router-link
                                     :to="{ name: 'forgot-password' }"
-                                    class="text-sm font-medium text-primary hover:underline"
+                                    class="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"
                                 >
                                     {{ t('features.auth.login.forgotPassword') }}
                                 </router-link>
@@ -91,68 +150,91 @@
                                 type="password"
                                 autocomplete="current-password"
                                 required
-                                :class="errors.password ? 'border-destructive focus-visible:ring-destructive' : ''"
+                                class="auth-input h-9 text-sm"
+                                :class="errors.password ? 'border-destructive/50 ring-destructive/20 focus:border-destructive' : ''"
                                 :placeholder="t('features.auth.login.passwordPlaceholder')"
                             />
-                            <p v-if="errors.password" class="text-sm text-destructive font-medium">
+                            <p v-if="errors.password" class="text-[10px] text-destructive font-medium ml-1">
                                 {{ Array.isArray(errors.password) ? errors.password[0] : errors.password }}
                             </p>
                         </div>
 
-                        <div class="flex items-center space-x-2">
-                            <Checkbox 
-                                id="remember-me" 
-                                name="remember-me"
-                                :checked="form.remember" 
-                                @update:checked="(v) => form.remember = v"
-                            />
-                            <label for="remember-me" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                {{ t('features.auth.login.rememberMe') }}
-                            </label>
+                        <div class="flex items-center justify-between px-1">
+                            <div class="flex items-center space-x-2">
+                                <Checkbox 
+                                    id="remember-me" 
+                                    name="remember-me"
+                                    :checked="form.remember" 
+                                    @update:checked="(v) => form.remember = v"
+                                    class="h-4 w-4 rounded border-border/60 transition-colors data-[state=checked]:bg-primary"
+                                />
+                                <label for="remember-me" class="text-xs font-medium leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                                    {{ t('features.auth.login.rememberMe') }}
+                                </label>
+                            </div>
                         </div>
 
                         <!-- Captcha -->
-                        <CaptchaWrapper 
-                            ref="captchaRef"
-                            action="login"
-                            @verified="onCaptchaVerified"
-                        />
+                        <div class="rounded-xl overflow-hidden border border-border/40 bg-muted/5">
+                            <CaptchaWrapper 
+                                ref="captchaRef"
+                                action="login"
+                                @verified="onCaptchaVerified"
+                            />
+                        </div>
 
-                        <div v-if="timeoutMessage" class="rounded-md bg-amber-500/15 p-3 text-sm text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        <div v-if="timeoutMessage" class="rounded-xl bg-warning/10 p-2 text-[10px] text-warning-foreground border border-warning/20 animate-fade">
                             {{ timeoutMessage }}
                         </div>
 
-                        <div v-if="rateLimited" class="rounded-md bg-destructive/15 p-3 text-sm text-destructive border border-destructive/20">
-                            <p class="font-semibold">{{ t('features.auth.messages.tooManyAttempts') }}</p>
+                        <div v-if="rateLimited" class="rounded-xl bg-destructive/10 p-2 text-[10px] text-destructive border border-destructive/20 animate-fade">
+                            <p class="font-bold mb-0.5">{{ t('features.auth.messages.tooManyAttempts') }}</p>
                             <p>{{ t('features.auth.messages.retryDetails', { time: formatRetryTime(retryAfter) }) }}</p>
                         </div>
 
-                        <div v-if="message && !errors.email && !errors.password && !rateLimited" class="rounded-md p-3 text-sm border" :class="messageType === 'error' ? 'bg-destructive/15 text-destructive border-destructive/20' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'">
+                        <div v-if="message && !errors.email && !errors.password && !rateLimited" class="rounded-xl p-2 text-[10px] border animate-fade" :class="messageType === 'error' ? 'bg-destructive/10 text-destructive border-destructive/20' : 'bg-success/10 text-success border-success/20'">
                             {{ message }}
                         </div>
 
-                        <Button type="submit" class="w-full" :disabled="loading || rateLimited || !isValid || (captchaEnabled && !captchaVerified)">
-                            <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
-                            <span v-if="loading">{{ t('features.auth.login.submit') }}...</span>
-                            <span v-else-if="rateLimited">{{ t('features.media.modals.bulk.wait') }}...</span>
-                            <span v-else>{{ t('features.auth.login.submit') }}</span>
+                        <Button type="submit" class="w-full h-9 auth-button-gradient mt-1" :disabled="loading || rateLimited || !isValid || (captchaEnabled && !captchaVerified)">
+                            <Loader2 v-if="loading" class="mr-2 h-3 w-3 animate-spin" />
+                            <span v-if="loading" class="text-xs">{{ t('features.auth.login.submit') }}...</span>
+                            <span v-else-if="rateLimited" class="text-xs">{{ t('features.media.modals.bulk.wait') }}...</span>
+                            <span v-else class="text-xs">{{ t('features.auth.login.submit') }}</span>
                         </Button>
 
-                        <!-- Registration Disabled Info -->
-                        <div v-if="registrationDisabledMessage" class="rounded-md bg-amber-500/15 p-3 text-sm text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                            {{ registrationDisabledMessage }}
+                        <!-- Social Logins Placeholder -->
+                        <div class="relative my-3">
+                            <div class="absolute inset-0 flex items-center">
+                                <span class="w-full border-t border-border/40"></span>
+                            </div>
+                            <div class="relative flex justify-center text-[10px] uppercase tracking-wider">
+                                <span class="bg-card px-2 text-muted-foreground font-bold">Or</span>
+                            </div>
                         </div>
 
-                        <div v-if="registrationEnabled" class="text-center text-sm text-muted-foreground mt-4">
+                        <div class="grid grid-cols-2 gap-2">
+                            <Button variant="outline" type="button" class="h-9 rounded-lg hover:bg-muted/50 transition-colors border-border/40">
+                                <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.9 3.28-2.12 4.41-1.37 1.34-3.26 2.4-6.4 2.4-5.34 0-9.6-4.32-9.6-9.6s4.26-9.6 9.6-9.6c3.15 0 5.48 1.25 7.18 2.87l2.29-2.29C18.9 1.5 15.86 0 12.48 0 5.58 0 0 5.58 0 12.48s5.58 12.48 12.48 12.48c3.7 0 6.64-1.21 8.87-3.56 2.3-2.3 3-5.5 3-8.1 0-.6-.05-1.12-.15-1.57z"/>
+                                </svg>
+                            </Button>
+                            <Button variant="outline" type="button" class="h-9 rounded-lg hover:bg-muted/50 transition-colors border-border/40">
+                                <Github class="h-4 w-4" />
+                            </Button>
+                        </div>
+
+                        <div v-if="registrationEnabled" class="text-center text-[10px] text-muted-foreground mt-3">
                             {{ t('features.auth.login.noAccount') }} 
-                            <router-link :to="{ name: 'register' }" class="font-medium text-primary hover:underline">
+                            <router-link :to="{ name: 'register' }" class="font-bold text-primary hover:text-primary/80 transition-all ml-1">
                                 {{ t('features.auth.login.register') }}
                             </router-link>
                         </div>
                     </form>
-                </CardContent>
+                </div>
             </div>
-        </Card>
+
+        </div>
     </div>
 </template>
 
@@ -162,10 +244,15 @@ import { ref, reactive, computed, onMounted, onUnmounted, nextTick, type Ref } f
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
+import { useCmsStore } from '../../stores/cms';
 import { useFormValidation } from '../../composables/useFormValidation';
 import { loginSchema } from '../../schemas/auth';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import LayoutTemplate from 'lucide-vue-next/dist/esm/icons/layout-template.js';
+import Apple from 'lucide-vue-next/dist/esm/icons/apple.js';
+import Github from 'lucide-vue-next/dist/esm/icons/github.js';
 import api, { resetLockdown } from '../../services/api';
+import authBg from '../../../images/auth-bg.png';
 
 // Shadcn Components
 import {
@@ -185,6 +272,7 @@ const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 const { t } = useI18n();
+const cmsStore = useCmsStore();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(loginSchema);
 
 const captchaRef = ref<any>(null);

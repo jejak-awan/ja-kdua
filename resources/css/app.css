@@ -501,3 +501,36 @@
 .no-transitions * {
     transition: none !important;
 }
+
+/* --- Auth UI Premium Utilities --- */
+@layer utilities {
+    .auth-input {
+        @apply h-11 px-4 text-base border-border/60 transition-all duration-200;
+    }
+
+    .auth-button-gradient {
+        @apply bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-white font-semibold transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 disabled:grayscale disabled:opacity-50 disabled:active:scale-100;
+    }
+
+    .auth-card-premium {
+        @apply border-border/40 shadow-xl shadow-primary/5 rounded-2xl overflow-hidden;
+    }
+
+    /* Fix Chrome/Safari autofill yellow/shadow background */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px white inset !important;
+        -webkit-text-fill-color: black !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+
+    .dark input:-webkit-autofill,
+    .dark input:-webkit-autofill:hover,
+    .dark input:-webkit-autofill:focus,
+    .dark input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px #0a1322 inset !important;
+        -webkit-text-fill-color: white !important;
+    }
+}

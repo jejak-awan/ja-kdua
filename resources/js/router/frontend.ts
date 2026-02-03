@@ -67,6 +67,22 @@ const frontendRoutes: RouteRecordRaw[] = [
                 }
             },
             {
+                path: 'terms',
+                name: 'terms',
+                component: () => import('@/views/legal/Terms.vue'),
+                meta: {
+                    title: 'Terms of Service',
+                }
+            },
+            {
+                path: 'privacy',
+                name: 'privacy',
+                component: () => import('@/views/legal/Privacy.vue'),
+                meta: {
+                    title: 'Privacy Policy',
+                }
+            },
+            {
                 path: 'f/:slug',
                 name: 'form.public',
                 component: () => import('@/views/frontend/FormView.vue'),

@@ -1,0 +1,15 @@
+
+> build
+> vite build
+
+vite v7.3.1 building client environment for production...
+transforming...
+✓ 318 modules transformed.
+✗ Build failed in 3.57s
+error during build:
+Could not resolve "../../../../images/auth-bg.png" from "resources/js/views/auth/ForgotPassword.vue?vue&type=script&setup=true&lang.ts"
+file: /var/www/ja-cms/resources/js/views/auth/ForgotPassword.vue?vue&type=script&setup=true&lang.ts
+    at getRollupError (file:///var/www/ja-cms/node_modules/rollup/dist/es/shared/parseAst.js:402:41)
+    at error (file:///var/www/ja-cms/node_modules/rollup/dist/es/shared/parseAst.js:398:42)
+    at ModuleLoader.handleInvalidResolvedId (file:///var/www/ja-cms/node_modules/rollup/dist/es/shared/node-entry.js:21687:24)
+    at file:///var/www/ja-cms/node_modules/rollup/dist/es/shared/node-entry.js:21647:26
