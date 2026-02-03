@@ -16,17 +16,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Create roles and permissions first (required)
-        $this->call(RolePermissionSeeder::class);
+        // 1. Foundation (Roles, Permissions, Settings, Languages, Tasks)
+        $this->call(FoundationSeeder::class);
 
-        // 2. Create default settings (required)
-        $this->call(SettingsSeeder::class);
-        $this->call(LanguageSeeder::class);
-        $this->call(ScheduledTaskSeeder::class);
-        $this->call(CommentSecuritySettingsSeeder::class);
-        $this->call(BuilderPresetSeeder::class);
-
-        // 3. Create admin user if not exists
+        // 2. Create Default Admin User
         $admin = User::firstOrCreate(
             ['email' => 'admin@jejakawan.com'],
             [
@@ -37,20 +30,15 @@ class DatabaseSeeder extends Seeder
         );
         $admin->assignRole('super-admin');
 
-        // 4. Create test user (optional, for development)
-        if (app()->environment('local', 'development', 'testing')) {
-            User::factory()->create([
-                'name' => 'Test User',
-                'email' => 'test@example.com',
-            ]);
+        // 3. Studio Structure (Categories, Tags, Menus, Forms)
+        $this->call(StudioSeeder::class);
 
-            // Optionally seed sample data in development
-            // $this->call(SampleDataSeeder::class);
-            $this->call(ThemeContentSeeder::class);
-            $this->call(ContentTemplateSeeder::class);
-            $this->call(JanariUpgradeSeeder::class);
+        // 4. Sample Data (Optional, for development)
+        if (app()->environment('local', 'development', 'testing')) {
+            $this->call(SampleDataSeeder::class);
+            // $this->call(ThemeContentSeeder::class); // Re-enable if you want theme-specific blocks
         }
 
-        $this->command->info('Database seeded successfully!');
+        $this->command->info('Full database reorganization and seeding completed successfully!');
     }
 }

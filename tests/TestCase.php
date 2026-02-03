@@ -94,7 +94,6 @@ abstract class TestCase extends BaseTestCase
             'view logs', 'delete logs',
             'view analytics',
             'view activity logs',
-            'view activity logs',
             'view security logs',
             // Missing permissions
             'manage comments', 'manage content', 'publish content', 'approve content',

@@ -217,6 +217,7 @@ class FormController extends BaseApiController
         ]);
     }
 
+
     protected function extractRulesFromBlocks($blocks)
     {
         $rules = [];
@@ -283,13 +284,6 @@ class FormController extends BaseApiController
         
         $newForm->save();
 
-        // Duplicate fields
-        foreach ($form->fields as $field) {
-            $newField = $field->replicate();
-            $newField->form_id = $newForm->id;
-            $newField->save();
-        }
-
         // Duplicate submissions if requested
         if ($withSubmissions) {
             foreach ($form->submissions as $submission) {
@@ -299,8 +293,9 @@ class FormController extends BaseApiController
             }
         }
 
-        return $this->success($newForm->load('fields'), 'Form duplicated successfully', 201);
+        return $this->success($newForm, 'Form duplicated successfully', 201);
     }
+
 
     public function bulkAction(Request $request)
     {
@@ -342,7 +337,6 @@ class FormController extends BaseApiController
 
                 $forms = $query->get();
                 foreach ($forms as $form) {
-                    $form->fields()->delete();
                     $form->submissions()->delete();
                     $form->forceDelete();
                 }

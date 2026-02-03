@@ -76,10 +76,12 @@ class Form extends Model
 
     protected function updateDailyStats($field)
     {
-        $this->analytics()->updateOrCreate(
+        $analytics = $this->analytics()->firstOrCreate(
             ['date' => now()->toDateString()],
-            [$field => \DB::raw("$field + 1")]
+            ['views' => 0, 'starts' => 0, 'submissions' => 0]
         );
+
+        $analytics->increment($field);
     }
 
     public function getUnreadSubmissionsCount()

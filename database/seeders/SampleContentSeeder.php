@@ -39,6 +39,12 @@ class SampleContentSeeder extends Seeder
         // Create blog posts
         $this->createBlogPosts($user, $categories, $tags);
 
+        // Create media folders
+        $this->createMediaFolders($user);
+
+        // Create comments
+        $this->createComments($user);
+
         $this->command->info('Sample content created successfully!');
     }
 
@@ -474,5 +480,53 @@ class SampleContentSeeder extends Seeder
         }
 
         $this->command->info('Created 5 blog posts');
+    }
+
+    private function createMediaFolders($user): void
+    {
+        $folders = [
+            ['name' => 'Wallpapers', 'slug' => 'wallpapers'],
+            ['name' => 'Blog Images', 'slug' => 'blog-images'],
+            ['name' => 'UI Assets', 'slug' => 'ui-assets'],
+            ['name' => 'Product Documentation', 'slug' => 'docs'],
+        ];
+
+        foreach ($folders as $folder) {
+            \App\Models\MediaFolder::updateOrCreate(
+                ['slug' => $folder['slug']],
+                array_merge($folder, ['author_id' => $user->id])
+            );
+        }
+
+        $this->command->info('Created 4 media folders');
+    }
+
+    private function createComments($user): void
+    {
+        $posts = Content::where('type', 'post')->get();
+        $sampleComments = [
+            'Great article! This really helped me understand the builder.',
+            'I love the design of this CMS. Is there a dark mode?',
+            'Very helpful tutorial, looking forward to the next one!',
+            'Could you elaborate more on the security features?',
+            'This is exactly what I was looking for. Simply amazing.',
+        ];
+
+        foreach ($posts as $post) {
+            // Add 1-3 comments per post
+            $count = rand(1, 3);
+            for ($i = 0; $i < $count; $i++) {
+                \App\Models\Comment::create([
+                    'content_id' => $post->id,
+                    'user_id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'body' => $sampleComments[array_rand($sampleComments)],
+                    'status' => rand(0, 1) ? 'approved' : 'pending',
+                ]);
+            }
+        }
+
+        $this->command->info('Created sample comments');
     }
 }

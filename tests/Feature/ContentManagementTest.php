@@ -13,7 +13,7 @@ use Tests\TestCase;
 
 class ContentManagementTest extends TestCase
 {
-// use RefreshDatabase;
+    use RefreshDatabase;
 
     /**
      * Test admin can list all contents.
@@ -253,7 +253,8 @@ class ContentManagementTest extends TestCase
         TestHelpers::assertApiSuccess($response, 201);
         $this->assertDatabaseHas('content_revisions', [
             'content_id' => $content->id,
-            'user_id' => $admin->id,
+            'author_id' => $admin->id,
+            'reason' => 'Test revision',
         ]);
     }
 

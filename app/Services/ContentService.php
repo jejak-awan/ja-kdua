@@ -434,16 +434,22 @@ class ContentService
      */
     public function createRevision(Content $content, int $userId, string $note = ''): ContentRevision
     {
-        return ContentRevision::create([
-            'content_id' => $content->id,
-            'user_id' => $userId,
-            'title' => $content->title,
-            'body' => $content->body,
+        // Prepare standard revision metadata
+        $meta = $content->meta ?? [];
+        $meta['revision_data'] = [
             'excerpt' => $content->excerpt,
             'slug' => $content->slug,
-            'meta' => $content->meta,
             'status' => $content->status,
-            'note' => $note,
+        ];
+
+        return ContentRevision::create([
+            'content_id' => $content->id,
+            'author_id' => $userId,
+            'title' => $content->title,
+            'body' => $content->body,
+            'blocks' => $content->blocks, // Ensure blocks are saved if available
+            'meta' => $meta,
+            'reason' => $note,
         ]);
     }
 

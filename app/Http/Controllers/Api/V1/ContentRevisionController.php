@@ -41,23 +41,32 @@ class ContentRevisionController extends BaseApiController
     public function store(Request $request, Content $content)
     {
         $validated = $request->validate([
-            'note' => 'nullable|string|max:500',
+            'reason' => 'nullable|string|max:500',
+            'note' => 'nullable|string|max:500', // Legacy support
         ]);
+
+        $reason = $validated['reason'] ?? $validated['note'] ?? 'Auto-saved revision';
+
+        // Prepare standard revision metadata
+        $meta = $content->meta ?? [];
+        $meta['revision_data'] = [
+            'excerpt' => $content->excerpt,
+            'slug' => $content->slug,
+            'status' => $content->status,
+        ];
 
         // Create revision from current content state
         $revision = ContentRevision::create([
             'content_id' => $content->id,
-            'user_id' => $request->user()->id,
+            'author_id' => $request->user()->id,
             'title' => $content->title,
             'body' => $content->body,
-            'excerpt' => $content->excerpt,
-            'slug' => $content->slug,
-            'meta' => $content->meta,
-            'status' => $content->status,
-            'note' => $validated['note'] ?? 'Auto-saved revision',
+            'blocks' => $content->blocks,
+            'meta' => $meta,
+            'reason' => $reason,
         ]);
 
-        return $this->success($revision->load('user'), 'Content revision created successfully', 201);
+        return $this->success($revision->load('author'), 'Content revision created successfully', 201);
     }
 
     public function restore(Request $request, Content $content, ContentRevision $revision)
@@ -66,27 +75,35 @@ class ContentRevisionController extends BaseApiController
             return $this->notFound('Revision');
         }
 
-        // Create a new revision of current state before restoring
-        ContentRevision::create([
-            'content_id' => $content->id,
-            'user_id' => $request->user()->id,
-            'title' => $content->title,
-            'body' => $content->body,
+        // Backup current state
+        $currentMeta = $content->meta ?? [];
+        $currentMeta['revision_data'] = [
             'excerpt' => $content->excerpt,
             'slug' => $content->slug,
-            'meta' => $content->meta,
             'status' => $content->status,
-            'note' => 'Backup before restore',
+        ];
+
+        ContentRevision::create([
+            'content_id' => $content->id,
+            'author_id' => $request->user()->id,
+            'title' => $content->title,
+            'body' => $content->body,
+            'blocks' => $content->blocks,
+            'meta' => $currentMeta,
+            'reason' => 'Backup before restore',
         ]);
 
         // Restore content from revision
+        $revisionData = $revision->meta['revision_data'] ?? [];
+        
         $content->update([
             'title' => $revision->title,
             'body' => $revision->body,
-            'excerpt' => $revision->excerpt,
-            'slug' => $revision->slug,
-            'meta' => $revision->meta,
-            'status' => $revision->status,
+            'blocks' => $revision->blocks,
+            'excerpt' => $revisionData['excerpt'] ?? $content->excerpt, // Fallback to current if missing
+            'slug' => $revisionData['slug'] ?? $content->slug,
+            'meta' => $revision->meta, // This might overwrite revision_data into content meta, which is fine
+            'status' => $revisionData['status'] ?? 'draft', // Safe default
         ]);
 
         return $this->success([

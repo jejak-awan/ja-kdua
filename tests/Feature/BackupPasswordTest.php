@@ -8,6 +8,8 @@ use Tests\TestCase;
 
 class BackupPasswordTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * A basic feature test example.
      */
@@ -41,6 +43,7 @@ class BackupPasswordTest extends TestCase
             'type' => 'database',
             'disk' => 'local',
             'path' => 'backups/test.zip',
+            'size' => 1024,
             'status' => 'completed',
             'password' => $password
         ]);

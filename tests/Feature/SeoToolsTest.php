@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 class SeoToolsTest extends TestCase
 {
-    // use RefreshDatabase;
+    use RefreshDatabase;
 
     protected User $admin;
 

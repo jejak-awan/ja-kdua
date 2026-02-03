@@ -496,12 +496,6 @@
             </div>
         </Card>
 
-        <!-- Submissions View -->
-        <Submissions
-            v-if="selectedForm"
-            :form="selectedForm"
-            @close="selectedForm = null"
-        />
 
         <!-- Share Dialog -->
         <Dialog v-model:open="showShareDialog">
@@ -602,7 +596,6 @@ import { useConfirm } from '@/composables/useConfirm';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
-import Submissions from './Submissions.vue';
 import { Badge, Button, Card, Checkbox, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Label, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui';
 
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
@@ -635,7 +628,6 @@ const loading = ref(true);
 const search = ref('');
 const statusFilter = ref('all');
 const trashedFilter = ref('without');
-const selectedForm = ref<Form | null>(null);
 const viewMode = ref('card');
 const showShareDialog = ref(false);
 const sharingForm = ref<Form | null>(null);

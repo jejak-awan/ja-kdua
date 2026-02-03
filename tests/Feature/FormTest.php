@@ -127,59 +127,8 @@ class FormTest extends TestCase
     /**
      * Test admin can add field to form.
      */
-    public function test_admin_can_add_field_to_form(): void
-    {
-        $admin = $this->createAdminUser();
-        $this->actingAs($admin, 'sanctum');
 
-        $form = Form::factory()->create();
 
-        $fieldData = [
-            'label' => 'Email Address',
-            'name' => 'email',
-            'type' => 'email',
-            'is_required' => true,
-            'sort_order' => 1,
-        ];
-
-        $response = $this->postJson("/api/v1/admin/ja/forms/{$form->id}/fields", $fieldData);
-
-        TestHelpers::assertApiSuccess($response, 201);
-    }
-
-    /**
-     * Test admin can update form field.
-     */
-    public function test_admin_can_update_form_field(): void
-    {
-        $admin = $this->createAdminUser();
-        $this->actingAs($admin, 'sanctum');
-
-        $form = Form::factory()->create();
-        $field = FormField::factory()->create(['form_id' => $form->id]);
-
-        $response = $this->putJson("/api/v1/admin/ja/forms/{$form->id}/fields/{$field->id}", [
-            'label' => 'Updated Label',
-        ]);
-
-        TestHelpers::assertApiSuccess($response);
-    }
-
-    /**
-     * Test admin can delete form field.
-     */
-    public function test_admin_can_delete_form_field(): void
-    {
-        $admin = $this->createAdminUser();
-        $this->actingAs($admin, 'sanctum');
-
-        $form = Form::factory()->create();
-        $field = FormField::factory()->create(['form_id' => $form->id]);
-
-        $response = $this->deleteJson("/api/v1/admin/ja/forms/{$form->id}/fields/{$field->id}");
-
-        TestHelpers::assertApiSuccess($response);
-    }
 
     /**
      * Test admin can duplicate form.
@@ -190,7 +139,6 @@ class FormTest extends TestCase
         $this->actingAs($admin, 'sanctum');
 
         $form = Form::factory()->create();
-        FormField::factory()->count(2)->create(['form_id' => $form->id]);
 
         $response = $this->postJson("/api/v1/admin/ja/forms/{$form->id}/duplicate");
 
@@ -233,18 +181,26 @@ class FormTest extends TestCase
      */
     public function test_public_can_submit_form(): void
     {
-        $form = Form::factory()->create(['is_active' => true]);
-        FormField::factory()->create([
-            'form_id' => $form->id,
-            'name' => 'name',
-            'type' => 'text',
-            'is_required' => true,
-        ]);
-        FormField::factory()->create([
-            'form_id' => $form->id,
-            'name' => 'email',
-            'type' => 'email',
-            'is_required' => true,
+        $form = Form::factory()->create([
+            'is_active' => true,
+            'blocks' => [
+                [
+                    'type' => 'form_input',
+                    'settings' => [
+                        'field_id' => 'name',
+                        'type' => 'text',
+                        'is_required' => true,
+                    ]
+                ],
+                [
+                    'type' => 'form_input',
+                    'settings' => [
+                        'field_id' => 'email',
+                        'type' => 'email',
+                        'is_required' => true,
+                    ]
+                ]
+            ]
         ]);
 
         $response = $this->postJson("/api/v1/cms/forms/{$form->slug}/submit", [
@@ -260,12 +216,18 @@ class FormTest extends TestCase
      */
     public function test_form_submission_validates_required_fields(): void
     {
-        $form = Form::factory()->create(['is_active' => true]);
-        FormField::factory()->create([
-            'form_id' => $form->id,
-            'name' => 'email',
-            'type' => 'email',
-            'is_required' => true,
+        $form = Form::factory()->create([
+            'is_active' => true,
+            'blocks' => [
+                [
+                    'type' => 'form_input',
+                    'settings' => [
+                        'field_id' => 'email',
+                        'type' => 'email',
+                        'is_required' => true,
+                    ]
+                ]
+            ]
         ]);
 
         $response = $this->postJson("/api/v1/cms/forms/{$form->slug}/submit", []);

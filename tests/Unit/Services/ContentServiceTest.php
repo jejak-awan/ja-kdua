@@ -122,7 +122,7 @@ class ContentServiceTest extends TestCase
         $this->service->update($content, $updateData, $this->user->id, true, 'Test revision note');
 
         $revision = ContentRevision::where('content_id', $content->id)
-            ->where('note', 'Test revision note')
+            ->where('reason', 'Test revision note')
             ->first();
 
         $this->assertNotNull($revision);

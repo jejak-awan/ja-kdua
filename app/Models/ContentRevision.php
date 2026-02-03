@@ -12,17 +12,16 @@ class ContentRevision extends Model
 
     protected $fillable = [
         'content_id',
-        'user_id',
+        'author_id',
         'title',
         'body',
-        'excerpt',
-        'slug',
+        'blocks',
         'meta',
-        'status',
-        'note',
+        'reason',
     ];
 
     protected $casts = [
+        'blocks' => 'array',
         'meta' => 'array',
     ];
 
@@ -31,8 +30,14 @@ class ContentRevision extends Model
         return $this->belongsTo(Content::class);
     }
 
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
+    
+    // Alias for backward compatibility if needed, or just remove
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'author_id');
     }
 }
