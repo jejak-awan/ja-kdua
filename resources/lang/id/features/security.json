@@ -80,7 +80,7 @@
         "removeSelected": "Hapus Terpilih"
     },
     "logs": {
-        "title": "Log Keamanan",
+        "title": "Jurnal Keamanan",
         "all": "Semua Event",
         "failedLogin": "Login Gagal",
         "blockedIp": "IP Terblokir",

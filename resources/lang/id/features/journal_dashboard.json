@@ -1,0 +1,33 @@
+{
+    "title": "Dasbor Jurnal",
+    "description": "Lihat ringkasan dan akses cepat ke semua sistem log",
+    "loading": "Memuat...",
+    "empty": "Tidak ada data",
+    "viewAll": "Lihat Semua",
+    "cards": {
+        "activity": {
+            "title": "Jurnal Aktivitas",
+            "description": "Aktivitas pengguna dan perubahan data",
+            "total": "total aktivitas"
+        },
+        "security": {
+            "title": "Jurnal Keamanan",
+            "description": "Event keamanan dan percobaan login",
+            "total": "total event"
+        },
+        "login": {
+            "title": "Riwayat Akses",
+            "description": "Semua aktivitas login pengguna",
+            "total": "total login"
+        },
+        "system": {
+            "title": "Jurnal Sistem",
+            "description": "Log aplikasi Laravel",
+            "files": "file log"
+        }
+    },
+    "recent": {
+        "activity": "Aktivitas Terbaru",
+        "security": "Event Keamanan Terbaru"
+    }
+}

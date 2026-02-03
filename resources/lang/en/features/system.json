@@ -161,7 +161,7 @@
         }
     },
     "logs": {
-        "title": "Log Viewer",
+        "title": "System Journal",
         "clear": "Clear Logs",
         "clearing": "Clearing...",
         "files": "Log Files",

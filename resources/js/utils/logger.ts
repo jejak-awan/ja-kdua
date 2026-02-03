@@ -12,7 +12,7 @@ interface ErrorLog {
 }
 
 class Logger {
-    private apiUrl = '/logs/frontend';
+    private apiUrl = '/journal/frontend';
     private queue: ErrorLog[] = []; // Kept for checking but technically unused now
 
     // Rate Limiting Logic

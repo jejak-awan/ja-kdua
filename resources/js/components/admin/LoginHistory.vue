@@ -144,7 +144,7 @@ const perPage = ref(10);
 const fetchHistory = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/profile/login-history', {
+        const response = await api.get('/profile/access-journal', {
             params: {
                 per_page: perPage.value,
                 page: currentPage.value,

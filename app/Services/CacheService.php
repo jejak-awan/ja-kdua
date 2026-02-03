@@ -101,7 +101,7 @@ class CacheService
     public function warmUp()
     {
         // Pre-cache frequently accessed data
-        Category::where('is_active', true)->get();
+        Category::all();
         Content::where('status', 'published')->limit(20)->get();
     }
 

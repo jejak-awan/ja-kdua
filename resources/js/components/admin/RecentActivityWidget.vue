@@ -133,7 +133,7 @@ const fetchActivities = async () => {
     }
     
     try {
-        const response = await api.get('/admin/ja/activity-logs', { params: { per_page: 6 } });
+        const response = await api.get('/admin/ja/activity-journal', { params: { per_page: 6 } });
         const { data } = parseResponse(response);
         activities.value = (data as Activity[]) || [];
     } catch (error: any) {
@@ -198,7 +198,7 @@ const getActionLabel = (action?: string) => {
     let translated = t(key);
     
     if (translated === key) {
-        key = `features.activityLogs.filters.types.${action}`;
+        key = `features.activityJournal.filters.types.${action}`;
         translated = t(key);
     }
     

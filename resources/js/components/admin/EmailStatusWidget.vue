@@ -136,7 +136,7 @@ const fetchStats = async () => {
 
 const fetchLogs = async () => {
   try {
-    const response = await api.get('/admin/ja/email-test/recent-logs?limit=5');
+    const response = await api.get('/admin/ja/email-test/recent-journal?limit=5');
     const { data } = parseResponse(response) as { data: { logs?: EmailLog[] } };
     if (data && Array.isArray(data.logs)) {
         logs.value = data.logs;

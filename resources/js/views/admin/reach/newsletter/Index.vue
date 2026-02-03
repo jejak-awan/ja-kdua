@@ -1,0 +1,434 @@
+<template>
+    <div>
+        <div class="mb-6 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-foreground">{{ $t('features.newsletter.title') }}</h1>
+                <p class="mt-1 text-sm text-muted-foreground">{{ $t('features.newsletter.subtitle') }}</p>
+            </div>
+            <div class="flex gap-2">
+                <Button
+                    variant="outline"
+                    @click="exportCsv"
+                >
+                    <Download class="w-4 h-4 mr-2" />
+                    {{ $t('features.newsletter.actions.export') }}
+                </Button>
+            </div>
+        </div>
+
+        <Card>
+            <!-- Filters & Search -->
+            <div class="p-4 border-b border-border flex flex-col md:flex-row md:items-center gap-4">
+                <div class="relative flex-1">
+                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                        v-model="filters.q"
+                        @input="debounceSearch"
+                        :placeholder="$t('features.newsletter.filters.search')"
+                        class="pl-9"
+                    />
+                </div>
+                <Select
+                    v-model="filters.status"
+                    @update:model-value="fetchSubscribers"
+                >
+                    <SelectTrigger class="w-full md:w-[200px]">
+                        <SelectValue :placeholder="$t('features.newsletter.filters.allStatus')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{{ $t('features.newsletter.filters.allStatus') }}</SelectItem>
+                        <SelectItem value="subscribed">{{ $t('features.newsletter.filters.subscribed') }}</SelectItem>
+                        <SelectItem value="unsubscribed">{{ $t('features.newsletter.filters.unsubscribed') }}</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Select
+                    v-model="filters.trashed"
+                    @update:model-value="fetchSubscribers"
+                >
+                    <SelectTrigger class="w-full md:w-[160px]">
+                        <SelectValue :placeholder="t('common.labels.status')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                         <SelectItem value="without">{{ t('common.labels.activeOnly') }}</SelectItem>
+                         <SelectItem value="with">{{ t('common.labels.includesTrashed') }}</SelectItem>
+                         <SelectItem value="only">{{ t('common.labels.trashedOnly') }}</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <!-- Bulk Actions -->
+                <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 transition-colors animate-in fade-in slide-in-from-top-1 ml-auto">
+                    <span class="text-sm font-medium text-primary">
+                        {{ selectedIds.length }} selected
+                    </span>
+                    <div class="h-4 w-px bg-primary/20"></div>
+                    <Select
+                        v-model="bulkActionSelection"
+                        @update:model-value="handleBulkAction"
+                    >
+                        <SelectTrigger class="w-[160px] h-8 border-primary/20">
+                            <SelectValue :placeholder="$t('features.content.list.bulkActions')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                             <SelectItem value="delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.delete') }}</SelectItem>
+                             <SelectItem value="restore" class="text-emerald-600 focus:text-emerald-600">{{ $t('common.actions.restore') }}</SelectItem>
+                             <SelectItem value="force_delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.forceDelete') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead class="w-[50px]">
+                            <Checkbox 
+                                :checked="isAllSelected"
+                                @update:checked="toggleSelectAll"
+                            />
+                        </TableHead>
+                        <TableHead>{{ $t('features.newsletter.table.subscriber') }}</TableHead>
+                        <TableHead>{{ $t('features.newsletter.table.status') }}</TableHead>
+                        <TableHead>{{ $t('features.newsletter.table.joinedAt') }}</TableHead>
+                        <TableHead>{{ $t('features.newsletter.table.source') }}</TableHead>
+                        <TableHead class="text-center">{{ $t('features.newsletter.table.actions') }}</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    <TableRow v-if="loading">
+                        <TableCell colspan="6" class="h-24 text-center">
+                            {{ $t('features.newsletter.messages.loading') }}
+                        </TableCell>
+                    </TableRow>
+                    <TableRow v-else-if="subscribers.length === 0">
+                        <TableCell colspan="6" class="h-24 text-center">
+                            {{ $t('features.newsletter.messages.empty') }}
+                        </TableCell>
+                    </TableRow>
+                    <TableRow v-for="subscriber in subscribers" :key="subscriber.id">
+                        <TableCell>
+                            <Checkbox 
+                                :checked="selectedIds.includes(subscriber.id)"
+                                @update:checked="toggleSelection(subscriber.id)"
+                            />
+                        </TableCell>
+                        <TableCell>
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-9 w-9">
+                                    <div class="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs border border-primary/20">
+                                        {{ (subscriber.name || subscriber.email).charAt(0).toUpperCase() }}
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-foreground flex items-center gap-2">
+                                        {{ subscriber.name || $t('features.newsletter.messages.noName') }}
+                                        <Badge v-if="subscriber.deleted_at" variant="destructive" class="h-4.5 text-[10px] px-1.5 uppercase font-bold tracking-wider">
+                                            {{ t('common.labels.deleted') }}
+                                        </Badge>
+                                    </div>
+                                    <div class="text-xs text-muted-foreground">
+                                        {{ subscriber.email }}
+                                    </div>
+                                </div>
+                            </div>
+                        </TableCell>
+                        <TableCell>
+                            <Badge
+                                variant="outline"
+                                :class="subscriber.status === 'subscribed' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'"
+                            >
+                                {{ $t(`features.newsletter.filters.${subscriber.status}`) }}
+                            </Badge>
+                        </TableCell>
+                        <TableCell class="text-xs text-muted-foreground">
+                            {{ formatDate(subscriber.created_at) }}
+                        </TableCell>
+                        <TableCell class="text-xs text-muted-foreground truncated max-w-[150px]" :title="subscriber.source">
+                            {{ subscriber.source }}
+                        </TableCell>
+                        <TableCell>
+                            <div class="flex items-center justify-center">
+                                <Button
+                                    v-if="subscriber.deleted_at"
+                                    variant="ghost"
+                                    size="icon"
+                                    @click="restoreSubscriber(subscriber)"
+                                    class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10"
+                                    :title="$t('common.actions.restore')"
+                                >
+                                    <RotateCcw class="w-4 h-4" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    @click="deleteSubscriber(subscriber)"
+                                    class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    :title="subscriber.deleted_at ? $t('common.actions.forceDelete') : $t('features.newsletter.actions.delete')"
+                                >
+                                    <Trash2 class="w-4 h-4" />
+                                </Button>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+
+            <!-- Pagination -->
+            <Pagination
+                v-if="pagination.total > 0"
+                :current-page="pagination.current_page"
+                :total-items="pagination.total"
+                :per-page="filters.per_page"
+                :show-page-numbers="true"
+                @page-change="changePage"
+                @update:per-page="changePerPage"
+                class="mt-4 px-4 pb-4"
+            />
+        </Card>
+    </div>
+</template>
+
+<script setup lang="ts">
+import { logger } from '@/utils/logger';
+import { ref, onMounted, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
+import { useConfirm } from '@/composables/useConfirm';
+import { parseResponse, ensureArray, parseSingleResponse } from '@/utils/responseParser';
+import { Badge, Button, Card, Checkbox, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
+
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
+import { debounce } from '@/utils/debounce';
+
+const { t } = useI18n();
+const toast = useToast();
+const { confirm } = useConfirm();
+
+const loading = ref(false);
+const subscribers = ref<any[]>([]);
+const pagination = ref<any>({});
+const filters = ref({
+    status: 'all',
+    q: '',
+    trashed: 'without',
+    page: 1,
+    per_page: 15,
+});
+
+const fetchSubscribers = async () => {
+    loading.value = true;
+    try {
+        const params: Record<string, any> = {};
+        
+        Object.entries(filters.value).forEach(([key, value]) => {
+            if (key === 'status' && value === 'all') return;
+            if (key === 'trashed' && value === 'without') return;
+            params[key] = value;
+        });
+
+        const response = await api.get('/admin/ja/newsletter/subscribers', { params });
+        const { data, pagination: pag } = parseResponse(response);
+        subscribers.value = data;
+        if (pag) {
+            pagination.value = pag;
+        }
+    } catch (error: any) {
+        logger.error('Failed to fetch subscribers:', error);
+    } finally {
+        loading.value = false;
+    }
+};
+
+const debounceSearch = debounce(() => {
+    filters.value.page = 1;
+    fetchSubscribers();
+}, 300);
+
+const changePage = (page: number) => {
+    if (page < 1 || (pagination.value as any).last_page && page > (pagination.value as any).last_page) return;
+    filters.value.page = page;
+    fetchSubscribers();
+};
+
+const changePerPage = (perPage: number) => {
+    filters.value.per_page = perPage;
+    filters.value.page = 1;
+    fetchSubscribers();
+};
+
+const deleteSubscriber = async (subscriber: any) => {
+    const isTrashed = !!subscriber.deleted_at;
+    const confirmed = await confirm({
+        title: isTrashed ? t('common.actions.forceDelete') : t('features.newsletter.actions.delete'),
+        message: isTrashed 
+            ? `Are you sure you want to PERMANENTLY delete ${subscriber.email}?`
+            : t('features.newsletter.confirm.delete', { email: subscriber.email }),
+        variant: 'danger',
+        confirmText: isTrashed ? t('common.actions.forceDelete') : t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
+
+    try {
+        if (isTrashed) {
+             await api.delete(`/admin/ja/newsletter/subscribers/${subscriber.id}/force-delete`);
+             toast.success.action(t('common.messages.success.deleted', { item: 'Subscriber' }));
+        } else {
+            await api.delete(`/admin/ja/newsletter/subscribers/${subscriber.id}`);
+            toast.success.delete('Subscriber');
+        }
+        fetchSubscribers();
+    } catch (error: any) {
+        logger.error('Failed to delete subscriber:', error);
+        toast.error.delete(error, 'Subscriber');
+    }
+};
+
+const restoreSubscriber = async (subscriber: any) => {
+    const confirmed = await confirm({
+        title: t('common.actions.restore'),
+        message: `Restore ${subscriber.email}?`,
+        variant: 'info',
+        confirmText: t('common.actions.restore'),
+    });
+
+    if (!confirmed) return;
+
+    try {
+        await api.post(`/admin/ja/newsletter/subscribers/${subscriber.id}/restore`);
+        toast.success.restore('Subscriber');
+        fetchSubscribers();
+    } catch (error: any) {
+         logger.error('Failed to restore subscriber:', error);
+        toast.error.fromResponse(error);
+    }
+};
+
+const exportCsv = async () => {
+    try {
+        const response = await api.get('/admin/ja/newsletter/export', {
+            params: { status: filters.value.status },
+            responseType: 'blob',
+        });
+        
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `subscribers-${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        toast.success.action(t('common.messages.success.exported'));
+    } catch (error: any) {
+        logger.error('Failed to export subscribers:', error);
+        toast.error.fromResponse(error);
+    }
+};
+
+const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
+
+const bulkActionSelection = ref('');
+
+const handleBulkAction = async (value: string) => {
+    if (!value) return;
+    await bulkAction(value);
+    bulkActionSelection.value = '';
+};
+
+const selectedIds = ref<any[]>([]);
+
+const isAllSelected = computed(() => {
+    return subscribers.value.length > 0 && selectedIds.value.length === subscribers.value.length;
+});
+
+const toggleSelection = (id: any) => {
+    const index = selectedIds.value.indexOf(id);
+    if (index === -1) {
+        selectedIds.value.push(id);
+    } else {
+        selectedIds.value.splice(index, 1);
+    }
+};
+
+const toggleSelectAll = (checked: boolean) => {
+    if (checked) {
+        selectedIds.value = subscribers.value.map(s => s.id);
+    } else {
+        selectedIds.value = [];
+    }
+};
+
+const bulkAction = async (action: string) => {
+    if (selectedIds.value.length === 0) return;
+    
+    if (action === 'delete' || action === 'force_delete') {
+         const isForce = action === 'force_delete';
+         const confirmed = await confirm({
+             title: isForce ? t('common.actions.forceDelete') : t('features.newsletter.actions.delete'),
+             message: isForce
+                ? `Are you sure you want to PERMANENTLY delete ${selectedIds.value.length} subscribers?`
+                : t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }),
+             variant: 'danger',
+             confirmText: isForce ? t('common.actions.forceDelete') : t('common.actions.delete'),
+         });
+
+         if (!confirmed) {
+             bulkActionSelection.value = '';
+             return;
+         }
+
+         try {
+             await api.post('/admin/ja/newsletter/subscribers/bulk-action', {
+                 ids: selectedIds.value,
+                 action: action
+             });
+             selectedIds.value = [];
+             await fetchSubscribers();
+             toast.success.action(t('common.messages.success.deleted', { item: 'Subscribers' }));
+         } catch (error: any) {
+             toast.error.action(error);
+         }
+    } else if (action === 'restore') {
+         try {
+             await api.post('/admin/ja/newsletter/subscribers/bulk-action', {
+                 ids: selectedIds.value,
+                 action: 'restore'
+             });
+             selectedIds.value = [];
+             await fetchSubscribers();
+             toast.success.restore('Subscribers');
+         } catch (error: any) {
+             toast.error.action(error);
+         }
+    } else if (action === 'unsubscribe' || action === 'subscribe') {
+         try {
+             await api.post('/admin/ja/newsletter/subscribers/bulk-action', {
+                 ids: selectedIds.value,
+                 action: action
+             });
+             selectedIds.value = [];
+             await fetchSubscribers();
+             toast.success.action(t('common.messages.success.updated'));
+         } catch (error: any) {
+             toast.error.action(error);
+         }
+    }
+};
+
+onMounted(() => {
+    fetchSubscribers();
+});
+</script>

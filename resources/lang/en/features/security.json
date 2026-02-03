@@ -80,7 +80,7 @@
         "removeSelected": "Remove Selected"
     },
     "logs": {
-        "title": "Security Logs",
+        "title": "Security Journal",
         "all": "All Events",
         "failedLogin": "Failed Login",
         "blockedIp": "Blocked IP",

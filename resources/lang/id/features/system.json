@@ -161,7 +161,7 @@
         }
     },
     "logs": {
-        "title": "Penampil Log",
+        "title": "Jurnal Sistem",
         "clear": "Bersihkan Log",
         "clearing": "Membersihkan...",
         "files": "File Log",

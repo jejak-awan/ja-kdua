@@ -163,8 +163,7 @@ class CacheWarmingService
 
         try {
             // Cache categories list
-            $categories = Category::where('is_active', true)
-                ->orderBy('sort_order')
+            $categories = Category::orderBy('sort_order')
                 ->get();
 
             Cache::put(self::PREFIX_CATEGORY_LIST, $categories, self::TTL_VERY_LONG);
@@ -182,8 +181,7 @@ class CacheWarmingService
             // Cache category tree
             $treeKey = self::PREFIX_CATEGORY_LIST.':tree';
             Cache::remember($treeKey, self::TTL_VERY_LONG, function () {
-                return Category::where('is_active', true)
-                    ->with('children')
+                return Category::with('children')
                     ->whereNull('parent_id')
                     ->orderBy('sort_order')
                     ->get();
@@ -206,16 +204,14 @@ class CacheWarmingService
         $count = 0;
 
         try {
-            $tags = Tag::where('is_active', true)
-                ->orderBy('name')
+            $tags = Tag::orderBy('name')
                 ->get();
 
             Cache::put(self::PREFIX_TAG_LIST, $tags, self::TTL_VERY_LONG);
             $count++;
 
             // Cache popular tags
-            $popularTags = Tag::where('is_active', true)
-                ->withCount('contents')
+            $popularTags = Tag::withCount('contents')
                 ->orderBy('contents_count', 'desc')
                 ->limit(20)
                 ->get();
@@ -296,8 +292,8 @@ class CacheWarmingService
                 'total_content' => Content::count(),
                 'published_content' => Content::where('status', 'published')->count(),
                 'draft_content' => Content::where('status', 'draft')->count(),
-                'total_categories' => Category::where('is_active', true)->count(),
-                'total_tags' => Tag::where('is_active', true)->count(),
+                'total_categories' => Category::count(),
+                'total_tags' => Tag::count(),
                 'total_media' => Media::count(),
                 'total_users' => DB::table('users')->count(),
             ];

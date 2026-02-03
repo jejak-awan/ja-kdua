@@ -4,26 +4,29 @@
  */
 
 export interface NavItem {
-    name: string;
-    to: string;
-    label: string;
-    permission: string;
+    name?: string;
+    to?: string;
+    label?: string;
+    permission?: string;
+    type?: 'item' | 'divider';
 }
 
 export const navigationGroups: Record<string, NavItem[]> = {
     // Content Management (5 items)
     content: [
-        { name: 'content-studio', to: '/admin/content-studio', label: 'Contents', permission: 'view content' },
+        { name: 'studio', to: '/admin/studio', label: 'Contents', permission: 'view content' },
         { name: 'forms', to: '/admin/forms', label: 'Forms', permission: 'view forms' },
         { name: 'media', to: '/admin/media', label: 'Media Library', permission: 'view media' },
         { name: 'file-manager', to: '/admin/file-manager', label: 'File Manager', permission: 'view files' },
         { name: 'comments', to: '/admin/comments', label: 'Comments', permission: 'view comments' },
     ],
 
-    // Engagement (2 items)
-    engagement: [
+    // Marketing & SEO (4 items)
+    marketing: [
         { name: 'newsletter', to: '/admin/newsletter', label: 'Newsletter', permission: 'view newsletter' },
         { name: 'email-templates', to: '/admin/email-templates', label: 'Email Templates', permission: 'manage settings' },
+        { name: 'seo', to: '/admin/seo', label: 'SEO Tools', permission: 'manage settings' },
+        { name: 'redirects', to: '/admin/redirects', label: 'Redirects', permission: 'view redirects' },
     ],
 
     // Users & Access (2 items)
@@ -32,12 +35,15 @@ export const navigationGroups: Record<string, NavItem[]> = {
         { name: 'roles', to: '/admin/roles', label: 'Roles & Permissions', permission: 'view roles' },
     ],
 
-    // Logs & Monitoring (4 items)
+    // Logs & Monitoring (6 items)
     logs: [
-        { name: 'logs-dashboard', to: '/admin/logs-dashboard', label: 'Logs Dashboard', permission: 'view logs' },
-        { name: 'activity-logs', to: '/admin/activity-logs', label: 'Activity Logs', permission: 'view activity logs' },
-        { name: 'login-history', to: '/admin/login-history', label: 'Login History', permission: 'view users' },
-        { name: 'security', to: '/admin/security', label: 'Security Logs', permission: 'view security logs' },
+        { name: 'journal-dashboard', to: '/admin/journal-dashboard', label: 'Journal Dashboard', permission: 'view logs' },
+        { name: 'activity-journal', to: '/admin/activity-journal', label: 'Activity Journal', permission: 'view activity logs' },
+        { name: 'access-journal', to: '/admin/access-journal', label: 'Access History', permission: 'view users' },
+        { name: 'security-journal', to: '/admin/security-journal', label: 'Security Journal', permission: 'view security logs' },
+        { type: 'divider', label: 'monitoring' },
+        { name: 'system-journal', to: '/admin/system-journal', label: 'System Journal', permission: 'view system' },
+        { name: 'analytics', to: '/admin/analytics', label: 'Analytics', permission: 'view analytics' },
     ],
 
     // Appearance (3 items)
@@ -49,12 +55,7 @@ export const navigationGroups: Record<string, NavItem[]> = {
         { name: 'languages', to: '/admin/languages', label: 'Languages', permission: 'view settings' },
     ],
 
-    // Analytics & SEO (3 items)
-    analytics: [
-        { name: 'analytics', to: '/admin/analytics', label: 'Analytics', permission: 'view analytics' },
-        { name: 'seo', to: '/admin/seo', label: 'SEO Tools', permission: 'manage settings' },
-        { name: 'redirects', to: '/admin/redirects', label: 'Redirects', permission: 'view redirects' },
-    ],
+
 
     // System (7 items) - Info Sistem at top as system dashboard
     system: [

@@ -85,21 +85,27 @@
                                 v-show="expandedSections[section.key]"
                                 class="mt-1 space-y-0.5"
                             >
-                                <router-link
-                                    v-for="item in filteredNavigation[section.key]"
-                                    :key="item.name"
-                                    :to="item.to"
-                                    @click="$emit('close')"
-                                    class="flex items-center px-3 py-2 text-sm font-medium rounded-xl group pl-9"
-                                    :class="[
-                                        $route.name === item.name
-                                            ? 'bg-accent text-foreground'
-                                            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                                    ]"
-                                >
-                                    <component :is="getIcon(item.name)" class="w-4 h-4 flex-shrink-0 mr-2.5" />
-                                    <span class="truncate">{{ getNavigationLabel(item) }}</span>
-                                </router-link>
+                                <template v-for="item in filteredNavigation[section.key]" :key="item.name || item.label">
+                                    <div v-if="item.type === 'divider'" class="py-2 px-9 flex items-center gap-2">
+                                        <div class="h-px bg-border flex-1"></div>
+                                        <span class="text-[10px] uppercase font-bold text-muted-foreground/30 tracking-widest whitespace-nowrap">{{ getNavigationLabel(item) }}</span>
+                                        <div class="h-px bg-border flex-1"></div>
+                                    </div>
+                                    <router-link
+                                        v-else
+                                        :to="item.to || ''"
+                                        @click="$emit('close')"
+                                        class="flex items-center px-3 py-2 text-sm font-medium rounded-xl group pl-9"
+                                        :class="[
+                                            $route.name === item.name
+                                                ? 'bg-accent text-foreground'
+                                                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                                        ]"
+                                    >
+                                        <component :is="getIcon(item.name || '')" class="w-4 h-4 flex-shrink-0 mr-2.5" />
+                                        <span class="truncate">{{ getNavigationLabel(item) }}</span>
+                                    </router-link>
+                                </template>
                             </div>
                         </template>
 
@@ -138,21 +144,27 @@
                                         </div>
                                         
                                         <!-- Items -->
-                                        <router-link
-                                            v-for="item in filteredNavigation[section.key]"
-                                            :key="item.name"
-                                            :to="item.to"
-                                            @click="activePopup = null; $emit('close')"
-                                            class="flex items-center px-3 py-2 text-sm font-medium hover:bg-accent mx-1 rounded-xl"
-                                            :class="[
-                                                $route.name === item.name
-                                                    ? 'text-foreground bg-accent'
-                                                    : 'text-muted-foreground hover:text-accent-foreground'
-                                            ]"
-                                        >
-                                            <component :is="getIcon(item.name)" class="w-4 h-4 flex-shrink-0 mr-2.5" />
-                                            <span class="truncate">{{ getNavigationLabel(item) }}</span>
-                                        </router-link>
+                                        <template v-for="item in filteredNavigation[section.key]" :key="item.name || item.label">
+                                            <div v-if="item.type === 'divider'" class="py-2 px-3 flex items-center gap-2">
+                                                <div class="h-px bg-border flex-1"></div>
+                                                <span class="text-[10px] uppercase font-bold text-muted-foreground/30 tracking-widest whitespace-nowrap">{{ getNavigationLabel(item) }}</span>
+                                                <div class="h-px bg-border flex-1"></div>
+                                            </div>
+                                            <router-link
+                                                v-else
+                                                :to="item.to || ''"
+                                                @click="activePopup = null; $emit('close')"
+                                                class="flex items-center px-3 py-2 text-sm font-medium hover:bg-accent mx-1 rounded-xl"
+                                                :class="[
+                                                    $route.name === item.name
+                                                        ? 'text-foreground bg-accent'
+                                                        : 'text-muted-foreground hover:text-accent-foreground'
+                                                ]"
+                                            >
+                                                <component :is="getIcon(item.name || '')" class="w-4 h-4 flex-shrink-0 mr-2.5" />
+                                                <span class="truncate">{{ getNavigationLabel(item) }}</span>
+                                            </router-link>
+                                        </template>
                                     </div>
                             </Teleport>
                         </div>
@@ -209,13 +221,11 @@ const authStore = useAuthStore();
 const cmsStore = useCmsStore();
 
 const sidebarSections: SidebarSection[] = [
-    { key: 'content', labelKey: 'common.navigation.sections.content', icon: getIcon('file-text') },
-    { key: 'media', labelKey: 'common.navigation.sections.media', icon: getIcon('image') },
-    { key: 'engagement', labelKey: 'common.navigation.sections.engagement', icon: getIcon('message-square') },
+    { key: 'content', labelKey: 'common.navigation.sections.content', icon: getIcon('layers') },
+    { key: 'marketing', labelKey: 'common.navigation.sections.marketing', icon: getIcon('megaphone') },
     { key: 'users', labelKey: 'common.navigation.sections.usersAccess', icon: getIcon('users') },
     { key: 'appearance', labelKey: 'common.navigation.sections.appearance', icon: getIcon('palette') },
-    { key: 'analytics', labelKey: 'common.navigation.sections.analyticsSeo', icon: getIcon('bar-chart') },
-    { key: 'logs', labelKey: 'common.navigation.sections.logs', icon: getIcon('scroll-text') },
+    { key: 'logs', labelKey: 'common.navigation.sections.logs', icon: getIcon('activity') },
     { key: 'system', labelKey: 'common.navigation.sections.system', icon: getIcon('settings') },
     { key: 'developer', labelKey: 'common.navigation.sections.developer', icon: getIcon('code') },
 ];
@@ -324,9 +334,14 @@ const filteredNavigation = computed(() => {
 });
 
 const getNavigationLabel = (item: NavItem) => {
+    if (item.type === 'divider') {
+        const key = `common.navigation.sections.${item.label}`;
+        return te(key) ? t(key) : item.label || '';
+    }
+    if (!item.name) return item.label || '';
     const camelName = item.name.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
     const key = `common.navigation.menu.${camelName}`;
-    return te(key) ? t(key) : item.label;
+    return te(key) ? t(key) : item.label || '';
 };
 
 const getVisitTooltip = computed(() => {

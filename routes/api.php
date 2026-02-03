@@ -49,7 +49,7 @@ Route::prefix('v1')->group(function () {
         Route::put('/profile', [App\Http\Controllers\Api\V1\UserController::class, 'updateProfile']);
         Route::post('/profile/avatar', [App\Http\Controllers\Api\V1\UserController::class, 'uploadAvatar']);
         Route::put('/profile/password', [App\Http\Controllers\Api\V1\UserController::class, 'updatePassword']);
-        Route::get('/profile/login-history', [App\Http\Controllers\Api\V1\UserController::class, 'loginHistory']);
+        Route::get('/profile/access-journal', [App\Http\Controllers\Api\V1\UserController::class, 'loginHistory']);
         Route::get('/profile/preferences', [App\Http\Controllers\Api\V1\UserController::class, 'getPreferences']);
         Route::put('/profile/preferences', [App\Http\Controllers\Api\V1\UserController::class, 'updatePreferences']);
 
@@ -126,7 +126,7 @@ Route::prefix('v1')->group(function () {
     // Actually, if we use it from logged-in app, auth:sanctum is fine. If we want to catch login page errors, it needs to be public.
     // Let's place it outside auth:sanctum group if possible OR keep it inside.
     // Given complexity, let's put it inside auth group for now to prevent spam, or use throttle.
-    Route::post('logs/frontend', [App\Http\Controllers\Api\V1\FrontendLogController::class, 'store'])->middleware('throttle:60,1');
+    Route::post('journal/frontend', [App\Http\Controllers\Api\V1\FrontendLogController::class, 'store'])->middleware('throttle:60,1');
 
     // Admin Management API (aliased to bypass WAF 403 blocks on /admin/cms/)
     Route::prefix('admin/ja')->middleware(['auth:sanctum', 'throttle:300,1'])->group(function () {
@@ -254,19 +254,19 @@ Route::prefix('v1')->group(function () {
         Route::post('roles/{role}/duplicate', [App\Http\Controllers\Api\V1\RoleController::class, 'duplicate'])->middleware('permission:manage users');
 
         // Activity Logs
-        Route::get('activity-logs', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'index'])->middleware('permission:manage users');
-        Route::post('activity-logs/clear', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'clear'])->middleware('permission:manage settings');
-        Route::get('activity-logs/recent', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'recent'])->middleware('permission:manage users');
-        Route::get('activity-logs/statistics', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'statistics'])->middleware('permission:manage users');
-        Route::get('activity-logs/export', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'export'])->middleware('permission:manage users');
-        Route::get('activity-logs/user/{userId}', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'userActivity'])->middleware('permission:manage users');
-        Route::get('activity-logs/{activityLog}', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'show'])->middleware('permission:manage users');
+        Route::get('activity-journal', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'index'])->middleware('permission:manage users');
+        Route::post('activity-journal/clear', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'clear'])->middleware('permission:manage settings');
+        Route::get('activity-journal/recent', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'recent'])->middleware('permission:manage users');
+        Route::get('activity-journal/statistics', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'statistics'])->middleware('permission:manage users');
+        Route::get('activity-journal/export', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'export'])->middleware('permission:manage users');
+        Route::get('activity-journal/user/{userId}', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'userActivity'])->middleware('permission:manage users');
+        Route::get('activity-journal/{activityLog}', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'show'])->middleware('permission:manage users');
 
         // Login History (Admin)
-        Route::get('login-history', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'index'])->middleware('permission:manage users');
-        Route::post('login-history/clear', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'clear'])->middleware('permission:manage settings');
-        Route::get('login-history/statistics', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'statistics'])->middleware('permission:manage users');
-        Route::get('login-history/export', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'export'])->middleware('permission:manage users');
+        Route::get('access-journal', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'index'])->middleware('permission:manage users');
+        Route::post('access-journal/clear', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'clear'])->middleware('permission:manage settings');
+        Route::get('access-journal/statistics', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'statistics'])->middleware('permission:manage users');
+        Route::get('access-journal/export', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'export'])->middleware('permission:manage users');
 
         // SEO Tools
         Route::get('seo/sitemap', [App\Http\Controllers\Api\V1\SeoController::class, 'generateSitemap']);
@@ -313,10 +313,10 @@ Route::prefix('v1')->group(function () {
         Route::get('backups/{backup}/download', [App\Http\Controllers\Api\V1\BackupController::class, 'download'])->middleware('permission:manage backups');
 
         // Security
-        Route::get('security/logs', [App\Http\Controllers\Api\V1\SecurityController::class, 'index'])->middleware('permission:manage settings');
-        Route::delete('security/logs', [App\Http\Controllers\Api\V1\SecurityController::class, 'clear'])->middleware('permission:manage settings');
-        Route::post('security/logs/clear', [App\Http\Controllers\Api\V1\SecurityController::class, 'clear'])->middleware('permission:manage settings');
-        Route::get('security/logs/{securityLog}', [App\Http\Controllers\Api\V1\SecurityController::class, 'show'])->middleware('permission:manage settings');
+        Route::get('security/journal', [App\Http\Controllers\Api\V1\SecurityController::class, 'index'])->middleware('permission:manage settings');
+        Route::delete('security/journal', [App\Http\Controllers\Api\V1\SecurityController::class, 'clear'])->middleware('permission:manage settings');
+        Route::post('security/journal/clear', [App\Http\Controllers\Api\V1\SecurityController::class, 'clear'])->middleware('permission:manage settings');
+        Route::get('security/journal/{securityLog}', [App\Http\Controllers\Api\V1\SecurityController::class, 'show'])->middleware('permission:manage settings');
         Route::get('security/stats', [App\Http\Controllers\Api\V1\SecurityController::class, 'stats'])->middleware('permission:manage settings');
         Route::get('security/alerts', [App\Http\Controllers\Api\V1\SecurityController::class, 'alerts'])->middleware('permission:manage settings');
 
@@ -469,7 +469,7 @@ Route::prefix('v1')->group(function () {
             Route::post('test-connection', [App\Http\Controllers\Api\V1\EmailTestController::class, 'testConnection']);
             Route::post('send-test', [App\Http\Controllers\Api\V1\EmailTestController::class, 'sendTest']);
             Route::get('queue-status', [App\Http\Controllers\Api\V1\EmailTestController::class, 'getQueueStatus']);
-            Route::get('recent-logs', [App\Http\Controllers\Api\V1\EmailTestController::class, 'getRecentLogs']);
+            Route::get('recent-journal', [App\Http\Controllers\Api\V1\EmailTestController::class, 'getRecentLogs']);
             Route::get('validate-config', [App\Http\Controllers\Api\V1\EmailTestController::class, 'validateConfig']);
         });
 
@@ -489,7 +489,7 @@ Route::prefix('v1')->group(function () {
 
         // Security Monitoring
         Route::prefix('security')->group(function () {
-            Route::get('logs', [App\Http\Controllers\Api\V1\SecurityController::class, 'index'])->middleware('permission:manage settings');
+            Route::get('journal', [App\Http\Controllers\Api\V1\SecurityController::class, 'index'])->middleware('permission:manage settings');
             Route::get('csp-reports', [App\Http\Controllers\Api\V1\CspReportController::class, 'index'])->middleware('permission:manage settings');
             Route::post('csp-reports/bulk-action', [App\Http\Controllers\Api\V1\CspReportController::class, 'bulkAction'])->middleware('permission:manage settings');
             Route::get('csp-reports/statistics', [App\Http\Controllers\Api\V1\CspReportController::class, 'statistics'])->middleware('permission:manage settings');
@@ -532,11 +532,11 @@ Route::prefix('v1')->group(function () {
         Route::post('file-manager/copy', [App\Http\Controllers\Api\V1\FileManagerController::class, 'copy'])->middleware('permission:manage files');
 
         // Logs
-        Route::get('logs', [App\Http\Controllers\Api\V1\LogController::class, 'index'])->middleware('permission:manage settings');
-        Route::delete('logs', [App\Http\Controllers\Api\V1\LogController::class, 'clear'])->middleware('permission:manage settings');
-        Route::post('logs/clear', [App\Http\Controllers\Api\V1\LogController::class, 'clear'])->middleware('permission:manage settings');
-        Route::get('logs/{filename}', [App\Http\Controllers\Api\V1\LogController::class, 'show'])->middleware('permission:manage settings');
-        Route::get('logs/{filename}/download', [App\Http\Controllers\Api\V1\LogController::class, 'download'])->middleware('permission:manage settings');
+        Route::get('system-journal', [App\Http\Controllers\Api\V1\LogController::class, 'index'])->middleware('permission:manage settings');
+        Route::delete('system-journal', [App\Http\Controllers\Api\V1\LogController::class, 'clear'])->middleware('permission:manage settings');
+        Route::post('system-journal/clear', [App\Http\Controllers\Api\V1\LogController::class, 'clear'])->middleware('permission:manage settings');
+        Route::get('system-journal/{filename}', [App\Http\Controllers\Api\V1\LogController::class, 'show'])->middleware('permission:manage settings');
+        Route::get('system-journal/{filename}/download', [App\Http\Controllers\Api\V1\LogController::class, 'download'])->middleware('permission:manage settings');
         
 
         // System Information

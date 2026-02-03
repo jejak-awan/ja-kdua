@@ -31,9 +31,9 @@ import roles from './features/roles.json';
 import themes from './features/themes.json';
 import forms from './features/forms.json';
 import menus from './features/menus.json';
-import activityLogs from './features/activity_logs.json';
-import loginHistory from './features/login_history.json';
-import logsDashboard from './features/logs_dashboard.json';
+import activityJournal from './features/activity_journal.json';
+import accessJournal from './features/access_journal.json';
+import journalDashboard from './features/journal_dashboard.json';
 
 import search from './features/search.json';
 import frontend from './features/frontend.json';
@@ -91,9 +91,9 @@ export default {
         themes,
         forms,
         menus,
-        activityLogs,
-        login_history: loginHistory,
-        logs_dashboard: logsDashboard,
+        activityJournal,
+        accessJournal,
+        journalDashboard,
 
         search,
         frontend,

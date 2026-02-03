@@ -1,0 +1,33 @@
+{
+    "title": "Journal Dashboard",
+    "description": "View summary and quick access to all log systems",
+    "loading": "Loading...",
+    "empty": "No data",
+    "viewAll": "View All",
+    "cards": {
+        "activity": {
+            "title": "Activity Journal",
+            "description": "User activities and data changes",
+            "total": "total activities"
+        },
+        "security": {
+            "title": "Security Journal",
+            "description": "Security events and login attempts",
+            "total": "total events"
+        },
+        "login": {
+            "title": "Access History",
+            "description": "All user login activities",
+            "total": "total logins"
+        },
+        "system": {
+            "title": "System Journal",
+            "description": "Laravel application logs",
+            "files": "log files"
+        }
+    },
+    "recent": {
+        "activity": "Recent Activities",
+        "security": "Recent Security Events"
+    }
+}
