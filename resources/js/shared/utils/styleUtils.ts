@@ -1,30 +1,44 @@
 import { BackgroundPatterns, BackgroundMasks } from './AssetLibrary'
 import type { ModuleSettings } from '../../types/builder'
+import type { CSSProperties } from 'vue'
+
+export interface GradientStop {
+    color: string;
+    position: number;
+}
+
+export interface Gradient {
+    type?: 'linear' | 'radial' | 'conical' | 'elliptical' | string;
+    direction?: string;
+    stops: GradientStop[];
+    repeat?: boolean;
+    length?: string;
+}
 
 /**
  * Universal Style Utilities for both Builder (Editor) and Renderer (Frontend)
  */
 
-export function getResponsiveValue(settings: ModuleSettings, baseKey: string, device: string = 'desktop'): any {
+export function getResponsiveValue<T = unknown>(settings: ModuleSettings, baseKey: string, device: string = 'desktop'): T | undefined {
     if (!settings) return undefined
-    if (device === 'desktop') return settings[baseKey]
+    if (device === 'desktop') return settings[baseKey] as T
 
     // Normalize device names (mobile, phone, tablet)
     const suffix = device === 'mobile' || device === 'phone' ? '_mobile' : `_${device}`
     const deviceValue = settings[baseKey + suffix]
 
     // Fallback: Phone/Mobile -> Tablet -> Desktop
-    if (deviceValue !== undefined && deviceValue !== null && deviceValue !== '') return deviceValue
+    if (deviceValue !== undefined && deviceValue !== null && deviceValue !== '') return deviceValue as T
 
     if (device === 'mobile' || device === 'phone') {
         const tabletValue = settings[baseKey + '_tablet']
-        if (tabletValue !== undefined && tabletValue !== null && tabletValue !== '') return tabletValue
+        if (tabletValue !== undefined && tabletValue !== null && tabletValue !== '') return tabletValue as T
     }
 
-    return settings[baseKey]
+    return settings[baseKey] as T
 }
 
-export const generateGradientCSS = (gradient: any) => {
+export const generateGradientCSS = (gradient: Gradient): string => {
     if (!gradient || !gradient.stops || gradient.stops.length < 2) return ''
     const stops = [...gradient.stops]
         .sort((a, b) => a.position - b.position)
@@ -39,7 +53,7 @@ export const generateGradientCSS = (gradient: any) => {
  * 2. Aliases (e.g. bgColor vs backgroundColor)
  * 3. Responsive objects (desktop/tablet/mobile)
  */
-export function getVal(settings: ModuleSettings, key: string, device: string = 'desktop'): any {
+export function getVal<T = unknown>(settings: ModuleSettings, key: string, device: string = 'desktop'): T | undefined {
     if (!settings) return undefined
 
     const aliases: Record<string, string[]> = {
@@ -106,7 +120,7 @@ export function getVal(settings: ModuleSettings, key: string, device: string = '
     })
 
     for (const k of tryKeys) {
-        const val = getResponsiveValue(settings, k, device)
+        const val = getResponsiveValue<T>(settings, k, device)
         if (val !== undefined && val !== null && val !== '') return val
     }
 
@@ -124,7 +138,7 @@ export function getVal(settings: ModuleSettings, key: string, device: string = '
         for (const k of tryKeys) {
             if (backgroundProps[k]) {
                 const subKey = backgroundProps[k]
-                const val = getResponsiveValue(bgObj as ModuleSettings, subKey, device)
+                const val = getResponsiveValue<T>(bgObj as ModuleSettings, subKey, device)
                 if (val !== undefined && val !== null && val !== '') return val
             }
         }
@@ -133,7 +147,7 @@ export function getVal(settings: ModuleSettings, key: string, device: string = '
     return undefined
 }
 
-export function toCSS(val: any, unit: string = 'px'): string | undefined {
+export function toCSS(val: string | number | undefined | null | unknown, unit: string = 'px'): string | undefined {
     if (val === undefined || val === null || val === '' || typeof val === 'object') return undefined
     const s = String(val)
     if (s.includes('px') || s.includes('rem') || s.includes('em') || s.includes('%') || s.includes('vh') || s.includes('vw') || s.includes('calc') || s.includes('var') || s === 'auto' || s === 'inherit') return s
@@ -141,8 +155,8 @@ export function toCSS(val: any, unit: string = 'px'): string | undefined {
     return s
 }
 
-export function getTypographyStyles(settings: ModuleSettings, prefix: string = '', device: string = 'desktop'): Record<string, any> {
-    const css: Record<string, any> = {}
+export function getTypographyStyles(settings: ModuleSettings, prefix: string = '', device: string = 'desktop'): CSSProperties {
+    const css: CSSProperties & Record<string, string | number | undefined> = {}
     const fields = [
         { key: 'font_family', prop: 'fontFamily' },
         { key: 'font_size', prop: 'fontSize', unit: 'px' },
@@ -166,19 +180,20 @@ export function getTypographyStyles(settings: ModuleSettings, prefix: string = '
                 const shadowStyles = getTextShadowStyles(settings, fullKey, device)
                 if (shadowStyles.textShadow) css.textShadow = shadowStyles.textShadow
             } else {
-                css[f.prop] = f.unit ? toCSS(val, f.unit) : val
+                const finalVal = f.unit ? toCSS(val, f.unit) : val as string | number | undefined
+                css[f.prop as keyof CSSProperties] = finalVal as any
             }
         }
     })
 
-    return css
+    return css as CSSProperties
 }
 
-export function getSpacingStyles(settings: ModuleSettings, baseKey: string, device: string = 'desktop', type: string = 'padding'): Record<string, any> {
-    const value = getResponsiveValue(settings, baseKey, device)
+export function getSpacingStyles(settings: ModuleSettings, baseKey: string, device: string = 'desktop', type: string = 'padding'): CSSProperties {
+    const value = getResponsiveValue<{ top?: unknown, bottom?: unknown, left?: unknown, right?: unknown, unit?: string }>(settings, baseKey, device)
     if (!value) return {}
 
-    const css: Record<string, any> = {}
+    const css: CSSProperties & Record<string, string | number | undefined> = {}
     const { top, bottom, left, right, unit = 'px' } = value
 
     if (top !== undefined) css[`${type}Top`] = toCSS(top, unit)
@@ -186,13 +201,13 @@ export function getSpacingStyles(settings: ModuleSettings, baseKey: string, devi
     if (left !== undefined) css[`${type}Left`] = toCSS(left, unit)
     if (right !== undefined) css[`${type}Right`] = toCSS(right, unit)
 
-    return css
+    return css as CSSProperties
 }
 
-export function getBorderStyles(settings: ModuleSettings, baseKey: string = 'border', device: string = 'desktop'): Record<string, any> {
-    const borderSettings = getResponsiveValue(settings, baseKey, device)
+export function getBorderStyles(settings: ModuleSettings, baseKey: string = 'border', device: string = 'desktop'): CSSProperties {
+    const borderSettings = getResponsiveValue<{ radius?: string | number | Record<string, number>, styles?: Record<string, { width: number, style: string, color: string }> }>(settings, baseKey, device)
     if (!borderSettings) return {}
-    const css: Record<string, any> = {}
+    const css: CSSProperties & Record<string, string | number | undefined> = {}
 
     // Radius
     const radius = borderSettings.radius
@@ -212,12 +227,12 @@ export function getBorderStyles(settings: ModuleSettings, baseKey: string = 'bor
     if (borderSettings.styles) {
         const sides = ['top', 'right', 'bottom', 'left']
         sides.forEach(side => {
-            const conf = borderSettings.styles[side]
-            if (conf && conf.width > 0 && conf.style !== 'none') {
+            const sideStyles = (borderSettings.styles as Record<string, { width: number, style: string, color: string }>)[side]
+            if (sideStyles && sideStyles.width > 0 && sideStyles.style !== 'none') {
                 const sideCap = side.charAt(0).toUpperCase() + side.slice(1)
-                css[`border${sideCap}Width`] = toCSS(conf.width)
-                css[`border${sideCap}Style`] = conf.style || 'solid'
-                css[`border${sideCap}Color`] = conf.color || 'transparent'
+                css[`border${sideCap}Width` as keyof CSSProperties] = toCSS(sideStyles.width) as any
+                css[`border${sideCap}Style` as keyof CSSProperties] = (sideStyles.style || 'solid') as any
+                css[`border${sideCap}Color` as keyof CSSProperties] = (sideStyles.color || 'transparent') as any
             }
         })
     }
@@ -225,32 +240,32 @@ export function getBorderStyles(settings: ModuleSettings, baseKey: string = 'bor
     return css
 }
 
-export function getBoxShadowStyles(settings: ModuleSettings, baseKey: string = 'boxShadow', device: string = 'desktop'): Record<string, any> {
-    const s = getResponsiveValue(settings, baseKey, device)
-    if (!s || s === 'none' || s.preset === 'none') return {}
+export function getBoxShadowStyles(settings: ModuleSettings, baseKey: string = 'boxShadow', device: string = 'desktop'): CSSProperties {
+    const s = getResponsiveValue<{ horizontal?: number, vertical?: number, blur?: number, spread?: number, color?: string, inset?: boolean, preset?: string } | string>(settings, baseKey, device)
+    if (!s || s === 'none' || (typeof s === 'object' && s.preset === 'none')) return {}
 
-    const { horizontal = 0, vertical = 0, blur = 0, spread = 0, color = 'rgba(0,0,0,0)', inset } = s
+    const { horizontal = 0, vertical = 0, blur = 0, spread = 0, color = 'rgba(0,0,0,0)', inset } = typeof s === 'string' ? {} : (s as Record<string, unknown>)
     const i = inset ? 'inset ' : ''
     return { boxShadow: `${i}${horizontal}px ${vertical}px ${blur}px ${spread}px ${color}` }
 }
 
-export function getTextShadowStyles(settings: ModuleSettings, baseKey: string = 'text_shadow', device: string = 'desktop'): Record<string, any> {
-    const s = getResponsiveValue(settings, baseKey, device)
-    if (!s || s === 'none' || s.preset === 'none') return {}
+export function getTextShadowStyles(settings: ModuleSettings, baseKey: string = 'text_shadow', device: string = 'desktop'): CSSProperties {
+    const s = getResponsiveValue<{ horizontal?: number, vertical?: number, blur?: number, color?: string, preset?: string } | string>(settings, baseKey, device)
+    if (!s || s === 'none' || (typeof s === 'object' && s.preset === 'none')) return {}
 
     // text-shadow does NOT support spread or inset
-    const { horizontal = 0, vertical = 0, blur = 0, color = 'rgba(0,0,0,0)' } = s
+    const { horizontal = 0, vertical = 0, blur = 0, color = 'rgba(0,0,0,0)' } = typeof s === 'string' ? {} : (s as Record<string, unknown>)
     return { textShadow: `${horizontal}px ${vertical}px ${blur}px ${color}` }
 }
 
-export function getSizingStyles(settings: ModuleSettings, device: string = 'desktop'): Record<string, any> {
-    const css: Record<string, any> = {}
+export function getSizingStyles(settings: ModuleSettings, device: string = 'desktop'): CSSProperties {
+    const css: CSSProperties & Record<string, string | number | undefined> = {}
     const props = ['width', 'maxWidth', 'minWidth', 'height', 'maxHeight', 'minHeight', 'zIndex']
 
     props.forEach(p => {
         const val = getVal(settings, p, device)
         if (val !== undefined && val !== null && val !== '') {
-            css[p] = (p === 'zIndex') ? val : toCSS(val)
+            css[p] = ((p === 'zIndex') ? val : toCSS(val)) as any
         }
     })
 
@@ -270,11 +285,11 @@ const svgToDataUri = (svgStr: string): string => {
     return `data:image/svg+xml;charset=utf-8,${encoded}`
 }
 
-export function getBackgroundStyles(settings: ModuleSettings, device: string = 'desktop'): Record<string, any> {
+export function getBackgroundStyles(settings: ModuleSettings, device: string = 'desktop'): CSSProperties {
     if (!settings) return {}
-    const css: Record<string, any> = {}
+    const css: CSSProperties & Record<string, string | number | undefined> = {}
 
-    const bgColor = getVal(settings, 'backgroundColor', device)
+    const bgColor = getVal<string>(settings, 'backgroundColor', device)
     if (bgColor) css.backgroundColor = bgColor
 
     const layers: string[] = []
@@ -283,10 +298,9 @@ export function getBackgroundStyles(settings: ModuleSettings, device: string = '
     const posList: string[] = []
     const blendList: string[] = []
 
-    // --- 0. Pattern (Top Layer) ---
-    const patternId = getVal(settings, 'backgroundPattern', device)
+    const patternId = getVal<string>(settings, 'backgroundPattern', device)
     if (patternId && patternId !== 'none') {
-        const patternObj = BackgroundPatterns.find((p: any) => p.id === patternId)
+        const patternObj = BackgroundPatterns.find((p: { id: string }) => p.id === patternId) as Record<string, any>
         if (patternObj) {
             const rawSvg = patternObj.svg
             // Resolve object structure if necessary
@@ -303,7 +317,7 @@ export function getBackgroundStyles(settings: ModuleSettings, device: string = '
                 }
 
                 // Pattern Color
-                const pColor = getVal(settings, 'backgroundPatternColor', device)
+                const pColor = getVal<string>(settings, 'backgroundPatternColor', device)
                 if (pColor) {
                     svg = svg.replace(/fill="currentColor"/g, `fill="${pColor}"`)
                         .replace(/stroke="currentColor"/g, `stroke="${pColor}"`)
@@ -313,9 +327,9 @@ export function getBackgroundStyles(settings: ModuleSettings, device: string = '
 
                 layers.push(`url("${svgToDataUri(svg)}")`)
 
-                const pSize = getVal(settings, 'backgroundPatternSize', device) || 'auto'
-                const pWidth = getVal(settings, 'backgroundPatternWidth', device)
-                const pHeight = getVal(settings, 'backgroundPatternHeight', device)
+                const pSize = getVal<string>(settings, 'backgroundPatternSize', device) || 'auto'
+                const pWidth = getVal<string | number>(settings, 'backgroundPatternWidth', device)
+                const pHeight = getVal<string | number>(settings, 'backgroundPatternHeight', device)
 
                 if (pSize === 'custom' && pWidth && pHeight) {
                     sizes.push(`${toCSS(pWidth)} ${toCSS(pHeight)}`)
@@ -325,22 +339,22 @@ export function getBackgroundStyles(settings: ModuleSettings, device: string = '
                     sizes.push('auto')
                 }
 
-                const pRepeat = getVal(settings, 'backgroundPatternRepeat', device) || 'repeat'
+                const pRepeat = getVal<string>(settings, 'backgroundPatternRepeat', device) || 'repeat'
                 repeatList.push(pRepeat)
 
                 // Pattern Position (Offset via position)
                 posList.push('0 0')
 
-                const pBlend = getVal(settings, 'backgroundPatternBlendMode', device) || 'normal'
+                const pBlend = getVal<string>(settings, 'backgroundPatternBlendMode', device) || 'normal'
                 blendList.push(pBlend)
             }
         }
     }
 
     // --- 1. Gradients ---
-    const gradientList = getVal(settings, 'backgroundGradients', device) || []
-    const singleGradient = getVal(settings, 'backgroundGradient', device)
-    let finalGradientList = []
+    const gradientList = getVal<Gradient[]>(settings, 'backgroundGradients', device) || []
+    const singleGradient = getVal<Gradient>(settings, 'backgroundGradient', device)
+    let finalGradientList: Gradient[] = []
 
     if (gradientList.length > 0) {
         finalGradientList = gradientList
@@ -348,7 +362,7 @@ export function getBackgroundStyles(settings: ModuleSettings, device: string = '
         finalGradientList = [singleGradient]
     }
 
-    const gradientCSSList = finalGradientList.map((g: any) => {
+    const gradientCSSList = finalGradientList.map((g: Gradient) => {
         if (!g || !g.stops || g.stops.length < 2) return ''
         const { type = 'linear', direction = '180deg', stops, repeat = false } = g
         const prefix = repeat ? 'repeating-' : ''
@@ -356,30 +370,30 @@ export function getBackgroundStyles(settings: ModuleSettings, device: string = '
         const stopString = sortedStops.map(s => `${s.color} ${s.position}%`).join(', ')
         if (type === 'linear') return `${prefix}linear-gradient(${direction}, ${stopString})`
         return `${prefix}radial-gradient(circle, ${stopString})`
-    }).filter((c: any) => !!c)
+    }).filter((c: string) => !!c)
 
     // --- 2. Image ---
-    const bgImage = getVal(settings, 'backgroundImage', device)
+    const bgImage = getVal<string>(settings, 'backgroundImage', device)
     const imageCSS = bgImage ? `url("${bgImage}")` : ''
 
-    if (getVal(settings, 'backgroundGradientShowAboveImage', device)) {
-        gradientCSSList.forEach((g: any) => { layers.push(g as string); sizes.push('100% 100%'); repeatList.push('no-repeat'); posList.push('center'); blendList.push('normal') })
+    if (getVal<boolean>(settings, 'backgroundGradientShowAboveImage', device)) {
+        gradientCSSList.forEach((g: string) => { layers.push(g); sizes.push('100% 100%'); repeatList.push('no-repeat'); posList.push('center'); blendList.push('normal') })
         if (imageCSS) {
             layers.push(imageCSS);
-            sizes.push(getVal(settings, 'backgroundImageSize', device) || 'cover');
-            repeatList.push(getVal(settings, 'backgroundImageRepeat', device) || 'no-repeat');
-            posList.push(getVal(settings, 'backgroundImagePosition', device) || 'center');
-            blendList.push(getVal(settings, 'backgroundImageBlendMode', device) || 'normal')
+            sizes.push(getVal<string>(settings, 'backgroundImageSize', device) || 'cover');
+            repeatList.push(getVal<string>(settings, 'backgroundImageRepeat', device) || 'no-repeat');
+            posList.push(getVal<string>(settings, 'backgroundImagePosition', device) || 'center');
+            blendList.push(getVal<string>(settings, 'backgroundImageBlendMode', device) || 'normal')
         }
     } else {
         if (imageCSS) {
             layers.push(imageCSS);
-            sizes.push(getVal(settings, 'backgroundImageSize', device) || 'cover');
-            repeatList.push(getVal(settings, 'backgroundImageRepeat', device) || 'no-repeat');
-            posList.push(getVal(settings, 'backgroundImagePosition', device) || 'center');
-            blendList.push(getVal(settings, 'backgroundImageBlendMode', device) || 'normal')
+            sizes.push(getVal<string>(settings, 'backgroundImageSize', device) || 'cover');
+            repeatList.push(getVal<string>(settings, 'backgroundImageRepeat', device) || 'no-repeat');
+            posList.push(getVal<string>(settings, 'backgroundImagePosition', device) || 'center');
+            blendList.push(getVal<string>(settings, 'backgroundImageBlendMode', device) || 'normal')
         }
-        gradientCSSList.forEach((g: any) => { layers.push(g as string); sizes.push('100% 100%'); repeatList.push('no-repeat'); posList.push('center'); blendList.push('normal') })
+        gradientCSSList.forEach((g: string) => { layers.push(g); sizes.push('100% 100%'); repeatList.push('no-repeat'); posList.push('center'); blendList.push('normal') })
     }
 
     if (layers.length > 0) {
@@ -391,9 +405,9 @@ export function getBackgroundStyles(settings: ModuleSettings, device: string = '
     }
 
     // --- 3. Mask ---
-    const maskId = getVal(settings, 'backgroundMask', device)
+    const maskId = getVal<string>(settings, 'backgroundMask', device)
     if (maskId && maskId !== 'none') {
-        const maskObj = BackgroundMasks.find((m: any) => m.id === maskId)
+        const maskObj = BackgroundMasks.find((m: { id: string }) => m.id === maskId) as Record<string, any>
         if (maskObj) {
             const variant = device === 'mobile' || device === 'phone' ? 'portrait' : (device === 'tablet' ? 'square' : 'landscape')
             const rawSvgSet = maskObj.svg?.default || maskObj.svg
@@ -412,11 +426,11 @@ export function getBackgroundStyles(settings: ModuleSettings, device: string = '
                 css.maskImage = maskUri
                 css.webkitMaskImage = maskUri
 
-                const mSize = getVal(settings, 'backgroundMaskSize', device) || 'fit'
+                const mSize = getVal<string>(settings, 'backgroundMaskSize', device) || 'fit'
                 let sizeVal = 'contain'
                 if (mSize === 'custom') {
-                    const mW = getVal(settings, 'backgroundMaskWidth', device)
-                    const mH = getVal(settings, 'backgroundMaskHeight', device)
+                    const mW = getVal<string | number>(settings, 'backgroundMaskWidth', device)
+                    const mH = getVal<string | number>(settings, 'backgroundMaskHeight', device)
                     sizeVal = (mW && mH) ? `${toCSS(mW)} ${toCSS(mH)}` : 'contain'
                 } else if (mSize === 'fit') {
                     sizeVal = 'contain'
@@ -439,9 +453,9 @@ export function getBackgroundStyles(settings: ModuleSettings, device: string = '
     return css
 }
 
-export function getLayoutStyles(settings: ModuleSettings, device: string = 'desktop'): Record<string, any> {
-    const css: Record<string, any> = {}
-    const layoutType = getVal(settings, 'layoutType', device)
+export function getLayoutStyles(settings: ModuleSettings, device: string = 'desktop'): CSSProperties {
+    const css: CSSProperties & Record<string, string | number | undefined> = {}
+    const layoutType = getVal<string>(settings, 'layoutType', device)
 
     if (layoutType === 'flex') {
         css.display = 'flex'
@@ -472,92 +486,92 @@ export function getLayoutStyles(settings: ModuleSettings, device: string = 'desk
     return css
 }
 
-export function getFilterStyles(settings: ModuleSettings, device: string = 'desktop'): Record<string, any> {
-    const css: Record<string, any> = {}
+export function getFilterStyles(settings: ModuleSettings, device: string = 'desktop'): CSSProperties {
+    const css: CSSProperties & Record<string, string | number | undefined> = {}
     const filters: string[] = []
 
-    const getFilterVal = (key: string) => {
-        const nested = getResponsiveValue(settings, 'filter', device)
+    const getFilterVal = (key: string): unknown => {
+        const nested = getResponsiveValue<Record<string, unknown>>(settings, 'filter', device)
         if (nested) {
             if (nested[key] !== undefined) return nested[key]
             const snake = key.replace(/[A-Z]/g, l => `_${l.toLowerCase()}`)
             if (nested[snake] !== undefined) return nested[snake]
         }
-        return getVal(settings, key, device)
+        return getVal<unknown>(settings, key, device)
     }
 
-    const opacity = getFilterVal('opacity')
+    const opacity = getFilterVal('opacity') as number | undefined
     if (opacity !== undefined && opacity != 100) css.opacity = opacity / 100
 
-    const blendMode = getFilterVal('blendMode') || getFilterVal('blend_mode')
-    if (blendMode && blendMode !== 'normal') css.mixBlendMode = blendMode
+    const blendMode = (getFilterVal('blendMode') || getFilterVal('blend_mode')) as string | undefined
+    if (blendMode && blendMode !== 'normal') css.mixBlendMode = blendMode as any
 
-    const blur = getFilterVal('blur')
-    if (blur && blur > 0) filters.push(`blur(${blur}px)`)
+    const blur = Number(getFilterVal('blur') || 0)
+    if (blur > 0) filters.push(`blur(${blur}px)`)
 
-    const brightness = getFilterVal('brightness')
-    if (brightness !== undefined && brightness != 100) filters.push(`brightness(${brightness}%)`)
+    const brightness = getFilterVal('brightness') as number | undefined
+    if (brightness !== undefined && Number(brightness) != 100) filters.push(`brightness(${brightness}%)`)
 
-    const contrast = getFilterVal('contrast')
-    if (contrast !== undefined && contrast != 100) filters.push(`contrast(${contrast}%)`)
+    const contrast = getFilterVal('contrast') as number | undefined
+    if (contrast !== undefined && Number(contrast) != 100) filters.push(`contrast(${contrast}%)`)
 
-    const grayscale = getFilterVal('grayscale')
-    if (grayscale && grayscale > 0) filters.push(`grayscale(${grayscale}%)`)
+    const grayscale = getFilterVal('grayscale') as number | undefined
+    if (Number(grayscale) > 0) filters.push(`grayscale(${grayscale}%)`)
 
-    const sepia = getFilterVal('sepia')
-    if (sepia && sepia > 0) filters.push(`sepia(${sepia}%)`)
+    const sepia = getFilterVal('sepia') as number | undefined
+    if (Number(sepia) > 0) filters.push(`sepia(${sepia}%)`)
 
-    const preserveSaturate = getFilterVal('saturate')
-    if (preserveSaturate !== undefined && preserveSaturate != 100) filters.push(`saturate(${preserveSaturate}%)`)
+    const preserveSaturate = getFilterVal('saturate') as number | undefined
+    if (preserveSaturate !== undefined && Number(preserveSaturate) != 100) filters.push(`saturate(${preserveSaturate}%)`)
 
-    const hueRotate = getFilterVal('hueRotate') || getFilterVal('hue_rotate')
-    if (hueRotate && hueRotate > 0) filters.push(`hue-rotate(${hueRotate}deg)`)
+    const hueRotate = (getFilterVal('hueRotate') || getFilterVal('hue_rotate')) as number | undefined
+    if (Number(hueRotate) > 0) filters.push(`hue-rotate(${hueRotate}deg)`)
 
-    const invert = getFilterVal('invert')
-    if (invert && invert > 0) filters.push(`invert(${invert}%)`)
+    const invert = getFilterVal('invert') as number | undefined
+    if (Number(invert) > 0) filters.push(`invert(${invert}%)`)
 
     if (filters.length > 0) css.filter = filters.join(' ')
-    return css
+    return css as CSSProperties
 }
 
-export function getTransformStyles(settings: ModuleSettings, device: string = 'desktop'): Record<string, any> {
+export function getTransformStyles(settings: ModuleSettings, device: string = 'desktop'): CSSProperties {
+    const css: CSSProperties & Record<string, string | number | undefined> = {}
     const transforms: string[] = []
-    const getTransVal = (key: string) => {
-        const nested = getResponsiveValue(settings, 'transform', device)
+    const getTransVal = (key: string): unknown => {
+        const nested = getResponsiveValue<Record<string, unknown>>(settings, 'transform', device)
         if (nested) {
             if (nested[key] !== undefined) return nested[key]
             const snake = key.replace(/[A-Z]/g, l => `_${l.toLowerCase()}`)
             if (nested[snake] !== undefined) return nested[snake]
         }
-        return getVal(settings, key, device)
+        return getVal<unknown>(settings, key, device)
     }
 
     const scale = getTransVal('scale') ?? getTransVal('transformScale') ?? getTransVal('transform_scale')
-    if (scale !== undefined && scale != 100) transforms.push(`scale(${scale / 100})`)
+    if (scale !== undefined && scale !== null && Number(scale) != 100) transforms.push(`scale(${Number(scale) / 100})`)
 
     const tx = getTransVal('translateX') ?? getTransVal('translate_x') ?? getTransVal('transform_translate_x')
     const ty = getTransVal('translateY') ?? getTransVal('translate_y') ?? getTransVal('transform_translate_y')
     if ((tx && tx != 0) || (ty && ty != 0)) transforms.push(`translate(${toCSS(tx)}, ${toCSS(ty)})`)
 
-    const rx = getTransVal('rotateX') ?? getTransVal('transform_rotate') ?? 0
-    const ry = getTransVal('rotateY') ?? getTransVal('transform_rotate_y') ?? 0
-    const rz = getTransVal('rotateZ') ?? getTransVal('rotate') ?? getTransVal('transform_rotate_z') ?? 0
+    const rx = (getTransVal('rotateX') ?? getTransVal('transform_rotate') ?? 0) as number
+    const ry = (getTransVal('rotateY') ?? getTransVal('transform_rotate_y') ?? 0) as number
+    const rz = (getTransVal('rotateZ') ?? getTransVal('rotate') ?? getTransVal('transform_rotate_z') ?? 0) as number
 
     if (rx && rx != 0) transforms.push(`rotateX(${rx}deg)`)
     if (ry && ry != 0) transforms.push(`rotateY(${ry}deg)`)
     if (rz && rz != 0) transforms.push(`rotateZ(${rz}deg)`)
 
-    const sx = getTransVal('skewX') ?? getTransVal('transform_skew_x') ?? 0
-    const sy = getTransVal('skewY') ?? getTransVal('transform_skew_y') ?? 0
+    const sx = (getTransVal('skewX') ?? getTransVal('transform_skew_x') ?? 0) as number
+    const sy = (getTransVal('skewY') ?? getTransVal('transform_skew_y') ?? 0) as number
     if (sx && sx != 0) transforms.push(`skewX(${sx}deg)`)
     if (sy && sy != 0) transforms.push(`skewY(${sy}deg)`)
 
-    const css: Record<string, any> = {}
     if (transforms.length > 0) css.transform = transforms.join(' ')
-    const origin = getTransVal('origin') ?? getTransVal('transformOrigin')
+    const origin = (getTransVal('origin') ?? getTransVal('transformOrigin')) as string | undefined
     if (origin && origin !== 'center') css.transformOrigin = origin
 
-    return css
+    return css as CSSProperties
 }
 
 export function hexToHsl(hex: string): { h: number; s: number; l: number } {
@@ -629,13 +643,13 @@ export function getHarmoniousGradientColors(baseHex: string): [string, string] {
     ]
 }
 
-export function getAnimationStyles(settings: ModuleSettings, device: string = 'desktop'): Record<string, any> {
-    const css: Record<string, any> = {}
+export function getAnimationStyles(settings: ModuleSettings, device: string = 'desktop'): CSSProperties {
+    const css: CSSProperties & Record<string, string | number | undefined> = {}
 
-    const getAnimVal = (key: string) => {
-        const nested = getResponsiveValue(settings, 'animation', device)
+    const getAnimVal = (key: string): unknown => {
+        const nested = getResponsiveValue<Record<string, unknown>>(settings, 'animation', device)
         if (nested && nested[key] !== undefined) return nested[key]
-        return getResponsiveValue(settings, `animation_${key}`, device)
+        return getResponsiveValue<unknown>(settings, `animation_${key}`, device)
     }
 
     const effect = getAnimVal('effect')
@@ -648,7 +662,7 @@ export function getAnimationStyles(settings: ModuleSettings, device: string = 'd
 
         if (duration !== undefined && duration !== null) css.animationDuration = `${duration}ms`
         if (delay !== undefined && delay !== null) css.animationDelay = `${delay}ms`
-        if (curve) css.animationTimingFunction = curve
+        if (curve) css.animationTimingFunction = curve as string
 
         if (repeat === 'infinite') {
             css.animationIterationCount = 'infinite'
@@ -660,11 +674,11 @@ export function getAnimationStyles(settings: ModuleSettings, device: string = 'd
     return css
 }
 
-export function getVisibilityStyles(settings: ModuleSettings, device: string = 'desktop'): Record<string, any> {
-    const css: Record<string, any> = {}
+export function getVisibilityStyles(settings: ModuleSettings, device: string = 'desktop'): CSSProperties {
+    const css: CSSProperties & Record<string, string | number | undefined> = {}
 
     const visibility = settings.visibility as { desktop?: boolean; tablet?: boolean; mobile?: boolean } | undefined
-    if (visibility && !Array.isArray(getVal(settings, 'disable_on', device))) {
+    if (visibility && !Array.isArray(getVal<unknown>(settings, 'disable_on', device))) {
         const desktop = visibility.desktop !== false
         const tablet = visibility.tablet !== undefined ? visibility.tablet !== false : desktop
         const mobile = visibility.mobile !== undefined ? visibility.mobile !== false : tablet
@@ -678,12 +692,12 @@ export function getVisibilityStyles(settings: ModuleSettings, device: string = '
     }
 
     // Overflow logic
-    const ox = getVal(settings, 'overflow_x', device)
-    const oy = getVal(settings, 'overflow_y', device)
+    const ox = getVal(settings, 'overflow_x', device) as any
+    const oy = getVal(settings, 'overflow_y', device) as any
     if (ox && ox !== 'visible') css.overflowX = ox
     if (oy && oy !== 'visible') css.overflowY = oy
 
-    return css
+    return css as CSSProperties
 }
 
 export function getVisibilityClasses(settings: ModuleSettings, device: string = 'desktop', isBuilder: boolean = false): string {
@@ -698,36 +712,36 @@ export function getVisibilityClasses(settings: ModuleSettings, device: string = 
 }
 
 export function getAnimationClasses(settings: ModuleSettings, device: string = 'desktop'): string {
-    const nested = getResponsiveValue(settings, 'animation', device)
-    const effect = (nested && nested.effect) || getResponsiveValue(settings, 'animation_effect', device)
+    const nested = getResponsiveValue<Record<string, string>>(settings, 'animation', device)
+    const effect = (nested && nested.effect) || getResponsiveValue<string>(settings, 'animation_effect', device)
     return effect || ''
 }
 
-export function getPositioningStyles(settings: ModuleSettings, device: string = 'desktop'): Record<string, any> {
-    const styles: Record<string, any> = {}
-    const zIndex = getVal(settings, 'z_index', device) || getResponsiveValue(settings, 'zIndex', device)
+export function getPositioningStyles(settings: ModuleSettings, device: string = 'desktop'): CSSProperties {
+    const styles: CSSProperties & Record<string, string | number | undefined> = {}
+    const zIndex = getVal<number>(settings, 'z_index', device) || getResponsiveValue<number>(settings, 'zIndex', device)
 
-    if (zIndex !== undefined && zIndex !== '' && zIndex !== 0) {
+    if (zIndex !== undefined && zIndex !== 0) {
         styles.zIndex = zIndex
     }
 
-    const pos = getVal(settings, 'position', device)
+    const pos = getVal<string>(settings, 'position', device)
     if (pos && pos !== 'static' && pos !== 'default') {
-        styles.position = pos
-        const top = getVal(settings, 'top', device); if (top) styles.top = toCSS(top)
-        const bottom = getVal(settings, 'bottom', device); if (bottom) styles.bottom = toCSS(bottom)
-        const left = getVal(settings, 'left', device); if (left) styles.left = toCSS(left)
-        const right = getVal(settings, 'right', device); if (right) styles.right = toCSS(right)
+        (styles as any).position = pos
+        const top = getVal<string | number>(settings, 'top', device); if (top) styles.top = toCSS(top)
+        const bottom = getVal<string | number>(settings, 'bottom', device); if (bottom) styles.bottom = toCSS(bottom)
+        const left = getVal<string | number>(settings, 'left', device); if (left) styles.left = toCSS(left)
+        const right = getVal<string | number>(settings, 'right', device); if (right) styles.right = toCSS(right)
     }
 
     return styles
 }
 
-export function getTransitionStyles(settings: ModuleSettings, device: string = 'desktop'): Record<string, any> {
-    const css: Record<string, any> = {}
-    const duration = getVal(settings, 'transition_duration', device)
-    const delay = getVal(settings, 'transition_delay', device)
-    const curve = getVal(settings, 'transition_curve', device)
+export function getTransitionStyles(settings: ModuleSettings, device: string = 'desktop'): CSSProperties {
+    const css: CSSProperties & Record<string, string | number | undefined> = {}
+    const duration = getVal<number>(settings, 'transition_duration', device)
+    const delay = getVal<number>(settings, 'transition_delay', device)
+    const curve = getVal<string>(settings, 'transition_curve', device)
 
     if (duration !== undefined && (duration as number) > 0) {
         css.transitionDuration = `${duration}ms`
@@ -742,11 +756,11 @@ export function getTransitionStyles(settings: ModuleSettings, device: string = '
 export function getColorVariables(settings: ModuleSettings, hoverSettings: ModuleSettings = {}, device: string = 'desktop'): Record<string, string> {
     const styles: Record<string, string> = {}
 
-    const textColor = getVal(settings, 'textColor', device)
-    const hoverTextColor = getVal(hoverSettings, 'textColor', device)
+    const textColor = getVal<string>(settings, 'textColor', device)
+    const hoverTextColor = getVal<string>(hoverSettings, 'textColor', device)
 
-    const bgColor = getVal(settings, 'backgroundColor', device)
-    const hoverBgColor = getVal(hoverSettings, 'backgroundColor', device)
+    const bgColor = getVal<string>(settings, 'backgroundColor', device)
+    const hoverBgColor = getVal<string>(hoverSettings, 'backgroundColor', device)
 
     if (textColor) styles['--text-color'] = textColor
     if (hoverTextColor) styles['--hover-text-color'] = hoverTextColor
@@ -760,15 +774,15 @@ export function getColorVariables(settings: ModuleSettings, hoverSettings: Modul
 /**
  * Premium Utility: Glassmorphism Styles
  */
-export function getGlassStyles(settings: ModuleSettings, prefix: string = '', device: string = 'desktop'): Record<string, any> {
-    const css: Record<string, any> = {}
+export function getGlassStyles(settings: ModuleSettings, prefix: string = '', device: string = 'desktop'): CSSProperties {
+    const css: CSSProperties & Record<string, string | number | undefined> = {}
     const p = prefix ? `${prefix}_` : ''
 
-    if (getVal(settings, `${p}enable_glass`, device)) {
-        const blur = getVal(settings, `${p}glass_blur`, device) || 10
-        const opacity = getVal(settings, `${p}glass_opacity`, device) || 10
-        const color = getVal(settings, `${p}glass_color`, device) || '#ffffff'
-        const border = getVal(settings, `${p}glass_border`, device) || 1
+    if (getVal<boolean>(settings, `${p}enable_glass`, device)) {
+        const blur = getVal<number>(settings, `${p}glass_blur`, device) || 10
+        const opacity = getVal<number>(settings, `${p}glass_opacity`, device) || 10
+        const color = getVal<string>(settings, `${p}glass_color`, device) || '#ffffff'
+        const border = getVal<number>(settings, `${p}glass_border`, device) || 1
 
         css.backdropFilter = `blur(${blur}px)`
         css.webkitBackdropFilter = `blur(${blur}px)`
@@ -788,12 +802,12 @@ export function getGlassStyles(settings: ModuleSettings, prefix: string = '', de
 /**
  * Premium Utility: Text Gradient Styles
  */
-export function getTextGradientStyles(settings: ModuleSettings, prefix: string = '', device: string = 'desktop'): Record<string, any> {
-    const css: Record<string, any> = {}
+export function getTextGradientStyles(settings: ModuleSettings, prefix: string = '', device: string = 'desktop'): CSSProperties {
+    const css: any = {}
     const p = prefix ? `${prefix}_` : ''
 
-    if (getVal(settings, `${p}use_gradient`, device)) {
-        const g = getVal(settings, `${p}gradient`, device)
+    if (getVal<boolean>(settings, `${p}use_gradient`, device)) {
+        const g = getVal<Gradient>(settings, `${p}gradient`, device)
         if (g && g.stops && g.stops.length >= 2) {
             css.backgroundImage = generateGradientCSS(g)
             css.webkitBackgroundClip = 'text'
@@ -809,10 +823,10 @@ export function getTextGradientStyles(settings: ModuleSettings, prefix: string =
 /**
  * Premium Utility: Mask Styles
  */
-export function getMaskStyles(settings: ModuleSettings, prefix: string = '', device: string = 'desktop'): Record<string, any> {
-    const css: Record<string, any> = {}
+export function getMaskStyles(settings: ModuleSettings, prefix: string = '', device: string = 'desktop'): CSSProperties {
+    const css: any = {}
     const p = prefix ? `${prefix}_` : ''
-    const shape = getVal(settings, `${p}mask_shape`, device)
+    const shape = getVal<string>(settings, `${p}mask_shape`, device)
 
     if (shape && shape !== 'none') {
         const masks: Record<string, string> = {

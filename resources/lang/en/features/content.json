@@ -73,7 +73,12 @@
         "welcomeToBuilder": "Build your layout",
         "chooseEditorDesc": "Choose between the standard text editor or our visual drag-and-drop builder.",
         "useBuilder": "Use JA-Builder",
-        "useDefault": "Use Classic Editor"
+        "useDefault": "Use Classic Editor",
+        "sidebar": {
+            "addToMenu": "Add to Menu",
+            "addToMenuDesc": "Add this content to a menu",
+            "comments": "Comments"
+        }
     },
     "seo": {
         "metaTitle": "SEO Title",

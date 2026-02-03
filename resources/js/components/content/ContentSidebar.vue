@@ -47,7 +47,7 @@
                         <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.publishDate') }}</Label>
                         <Input
                             :model-value="modelValue.published_at"
-                            @update:model-value="(val) => updateField('published_at', val)"
+                            @update:model-value="(val) => updateField('published_at', val as string)"
                             type="datetime-local"
                             class="text-xs h-9"
                         />
@@ -59,7 +59,7 @@
                              <span class="text-[10px] text-muted-foreground font-mono select-none px-1">/</span>
                              <Input
                                 :model-value="modelValue.slug"
-                                @update:model-value="(val) => updateField('slug', val)"
+                                @update:model-value="(val) => updateField('slug', val as string)"
                                 class="text-xs font-mono h-9"
                                 :placeholder="$t('features.content.form.slugPlaceholder')"
                             />
@@ -109,7 +109,7 @@
                         </div>
                         <div class="flex-1">
                          <div class="flex items-center justify-between">
-                         <span class="text-xs font-semibold text-foreground">{{ t('features.contents.form.sidebar.addToMenu') }}</span>
+                         <span class="text-xs font-semibold text-foreground">{{ t('features.content.form.sidebar.addToMenu') }}</span>
                          <Badge v-if="modelValue.menu_item?.add_to_menu" variant="secondary" class="h-5 text-[10px] px-1.5 bg-primary/10 text-primary border-primary/20">
                              {{ t('common.status.enabled') }}
                          </Badge>
@@ -125,7 +125,7 @@
                     <div class="flex items-center justify-between border border-border/40 rounded-lg p-3 bg-muted/20">
                         <div class="space-y-0.5">
                             <Label class="text-xs font-medium leading-none">{{ $t('features.menus.actions.addToMenu') }}</Label>
-                            <p class="text-[10px] text-muted-foreground leading-tight">Add this content to a menu</p>
+                            <p class="text-[10px] text-muted-foreground leading-tight">{{ $t('features.content.form.sidebar.addToMenuDesc') }}</p>
                         </div>
                         <Switch
                             :checked="!!modelValue.menu_item?.add_to_menu"
@@ -159,7 +159,7 @@
                                 :disabled="loadingParentItems"
                             >
                                 <SelectTrigger class="w-full h-9">
-                                    <SelectValue :placeholder="loadingParentItems ? 'Loading...' : $t('features.menus.form.rootItem')" />
+                                    <SelectValue :placeholder="loadingParentItems ? $t('common.messages.loading.default') : $t('features.menus.form.rootItem')" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="root">{{ $t('features.menus.form.rootItem') }}</SelectItem>
@@ -174,7 +174,7 @@
                             <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.menus.form.label') }}</Label>
                             <Input
                                 :model-value="modelValue.menu_item.title"
-                                @update:model-value="(val) => updateMenuField('title', val)"
+                                @update:model-value="(val) => updateMenuField('title', val as string)"
                                 class="text-xs h-9"
                                 :placeholder="$t('features.menus.form.labelPlaceholder')"
                             />
@@ -316,7 +316,7 @@
                 <div v-show="sections.excerpt" class="border-t border-border/5 p-5">
                     <Textarea
                         :model-value="modelValue.excerpt"
-                        @update:model-value="(val) => updateField('excerpt', val)"
+                        @update:model-value="(val) => updateField('excerpt', val as string)"
                         rows="4"
                         class="resize-none text-sm bg-muted/10"
                         :placeholder="$t('features.content.form.excerptPlaceholder')"
@@ -337,7 +337,7 @@
                         </div>
                         <div class="flex-1">
                          <div class="flex items-center justify-between">
-                         <span class="text-xs font-semibold text-foreground">{{ t('features.contents.form.sidebar.comments') }}</span>
+                         <span class="text-xs font-semibold text-foreground">{{ t('features.content.form.sidebar.comments') }}</span>
                          <Badge v-if="!modelValue.comment_status" variant="secondary" class="h-5 text-[10px] px-1.5 bg-warning/10 text-warning border-warning/20">
                              {{ t('common.status.disabled') }}
                          </Badge>
@@ -374,7 +374,7 @@
                         <div class="p-1.5 rounded-md bg-destructive/10 text-destructive">
                             <Search class="w-3.5 h-3.5" />
                         </div>
-                        <span class="text-sm font-semibold text-foreground">SEO</span>
+                        <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.seoSettings') }}</span>
                     </div>
                     <ChevronDown 
                         class="w-4 h-4 text-muted-foreground transition-transform duration-200"
@@ -386,7 +386,7 @@
                         <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.seo.metaTitle') }}</Label>
                         <Input
                             :model-value="modelValue.meta_title"
-                            @update:model-value="(val) => updateField('meta_title', val)"
+                            @update:model-value="(val) => updateField('meta_title', val as string)"
                              class="text-xs h-9"
                         />
                     </div>
@@ -394,7 +394,7 @@
                         <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.seo.metaDescription') }}</Label>
                         <Textarea
                             :model-value="modelValue.meta_description"
-                            @update:model-value="(val) => updateField('meta_description', val)"
+                            @update:model-value="(val) => updateField('meta_description', val as string)"
                             rows="3"
                              class="resize-none text-xs bg-muted/10"
                         />
@@ -403,7 +403,7 @@
                         <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.metaKeywords') }}</Label>
                         <Textarea
                             :model-value="modelValue.meta_keywords"
-                            @update:model-value="(val) => updateField('meta_keywords', val)"
+                            @update:model-value="(val) => updateField('meta_keywords', val as string)"
                             rows="2"
                              class="resize-none text-xs bg-muted/10"
                              :placeholder="$t('features.content.form.keywordsPlaceholder')"
@@ -412,7 +412,7 @@
                     <div class="space-y-1.5">
                         <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.ogImage') }}</Label>
                         <MediaPicker
-                            @selected="(media: any) => updateField('og_image', (media?.url ?? media) || null)"
+                            @selected="(media: { url?: string } | string | null) => updateField('og_image', (typeof media === 'object' ? media?.url : media) || null)"
                             :label="$t('features.content.form.selectOgImage')"
                             :constraints="{
                                 allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
@@ -468,7 +468,7 @@ import MenuSquare from 'lucide-vue-next/dist/esm/icons/square-menu.js';
 import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
 import FeaturedImage from '@/components/content/FeaturedImage.vue';
 import MediaPicker from '@/components/media/MediaPicker.vue';
-import type { Content, ContentForm, Category, Tag, MenuItem, Menu } from '@/types/cms';
+import type { ContentForm, Category, Tag, MenuItem, Menu } from '@/types/cms';
 
 const { t } = useI18n();
 
@@ -477,7 +477,7 @@ const props = withDefaults(defineProps<{
     categories?: Category[];
     tags?: Tag[];
     selectedTags?: Tag[];
-    menus?: any[]; // Menu type in cms.ts might differ, using any for list if strict Menu type causes issues, but let's try Menu[] first if compatible. cms.ts has Menu interface.
+    menus?: Menu[];
 }>(), {
     categories: () => [],
     tags: () => [],
@@ -526,7 +526,7 @@ const filteredTags = computed(() => {
     return availableTags.value.slice(0, 10);
 });
 
-const updateField = (field: string, value: any) => {
+const updateField = <K extends keyof ContentForm>(field: K, value: any) => {
     emit('update:modelValue', { ...props.modelValue, [field]: value });
 };
 
@@ -598,7 +598,7 @@ const removeTag = (tagIdOrName: string | number | null) => {
     ));
 };
 
-const updateMenuField = (field: string, value: any) => {
+const updateMenuField = <K extends keyof MenuItem>(field: K, value: any) => {
     emit('update:modelValue', {
         ...props.modelValue,
         menu_item: {

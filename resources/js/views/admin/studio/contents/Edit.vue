@@ -135,7 +135,8 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue';
+import type { Ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useHead } from '@vueuse/head';
@@ -176,7 +177,7 @@ import { useAutoSave } from '@/composables/useAutoSave';
 import { useToast } from '@/composables/useToast';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { contentSchema } from '@/schemas';
-import type { Content, Category, Tag, ContentForm, MenuItem, ContentTemplate } from '@/types/cms';
+import type { Content, Category, Tag, ContentForm, Menu, MenuItem, ContentTemplate } from '@/types/cms';
 
 interface LockStatus {
     is_locked: boolean;
@@ -201,7 +202,7 @@ const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(co
 const loading = ref(false);
 const categories = ref<Category[]>([]);
 const tags = ref<Tag[]>([]);
-const menus = ref<any[]>([]);
+const menus = ref<Menu[]>([]);
 const selectedTags = ref<Tag[]>([]);
 const lockStatus = ref<LockStatus | null>(null);
 const lockInterval = ref<ReturnType<typeof setInterval> | null>(null);
@@ -287,7 +288,7 @@ const {
     saveStatus: autoSaveStatus,
     hasChanges,
     startAutoSave,
-} = useAutoSave(formWithTags as any, contentId as any, {
+} = useAutoSave(formWithTags as Ref<Record<string, unknown>>, contentId as string | number, {
     interval: 30000, // 30 seconds
     enabled: computed(() => autoSaveEnabled.value),
 });
@@ -358,6 +359,9 @@ const fetchContent = async () => {
             }
         }
         
+        // Wait for watchers to finish auto-generating fields (slug, meta_title, etc.)
+        await nextTick();
+
         // Save initial state for dirty checking (including tags)
         initialForm.value = JSON.stringify({
             ...form.value,
@@ -370,10 +374,10 @@ const fetchContent = async () => {
         
         // Lock content on edit
         await lockContent();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch content:', error);
         toast.error.load(error);
-        router.push({ name: 'content-studio' });
+    router.push({ name: 'studio' });
     } finally {
         loading.value = false;
     }
@@ -394,7 +398,7 @@ const lockContent = async () => {
             clearInterval(lockInterval.value);
         }
         lockInterval.value = setInterval(checkLockStatus, 30000);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to lock content:', error);
     }
 };
@@ -406,7 +410,7 @@ const checkLockStatus = async () => {
         if (data) {
             lockStatus.value = data;
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to check lock status:', error);
     }
 };
@@ -418,7 +422,7 @@ const handleUnlock = async () => {
         if (lockInterval.value) {
             clearInterval(lockInterval.value);
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to unlock content:', error);
         toast.error.fromResponse(error);
     }
@@ -440,7 +444,7 @@ const previewContent = computed(() => {
         author: { name: authStore.user?.name || 'Current User' },
         category: category ? { name: category.name } : null,
         published_at: form.value.published_at || new Date().toISOString(),
-    } as any;
+    } as unknown as Record<string, unknown>;
 });
 
 const handlePublishFromPreview = async () => {
@@ -453,7 +457,7 @@ const fetchCategories = async () => {
         const response = await api.get('/admin/ja/categories', { params: { per_page: 100 } });
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch categories:', error);
         categories.value = [];
     }
@@ -461,14 +465,14 @@ const fetchCategories = async () => {
 
 const fetchTags = async (query = '') => {
     try {
-        const params: Record<string, any> = { per_page: 50 };
+        const params: Record<string, unknown> = { per_page: 50 };
         if (query) {
             params.search = query;
         }
         const response = await api.get('/admin/ja/tags', { params });
         const { data } = parseResponse(response);
         tags.value = ensureArray(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch tags:', error);
     }
 };
@@ -478,7 +482,7 @@ const fetchMenus = async () => {
         const response = await api.get('/admin/ja/menus');
         const data = response.data?.data || response.data || [];
         menus.value = Array.isArray(data) ? data : [];
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch menus:', error);
     }
 };
@@ -558,15 +562,18 @@ const handleSubmit = async (status: string | null = null) => {
         
         // Only redirect if not saving from within the builder (status will be a string if from builder)
         if (status === null) {
-            router.push({ name: 'content-studio' });
+        router.push({ name: 'studio' });
         }
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
-        } else {
-            logger.error('Failed to update content:', error);
-            toast.error.fromResponse(error);
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response: { status: number, data: { errors: Record<string, string[]> } } };
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors || {});
+                return;
+            }
         }
+        logger.error('Failed to update content:', error);
+        toast.error.fromResponse(error);
     } finally {
         loading.value = false;
     }
@@ -578,13 +585,13 @@ const handleCancel = () => {
     if (isDirty.value) {
         showConfirmDialog.value = true;
     } else {
-        router.push({ name: 'content-studio' });
+    router.push({ name: 'studio' });
     }
 };
 
 const confirmCancel = () => {
     showConfirmDialog.value = false;
-    router.push({ name: 'content-studio' });
+    router.push({ name: 'studio' });
 };
 
 onMounted(() => {

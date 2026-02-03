@@ -2,7 +2,7 @@
     <div class="max-w-7xl mx-auto">
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ t('features.content_templates.form.editTitle') }}</h1>
-            <Button variant="ghost" @click="router.push({ name: 'content-studio', query: { tab: 'templates' } })">
+            <Button variant="ghost" @click="router.push({ name: 'studio', query: { tab: 'templates' } })">
                 <ChevronLeft class="w-4 h-4 mr-2" />
                 {{ t('features.content_templates.form.back') }}
             </Button>
@@ -131,7 +131,7 @@
 
                     <div class="flex items-center gap-2">
                          <div class="flex-1"></div>
-                         <Button variant="outline" type="button" @click="router.push({ name: 'content-studio', query: { tab: 'templates' } })">
+                         <Button variant="outline" type="button" @click="router.push({ name: 'studio', query: { tab: 'templates' } })">
                             {{ t('features.content_templates.form.cancel') }}
                         </Button>
                         <Button type="submit" :disabled="saving || !isDirty">
@@ -213,7 +213,7 @@ const fetchTemplate = async () => {
     } catch (error: any) {
         logger.error('Failed to fetch template:', error);
         toast.error.load(error);
-        router.push({ name: 'content-studio', query: { tab: 'templates' } });
+        router.push({ name: 'studio', query: { tab: 'templates' } });
     } finally {
         loading.value = false;
     }

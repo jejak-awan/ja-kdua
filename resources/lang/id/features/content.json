@@ -73,7 +73,12 @@
         "welcomeToBuilder": "Bangun tata letak Anda",
         "chooseEditorDesc": "Pilih antara editor teks standar atau desain visual drag-and-drop kami.",
         "useBuilder": "Gunakan JA-Builder",
-        "useDefault": "Gunakan Editor Klasik"
+        "useDefault": "Gunakan Editor Klasik",
+        "sidebar": {
+            "addToMenu": "Tambahkan ke Menu",
+            "addToMenuDesc": "Tambahkan konten ini ke menu",
+            "comments": "Komentar"
+        }
     },
     "seo": {
         "metaTitle": "Judul SEO",

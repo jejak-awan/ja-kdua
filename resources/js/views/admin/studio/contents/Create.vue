@@ -113,15 +113,15 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import type { Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useHead } from '@vueuse/head';
 import { useCmsStore } from '@/stores/cms';
 import api from '@/services/api';
 
-import Save from 'lucide-vue-next/dist/esm/icons/save.js';
-import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+
 
 // UI Components
 import {
@@ -142,10 +142,9 @@ import ContentSidebar from '@/components/content/ContentSidebar.vue';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
 import { useAutoSave } from '@/composables/useAutoSave';
 import { useToast } from '@/composables/useToast';
-import { useConfirm } from '@/composables/useConfirm';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { contentSchema } from '@/schemas';
-import type { Category, Tag, ContentForm, MenuItem } from '@/types/cms';
+import type { Category, Tag, ContentForm, Menu } from '@/types/cms';
 
 interface ConflictDetails {
     id: number;
@@ -156,7 +155,7 @@ interface ConflictDetails {
 
 interface SlugConflict {
     details: ConflictDetails;
-    originalError: any;
+    originalError: unknown;
 }
 
 const { t } = useI18n();
@@ -164,13 +163,13 @@ const router = useRouter();
 const toast = useToast();
 const cmsStore = useCmsStore();
 
-const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(contentSchema);
+const { validateWithZod, setErrors, clearErrors } = useFormValidation(contentSchema);
 
 const isSidebarOpen = ref(true);
 const loading = ref(false);
 const categories = ref<Category[]>([]);
 const tags = ref<Tag[]>([]);
-const menus = ref<any[]>([]); // Use flexible type for now or Menu[] if ready
+const menus = ref<Menu[]>([]);
 const selectedTags = ref<Tag[]>([]);
 const contentId = ref<number | null>(null);
 
@@ -249,43 +248,47 @@ const isValid = computed(() => {
 const autoSaveEnabled = ref(true); // Default to true
 
 const {
-    isSaving: autoSaving,
     lastSaved,
     saveStatus: autoSaveStatus,
     hasChanges,
-} = useAutoSave(formWithTags as any, contentId as any, {
+} = useAutoSave(formWithTags as Ref<Record<string, unknown>>, contentId as Ref<number | null>, {
     interval: 30000, 
     enabled: computed(() => autoSaveEnabled.value),
-    onSave: (response: any) => {
+    onSave: (response: { data?: { id?: number } }) => {
         // Update contentId if new content was created
         if (response?.data?.id && !contentId.value) {
             contentId.value = response.data.id;
         }
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
         // Handle slug conflict from autosave
-        if (error.response?.status === 409 && error.response?.data?.code === 'SLUG_CONFLICT') {
-            slugConflict.value = {
-                details: error.response.data.data?.conflict,
-                originalError: error
-            };
-            // Do not show generic toast for this specific handled error
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response?: { status?: number, data?: { code?: string, data?: { conflict: ConflictDetails } } } };
+            if (err.response?.status === 409 && err.response?.data?.code === 'SLUG_CONFLICT') {
+                const conflictData = err.response?.data?.data;
+                if (conflictData) {
+                    slugConflict.value = {
+                        details: conflictData.conflict,
+                        originalError: error
+                    };
+                }
+            }
         }
     },
-    shouldSave: (formData: any) => {
+    shouldSave: (formData: Record<string, unknown>) => {
         // Always save if we already have an ID (updates)
         if (contentId.value) return true;
 
         // For new content, require Title AND (Body OR Blocks OR Excerpt)
         // This prevents creating empty drafts just by typing a title
-        const hasTitle = formData.title && formData.title.trim().length > 0;
+        const hasTitle = formData.title && typeof formData.title === 'string' && formData.title.trim().length > 0;
         
         // Check content substance
-        const hasBody = formData.body && formData.body.trim().length > 0;
-        const hasBlocks = formData.blocks && formData.blocks.length > 0;
-        const hasExcerpt = formData.excerpt && formData.excerpt.trim().length > 0;
+        const hasBody = formData.body && typeof formData.body === 'string' && formData.body.trim().length > 0;
+        const hasBlocks = formData.blocks && Array.isArray(formData.blocks) && formData.blocks.length > 0;
+        const hasExcerpt = formData.excerpt && typeof formData.excerpt === 'string' && formData.excerpt.trim().length > 0;
 
-        return hasTitle && (hasBody || hasBlocks || hasExcerpt);
+        return !!hasTitle && (!!hasBody || !!hasBlocks || !!hasExcerpt);
     }
 });
 
@@ -298,7 +301,7 @@ const fetchCategories = async () => {
         const response = await api.get('/admin/ja/categories', { params: { per_page: 100 } });
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch categories:', error);
         categories.value = [];
     }
@@ -306,14 +309,14 @@ const fetchCategories = async () => {
 
 const fetchTags = async (query = '') => {
     try {
-        const params: Record<string, any> = { per_page: 50 };
+        const params: Record<string, unknown> = { per_page: 50 };
         if (query) {
             params.search = query;
         }
         const response = await api.get('/admin/ja/tags', { params });
         const { data } = parseResponse(response);
         tags.value = ensureArray(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch tags:', error);
     }
 };
@@ -323,7 +326,7 @@ const fetchMenus = async () => {
         const response = await api.get('/admin/ja/menus');
         const { data } = parseResponse(response);
         menus.value = ensureArray(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch menus:', error);
     }
 };
@@ -394,22 +397,28 @@ const handleSubmit = async (status: string | null = null) => {
         
         // Only redirect if not saving from within the builder
         if (status === null) {
-            router.push({ name: 'content-studio' });
+    router.push({ name: 'studio' });
         } else {
              // If staying, update contentId for future saves (though auto-save handles this too)
              if (response.data?.id && !contentId.value) {
                  contentId.value = response.data.id;
              }
         }
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
-        } else if (error.response?.status === 409 && error.response?.data?.code === 'SLUG_CONFLICT') {
-            // Handle slug conflict
-            slugConflict.value = {
-                details: error.response.data.data?.conflict,
-                originalError: error
-            };
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response?: { status?: number, data?: { errors?: Record<string, string[]>, code?: string, data?: { conflict: ConflictDetails } } } };
+            if (err.response?.status === 422 && err.response.data) {
+                setErrors(err.response.data.errors || {});
+            } else if (err.response?.status === 409 && err.response?.data?.code === 'SLUG_CONFLICT') {
+                // Handle slug conflict
+                slugConflict.value = {
+                    details: err.response?.data?.data?.conflict as ConflictDetails,
+                    originalError: error
+                };
+            } else {
+                logger.error('Failed to create content:', error);
+                toast.error.fromResponse(error);
+            }
         } else {
             logger.error('Failed to create content:', error);
             toast.error.fromResponse(error);
@@ -425,13 +434,13 @@ const handleCancel = () => {
     if (hasChanges.value) {
         showConfirmDialog.value = true;
     } else {
-        router.push({ name: 'content-studio' });
+        router.push({ name: 'studio' });
     }
 };
 
 const confirmCancel = () => {
     showConfirmDialog.value = false;
-    router.push({ name: 'content-studio' });
+    router.push({ name: 'studio' });
 };
 
 // Slug Conflict Handling
@@ -459,7 +468,7 @@ const resolveConflict = async (action: 'unique' | 'force_delete') => {
             toast.success.action('Conflict resolved: Previous item deleted.');
             // Retry submission
             await handleSubmit(form.value.status);
-        } catch (error: any) {
+        } catch (error: unknown) {
             logger.error('Failed to force delete conflicting item:', error);
             toast.error.action({ message: 'Failed to remove conflicting item. Please rename your current page.' });
         } finally {
@@ -468,9 +477,13 @@ const resolveConflict = async (action: 'unique' | 'force_delete') => {
     }
 };
 
-onMounted(() => {
+onMounted(async () => {
     fetchCategories();
     fetchTags();
     fetchMenus();
+    
+    // Wait for any child components or watchers to stabilize
+    await nextTick();
+    hasChanges.value = false;
 });
 </script>
