@@ -156,7 +156,7 @@ class FoundationSeeder extends Seeder
             ['key' => 'block_duration_minutes', 'value' => '30', 'group' => 'security', 'type' => 'integer'],
             ['key' => 'log_retention_days', 'value' => '90', 'group' => 'security', 'type' => 'integer'],
             ['key' => 'enable_captcha', 'value' => '0', 'group' => 'security', 'type' => 'boolean'],
-            ['key' => 'captcha_method', 'value' => 'turnstile', 'group' => 'security', 'type' => 'string'],
+            ['key' => 'captcha_method', 'value' => 'slider', 'group' => 'security', 'type' => 'string'],
             ['key' => 'captcha_on_login', 'value' => '1', 'group' => 'security', 'type' => 'boolean'],
             ['key' => 'captcha_on_register', 'value' => '1', 'group' => 'security', 'type' => 'boolean'],
 

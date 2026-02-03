@@ -53,6 +53,12 @@ const fetchSettings = async () => {
         }
         
         method.value = data.method
+        
+        // Fallback to slider if method is not recognized
+        if (!['slider', 'math', 'image'].includes(method.value)) {
+            logger.warning(`Unknown captcha method "${method.value}", falling back to slider`);
+            method.value = 'slider'
+        }
     } catch (e) {
         logger.error('Failed to fetch captcha settings:', e)
         enabled.value = false
