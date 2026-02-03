@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Content;
 use App\Models\ContentCustomField;
 use App\Models\ContentRevision;
+use App\Models\MediaUsage;
 use App\Models\SearchIndex;
 use App\Models\Tag;
 use App\Models\Webhook;
@@ -172,7 +173,10 @@ class ContentService
         $newTags = $data['new_tags'] ?? [];
         $customFields = $data['custom_fields'] ?? null;
         // Keep editor_type
-        unset($data['create_revision'], $data['tags'], $data['new_tags'], $data['custom_fields']);
+        // Generate slug if not provided
+        if (empty($data['slug'])) {
+            $data['slug'] = $this->generateUniqueSlug($data['title']);
+        }
 
         $content = Content::create($data);
 
@@ -266,10 +270,10 @@ class ContentService
         }
 
         // Track media usage
-        if (isset($data['featured_image'])) {
+        if (array_key_exists('featured_image', $data)) {
             $this->trackMediaUsage($content, 'featured_image');
         }
-        if (isset($data['og_image'])) {
+        if (array_key_exists('og_image', $data)) {
             $this->trackMediaUsage($content, 'og_image');
         }
 
@@ -307,8 +311,12 @@ class ContentService
      */
     protected function trackMediaUsage(Content $content, string $fieldName): void
     {
-        // Placeholder for media tracking logic
-        // In a real implementation, this would link the content to the Media model
+        $mediaId = $content->{$fieldName};
+        if ($mediaId) {
+            MediaUsage::track($mediaId, $content, $fieldName);
+        } else {
+            MediaUsage::untrack(null, $content, $fieldName);
+        }
     }
 
     /**
@@ -319,6 +327,10 @@ class ContentService
         $contentId = $content->id;
 
         SearchIndex::remove($content);
+        
+        // Untrack media usage
+        MediaUsage::untrack(null, $content);
+
         $content->delete();
 
         Webhook::triggerForEvent('content.deleted', ['id' => $contentId]);
@@ -528,6 +540,10 @@ class ContentService
     {
         $content = Content::withTrashed()->findOrFail($id);
         SearchIndex::remove($content);
+
+        // Untrack media usage
+        MediaUsage::untrack(null, $content);
+
         $content->forceDelete();
         Webhook::triggerForEvent('content.force_deleted', ['id' => $id]);
         $this->clearContentCaches($id);

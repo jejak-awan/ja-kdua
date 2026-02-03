@@ -32,8 +32,7 @@ class MediaUsage extends Model
     {
         // Remove old usage for this field if exists
         if ($fieldName) {
-            self::where('media_id', $mediaId)
-                ->where('model_type', get_class($model))
+            self::where('model_type', $model->getMorphClass())
                 ->where('model_id', $model->id)
                 ->where('field_name', $fieldName)
                 ->delete();
@@ -41,19 +40,23 @@ class MediaUsage extends Model
 
         return self::create([
             'media_id' => $mediaId,
-            'model_type' => get_class($model),
+            'model_type' => $model->getMorphClass(),
             'model_id' => $model->id,
             'field_name' => $fieldName,
         ]);
     }
 
     // Helper method to remove media usage
-    public static function untrack($mediaId, $model = null, $fieldName = null)
+    public static function untrack($mediaId = null, $model = null, $fieldName = null)
     {
-        $query = self::where('media_id', $mediaId);
+        $query = self::query();
+
+        if ($mediaId) {
+            $query->where('media_id', $mediaId);
+        }
 
         if ($model) {
-            $query->where('model_type', get_class($model))
+            $query->where('model_type', $model->getMorphClass())
                 ->where('model_id', $model->id);
         }
 

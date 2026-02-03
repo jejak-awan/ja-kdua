@@ -276,9 +276,14 @@ class ThemeService
             }
         }
 
-        // Check required plugins (if plugin system exists)
+        // Check required plugins
         if (isset($theme->dependencies['plugins'])) {
-            // TODO: Implement plugin dependency check
+            foreach ($theme->dependencies['plugins'] as $requiredPlugin) {
+                $plugin = \App\Models\Plugin::where('slug', $requiredPlugin)->first();
+                if (! $plugin || ! $plugin->is_active) {
+                    return false;
+                }
+            }
         }
 
         return true;
