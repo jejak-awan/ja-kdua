@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition, ModuleField } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -11,7 +11,6 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    orderSettings,
     adminLabelSettings,
     cssSettings,
     typographySettings,
@@ -108,11 +107,11 @@ const HeadingModule: ModuleDefinition = {
                         label: 'Wrap Heading with Link'
                     },
                     {
-                        ...((linkSettings.fields as any[])[0]),
+                        ...(linkSettings.fields as ModuleField[])[0],
                         show_if: { field: 'use_link', value: true }
                     },
                     {
-                        ...((linkSettings.fields as any[])[1]),
+                        ...(linkSettings.fields as ModuleField[])[1],
                         show_if: { field: 'use_link', value: true }
                     },
                     {
@@ -182,7 +181,7 @@ const HeadingModule: ModuleDefinition = {
             {
                 id: 'typography',
                 label: 'Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: f.name === 'text_align' ? 'alignment' : f.name
                 }))

@@ -21,7 +21,7 @@
             :required="getVal(settings, 'is_required')"
           >
             <option value="" disabled>{{ getVal(settings, 'placeholder') || 'Select an option' }}</option>
-            <option v-for="option in getVal(settings, 'options')" :key="option.value" :value="option.value">
+            <option v-for="option in (getVal(settings, 'options') as { label: string, value: string }[])" :key="option.value" :value="option.value">
               {{ option.label }}
             </option>
           </select>
@@ -47,10 +47,10 @@ import type { BlockProps } from '../../types/builder'
 
 const props = defineProps<BlockProps>()
 
-const formState = inject<Record<string, any>>('formState', {})
-const updateFormValue = inject<(id: string, val: any) => void>('updateFormValue', () => {})
+const formState = inject<Record<string, unknown>>('formState', {})
+const updateFormValue = inject<(id: string, val: unknown) => void>('updateFormValue', () => {})
 
-const fieldId = computed(() => getVal(props.settings || {}, 'field_id'))
+const fieldId = computed(() => getVal<string>(props.settings || {}, 'field_id'))
 
 const value = computed({
   get: () => fieldId.value ? formState[fieldId.value] : '',

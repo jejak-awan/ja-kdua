@@ -4,8 +4,8 @@
     :mode="mode" 
     :device="device"
     class="toggle-block w-full transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Toggle'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Toggle'"
     :style="cardStyles"
   >
     <template #default="{ settings: blockSettings }">
@@ -31,7 +31,7 @@
                         v-if="toggleIconValue !== 'none'"
                         :name="computedIconName"
                         class="w-5 h-5 shrink-0"
-                        :style="{ color: iconColorValue }"
+                        :style="{ color: (iconColorValue as string) }"
                     />
                 </div>
               </template>
@@ -41,7 +41,7 @@
               <div 
                 class="toggle-content p-6 rounded-xl prose max-w-none text-slate-600 font-medium leading-relaxed" 
                 :style="contentStyles"
-                v-html="getVal(blockSettings, 'content') || 'Toggle content goes here...'"
+                v-html="getVal<string>(blockSettings as ModuleSettings, 'content') || 'Toggle content goes here...'"
               >
               </div>
             </AccordionContent>
@@ -58,7 +58,7 @@ import BaseBlock from '../components/BaseBlock.vue'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../ui'
 import { LucideIcon } from '@/components/ui';
 import { getVal, getLayoutStyles, getTypographyStyles } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance
@@ -69,30 +69,30 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const settings = computed(() => (props.module?.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module?.settings || {}) as ModuleSettings)
 
-const titleValue = computed(() => getVal(settings.value, 'title', props.device) || 'Toggle Title')
-const toggleIconValue = computed(() => getVal(settings.value, 'toggleIcon', props.device) || 'chevron')
-const iconPositionValue = computed(() => getVal(settings.value, 'iconPosition', props.device) || 'right')
-const iconColorValue = computed(() => getVal(settings.value, 'iconColor', props.device) || 'currentColor')
-const defaultOpenValue = computed(() => !!getVal(settings.value, 'defaultOpen', props.device))
+const titleValue = computed(() => getVal<string>(settings.value, 'title', props.device) || 'Toggle Title')
+const toggleIconValue = computed(() => getVal<string>(settings.value, 'toggleIcon', props.device) || 'chevron')
+const iconPositionValue = computed(() => getVal<string>(settings.value, 'iconPosition', props.device) || 'right')
+const iconColorValue = computed(() => getVal<string>(settings.value, 'iconColor', props.device) || 'currentColor')
+const defaultOpenValue = computed(() => !!getVal<boolean>(settings.value, 'defaultOpen', props.device))
 
 const headerStyles = computed(() => {
-  const styles: any = {
-    backgroundColor: getVal(settings.value, 'headerBackgroundColor', props.device) || '#f8fafc',
+  const styles: Record<string, string | number> = {
+    backgroundColor: getVal<string>(settings.value, 'headerBackgroundColor', props.device) || '#f8fafc',
   }
   Object.assign(styles, getTypographyStyles(settings.value, 'header_', props.device))
-  const padding = getVal(settings.value, 'headerPadding', props.device)
+  const padding = getVal<string | number>(settings.value, 'headerPadding', props.device)
   if (padding) styles.padding = padding
   return styles
 })
 
 const contentStyles = computed(() => {
-  const styles: any = {
-    backgroundColor: getVal(settings.value, 'contentBackgroundColor', props.device) || '#ffffff',
+  const styles: Record<string, string | number> = {
+    backgroundColor: getVal<string>(settings.value, 'contentBackgroundColor', props.device) || '#ffffff',
   }
   Object.assign(styles, getTypographyStyles(settings.value, 'content_', props.device))
-  const padding = getVal(settings.value, 'contentPadding', props.device)
+  const padding = getVal<string | number>(settings.value, 'contentPadding', props.device)
   if (padding) styles.padding = padding
   return styles
 })
@@ -102,13 +102,12 @@ const computedIconName = computed(() => {
     return 'ChevronDown'
 })
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'header_', props.device))
-const contentTypographyStyles = computed(() => getTypographyStyles(settings.value, 'content_', props.device))
+const titleStyles = computed(() => (getTypographyStyles(settings.value, 'header_', props.device) || {}) as Record<string, string | number>)
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1.05
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1.05
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -117,7 +116,7 @@ const cardStyles = computed(() => {
 })
 
 const containerStyles = computed(() => {
-    return getLayoutStyles(settings.value, props.device)
+    return (getLayoutStyles(settings.value, props.device) || {}) as Record<string, string | number>
 })
 </script>
 

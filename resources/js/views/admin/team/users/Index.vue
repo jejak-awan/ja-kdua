@@ -363,7 +363,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import api from '@/services/api';
 import { cn } from '@/lib/utils';
-import { parseResponse, ensureArray } from '@/utils/responseParser';
+import { parseResponse, ensureArray, type PaginationData } from '@/utils/responseParser';
 import { useToast } from '@/composables/useToast';
 import {
     Pagination,
@@ -396,7 +396,6 @@ import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
 import UserPlus from 'lucide-vue-next/dist/esm/icons/user-plus.js';
 import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
 import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
-import Tag from 'lucide-vue-next/dist/esm/icons/tag.js';
 import { useAuthStore } from '@/stores/auth';
 import { useConfirm } from '@/composables/useConfirm';
 import type { User, Role } from '@/types/auth';
@@ -412,7 +411,7 @@ const roleFilter = ref('all');
 const verificationFilter = ref('all');
 const trashedFilter = ref('without');
 const activeStatFilter = ref<string | null>(null);
-const pagination = ref<any>(null);
+const pagination = ref<PaginationData | null>(null);
 const authStore = useAuthStore();
 
 const { confirm } = useConfirm();
@@ -460,7 +459,7 @@ const canDelete = (targetUser: User) => {
     if (isSuperAdmin(targetUser)) {
         const superAdminCount = users.value.filter(u => isSuperAdmin(u)).length;
         // This is only a frontend check, backend will re-verify
-        if (pagination.value?.total <= 1 || superAdminCount <= 1) return false;
+        if ((pagination.value?.total || 0) <= 1 || superAdminCount <= 1) return false;
     }
     
     return true;
@@ -469,7 +468,7 @@ const canDelete = (targetUser: User) => {
 const fetchUsers = async () => {
     loading.value = true;
     try {
-        const params: any = {
+        const params: Record<string, string | number | boolean | undefined> = {
             page: pagination.value?.current_page || 1,
             per_page: pagination.value?.per_page || 10,
         };
@@ -505,16 +504,16 @@ const fetchUsers = async () => {
         const response = await api.get('/admin/ja/users', { params });
         const { data, pagination: paginationData } = parseResponse(response);
         // Ensure each user has roles array
-        users.value = ensureArray(data).map((user: any) => ({
+        users.value = (ensureArray(data) as User[]).map((user: User) => ({
             ...user,
             roles: user.roles || [],
         }));
         if (paginationData) {
             pagination.value = paginationData;
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch users:', error);
-        toast.error.action(error);
+        toast.error.action(error as Record<string, unknown>);
     } finally {
         loading.value = false;
     }
@@ -529,7 +528,7 @@ const fetchStats = async () => {
         if (response.data && response.data.data) {
             stats.value = response.data.data;
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch stats:', error);
     }
 };
@@ -571,7 +570,7 @@ const fetchRoles = async () => {
             });
             roles.value = Array.from(uniqueRoles.values());
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch roles:', error);
     }
 };
@@ -611,9 +610,9 @@ const deleteUser = async (user: User) => {
         await api.delete(`/admin/ja/users/${user.id}`);
         await fetchUsers();
         toast.success.delete('User');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to delete user:', error);
-        toast.error.delete(error, 'User');
+        toast.error.delete(error as Record<string, unknown>, 'User');
     }
 };
 
@@ -633,9 +632,9 @@ const forceLogoutUser = async (user: User) => {
         await api.post(`/admin/ja/users/${user.id}/force-logout`);
         
         toast.success.action('User forced logout');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to force logout user:', error);
-        toast.error.action(error);
+        toast.error.action(error as Record<string, unknown>);
     }
 };
 
@@ -644,9 +643,9 @@ const verifyUser = async (user: User) => {
         await api.post(`/admin/ja/users/${user.id}/verify`);
         toast.success.action('User verified');
         await fetchUsers();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to verify user:', error);
-        toast.error.action(error);
+        toast.error.action(error as Record<string, unknown>);
     }
 };
 
@@ -664,9 +663,9 @@ const restoreUser = async (user: User) => {
         await api.post(`/admin/ja/users/${user.id}/restore`);
         toast.success.action('User restored');
         await fetchUsers();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to restore user:', error);
-        toast.error.action(error);
+        toast.error.action(error as Record<string, unknown>);
     }
 };
 
@@ -684,9 +683,9 @@ const forceDeleteUser = async (user: User) => {
         await api.delete(`/admin/ja/users/${user.id}/force-delete`);
         toast.success.action('User permanently deleted');
         await fetchUsers();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to force delete user:', error);
-        toast.error.action(error);
+        toast.error.action(error as Record<string, unknown>);
     }
 };
 
@@ -751,7 +750,7 @@ const bulkAction = async (action: string) => {
     const confirmed = await confirm({
         title: confirmTitle,
         message: confirmMessage,
-        variant: confirmVariant as any,
+        variant: confirmVariant as 'success' | 'warning' | 'info' | 'danger',
         confirmText: t('common.actions.confirm') || 'Confirm',
     });
 
@@ -761,7 +760,7 @@ const bulkAction = async (action: string) => {
     }
 
     try {
-        const response = await api.post('/admin/ja/users/bulk-action', {
+        await api.post('/admin/ja/users/bulk-action', {
             ids: selectedIds.value,
             action: action
         });
@@ -770,9 +769,9 @@ const bulkAction = async (action: string) => {
         await fetchUsers();
         
         toast.success.action('Bulk action successful');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Bulk action failed:', error);
-        toast.error.action(error);
+        toast.error.action(error as Record<string, unknown>);
     }
 };
 

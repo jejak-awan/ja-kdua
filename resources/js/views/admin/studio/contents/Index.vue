@@ -7,14 +7,12 @@ import { useHead } from '@vueuse/head';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import CheckCircle2 from 'lucide-vue-next/dist/esm/icons/circle-check-big.js';
-import XCircle from 'lucide-vue-next/dist/esm/icons/circle-x.js';
 import Clock3 from 'lucide-vue-next/dist/esm/icons/clock-3.js';
 import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
 import FileEdit from 'lucide-vue-next/dist/esm/icons/file-pen.js';
 import Archive from 'lucide-vue-next/dist/esm/icons/archive.js';
 import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
-import LayoutTemplate from 'lucide-vue-next/dist/esm/icons/layout-template.js';
 import Type from 'lucide-vue-next/dist/esm/icons/type.js';
 import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
 import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
@@ -24,7 +22,7 @@ import { useCmsStore } from '@/stores/cms';
 import { useConfirm } from '@/composables/useConfirm';
 import { useToast } from '@/composables/useToast';
 import api from '@/services/api';
-import { parseResponse, ensureArray, type PaginationData } from '@/utils/responseParser';
+import { parseResponse, parseSingleResponse, ensureArray, type PaginationData } from '@/utils/responseParser';
 import { cn } from '@/lib/utils';
 import type { Content } from '@/types/cms';
 
@@ -58,6 +56,23 @@ interface ContentStats {
     pending: number;
     archived: number;
     trashed: number;
+}
+
+interface ContentFilter {
+    page: number;
+    per_page: string;
+    sort: string;
+    order: string;
+    search?: string;
+    status?: string;
+    [key: string]: string | number | undefined;
+}
+
+interface ConfirmOptions {
+    title: string;
+    message: string;
+    variant?: 'danger' | 'warning' | 'info' | 'success';
+    confirmText?: string;
 }
 
 const { t } = useI18n();
@@ -99,7 +114,7 @@ const stats = ref<ContentStats>({
 const fetchContents = async (page: number = 1) => {
     loading.value = true;
     try {
-        const params: Record<string, any> = {
+        const params: ContentFilter = {
             page,
             per_page: perPage.value,
             sort: 'created_at',
@@ -117,7 +132,7 @@ const fetchContents = async (page: number = 1) => {
         contents.value = ensureArray(data);
         pagination.value = meta;
         
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch contents:', error);
         toast.error.action(error);
         contents.value = [];
@@ -129,8 +144,9 @@ const fetchContents = async (page: number = 1) => {
 
 const fetchStats = async () => {
     try {
-        const response = await api.get('/admin/ja/contents/stats') as any;
-        stats.value = response.data.data || {
+        const response = await api.get('/admin/ja/contents/stats');
+        const data = parseSingleResponse<ContentStats>(response);
+        stats.value = data || {
             total: 0,
             published: 0,
             draft: 0,
@@ -138,7 +154,7 @@ const fetchStats = async () => {
             archived: 0,
             trashed: 0
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch stats:', error);
     }
 };
@@ -162,7 +178,7 @@ const toggleFeatured = async (content: Content) => {
     try {
         await api.patch(`/admin/ja/contents/${content.id}/toggle-featured`);
         toast.success.action(t('common.messages.success.updated'));
-    } catch (error: any) {
+    } catch (error: unknown) {
         content.is_featured = previousState;
         toast.error.action(error);
     }
@@ -187,7 +203,7 @@ const getUserInitials = (name?: string) => {
 const handleBulkAction = async (action: string) => {
     if (!action) return;
     
-    const confirmConfig: any = {
+    const confirmConfig: ConfirmOptions = {
         title: t('features.content.list.bulkActions'),
         message: t('common.messages.confirm.bulkAction', { action: action, count: selectedContents.value.length }),
     };
@@ -202,7 +218,7 @@ const handleBulkAction = async (action: string) => {
         confirmConfig.variant = 'danger';
         confirmConfig.confirmText = t('features.content.actions.reject');
     } else if (action === 'restore') {
-        confirmConfig.variant = 'default';
+        confirmConfig.variant = 'info';
         confirmConfig.confirmText = t('common.actions.restore');
     } else if (action === 'force_delete') {
         confirmConfig.variant = 'danger';
@@ -226,7 +242,7 @@ const handleBulkAction = async (action: string) => {
         await fetchStats();
         toast.success.update();
         bulkAction.value = '';
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to perform bulk action:', error);
         toast.error.action(error);
     } finally {
@@ -249,7 +265,7 @@ const handleEmptyTrash = async () => {
         await fetchContents();
         await fetchStats();
         toast.success.action(t('common.messages.success.deleted') || 'Trash emptied successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to empty trash:', error);
         toast.error.action(error);
     }
@@ -267,7 +283,7 @@ const handleDelete = async (content: Content) => {
         await api.delete(`/admin/ja/contents/${content.id}`);
         await fetchContents();
         await fetchStats();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to delete content:', error);
         toast.error.delete(error, content.title);
     }
@@ -288,7 +304,7 @@ const handleRestore = async (content: Content) => {
         await fetchContents();
         await fetchStats();
         toast.success.action(t('common.messages.success.restored') || 'Content restored');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to restore content:', error);
         toast.error.action(error);
     }
@@ -306,7 +322,7 @@ const handleForceDelete = async (content: Content) => {
         await api.delete(`/admin/ja/contents/${content.id}/force-delete`);
         await fetchContents();
         await fetchStats();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to force delete content:', error);
         toast.error.delete(error, content.title);
     }
@@ -316,55 +332,6 @@ const handleEdit = (content: Content) => {
     router.push({ name: 'contents.edit', params: { id: content.id } });
 };
 
-const handlePreview = (content: Content) => {
-    const routeData = router.resolve({ name: 'posts.show', params: { slug: content.slug } });
-    window.open(routeData.href, '_blank');
-};
-
-const handleDuplicate = async (content: Content) => {
-    try {
-        await api.post(`/admin/ja/contents/${content.id}/duplicate`);
-        await fetchContents();
-        await fetchStats();
-        toast.success.action(t('common.messages.success.duplicated') || 'Content duplicated');
-    } catch (error: any) {
-        logger.error('Failed to duplicate content:', error);
-        toast.error.action(error);
-    }
-};
-
-const handleApprove = async (content: Content) => {
-    try {
-        await api.patch(`/admin/ja/contents/${content.id}/approve`);
-        await fetchContents();
-        await fetchStats();
-        toast.success.action(t('features.content.messages.approved') || 'Content approved');
-    } catch (error: any) {
-        logger.error('Failed to approve content:', error);
-        toast.error.action(error);
-    }
-};
-
-const handleReject = async (content: Content) => {
-    const reason = await confirm({
-        title: t('features.content.actions.reject'),
-        message: t('features.content.messages.rejectReason'),
-        input: true,
-        inputPlaceholder: t('features.content.placeholders.rejectionReason'),
-        confirmText: t('features.content.actions.reject'),
-        variant: 'danger'
-    });
-    if (reason === false) return;
-    try {
-        await api.patch(`/admin/ja/contents/${content.id}/reject`, { reason_for_rejection: reason });
-        await fetchContents();
-        await fetchStats();
-        toast.success.action(t('features.content.messages.rejected') || 'Content rejected');
-    } catch (error: any) {
-        logger.error('Failed to reject content:', error);
-        toast.error.action(error);
-    }
-};
 
 const formatDate = (date: string | undefined) => {
     if (!date) return '-';

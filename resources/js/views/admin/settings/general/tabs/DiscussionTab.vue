@@ -5,14 +5,14 @@
             :key="group.id"
             :title="group.title"
             :description="group.description"
-            :icon="group.icon"
+            :icon="(group.icon as any)"
             :color="group.color as any"
             :default-expanded="group.defaultExpanded"
         >
             <SettingField
                 v-for="setting in group.settings"
                 :key="setting.id"
-                :model-value="formData[setting.key]"
+                :model-value="(formData[setting.key] as any)"
                 @update:model-value="(value) => updateField(setting.key, value)"
                 :field-key="setting.key"
                 :label="$t('features.settings.labels.' + setting.key)"
@@ -35,7 +35,7 @@ import SettingField from '@/components/settings/SettingField.vue'
 interface Setting {
     id: number | string;
     key: string;
-    value: any;
+    value: unknown;
     type: string;
     group: string;
 }
@@ -44,8 +44,8 @@ interface SettingGroupData {
     id: string;
     title: string;
     description: string;
-    icon: any;
-    color: string;
+    icon: unknown;
+    color: 'primary' | 'blue' | 'emerald' | 'amber' | 'red' | 'purple' | 'indigo' | 'orange' | 'pink';
     keys: string[];
     settings: Setting[];
     defaultExpanded: boolean;
@@ -53,7 +53,7 @@ interface SettingGroupData {
 
 interface Props {
     settings: Setting[];
-    formData: Record<string, any>;
+    formData: Record<string, unknown>;
     errors?: Record<string, string[]>;
 }
 
@@ -109,10 +109,10 @@ const discussionSettingsGrouped = computed(() => {
 })
 
 const emit = defineEmits<{
-    (e: 'update:formData', value: Record<string, any>): void;
+    (e: 'update:formData', value: Record<string, unknown>): void;
 }>()
 
-const updateField = (key: string, value: any) => {
+const updateField = (key: string, value: unknown) => {
     emit('update:formData', { ...props.formData, [key]: value })
 }
 </script>

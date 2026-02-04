@@ -87,7 +87,7 @@ const { validateWithZod, setErrors, clearErrors } = useFormValidation(menuSchema
 
 const emit = defineEmits<{
     (e: 'close'): void;
-    (e: 'saved', menu: any): void;
+    (e: 'saved', menu: { id?: string | number }): void;
 }>();
 
 const saving = ref(false);
@@ -142,11 +142,16 @@ const handleSubmit = async () => {
         toast.success.create('Menu');
         emit('saved', menu);
         emit('close');
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response?: { status?: number, data?: { errors?: Record<string, string[]>, message?: string } } };
+            if (err.response?.status === 422) {
+                setErrors((err.response?.data?.errors as Record<string, string[]>) || {});
+            } else {
+                toast.error.fromResponse(error);
+            }
         } else {
-            toast.error.fromResponse(error);
+            toast.error.action('Failed to save menu');
         }
     } finally {
         saving.value = false;

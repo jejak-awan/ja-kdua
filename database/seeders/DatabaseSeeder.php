@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Services\MediaService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -38,6 +39,12 @@ class DatabaseSeeder extends Seeder
             $this->call(SampleDataSeeder::class);
             // $this->call(ThemeContentSeeder::class); // Re-enable if you want theme-specific blocks
         }
+
+        // 5. Sync Media Files
+        $this->command->info('Scanning for media files...');
+        $mediaService = new MediaService;
+        $stats = $mediaService->scan();
+        $this->command->info("Media sync: Scanned {$stats['scanned']} files, added {$stats['added']} new files.");
 
         $this->command->info('Full database reorganization and seeding completed successfully!');
     }

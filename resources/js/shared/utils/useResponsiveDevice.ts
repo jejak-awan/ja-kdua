@@ -1,12 +1,13 @@
 import { ref, computed, onMounted, onUnmounted, inject } from 'vue'
 import { throttle } from './performance'
+import type { BuilderInstance } from '@/types/builder'
 
 export function useResponsiveDevice() {
     const builder = inject('builder', null)
 
     if (builder) {
         // We are in builder mode, rely on builder's selected device
-        return computed(() => (builder as any).device.value)
+        return computed(() => (builder as BuilderInstance).device.value)
     }
 
     // We are in frontend mode, listen to window resize

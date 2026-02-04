@@ -12,6 +12,8 @@ export interface Menu {
     updated_at?: string;
 }
 
+export type PropertyValue = string | number | boolean | null | undefined | unknown[] | Record<string, unknown>;
+
 export interface MenuItem {
     id?: number | string | null;
     _temp_id?: string;
@@ -20,7 +22,7 @@ export interface MenuItem {
     title?: string;
     type?: string; // 'custom', 'post', 'page', 'category', 'system'
     target_id?: number | null;
-    url?: string;
+    url?: string | null;
     target?: string;
     order?: number;
     depth?: number;
@@ -47,7 +49,7 @@ export interface MenuItem {
 
     children?: MenuItem[];
     add_to_menu?: boolean; // UI only
-    [key: string]: string | number | boolean | null | undefined | MenuItem[] | Record<string, unknown>;
+    [key: string]: PropertyValue;
 }
 
 export interface MenuItemDTO {

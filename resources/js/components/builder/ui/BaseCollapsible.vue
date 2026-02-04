@@ -46,7 +46,7 @@ interface Props {
   iconPosition?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   modelValue: undefined,
   title: '',
   defaultOpen: false,
@@ -63,3 +63,4 @@ const handleUpdate = (val: string | string[] | undefined) => {
     emit('update:modelValue', val === 'item-1');
 };
 </script>
+```

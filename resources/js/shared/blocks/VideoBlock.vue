@@ -4,8 +4,6 @@
     :mode="mode" 
     :device="device"
     class="video-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Video Player'"
     :style="cardStyles"
   >
     <template #default="{ settings: blockSettings }">
@@ -37,10 +35,10 @@
         <video 
           v-else-if="videoType === 'selfHosted' && videoUrl"
           :src="videoUrl"
-          :poster="blockSettings.posterImage"
-          :autoplay="blockSettings.autoplay"
-          :loop="blockSettings.loop"
-          :muted="blockSettings.muted"
+          :poster="(blockSettings.posterImage as string)"
+          :autoplay="(blockSettings.autoplay as boolean)"
+          :loop="(blockSettings.loop as boolean)"
+          :muted="(blockSettings.muted as boolean)"
           :controls="blockSettings.controls !== false"
           class="video-element absolute inset-0 w-full h-full object-cover"
         />
@@ -59,13 +57,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import Play from 'lucide-vue-next/dist/esm/icons/play.js';import BaseBlock from '../components/BaseBlock.vue'
+import Play from 'lucide-vue-next/dist/esm/icons/play.js';
+import BaseBlock from '../components/BaseBlock.vue'
 import { 
     getVal,
-    getLayoutStyles,
-    getResponsiveValue 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance
@@ -76,10 +74,10 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 // Unified URL
-const videoUrl = computed(() => getVal(settings.value, 'url', props.device) || '')
+const videoUrl = computed(() => getVal<string>(settings.value, 'url', props.device) || '')
 
 // Detect Type
 const videoType = computed(() => {
@@ -100,11 +98,11 @@ const youtubeId = computed(() => {
 const youtubeEmbedUrl = computed(() => {
   if (!youtubeId.value) return ''
   const params = new URLSearchParams({
-    autoplay: settings.value.autoplay ? '1' : '0',
-    loop: settings.value.loop ? '1' : '0',
-    mute: settings.value.muted ? '1' : '0',
-    controls: settings.value.controls !== false ? '1' : '0',
-    playlist: settings.value.loop ? youtubeId.value : '' 
+    autoplay: (settings.value.autoplay as boolean) ? '1' : '0',
+    loop: (settings.value.loop as boolean) ? '1' : '0',
+    mute: (settings.value.muted as boolean) ? '1' : '0',
+    controls: (settings.value.controls as boolean) !== false ? '1' : '0',
+    playlist: (settings.value.loop as boolean) ? youtubeId.value : '' 
   })
   return `https://www.youtube.com/embed/${youtubeId.value}?${params.toString()}`
 })
@@ -119,9 +117,9 @@ const vimeoId = computed(() => {
 const vimeoEmbedUrl = computed(() => {
   if (!vimeoId.value) return ''
   const params = new URLSearchParams({
-    autoplay: settings.value.autoplay ? '1' : '0',
-    loop: settings.value.loop ? '1' : '0',
-    muted: settings.value.muted ? '1' : '0'
+    autoplay: (settings.value.autoplay as boolean) ? '1' : '0',
+    loop: (settings.value.loop as boolean) ? '1' : '0',
+    muted: (settings.value.muted as boolean) ? '1' : '0'
   })
   return `https://player.vimeo.com/video/${vimeoId.value}?${params.toString()}`
 })
@@ -135,14 +133,14 @@ const aspectRatioPadding = computed(() => {
     '9:16': '177.78%',
     '21:9': '42.86%'
   }
-  const ratio = getVal(settings.value, 'aspectRatio', props.device) || '16:9'
+  const ratio = getVal<string>(settings.value, 'aspectRatio', props.device) || '16:9'
   return ratioMap[ratio] || '56.25%'
 })
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -152,18 +150,15 @@ const cardStyles = computed(() => {
 
 const containerStyles = computed(() => {
     const layoutStyles = getLayoutStyles(settings.value, props.device)
-    const alignment = getVal(settings.value, 'alignment', props.device) || 'center'
+    const alignment = getVal<string>(settings.value, 'alignment', props.device) || 'center'
     
-    let marginX = 'auto'
-    if (alignment === 'left') marginX = '0'
-    if (alignment === 'right') marginX = 'auto 0'
-
-    return {
+    const styles: Record<string, string | number> = {
         ...layoutStyles,
         paddingTop: aspectRatioPadding.value,
         marginLeft: alignment === 'left' ? '0' : (alignment === 'right' ? 'auto' : 'auto'),
         marginRight: alignment === 'right' ? '0' : (alignment === 'left' ? 'auto' : 'auto')
     }
+    return styles
 })
 </script>
 

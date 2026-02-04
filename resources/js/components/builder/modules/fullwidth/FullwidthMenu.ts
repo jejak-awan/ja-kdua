@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -125,7 +125,7 @@ const FullwidthMenuModule: ModuleDefinition = {
             {
                 id: 'menuTypography',
                 label: 'Menu Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `menu_${f.name}`,
                     label: `Menu ${f.label}`

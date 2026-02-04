@@ -54,7 +54,7 @@ const resolveBlockSettings = (block: BlockInstance) => {
     const settings = { ...block.settings };
     
     // Process dynamic settings
-    const dynamicSettings = (block as any).dynamicSettings;
+    const dynamicSettings = block.dynamicSettings;
     if (dynamicSettings) {
         Object.entries(dynamicSettings).forEach(([key, sourceId]) => {
             if (sourceId) {

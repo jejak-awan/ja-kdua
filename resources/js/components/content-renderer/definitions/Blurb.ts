@@ -42,7 +42,7 @@ export default {
             key: 'iconName',
             type: 'icon',
             label: 'Icon',
-            condition: (s: any) => s.mediaType === 'icon',
+            condition: (s: Record<string, unknown>) => s.mediaType === 'icon',
             default: 'Zap',
             tab: 'content'
         },
@@ -50,7 +50,7 @@ export default {
             key: 'image',
             type: 'image',
             label: 'Image',
-            condition: (s: any) => s.mediaType === 'image',
+            condition: (s: Record<string, unknown>) => s.mediaType === 'image',
             tab: 'content'
         },
 

@@ -101,15 +101,12 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { inject, computed } from 'vue';
+import { inject } from 'vue';
 import Folder from 'lucide-vue-next/dist/esm/icons/folder.js';
-import ChevronsLeft from 'lucide-vue-next/dist/esm/icons/chevrons-left.js';
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';
-import ClipboardPaste from 'lucide-vue-next/dist/esm/icons/clipboard-paste.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import { 
-    Button,
     ContextMenu,
     ContextMenuTrigger
 } from '@/components/ui';
@@ -122,18 +119,15 @@ const {
     currentPath,
     sidebarCollapsed,
     folderTree,
-    clipboard,
     dropTarget,
-    toggleSidebar,
     navigateToPath,
-    pasteFromClipboard,
     moveItem,
     showTrashView,
     trashCount,
     isMounted
 } = inject(FileManagerKey)!;
 
-const clipboardCount = computed(() => clipboard.value.items.length);
+
 
 const onDragOver = (event: DragEvent, folder: FolderItem) => {
     event.preventDefault();

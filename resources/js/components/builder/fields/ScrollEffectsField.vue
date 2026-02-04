@@ -53,12 +53,17 @@ import Scaling from 'lucide-vue-next/dist/esm/icons/scaling.js';
 import RotateCw from 'lucide-vue-next/dist/esm/icons/rotate-cw.js';
 import Droplet from 'lucide-vue-next/dist/esm/icons/droplet.js';
 import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
-import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
-import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';import { BaseLabel, BaseToggle } from '../ui'
+import { BaseLabel, BaseToggle } from '../ui'
+import type { SettingDefinition } from '@/types/builder'
+
+interface ScrollEffectState {
+  enabled: boolean;
+  level: number;
+}
 
 const props = defineProps<{
-  field: any;
-  value: Record<string, any>;
+  field: SettingDefinition;
+  value: Record<string, ScrollEffectState>;
   module: BlockInstance;
 }>()
 
@@ -75,7 +80,7 @@ const tabs = [
   { id: 'blur', label: 'Blur', icon: Droplet }
 ]
 
-const localValue = reactive<Record<string, any>>({
+const localValue = reactive<Record<string, ScrollEffectState>>({
   vertical: { enabled: false, level: 0 },
   horizontal: { enabled: false, level: 0 },
   scaling: { enabled: false, level: 0 },

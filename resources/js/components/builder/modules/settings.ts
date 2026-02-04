@@ -30,7 +30,7 @@ export const animationSettings = {
             step: 100,
             default: 1000,
             showInput: true,
-            condition: (s: any) => !!s.animation_effect
+            condition: (s: Record<string, unknown>) => !!s.animation_effect
         },
         {
             name: 'animation_delay',
@@ -41,7 +41,7 @@ export const animationSettings = {
             step: 50,
             default: 0,
             showInput: true,
-            condition: (s: any) => !!s.animation_effect
+            condition: (s: Record<string, unknown>) => !!s.animation_effect
         },
         {
             name: 'animation_repeat',
@@ -52,7 +52,7 @@ export const animationSettings = {
                 { label: 'Infinite', value: 'infinite' }
             ],
             default: '1',
-            condition: (s: any) => !!s.animation_effect
+            condition: (s: Record<string, unknown>) => !!s.animation_effect
         }
     ]
 }

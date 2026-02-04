@@ -44,7 +44,7 @@ import { useConfirm } from './composables/useConfirm';
 import { SessionTimeoutModal, Toast, ConfirmModal, GlobalErrorModal } from '@/components/ui';
 import SystemOverlay from './components/shared/SystemOverlay.vue';
 import { SystemMonitor } from './services/SystemMonitor';
-import { setToastInstance } from './services/toast';
+import { setToastInstance, type ToastInstance } from './services/toast';
 
 const authStore = useAuthStore();
 const cmsStore = useCmsStore();
@@ -53,7 +53,7 @@ const { initializeLanguage } = useLanguage();
 const { confirmState } = useConfirm();
 
 // Toast reference
-const toastRef = ref<any>(null);
+const toastRef = ref<ToastInstance | null>(null);
 
 // Session timeout management
 const {
@@ -98,14 +98,15 @@ onMounted(async () => {
     authStore.initAuth();
     
     // Global listener for chunk loading errors (occurs after build/asset change)
-    const handleChunkError = (e: any) => {
+    const handleChunkError = (e: ErrorEvent | PromiseRejectionEvent | { message?: string }) => {
         // If session is already terminated, don't try to recover, just stop.
-        if ((window as any).__isSessionTerminated) {
+        if ((window as unknown as { __isSessionTerminated?: boolean }).__isSessionTerminated) {
             return;
         }
 
         // Mismatched hash or missing chunk usually means new deployment
-        if (e.message?.includes('Loading chunk') || e.message?.includes('CSS chunk') || e.message?.includes('HTML')) {
+        const msg = (e as ErrorEvent).message || (e as { message?: string }).message || '';
+        if (msg.includes('Loading chunk') || msg.includes('CSS chunk') || msg.includes('HTML')) {
             logger.warning('Chunk mismatch detected. Triggering System Lockdown.', e);
             SystemMonitor.triggerLockdown('chunk_error');
         }
@@ -144,7 +145,7 @@ onMounted(async () => {
         logger.warning('Public settings fetch failed:', err);
     });
     
-    if (authStore.isAuthenticated && !(window as any).__isSessionTerminated) {
+    if (authStore.isAuthenticated && !(window as unknown as { __isSessionTerminated?: boolean }).__isSessionTerminated) {
         authStore.fetchUser();
     }
 

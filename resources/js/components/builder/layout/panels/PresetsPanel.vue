@@ -78,14 +78,14 @@ import Trash from 'lucide-vue-next/dist/esm/icons/trash.js';
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
-import type { BuilderInstance } from '@/types/builder';
+import type { BuilderInstance, BuilderPreset } from '@/types/builder';
 
 const { t } = useI18n();
 const builder = inject<BuilderInstance>('builder');
 const icons = { Star, Check, Trash, ChevronDown, ChevronRight, Plus };
 
 // builder.presets is already a reactive Proxy, not a ref - don't use .value
-const presets = computed(() => (builder?.presets?.value as any[]) || []);
+const presets = computed(() => (builder?.presets?.value as BuilderPreset[]) || []);
 const loading = computed(() => builder?.loadingPresets?.value || false);
 
 // Accordion state - single open behavior
@@ -94,7 +94,7 @@ const isLoaded = ref(false);
 
 watch(presets, (newPresets) => {
     if (newPresets.length > 0 && !isLoaded.value) {
-        const types = Array.from(new Set(newPresets.map((p: any) => p.type))).sort();
+        const types = Array.from(new Set(newPresets.map((p: BuilderPreset) => p.type))).sort();
         if (types.length > 0) {
             activeType.value = types[0]; // Open the first category by default
         }
@@ -109,20 +109,20 @@ const toggleType = (type: string) => {
 const isExpanded = (type: string) => activeType.value === type;
 
 const groupedTypes = computed(() => {
-    const types = new Set(presets.value.map((p: any) => p.type));
+    const types = new Set(presets.value.map((p: BuilderPreset) => p.type));
     return Array.from(types).sort();
 });
 
 const getPresetsByType = (type: string) => {
-    return presets.value.filter((p: any) => p.type === type);
+    return presets.value.filter((p: BuilderPreset) => p.type === type);
 };
 
-const canApplyToSelection = (preset: any) => {
+const canApplyToSelection = (preset: BuilderPreset) => {
     if (!builder?.selectedModule?.value) return false;
     return builder.selectedModule.value.type === preset.type;
 };
 
-const handlePresetClick = (preset: any) => {
+const handlePresetClick = (preset: BuilderPreset) => {
     if (canApplyToSelection(preset) && builder?.selectedModule?.value) {
         // Apply styles to selected module
         builder.applyPreset(builder.selectedModule.value.id, preset);

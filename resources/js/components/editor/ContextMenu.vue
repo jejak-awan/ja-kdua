@@ -22,11 +22,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { computed, onMounted, onBeforeUnmount, type Component } from 'vue';
 
 interface ContextMenuItem {
     label?: string;
-    icon?: any;
+    icon?: Component | string;
     action?: string;
     type?: 'separator' | string;
 }

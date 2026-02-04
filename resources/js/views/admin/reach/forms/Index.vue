@@ -589,7 +589,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useConfirm } from '@/composables/useConfirm';
@@ -616,6 +616,12 @@ import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
 import ExternalLink from 'lucide-vue-next/dist/esm/icons/external-link.js';
 
 import type { Form } from '@/types/forms';
+import type { BlockInstance } from '@/types/builder';
+
+interface FormFilters {
+    trashed?: string;
+    [key: string]: string | number | undefined;
+}
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
@@ -660,7 +666,7 @@ const countFormFields = (form: Form): number => {
     const formBlockTypes = ['form_input', 'form_textarea', 'form_select', 'form_checkbox', 'form_radio'];
     let count = 0;
     
-    const countBlocks = (blocks: any[]) => {
+    const countBlocks = (blocks: BlockInstance[]) => {
         if (!blocks || !Array.isArray(blocks)) return;
         for (const block of blocks) {
             if (formBlockTypes.includes(block.type)) {
@@ -707,7 +713,7 @@ const fetchForms = async () => {
     try {
         loading.value = true;
         
-        const params: Record<string, any> = {};
+        const params: FormFilters = {};
         if (trashedFilter.value !== 'without') {
             params.trashed = trashedFilter.value;
         }
@@ -715,7 +721,7 @@ const fetchForms = async () => {
         const response = await api.get('/admin/ja/forms', { params });
         const { data } = parseResponse<Form>(response);
         forms.value = ensureArray<Form>(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Error fetching forms:', error);
         forms.value = [];
     } finally {
@@ -742,7 +748,7 @@ const toggleFormStatus = async (form: Form) => {
             forms.value[index] = updatedForm;
         }
         toast.success.action(t('common.messages.success.updated', { item: 'Form status' }));
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Error toggling form status:', error);
         toast.error.fromResponse(error);
     }
@@ -762,37 +768,13 @@ const deleteForm = async (form: Form) => {
         await api.delete(`/admin/ja/forms/${form.id}`);
         toast.success.delete('Form');
         fetchForms();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to delete form:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const bulkDelete = async () => {
-    if (selectedIds.value.length === 0) return;
 
-    const confirmed = await confirm({
-        title: t('features.forms.bulk.delete'),
-        message: t('features.forms.bulk.confirmDelete', { count: selectedIds.value.length }),
-        variant: 'danger',
-        confirmText: t('common.actions.delete'),
-    });
-
-    if (!confirmed) return;
-
-    try {
-        await api.post('/admin/ja/forms/bulk-action', { 
-            ids: selectedIds.value,
-            action: 'delete'
-        });
-        toast.success.delete('Forms');
-        selectedIds.value = [];
-        fetchForms();
-    } catch (error: any) {
-        logger.error('Failed to bulk delete forms:', error);
-        toast.error.fromResponse(error);
-    }
-};
 
 const openDuplicateDialog = (form: Form) => {
     duplicatingForm.value = form;
@@ -810,7 +792,7 @@ const handleDuplicate = async (withSubmissions: boolean) => {
         toast.success.duplicate('Form');
         showDuplicateDialog.value = false;
         fetchForms();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to duplicate form:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -832,7 +814,7 @@ const restoreForm = async (form: Form) => {
         await api.post(`/admin/ja/forms/${form.id}/restore`);
         toast.success.restore('Form');
         fetchForms();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to restore form:', error);
         toast.error.fromResponse(error);
     }
@@ -852,7 +834,7 @@ const forceDeleteForm = async (form: Form) => {
         await api.delete(`/admin/ja/forms/${form.id}/force-delete`);
         toast.success.action(t('common.messages.success.deleted', { item: 'Form' }));
         fetchForms();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to force delete form:', error);
         toast.error.fromResponse(error);
     }
@@ -873,7 +855,7 @@ const toggleSelection = (formId: number | string) => {
     }
 };
 
-const toggleSelectAll = (checked: any) => {
+const toggleSelectAll = (checked: boolean) => {
     if (checked) {
         selectedIds.value = filteredForms.value.map(f => f.id);
     } else {
@@ -883,7 +865,7 @@ const toggleSelectAll = (checked: any) => {
 
 const bulkActionSelection = ref('');
 
-const handleBulkAction = async (value: any) => {
+const handleBulkAction = async (value: string) => {
     if (!value) return;
     
     if (value === 'delete') {
@@ -915,7 +897,7 @@ const handleBulkAction = async (value: any) => {
     bulkActionSelection.value = '';
 };
 
-const performBulkAction = async (action: any) => {
+const performBulkAction = async (action: string) => {
     try {
         await api.post('/admin/ja/forms/bulk-action', { 
             ids: selectedIds.value,
@@ -924,15 +906,15 @@ const performBulkAction = async (action: any) => {
         toast.success.action(t('common.messages.success.updated', { item: 'Forms' }));
         selectedIds.value = [];
         fetchForms();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to bulk action forms:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const calculateConversion = (form: any) => {
+const calculateConversion = (form: Form) => {
     if (!form.view_count || form.view_count === 0) return 0
-    return Math.round((form.submission_count / form.view_count) * 100)
+    return Math.round(((form.submission_count || 0) / form.view_count) * 100)
 }
 
 onMounted(() => {

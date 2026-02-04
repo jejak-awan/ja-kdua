@@ -42,12 +42,12 @@ import { useI18n } from 'vue-i18n'
 import { BackgroundPatterns } from '@/shared/utils/AssetLibrary'
 import type { SettingDefinition } from '@/types/builder'
 
-const props = defineProps<{
+defineProps<{
   field?: SettingDefinition;
   value?: string;
 }>()
 
-const emit = defineEmits(['update:value'])
+defineEmits(['update:value'])
 const { t } = useI18n()
 </script>
 

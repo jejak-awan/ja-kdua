@@ -132,7 +132,6 @@
 import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue';
 import api from '@/services/api';
-import { useToast } from '@/composables/useToast';
 import {
     Button,
     Card,
@@ -144,9 +143,37 @@ import {
 import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 
-const toast = useToast();
-const queries = ref<any[]>([]);
-const stats = ref<any>({});
+interface User {
+  id: number;
+  name: string;
+}
+
+interface SlowQuery {
+  id: number;
+  route: string;
+  duration: number;
+  user: User | null;
+  query: string;
+  created_at: string;
+}
+
+interface QueryStats {
+  total?: number;
+  avg_duration?: number;
+  max_duration?: number;
+  today?: number;
+}
+
+interface PaginationInfo {
+  total: number;
+  from: number;
+  to: number;
+  current_page: number;
+  last_page: number;
+}
+
+const queries = ref<SlowQuery[]>([]);
+const stats = ref<QueryStats>({});
 const loading = ref(false);
 const threshold = ref(1000);
 
@@ -159,7 +186,7 @@ const filters = ref({
   per_page: 50,
 });
 
-const pagination = ref({ total: 0, from: 0, to: 0, current_page: 1, last_page: 1 });
+const pagination = ref<PaginationInfo>({ total: 0, from: 0, to: 0, current_page: 1, last_page: 1 });
 
 async function fetchQueries() {
   loading.value = true;
@@ -173,7 +200,7 @@ async function fetchQueries() {
       current_page: response.data.data.current_page || 1,
       last_page: response.data.data.last_page || 1,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to fetch slow queries:', error);
   } finally {
     loading.value = false;
@@ -184,7 +211,7 @@ async function fetchStats() {
   try {
     const response = await api.get('/admin/ja/security/slow-queries/statistics');
     stats.value = response.data.data || {};
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to fetch stats:', error);
   }
 }
@@ -204,7 +231,7 @@ function changePage(page: number) {
   fetchQueries();
 }
 
-function getDurationVariant(duration: number) {
+function getDurationVariant(duration: number): "default" | "destructive" | "secondary" | "success" | "outline" | null | undefined {
   if (duration >= 5000) return 'destructive';
   if (duration >= 2000) return 'secondary'; // Fallback for warning
   return 'secondary';

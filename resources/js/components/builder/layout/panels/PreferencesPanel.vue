@@ -77,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject, computed } from 'vue';
+import { inject, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { BaseToggle, BaseDropdown } from '@/components/builder/ui';
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';

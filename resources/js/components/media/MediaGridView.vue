@@ -228,7 +228,6 @@ import Link from 'lucide-vue-next/dist/esm/icons/link.js';
 import FolderPlus from 'lucide-vue-next/dist/esm/icons/folder-plus.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import { 
-    Badge, 
     Button, 
     Checkbox, 
     LazyImage,
@@ -270,7 +269,8 @@ const {
     emptyTrash
 } = inject(MediaManagerKey)!;
 
-const emit = defineEmits(['select-folder']); // Keep select-folder if it's used by parent? No, it's used in template.
+// defineEmits is unused as we use injected functions directly
+// const emit = defineEmits(['select-folder']);
 // Actually, I should remove all emits and use the injected functions directly in template.
 // But wait, the template uses $emit. I need to update the template too.
 

@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -134,7 +134,7 @@ const IconListModule: ModuleDefinition = {
             {
                 id: 'textTypography',
                 label: 'Text Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `text_${f.name}`,
                     label: `Text ${f.label}`

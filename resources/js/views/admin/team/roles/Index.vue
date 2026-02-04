@@ -379,7 +379,6 @@
 import { logger } from '@/utils/logger';
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
@@ -426,7 +425,6 @@ import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
 
 import type { Role, Permission } from '@/types/auth';
 
-const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const toast = useToast();
@@ -443,7 +441,7 @@ const search = ref('');
 const activeRoleId = ref<number | null>(null);
 const selectedRoleIds = ref<number[]>([]);
 const expandedCategories = ref<string[]>([]);
-const initialData = ref<any>(null);
+const initialData = ref<{ name: string; permissions: string[]; matrixPermissions: Record<number, string[]> } | null>(null);
 
 // Form State
 const form = ref<{
@@ -500,14 +498,14 @@ const isDirty = computed(() => {
 const fetchRoles = async () => {
     loading.value = true;
     try {
-        const response: any = await api.get('/admin/ja/roles?limit=100');
+        const response = await api.get('/admin/ja/roles?limit=100');
         // Handle Laravel paginated response structure: 
         // response.data (axios) -> .data (Common Response) -> .data (Paginator collection)
         const rawRoles = response.data?.data?.data || response.data?.data || response.data || [];
         roles.value = Array.isArray(rawRoles) ? rawRoles.filter(Boolean) : [];
         if (workspaceMode.value === 'comparison') syncMatrixFromRoles();
-    } catch (error: any) {
-        toast.error.load(error);
+    } catch (error: unknown) {
+        toast.error.load(error as Record<string, unknown>);
     } finally {
         loading.value = false;
     }
@@ -515,7 +513,7 @@ const fetchRoles = async () => {
 
 const fetchPermissions = async () => {
     try {
-        const response: any = await api.get('/admin/ja/roles/permissions');
+        const response = await api.get('/admin/ja/roles/permissions');
         const rawPerms = response.data?.data || response.data || {};
         
         // Sanitize permissions
@@ -528,7 +526,7 @@ const fetchPermissions = async () => {
         
         permissions.value = sanitized;
         expandedCategories.value = Object.keys(sanitized).slice(0, 2);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch permissions:', error);
     }
 };
@@ -620,7 +618,7 @@ const syncMatrixFromRoles = () => {
 };
 
 const getRole = (id: number | string) => roles.value.find(r => r && String(r.id) === String(id));
-const roleIdToNum = (id: any) => Number(id);
+const roleIdToNum = (id: string | number) => Number(id);
 
 // Permission Handlers
 const togglePermission = (name: string) => {
@@ -703,9 +701,10 @@ const saveChanges = async () => {
             toast.success.update('Roles synced successfully');
         }
         await fetchRoles();
-    } catch (error: any) {
-        if (error.response?.status === 422) setErrors(error.response.data.errors || {});
-        else toast.error.action(error);
+    } catch (error: unknown) {
+        const err = error as { response?: { status?: number; data?: { errors?: Record<string, string[]> } } };
+        if (err.response?.status === 422) setErrors(err.response.data?.errors || {});
+        else toast.error.action(error as Record<string, unknown>);
     } finally {
         saving.value = false;
     }
@@ -734,8 +733,8 @@ const deleteRole = async (role: Role) => {
         if (activeRoleId.value === role.id) router.push({ name: 'roles' });
         selectedRoleIds.value = selectedRoleIds.value.filter(id => id !== role.id);
         fetchRoles();
-    } catch (error: any) {
-        toast.error.delete(error, 'Role');
+    } catch (error: unknown) {
+        toast.error.delete(error as Record<string, unknown>, 'Role');
     }
 };
 

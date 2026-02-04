@@ -1,8 +1,7 @@
 <template>
     <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-background via-muted/20 to-background px-4 py-2 sm:px-6 lg:px-8">
         <div class="w-full max-w-5xl flex flex-col md:flex-row bg-card rounded-3xl shadow-2xl shadow-primary/5 overflow-hidden border border-border/40 min-h-0 animate-fade-up">
-            
-            <!-- Left Column: Decorative Graphic -->
+<!-- Left Column: Decorative Graphic -->
             <div class="hidden md:flex md:w-1/2 relative overflow-hidden items-center justify-center p-6">
                 <!-- Premium Background Image -->
                 <div class="absolute inset-0 z-0">
@@ -169,7 +168,7 @@
                     <div class="grid grid-cols-2 gap-2">
                         <Button variant="outline" type="button" class="h-9 rounded-lg hover:bg-muted/50 transition-colors border-border/40">
                             <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.9 3.28-2.12 4.41-1.37 1.34-3.26 2.4-6.4 2.4-5.34 0-9.6-4.32-9.6-9.6s4.26-9.6 9.6-9.6c3.15 0 5.48 1.25 7.18 2.87l2.29-2.29C18.9 1.5 15.86 0 12.48 0 5.58 0 0 5.58 0 12.48s5.58 12.48 12.48 12.48c3.7 0 6.64-1.21 8.87-3.56 2.3-2.3 3-5.5 3-8.1 0-.6-.05-1.12-.15-1.57z"/>
+                                <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.9 3.28-2.12 4.41-1.37 1.34-3.26 2.4-6.4 2.4-5.34 0-9.6-4.32-9.6-9.6s4.26-9.6 9.6-9.6c3.15 0 5.48 1.25 7.18 2.87l2.29-2.29C18.9 1.5 15.86 0 12.48 0 5.58 0 0 5.58 0 12.48s5.58 12.48 12.48 12.48c3.7 0 6.64-1.21 8.87-3.56 2.3-2.3 3-5.5 3-8.1 0-.6-.05-1.12-.15-1.57z" />
                             </svg>
                         </Button>
                         <Button variant="outline" type="button" class="h-9 rounded-lg hover:bg-muted/50 transition-colors border-border/40">
@@ -185,8 +184,7 @@
                     </div>
                 </form>
             </div>
-
-        </div>
+</div>
     </div>
 </template>
 
@@ -201,24 +199,24 @@ import { useFormValidation } from '../../composables/useFormValidation';
 import { registerSchema } from '../../schemas/auth';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import LayoutTemplate from 'lucide-vue-next/dist/esm/icons/layout-template.js';
-import Apple from 'lucide-vue-next/dist/esm/icons/apple.js';
 import Github from 'lucide-vue-next/dist/esm/icons/github.js';
 import api from '../../services/api';
 import authBg from '../../../images/auth-bg.png';
 
 // Shadcn Components
 import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardContent,
     Button,
     Input,
     Label,
     Checkbox
 } from '../../components/ui';
-import CaptchaWrapper from '../../components/captcha/CaptchaWrapper.vue';
+import CaptchaWrapper, { type CaptchaPayload } from '../../components/captcha/CaptchaWrapper.vue';
+import type { RegisterData } from '../../types/auth';
+
+interface CaptchaWrapperInstance {
+    enabled: boolean;
+    method: string;
+}
 
 const router = useRouter();
 const { t } = useI18n();
@@ -226,7 +224,7 @@ const authStore = useAuthStore();
 const cmsStore = useCmsStore();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(registerSchema);
 
-const captchaRef = ref<any>(null);
+const captchaRef = ref<CaptchaWrapperInstance | null>(null);
 const captchaVerified = ref(false);
 const captchaToken = ref('');
 const captchaAnswer = ref('');
@@ -240,10 +238,7 @@ const form = reactive({
     terms: false,
 });
 
-interface CaptchaPayload {
-    token: string;
-    answer: string;
-}
+// CaptchaPayload imported from CaptchaWrapper.vue
 
 const onCaptchaVerified = (payload: CaptchaPayload) => {
     captchaToken.value = payload.token;
@@ -299,7 +294,12 @@ const handleRegister = async () => {
     clearErrors();
     message.value = '';
 
-    const payload: any = { ...form };
+    const payload: RegisterData & { captcha_token?: string; captcha_answer?: string } = { 
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        password_confirmation: form.password_confirmation,
+    };
     
     if (captchaEnabled.value) {
         payload.captcha_token = captchaToken.value;

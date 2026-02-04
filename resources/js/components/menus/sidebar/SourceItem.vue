@@ -32,7 +32,7 @@ import Tag from 'lucide-vue-next/dist/esm/icons/tag.js';
 import LinkIcon from 'lucide-vue-next/dist/esm/icons/link.js';
 
 const props = defineProps<{
-    item: Record<string, any>;
+    item: Record<string, unknown>;
     type?: string;
 }>();
 

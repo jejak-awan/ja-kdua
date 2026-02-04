@@ -22,9 +22,9 @@ export function useSessionTimeout() {
     const lastActivityTime = ref(Date.now());
 
     // Timers
-    let warningTimer: any = null;
-    let countdownTimer: any = null;
-    let activityCheckTimer: any = null;
+    let warningTimer: ReturnType<typeof setTimeout> | null = null;
+    let countdownTimer: ReturnType<typeof setInterval> | null = null;
+    let activityCheckTimer: ReturnType<typeof setInterval> | null = null;
 
     // Computed
     const sessionExpiryTime = computed(() => {
@@ -101,7 +101,7 @@ export function useSessionTimeout() {
 
     // Heartbeat logic
     const HEARTBEAT_INTERVAL = 30 * 1000; // Check every 30 seconds for faster detection
-    let heartbeatTimer: any = null;
+    let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
 
     const startHeartbeat = () => {
         clearHeartbeat();
@@ -116,8 +116,9 @@ export function useSessionTimeout() {
 
             try {
                 // Lightweight check to validate session
-                await api.get('/user', { _skipManualRedirect: true } as any);
-            } catch (error: any) {
+                await api.get('/user', { _skipManualRedirect: true } as Record<string, unknown>);
+            } catch (error: unknown) {
+                const err = error as { response?: { status?: number } };
                 // Double check flag to prevent race conditions with api.js interceptor
                 if (window.__isSessionTerminated) {
                     stopAllTimers();
@@ -125,7 +126,7 @@ export function useSessionTimeout() {
                 }
 
                 // If it's a session error (401, 403, or 419)
-                const status = error.response?.status;
+                const status = err.response?.status;
                 if (status === 401 || status === 403 || status === 419) {
                     // Stop everything instantly via Vapor Lock
                     triggerVaporLock();

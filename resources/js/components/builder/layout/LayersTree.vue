@@ -103,7 +103,7 @@ const props = withDefaults(defineProps<Props>(), {
   collapseSignal: 0
 });
 
-const emit = defineEmits<{
+defineEmits<{
   (e: 'select', id: string): void;
 }>();
 

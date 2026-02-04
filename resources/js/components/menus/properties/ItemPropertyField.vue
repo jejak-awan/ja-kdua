@@ -129,7 +129,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
-import type { MenuItemSetting } from '@/types/menu';
+import type { MenuItemSetting, PropertyValue } from '@/types/menu';
 
 // UI Components
 import {
@@ -149,8 +149,6 @@ import {
 import MediaPicker from '@/components/media/MediaPicker.vue';
 
 const { t } = useI18n();
-
-type PropertyValue = string | number | boolean | null | undefined | any[] | Record<string, any>;
 
 const emit = defineEmits<{
     (e: 'update', value: PropertyValue): void;

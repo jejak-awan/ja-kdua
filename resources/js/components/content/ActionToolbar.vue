@@ -94,7 +94,7 @@ const props = withDefaults(defineProps<{
     isEdit: false
 });
 
-const emit = defineEmits<{
+defineEmits<{
     (e: 'toggle-sidebar'): void;
     (e: 'save'): void;
     (e: 'cancel'): void;

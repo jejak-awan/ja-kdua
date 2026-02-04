@@ -59,7 +59,7 @@ export function usePresets() {
                 presets.value.push(newPreset)
                 return newPreset
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             toast.error.fromResponse(err)
             throw err
         }
@@ -77,7 +77,7 @@ export function usePresets() {
                 presets.value = presets.value.filter(p => p.id !== presetId)
                 return true
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             toast.error.fromResponse(err)
             return false
         }

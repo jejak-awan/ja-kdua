@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import type { SettingDefinition } from '@/types/builder'
+import type { SettingDefinition, BlockInstance } from '@/types/builder'
 import { useI18n } from 'vue-i18n'
 import AlignLeft from 'lucide-vue-next/dist/esm/icons/align-start-horizontal.js';
 import AlignCenter from 'lucide-vue-next/dist/esm/icons/align-center-horizontal.js';
@@ -67,7 +67,7 @@ defineEmits<{
 }>()
 
 const { t, te } = useI18n()
-const module = inject<any>('module', {})
+const module = inject<BlockInstance>('module', {} as BlockInstance)
 
 const getOptionLabel = (option: FieldOption) => {
   const type = module?.type || 'common'
@@ -88,7 +88,7 @@ const getOptionLabel = (option: FieldOption) => {
 }
 
 const mappedOptions = computed(() => {
-  return ((props.field.options as any) || []).map((opt: FieldOption) => ({
+  return ((props.field.options as FieldOption[]) || []).map((opt: FieldOption) => ({
     ...opt,
     label: getOptionLabel(opt),
     icon: opt.icon ? iconMap[opt.icon] || iconMap.Grid : undefined,

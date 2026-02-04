@@ -260,7 +260,6 @@
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
-import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 
@@ -303,7 +302,7 @@ import MenuSquare from 'lucide-vue-next/dist/esm/icons/square-menu.js';
 
 interface Props {
     menuId: string | number;
-    menus: Menu[];
+    menus?: Menu[];
     trashedFilter?: string;
     isTrashed?: boolean;
     trashedCount?: number;
@@ -366,7 +365,7 @@ const locations = ref<LocationOption[]>([]);
 const propertiesWidth = ref(400); // Default width
 const isResizing = ref(false);
 
-const startResizing = (e: MouseEvent) => {
+const startResizing = (_e: MouseEvent) => {
     isResizing.value = true;
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';

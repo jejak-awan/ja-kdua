@@ -256,7 +256,7 @@ const fetchHealth = async () => {
             health.value = data as SystemHealth;
             lastUpdated.value = new Date();
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         if (error && typeof error === 'object' && 'code' in error && 'response' in error) {
             const err = error as { code: string; response?: { status: number } };
             if (err.code !== 'ERR_CANCELED' && err.response?.status !== 401) {
@@ -283,7 +283,12 @@ const formatTime = (date: Date) => {
 
 onMounted(() => {
     fetchHealth();
-    refreshInterval.value = setInterval(fetchHealth, 120000);
+    // Refresh every 3 minutes, but only if the tab is visible
+    refreshInterval.value = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+            fetchHealth();
+        }
+    }, 180000);
 });
 
 onUnmounted(() => {

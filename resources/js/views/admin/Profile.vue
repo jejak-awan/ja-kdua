@@ -58,7 +58,7 @@
                              <div>
                                 <MediaPicker
                                     :label="$t('features.users.form.selectAvatar')"
-                                    @selected="(media: any) => profileForm.avatar = media.url"
+                                    @selected="(media: { url: string }) => profileForm.avatar = media.url"
                                 />
                                 <p class="mt-2 text-xs text-muted-foreground">
                                     JPG, GIF or PNG. 1MB max.
@@ -271,16 +271,16 @@ const isPasswordValid = computed(() => {
 const fetchProfile = async () => {
     try {
         const response = await api.get('/profile');
-        if (response.data?.success || response.data?.data) {
-            const user = response.data.data || response.data;
+        const data = response.data?.data || response.data;
+        if (data) {
             profileForm.value = {
-                name: user.name || '',
-                email: user.email || '',
-                phone: user.phone || '',
-                bio: user.bio || '',
-                location: user.location || '',
-                website: user.website || '',
-                avatar: user.avatar || null,
+                name: data.name || '',
+                email: data.email || '',
+                phone: data.phone || '',
+                bio: data.bio || '',
+                location: data.location || '',
+                website: data.website || '',
+                avatar: data.avatar || null,
             };
             initialProfileForm.value = JSON.parse(JSON.stringify(profileForm.value));
         }

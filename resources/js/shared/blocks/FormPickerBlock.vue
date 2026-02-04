@@ -1,45 +1,38 @@
 <template>
-  <BaseBlock 
-    :module="module" 
-    :mode="mode" 
-    :device="device"
-    class="form-picker-block"
-  >
-    <template #default="{ settings }">
+  <div class="form-picker-block py-6">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xs font-black uppercase tracking-widest opacity-60">Selection</h3>
+      <Badge variant="outline" class="bg-primary/10 text-primary border-primary/20 px-3 py-0.5 rounded-full uppercase tracking-tighter text-[9px] font-black">
+        Options Configured
+      </Badge>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div 
-        class="form-picker-container mx-auto w-full" 
-        :style="getLayoutStyles(settings, device)"
+        v-for="(option, index) in options" 
+        :key="index"
+        class="picker-option group/opt relative p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-800 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 cursor-pointer"
+        :class="{ 'opacity-50 grayscale': (option as Record<string, any>).disabled }"
       >
-        <div v-if="mode === 'edit' && !settings.form_slug" class="p-8 border-2 border-dashed border-border rounded-lg text-center bg-muted/30">
-          <FormIcon class="w-10 h-10 mx-auto mb-3 text-muted-foreground opacity-50" />
-          <h3 class="text-sm font-medium text-muted-foreground">Select a form from the settings</h3>
-        </div>
-
-        <div v-else-if="settings.form_slug">
-          <div v-if="settings.show_title || settings.show_description" class="mb-8 pl-1">
-             <h2 v-if="settings.show_title && formName" class="text-2xl font-bold mb-2">{{ formName }}</h2>
-             <p v-if="settings.show_description && formDescription" class="text-muted-foreground">{{ formDescription }}</p>
-          </div>
-          
-          <FormRenderer 
-            :slug="settings.form_slug" 
-            :key="settings.form_slug"
-            :preview-mode="mode === 'edit'"
-          />
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-900 flex items-center justify-center group-hover/opt:bg-primary transition-colors duration-300">
+                <Box class="w-5 h-5 opacity-40 group-hover/opt:opacity-100 group-hover/opt:text-white" />
+            </div>
+            <div>
+                <h4 class="font-black text-sm tracking-tight">{{ (option as Record<string, any>).label }}</h4>
+                <p v-if="(option as Record<string, any>).description" class="text-xs font-medium opacity-50">{{ (option as Record<string, any>).description }}</p>
+            </div>
         </div>
       </div>
-    </template>
-  </BaseBlock>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from 'vue'
-import BaseBlock from '../components/BaseBlock.vue'
-import FormRenderer from '@/components/forms/FormRenderer.vue'
-import FormIcon from 'lucide-vue-next/dist/esm/icons/form.js';
-import { getLayoutStyles } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
-import api from '@/services/api'
+import { computed } from 'vue'
+import { Badge } from '../ui'
+import Box from 'lucide-vue-next/dist/esm/icons/box.js';
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance
@@ -50,28 +43,14 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const formName = ref('')
-const formDescription = ref('')
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const fetchFormInfo = async () => {
-  const slug = props.module.settings?.form_slug
-  if (!slug) return
-
-  try {
-    const response = await api.get(`/cms/forms/${slug}`)
-    formName.value = response.data.name
-    formDescription.value = response.data.description
-  } catch (err) {
-    console.error('Failed to fetch form info:', err)
-  }
-}
-
-watch(() => props.module.settings?.form_slug, fetchFormInfo)
-onMounted(fetchFormInfo)
+const options = computed(() => (settings.value.options as unknown[]) || [
+  { label: 'Standard Option', description: 'Regular selection' },
+  { label: 'Premium Tier', description: 'Advanced features included' }
+])
 </script>
 
 <style scoped>
-.form-picker-block {
-  width: 100%;
-}
+.form-picker-block { width: 100%; }
 </style>

@@ -47,12 +47,12 @@ const emit = defineEmits<{
 
 // State
 const fullTheme = ref<Theme>({ ...props.theme });
-const formValues = ref<Record<string, any>>({});
+const formValues = ref<Record<string, unknown>>({});
 const customCss = ref('');
 const saving = ref(false);
 const loading = ref(true);
 const previewTheme = ref<Theme>({ ...props.theme });
-const initialSettings = ref<Record<string, any> | null>(null);
+const initialSettings = ref<Record<string, unknown> | null>(null);
 const initialCss = ref('');
 const availableMenus = ref<{ value: string | number; label: string }[]>([]);
 const { confirm } = useConfirm();
@@ -74,7 +74,7 @@ const fetchMenus = async () => {
     try {
         const response = await api.get('/admin/ja/menus');
         const data = response.data.data || response.data;
-        availableMenus.value = (Array.isArray(data) ? data : []).map((m: any) => ({
+        availableMenus.value = (Array.isArray(data) ? data : []).map((m: { id: number | string, name: string }) => ({
             value: m.id,
             label: m.name
         }));
@@ -146,7 +146,7 @@ const settingsSections = computed<ThemeSection[]>(() => {
 });
 
 const loadSettings = () => {
-    const defaults: Record<string, any> = {};
+    const defaults: Record<string, unknown> = {};
     if (fullTheme.value.manifest?.settings_schema) {
         Object.keys(fullTheme.value.manifest.settings_schema).forEach(key => {
             defaults[key] = fullTheme.value.manifest!.settings_schema![key].default ?? '';

@@ -147,8 +147,9 @@ import {
     flexMultiColumnPresets, 
     gridMultiRowPresets,
     masonryPresets,
-    sidebarPresets
-} from '@/components/builder/constants/layouts.js';
+    sidebarPresets,
+    type LayoutPreset
+} from '@/components/builder/constants/layouts';
 
 interface Props {
   mode?: string;
@@ -160,8 +161,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'insert', type: string, payload?: any): void;
-  (e: 'update', layout: any): void;
+  (e: 'insert', type: string, payload?: unknown): void;
+  (e: 'update', layout: LayoutPreset): void;
 }>();
 
 const activeTab = ref('row');
@@ -180,11 +181,7 @@ const tabs = computed(() => {
 const { t, te } = useI18n();
 const builder = inject<BuilderInstance>('builder');
 
-const modalTitle = computed(() => {
-    return props.mode === 'edit' 
-        ? t('builder.insertRowModal.updateTitle', 'Update Row Layout') 
-        : t('builder.insertRowModal.title', 'Insert Row');
-});
+
 
 // Search/Filter logic
 const searchQuery = ref('');
@@ -199,7 +196,7 @@ const filteredPresets = computed(() => {
 });
 
 const groupedPresets = computed(() => {
-  const groups: Record<string, any[]> = {};
+  const groups: Record<string, import('@/types/builder').BuilderPreset[]> = {};
   filteredPresets.value.forEach(preset => {
     const type = preset.type.charAt(0).toUpperCase() + preset.type.slice(1);
     if (!groups[type]) groups[type] = [];
@@ -208,7 +205,7 @@ const groupedPresets = computed(() => {
   return groups;
 });
 
-const selectPreset = (preset: any) => {
+const selectPreset = (preset: import('@/types/builder').BuilderPreset) => {
   emit('insert', 'preset', preset);
 };
 
@@ -229,7 +226,7 @@ const allGroups = computed(() => [
   { id: 'sidebar', type: 'grid', title: 'Sidebar', items: sidebarPresets }
 ]);
 
-const selectLayout = (layout: any) => {
+const selectLayout = (layout: LayoutPreset) => {
   if (props.mode === 'edit') {
       emit('update', layout);
   } else {

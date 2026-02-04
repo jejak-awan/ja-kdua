@@ -95,7 +95,7 @@
 
                                 <select
                                     v-if="setting.key === 'cache_driver'"
-                                    :value="formData[setting.key]"
+                                    :value="(formData[setting.key] as any)"
                                     @change="(e) => updateField(setting.key, (e.target as HTMLSelectElement).value)"
                                     class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
                                     :class="{ 'border-destructive': errors?.[setting.key] }"
@@ -110,7 +110,7 @@
                                     <label class="flex items-center cursor-pointer">
                                         <div class="relative">
                                             <input 
-                                                :checked="formData[setting.key]" 
+                                                :checked="Boolean(formData[setting.key])" 
                                                 @change="(e) => updateField(setting.key, (e.target as HTMLInputElement).checked)"
                                                 type="checkbox" 
                                                 class="sr-only peer"
@@ -125,7 +125,7 @@
 
                                 <input
                                     v-else-if="setting.key === 'cache_ttl'"
-                                    :value="formData[setting.key]"
+                                    :value="(formData[setting.key] as any)"
                                     @input="(e) => updateField(setting.key, parseInt((e.target as HTMLInputElement).value))"
                                     type="number"
                                     class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
@@ -246,7 +246,7 @@
                             {{ $t('features.settings.descriptions.' + (cdnUrlSetting?.key || '')) }}
                         </p>
                         <input
-                            :value="formData[cdnUrlSetting?.key || '']"
+                            :value="(formData[cdnUrlSetting?.key || ''] as any)"
                             @input="(e) => updateField(cdnUrlSetting?.key || '', (e.target as HTMLInputElement).value)"
                             type="text"
                             :disabled="!formData.enable_cdn"
@@ -269,7 +269,7 @@
                             Comma-separated list of directories to serve via CDN
                         </p>
                         <input
-                            :value="formData[cdnIncludedDirsSetting?.key || '']"
+                            :value="(formData[cdnIncludedDirsSetting?.key || ''] as any)"
                             @input="(e) => updateField(cdnIncludedDirsSetting?.key || '', (e.target as HTMLInputElement).value)"
                             type="text"
                             :disabled="!formData.enable_cdn"
@@ -288,7 +288,7 @@
                             File extensions to exclude from CDN
                         </p>
                         <input
-                            :value="formData[cdnExcludedExtsSetting?.key || '']"
+                            :value="(formData[cdnExcludedExtsSetting?.key || ''] as any)"
                             @input="(e) => updateField(cdnExcludedExtsSetting?.key || '', (e.target as HTMLInputElement).value)"
                             type="text"
                             :disabled="!formData.enable_cdn"
@@ -344,7 +344,7 @@
 
                             <input
                                 v-if="setting.type === 'string'"
-                                :value="formData[setting.key]"
+                                :value="(formData[setting.key] as any)"
                                 @input="(e) => updateField(setting.key, (e.target as HTMLInputElement).value)"
                                 type="text"
                                  class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
@@ -352,7 +352,7 @@
                             >
                             <input
                                 v-else-if="setting.type === 'integer'"
-                                :value="formData[setting.key]"
+                                :value="(formData[setting.key] as any)"
                                 @input="(e) => updateField(setting.key, parseInt((e.target as HTMLInputElement).value))"
                                 type="number"
                                 class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
@@ -362,7 +362,7 @@
                                 <label class="flex items-center cursor-pointer">
                                     <div class="relative">
                                         <input 
-                                            :checked="formData[setting.key]" 
+                                            :checked="Boolean(formData[setting.key])" 
                                             @change="(e) => updateField(setting.key, (e.target as HTMLInputElement).checked)"
                                             type="checkbox" 
                                             class="sr-only peer"
@@ -390,7 +390,7 @@ import type { CacheStatus } from '@/types/settings'
 interface Setting {
     id: number | string;
     key: string;
-    value: any;
+    value: unknown;
     type: string;
     group: string;
     description?: string;
@@ -405,7 +405,7 @@ interface SectionState {
 
 interface Props {
     settings: Setting[];
-    formData: Record<string, any>;
+    formData: Record<string, unknown>;
     cacheStatus?: CacheStatus | null;
     clearingCache?: boolean;
     warmingCache?: boolean;
@@ -420,12 +420,12 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-    (e: 'update:formData', value: Record<string, any>): void;
+    (e: 'update:formData', value: Record<string, unknown>): void;
     (e: 'clear-cache'): void;
     (e: 'warm-cache'): void;
 }>()
 
-const updateField = (key: string, value: any) => {
+const updateField = (key: string, value: unknown) => {
     emit('update:formData', { ...props.formData, [key]: value })
 }
 

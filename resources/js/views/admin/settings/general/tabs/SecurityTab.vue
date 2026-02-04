@@ -6,13 +6,13 @@
             :title="group.title"
             :description="group.description"
             :icon="group.icon"
-            :color="group.color as any"
+            :color="group.color"
             :default-expanded="group.defaultExpanded"
         >
             <SettingField
                 v-for="setting in group.settings"
                 :key="setting.id"
-                :model-value="formData[setting.key]"
+                :model-value="(formData[setting.key] as any)"
                 @update:model-value="(value) => updateField(setting.key, value)"
                 :field-key="setting.key"
                 :label="$t('features.settings.labels.' + setting.key)"
@@ -32,21 +32,24 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SettingGroup from '@/components/settings/SettingGroup.vue'
 import SettingField from '@/components/settings/SettingField.vue'
+import type { Component } from 'vue'
 
 interface Setting {
     id: number | string;
     key: string;
-    value: any;
+    value: unknown;
     type: string;
     group: string;
 }
+
+type SettingGroupColor = 'primary' | 'blue' | 'emerald' | 'amber' | 'red' | 'purple' | 'indigo' | 'orange' | 'pink'
 
 interface SettingGroupData {
     id: string;
     title: string;
     description: string;
-    icon: any;
-    color: string;
+    icon: Component;
+    color: SettingGroupColor;
     keys: string[];
     settings: Setting[];
     defaultExpanded: boolean;
@@ -54,7 +57,7 @@ interface SettingGroupData {
 
 interface Props {
     settings: Setting[];
-    formData: Record<string, any>;
+    formData: Record<string, unknown>;
     errors?: Record<string, string[]>;
 }
 
@@ -63,10 +66,10 @@ const { t } = useI18n()
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
-    (e: 'update:formData', value: Record<string, any>): void;
+    (e: 'update:formData', value: Record<string, unknown>): void;
 }>()
 
-const updateField = (key: string, value: any) => {
+const updateField = (key: string, value: unknown) => {
     emit('update:formData', { ...props.formData, [key]: value })
 }
 

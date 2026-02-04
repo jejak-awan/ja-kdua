@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -88,7 +88,7 @@ const FeaturedImageModule: ModuleDefinition = {
             {
                 id: 'captionTypography',
                 label: 'Caption Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `caption_${f.name}`,
                     label: `Caption ${f.label}`

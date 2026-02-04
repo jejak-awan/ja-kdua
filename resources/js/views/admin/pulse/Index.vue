@@ -213,10 +213,9 @@ const fetchStats = async () => {
             total: (logData.total_logins || 0) + (logData.failed_logins || 0)
         };
 
-        // Fetch system logs
-        const systemLogs = await api.get('/admin/ja/system-journal').catch(() => ({ data: {} }));
+        const systemLogs = await api.get('/admin/ja/system-journal').catch(() => ({ data: { data: [] } }));
         stats.value.system = { files: (systemLogs.data?.data || []).length };
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch stats:', error);
     }
 };
@@ -227,11 +226,10 @@ const fetchRecentLogs = async () => {
         const activityResponse = await api.get('/admin/ja/activity-journal/recent?limit=10').catch(() => ({ data: {} }));
         recentActivity.value = activityResponse.data?.data || [];
 
-        // Fetch recent security
-        const securityResponse = await api.get('/admin/ja/security/journal?per_page=10').catch(() => ({ data: {} }));
+        const securityResponse = await api.get('/admin/ja/security/journal?per_page=10').catch(() => ({ data: { data: { data: [] } } }));
         const secData = securityResponse.data?.data?.data || securityResponse.data?.data || [];
         recentSecurity.value = Array.isArray(secData) ? secData : [];
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch recent logs:', error);
     }
 };

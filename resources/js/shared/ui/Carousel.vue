@@ -11,13 +11,14 @@
 </template>
 
 <script setup lang="ts">
-import { type HTMLAttributes, type UnwrapRef, computed, provide, ref, onMounted } from 'vue';
+import { type HTMLAttributes, computed, provide, ref, onMounted } from 'vue';
 import emblaCarouselVue from 'embla-carousel-vue';
-import { type CarouselApi, type CarouselEmits, type CarouselProps, useCarousel } from './useCarousel';
+import { type CarouselApi, type CarouselEmits, type CarouselProps } from './useCarousel';
 import { cn } from '../../lib/utils';
 
 const props = withDefaults(defineProps<CarouselProps & { class?: HTMLAttributes['class'] }>(), {
   orientation: 'horizontal',
+  class: '',
 });
 
 const emits = defineEmits<CarouselEmits>();

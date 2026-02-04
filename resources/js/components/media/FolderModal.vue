@@ -87,9 +87,7 @@
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
 import { ref, onMounted, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useToast } from '@/composables/useToast';
-import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import api from '@/services/api';
 import { 
@@ -118,7 +116,7 @@ interface FolderForm {
 }
 
 const authStore = useAuthStore();
-const { t } = useI18n();
+
 const toast = useToast();
 
 const emit = defineEmits<{
@@ -160,7 +158,7 @@ const handleSubmit = async () => {
         toast.success.create('Folder');
         emit('created');
         emit('close');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to create folder:', error);
         toast.error.fromResponse(error);
     } finally {

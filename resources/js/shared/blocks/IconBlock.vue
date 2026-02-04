@@ -3,7 +3,7 @@
     <template #default="{ settings, device: blockDevice }">
       <div 
         class="icon-block" 
-        :id="getVal(settings, 'html_id', blockDevice)"
+        :id="(getVal<string>(settings, 'html_id', blockDevice) as string)"
         :style="iconBlockStyles(settings, blockDevice)"
       >
         <component
@@ -11,8 +11,8 @@
           class="icon-wrapper transition-colors duration-300 group"
           :href="getVal(settings, 'linkUrl') || undefined"
           :target="getVal(settings, 'linkTarget') || '_self'"
-          :aria-label="getVal(settings, 'aria_label', blockDevice) || undefined"
-          :role="getVal(settings, 'aria_label', blockDevice) ? 'img' : undefined"
+          :aria-label="getVal<string>(settings, 'aria_label', blockDevice) || undefined"
+          :role="getVal<string>(settings, 'aria_label', blockDevice) ? 'img' : undefined"
           :style="iconWrapperStyles(settings, blockDevice)"
         >
           <LucideIcon 
@@ -30,38 +30,42 @@
 <script setup lang="ts">
 import BaseBlock from '../components/BaseBlock.vue'
 import { LucideIcon } from '@/components/ui';
+import type { CSSProperties } from 'vue'
 import { 
     getVal, 
     getTextGradientStyles,
     getMaskStyles,
     getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockProps } from '@/types/builder'
+import type { BlockProps, ModuleSettings } from '@/types/builder'
 
-const props = withDefaults(defineProps<BlockProps>(), {
+const _props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })
 
-const iconName = (settings: any, device: string) => {
-    const icon = getVal(settings, 'icon', device) || 'Star'
+
+const iconName = (settings: ModuleSettings, device: string) => {
+    const icon = getVal<string>(settings, 'icon', device) || 'Star'
     return typeof icon === 'string' ? icon.replace('lucide:', '') : 'Star'
 }
-const iconSize = (settings: any, device: string) => {
-    const size = getVal(settings, 'size', device) || 48
-    return typeof size === 'number' ? size : parseInt(size) || 48
+const iconSize = (settings: ModuleSettings, device: string) => {
+    const size = getVal<string | number>(settings, 'size', device) || 48
+    return typeof size === 'number' ? size : parseInt(size as string) || 48
 }
 
-const iconBlockStyles = (settings: any, device: string) => {
-  return {
+const iconBlockStyles = (settings: ModuleSettings, device: string): CSSProperties => {
+  const layoutStyles = getLayoutStyles(settings, device)
+  const styles: Record<string, string | number> = {
     width: '100%',
-    ...getLayoutStyles(settings, device),
-    textAlign: (getVal(settings, 'alignment', device) || 'center') as any
+    ...layoutStyles,
+    textAlign: (getVal<string>(settings, 'alignment', device) || 'center') as string
   }
+  return styles as CSSProperties
 }
 
-const iconWrapperStyles = (settings: any, device: string) => {
-  const styles: Record<string, any> = {
+const iconWrapperStyles = (settings: ModuleSettings, device: string): CSSProperties => {
+  const styles: Record<string, string | number> = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -71,48 +75,48 @@ const iconWrapperStyles = (settings: any, device: string) => {
   }
 
   // Set CSS Variables for Hover States
-  const hoverScale = getVal(settings, 'hover_scale', device) || 1.1;
+  const hoverScale = getVal<number>(settings, 'hover_scale', device) || 1.1;
   styles['--hover-scale'] = `scale(${hoverScale})`;
   
-  const hoverColor = getVal(settings, 'hover_color', device);
+  const hoverColor = getVal<string>(settings, 'hover_color', device);
   if (hoverColor) {
       styles['--hover-color'] = hoverColor;
   }
 
-  const hoverBgColor = getVal(settings, 'hover_background_color', device);
+  const hoverBgColor = getVal<string>(settings, 'hover_background_color', device);
   if (hoverBgColor) {
       styles['--hover-bg-color'] = hoverBgColor;
   }
 
   // 1. Background Shape
-  if (getVal(settings, 'use_background', device)) {
-      styles.backgroundColor = getVal(settings, 'background_color', device) || '#f3f4f6'
+  if (getVal<boolean>(settings, 'use_background', device)) {
+      styles.backgroundColor = getVal<string>(settings, 'background_color', device) || '#f3f4f6'
       styles.padding = '20px'
       Object.assign(styles, getMaskStyles(settings, 'background', device))
   }
 
   // 2. Glow Effect
-  if (getVal(settings, 'use_glow', device)) {
-      const glow = getVal(settings, 'glow_color', device) || 'rgba(32, 89, 234, 0.5)'
+  if (getVal<boolean>(settings, 'use_glow', device)) {
+      const glow = getVal<string>(settings, 'glow_color', device) || 'rgba(32, 89, 234, 0.5)'
       styles.filter = `drop-shadow(0 0 15px ${glow})`
   }
 
-  return styles
+  return styles as CSSProperties
 }
 
-const iconStyles = (settings: any, device: string) => {
-    const styles: Record<string, any> = {
+const iconStyles = (settings: ModuleSettings, device: string): CSSProperties => {
+    const styles: Record<string, string | number> = {
         display: 'block',
         transition: 'color 0.3s ease-in-out'
     }
 
-    if (getVal(settings, 'use_gradient', device)) {
+    if (getVal<boolean>(settings, 'use_gradient', device)) {
         Object.assign(styles, getTextGradientStyles(settings, '', device))
     } else {
-        styles.color = getVal(settings, 'color', device) || '#2059ea'
+        styles.color = getVal<string>(settings, 'color', device) || '#2059ea'
     }
 
-    return styles
+    return styles as CSSProperties
 }
 </script>
 

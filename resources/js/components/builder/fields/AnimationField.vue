@@ -80,10 +80,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, reactive, computed } from 'vue'
+import { watch, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import PlayCircle from 'lucide-vue-next/dist/esm/icons/circle-play.js';
-import { BaseLabel, BaseSliderInput, BaseCollapsible, BaseSegmentedControl } from '@/components/builder/ui'
+import { BaseLabel, BaseSliderInput, BaseCollapsible } from '@/components/builder/ui'
 import type { SettingDefinition } from '@/types/builder'
 
 interface AnimationState {
@@ -96,8 +96,8 @@ interface AnimationState {
 
 const props = defineProps<{
   field?: SettingDefinition;
-  value: Record<string, any>;
-  placeholderValue?: any;
+  value: Record<string, unknown>;
+  placeholderValue?: unknown;
 }>()
 
 const emit = defineEmits(['update:value'])
@@ -117,7 +117,7 @@ watch(() => props.value, (newVal) => {
         Object.keys(localValue).forEach(key => {
             const k = key as keyof AnimationState
             if (newVal[k] !== undefined) {
-                (localValue as any)[k] = newVal[k]
+                (localValue as unknown as Record<string, unknown>)[k] = newVal[k]
             }
         })
     }

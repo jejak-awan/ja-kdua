@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -102,7 +102,7 @@ const VideoPopupModule: ModuleDefinition = {
             {
                 id: 'buttonTypography',
                 label: 'Button Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `button_${f.name}`,
                     label: `Button ${f.label}`

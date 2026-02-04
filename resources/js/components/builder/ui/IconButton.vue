@@ -22,13 +22,13 @@ import { type Component } from 'vue';
 import { Button } from '@/components/ui';
 
 interface Props {
-  icon: object | ((...args: any[]) => any) | string | Component;
+  icon: object | ((...args: unknown[]) => unknown) | string | Component;
   variant?: 'primary' | 'secondary' | 'ghost'; // custom variants mapped to shred
   size?: 'sm' | 'md' | 'lg';
   active?: boolean;
   title?: string;
   disabled?: boolean;
-  class?: any;
+  class?: string | object | unknown[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -46,12 +46,12 @@ defineEmits<{
 
 const mappedVariant = computed(() => {
   if (props.active) return 'default';
-  const map: Record<string, any> = {
+  const map: Record<string, "default" | "secondary" | "ghost" | "link" | "outline" | "destructive"> = {
     'primary': 'default',
     'secondary': 'secondary',
     'ghost': 'ghost'
   };
-  return map[props.variant] || 'secondary';
+  return map[props.variant || 'secondary'] || 'secondary';
 });
 
 const iconSize = computed(() => {

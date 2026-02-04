@@ -166,7 +166,7 @@ import type { ThemeSection } from '@/types/theme';
 
 const props = withDefaults(defineProps<{
     sections?: ThemeSection[];
-    formValues: Record<string, any>;
+    formValues: Record<string, unknown>;
     customCss?: string;
     loading?: boolean;
     saving?: boolean;
@@ -186,7 +186,7 @@ const props = withDefaults(defineProps<{
 });
 
 const emit = defineEmits<{
-    (e: 'update:formValues', value: Record<string, any>): void;
+    (e: 'update:formValues', value: Record<string, unknown>): void;
     (e: 'update:customCss', value: string): void;
     (e: 'change'): void;
     (e: 'undo'): void;
@@ -210,7 +210,7 @@ const toggleSection = (id: string) => {
     }
 };
 
-const updateField = (key: string, value: any) => {
+const updateField = (key: string, value: unknown) => {
     emit('change');
     emit('update:formValues', { ...props.formValues, [key]: value });
 };
@@ -220,7 +220,7 @@ const openMediaPicker = (fieldKey: string) => {
     showMediaPicker.value = true;
 };
 
-const handleMediaSelect = (media: any) => {
+const handleMediaSelect = (media: { url: string }) => {
     if (activeMediaField.value) {
         updateField(activeMediaField.value, media.url);
     }

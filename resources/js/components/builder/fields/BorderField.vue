@@ -14,14 +14,14 @@
             <BaseNumberInput 
               v-model="radius[corner]" 
               :label="t(`builder.fields.border.radius.${corner}`)"
-              :placeholder="String((placeholderValue?.radius?.[corner] as number | string) ?? 0)"
+              :placeholder="String(getPlaceholderRadius(corner))"
               @update:model-value="updateRadius(corner)"
             />
         </div>
         
         <!-- Link Button -->
         <div class="link-wrapper absolute-center">
-             <button class="link-btn" :class="{active: radius.linked}" @click="toggleRadiusLink" :title="t('builder.fields.spacing.link')">
+             <button class="link-btn" :class="{active: linked}" @click="toggleRadiusLink" :title="t('builder.fields.spacing.link')">
                 <Link2 :size="12" />
              </button>
         </div>
@@ -52,7 +52,7 @@
               v-model.number="currentStyle.width" 
               :min="0" 
               :max="50" 
-              :placeholder-value="((placeholderValue?.styles?.[activeSide]?.width as number | string) ?? (placeholderValue?.styles?.all?.width as number | string) ?? undefined) as number | undefined"
+              :placeholder-value="getPlaceholderWidth"
               @update:model-value="updateStyle('width')"
               unit="px"
             />
@@ -63,8 +63,8 @@
              <BaseLabel>{{ t('builder.fields.border.color') }}</BaseLabel>
              <ColorField 
                :value="currentStyle.color" 
-               :placeholder-value="(placeholderValue?.styles?.[activeSide]?.color as string) ?? (placeholderValue?.styles?.all?.color as string) ?? null"
-               @update:value="(val: string) => { currentStyle.color = val; updateStyle('color', val) }" 
+               :placeholder-value="getPlaceholderColor"
+               @update:value="(val: string) => { currentStyle.color = val; updateStyle('color') }" 
              />
          </div>
 
@@ -111,7 +111,10 @@ const props = defineProps<{
     radius: { tl: number | string; tr: number | string; bl: number | string; br: number | string; linked: boolean };
     styles: Record<string, { width: number | string; color: string; style: string }>;
   };
-  placeholderValue?: any;
+  placeholderValue?: {
+    radius?: Record<string, number | string>;
+    styles?: Record<string, { width?: number | string; color?: string; style?: string }>;
+  } | null;
 }>()
 
 const emit = defineEmits(['update:value'])
@@ -139,8 +142,9 @@ const mappedSides = computed(() => {
 const activeSide = ref('all')
 
 // Internal models
-const radius = reactive<Record<string, any>>({ tl: 0, tr: 0, bl: 0, br: 0, linked: true })
-const styles = reactive<Record<string, any>>({
+const linked = ref(true)
+const radius = reactive<Record<string, number | string>>({ tl: 0, tr: 0, bl: 0, br: 0 })
+const styles = reactive<Record<string, { width: number | string; color: string; style: string }>>({
     all: { width: 0, color: '#333333', style: 'solid' },
     top: { width: 0, color: '#333333', style: 'solid' },
     right: { width: 0, color: '#333333', style: 'solid' },
@@ -151,7 +155,15 @@ const styles = reactive<Record<string, any>>({
 // Sync from props
 watch(() => props.value, (newVal) => {
     if(!newVal) return
-    if(newVal.radius) Object.assign(radius, newVal.radius)
+    if(newVal.radius) {
+        linked.value = newVal.radius.linked
+        Object.keys(radius).forEach(k => {
+            const val = (newVal.radius as Record<string, unknown>)[k]
+            if (typeof val === 'string' || typeof val === 'number') {
+                radius[k] = val
+            }
+        })
+    }
     if(newVal.styles) Object.assign(styles, newVal.styles)
 }, { deep: true, immediate: true })
 
@@ -160,9 +172,25 @@ const currentStyle = computed(() => {
     return styles[activeSide.value] || styles.all
 })
 
+const getPlaceholderRadius = (corner: string) => {
+    return (props.placeholderValue?.radius?.[corner] as number | string) ?? 0
+}
+
+const getPlaceholderWidth = computed(() => {
+    const val = (props.placeholderValue?.styles?.[activeSide.value]?.width as number | string) 
+        ?? (props.placeholderValue?.styles?.all?.width as number | string)
+    return (val ?? undefined) as number | undefined
+})
+
+const getPlaceholderColor = computed(() => {
+    return (props.placeholderValue?.styles?.[activeSide.value]?.color as string) 
+        ?? (props.placeholderValue?.styles?.all?.color as string) 
+        ?? null
+})
+
 // Updates
 const updateRadius = (corner: string) => {
-    if(radius.linked) {
+    if(linked.value) {
         const val = radius[corner]
         radius.tl = radius.tr = radius.bl = radius.br = val
     }
@@ -170,18 +198,18 @@ const updateRadius = (corner: string) => {
 }
 
 const toggleRadiusLink = () => {
-    radius.linked = !radius.linked
-    if(radius.linked) {
+    linked.value = !linked.value
+    if(linked.value) {
         const val = radius.tl 
         radius.tr = radius.bl = radius.br = val
         emitUpdate()
     }
 }
 
-const updateStyle = (prop: string, val?: any) => {
+const updateStyle = (prop: string) => {
     if(activeSide.value === 'all') {
-         ['top','right','bottom','left'].forEach(s => {
-             styles[s][prop] = styles.all[prop]
+         (['top','right','bottom','left'] as const).forEach(s => {
+             (styles[s] as Record<string, unknown>)[prop] = (styles.all as Record<string, unknown>)[prop]
          })
     }
     emitUpdate()
@@ -189,7 +217,7 @@ const updateStyle = (prop: string, val?: any) => {
 
 const emitUpdate = () => {
     emit('update:value', {
-        radius: { ...radius },
+        radius: { ...radius, linked: linked.value },
         styles: JSON.parse(JSON.stringify(styles))
     })
 }

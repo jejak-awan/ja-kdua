@@ -178,24 +178,25 @@ import Maximize from 'lucide-vue-next/dist/esm/icons/maximize.js';
 import Minimize from 'lucide-vue-next/dist/esm/icons/minimize.js';
 import ChevronsLeft from 'lucide-vue-next/dist/esm/icons/chevrons-left.js';
 import Wand2 from 'lucide-vue-next/dist/esm/icons/wand-sparkles.js';
-import Layers from 'lucide-vue-next/dist/esm/icons/layers.js'
 import { useI18n } from 'vue-i18n'
 import { DEVICE_MODES } from '@/components/builder/core/constants'
 import { IconButton, BaseDropdown, BaseDivider } from '@/components/builder/ui'
 import AdminLogo from '@/components/layouts/AdminLogo.vue'
 import type { BuilderInstance } from '@/types/builder'
 
+import type { Component } from 'vue';
+
 // Icons mapping for dynamic components
-const icons: Record<string, any> = { Monitor, Tablet, Smartphone, Wand2 }
+const icons: Record<string, Component> = { Monitor, Tablet, Smartphone, Wand2 }
 
 // Inject builder state
 const builder = inject<BuilderInstance>('builder')!
 
 // Props & Emits
-const props = defineProps<{
+defineProps<{
   sidebarVisible?: boolean
 }>()
-const emit = defineEmits<{
+defineEmits<{
   (e: 'toggle-sidebar'): void
   (e: 'change-device', device: string): void
   (e: 'open-pages'): void
@@ -208,7 +209,7 @@ const { t } = useI18n()
 // State
 const device = computed(() => builder?.device.value || 'desktop')
 const zoom = computed(() => builder?.zoom.value || 100)
-const wireframeMode = computed(() => builder?.wireframeMode.value || false)
+
 
 const deviceModes = Object.values(DEVICE_MODES)
 
@@ -238,11 +239,7 @@ const toggleFullscreen = () => {
     }
 }
 
-const toggleWireframe = () => {
-  if (builder) {
-    builder.wireframeMode.value = !builder.wireframeMode.value
-  }
-}
+
 </script>
 
 <style scoped>

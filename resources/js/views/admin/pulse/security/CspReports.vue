@@ -132,7 +132,7 @@ type="checkbox" v-model="selectedReports" :value="report.id"
               </span>
             </td>
             <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-              <div class="truncate max-w-xs" :title="report.blocked_uri">
+              <div class="truncate max-w-xs" :title="report.blocked_uri || undefined">
                 {{ report.blocked_uri || 'N/A' }}
               </div>
             </td>
@@ -198,9 +198,35 @@ import { useConfirm } from '@/composables/useConfirm';
 const toast = useToast();
 const { confirm: confirmDialog } = useConfirm();
 
-const reports = ref<any[]>([]);
-const stats = ref<any>({});
-const selectedReports = ref<any[]>([]);
+interface CspReport {
+  id: number;
+  violated_directive: string;
+  blocked_uri: string | null;
+  document_uri: string;
+  ip_address: string;
+  status: string;
+  created_at: string;
+}
+
+interface CspStats {
+  total?: number;
+  new?: number;
+  by_directive?: Array<{ violated_directive: string; count: number }>;
+  recent_trend?: Array<{ date: string; count: number }>;
+}
+
+interface PaginationInfo {
+  total: number;
+  per_page: number;
+  current_page: number;
+  last_page: number;
+  from: number;
+  to: number;
+}
+
+const reports = ref<CspReport[]>([]);
+const stats = ref<CspStats>({});
+const selectedReports = ref<number[]>([]);
 const loading = ref(false);
 
 const filters = ref({
@@ -212,7 +238,7 @@ const filters = ref({
   per_page: 50,
 });
 
-const pagination = ref({
+const pagination = ref<PaginationInfo>({
   total: 0,
   per_page: 50,
   current_page: 1,
@@ -249,9 +275,9 @@ async function fetchReports() {
       from: response.data.data.from,
       to: response.data.data.to,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.error.fromResponse(error);
-    logger.error(error instanceof Error ? error.message : String(error), { error: error });
+    logger.error('Failed to fetch reports:', error);
   } finally {
     loading.value = false;
   }
@@ -261,7 +287,7 @@ async function fetchStatistics() {
   try {
     const response = await api.get('/admin/ja/security/csp-reports/statistics');
     stats.value = response.data.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to load statistics', error);
   }
 }
@@ -288,8 +314,9 @@ function changePage(page: number) {
   fetchReports();
 }
 
-function toggleSelectAll(event: any) {
-  if (event.target.checked) {
+function toggleSelectAll(event: Event) {
+  const target = event.target as HTMLInputElement;
+  if (target.checked) {
     selectedReports.value = reports.value.map(r => r.id);
   } else {
     selectedReports.value = [];
@@ -315,9 +342,9 @@ async function bulkAction(action: string) {
     selectedReports.value = [];
     fetchReports();
     fetchStatistics();
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.error.fromResponse(error);
-    logger.error(error instanceof Error ? error.message : String(error), { error: error });
+    logger.error('Bulk action failed:', error);
   }
 }
 
@@ -326,13 +353,13 @@ function refreshReports() {
   fetchStatistics();
 }
 
-function getStatusVariant(status: string) {
+function getStatusVariant(status: string): "default" | "destructive" | "secondary" | "success" | "outline" | null | undefined {
   const variants: Record<string, string> = {
     new: 'warning',
     reviewed: 'info',
     false_positive: 'secondary',
   };
-  return (variants[status] || 'secondary') as any;
+  return (variants[status] || 'secondary') as "default" | "destructive" | "secondary" | "success" | "outline" | null | undefined;
 }
 
 function formatStatus(status: string) {

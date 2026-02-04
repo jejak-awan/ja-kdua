@@ -71,8 +71,6 @@ const authStore = useAuthStore();
 const { t } = useI18n();
 
 const user = computed(() => authStore.user);
-const reason = ref(window.history.state?.reason || null);
-const requiredPermissions = ref(window.history.state?.requiredPermissions || []);
 const traceId = ref(`TRC-${Date.now().toString().slice(-6)}-${Math.random().toString(36).substring(7).toUpperCase()}`);
 
 const goBack = () => {

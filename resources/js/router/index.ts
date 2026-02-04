@@ -19,8 +19,6 @@ declare module 'vue-router' {
     }
 }
 
-const { showError } = useSystemError();
-
 const routes: Array<RouteRecordRaw> = [
     // Frontend routes (public)
     ...frontendRoutes,
@@ -506,7 +504,7 @@ router.afterEach((to) => {
         title: document.title
     }).catch(err => {
         // Silently fail for analytics errors
-        console.debug('Analytics tracking failed:', err);
+        logger.debug('Analytics tracking failed:', err);
     });
 });
 

@@ -260,7 +260,7 @@
                           v-if="setting.type === 'string' || setting.type === 'integer'"
                           :id="setting.key"
                           :type="setting.type === 'integer' ? 'number' : (setting.is_encrypted ? 'password' : 'text')"
-                          v-model="settingsForm[setting.key]"
+                          v-model="(settingsForm[setting.key] as any)"
                           :class="{ 'border-destructive focus-visible:ring-destructive': errors[setting.key] }"
                         />
                         <p v-if="errors[setting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[setting.key]) ? errors[setting.key][0] : errors[setting.key] }}</p>
@@ -495,10 +495,11 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 
+import axios from 'axios'
 import api from '@/services/api'
 import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
@@ -548,7 +549,9 @@ import Route from 'lucide-vue-next/dist/esm/icons/route.js';
 import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
 import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
-import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';interface RedisStat {
+import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';
+
+interface RedisStat {
   version: string;
   used_memory: string;
   total_keys: number;
@@ -576,10 +579,10 @@ interface CacheStats {
 
 interface SettingItem {
   key: string;
-  value: any;
+  value: unknown;
   type: string;
-  description ?: string;
-  is_encrypted ?: boolean;
+  description?: string;
+  is_encrypted?: boolean;
 }
 
 interface SettingGroup {
@@ -601,8 +604,8 @@ const activeTab = ref('statistics')
 
 // Settings
 const settings = ref<Record<string, SettingItem[]>>({})
-const settingsForm = ref<Record<string, any>>({});
-const initialSettingsForm = ref<Record<string, any>>({}); // Track initial state
+const settingsForm = ref<Record<string, unknown>>({});
+const initialSettingsForm = ref<Record<string, unknown>>({}); // Track initial state
 const errors = ref<Record<string, string | string[]>>({})
 const cacheDriver = ref<string | null>(null) // Global cache driver status
 
@@ -665,7 +668,7 @@ const loadSettings = async () : Promise<void> => {
       })
     })
     initialSettingsForm.value = JSON.parse(JSON.stringify(settingsForm.value));
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to load Redis settings:', error)
   }
 }
@@ -693,20 +696,21 @@ const saveSettings = async () : Promise<void> => {
     setTimeout(() => {
       connectionStatus.value = null
     }, 3000)
-  } catch (error: any) {
-    if (error && typeof error === 'object' && 'response' in error) {
-      const err = error as { response?: { status: number; data?: { errors?: Record<string, string | string[]> } } };
-      if (err.response?.status === 422) {
-        errors.value = err.response.data?.errors || {}
-      } else {
-        toast.error.fromResponse(error)
-        connectionStatus.value = {
-          type: 'error',
-          message: (err as any).response?.data?.message || t('features.redis.messages.saveFailed')
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            if (error.response?.status === 422) {
+                errors.value = (error.response.data as { errors?: Record<string, string | string[]> })?.errors || {}
+            } else {
+                toast.error.fromResponse(error)
+                connectionStatus.value = {
+                    type: 'error',
+                    message: (error.response?.data as { message?: string })?.message || t('features.redis.messages.saveFailed')
+                }
+            }
+        } else {
+            logger.error('Failed to save settings:', error);
         }
-      }
-    }
-  } finally {
+    } finally {
     saving.value = false
   }
 }
@@ -721,17 +725,15 @@ const testConnection = async () : Promise<void> => {
       type: 'success',
       message: `✅ ${response.data.data.message || t('features.redis.messages.testSuccess')} (${response.data.data.response_time})`
     }
-    
     // Auto clear after 3 seconds
     setTimeout(() => {
       connectionStatus.value = null;
     }, 3000);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     let msg = t('features.redis.messages.testFailed');
-    if (error && typeof error === 'object' && 'response' in error) {
-      const err = error as { response?: { data?: { message?: string } } };
-      msg = err.response?.data?.message || msg;
+    if (axios.isAxiosError(error)) {
+        msg = (error.response?.data as { message?: string })?.message || msg;
     }
     connectionStatus.value = {
       type: 'error',
@@ -747,7 +749,7 @@ const loadStats = async () : Promise<void> => {
   try {
     const response = await api.get('/admin/ja/redis/info')
     stats.value = response.data.data
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to load Redis stats:', error)
   } finally {
     loadingStats.value = false
@@ -758,7 +760,7 @@ const loadCacheStats = async () : Promise<void> => {
   try {
     const response = await api.get('/admin/ja/redis/cache-stats')
     cacheStats.value = response.data.data
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to load cache stats:', error)
   }
 }
@@ -768,7 +770,7 @@ const getCacheStatus = async () : Promise<void> => {
         const response = await api.get('/admin/ja/system/cache-status')
         const data = response.data.data
         cacheDriver.value = data.driver
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to get global cache status:', error)
     }
 }
@@ -808,15 +810,14 @@ const flushCache = async (type: string) : Promise<void> => {
     }
 
     loadCacheStats()
-  } catch (error: any) {
+  } catch (error: unknown) {
     // If it's a 401, we know what happened
-    if (error && typeof error === 'object' && 'response' in error) {
-      const err = error as { response?: { status: number } };
-      if (err.response?.status === 401 && isDestructive) {
-         authStore.clearAuth()
-         window.location.href = '/login?message=session_cleared'
-         return
-      }
+    if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 && isDestructive) {
+            authStore.clearAuth()
+            window.location.href = '/login?message=session_cleared'
+            return
+        }
     }
     toast.error.fromResponse(error)
   } finally {
@@ -851,14 +852,13 @@ const warmCache = async () : Promise<void> => {
     authStore.clearAuth()
     window.location.href = '/login?message=session_cleared'
     
-  } catch (error: any) {
-     if (error && typeof error === 'object' && 'response' in error) {
-       const err = error as { response?: { status: number } };
-       if (err.response?.status === 401) {
-         authStore.clearAuth()
-         window.location.href = '/login?message=session_cleared'
-         return
-       }
+  } catch (error: unknown) {
+     if (axios.isAxiosError(error)) {
+         if (error.response?.status === 401) {
+             authStore.clearAuth()
+             window.location.href = '/login?message=session_cleared'
+             return
+         }
      }
     toast.error.fromResponse(error)
   } finally {
@@ -877,13 +877,13 @@ const formatGroupName = (group: string) => {
   return group.charAt(0).toUpperCase() + group.slice(1)
 }
 
-const getGroupIcon = (groupName: string) => {
-  const icons: Record<string, any> = {
+const getGroupIcon = (groupName: string): Component => {
+  const icons: Record<string, Component> = {
     'Connection': Database,
     'Cache': Zap,
     'Session & Queue': Clock
   }
-  return icons[groupName] || Database
+  return (icons[groupName] || Database) as Component
 }
 
 const getGroupDescription = (groupName: string) => {

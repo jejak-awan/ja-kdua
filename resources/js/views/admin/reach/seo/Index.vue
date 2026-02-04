@@ -109,7 +109,7 @@
                             <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.analysis.title') }}</h3>
                             <div class="space-y-2 mb-4">
                                 <Label>{{ $t('features.seo.analysis.selectContent') }}</Label>
-                                <Select v-model="selectedContentId">
+                                <Select :model-value="String(selectedContentId || '')" @update:model-value="(val) => selectedContentId = val">
                                     <SelectTrigger>
                                         <SelectValue :placeholder="$t('features.seo.analysis.placeholder')" />
                                     </SelectTrigger>
@@ -117,7 +117,7 @@
                                         <SelectItem 
                                             v-for="content in contents" 
                                             :key="content.id" 
-                                            :value="content.id"
+                                            :value="String(content.id)"
                                         >
                                             {{ content.title }}
                                         </SelectItem>
@@ -181,7 +181,7 @@
                             <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.schema.title') }}</h3>
                             <div class="space-y-2 mb-4">
                                 <Label>{{ $t('features.seo.schema.selectContent') }}</Label>
-                                <Select v-model="selectedContentForSchema">
+                                <Select :model-value="String(selectedContentForSchema || '')" @update:model-value="(val) => selectedContentForSchema = val">
                                     <SelectTrigger>
                                         <SelectValue :placeholder="$t('features.seo.analysis.placeholder')" />
                                     </SelectTrigger>
@@ -189,7 +189,7 @@
                                         <SelectItem 
                                             v-for="content in contents" 
                                             :key="content.id" 
-                                            :value="content.id"
+                                            :value="String(content.id)"
                                         >
                                             {{ content.title }}
                                         </SelectItem>
@@ -268,28 +268,33 @@ import Code2 from 'lucide-vue-next/dist/esm/icons/code-xml.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import { parseResponse, ensureArray, parseSingleResponse } from '@/utils/responseParser';
 
+interface AnalysisResult {
+    score: number;
+    message: string;
+    suggestions: string[];
+}
+
+interface SeoContent {
+    id: number | string;
+    title: string;
+}
+
 const { t } = useI18n();
 const toast = useToast();
 const activeTab = ref('sitemap');
-const tabs = computed(() => [
-    { id: 'sitemap', label: t('features.seo.tabs.sitemap') },
-    { id: 'robots', label: t('features.seo.tabs.robots') },
-    { id: 'analysis', label: t('features.seo.tabs.analysis') },
-    { id: 'schema', label: t('features.seo.tabs.schema') },
-]);
 
 const windowLocationOrigin = ref(window.location.origin);
 const sitemapUrl = ref('/sitemap.xml');
 const generatingSitemap = ref(false);
 const robotsContent = ref('');
 const savingRobots = ref(false);
-const contents = ref<any[]>([]);
-const selectedContentId = ref<any>(null);
+const contents = ref<SeoContent[]>([]);
+const selectedContentId = ref<number | string | null>(null);
 const analyzing = ref(false);
-const analysisResults = ref<any>(null);
-const selectedContentForSchema = ref<any>(null);
+const analysisResults = ref<Record<string, AnalysisResult> | null>(null);
+const selectedContentForSchema = ref<number | string | null>(null);
 const generatingSchema = ref(false);
-const schemaJson = ref<any>(null);
+const schemaJson = ref<string | null>(null);
 const initialRobotsContent = ref('');
 
 const isDirty = computed(() => {
@@ -299,10 +304,10 @@ const isDirty = computed(() => {
 const fetchRobotsTxt = async () => {
     try {
         const response = await api.get('/admin/ja/seo/robots-txt');
-        const data = parseSingleResponse<any>(response) || {};
+        const data = parseSingleResponse<{ content: string }>(response) || { content: '' };
         robotsContent.value = data.content || '';
         initialRobotsContent.value = robotsContent.value;
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch robots.txt:', error);
     }
 };
@@ -313,7 +318,7 @@ const saveRobotsTxt = async () => {
         await api.put('/admin/ja/seo/robots-txt', { content: robotsContent.value });
         initialRobotsContent.value = robotsContent.value;
         toast.success.save();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to save robots.txt:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -326,7 +331,7 @@ const generateSitemap = async () => {
     try {
         await api.get('/admin/ja/seo/sitemap');
         toast.success.action(t('features.seo.sitemap.generated'));
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to generate sitemap:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -343,8 +348,8 @@ const fetchContents = async () => {
     try {
         const response = await api.get('/admin/ja/contents');
         const { data } = parseResponse(response);
-        contents.value = ensureArray(data);
-    } catch (error: any) {
+        contents.value = ensureArray(data) as SeoContent[];
+    } catch (error: unknown) {
         logger.error('Failed to fetch contents:', error);
         contents.value = [];
     }
@@ -356,8 +361,8 @@ const runAnalysis = async () => {
     analyzing.value = true;
     try {
         const response = await api.get(`/admin/ja/contents/${selectedContentId.value}/seo-analysis`);
-        analysisResults.value = parseSingleResponse<any>(response) || {};
-    } catch (error: any) {
+        analysisResults.value = parseSingleResponse<Record<string, AnalysisResult>>(response) || {};
+    } catch (error: unknown) {
         logger.error('Failed to run SEO analysis:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -371,9 +376,9 @@ const generateSchema = async () => {
     generatingSchema.value = true;
     try {
         const response = await api.get(`/admin/ja/contents/${selectedContentForSchema.value}/schema`);
-        const schema = parseSingleResponse<any>(response) || {};
+        const schema = parseSingleResponse<Record<string, unknown>>(response) || {};
         schemaJson.value = JSON.stringify(schema, null, 2);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to generate schema:', error);
         toast.error.fromResponse(error);
     } finally {

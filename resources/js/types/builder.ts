@@ -1,7 +1,9 @@
 import type { Ref, ComputedRef, Component } from 'vue';
 import type { Category, Tag } from './taxonomy';
+export type { Category, Tag };
 import type { Menu } from './menu';
 import type { ThemeData, ThemeSettings } from './theme';
+export type { ThemeData, ThemeSettings };
 
 export interface BuilderOptions {
     mode?: 'site' | 'page';
@@ -61,6 +63,7 @@ export interface BlockInstance {
     children?: BlockInstance[];
     data?: Record<string, unknown>; // For compatibility with dynamic data
     sourceType?: string; // For compatibility
+    dynamicSettings?: Record<string, string>;
 }
 
 export interface Canvas {
@@ -97,7 +100,8 @@ export interface PageMetadata {
         parent_id: number | null;
         title: string;
     };
-    [key: string]: string | number | boolean | null | undefined | Tag[] | PageMetadata['menu_item'];
+    meta?: Record<string, unknown>;
+    [key: string]: unknown;
 }
 
 export interface GlobalSettings {
@@ -161,6 +165,7 @@ export interface BuilderState {
     lastSavedVersion: Ref<number>;
     markAsDirty: () => void;
     isDirty: ComputedRef<boolean>;
+    insertTargetId: Ref<string | null>;
 }
 
 export interface SettingOption {
@@ -262,6 +267,7 @@ export interface ModuleManager {
     resetLayout: () => void;
     findModule: (id: string) => BlockInstance | null;
     findParentById: (items: BlockInstance[], id: string) => BlockInstance | null;
+    getModulePath: (items: BlockInstance[], id: string) => BlockInstance[];
 
     // Management/Registry Parts
     definitions: Ref<Record<string, BlockDefinition>>;
@@ -320,13 +326,13 @@ export interface BuilderInstance extends BuilderState, ModuleManager {
     globalAction: Ref<{ type: string; payload: unknown } | null>;
 
     loadTheme: (slug?: string | null) => Promise<void>;
+    fetchPresets: () => Promise<void>;
     handleSavePreset: (name: string) => Promise<void>;
     confirm: (options: Partial<ConfirmModalState> & Record<string, unknown>) => Promise<boolean>;
     prompt: (options: Partial<InputModalState> & Record<string, unknown>) => Promise<string | null>;
     openResponsiveModal: (config: ResponsiveModalState) => void;
     fetchThemes: () => Promise<void>; // Restored
     updateThemeSettings: (themeSlug: string, settings: ThemeSettings) => Promise<void>; // Restored
-    fetchTemplates: () => Promise<unknown[]>;
     createTemplate: (data: { name: string; type: string }) => Promise<unknown>;
     deleteTemplate: (id: string | number) => Promise<boolean>;
     updateContentMeta: (id: string | number, meta: Record<string, unknown>) => Promise<unknown>;
@@ -354,11 +360,14 @@ export interface BuilderInstance extends BuilderState, ModuleManager {
     openContextMenu?: (moduleId: string, event: MouseEvent, title?: string, type?: string, mode?: string) => void;
 
     // Presets & Dynamic Content
-    insertFromPreset: (preset: BuilderPreset, parentId?: string | null, index?: number) => BlockInstance | null;
-    applyPreset: (id: string, preset: BuilderPreset) => boolean;
-    fetchPresets: () => Promise<void>;
     presets: Ref<BuilderPreset[]>;
     loadingPresets: Ref<boolean>;
+
+    // Pages
+    fetchPages: () => Promise<void>;
+    setCurrentPage: (id: number | string) => void;
+    addPage: (title: string) => Promise<void>;
+    deletePage: (id: number | string) => Promise<void>;
 }
 
 export interface BuilderPreset {

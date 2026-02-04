@@ -4,8 +4,6 @@
     :mode="mode" 
     :device="device"
     class="lottie-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Lottie Animation'"
     :style="cardStyles"
   >
     <div class="lottie-wrapper flex w-full" :style="wrapperStyles">
@@ -19,7 +17,7 @@
               </div>
               <span class="font-bold text-lg tracking-tight">Lottie Animation</span>
               <div class="url-badge bg-black/10 px-3 py-1 rounded-full text-[10px] font-mono max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                {{ settings.animationUrl || settings.animationJson || 'No source set' }}
+                {{ (settings.animationUrl as string) || (settings.animationJson as string) || 'No source set' }}
               </div>
             </div>
         </template>
@@ -28,7 +26,7 @@
         <template v-else>
             <div 
                 class="lottie-view-container w-full h-full"
-                :data-lottie-url="settings.animationUrl"
+                :data-lottie-url="(settings.animationUrl as string)"
                 :data-lottie-loop="settings.loop !== false"
                 :data-lottie-autoplay="settings.autoplay !== false"
             >
@@ -46,12 +44,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import Film from 'lucide-vue-next/dist/esm/icons/film.js';import { 
+import Film from 'lucide-vue-next/dist/esm/icons/film.js';
+import { 
     getVal,
-    getLayoutStyles,
-    getResponsiveValue 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance
@@ -62,12 +60,12 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -77,19 +75,20 @@ const cardStyles = computed(() => {
 
 const wrapperStyles = computed(() => {
     const layoutStyles = getLayoutStyles(settings.value, props.device)
-    const alignment = getVal(settings.value, 'alignment', props.device) || 'center'
+    const alignment = getVal<string>(settings.value, 'alignment', props.device) || 'center'
     
-    return {
+    const styles: Record<string, string | number> = {
         ...layoutStyles,
         justifyContent: alignment === 'left' ? 'flex-start' : 
                         (alignment === 'right' ? 'flex-end' : 'center')
     }
+    return styles
 })
 
 const playerStyles = computed(() => {
-  const width = getVal(settings.value, 'width', props.device) || 300
-  const height = getVal(settings.value, 'height', props.device) || 300
-  const maxWidthValue = getVal(settings.value, 'maxWidth', props.device) || 100
+  const width = getVal<string | number>(settings.value, 'width', props.device) || 300
+  const height = getVal<string | number>(settings.value, 'height', props.device) || 300
+  const maxWidthValue = getVal<string | number>(settings.value, 'maxWidth', props.device) || 100
   return {
     width: typeof width === 'number' ? `${width}px` : width,
     height: typeof height === 'number' ? `${height}px` : height,

@@ -14,6 +14,7 @@ export interface ThemeSetting {
     options?: ThemeOption[];
     placeholder?: string;
     description?: string;
+    unit?: string;
     default?: unknown;
 }
 

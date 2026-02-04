@@ -77,8 +77,8 @@ export function useLanguage() {
             if (response.data?.success && response.data?.data?.locale) {
                 return response.data.data.locale;
             }
-        } catch (error: any) {
-            console.debug('Failed to load locale from backend:', error.message);
+        } catch (error: unknown) {
+            logger.warning('Failed to load locale from backend:', (error as Error).message);
         }
         return null;
     };
@@ -91,8 +91,8 @@ export function useLanguage() {
 
         try {
             await api.put('/profile/preferences', { locale });
-        } catch (error: any) {
-            console.debug('Locale sync failed:', error.message);
+        } catch (error: unknown) {
+            logger.warning('Locale sync failed:', (error as Error).message);
         }
     };
 
@@ -227,9 +227,10 @@ export function useLanguage() {
     /**
      * Translate text using Vue I18n
      */
-    const t = (key: string, params: Record<string, any> = {}) => {
-        if ((i18n as any) && (i18n.global as any)) {
-            return (i18n.global as any).t(key, params);
+    const t = (key: string, params: Record<string, unknown> = {}) => {
+        const i18nGlobal = i18n.global as unknown as { t: (key: string, params: Record<string, unknown>) => string };
+        if (i18nGlobal) {
+            return i18nGlobal.t(key, params);
         }
         return key;
     };

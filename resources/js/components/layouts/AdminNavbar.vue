@@ -210,7 +210,6 @@
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useLanguage, type Language } from '@/composables/useLanguage';
@@ -236,10 +235,11 @@ interface Notification {
     message: string;
     read_at: string | null;
     created_at: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
-const router = useRouter();
+// router is unused here but kept if needed for future navigation
+// const router = useRouter();
 const authStore = useAuthStore();
 const { t } = useI18n();
 
@@ -289,7 +289,7 @@ const recentNotifications = computed(() => {
 const userAvatar = computed(() => {
     if (!props.user?.avatar || avatarError.value) return null;
 
-    const formatUrl = (path: any) => {
+    const formatUrl = (path: unknown) => {
         if (!path || typeof path !== 'string') return null;
         if (path.startsWith('http') || path.startsWith('/storage/')) return path;
         return `/storage/${path.replace(/^\//, '')}`;
@@ -309,7 +309,7 @@ const userInitial = computed(() => {
 });
 
 const fetchNotifications = async () => {
-    if (!props.isAuthenticated || (window as any).__isSessionTerminated) return;
+    if (!props.isAuthenticated || (window as unknown as { __isSessionTerminated?: boolean }).__isSessionTerminated) return;
     
     loadingNotifications.value = true;
     try {

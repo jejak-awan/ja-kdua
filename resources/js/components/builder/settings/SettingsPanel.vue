@@ -21,7 +21,7 @@
 import { ref, computed, watch } from 'vue'
 import ModuleRegistry from '@/components/builder/core/ModuleRegistry'
 import SettingsGroup from './SettingsGroup.vue'
-import type { BlockInstance, ModuleDefinition } from '@/types/builder'
+import type { BlockInstance, ModuleDefinition, ModuleGroup, SettingDefinition, ModuleField } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -40,35 +40,63 @@ const moduleDefinition = computed<ModuleDefinition | undefined>(() =>
 )
 
 // Get groups for current tab
-const groups = computed(() => {
+const groups = computed<ModuleGroup[]>(() => {
   const def = moduleDefinition.value
   if (!def?.settings) return []
   
-  // Use Type Guard or cast to handle the Union type safely
+  let rawItems: ModuleField[] = []
   if (Array.isArray(def.settings)) {
-    return props.activeTab === 'content' ? def.settings : []
+    rawItems = props.activeTab === 'content' ? def.settings as ModuleField[] : []
+  } else {
+    const settingsObj = def.settings as Record<string, ModuleField[] | undefined>
+    rawItems = settingsObj[props.activeTab] || []
   }
+
+  // Normalize to groups
+  const normalized: ModuleGroup[] = []
+  let currentDefaultGroup: ModuleGroup | null = null
+
+  const isGroup = (item: ModuleField): item is ModuleGroup => {
+    return 'id' in item && 'fields' in item
+  }
+
+  rawItems.forEach((item) => {
+    if (isGroup(item)) {
+      normalized.push(item)
+      currentDefaultGroup = null
+    } else {
+      if (!currentDefaultGroup) {
+        currentDefaultGroup = {
+          id: 'general',
+          label: 'General',
+          fields: []
+        }
+        normalized.push(currentDefaultGroup)
+      }
+      currentDefaultGroup.fields.push(item)
+    }
+  })
   
-  const settingsObj = def.settings as Record<string, any>
-  return settingsObj[props.activeTab] || []
+  return normalized
 })
 
 // Filter groups by search query
-const filteredGroups = computed(() => {
+const filteredGroups = computed<ModuleGroup[]>(() => {
   if (!props.searchQuery) return groups.value
   
   const query = props.searchQuery.toLowerCase()
   
-  return groups.value.map((group: any) => {
-    const filteredFields = group.fields.filter((field: any) => 
-      field.label.toLowerCase().includes(query) ||
-      field.name.toLowerCase().includes(query)
-    )
+  return groups.value.map((group) => {
+    const filteredFields = group.fields.filter((field) => {
+      const f = field as SettingDefinition
+      return (f.label || '').toLowerCase().includes(query) ||
+             (f.name || '').toLowerCase().includes(query)
+    })
     
     if (filteredFields.length === 0) return null
     
     return { ...group, fields: filteredFields }
-  }).filter(Boolean)
+  }).filter((g): g is ModuleGroup => g !== null)
 })
 
 // Single group open logic

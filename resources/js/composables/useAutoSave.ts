@@ -5,9 +5,9 @@ import api from '@/services/api';
 interface AutoSaveOptions {
     interval?: number;
     enabled?: boolean | Ref<boolean> | ComputedRef<boolean> | (() => boolean);
-    onSave?: (data: any) => void;
-    onError?: (error: any) => void;
-    shouldSave?: (form: any) => boolean;
+    onSave?: (data: unknown) => void;
+    onError?: (error: unknown) => void;
+    shouldSave?: (form: Record<string, unknown>) => boolean;
 }
 
 interface AutoSaveReturn {
@@ -24,7 +24,7 @@ interface AutoSaveReturn {
 /**
  * Auto-save composable for content editor
  */
-export function useAutoSave(form: Ref<any>, contentId: Ref<number | null | string> | number | string | null = null, options: AutoSaveOptions = {}): AutoSaveReturn {
+export function useAutoSave(form: Ref<Record<string, unknown>>, contentId: Ref<number | null | string> | number | string | null = null, options: AutoSaveOptions = {}): AutoSaveReturn {
     const {
         interval = 30000, // 30 seconds
         enabled: enabledOption = true,
@@ -42,9 +42,9 @@ export function useAutoSave(form: Ref<any>, contentId: Ref<number | null | strin
     const isSaving = ref(false);
     const lastSaved = ref<Date | null>(null);
     const saveStatus = ref<'idle' | 'saving' | 'saved' | 'error'>('idle'); // idle, saving, saved, error
-    const autoSaveInterval = ref<any>(null);
+    const autoSaveInterval = ref<ReturnType<typeof setInterval> | null>(null);
     const hasChanges = ref(false);
-    const lastSavedData = ref<any>(null);
+    const lastSavedData = ref<Record<string, unknown> | null>(null);
 
     // Track form changes
     const checkChanges = () => {
@@ -92,7 +92,7 @@ export function useAutoSave(form: Ref<any>, contentId: Ref<number | null | strin
             if (!shouldSaveFn(form.value)) {
                 return;
             }
-        } else if (!form.value.title || form.value.title.trim() === '') {
+        } else if (!form.value.title || (form.value.title as string).trim() === '') {
             // Default check: must have title
             return;
         }

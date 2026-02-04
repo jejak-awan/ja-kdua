@@ -40,10 +40,10 @@
                     </p>
                     <!-- Social Links -->
                     <div class="flex gap-4">
-                         <a v-if="getSetting('social_twitter')" :href="getSetting('social_twitter')" target="_blank" class="text-muted-foreground hover:text-primary transition-colors">
+                         <a v-if="getSetting('social_twitter')" :href="(getSetting('social_twitter') as string)" target="_blank" class="text-muted-foreground hover:text-primary transition-colors">
                             <Twitter class="w-5 h-5" />
                          </a>
-                         <a v-if="getSetting('social_github')" :href="getSetting('social_github')" target="_blank" class="text-muted-foreground hover:text-primary transition-colors">
+                         <a v-if="getSetting('social_github')" :href="(getSetting('social_github') as string)" target="_blank" class="text-muted-foreground hover:text-primary transition-colors">
                             <Github class="w-5 h-5" />
                          </a>
                     </div>
@@ -211,9 +211,14 @@ const submitNewsletter = async () => {
         
         toast.success.action(t('features.frontend.newsletter.success'))
         email.value = ''
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors)
+    } catch (error: unknown) {
+        if (typeof error === 'object' && error !== null && 'response' in error) {
+            const err = error as { response: { status: number; data: { errors: Record<string, string[]> } } };
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors)
+            } else {
+                toast.error.action(error)
+            }
         } else {
             toast.error.action(error)
         }

@@ -1,7 +1,7 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
     <template #default="{ settings, device: blockDevice }">
-        <div class="feature-grid-container grid" :style="gridStyles(settings, blockDevice)">
+        <div class="feature-grid-container grid" :style="gridStyles(settings, blockDevice as string)">
             <div 
                 v-for="(item, index) in items(settings)" 
                 :key="index"
@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject } from 'vue'
+import { type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { getVal } from '../utils/styleUtils'
 import Star from 'lucide-vue-next/dist/esm/icons/star.js';
@@ -46,25 +46,26 @@ import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
 import Shield from 'lucide-vue-next/dist/esm/icons/shield.js';
 import Heart from 'lucide-vue-next/dist/esm/icons/heart.js';
-import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';import type { Component } from 'vue'
+import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
+import type { Component } from 'vue'
+import type { BlockProps, ModuleSettings } from '@/types/builder'
 
 const iconMap: Record<string, Component> = {
     Star, Layers, Palette, Globe, Code2, Check, Zap, Shield, Heart, HelpCircle
 }
-import type { BlockProps, BuilderInstance } from '@/types/builder'
 
-const props = withDefaults(defineProps<BlockProps>(), {
-  mode: 'view',
-  device: 'desktop'
-})
+defineProps<BlockProps>()
 
-const builder = inject<BuilderInstance>('builder', null as any)
+interface FeatureItem {
+    title: string;
+    description: string;
+    icon?: string;
+}
+const items = (settings: ModuleSettings) => (getVal<FeatureItem[]>(settings, 'items') || [])
 
-const items = (settings: any) => getVal(settings, 'items') || []
-
-const gridStyles = (settings: any, device: string) => {
-    const cols = getVal(settings, 'columns', device) || 3
-    const gap = getVal(settings, 'gap', device) || 'gap-8'
+const gridStyles = (settings: ModuleSettings, device: string): CSSProperties => {
+    const cols = getVal<number>(settings, 'columns', device) || 3
+    const gap = getVal<string>(settings, 'gap', device) || 'gap-8'
     
     const gapMap: Record<string, string> = {
         'gap-4': '1rem',
@@ -75,26 +76,26 @@ const gridStyles = (settings: any, device: string) => {
     return {
         gridTemplateColumns: `repeat(${cols}, 1fr)`,
         gap: gapMap[gap] || '2rem'
-    }
+    } as CSSProperties
 }
 
-const cardStyles = (settings: any) => {
+const cardStyles = (settings: ModuleSettings): CSSProperties => {
     return {
-        backgroundColor: getVal(settings, 'cardBgColor') || 'rgba(255, 255, 255, 0.5)',
-        borderColor: getVal(settings, 'cardBorderColor') || 'rgba(0,0,0,0.1)',
+        backgroundColor: getVal<string>(settings, 'cardBgColor') || 'rgba(255, 255, 255, 0.5)',
+        borderColor: getVal<string>(settings, 'cardBorderColor') || 'rgba(0,0,0,0.1)',
         borderWidth: '1px',
         borderStyle: 'solid'
-    }
+    } as CSSProperties
 }
 
-const iconWrapperStyles = (settings: any) => {
+const iconWrapperStyles = (settings: ModuleSettings): CSSProperties => {
     return {
-        backgroundColor: getVal(settings, 'iconBgColor') || 'rgba(37, 99, 235, 0.1)'
-    }
+        backgroundColor: getVal<string>(settings, 'iconBgColor') || 'rgba(37, 99, 235, 0.1)'
+    } as CSSProperties
 }
 
-const iconSizeClass = (settings: any) => {
-    const wrapperSize = getVal(settings, 'iconSize') || 'w-14 h-14'
+const iconSizeClass = (settings: ModuleSettings) => {
+    const wrapperSize = getVal<string>(settings, 'iconSize') || 'w-14 h-14'
     if (wrapperSize.includes('w-20')) return 'w-10 h-10'
     if (wrapperSize.includes('w-14')) return 'w-7 h-7'
     return 'w-5 h-5'

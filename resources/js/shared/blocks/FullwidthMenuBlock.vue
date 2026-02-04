@@ -5,15 +5,15 @@
     :device="device"
     tag="nav"
     class="fullwidth-menu-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Fullwidth Menu'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Fullwidth Menu'"
     :style="cardStyles"
   >
     <template #default="{ settings: blockSettings }">
       <div class="menu-inner max-w-[1400px] mx-auto px-6 flex items-center justify-between transition-colors duration-300">
         <!-- Logo -->
         <div v-if="blockSettings.showLogo || mode === 'edit'" class="menu-logo flex-shrink-0">
-          <img v-if="blockSettings.logoImage" :src="blockSettings.logoImage" :style="logoStyles" :alt="blockSettings.logoText || 'Logo'" />
+          <img v-if="blockSettings.logoImage" :src="(blockSettings.logoImage as string)" :style="logoStyles" :alt="(blockSettings.logoText as string) || 'Logo'" />
           <div 
             v-else 
             class="logo-placeholder text-2xl font-bold transition-colors duration-300"
@@ -66,15 +66,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, inject, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import MenuIcon from 'lucide-vue-next/dist/esm/icons/menu.js';import { 
+import MenuIcon from 'lucide-vue-next/dist/esm/icons/menu.js';
+import { 
     getVal,
     getTypographyStyles,
-    getLayoutStyles,
-    getResponsiveValue 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance
@@ -85,13 +85,14 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const builder = inject<BuilderInstance | null>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 const mobileMenuOpen = ref(false)
 
 const updateText = (key: string, event: FocusEvent) => {
     if (props.mode !== 'edit' || !event.target) return
     const newValue = (event.target as HTMLElement).innerText;
-    (window as any).builder?.updateModuleSettings(props.module.id, { [key]: newValue });
+    builder?.updateModuleSettings(props.module.id, { [key]: newValue });
 }
 
 const handleLinkClick = (url: string) => {
@@ -115,26 +116,26 @@ const menuItems = computed(() => {
     ]
 })
 
-const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+const cardStyles = computed((): CSSProperties => {
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
     
-    return styles
+    return styles as CSSProperties
 })
 
-const logoStyles = computed(() => ({
-  maxHeight: `${getResponsiveValue(settings.value, 'logoMaxHeight', props.device) || 60}px`,
+const logoStyles = computed((): CSSProperties => ({
+  maxHeight: `${getVal<number>(settings.value, 'logoMaxHeight', props.device) || 60}px`,
   width: 'auto'
-}))
+} as CSSProperties))
 
-const menuItemsStyles = computed(() => {
+const menuItemsStyles = computed((): CSSProperties => {
   const layoutStyles = getLayoutStyles(settings.value, props.device)
-  const alignment = getResponsiveValue(settings.value, 'alignment', props.device) || 'center'
-  const spacing = getResponsiveValue(settings.value, 'itemSpacing', props.device) || 24
+  const alignment = getVal<string>(settings.value, 'alignment', props.device) || 'center'
+  const spacing = getVal<number>(settings.value, 'itemSpacing', props.device) || 24
   
   return {
     ...layoutStyles,
@@ -142,10 +143,10 @@ const menuItemsStyles = computed(() => {
                     alignment === 'center' ? 'center' : 'flex-start',
     gap: `${spacing}px`,
     flex: 1
-  }
+  } as CSSProperties
 })
 
-const linkStyles = computed(() => getTypographyStyles(settings.value, 'menu_', props.device))
+const linkStyles = computed(() => (getTypographyStyles(settings.value, 'menu_', props.device) || {}) as CSSProperties)
 </script>
 
 <style scoped>

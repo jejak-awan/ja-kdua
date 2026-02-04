@@ -34,7 +34,7 @@
                         </div>
                         <div>
                             <MediaPicker
-                                @selected="(media: any) => form.avatar = media.url"
+                                @selected="(media: { url: string }) => form.avatar = media.url"
                                 :label="$t('features.users.form.selectAvatar')"
                             ></MediaPicker>
                             <Button
@@ -184,7 +184,7 @@
                                 :id="`role-${role.id}`"
                                 :checked="form.roles.includes(role.id)"
                                 :disabled="getRoleRank(role.name) > authStore.getRoleRank()"
-                                @update:checked="(checked) => {
+                                @update:checked="(checked: boolean) => {
                                     if (checked) form.roles.push(role.id);
                                     else form.roles = form.roles.filter(id => id !== role.id);
                                 }"
@@ -298,7 +298,7 @@ const fetchRoles = async () => {
         const response = await api.get('/admin/ja/roles');
         const { data } = parseResponse(response);
         availableRoles.value = ensureArray(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch roles:', error);
     } finally {
         loadingRoles.value = false;
@@ -323,9 +323,10 @@ const handleSubmit = async () => {
         await api.post('/admin/ja/users', form.value);
         toast.success.create('User');
         router.push({ name: 'users.index' });
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
+    } catch (error: unknown) {
+        const err = error as { response?: { status?: number; data?: { errors?: Record<string, string[]> } } };
+        if (err.response?.status === 422) {
+            setErrors(err.response.data?.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -126,6 +127,138 @@ return new class extends Migration
             $table->boolean('is_system')->default(false)->index();
             $table->timestamps();
         });
+
+        // 7. Seed Default Presets
+        $now = now();
+        DB::table('builder_presets')->insert([
+            [
+                'type' => 'module', // stored as generic module type usually, or specific like 'section'
+                'name' => 'Hero basic',
+                'is_system' => true,
+                'created_at' => $now,
+                'updated_at' => $now,
+                'settings' => json_encode([
+                    'type' => 'section',
+                    'settings' => [
+                        'padding' => '80px 0',
+                         'background_color' => '#f8f9fa'
+                    ],
+                    'children' => [
+                        [
+                            'type' => 'row',
+                            'children' => [
+                                [
+                                    'type' => 'column',
+                                    'settings' => ['width' => '12'],
+                                    'children' => [
+                                        [
+                                            'type' => 'heading',
+                                            'settings' => [
+                                                'text' => 'Welcome to our website',
+                                                'tag' => 'h1',
+                                                'alignment' => 'center'
+                                            ]
+                                        ],
+                                        [
+                                            'type' => 'text',
+                                            'settings' => [
+                                                'content' => '<p style="text-align: center;">This is a simple hero section to get you started.</p>',
+                                                'alignment' => 'center'
+                                            ]
+                                        ],
+                                        [
+                                            'type' => 'button',
+                                            'settings' => [
+                                                'text' => 'Get Started',
+                                                'alignment' => 'center',
+                                                'url' => '#'
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]),
+            ],
+            [
+                'type' => 'module',
+                'name' => 'Feature Grid (3 Cols)',
+                'is_system' => true,
+                'created_at' => $now,
+                'updated_at' => $now,
+                'settings' => json_encode([
+                    'type' => 'section',
+                    'settings' => ['padding' => '60px 0'],
+                    'children' => [
+                        [
+                            'type' => 'row',
+                            'children' => [
+                                [
+                                    'type' => 'column',
+                                    'settings' => ['width' => '4'],
+                                    'children' => [
+                                        ['type' => 'heading', 'settings' => ['text' => 'Feature 1', 'tag' => 'h3']],
+                                        ['type' => 'text', 'settings' => ['content' => 'Description for feature 1.']]
+                                    ]
+                                ],
+                                [
+                                    'type' => 'column',
+                                    'settings' => ['width' => '4'],
+                                    'children' => [
+                                        ['type' => 'heading', 'settings' => ['text' => 'Feature 2', 'tag' => 'h3']],
+                                        ['type' => 'text', 'settings' => ['content' => 'Description for feature 2.']]
+                                    ]
+                                ],
+                                [
+                                    'type' => 'column',
+                                    'settings' => ['width' => '4'],
+                                    'children' => [
+                                        ['type' => 'heading', 'settings' => ['text' => 'Feature 3', 'tag' => 'h3']],
+                                        ['type' => 'text', 'settings' => ['content' => 'Description for feature 3.']]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]),
+            ],
+            [
+                'type' => 'module',
+                'name' => 'Call to Action',
+                'is_system' => true,
+                'created_at' => $now,
+                'updated_at' => $now,
+                'settings' => json_encode([
+                    'type' => 'section',
+                    'settings' => [
+                        'background_color' => '#4f46e5',
+                        'padding' => '60px 0'
+                    ],
+                    'children' => [
+                        [
+                            'type' => 'row',
+                            'children' => [
+                                [
+                                    'type' => 'column',
+                                    'settings' => ['width' => '8'],
+                                    'children' => [
+                                        ['type' => 'heading', 'settings' => ['text' => 'Ready to dive in?', 'tag' => 'h2', 'color' => '#ffffff']],
+                                    ]
+                                ],
+                                [
+                                    'type' => 'column',
+                                    'settings' => ['width' => '4', 'vertical_align' => 'center'],
+                                    'children' => [
+                                        ['type' => 'button', 'settings' => ['text' => 'Sign Up Now', 'variant' => 'outline', 'color' => '#ffffff']]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]),
+            ]
+        ]);
     }
 
     /**

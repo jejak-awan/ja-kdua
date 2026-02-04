@@ -4,17 +4,17 @@
     :mode="mode" 
     :device="device"
     class="portfolio-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Portfolio'"
-    :style="cardStyles"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Portfolio'"
+    :style="(cardStyles as any)"
   >
-    <div class="portfolio-wrapper w-full" :style="containerStyles">
+    <div class="portfolio-wrapper w-full" :style="(containerStyles as any)">
       <h2 
         v-if="settings.title || mode === 'edit'" 
         class="portfolio-main-title text-center mb-16 tracking-tighter outline-none" 
-        :style="mainTitleStyles"
+        :style="(mainTitleStyles as any)"
         :contenteditable="mode === 'edit'"
-        @blur="(e: any) => updateField('title', (e.target as HTMLElement).innerText)"
+        @blur="(e: FocusEvent) => updateField('title', (e.target as HTMLElement).innerText)"
         v-text="settings.title || 'Selected Works'"
       ></h2>
 
@@ -25,7 +25,7 @@
           :key="cat" 
           :variant="activeFilter === cat ? 'default' : 'outline'"
           class="rounded-full px-8 py-6 font-black uppercase tracking-widest text-[10px] transition-[width] duration-500 shadow-xl hover:shadow-2xl"
-          :style="activeFilter === cat ? {} : filterTypographyStyles"
+          :style="activeFilter === cat ? {} : (filterTypographyStyles as any)"
           @click="activeFilter = cat"
         >
           {{ cat }}
@@ -33,7 +33,7 @@
       </div>
       
       <!-- Grid -->
-      <div class="portfolio-grid transition-[width] duration-500" :style="gridStyles">
+      <div class="portfolio-grid transition-[width] duration-500" :style="(gridStyles as any)">
         <Card 
           v-for="item in mockItems" 
           :key="item.id" 
@@ -48,7 +48,7 @@
           <!-- Overlay -->
           <div 
               class="item-overlay absolute inset-0 z-20 flex flex-col items-center justify-center p-12 opacity-0 group-hover:opacity-100 transition-colors duration-700 backdrop-blur-xl bg-primary/80"
-              :style="overlayStyles"
+              :style="(overlayStyles as any)"
           >
             <Badge 
               v-if="settings.showCategory !== false" 
@@ -60,7 +60,7 @@
             <h4 
               v-if="settings.showTitle !== false" 
               class="item-title text-white text-3xl font-black text-center tracking-tighter leading-none max-w-xs transform -translate-y-2 group-hover:translate-y-0 transition-transform duration-500 delay-75"
-              :style="itemTitleStyles"
+              :style="(itemTitleStyles as any)"
             >
               {{ item.title }}
             </h4>
@@ -85,7 +85,7 @@ import {
   getLayoutStyles, 
   getTypographyStyles 
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -96,23 +96,23 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const builder = inject<BuilderInstance | null>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const categories = ['All', 'UX/UI', 'Development', 'Branding']
 const activeFilter = ref('All')
 
 const mockItems = computed(() => {
-    const count = getVal(settings.value, 'itemsPerPage', props.device) || 9
+    const count = getVal<number>(settings.value, 'itemsPerPage', props.device) || 9
     return Array.from({ length: count }, (_, i) => ({
         id: i + 1, title: `Creative Nexus ${i + 1}`, category: categories[1 + (i % 3)]
     }))
 })
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -123,18 +123,19 @@ const cardStyles = computed(() => {
 const containerStyles = computed(() => getLayoutStyles(settings.value, props.device))
 
 const gridStyles = computed(() => {
-    const cols = getVal(settings.value, 'columns', props.device) || 3
-    const gap = getVal(settings.value, 'gap', props.device) || 24
-    return { 
+    const cols = getVal<string | number>(settings.value, 'columns', props.device) || 3
+    const gap = getVal<string | number>(settings.value, 'gap', props.device) || 24
+    const styles: Record<string, string | number> = { 
         display: 'grid', 
         gridTemplateColumns: props.device === 'mobile' ? '1fr' : (props.device === 'tablet' ? 'repeat(2, 1fr)' : `repeat(${cols}, 1fr)`), 
         gap: `${gap}px`,
         width: '100%'
     }
+    return styles
 })
 
 const overlayStyles = computed(() => ({ 
-    backgroundColor: getVal(settings.value, 'overlayColor', props.device) || '', 
+    backgroundColor: getVal<string>(settings.value, 'overlayColor', props.device) || '', 
 }))
 
 const filterTypographyStyles = computed(() => getTypographyStyles(settings.value, 'filter_', props.device))

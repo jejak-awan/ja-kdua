@@ -370,7 +370,7 @@ import {
 } from '@/components/ui';
 import { MediaManagerKey } from '@/keys';
 
-const { t } = useI18n();
+useI18n();
 const showFilters = ref(false);
 
 const {
@@ -386,13 +386,11 @@ const {
     isTrashMode,
     selectedMedia,
     selectedFolders,
-    bulkAction,
     availableFilters,
     startBulkAction,
     breadcrumbs,
     selectFolder,
     sidebarCollapsed,
-    toggleMediaSelection,
     clearSelection,
     showMoveFolderModal,
     showUpdateAltModal,

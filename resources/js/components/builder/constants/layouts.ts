@@ -1,11 +1,11 @@
 export interface LayoutPreset {
-    name: string;
+    name?: string;
     widths?: number[]; // Simple column widths (e.g. [1, 1])
     specialty?: boolean;
-    rows?: { widths: number[] }[]; // For multi-row flex layouts
+    rows?: LayoutPreset[]; // For multi-row flex layouts
     cols?: {
         width: number;
-        rows?: { widths: number[] }[];
+        rows?: LayoutPreset[];
     }[]; // For specialty/masonry layouts
 }
 

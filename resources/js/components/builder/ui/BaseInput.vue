@@ -51,7 +51,7 @@ interface Props {
   error?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   modelValue: '',
   type: 'text',
   placeholder: '',
@@ -61,7 +61,7 @@ const props = withDefaults(defineProps<Props>(), {
   error: false
 });
 
-const emit = defineEmits<{
+defineEmits<{
   (e: 'update:modelValue', value: string | number): void;
   (e: 'blur', event: FocusEvent): void;
   (e: 'focus', event: FocusEvent): void;

@@ -103,7 +103,9 @@ watch(() => props.isOpen, (newVal) => {
     }
 });
 
-const variantIcons: Record<ConfirmVariant, any> = {
+import type { Component } from 'vue';
+
+const variantIcons: Record<ConfirmVariant, Component> = {
     warning: AlertTriangle,
     danger: Trash2,
     destructive: Trash2,

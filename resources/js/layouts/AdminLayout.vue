@@ -49,7 +49,6 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useCmsStore } from '../stores/cms';
 import { useSidebar } from '../composables/useSidebar';
-import { useLayoutMount } from '../composables/useLayoutMount';
 import { useHead } from '@vueuse/head';
 import { useI18n } from 'vue-i18n';
 import AdminSidebar from '../components/layouts/AdminSidebar.vue';
@@ -63,7 +62,6 @@ const { t, te } = useI18n();
 const { sidebarMinimized, sidebarOpen, toggleSidebarMinimize, toggleSidebarOpen, closeSidebar } = useSidebar();
 
 // Use shared mounted state for synchronized transitions
-const { mounted } = useLayoutMount();
 
 // Resize Throttling
 const resizing = ref(false);

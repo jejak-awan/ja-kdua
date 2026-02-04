@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue'
+import { computed, inject, defineAsyncComponent, onMounted, onUnmounted, ref, type CSSProperties } from 'vue'
 const BackgroundMedia = defineAsyncComponent(() => import('./BackgroundMedia.vue'))
 import { 
   getBackgroundStyles, 
@@ -61,7 +61,20 @@ import {
 } from '../utils/styleUtils'
 import { interactionManager } from '../utils/InteractionManager'
 import { useResponsiveDevice } from '../utils/useResponsiveDevice'
-import type { BlockInstance, BlockProps, BuilderInstance } from '../../types/builder'
+import type { BlockInstance, BlockProps, BuilderInstance, ModuleSettings } from '../../types/builder'
+
+interface BlockAttribute {
+    name: string;
+    value: string | number | boolean;
+}
+
+interface BlockInteraction {
+    trigger: string;
+    action: string;
+    targetId?: string;
+    className?: string;
+    animationName?: string;
+}
 
 const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
@@ -75,11 +88,11 @@ const builder = inject<BuilderInstance>('builder')
 const detectedDevice = useResponsiveDevice()
 const device = computed(() => props.device || detectedDevice.value)
 
-const settings = computed(() => (props.settings || props.module?.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.settings || props.module?.settings || {}) as ModuleSettings)
 const isSelected = computed(() => props.mode === 'edit' && builder?.selectedModuleId.value === props.module.id)
 
-const wrapperStyles = computed(() => {
-  const s: Record<string, any> = {}
+const wrapperStyles = computed((): CSSProperties => {
+  const s: Record<string, string | number | undefined> = {}
   
   const background = getBackgroundStyles(settings.value, device.value)
   const padding = getSpacingStyles(settings.value, 'padding', device.value, 'padding')
@@ -94,7 +107,7 @@ const wrapperStyles = computed(() => {
   const positioning = getPositioningStyles(settings.value, device.value)
   const animation = getAnimationStyles(settings.value, device.value)
   const transition = getTransitionStyles(settings.value, device.value)
-  const colors = getColorVariables(settings.value, (props.module as any).hoverSettings || {}, device.value)
+  const colors = getColorVariables(settings.value, (props.module as BlockInstance & { hoverSettings?: Record<string, unknown> }).hoverSettings || {}, device.value)
 
   if (props.manualStyles) {
       // Properties that define outer layout stays on wrapper
@@ -122,10 +135,10 @@ const wrapperStyles = computed(() => {
   return s
 })
 
-const contentStyles = computed(() => {
+const contentStyles = computed((): CSSProperties => {
     if (!props.manualStyles) return {}
     
-    return {
+    const styles = {
         ...getBackgroundStyles(settings.value, device.value),
         ...getSpacingStyles(settings.value, 'padding', device.value, 'padding'),
         ...getBorderStyles(settings.value, 'border', device.value),
@@ -134,9 +147,10 @@ const contentStyles = computed(() => {
         ...getTransformStyles(settings.value, device.value),
         ...getTransitionStyles(settings.value, device.value),
     }
+    return styles as CSSProperties
 })
 
-const cssId = computed(() => getVal(settings.value, 'cssId', device.value) || getVal(settings.value, '_css_id', device.value))
+const cssId = computed(() => (getVal<string>(settings.value, 'cssId', device.value) || getVal<string>(settings.value, '_css_id', device.value)) as string | undefined)
 
 const customClass = computed(() => {
     let classes = [getVal(settings.value, 'cssClass', device.value) || '']
@@ -144,7 +158,7 @@ const customClass = computed(() => {
     classes.push(getVisibilityClasses(settings.value, device.value, props.mode === 'edit'))
     classes.push(getAnimationClasses(settings.value, device.value))
     
-    const hover = (props.module as any).hoverSettings || {}
+    const hover = (props.module as BlockInstance & { hoverSettings?: Record<string, unknown> }).hoverSettings || {}
     const hasHoverText = getVal(hover, 'textColor', device.value) || getVal(hover, 'color', device.value)
     const hasHoverBg = getVal(hover, 'backgroundColor', device.value) || getVal(hover, 'bgColor', device.value)
     
@@ -159,22 +173,22 @@ const customClass = computed(() => {
     return classes.join(' ')
 })
 
-const interactionStyles = computed(() => {
+const interactionStyles = computed((): CSSProperties => {
     const state = interactionManager.getBlockState(props.module.id)
-    const s: Record<string, any> = {}
+    const s: Record<string, string | number | undefined> = {}
     if (state.activeAnimation) {
         s.animationName = state.activeAnimation
         s.animationDuration = '1s'
         s.animationIterationCount = '1'
     }
-    return s
+    return s as CSSProperties
 })
 
 const customAttributes = computed(() => {
-    const attrs: Record<string, any> = {}
-    const list = getVal(settings.value, 'attributes', device.value) || []
+    const attrs: Record<string, string | number | boolean | undefined> = {}
+    const list = (getVal<BlockAttribute[]>(settings.value, 'attributes', device.value) || [])
     if (Array.isArray(list)) {
-        list.forEach(attr => {
+        list.forEach((attr: BlockAttribute) => {
             if (attr.name && attr.name !== 'id' && attr.name !== 'class') {
                 attrs[attr.name] = attr.value
             }
@@ -184,20 +198,20 @@ const customAttributes = computed(() => {
 })
 
 const customCssInternal = computed(() => {
-    const css = getVal(settings.value, 'custom_css', device.value)
+    const css = (getVal<string>(settings.value, 'custom_css', device.value))
     if (!css) return ''
     
-    const id = cssId.value || `#${props.module.id}`
+    const id = (cssId.value as string) || `#${props.module.id}`
     const selector = id.startsWith('#') ? id : `#${id}`
     return css.replace(/selector/g, selector)
 })
 
 const getAttributes = (prefix = '') => {
     const key = prefix ? `${prefix}_attributes` : 'attributes'
-    const list = getVal(settings.value, key, device.value) || []
-    const attrs: Record<string, any> = {}
+    const list = (getVal<BlockAttribute[]>(settings.value, key, device.value) || [])
+    const attrs: Record<string, string | number | boolean | undefined> = {}
     if (Array.isArray(list)) {
-        list.forEach(attr => {
+        list.forEach((attr: BlockAttribute) => {
             if (attr.name && attr.name !== 'id' && attr.name !== 'class') {
                 attrs[attr.name] = attr.value
             }
@@ -220,9 +234,9 @@ const onBlockClick = (e: MouseEvent) => {
 }
 
 const onInteractionEvent = (triggerType: string) => {
-    const interactions = getVal(settings.value, 'interactions', device.value) || []
+    const interactions = (getVal<BlockInteraction[]>(settings.value, 'interactions', device.value) || [])
     if (Array.isArray(interactions)) {
-        interactions.forEach(inter => {
+        interactions.forEach((inter: BlockInteraction) => {
             if (inter.trigger === triggerType && inter.action) {
                 const action: string = inter.action
                 const targetId: string = inter.targetId || props.module.id
@@ -238,7 +252,7 @@ const onInteractionEvent = (triggerType: string) => {
 }
 
 onMounted(() => {
-    const interactions = getVal(settings.value, 'interactions', device.value) || []
+    const interactions = (getVal<BlockInteraction[]>(settings.value, 'interactions', device.value) || [])
     const hasViewportTriggers = Array.isArray(interactions) && interactions.some(i => i.trigger === 'viewportenter' || i.trigger === 'viewportexit')
     
     if (hasViewportTriggers && blockRef.value) {

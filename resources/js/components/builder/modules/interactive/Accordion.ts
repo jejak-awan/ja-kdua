@@ -1,3 +1,4 @@
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -25,7 +26,7 @@ import {
 /**
  * Accordion Module Definition
  */
-export default {
+const AccordionModule: ModuleDefinition = {
     name: 'accordion',
     title: 'Accordion',
     icon: 'List',
@@ -132,7 +133,7 @@ export default {
             {
                 id: 'headerTypography',
                 label: 'Header Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `header_${f.name}`,
                     label: `Header ${f.label}`
@@ -141,7 +142,7 @@ export default {
             {
                 id: 'contentTypography',
                 label: 'Content Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `content_${f.name}`,
                     label: `Content ${f.label}`
@@ -174,4 +175,6 @@ export default {
             attributesSettings
         ]
     }
-}
+};
+
+export default AccordionModule;

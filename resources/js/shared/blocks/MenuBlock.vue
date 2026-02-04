@@ -4,8 +4,8 @@
     :mode="mode"
     :settings="settings"
     class="menu-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Main Navigation'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Main Navigation'"
   >
     <nav 
         class="menu-nav flex items-center w-full transition-colors duration-300" 
@@ -13,24 +13,24 @@
             alignment === 'center' ? 'justify-center' : (alignment === 'right' ? 'justify-end' : 'justify-start'),
             menuStyle === 'vertical' ? 'flex-col' : 'flex-row'
         ]"
-        :style="containerStyles"
+        :style="(containerStyles as any)"
     >
       <!-- Logo Section -->
       <div v-if="showLogo && settings.logoImage" class="menu-logo flex-shrink-0 mr-10" :class="logoPosition === 'right' ? 'order-last ml-10 mr-0' : ''">
-        <img :src="settings.logoImage" alt="Logo" class="logo-image h-12 w-auto object-contain transition-transform duration-300 hover:scale-105" />
+        <img :src="(settings.logoImage as string)" alt="Logo" class="logo-image h-12 w-auto object-contain transition-transform duration-300 hover:scale-105" />
       </div>
       
       <!-- Desktop Menu -->
       <ul 
         class="menu-items hidden md:flex list-none p-0 m-0 transition-colors duration-300" 
         :class="menuStyle === 'vertical' ? 'flex-col gap-6' : 'flex-row gap-10'"
-        :style="menuStyles"
+        :style="(menuStyles as any)"
       >
         <li v-for="item in menuItems" :key="item" class="menu-item group/item">
           <a 
             href="#" 
             class="menu-link block transition-colors duration-300 font-bold tracking-tight relative pb-1" 
-            :style="linkStyles"
+            :style="(linkStyles as any)"
             @click.prevent
           >
             {{ item }}
@@ -73,43 +73,45 @@
 import { computed, ref, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import MenuIcon from 'lucide-vue-next/dist/esm/icons/menu.js';
-import X from 'lucide-vue-next/dist/esm/icons/x.js';import { 
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import { 
   getVal,
   getLayoutStyles,
   getTypographyStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = defineProps<{
   module: BlockInstance
   mode: 'view' | 'edit'
 }>()
 
-const builder = inject<any>('builder', null)
+const builder = inject<BuilderInstance | null>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const mobileOpen = ref(false)
 const menuItems = ['Home', 'Products', 'Services', 'Insights', 'Company']
 
-const showLogo = computed(() => getVal(settings.value, 'showLogo', device.value))
-const logoPosition = computed(() => getVal(settings.value, 'logoPosition', device.value) || 'left')
-const menuStyle = computed(() => getVal(settings.value, 'style', device.value) || 'horizontal')
-const alignment = computed(() => getVal(settings.value, 'alignment', device.value) || 'left')
+const showLogo = computed(() => getVal<boolean>(settings.value, 'showLogo', device.value))
+const logoPosition = computed(() => getVal<string>(settings.value, 'logoPosition', device.value) || 'left')
+const menuStyle = computed(() => getVal<string>(settings.value, 'style', device.value) || 'horizontal')
+const alignment = computed(() => getVal<string>(settings.value, 'alignment', device.value) || 'left')
 
 const containerStyles = computed(() => {
     return getLayoutStyles(settings.value, device.value)
 })
 
 const menuStyles = computed(() => {
-  const bgColor = getVal(settings.value, 'menuBackgroundColor', device.value) || 'transparent'
-  return { 
+  const bgColor = getVal<string>(settings.value, 'menuBackgroundColor', device.value) || 'transparent'
+  const styles: Record<string, string | number> = { 
     backgroundColor: bgColor 
   }
+  return styles
 })
 
 const linkStyles = computed(() => {
-  const styles = getTypographyStyles(settings.value, 'menu_', device.value)
+  const styles = (getTypographyStyles(settings.value, 'menu_', device.value) || {}) as Record<string, string | number>
   return styles
 })
 </script>

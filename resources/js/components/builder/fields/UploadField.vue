@@ -113,7 +113,7 @@ import { ref, computed, watch, inject, onMounted, onUnmounted } from 'vue'
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import Upload from 'lucide-vue-next/dist/esm/icons/upload.js';
 import File from 'lucide-vue-next/dist/esm/icons/file.js';
-import Video from 'lucide-vue-next/dist/esm/icons/video.js';
+
 import LinkIcon from 'lucide-vue-next/dist/esm/icons/link.js';
 import Variable from 'lucide-vue-next/dist/esm/icons/variable.js';
 import MediaPicker from '@/components/media/MediaPicker.vue'
@@ -121,7 +121,7 @@ import { BaseInput, IconButton } from '@/components/builder/ui'
 import { useToast } from '@/composables/useToast'
 import type { BuilderInstance, SettingDefinition, GlobalVariable, BlockInstance } from '@/types/builder'
 import { toCssVarName } from '../core/cssVariables'
-import { useI18n } from 'vue-i18n'
+
 
 const props = withDefaults(defineProps<{
   field: SettingDefinition;
@@ -131,19 +131,20 @@ const props = withDefaults(defineProps<{
   allowedExtensions?: string[];
   maxSize?: number | null;
   module?: BlockInstance;
-  previewStyle?: Record<string, any>;
+  previewStyle?: Record<string, string | number>;
 }>(), {
   value: '',
   placeholderValue: '',
   hidePreview: false,
   allowedExtensions: () => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
   maxSize: null,
+  module: undefined,
   previewStyle: () => ({})
 })
 
 const emit = defineEmits(['update:value'])
 const toast = useToast()
-const { t } = useI18n()
+
 const builder = inject<BuilderInstance>('builder')
 const globalImages = builder?.globalVariables?.globalImages || ref<GlobalVariable[]>([])
 
@@ -277,7 +278,7 @@ const selectVar = (val: string) => {
     emit('update:value', `var(${val})`)
 }
 
-const handleSelection = (media: any) => {
+const handleSelection = (media: { url: string; extension?: string }) => {
   if (media && media.url) {
     const ext = media.extension || (media.url.split('.').pop() || '').toLowerCase().split('?')[0]
     if (props.allowedExtensions && props.allowedExtensions.length > 0 && !props.allowedExtensions.includes(ext)) {

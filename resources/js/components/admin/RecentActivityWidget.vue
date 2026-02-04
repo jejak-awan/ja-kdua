@@ -136,7 +136,7 @@ const fetchActivities = async () => {
         const response = await api.get('/admin/ja/activity-journal', { params: { per_page: 6 } });
         const { data } = parseResponse(response);
         activities.value = (data as Activity[]) || [];
-    } catch (error: any) {
+    } catch (error: unknown) {
         if (error && typeof error === 'object' && 'code' in error && 'response' in error) {
             const err = error as { code: string; response?: { status: number } };
             if (err.code !== 'ERR_CANCELED' && err.response?.status !== 401) {
@@ -207,7 +207,12 @@ const getActionLabel = (action?: string) => {
 
 onMounted(() => {
     fetchActivities();
-    refreshInterval.value = setInterval(fetchActivities, 120000);
+    // Refresh every 3 minutes, but only if the tab is visible
+    refreshInterval.value = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+            fetchActivities();
+        }
+    }, 180000);
 });
 
 onUnmounted(() => {

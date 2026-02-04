@@ -291,7 +291,7 @@
                     </div>
                 </button>
                 <div v-show="sections.image" class="border-t border-border/5 p-5">
-                     <FeaturedImage :model-value="modelValue.featured_image || null" @update:model-value="(val: any) => updateField('featured_image', val)" />
+                     <FeaturedImage :model-value="modelValue.featured_image || null" @update:model-value="(val: string | null) => updateField('featured_image', val)" />
                 </div>
             </div>
 
@@ -526,7 +526,7 @@ const filteredTags = computed(() => {
     return availableTags.value.slice(0, 10);
 });
 
-const updateField = <K extends keyof ContentForm>(field: K, value: any) => {
+const updateField = <K extends keyof ContentForm>(field: K, value: ContentForm[K]) => {
     emit('update:modelValue', { ...props.modelValue, [field]: value });
 };
 
@@ -598,7 +598,7 @@ const removeTag = (tagIdOrName: string | number | null) => {
     ));
 };
 
-const updateMenuField = <K extends keyof MenuItem>(field: K, value: any) => {
+const updateMenuField = <K extends keyof MenuItem>(field: K, value: MenuItem[K]) => {
     emit('update:modelValue', {
         ...props.modelValue,
         menu_item: {

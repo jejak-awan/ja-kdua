@@ -1,5 +1,5 @@
 import { logger } from '@/utils/logger';
-import { shallowRef } from 'vue';
+import { shallowRef, type Component } from 'vue';
 import type { MenuItemDefinition, MenuItem, MenuItemSetting } from '@/types/menu';
 
 /**
@@ -69,7 +69,7 @@ class MenuItemRegistry {
             return null;
         }
 
-        const defaultValues: Record<string, any> = {};
+        const defaultValues: Record<string, unknown> = {};
         if (definition.settings) {
             definition.settings.forEach(setting => {
                 if (setting.default !== undefined) {
@@ -101,7 +101,7 @@ class MenuItemRegistry {
     /**
      * Get icon component for a type
      */
-    getIcon(type: string): any {
+    getIcon(type: string): Component | string | undefined {
         const definition = this.get(type);
         return definition?.icon;
     }

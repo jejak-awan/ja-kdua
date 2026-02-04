@@ -137,16 +137,11 @@ import { useI18n } from 'vue-i18n'
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
 import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
-import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
-import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Monitor from 'lucide-vue-next/dist/esm/icons/monitor.js';
 import Tablet from 'lucide-vue-next/dist/esm/icons/tablet.js';
 import MousePointer from 'lucide-vue-next/dist/esm/icons/mouse-pointer.js';
 import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
-import SlidersHorizontal from 'lucide-vue-next/dist/esm/icons/sliders-horizontal.js';
-import Check from 'lucide-vue-next/dist/esm/icons/check.js';
-import Library from 'lucide-vue-next/dist/esm/icons/library.js';
 import ChevronsRight from 'lucide-vue-next/dist/esm/icons/chevrons-right.js';
 import { SETTINGS_TABS } from '@/components/builder/core/constants'
 import ModuleRegistry from '@/components/builder/core/ModuleRegistry'
@@ -155,7 +150,7 @@ import ResponsiveBreakpointsModal from '@/components/builder/modals/ResponsiveBr
 import { IconButton, BaseInput, BaseDropdown, BaseDivider } from '@/components/builder/ui'
 import DesignPresetsSelector from '@/components/builder/settings/DesignPresetsSelector.vue'
 import ThemeSettingsPanel from '@/components/builder/layout/panels/ThemeSettingsPanel.vue'
-import type { BuilderInstance, BlockInstance } from '../../../types/builder'
+import type { BuilderInstance, BlockInstance, BuilderPreset } from '../../../types/builder'
 
 const { t, te } = useI18n()
 
@@ -178,7 +173,7 @@ defineEmits<{
 }>()
 
 // Inject
-const builder = inject<BuilderInstance>('builder') as any
+const builder = inject<BuilderInstance>('builder')!
 
 // State
 const activePanel = computed(() => builder?.activePanel?.value)
@@ -238,7 +233,7 @@ const goBack = () => {
 
 const selectBreakpoint = (bp: { id: string }) => {
   if (builder?.setDeviceMode) {
-    builder.setDeviceMode(bp.id)
+    builder.setDeviceMode(bp.id as 'desktop' | 'tablet' | 'mobile')
   }
 }
 
@@ -250,19 +245,19 @@ const openSettings = (event: MouseEvent) => {
   showBreakpointsModal.value = true
 }
 
-const handleBreakpointsSave = (_breakpointsData: any) => {
+const handleBreakpointsSave = (_breakpointsData: unknown) => {
   // Logic to save breakpoints settings
 }
 
-const handlePresetAction = (payload: { type: string, data: any }) => {
+const handlePresetAction = (payload: { type: string, data: unknown }) => {
   const { type, data } = payload
   if (type === 'addNew' || type === 'newFromCurrent') {
     if (props.module) {
-      builder?.openSavePresetModal(props.module.id)
+      builder?.openSavePresetModal?.(props.module.id)
     }
   } else if (type === 'apply' && data) {
     if (props.module) {
-      builder?.applyPreset(props.module.id, data)
+      builder?.applyPreset(props.module.id, data as BuilderPreset)
     }
   }
 }

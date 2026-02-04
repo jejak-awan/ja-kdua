@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -163,7 +163,7 @@ const TextModule: ModuleDefinition = {
                             { name: 'hover_text_color', type: 'color', label: 'Hover Text Color', responsive: true }
                         ]
                     },
-                    ...typographySettings.fields!
+                    ...(typographySettings.fields as SettingDefinition[])
                 ]
             },
             backgroundSettings,

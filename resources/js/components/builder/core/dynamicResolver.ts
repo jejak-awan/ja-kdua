@@ -83,7 +83,7 @@ export async function resolveTag(tag: string, context: DynamicContext = {}): Pro
         })
 
         return value
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to resolve dynamic tag:', error)
         return tag // Return the tag itself as fallback
     }
@@ -152,7 +152,7 @@ export async function resolveTags(tags: string[], context: DynamicContext = {}):
         }
 
         return results
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to resolve dynamic tags:', error)
         // Return tags as-is
         for (const tag of uncachedTags) {

@@ -4,32 +4,32 @@
     :mode="mode" 
     :device="device"
     class="blog-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Blog Posts'"
-    :style="cardStyles"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Blog Posts'"
+    :style="(cardStyles as any)"
   >
-    <div class="blog-wrapper w-full" :style="containerStyles">
+    <div class="blog-wrapper w-full" :style="(containerStyles as any)">
       <h2 
         v-if="settings.title || mode === 'edit'" 
         class="blog-main-title mb-16 outline-none tracking-tighter" 
-        :style="mainTitleStyles"
+        :style="(mainTitleStyles as any)"
         :contenteditable="mode === 'edit'"
-        @blur="(e: any) => updateField('title', (e.target as HTMLElement).innerText)"
-        v-text="settings.title || 'Insights & Stories'"
+        @blur="(e: FocusEvent) => updateField('title', (e.target as HTMLElement).innerText)"
+        v-text="(settings.title as string) || 'Insights & Stories'"
       ></h2>
 
-      <div class="blog-grid transition-[width] duration-500" :style="gridStyles">
+      <div class="blog-grid transition-[width] duration-500" :style="(gridStyles as any)">
         <Card 
           v-for="post in mockPosts" 
           :key="post.id"
           class="blog-post group flex flex-col border-none shadow-2xl overflow-hidden rounded-[3rem] transition-colors duration-700 bg-white dark:bg-slate-900 border border-slate-50 dark:border-slate-800 hover:-translate-y-4"
-          :style="postStyles"
+          :style="(postStyles as any)"
         >
           <!-- Featured Image -->
           <div 
             v-if="settings.showImage !== false" 
             class="post-image relative overflow-hidden transition-[width] duration-500" 
-            :style="imageWrapperStyles"
+            :style="(imageWrapperStyles as any)"
           >
             <div class="absolute inset-0 bg-slate-50 dark:bg-slate-950 flex items-center justify-center overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10" />
@@ -49,7 +49,7 @@
           <CardContent class="p-10 flex flex-col flex-grow relative z-20">
             <CardTitle 
               class="post-title text-2xl font-black mb-4 line-clamp-2 leading-tight tracking-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors border-none" 
-              :style="itemTitleStyles"
+              :style="(itemTitleStyles as any)"
             >
               {{ post.title }}
             </CardTitle>
@@ -57,7 +57,7 @@
             <CardDescription 
               v-if="settings.showExcerpt !== false" 
               class="post-excerpt mb-10 line-clamp-3 text-slate-500 dark:text-slate-400 font-medium leading-relaxed" 
-              :style="excerptStyles"
+              :style="(excerptStyles as any)"
             >
               {{ post.excerpt }}
             </CardDescription>
@@ -94,7 +94,7 @@ import {
   getLayoutStyles, 
   getTypographyStyles 
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -105,12 +105,12 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const builder = inject<BuilderInstance | null>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 // Mock posts for preview
 const mockPosts = computed(() => {
-  const count = getVal(settings.value, 'itemsPerPage', props.device) || 6
+  const count = getVal<number>(settings.value, 'itemsPerPage', props.device) || 6
   return Array.from({ length: Math.min(count, 12) }, (_, i) => ({
     id: i + 1,
     title: `Crafting Digital Excellence: The Art of Dynamic CMS Design`,
@@ -122,9 +122,9 @@ const mockPosts = computed(() => {
 })
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -135,9 +135,9 @@ const cardStyles = computed(() => {
 const containerStyles = computed(() => getLayoutStyles(settings.value, props.device))
 
 const gridStyles = computed(() => {
-  const layout = getVal(settings.value, 'layout', props.device) || 'grid'
-  const columns = getVal(settings.value, 'columns', props.device) || 3
-  const gap = getVal(settings.value, 'gap', props.device) || 32
+  const layout = getVal<string>(settings.value, 'layout', props.device) || 'grid'
+  const columns = getVal<number>(settings.value, 'columns', props.device) || 3
+  const gap = getVal<number>(settings.value, 'gap', props.device) || 32
   
   if (layout === 'list') {
     return { 
@@ -154,11 +154,11 @@ const gridStyles = computed(() => {
 })
 
 const postStyles = computed(() => ({
-    backgroundColor: getVal(settings.value, 'cardBackgroundColor', props.device) || 'transparent',
+    backgroundColor: getVal<string>(settings.value, 'cardBackgroundColor', props.device) || 'transparent',
 }))
 
 const imageWrapperStyles = computed(() => {
-  const ratio = getVal(settings.value, 'imageAspectRatio', props.device) || '16:9'
+  const ratio = getVal<string>(settings.value, 'imageAspectRatio', props.device) || '16:9'
   const ratioMap: Record<string, string> = { '16:9': '56.25%', '4:3': '75%', '1:1': '100%' }
   return { paddingTop: ratioMap[ratio] || '56.25%' }
 })

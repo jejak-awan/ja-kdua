@@ -4,23 +4,23 @@
     :mode="mode"
     :settings="settings"
     class="team-member-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Team Member'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Team Member'"
   >
     <div 
       class="flex transition-colors duration-300 w-full p-8 rounded-[3rem] bg-white dark:bg-slate-900 border border-slate-50 dark:border-slate-800 shadow-xl hover:-translate-y-3 group" 
       :class="[
         layout === 'stacked' ? 'flex-col items-center gap-8 text-center' : 'flex-row items-center gap-10 text-left',
-        getVal(settings, 'alignment', device) === 'right' ? 'flex-row-reverse text-right' : ''
+        getVal<string>(settings, 'alignment', device) === 'right' ? 'flex-row-reverse text-right' : ''
       ]"
       :style="containerStyles"
     >
       <!-- Avatar -->
       <Avatar :style="avatarStyles" class="flex-shrink-0 shadow-2xl transition-transform duration-700 group-hover:scale-110 group-hover:rotate-3 border-4 border-slate-50 dark:border-slate-800 overflow-hidden rounded-[2.5rem]">
         <AvatarImage 
-          v-if="getVal(settings, 'image', device)" 
-          :src="getVal(settings, 'image', device)" 
-          :alt="getVal(settings, 'name', device)" 
+          v-if="getVal<string>(settings, 'image', device)" 
+          :src="(getVal<string>(settings, 'image', device) as string)" 
+          :alt="(getVal<string>(settings, 'name', device) as string)" 
           class="object-cover"
         />
         <AvatarFallback class="bg-slate-50 dark:bg-slate-950 text-primary">
@@ -34,22 +34,22 @@
           class="font-black text-2xl mb-2 outline-none tracking-tighter text-slate-900 dark:text-white" 
           :style="nameStyles"
           :contenteditable="mode === 'edit'"
-          @blur="(e: any) => updateField('name', (e.target as HTMLElement).innerText)"
-          v-text="getVal(settings, 'name', device) || 'Design Luminary'"
+          @blur="(e: FocusEvent) => updateField('name', (e.target as HTMLElement).innerText)"
+          v-text="getVal<string>(settings, 'name', device) || 'Design Luminary'"
         ></h3>
         <p 
           class="text-xs font-black uppercase tracking-[0.2em] text-primary mb-5 outline-none" 
           :style="positionStyles"
           :contenteditable="mode === 'edit'"
-          @blur="(e: any) => updateField('position', (e.target as HTMLElement).innerText)"
-          v-text="getVal(settings, 'position', device) || 'Principal Architect'"
+          @blur="(e: FocusEvent) => updateField('position', (e.target as HTMLElement).innerText)"
+          v-text="getVal<string>(settings, 'position', device) || 'Principal Architect'"
         ></p>
         <div 
           v-if="bioValue || mode === 'edit'" 
           class="mb-8 leading-relaxed outline-none text-slate-500 dark:text-slate-400 font-medium" 
           :style="bioStyles"
           :contenteditable="mode === 'edit'"
-          @blur="(e: any) => updateField('bio', (e.target as HTMLElement).innerText)"
+          @blur="(e: FocusEvent) => updateField('bio', (e.target as HTMLElement).innerText)"
           v-text="bioValue || 'Crafting experiences that bridge the gap between human intuition and digital precision.'"
         ></div>
         
@@ -76,8 +76,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
-import User from 'lucide-vue-next/dist/esm/icons/user.js';import BaseBlock from '../components/BaseBlock.vue'
+import { computed, inject, type CSSProperties } from 'vue'
+import User from 'lucide-vue-next/dist/esm/icons/user.js';
+import BaseBlock from '../components/BaseBlock.vue'
 import { Avatar, AvatarImage, AvatarFallback } from '../ui'
 import { LucideIcon } from '@/components/ui';
 import { 
@@ -85,31 +86,33 @@ import {
   getLayoutStyles, 
   getTypographyStyles 
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = defineProps<{
   module: BlockInstance
   mode: 'view' | 'edit'
 }>()
 
-const builder = inject<any>('builder', null)
-const device = computed(() => builder?.device?.value || 'desktop')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const builder = inject<BuilderInstance | null>('builder', null)
+const device = computed(() => (builder?.device?.value || 'desktop') as 'desktop' | 'tablet' | 'mobile')
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const bioValue = computed(() => getVal(settings.value, 'bio', device.value))
-const layout = computed(() => getVal(settings.value, 'layout', device.value) || 'stacked')
-const alignment = computed(() => getVal(settings.value, 'alignment', device.value) || 'center')
+const bioValue = computed(() => getVal<string>(settings.value, 'bio', device.value))
+const layout = computed(() => getVal<string>(settings.value, 'layout', device.value) || 'stacked')
+const alignment = computed(() => getVal<string>(settings.value, 'alignment', device.value) || 'center')
 
-const containerStyles = computed(() => {
-    return getLayoutStyles(settings.value, device.value)
+const containerStyles = computed((): CSSProperties => {
+    return (getLayoutStyles(settings.value, device.value) || {}) as CSSProperties
 })
 
-const avatarStyles = computed(() => {
-    const size = parseInt(getVal(settings.value, 'imageSize', device.value)) || 150
-    return {
+const avatarStyles = computed((): CSSProperties => {
+    const val = getVal<string | number>(settings.value, 'imageSize', device.value)
+    const size = parseInt(val as string) || 150
+    const styles: Record<string, string | number> = {
         width: `${size}px`,
         height: `${size}px`
     }
+    return styles as CSSProperties
 })
 
 const socialAlignmentClass = computed(() => {
@@ -118,11 +121,15 @@ const socialAlignmentClass = computed(() => {
     return 'justify-start' 
 })
 
-const socialLinks = computed(() => settings.value.socialLinks || [])
+interface TeamSocial {
+    network: string;
+    url?: string;
+}
+const socialLinks = computed(() => (settings.value.socialLinks as TeamSocial[]) || [])
 
-const nameStyles = computed(() => getTypographyStyles(settings.value, 'name_', device.value))
-const positionStyles = computed(() => getTypographyStyles(settings.value, 'position_', device.value))
-const bioStyles = computed(() => getTypographyStyles(settings.value, 'bio_', device.value))
+const nameStyles = computed(() => (getTypographyStyles(settings.value, 'name_', device.value) || {}) as CSSProperties)
+const positionStyles = computed(() => (getTypographyStyles(settings.value, 'position_', device.value) || {}) as CSSProperties)
+const bioStyles = computed(() => (getTypographyStyles(settings.value, 'bio_', device.value) || {}) as CSSProperties)
 
 const updateField = (key: string, value: string) => {
   if (props.mode !== 'edit' || !builder) return

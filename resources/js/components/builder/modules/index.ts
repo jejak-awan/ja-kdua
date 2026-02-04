@@ -4,6 +4,7 @@
  */
 
 import ModuleRegistry from '@/components/builder/core/ModuleRegistry'
+import type { ModuleDefinition } from '@/types/builder';
 
 // Bulk import all modules using glob
 const moduleFiles = import.meta.glob([
@@ -15,9 +16,9 @@ const moduleFiles = import.meta.glob([
     './forms/*.ts',
     './dynamic/*.ts',
     './fullwidth/*.ts'
-], { eager: true }) as Record<string, { default: any }>;
+], { eager: true }) as Record<string, { default: ModuleDefinition }>;
 
-const modules: any[] = [];
+const modules: ModuleDefinition[] = [];
 
 // Process and register each module
 Object.keys(moduleFiles).forEach((path) => {

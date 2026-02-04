@@ -4,8 +4,8 @@
     :mode="mode" 
     :device="device"
     class="video-slider-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Premium Video Slider'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Premium Video Slider'"
     :style="cardStyles"
   >
     <div class="carousel-container relative w-full" :style="containerStyles">
@@ -75,8 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { logger } from '@/utils/logger';
-import { computed, inject } from 'vue'
+import { computed } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import Carousel from '../ui/Carousel.vue'
 import CarouselContent from '../ui/CarouselContent.vue'
@@ -85,31 +84,43 @@ import CarouselNext from '../ui/CarouselNext.vue'
 import CarouselPrevious from '../ui/CarouselPrevious.vue'
 import { Card, CardContent, CardTitle, CardDescription, Badge } from '../ui'
 import Autoplay from 'embla-carousel-autoplay'
+import type { EmblaPluginType } from 'embla-carousel'
 import Film from 'lucide-vue-next/dist/esm/icons/film.js';
-import Play from 'lucide-vue-next/dist/esm/icons/play.js';import { 
+import Play from 'lucide-vue-next/dist/esm/icons/play.js';
+import { 
     getVal,
     getTypographyStyles,
     getLayoutStyles,
     getResponsiveValue 
 } from '../utils/styleUtils'
-import type { BlockInstance, BlockProps } from '@/types/builder'
+import type { BlockProps, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.settings || props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.settings || props.module.settings || {}) as ModuleSettings)
 
-const items = computed(() => settings.value.items || [
+interface VideoItem {
+    title: string;
+    description?: string;
+    type?: string;
+    videoId?: string;
+    thumbnail?: string;
+}
+
+const items = computed(() => (settings.value.items as VideoItem[]) || [
     { title: 'Designing the Future of CMS', description: 'Take a deep dive into modern component architecture and user experience design.', type: 'YouTube', videoId: 'aqz-KE-bpKQ' },
     { title: 'Unmatched Performance with Vue 3', description: 'Exploring how script setup and reactivity transform web development workflows.', type: 'Vimeo', videoId: '446698547' },
     { title: 'Mastering Tailwind Layouts', description: 'Learn the secrets to building highly responsive, premium interfaces in record time.', type: 'YouTube', videoId: 'aqz-KE-bpKQ' }
 ])
 
-const slidesPerView = computed(() => parseInt(getResponsiveValue(settings.value, 'slidesPerView', props.device)) || 1)
-const showArrows = computed(() => getResponsiveValue(settings.value, 'showArrows', props.device) !== false)
+const slidesPerView = computed(() => {
+    const val = getResponsiveValue<string | number>(settings.value, 'slidesPerView', props.device)
+    return parseInt(val as string) || 1
+})
+const showArrows = computed(() => getResponsiveValue<boolean>(settings.value, 'showArrows', props.device) !== false)
 
 const slideBasisClass = computed(() => {
     const spv = slidesPerView.value
@@ -123,14 +134,14 @@ const slideBasisClass = computed(() => {
 const carouselOptions = computed(() => ({
     align: 'start' as const,
     loop: settings.value.loop !== false,
-    slidesToScroll: slidesPerView.value
+    slidesToScroll: slidesPerView.value as 1 | 2 | 3 | 4
 }))
 
-const carouselPlugins = computed(() => {
+const carouselPlugins = computed<EmblaPluginType[]>(() => {
     const plugins = []
     if (settings.value.autoplay && props.mode === 'view') {
         plugins.push(Autoplay({
-            delay: parseInt(settings.value.autoplaySpeed) || 5000,
+            delay: parseInt(settings.value.autoplaySpeed as string) || 5000,
             stopOnInteraction: false
         }))
     }
@@ -138,9 +149,9 @@ const carouselPlugins = computed(() => {
 })
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -148,22 +159,21 @@ const cardStyles = computed(() => {
     return styles
 })
 
-const containerStyles = computed(() => getLayoutStyles(settings.value, props.device))
+const containerStyles = computed(() => (getLayoutStyles(settings.value, props.device) || {}) as Record<string, string | number>)
 
-const handlePlay = (video: any) => {
+const handlePlay = (_video: VideoItem) => {
     if (props.mode === 'edit') return
-    logger.info('Playing video:', video)
 }
 
-const getThumb = (video: any) => {
+const getThumb = (video: VideoItem): string | undefined => {
     if (video.thumbnail) return video.thumbnail
-    if (video.videoId && video.type === 'youtube') {
+    if (video.videoId && (video.type === 'YouTube' || video.type === 'youtube')) {
         return `https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`
     }
-    return null
+    return undefined
 }
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
+const titleStyles = computed(() => (getTypographyStyles(settings.value, 'title_', props.device) || {}) as Record<string, string | number>)
 </script>
 
 <style scoped>

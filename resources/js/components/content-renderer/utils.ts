@@ -24,5 +24,5 @@ export const generateUUID = sharedGenerateUUID
 /**
  * Legacy resolve function for individual sensitive properties.
  */
-export const resolve = (val: any, device: string = 'desktop') =>
+export const resolve = (val: unknown, device: string = 'desktop') =>
     SharedStyles.getResponsiveValue({ key: val }, 'key', device)

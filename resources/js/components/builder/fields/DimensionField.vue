@@ -105,7 +105,7 @@ const displayValue = computed({
         if (keywords.includes(unit.value)) return unit.value
         return numericValue.value
     },
-    set: (val: any) => {
+    set: (val: string | number) => {
         const lowerVal = String(val).toLowerCase()
         if (keywords.includes(lowerVal)) {
             unit.value = lowerVal
@@ -114,7 +114,7 @@ const displayValue = computed({
             return
         }
         
-        const num = parseFloat(val)
+        const num = parseFloat(String(val))
         if (!isNaN(num)) {
             numericValue.value = num
             if (keywords.includes(unit.value)) unit.value = 'px'

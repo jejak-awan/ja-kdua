@@ -1,3 +1,4 @@
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -23,7 +24,7 @@ import {
 /**
  * Tabs Module Definition
  */
-export default {
+const TabsModule: ModuleDefinition = {
     name: 'tabs',
     title: 'Tabs',
     icon: 'RectangleHorizontal',
@@ -122,7 +123,7 @@ export default {
             {
                 id: 'tabTypography',
                 label: 'Tab Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `tab_${f.name}`,
                     label: `Tab ${f.label}`
@@ -131,7 +132,7 @@ export default {
             {
                 id: 'tabActiveTypography',
                 label: 'Active Tab Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `tab_active_${f.name}`,
                     label: `Active Tab ${f.label}`
@@ -148,7 +149,7 @@ export default {
             {
                 id: 'contentTypography',
                 label: 'Content Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `content_${f.name}`,
                     label: `Content ${f.label}`
@@ -181,4 +182,6 @@ export default {
             attributesSettings
         ]
     }
-}
+};
+
+export default TabsModule;

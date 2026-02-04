@@ -4,19 +4,19 @@
     :mode="mode"
     :device="device"
     class="filterable-portfolio-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Filterable Portfolio'"
-    :style="cardStyles"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Filterable Portfolio'"
+    :style="(cardStyles as any)"
   >
-    <div class="portfolio-container w-full" :style="containerStyles">
+    <div class="portfolio-container w-full" :style="(containerStyles as any)">
       <!-- Filter Tabs -->
-      <div v-if="settings.showFilter !== false" class="portfolio-filter mb-16 flex flex-wrap gap-4" :style="filterStyles">
+      <div v-if="settings.showFilter !== false" class="portfolio-filter mb-16 flex flex-wrap gap-4" :style="(filterStyles as any)">
         <Button 
           v-for="cat in categories" 
           :key="cat" 
           :variant="activeFilter === cat ? 'default' : 'outline'"
           class="rounded-full px-8 py-6 font-black uppercase tracking-widest text-[10px] transition-[width] duration-500 shadow-xl hover:shadow-2xl" 
-          :style="activeFilter === cat ? {} : filterBtnStyles"
+          :style="activeFilter === cat ? {} : (filterBtnStyles as any)"
           @click="activeFilter = cat"
         >
           {{ cat }}
@@ -24,7 +24,7 @@
       </div>
       
       <!-- Portfolio Grid -->
-      <div class="portfolio-grid grid transition-[width] duration-500" :style="gridStyles">
+      <div class="portfolio-grid grid transition-[width] duration-500" :style="(gridStyles as any)">
         <Card 
             v-for="(item, i) in filteredItems" 
             :key="i" 
@@ -35,23 +35,22 @@
             <img v-if="item.image" :src="item.image" :alt="item.title" class="w-full h-full object-cover transition-opacity duration-700 group-hover:opacity-40" />
             <FolderOpen v-else class="w-24 h-24 text-slate-100 dark:text-slate-800 opacity-30" />
           </div>
-          
           <div 
             class="item-overlay absolute inset-0 z-20 flex flex-col items-center justify-center p-12 text-center opacity-0 group-hover:opacity-100 transition-colors duration-700 backdrop-blur-xl bg-primary/80" 
-            :style="overlayStyles"
+            :style="(overlayStyles as Record<string, string | number>)"
           >
             <Badge 
                 v-if="settings.showCategories !== false" 
                 variant="secondary"
                 class="mb-6 rounded-2xl font-black px-6 py-2 text-[10px] uppercase tracking-[0.3em] bg-white/10 text-white border-white/20 backdrop-blur-md shadow-2xl transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-500"
-                :style="itemCategoryStyles"
+                :style="(itemCategoryStyles as any)"
             >
                 {{ item.category }}
             </Badge>
             <h4 
                 v-if="settings.showTitle !== false" 
                 class="item-title text-white text-3xl font-black tracking-tighter leading-none max-w-xs transform -translate-y-2 group-hover:translate-y-0 transition-transform duration-500 delay-75" 
-                :style="itemTitleStyles"
+                :style="(itemTitleStyles as any)"
             >
                 {{ item.title }}
             </h4>
@@ -70,13 +69,21 @@
 import { computed, ref, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Button, Badge, Card } from '../ui'
-import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';import { LucideIcon } from '@/components/ui';
+import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';
+import { LucideIcon } from '@/components/ui';
 import { 
   getVal,
   getLayoutStyles,
   getTypographyStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
+
+interface PortfolioItem {
+  title: string;
+  category: string;
+  image: string | null;
+  url?: string;
+}
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -87,13 +94,14 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const builder = inject<BuilderInstance | null>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
+const device = computed(() => props.device || builder?.device?.value || 'desktop')
 
 const activeFilter = ref('All')
 
 // Mock dynamic data
-const injectedPortfolioItems = inject<any[]>('portfolioItems', [
+const injectedPortfolioItems = inject<PortfolioItem[]>('portfolioItems', [
   { title: 'Luminous Branding', category: 'Branding', image: 'https://picsum.photos/800/800?random=21' },
   { title: 'Nexus UI Design', category: 'Design', image: 'https://picsum.photos/800/800?random=22' },
   { title: 'Aura App Dev', category: 'Development', image: 'https://picsum.photos/800/800?random=23' },
@@ -104,7 +112,7 @@ const injectedPortfolioItems = inject<any[]>('portfolioItems', [
   { title: 'Nova Marketing', category: 'Strategy', image: 'https://picsum.photos/800/800?random=28' }
 ])
 
-const allLabel = computed(() => getVal(settings.value, 'allLabel', props.device) || 'All')
+const allLabel = computed(() => getVal<string>(settings.value, 'allLabel', device.value) || 'All')
 
 const categories = computed(() => {
     const cats = new Set([allLabel.value])
@@ -113,7 +121,7 @@ const categories = computed(() => {
 })
 
 const filteredItems = computed(() => {
-  const count = getVal(settings.value, 'postsCount', props.device) || 12
+  const count = getVal<number>(settings.value, 'postsCount', device.value) || 12
   let items = injectedPortfolioItems
   if (activeFilter.value !== allLabel.value) {
       items = items.filter(i => i.category === activeFilter.value)
@@ -121,15 +129,15 @@ const filteredItems = computed(() => {
   return items.slice(0, count)
 })
 
-const handleItemClick = (item: any) => {
+const handleItemClick = (item: PortfolioItem) => {
     if (props.mode === 'edit') return
     if (item.url) window.location.href = item.url
 }
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', device.value) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', device.value) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -137,32 +145,36 @@ const cardStyles = computed(() => {
     return styles
 })
 
-const containerStyles = computed(() => getLayoutStyles(settings.value, props.device))
+const containerStyles = computed(() => (getLayoutStyles(settings.value, device.value) || {}) as Record<string, string | number>)
 
 const filterStyles = computed(() => {
-    const alignment = getVal(settings.value, 'filterAlignment', props.device) || 'center'
-    return { 
+    const alignment = getVal<string>(settings.value, 'filterAlignment', device.value) || 'center'
+    const styles: Record<string, string | number> = { 
         justifyContent: alignment === 'center' ? 'center' : (alignment === 'right' ? 'flex-end' : 'flex-start')
     }
+    return styles
 })
 
-const filterBtnStyles = computed(() => getTypographyStyles(settings.value, 'filter_', props.device))
+const filterBtnStyles = computed(() => getTypographyStyles(settings.value, 'filter_', device.value))
 
 const gridStyles = computed(() => {
-    const cols = getVal(settings.value, 'columns', props.device) || 4
+    const cols = getVal<number>(settings.value, 'columns', device.value) || 4
     return { 
         display: 'grid',
-        gridTemplateColumns: props.device === 'mobile' ? '1fr' : (props.device === 'tablet' ? 'repeat(2, 1fr)' : `repeat(${cols}, 1fr)`),
+        gridTemplateColumns: device.value === 'mobile' ? '1fr' : (device.value === 'tablet' ? 'repeat(2, 1fr)' : `repeat(${cols}, 1fr)`),
         gap: '2rem'
     }
 })
 
-const overlayStyles = computed(() => ({ 
-  backgroundColor: getVal(settings.value, 'overlayColor', props.device) || '' 
-}))
+const overlayStyles = computed(() => {
+  const styles: Record<string, string | number> = { 
+    backgroundColor: getVal<string>(settings.value, 'overlayColor', device.value) || '' 
+  }
+  return styles
+})
 
-const itemTitleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
-const itemCategoryStyles = computed(() => getTypographyStyles(settings.value, 'category_', props.device))
+const itemTitleStyles = computed(() => (getTypographyStyles(settings.value, 'title_', device.value) || {}) as Record<string, string | number>)
+const itemCategoryStyles = computed(() => (getTypographyStyles(settings.value, 'category_', device.value) || {}) as Record<string, string | number>)
 </script>
 
 <style scoped>

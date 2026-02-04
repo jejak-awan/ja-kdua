@@ -229,7 +229,6 @@ import { logger } from '@/utils/logger';
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue'
-import { useTheme } from '@/composables/useTheme'
 import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
 import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
 import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
@@ -239,6 +238,8 @@ import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
 import Github from 'lucide-vue-next/dist/esm/icons/github.js';
 import type { Component } from 'vue'
 import type { Content } from '@/types/cms'
+
+import type { BlockInstance } from '@/types/builder'
 
 interface Feature {
     icon: Component;
@@ -259,11 +260,10 @@ interface TeamMember {
 }
 
 interface PageData extends Content {
-    title: string;
-    blocks?: any[]; 
+    blocks?: BlockInstance[]; 
 }
 
-const { getSetting } = useTheme()
+// useTheme imported but getSetting not used
 
 const pageData = ref<PageData | null>(null)
 const loading = ref(true)

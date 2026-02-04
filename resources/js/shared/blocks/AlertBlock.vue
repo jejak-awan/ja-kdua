@@ -1,155 +1,85 @@
 <template>
-  <BaseBlock
-    :module="module"
-    :mode="mode"
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
     :device="device"
-    class="alert-block"
+    class="alert-block transition-all duration-300"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Alert Notification'"
   >
-    <template #default="{ settings, device: blockDevice }">
-      <div 
-        v-if="!dismissed" 
-        class="w-full"
-        :id="getVal(settings, 'html_id', blockDevice)"
-        :style="containerStyles(settings, blockDevice)"
-      >
-        <Alert 
-           class="transition-colors duration-300 relative overflow-hidden"
-           :class="[
-             alertClasses(settings, blockDevice),
-             getVal(settings, 'class')
-           ]"
-           :style="alertStyles(settings, blockDevice)"
-           :aria-label="getVal(settings, 'aria_label', blockDevice) || undefined"
-           :role="getVal(settings, 'aria_label', blockDevice) ? 'alert' : undefined"
+    <div 
+        class="alert-container mx-auto px-6 py-4 rounded-2xl border-2 flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-500" 
+        :class="[variantClasses]"
+        :style="containerStyles"
+    >
+        <div class="alert-icon-wrapper shrink-0">
+             <LucideIcon :name="iconName" class="w-6 h-6" />
+        </div>
+        <div class="alert-content flex-1 min-w-0">
+             <h4 v-if="settings.title" class="font-black text-sm uppercase tracking-widest mb-1">{{ settings.title }}</h4>
+             <p class="text-sm font-medium opacity-80 leading-relaxed">{{ settings.content || 'Important notification message.' }}</p>
+        </div>
+        <Button 
+            v-if="settings.showClose" 
+            variant="ghost" 
+            size="icon" 
+            class="rounded-full hover:bg-black/5 dark:hover:bg-white/5"
         >
-          <component 
-            v-if="getVal(settings, 'showIcon', blockDevice) !== false"
-            :is="getAlertIcon(settings, blockDevice)" 
-            class="h-4 w-4 shrink-0" 
-            :style="{ color: getVal(settings, 'iconColor') || themeColors(settings, blockDevice).icon }"
-          />
-          
-          <div class="flex-1 min-w-0">
-            <AlertTitle 
-              v-if="mode === 'edit' || getVal(settings, 'title', blockDevice)"
-              :contenteditable="mode === 'edit'"
-              @blur="onTitleBlur($event)"
-              class="mb-2 transition-colors duration-300"
-              :style="getTypographyStyles(settings, 'title_', blockDevice)"
-            >
-              <div v-html="getVal(settings, 'title', blockDevice) || (mode === 'edit' ? 'Alert Title' : '')"></div>
-            </AlertTitle>
-            
-            <AlertDescription 
-              :contenteditable="mode === 'edit'"
-              @blur="onMessageBlur($event)"
-              class="transition-colors duration-300"
-              :style="getTypographyStyles(settings, 'message_', blockDevice)"
-            >
-              <div v-html="getVal(settings, 'message', blockDevice) || (mode === 'edit' ? 'Alert message goes here...' : '')"></div>
-            </AlertDescription>
-          </div>
-
-          <button 
-            v-if="getVal(settings, 'dismissible', blockDevice)" 
-            class="absolute right-4 top-4 rounded-sm hover:opacity-100 opacity-60 transition-opacity"
-            @click="dismissed = true"
-            aria-label="Dismiss alert"
-          >
-            <X class="h-4 w-4" />
-          </button>
-        </Alert>
-      </div>
-    </template>
+             <X class="w-4 h-4" />
+        </Button>
+    </div>
   </BaseBlock>
 </template>
 
 <script setup lang="ts">
-import { ref, inject } from 'vue'
-import Info from 'lucide-vue-next/dist/esm/icons/info.js';
-import CheckCircle from 'lucide-vue-next/dist/esm/icons/circle-check.js';
-import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';
-import XCircle from 'lucide-vue-next/dist/esm/icons/circle-x.js';
-import X from 'lucide-vue-next/dist/esm/icons/x.js';import BaseBlock from '../components/BaseBlock.vue'
-import { Alert, AlertTitle, AlertDescription } from '../ui'
+import { computed, type CSSProperties } from 'vue'
+import BaseBlock from '../components/BaseBlock.vue'
+import { Button } from '../ui'
+import { LucideIcon } from '@/components/ui'
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import { 
-    getVal, 
-    getTypographyStyles,
-    getLayoutStyles 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance, BuilderInstance, BlockProps } from '../../types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
-const props = withDefaults(defineProps<BlockProps>(), {
+const props = withDefaults(defineProps<{
+  module: BlockInstance
+  mode?: 'view' | 'edit'
+  device?: 'desktop' | 'tablet' | 'mobile'
+}>(), {
   mode: 'view',
   device: 'desktop'
 })
 
-const builder = inject<BuilderInstance>('builder', null as any)
-const dismissed = ref(false)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const getAlertIcon = (settings: any, device: string) => {
-  const variant = getVal(settings, 'variant', device) || 'info'
-  const icons: Record<string, any> = { 
-    info: Info, 
-    success: CheckCircle, 
-    warning: AlertTriangle, 
-    error: XCircle,
-    default: Info,
-    destructive: XCircle
-  }
-  return icons[variant] || Info
-}
-
-const themeColors = (settings: any, device: string) => {
-  const variant = getVal(settings, 'variant', device) || 'info'
-  const colors: Record<string, any> = {
-    info: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-900', icon: 'text-blue-600' },
-    success: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-900', icon: 'text-green-600' },
-    warning: { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-900', icon: 'text-yellow-600' },
-    error: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-900', icon: 'text-red-600' },
-    default: { bg: 'bg-background', border: 'border-border', text: 'text-foreground', icon: 'text-foreground' },
-    destructive: { bg: 'bg-destructive/15', border: 'border-destructive/50', text: 'text-destructive', icon: 'text-destructive' }
-  }
-  return colors[variant] || colors.info
-}
-
-const alertClasses = (settings: any, device: string) => {
-    const colors = themeColors(settings, device)
-    return `${colors.bg} ${colors.border} ${colors.text}`
-}
-
-const containerStyles = (settings: any, device: string) => {
-  return {
-    ...getLayoutStyles(settings, device)
-  }
-}
-
-const alertStyles = (settings: any, device: string) => {
-    const style: Record<string, any> = {
-      '--hover-opacity': getVal(settings, 'hover_opacity', device) ?? 1
+const variantClasses = computed(() => {
+    const variant = settings.value.variant || 'info'
+    const variants: Record<string, string> = {
+        info: 'bg-primary/5 border-primary/20 text-primary',
+        success: 'bg-emerald-500/5 border-emerald-500/20 text-emerald-600',
+        warning: 'bg-amber-500/5 border-amber-500/20 text-amber-600',
+        destructive: 'bg-destructive/5 border-destructive/20 text-destructive'
     }
-    return style
-}
+    return variants[variant as string] || variants.info
+})
 
-const onTitleBlur = (e: any) => {
-  if (props.mode !== 'edit' || !builder) return
-  builder.updateModuleSettings(props.module.id, { title: e.target.innerText })
-}
+const iconName = computed(() => {
+    const variant = settings.value.variant || 'info'
+    const icons: Record<string, string> = {
+        info: 'Info',
+        success: 'CheckCircle2',
+        warning: 'AlertTriangle',
+        destructive: 'AlertOctagon'
+    }
+    return icons[variant as string] || icons.info
+})
 
-const onMessageBlur = (e: any) => {
-  if (props.mode !== 'edit' || !builder) return
-  builder.updateModuleSettings(props.module.id, { message: e.target.innerText })
-}
+const containerStyles = computed((): CSSProperties => {
+    return getLayoutStyles(settings.value, props.device) as CSSProperties
+})
 </script>
 
 <style scoped>
-.alert-block { width: 100%; }
-
-.alert-block :deep(.alert) {
-  will-change: opacity, transform;
-}
-
-.alert-block :deep(.alert:hover) {
-  opacity: var(--hover-opacity);
-}
+.alert-block { width: 100%; position: relative; }
 </style>

@@ -46,12 +46,12 @@
                 v-for="module in categoryModules"
                 :key="module.name"
                 class="module-card"
-                @click="selectModule(module.name)"
+                @click="module.name && selectModule(module.name!)"
               >
                 <div class="module-icon">
                   <component :size="24" :is="getIcon(module.icon)" />
                 </div>
-                <span class="module-name">{{ te('builder.modules.' + module.name) ? $t('builder.modules.' + module.name) : module.title }}</span>
+                <span class="module-name">{{ (module.name && te('builder.modules.' + module.name)) ? $t('builder.modules.' + module.name) : module.title }}</span>
               </button>
             </div>
           </div>
@@ -212,6 +212,8 @@ import Disc from 'lucide-vue-next/dist/esm/icons/disc.js';
 import TextAlignStart from 'lucide-vue-next/dist/esm/icons/text-align-start.js';
 import { BaseModal, BaseInput, Tabs, TabsList, TabsTrigger } from '@/components/builder/ui';
 import ModuleRegistry from '@/components/builder/core/ModuleRegistry';
+import type { BuilderInstance, BlockInstance, BuilderPreset, ModuleDefinition } from '@/types/builder';
+
 import { 
     equalLayouts, 
     offsetLayouts, 
@@ -219,11 +221,12 @@ import {
     flexMultiColumnPresets, 
     gridMultiRowPresets,
     masonryPresets,
-    sidebarPresets
-} from '@/components/builder/constants/layouts.js';
-import type { BuilderInstance } from '@/types/builder';
+    sidebarPresets,
+    type LayoutPreset
+} from '@/components/builder/constants/layouts';
 
-const icons: Record<string, any> = { 
+
+const icons: Record<string, Component> = { 
   X, Search, Type, Heading, Image, MousePointer, Video, Layout,
   AlignJustify, Square, Columns, MessageSquare, Quote, Star,
   Play, Clock, AlertCircle, Code, Users, Circle, List,
@@ -237,11 +240,11 @@ const icons: Record<string, any> = {
 // Emits
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'insert', type: string, payload?: any): void;
+  (e: 'insert', type: string, payload?: unknown): void;
 }>();
 
 // Props/Injections
-const builder = inject<any>('builder'); // Using any to avoid complicated type casting for extended builder object
+const builder = inject<BuilderInstance>('builder');
 
 // State
 const activeTab = ref('module');
@@ -269,16 +272,16 @@ const allGroups = computed(() => [
 
 // Context-aware suggestions
 const suggestedModules = computed(() => {
-  if (!builder?.insertTargetId?.value) return [];
+  if (!builder || !builder.insertTargetId.value) return [];
   
   const targetId = builder.insertTargetId.value;
-  const blocks = builder.blocks?.value || [];
+  const blocks = builder.blocks.value;
   
   // Find full path of the insert target
-  const targetPath = builder.findModule ? builder.getModulePath(blocks, targetId) : [];
+  const targetPath = builder.getModulePath(blocks, targetId);
   
   // Check for specialized contexts (primarily forms for now)
-  const isFormContext = targetPath.some((m: any) => 
+  const isFormContext = targetPath.some((m: BlockInstance) => 
     (m.type && ['contactform', 'login', 'signup', 'newsletter'].includes(m.type)) ||
     (m.type && builder.getModuleDefinition?.(m.type as string)?.category === 'forms')
   );
@@ -303,21 +306,21 @@ const groupedModules = computed(() => {
   // Filter by search
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
-    filtered = filtered.filter((m: any) => 
-      m.title.toLowerCase().includes(query) ||
-      m.name.toLowerCase().includes(query)
+    filtered = filtered.filter((m: ModuleDefinition) => 
+      (m.title || '').toLowerCase().includes(query) ||
+      (m.name || '').toLowerCase().includes(query)
     );
   }
 
   // Group by category
-  const groups: Record<string, any[]> = {};
+  const groups: Record<string, ModuleDefinition[]> = {};
   
   // Add suggested first if no search is active
   if (!searchQuery.value && suggestedModules.value.length > 0) {
     groups[t('builder.categories.suggested')] = suggestedModules.value;
   }
 
-  filtered.forEach((module: any) => {
+  filtered.forEach((module: ModuleDefinition) => {
      const catKey = (module.category || 'content').toLowerCase();
      const catTitle = te('builder.categories.' + catKey) ? t('builder.categories.' + catKey) : (module.category || 'Content');
      
@@ -335,14 +338,13 @@ const loadingPresets = computed(() => builder?.loadingPresets?.value || false);
 const presets = computed(() => builder?.presets?.value || []);
 
 const filteredPresets = computed(() => {
-  if (!searchQuery.value) return presets.value;
   const query = searchQuery.value.toLowerCase();
-  return presets.value.filter((p: any) => p.name.toLowerCase().includes(query));
+  return presets.value.filter((p: BuilderPreset) => p.name.toLowerCase().includes(query));
 });
 
 const groupedPresets = computed(() => {
-  const groups: Record<string, any[]> = {};
-  filteredPresets.value.forEach((preset: any) => {
+  const groups: Record<string, BuilderPreset[]> = {};
+  filteredPresets.value.forEach((preset: BuilderPreset) => {
     const type = preset.type.charAt(0).toUpperCase() + preset.type.slice(1);
     if (!groups[type]) groups[type] = [];
     groups[type].push(preset);
@@ -357,15 +359,15 @@ const getIcon = (icon?: string | Component) => {
   return icon;
 };
 
-const selectModule = (name: string) => {
-  emit('insert', name);
+const selectModule = (name?: string) => {
+  if (name) emit('insert', name);
 };
 
-const selectLayout = (layout: any) => {
+const selectLayout = (layout: LayoutPreset) => {
   emit('insert', 'row', layout);
 };
 
-const selectPreset = (preset: any) => {
+const selectPreset = (preset: BuilderPreset) => {
   emit('insert', 'preset', preset);
 };
 

@@ -5,8 +5,8 @@
     :device="device"
     tag="article"
     class="fullwidth-post-content-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Fullwidth Post Content'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Fullwidth Post Content'"
     :style="cardStyles"
   >
     <div class="content-inner mx-auto px-6 transition-[width] duration-500" :style="innerStyles">
@@ -23,21 +23,20 @@
             "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit."
           </blockquote>
       </div>
-      <div v-else class="post-content-render" v-html="postContent" />
+      <div v-else class="post-content-render" v-html="(postContent as string)" />
     </div>
   </BaseBlock>
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, inject, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { 
     getVal,
     getTypographyStyles,
-    getLayoutStyles,
-    getResponsiveValue 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -48,52 +47,51 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const postContent = inject('postContent', '<p>Post content not found.</p>')
+const postContent = inject<string>('postContent', '<p>Post content not found.</p>')
 
-const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+const cardStyles = computed((): CSSProperties => {
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
     
-    return styles
+    return styles as CSSProperties
 })
 
-const innerStyles = computed(() => {
+const innerStyles = computed((): CSSProperties => {
   const layoutStyles = getLayoutStyles(settings.value, props.device)
-  const maxWidth = getResponsiveValue(settings.value, 'maxWidth', props.device) || 1200
+  const maxWidth = getVal<number>(settings.value, 'maxWidth', props.device) || 1200
   return {
     ...layoutStyles,
     maxWidth: settings.value.contentWidth === 'boxed' ? `${maxWidth}px` : '100%',
     margin: '0 auto',
     width: '100%'
-  }
+  } as CSSProperties
 })
 
-const paragraphStyles = computed(() => {
+const paragraphStyles = computed((): CSSProperties => {
   const styles = getTypographyStyles(settings.value, 'text_', props.device)
-  styles.marginBottom = `${settings.value.paragraphSpacing || 24}px`
-  return styles
+  styles.marginBottom = `${(settings.value.paragraphSpacing as number) || 24}px`
+  return styles as CSSProperties
 })
 
-const headingStyles = computed(() => {
+const headingStyles = computed((): CSSProperties => {
   const styles = getTypographyStyles(settings.value, 'heading_', props.device)
-  styles.marginTop = `${settings.value.headingSpacing || 32}px`
+  styles.marginTop = `${(settings.value.headingSpacing as number) || 32}px`
   styles.marginBottom = '16px'
-  return styles
+  return styles as CSSProperties
 })
 
-const linkStyles = computed(() => getTypographyStyles(settings.value, 'link_', props.device))
+const linkStyles = computed(() => getTypographyStyles(settings.value, 'link_', props.device) as CSSProperties)
 
-const blockquoteStyles = computed(() => ({
-  borderLeftColor: settings.value.blockquoteBorderColor || '#2059ea',
-  backgroundColor: settings.value.blockquoteBackgroundColor || '#f8f9fa',
-}))
+const blockquoteStyles = computed((): CSSProperties => ({
+  borderLeftColor: (settings.value.blockquoteBorderColor as string) || '#2059ea',
+  backgroundColor: (settings.value.blockquoteBackgroundColor as string) || '#f8f9fa',
+} as CSSProperties))
 </script>
 
 <style scoped>

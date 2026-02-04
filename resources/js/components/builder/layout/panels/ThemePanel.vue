@@ -48,7 +48,7 @@
                 class="setting-field select-field"
                 @change="handleInput(setting.key)"
               >
-                <option v-for="opt in setting.options" :key="opt.value" :value="opt.value">
+                <option v-for="opt in setting.options" :key="String(opt.value)" :value="opt.value">
                   {{ opt.label }}
                 </option>
               </select>
@@ -100,6 +100,11 @@ import { useI18n } from 'vue-i18n';
 import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import type { BuilderInstance } from '@/types/builder';
+import type { ThemeSetting } from '@/types/theme';
+
+interface SettingItem extends ThemeSetting {
+  key: string;
+}
 
 const { t } = useI18n();
 const builder = inject<BuilderInstance>('builder');
@@ -108,14 +113,14 @@ const activeTheme = computed(() => builder?.themeData?.value);
 const loading = computed(() => builder?.loadingThemes?.value);
 const saving = ref(false);
 const isDirty = ref(false);
-const formValues = ref<Record<string, any>>({});
+const formValues = ref<Record<string, unknown>>({});
 const expandedSections = ref<string[]>(['General', 'Colors']);
 
 const settingsSections = computed(() => {
   if (!activeTheme.value?.manifest?.settings_schema) return [];
   
   const schema = activeTheme.value.manifest.settings_schema;
-  const sectionsMap: Record<string, any> = {};
+  const sectionsMap: Record<string, { id: string; label: string; settings: SettingItem[] }> = {};
 
   Object.keys(schema).forEach(key => {
     const setting = schema[key];
@@ -138,7 +143,7 @@ const settingsSections = computed(() => {
 const loadSettings = () => {
     if (!activeTheme.value) return;
     
-    const defaults: Record<string, any> = {};
+    const defaults: Record<string, unknown> = {};
     const schema = activeTheme.value.manifest?.settings_schema || {};
     
     Object.keys(schema).forEach(key => {
@@ -149,7 +154,7 @@ const loadSettings = () => {
     isDirty.value = false;
 };
 
-const handleInput = (key: string) => {
+const handleInput = (_key: string) => {
     isDirty.value = true;
     // Live update builder theme settings for preview
     if (builder?.themeSettings) {

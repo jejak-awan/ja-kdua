@@ -4,14 +4,14 @@
     :settings="settings" 
     :mode="mode"
     class="group-carousel-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Group Carousel'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Group Carousel'"
   >
-    <div class="carousel-container relative group" :style="containerStyles">
+    <div class="carousel-container relative group" :style="(containerStyles as any)">
         <Carousel 
           class="w-full" 
-          :opts="carouselOptions"
-          :plugins="carouselPlugins"
+          :opts="(carouselOptions as any)"
+          :plugins="(carouselPlugins as any)"
         >
           <CarouselContent class="-ml-4">
              <!-- Builder Mode -->
@@ -52,8 +52,8 @@
 
           <!-- Navigation -->
           <template v-if="showControls">
-              <CarouselPrevious v-if="settings.showArrows !== false" class="left-2 opacity-0 group-hover:opacity-100 transition-[width] duration-500 hover:scale-110 active:scale-95 shadow-xl border-none" :style="arrowStyles" />
-              <CarouselNext v-if="settings.showArrows !== false" class="right-2 opacity-0 group-hover:opacity-100 transition-[width] duration-500 hover:scale-110 active:scale-95 shadow-xl border-none" :style="arrowStyles" />
+              <CarouselPrevious v-if="settings.showArrows !== false" class="left-2 opacity-0 group-hover:opacity-100 transition-[width] duration-500 hover:scale-110 active:scale-95 shadow-xl border-none" :style="(arrowStyles as any)" />
+              <CarouselNext v-if="settings.showArrows !== false" class="right-2 opacity-0 group-hover:opacity-100 transition-[width] duration-500 hover:scale-110 active:scale-95 shadow-xl border-none" :style="(arrowStyles as any)" />
           </template>
         </Carousel>
     </div>
@@ -69,26 +69,28 @@ import CarouselItem from '../ui/CarouselItem.vue'
 import CarouselNext from '../ui/CarouselNext.vue'
 import CarouselPrevious from '../ui/CarouselPrevious.vue'
 import Autoplay from 'embla-carousel-autoplay'
-import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';import { 
+import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
+import { 
   getVal,
   getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
+import type { Component } from 'vue'
 
 const props = defineProps<{
   module: BlockInstance
   mode: 'view' | 'edit'
 }>()
 
-const builder = inject<any>('builder', null)
+const builder = inject<BuilderInstance | null>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const BlockRenderer = inject<any>('BlockRenderer', null)
+const BlockRenderer = inject<Component | null>('BlockRenderer', null)
 
 const slidesPerView = computed(() => {
-  const val = getVal(settings.value, 'slidesPerView', device.value)
-  return parseInt(val) || 1
+  const val = getVal<string | number>(settings.value, 'slidesPerView', device.value)
+  return typeof val === 'number' ? val : (parseInt(val as string) || 1)
 })
 
 const slideBasisClass = computed(() => {
@@ -119,7 +121,7 @@ const carouselPlugins = computed(() => {
     const plugins = []
     if (settings.value.autoplay && props.mode === 'view') {
         plugins.push(Autoplay({
-            delay: parseInt(settings.value.autoplaySpeed) || 5000,
+            delay: parseInt(settings.value.autoplaySpeed as string) || 5000,
             stopOnInteraction: false,
             stopOnMouseEnter: true
         }))

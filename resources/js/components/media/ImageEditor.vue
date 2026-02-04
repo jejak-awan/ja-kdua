@@ -483,7 +483,7 @@ const cancelCrop = () => {
 };
 
 // --- Adjust Logic ---
-const applyPreset = (preset: any) => {
+const applyPreset = (preset: { settings: FilterSettings }) => {
     filters.value = { ...preset.settings };
 };
 
@@ -623,18 +623,8 @@ const saveImage = async () => {
         });
         emit('updated');
         emit('close');
-    } catch (err: any) {
+    } catch (err: unknown) {
         logger.error("Failed to save", err);
-        let msg = t('features.media.modals.editor.failed') || 'Failed to save image';
-        if (err.response && err.response.data) {
-            if (err.response.data.errors) {
-                const errors = err.response.data.errors;
-                const errorMessages = Object.values(errors).flat().join('\n');
-                msg += '\n' + errorMessages;
-            } else if (err.response.data.message) {
-                 msg += ': ' + err.response.data.message;
-            }
-        }
         toast.error.fromResponse(err);
     } finally {
         saving.value = false;

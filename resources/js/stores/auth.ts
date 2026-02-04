@@ -1,9 +1,18 @@
 import { logger } from '@/utils/logger';
 import { defineStore } from 'pinia';
-import type { AxiosError, AxiosResponse } from 'axios';
-import axios, { isCancel, isAxiosError } from 'axios';
-import api, { getCsrfCookie } from '../services/api';
+import type { AxiosResponse } from 'axios';
+import { isCancel, isAxiosError } from 'axios';
+import api, { getCsrfCookie, type CustomAxiosRequestConfig } from '../services/api';
 import type { User, Role, AuthState, AuthResponse, LoginCredentials, RegisterData, ResetPasswordData } from '../types/auth';
+
+interface ApiErrorResponse {
+    message?: string;
+    errors?: Record<string, string[]>;
+    retry_after?: string | number;
+    requires_verification?: boolean;
+    user_id?: number | string;
+    requires_two_factor?: boolean;
+}
 
 export const ROLE_RANKS: Record<string, number> = {
     'super-admin': 100,
@@ -123,7 +132,7 @@ export const useAuthStore = defineStore('auth', {
             } catch (error: unknown) {
                 // Handle different error statuses
                 const axiosError = isAxiosError(error) ? error : null;
-                const errorData = (axiosError?.response?.data as any) || {};
+                const errorData = (axiosError?.response?.data as ApiErrorResponse) || {};
                 const errors = errorData.errors || {};
                 const status = axiosError?.response?.status;
                 const headers = axiosError?.response?.headers || {};
@@ -135,11 +144,11 @@ export const useAuthStore = defineStore('auth', {
 
                     // Try from response body first
                     if (errorData.retry_after) {
-                        retryAfter = parseInt(errorData.retry_after, 10);
+                        retryAfter = parseInt(String(errorData.retry_after), 10);
                     }
                     // Try from headers (axios lowercases header names)
                     else if (headers['retry-after']) {
-                        retryAfter = parseInt(headers['retry-after'] as string, 10);
+                        retryAfter = parseInt(String(headers['retry-after']), 10);
                     }
 
                     const retryAfterSeconds = retryAfter;
@@ -193,7 +202,7 @@ export const useAuthStore = defineStore('auth', {
                 return { success: true, data: response.data };
             } catch (error: unknown) {
                 const axiosError = isAxiosError(error) ? error : null;
-                const responseData = (axiosError?.response?.data as any) || {};
+                const responseData = (axiosError?.response?.data as ApiErrorResponse) || {};
                 return {
                     success: false,
                     message: responseData.message || 'Registration failed',
@@ -205,7 +214,7 @@ export const useAuthStore = defineStore('auth', {
         async logout() {
             try {
                 // Skip 401 handler redirect - logout is intentionally ending session
-                await api.post('/logout', {}, { _skipManualRedirect: true } as any);
+                await api.post('/logout', {}, { _skipManualRedirect: true } as CustomAxiosRequestConfig);
             } catch (error: unknown) {
                 // Silence session errors (401/419) and cancellations during logout
                 // These are expected if the session is already terminated.
@@ -241,7 +250,7 @@ export const useAuthStore = defineStore('auth', {
             } catch (error: unknown) {
                 this.clearAuth();
                 const axiosError = isAxiosError(error) ? error : null;
-                const responseData = (axiosError?.response?.data as any) || {};
+                const responseData = (axiosError?.response?.data as ApiErrorResponse) || {};
                 return { success: false, message: responseData.message };
             }
         },
@@ -252,7 +261,7 @@ export const useAuthStore = defineStore('auth', {
                 return { success: true, message: response.data.message };
             } catch (error: unknown) {
                 const axiosError = isAxiosError(error) ? error : null;
-                const responseData = (axiosError?.response?.data as any) || {};
+                const responseData = (axiosError?.response?.data as ApiErrorResponse) || {};
                 return {
                     success: false,
                     message: responseData.message || 'Failed to send reset link',
@@ -266,7 +275,7 @@ export const useAuthStore = defineStore('auth', {
                 return { success: true, message: response.data.message };
             } catch (error: unknown) {
                 const axiosError = isAxiosError(error) ? error : null;
-                const responseData = (axiosError?.response?.data as any) || {};
+                const responseData = (axiosError?.response?.data as ApiErrorResponse) || {};
                 return {
                     success: false,
                     message: responseData.message || 'Password reset failed',

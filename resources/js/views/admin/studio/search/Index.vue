@@ -100,16 +100,26 @@ import { parseResponse, ensureArray } from '@/utils/responseParser';
 const route = useRoute();
 const router = useRouter();
 
+interface SearchResult {
+    id: number | string;
+    type: string;
+    title: string;
+    description?: string;
+    created_at?: string;
+    author?: string;
+    url?: string;
+}
+
 const query = ref(route.query.q || '');
 const searchQuery = ref(route.query.q || '');
-const results = ref<any[]>([]);
+const results = ref<SearchResult[]>([]);
 const loading = ref(false);
-const typeFilters = ref<any[]>([]);
+const typeFilters = ref<string[]>([]);
 
 const availableTypes = ['content', 'category', 'user', 'media', 'page', 'tag'];
 
 const groupedResults = computed(() => {
-    const grouped: Record<string, any[]> = {};
+    const grouped: Record<string, SearchResult[]> = {};
     
     let filteredResults = results.value;
     if (typeFilters.value.length > 0) {
@@ -143,7 +153,7 @@ const performSearch = async () => {
         
         // Update URL
         router.replace({ query: { q: query.value } });
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to search:', error);
         results.value = [];
     } finally {
@@ -160,7 +170,7 @@ const toggleTypeFilter = (type: string) => {
     }
 };
 
-const handleResultClick = (result: any) => {
+const handleResultClick = (result: SearchResult) => {
     // Navigate based on result type
     if (result.type === 'content') {
         router.push({ name: 'contents.edit', params: { id: result.id } });

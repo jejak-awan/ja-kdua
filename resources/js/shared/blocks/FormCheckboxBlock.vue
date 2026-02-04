@@ -14,7 +14,7 @@
         </label>
         
         <div class="space-y-2">
-          <div v-for="option in getVal(settings, 'options')" :key="option.value" class="flex items-center space-x-2">
+          <div v-for="option in (getVal(settings, 'options') as { label: string, value: string }[])" :key="option.value" class="flex items-center space-x-2">
             <input 
               type="checkbox"
               :id="`check-${module.id}-${option.value}`"
@@ -43,10 +43,10 @@ import type { BlockProps } from '../../types/builder'
 
 const props = defineProps<BlockProps>()
 
-const formState = inject<Record<string, any>>('formState', {})
-const updateFormValue = inject<(id: string, val: any) => void>('updateFormValue', () => {})
+const formState = inject<Record<string, unknown>>('formState', {})
+const updateFormValue = inject<(id: string, val: unknown) => void>('updateFormValue', () => {})
 
-const fieldId = computed(() => getVal(props.settings || {}, 'field_id'))
+const fieldId = computed(() => getVal<string>(props.settings || {}, 'field_id'))
 
 const value = computed({
   get: () => {

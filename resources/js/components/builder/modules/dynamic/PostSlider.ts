@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -118,7 +118,7 @@ const PostSliderModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -127,7 +127,7 @@ const PostSliderModule: ModuleDefinition = {
             {
                 id: 'metaTypography',
                 label: 'Meta Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `meta_${f.name}`,
                     label: `Meta ${f.label}`
@@ -136,7 +136,7 @@ const PostSliderModule: ModuleDefinition = {
             {
                 id: 'excerptTypography',
                 label: 'Excerpt Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `excerpt_${f.name}`,
                     label: `Excerpt ${f.label}`
@@ -147,7 +147,7 @@ const PostSliderModule: ModuleDefinition = {
                 label: 'Button Style',
                 fields: [
                     { name: 'buttonBackgroundColor', type: 'color', label: 'Button Background' },
-                    ...((typographySettings.fields as any[])).map(f => ({
+                    ...(typographySettings.fields as SettingDefinition[]).map(f => ({
                         ...f,
                         name: `button_${f.name}`,
                         label: `Button ${f.label}`

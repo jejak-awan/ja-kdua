@@ -325,11 +325,35 @@ import EyeOff from 'lucide-vue-next/dist/esm/icons/eye-off.js';
 import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
 import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 
+interface Backup {
+    id: number;
+    name: string;
+    type: string;
+    size: number;
+    password?: string;
+    created_at: string;
+}
+
+interface BackupSchedule {
+    enabled: boolean;
+    frequency: string;
+    time: string;
+    retention_days: number;
+    max_count: number;
+}
+
+interface BackupStatistics {
+    total: number;
+    total_size: number;
+    last_backup: string | null;
+    schedule: BackupSchedule;
+}
+
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
-const backups = ref<any[]>([]);
-const statistics = ref<any>(null);
+const backups = ref<Backup[]>([]);
+const statistics = ref<BackupStatistics | null>(null);
 const loading = ref(false);
 const creating = ref(false);
 const search = ref('');
@@ -342,7 +366,7 @@ const scheduleForm = ref({
     backup_retention_days: 30,
     backup_max_count: 10
 });
-const initialScheduleForm = ref<any>(null);
+const initialScheduleForm = ref<typeof scheduleForm.value | null>(null);
 
 // Visibility toggle state for each backup row
 const visiblePasswords = ref<Record<number, boolean>>({});
@@ -389,17 +413,23 @@ const fetchBackups = async () => {
         // Fetch statistics
         try {
             const statsResponse = await api.get('/admin/ja/backups/statistics');
-            statistics.value = parseSingleResponse(statsResponse);
-        } catch (error: any) {
+            statistics.value = parseSingleResponse<BackupStatistics>(statsResponse);
+        } catch {
             // Calculate from backups if endpoint doesn't exist
             statistics.value = {
                 total: backups.value.length,
                 total_size: backups.value.reduce((sum, b) => sum + (b.size || 0), 0),
                 last_backup: backups.value.length > 0 ? backups.value[0].created_at : null,
-                auto_backup: false,
+                schedule: {
+                    enabled: false,
+                    frequency: 'daily',
+                    time: '02:00',
+                    retention_days: 30,
+                    max_count: 10
+                }
             };
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch backups:', error);
     } finally {
         loading.value = false;
@@ -412,7 +442,7 @@ const createBackup = async () => {
         await api.post('/admin/ja/backups');
         toast.success.action(t('features.system.backups.messages.created'));
         await fetchBackups();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to create backup:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -420,7 +450,7 @@ const createBackup = async () => {
     }
 };
 
-const downloadBackup = async (backup: any) => {
+const downloadBackup = async (backup: Backup) => {
     try {
         const response = await api.get(`/admin/ja/backups/${backup.id}/download`, {
             responseType: 'blob',
@@ -432,13 +462,13 @@ const downloadBackup = async (backup: any) => {
         document.body.appendChild(link);
         link.click();
         link.remove();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to download backup:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const restoreBackup = async (backup: any) => {
+const restoreBackup = async (backup: Backup) => {
     const confirmed = await confirm({
         title: t('features.system.backups.actions.restore'),
         message: t('features.system.backups.confirm.restore', { name: backup.name }),
@@ -463,13 +493,13 @@ const restoreBackup = async (backup: any) => {
         setTimeout(() => {
             window.location.reload();
         }, 1500);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to restore backup:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const deleteBackup = async (backup: any) => {
+const deleteBackup = async (backup: Backup) => {
     const confirmed = await confirm({
         title: t('features.system.backups.actions.delete'),
         message: t('features.system.backups.confirm.delete', { name: backup.name }),
@@ -483,7 +513,7 @@ const deleteBackup = async (backup: any) => {
         await api.delete(`/admin/ja/backups/${backup.id}`);
         toast.success.delete();
         await fetchBackups();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to delete backup:', error);
         toast.error.fromResponse(error);
     }
@@ -504,7 +534,7 @@ const saveSchedule = async () => {
         showScheduleModal.value = false;
         await fetchBackups(); // Refresh statistics
         toast.success.save();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to save schedule:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -527,7 +557,7 @@ const openScheduleModal = () => {
     showScheduleModal.value = true;
 };
 
-const formatDate = (date: string) => {
+const formatDate = (date: string | null) => {
     if (!date) return '-';
     // Use i18n date format or component logic. 
     // Ideally use d() from useI18n if setup, but standard toLocaleString is used here.

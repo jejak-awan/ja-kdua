@@ -163,7 +163,7 @@ const confirmInitialMode = (mode: string) => {
     updateField('editor_type', mode);
 };
 
-const handleSave = (status?: any) => {
+const handleSave = (status?: unknown) => {
     emit('save', typeof status === 'string' ? status : undefined);
 };
 
@@ -175,7 +175,7 @@ const handleBuilderClose = () => {
     emit('cancel');
 };
 
-const updateField = (field: string, value: any) => {
+const updateField = (field: string, value: unknown) => {
     emit('update:modelValue', { ...props.modelValue, [field]: value });
 };
 

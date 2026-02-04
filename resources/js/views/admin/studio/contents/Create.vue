@@ -254,10 +254,11 @@ const {
 } = useAutoSave(formWithTags as Ref<Record<string, unknown>>, contentId as Ref<number | null>, {
     interval: 30000, 
     enabled: computed(() => autoSaveEnabled.value),
-    onSave: (response: { data?: { id?: number } }) => {
+    onSave: (response: unknown) => {
+        const res = response as { data?: { id?: number } };
         // Update contentId if new content was created
-        if (response?.data?.id && !contentId.value) {
-            contentId.value = response.data.id;
+        if (res?.data?.id && !contentId.value) {
+            contentId.value = res.data.id;
         }
     },
     onError: (error: unknown) => {
@@ -348,6 +349,7 @@ const handleSubmit = async (status: string | null = null) => {
         form.value.status = status;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!validateWithZod(form.value as any)) return;
 
     loading.value = true;

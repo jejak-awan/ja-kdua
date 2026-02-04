@@ -204,9 +204,12 @@ const handleSubmit = async () => {
         await api.post('/admin/ja/content-templates', form.value);
         toast.success.create('Template');
         router.push({ name: 'studio', query: { tab: 'templates' } });
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response: { status: number, data: { errors: Record<string, string[]> } } };
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors || {});
+            }
         } else {
             toast.error.fromResponse(error);
         }

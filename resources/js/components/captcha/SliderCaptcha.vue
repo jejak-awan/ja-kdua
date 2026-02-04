@@ -53,6 +53,7 @@ import { useI18n } from 'vue-i18n'
 import GripVertical from 'lucide-vue-next/dist/esm/icons/grip-vertical.js';
 import CheckCircle from 'lucide-vue-next/dist/esm/icons/circle-check.js';
 import api from '@/services/api'
+import type { AxiosError } from 'axios'
 
 const { t } = useI18n()
 
@@ -119,14 +120,14 @@ const onDrag = (e: MouseEvent | TouchEvent) => {
     progress.value = newProgress
 }
 
-const endDrag = async (e?: MouseEvent | TouchEvent) => {
+const endDrag = async (_e?: MouseEvent | TouchEvent) => {
     if (!dragging.value) return
     
     dragging.value = false
-    document.removeEventListener('mousemove', onDrag as any)
-    document.removeEventListener('mouseup', endDrag as any)
-    document.removeEventListener('touchmove', onDrag as any)
-    document.removeEventListener('touchend', endDrag as any)
+    document.removeEventListener('mousemove', onDrag as unknown as EventListener)
+    document.removeEventListener('mouseup', endDrag as unknown as EventListener)
+    document.removeEventListener('touchmove', onDrag as unknown as EventListener)
+    document.removeEventListener('touchend', endDrag as unknown as EventListener)
     
     // Server-side verification
     try {
@@ -137,13 +138,14 @@ const endDrag = async (e?: MouseEvent | TouchEvent) => {
         
         verified.value = true
         emit('verified', { token: token.value, answer: String(Math.round(progress.value)) })
-    } catch (e: any) {
+    } catch (e: unknown) {
         // Just like MathCaptcha, we catch 422 as expected verification failure
         error.value = t('features.auth.captcha.tryAgain')
         progress.value = 0
         
-        if (e.response?.status !== 422) {
-             logger.error('Slider verification failed:', e)
+        const err = e as AxiosError;
+        if (err.response?.status !== 422) {
+             logger.error('Slider verification failed:', err)
         }
         
         // Generate new captcha after failed attempt
@@ -156,9 +158,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-    document.removeEventListener('mousemove', onDrag as any)
-    document.removeEventListener('mouseup', endDrag as any)
-    document.removeEventListener('touchmove', onDrag as any)
-    document.removeEventListener('touchend', endDrag as any)
+    document.removeEventListener('mousemove', onDrag as unknown as EventListener)
+    document.removeEventListener('mouseup', endDrag as unknown as EventListener)
+    document.removeEventListener('touchmove', onDrag as unknown as EventListener)
+    document.removeEventListener('touchend', endDrag as unknown as EventListener)
 })
 </script>

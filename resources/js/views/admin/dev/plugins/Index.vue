@@ -37,7 +37,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
@@ -47,18 +47,26 @@ import { parseResponse, ensureArray } from '@/utils/responseParser';
 const { t } = useI18n();
 const toast = useToast();
 
-const plugins = ref<any[]>([]);
+interface Plugin {
+    id: string | number;
+    name: string;
+    version?: string;
+    is_active: boolean;
+    settings?: Record<string, unknown>;
+}
+
+const plugins = ref<Plugin[]>([]);
 const loading = ref(false);
 const showSettingsModal = ref(false);
-const selectedPlugin = ref<any>(null);
+const selectedPlugin = ref<Plugin | null>(null);
 
 const fetchPlugins = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/ja/plugins');
-        const { data } = parseResponse(response);
+        const { data } = parseResponse<Plugin[]>(response);
         plugins.value = ensureArray(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch plugins:', error);
         toast.error.default(t('features.developer.plugins.messages.failed_fetch')); // Keep generic message or use fromResponse if applicable, but fetch usually generic
     } finally {
@@ -66,7 +74,7 @@ const fetchPlugins = async () => {
     }
 };
 
-const togglePlugin = async (plugin: any) => {
+const togglePlugin = async (plugin: Plugin) => {
     try {
         if (plugin.is_active) {
             await api.post(`/admin/ja/plugins/${plugin.id}/deactivate`);
@@ -77,13 +85,13 @@ const togglePlugin = async (plugin: any) => {
             plugin.is_active = true;
             toast.success.action(t('features.developer.plugins.messages.activated'));
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to toggle plugin:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const openSettings = (plugin: any) => {
+const openSettings = (plugin: Plugin) => {
     selectedPlugin.value = plugin;
     showSettingsModal.value = true;
 };

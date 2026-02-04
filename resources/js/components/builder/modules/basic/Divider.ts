@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -151,7 +151,7 @@ const DividerModule: ModuleDefinition = {
                         type: 'group',
                         label: 'Text Styling',
                         show_if: { field: 'add_text', value: true },
-                        fields: typographySettings.fields!
+                        fields: typographySettings.fields as SettingDefinition[]
                     }
                 ]
             },

@@ -100,8 +100,8 @@ watch(() => props.name, async (name) => {
     const icon = module[pascalName as keyof typeof module];
     
     if (icon) {
-      iconCache.set(pascalName, icon as any);
-      iconComponent.value = icon as any;
+      iconCache.set(pascalName, icon as Component);
+      iconComponent.value = icon as Component;
     } else {
       // Fallback: try kebab-case if PascalCase fails (some older icon lists might use kebab)
       const kebabName = toKebabCase(name);
@@ -109,8 +109,8 @@ watch(() => props.name, async (name) => {
       const kebabIcon = module[kebabPascalName as keyof typeof module];
       
       if (kebabIcon) {
-          iconCache.set(pascalName, kebabIcon as any);
-          iconComponent.value = kebabIcon as any;
+          iconCache.set(pascalName, kebabIcon as Component);
+          iconComponent.value = kebabIcon as Component;
       } else {
           logger.warning(`LucideIcon: Icon "${name}" not found in lucide-vue-next`);
           iconComponent.value = null;

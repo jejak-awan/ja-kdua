@@ -190,12 +190,12 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
-import { parseResponse, ensureArray, parseSingleResponse } from '@/utils/responseParser';
+import { parseResponse } from '@/utils/responseParser';
 import { Badge, Button, Card, Checkbox, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
 
 import Download from 'lucide-vue-next/dist/esm/icons/download.js';
@@ -208,9 +208,26 @@ const { t } = useI18n();
 const toast = useToast();
 const { confirm } = useConfirm();
 
+interface Subscriber {
+    id: number | string;
+    name: string | null;
+    email: string;
+    status: 'subscribed' | 'unsubscribed';
+    created_at: string;
+    source: string | null;
+    deleted_at: string | null;
+}
+
+interface NewsletterPagination {
+    current_page: number;
+    total: number;
+    per_page: number | string;
+    last_page: number;
+}
+
 const loading = ref(false);
-const subscribers = ref<any[]>([]);
-const pagination = ref<any>({});
+const subscribers = ref<Subscriber[]>([]);
+const pagination = ref<NewsletterPagination | Record<string, never>>({});
 const filters = ref({
     status: 'all',
     q: '',
@@ -222,7 +239,7 @@ const filters = ref({
 const fetchSubscribers = async () => {
     loading.value = true;
     try {
-        const params: Record<string, any> = {};
+        const params: Record<string, string | number> = {};
         
         Object.entries(filters.value).forEach(([key, value]) => {
             if (key === 'status' && value === 'all') return;
@@ -232,11 +249,11 @@ const fetchSubscribers = async () => {
 
         const response = await api.get('/admin/ja/newsletter/subscribers', { params });
         const { data, pagination: pag } = parseResponse(response);
-        subscribers.value = data;
+        subscribers.value = data as Subscriber[];
         if (pag) {
-            pagination.value = pag;
+            pagination.value = pag as NewsletterPagination;
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch subscribers:', error);
     } finally {
         loading.value = false;
@@ -249,7 +266,7 @@ const debounceSearch = debounce(() => {
 }, 300);
 
 const changePage = (page: number) => {
-    if (page < 1 || (pagination.value as any).last_page && page > (pagination.value as any).last_page) return;
+    if (page < 1 || (pagination.value as NewsletterPagination).last_page && page > (pagination.value as NewsletterPagination).last_page) return;
     filters.value.page = page;
     fetchSubscribers();
 };
@@ -260,7 +277,7 @@ const changePerPage = (perPage: number) => {
     fetchSubscribers();
 };
 
-const deleteSubscriber = async (subscriber: any) => {
+const deleteSubscriber = async (subscriber: Subscriber) => {
     const isTrashed = !!subscriber.deleted_at;
     const confirmed = await confirm({
         title: isTrashed ? t('common.actions.forceDelete') : t('features.newsletter.actions.delete'),
@@ -282,13 +299,13 @@ const deleteSubscriber = async (subscriber: any) => {
             toast.success.delete('Subscriber');
         }
         fetchSubscribers();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to delete subscriber:', error);
         toast.error.delete(error, 'Subscriber');
     }
 };
 
-const restoreSubscriber = async (subscriber: any) => {
+const restoreSubscriber = async (subscriber: Subscriber) => {
     const confirmed = await confirm({
         title: t('common.actions.restore'),
         message: `Restore ${subscriber.email}?`,
@@ -302,7 +319,7 @@ const restoreSubscriber = async (subscriber: any) => {
         await api.post(`/admin/ja/newsletter/subscribers/${subscriber.id}/restore`);
         toast.success.restore('Subscriber');
         fetchSubscribers();
-    } catch (error: any) {
+    } catch (error: unknown) {
          logger.error('Failed to restore subscriber:', error);
         toast.error.fromResponse(error);
     }
@@ -315,7 +332,7 @@ const exportCsv = async () => {
             responseType: 'blob',
         });
         
-        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const url = window.URL.createObjectURL(new Blob([response.data as BlobPart]));
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', `subscribers-${new Date().toISOString().split('T')[0]}.csv`);
@@ -323,7 +340,7 @@ const exportCsv = async () => {
         link.click();
         link.remove();
         toast.success.action(t('common.messages.success.exported'));
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to export subscribers:', error);
         toast.error.fromResponse(error);
     }
@@ -348,13 +365,13 @@ const handleBulkAction = async (value: string) => {
     bulkActionSelection.value = '';
 };
 
-const selectedIds = ref<any[]>([]);
+const selectedIds = ref<(string | number)[]>([]);
 
 const isAllSelected = computed(() => {
     return subscribers.value.length > 0 && selectedIds.value.length === subscribers.value.length;
 });
 
-const toggleSelection = (id: any) => {
+const toggleSelection = (id: string | number) => {
     const index = selectedIds.value.indexOf(id);
     if (index === -1) {
         selectedIds.value.push(id);
@@ -398,7 +415,7 @@ const bulkAction = async (action: string) => {
              selectedIds.value = [];
              await fetchSubscribers();
              toast.success.action(t('common.messages.success.deleted', { item: 'Subscribers' }));
-         } catch (error: any) {
+         } catch (error: unknown) {
              toast.error.action(error);
          }
     } else if (action === 'restore') {
@@ -410,7 +427,7 @@ const bulkAction = async (action: string) => {
              selectedIds.value = [];
              await fetchSubscribers();
              toast.success.restore('Subscribers');
-         } catch (error: any) {
+         } catch (error: unknown) {
              toast.error.action(error);
          }
     } else if (action === 'unsubscribe' || action === 'subscribe') {
@@ -422,7 +439,7 @@ const bulkAction = async (action: string) => {
              selectedIds.value = [];
              await fetchSubscribers();
              toast.success.action(t('common.messages.success.updated'));
-         } catch (error: any) {
+         } catch (error: unknown) {
              toast.error.action(error);
          }
     }

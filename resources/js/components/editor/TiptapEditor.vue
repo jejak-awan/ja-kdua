@@ -44,7 +44,7 @@
         <PropertiesPopover 
             v-model:open="showPropertiesModal"
             :node="selectedNodeForProperties"
-            :anchor="(propertiesAnchor as any)"
+            :anchor="propertiesAnchor"
             @save="saveMediaProperties"
         />
 
@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onBeforeUnmount, reactive, nextTick, type Component } from 'vue';
+import { ref, watch, onBeforeUnmount, reactive, type Component } from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3';
 import { useI18n } from 'vue-i18n';
 import StarterKit from '@tiptap/starter-kit';
@@ -127,7 +127,6 @@ import markdown from 'highlight.js/lib/languages/markdown';
 
 import SettingsIcon from 'lucide-vue-next/dist/esm/icons/settings.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
-import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
 import Bold from 'lucide-vue-next/dist/esm/icons/bold.js';
 import Italic from 'lucide-vue-next/dist/esm/icons/italic.js';
 import Undo from 'lucide-vue-next/dist/esm/icons/undo.js';
@@ -135,7 +134,7 @@ import Redo from 'lucide-vue-next/dist/esm/icons/redo.js';
 import RemoveFormatting from 'lucide-vue-next/dist/esm/icons/remove-formatting.js';
 
 interface Props {
-    modelValue: string;
+    modelValue?: string;
     placeholder?: string;
 }
 
@@ -202,7 +201,7 @@ const editor = useEditor({
             paragraph: false,
         }),
         Placeholder.configure({
-            placeholder: ({ node }) => {
+            placeholder: ({ node: _node }) => {
                 if (props.placeholder === 'Start writing...') {
                     return t('features.editor.placeholder.text')
                 }
@@ -243,7 +242,7 @@ const editor = useEditor({
             class: 'focus:outline-none min-h-[400px]',
         },
         handleDOMEvents: {
-            dblclick: (view, event) => {
+            dblclick: (_view, _event) => {
                 // Check if we clicked on a media node
                 if (editor.value && (editor.value.isActive('image') || editor.value.isActive('video') || editor.value.isActive('htmlEmbed') || editor.value.isActive('icon'))) {
                     openProperties()
@@ -309,7 +308,7 @@ function saveMediaProperties(properties: Record<string, unknown>) {
     const { pos } = selectedNodeForProperties.value;
     // Use setNodeMarkup to update specific node by position, keeping focus in popover
     editor.value.chain().command(({ tr }) => {
-        tr.setNodeMarkup(pos, undefined, properties as any);
+        tr.setNodeMarkup(pos, undefined, properties as Record<string, unknown>);
         return true;
     }).run();
 }

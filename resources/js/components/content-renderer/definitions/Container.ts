@@ -15,8 +15,7 @@ import AlignVerticalJustifyEnd from 'lucide-vue-next/dist/esm/icons/align-vertic
 import { defineAsyncComponent } from 'vue';
 
 // Import Presets
-import { backgroundDefaults } from './presets/background';
-import { borderRadiusPresets, borderDefaults } from './presets/border';
+import { borderRadiusPresets } from './presets/border';
 import { shadowOptions } from './presets/effects';
 
 export default {
@@ -55,7 +54,7 @@ export default {
                 { label: 'Row Reverse', value: 'flex-row-reverse' }
             ],
             default: 'flex-col',
-            condition: (settings: any) => !settings.layout || settings.layout === 'stack' || settings.layout === 'custom',
+            condition: (settings: Record<string, unknown>) => !settings.layout || settings.layout === 'stack' || settings.layout === 'custom',
             tab: 'style'
         },
         {

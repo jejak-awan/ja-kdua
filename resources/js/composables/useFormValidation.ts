@@ -4,14 +4,14 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { ZodSchema, ZodError } from 'zod';
 
-type ValidationRule = string | Record<string, any> | ((value: any, formData: any) => boolean | string);
-type ValidatorFunction = (value: any, formData?: any) => boolean | string;
+type ValidationRule<T = Record<string, unknown>> = string | Record<string, unknown> | ((value: unknown, formData: T) => boolean | string);
+type ValidatorFunction<T = Record<string, unknown>> = (value: unknown, formData: T) => boolean | string;
 
 /**
  * Form validation composable with Zod schema support and i18n integration
  * Provides both client-side (Zod) and server-side (422) error handling
  */
-export function useFormValidation<T extends Record<string, any>>(zodSchema: ZodSchema<T> | null = null) {
+export function useFormValidation<T extends Record<string, unknown>>(zodSchema: ZodSchema<T> | null = null) {
     const { t } = useI18n();
     const errors: Ref<Record<string, string[] | string>> = ref({});
     const touched: Ref<Record<string, boolean>> = ref({});
@@ -20,50 +20,51 @@ export function useFormValidation<T extends Record<string, any>>(zodSchema: ZodS
     /**
      * Built-in validation rules (legacy support)
      */
-    const rules: Record<string, ValidatorFunction | ((...args: any[]) => ValidatorFunction)> = {
-        required: (value: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rules: Record<string, any> = {
+        required: (value: unknown) => {
             const valid = value !== null && value !== undefined && value !== '' &&
                 (Array.isArray(value) ? value.length > 0 : true);
             return valid || 'common.validation.required';
         },
 
-        email: (value: any) => {
+        email: (value: unknown) => {
             if (!value) return true;
             const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value));
             return valid || 'common.validation.email';
         },
 
-        min: (min: number) => (value: any) => {
+        min: (min: number) => (value: unknown) => {
             if (!value) return true;
             const valid = String(value).length >= min;
             return valid || t('common.validation.min', { min });
         },
 
-        max: (max: number) => (value: any) => {
+        max: (max: number) => (value: unknown) => {
             if (!value) return true;
             const valid = String(value).length <= max;
             return valid || t('common.validation.max', { max });
         },
 
-        minValue: (min: number) => (value: any) => {
+        minValue: (min: number) => (value: unknown) => {
             if (!value) return true;
             const valid = Number(value) >= min;
             return valid || t('common.validation.minValue', { min });
         },
 
-        maxValue: (max: number) => (value: any) => {
+        maxValue: (max: number) => (value: unknown) => {
             if (!value) return true;
             const valid = Number(value) <= max;
             return valid || t('common.validation.maxValue', { max });
         },
 
-        numeric: (value: any) => {
+        numeric: (value: unknown) => {
             if (!value) return true;
             const valid = /^\d+$/.test(String(value));
             return valid || 'common.validation.numeric';
         },
 
-        url: (value: any) => {
+        url: (value: unknown) => {
             if (!value) return true;
             try {
                 new URL(String(value));
@@ -73,12 +74,12 @@ export function useFormValidation<T extends Record<string, any>>(zodSchema: ZodS
             }
         },
 
-        confirmed: (confirmField: string) => (value: any, formData: any) => {
-            const valid = value === formData[confirmField];
+        confirmed: (confirmField: string) => (value: unknown, formData: T) => {
+            const valid = value === formData[confirmField as keyof T];
             return valid || 'common.validation.confirmed';
         },
 
-        slug: (value: any) => {
+        slug: (value: unknown) => {
             if (!value) return true;
             const valid = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(String(value));
             return valid || 'common.validation.slug';
@@ -122,7 +123,7 @@ export function useFormValidation<T extends Record<string, any>>(zodSchema: ZodS
 
     /**
      * Validate form data using Zod schema
-     * @param {Object} formData - Form data to validate
+     * @param {T} formData - Form data to validate
      * @returns {boolean} - True if valid, false if validation errors
      */
     const validateWithZod = (formData: T): boolean => {
@@ -155,10 +156,11 @@ export function useFormValidation<T extends Record<string, any>>(zodSchema: ZodS
     /**
      * Validate a single field using Zod schema
      * @param {string} fieldName - Field name to validate
-     * @param {any} value - Field value
-     * @param {Object} formData - Full form data (for cross-field validation)
+     * @param {string} fieldName - Field name to validate
+     * @param {unknown} value - Field value
+     * @param {Partial<T>} formData - Full form data (for cross-field validation)
      */
-    const validateFieldWithZod = (fieldName: string, value: any, formData: Partial<T> = {}): boolean => {
+    const validateFieldWithZod = (fieldName: string, value: unknown, formData: Partial<T> = {}): boolean => {
         if (!zodSchema) return true;
 
         // Create partial data for validation
@@ -190,7 +192,7 @@ export function useFormValidation<T extends Record<string, any>>(zodSchema: ZodS
     /**
      * Validate a single field using legacy rules
      */
-    const validateField = (fieldName: string, value: any, fieldRules: ValidationRule[], formData: any = {}): boolean => {
+    const validateField = (fieldName: string, value: unknown, fieldRules: ValidationRule<T>[], formData: T = {} as T): boolean => {
         if (!fieldRules || fieldRules.length === 0) {
             return true;
         }
@@ -198,7 +200,8 @@ export function useFormValidation<T extends Record<string, any>>(zodSchema: ZodS
         const fieldErrors: string[] = [];
 
         for (const rule of fieldRules) {
-            let validator: ValidatorFunction | undefined;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            let validator: any;
             let result: boolean | string | undefined;
 
             if (typeof rule === 'string') {
@@ -209,7 +212,7 @@ export function useFormValidation<T extends Record<string, any>>(zodSchema: ZodS
             } else if (typeof rule === 'object') {
                 const ruleName = Object.keys(rule)[0];
                 const ruleParams = rule[ruleName];
-                const ruleCreator = rules[ruleName] as (...args: any[]) => ValidatorFunction;
+                const ruleCreator = rules[ruleName];
 
                 if (ruleCreator) {
                     if (Array.isArray(ruleParams)) {
@@ -222,7 +225,7 @@ export function useFormValidation<T extends Record<string, any>>(zodSchema: ZodS
                     }
                 }
             } else if (typeof rule === 'function') {
-                result = rule(value, formData);
+                result = (rule as (value: unknown, formData: T) => boolean | string)(value, formData);
             }
 
             if (result !== true && result !== undefined) {
@@ -243,7 +246,7 @@ export function useFormValidation<T extends Record<string, any>>(zodSchema: ZodS
     /**
      * Validate entire form using legacy rules
      */
-    const validate = (formData: any, validationRules: Record<string, ValidationRule[]>): boolean => {
+    const validate = (formData: T, validationRules: Record<string, ValidationRule<T>[]>): boolean => {
         validating.value = true;
         errors.value = {};
 

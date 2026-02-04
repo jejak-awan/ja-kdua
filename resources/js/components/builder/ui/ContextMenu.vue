@@ -169,9 +169,10 @@ import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
 import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
 import EyeOff from 'lucide-vue-next/dist/esm/icons/eye-off.js';
 import BookmarkPlus from 'lucide-vue-next/dist/esm/icons/bookmark-plus.js';
+import type { BuilderInstance } from '@/types/builder';
 
 const { t } = useI18n();
-const builder = inject<any>('builder');
+const builder = inject<BuilderInstance>('builder');
 
 interface Props {
     visible?: boolean;
@@ -187,7 +188,10 @@ const props = withDefaults(defineProps<Props>(), {
     visible: false,
     x: 0,
     y: 0,
-    mode: 'module'
+    mode: 'module',
+    moduleId: '',
+    title: '',
+    type: ''
 });
 
 const emit = defineEmits<{
@@ -196,10 +200,10 @@ const emit = defineEmits<{
 }>();
 
 // Computed properties for menu state
-const canUndo = computed(() => builder?.canUndo ?? false);
-const canRedo = computed(() => builder?.canRedo ?? false);
-const hasClipboard = computed(() => !!builder?.clipboard);
-const hasStyleClipboard = computed(() => !!builder?.styleClipboard);
+const canUndo = computed(() => builder?.canUndo.value ?? false);
+const canRedo = computed(() => builder?.canRedo.value ?? false);
+const hasClipboard = computed(() => builder?.clipboard.value?.type === 'module');
+const hasStyleClipboard = computed(() => builder?.clipboard.value?.type === 'styles');
 const isMainCanvas = computed(() => props.type === 'Main');
 const typeLabel = computed(() => props.type || 'Module');
 
@@ -210,7 +214,7 @@ const isContainer = computed(() => {
 
 const hasParent = computed(() => {
     if (!props.moduleId || !builder) return false;
-    const parent = builder.findParentById?.(builder.blocks, props.moduleId);
+    const parent = builder.findParentById?.(builder.blocks.value, props.moduleId);
     return !!parent;
 });
 
@@ -249,7 +253,7 @@ const menuStyle = computed<CSSProperties>(() => {
 });
 
 // Close on click outside
-const handleClickOutside = (e: Event) => {
+const handleClickOutside = (_e: Event) => {
     if (props.visible) {
         emit('close');
     }

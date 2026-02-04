@@ -84,6 +84,7 @@ import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 import api from '@/services/api'
+import type { AxiosError } from 'axios'
 import { Button } from '@/components/ui'
 
 const { t } = useI18n()
@@ -127,14 +128,19 @@ const verify = async () => {
         verified.value = true
         error.value = ''
         emit('verified', { token: token.value, answer: answer.value })
-    } catch (e: any) {
+    } catch (e: unknown) {
         verified.value = false
-        if (e.response && e.response.status === 422) {
-             error.value = t('features.auth.captcha.error') || t('features.auth.captcha.invalid') || 'Invalid code'
-             answer.value = '' // Clear incorrect answer
+        const err = e as AxiosError<{ message?: string }>;
+        // 422 is a validation error (wrong answer or expired token), not a system crash
+        if (err.response && err.response.status === 422) {
+            error.value = t('features.auth.captcha.error') || 'Incorrect answer'
+            // We just log a warning instead of error to avoid alarming developers
+            logger.warning('Captcha verification failed:', err.response.data?.message || 'Invalid answer')
+            answer.value = '' // Clear incorrect answer
         } else {
-             error.value = 'Validation failed'
-             logger.error('Image captcha error:', e)
+            // Other errors (500, etc)
+            error.value = 'Validation failed'
+            logger.error('Captcha system error:', err)
         }
     }
 }

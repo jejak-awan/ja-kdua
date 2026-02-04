@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted, onUnmounted, provide } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from '@/services/toast'
 import Builder from '@/components/builder/Builder.vue'
@@ -51,10 +51,10 @@ import {
 
 const router = useRouter()
 const isFullscreen = ref(false)
-const builderRef = ref<any>(null)
+const builderRef = ref<{ builder?: { content: { value: { status: string } }; isDirty: boolean; saveContent: () => Promise<void> } } | null>(null)
 const showConfirmDialog = ref(false)
 
-const handleSave = async (status: any) => {
+const handleSave = async (status: string | null) => {
     if (!builderRef.value?.builder) return
     
     // In site mode, we might just use saveContent logic from builder

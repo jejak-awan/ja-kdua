@@ -6,12 +6,12 @@ import SettingGroup from '@/components/settings/SettingGroup.vue'
 import SettingField from '@/components/settings/SettingField.vue'
 import { Button } from '@/components/ui';
 import { useConfirm } from '@/composables/useConfirm'
-import toast from '@/services/toast'
+import type { SettingValue } from '@/types/settings'
 
 interface Setting {
     id: number | string;
     key: string;
-    value: any;
+    value: unknown;
     type: string;
     group: string;
 }
@@ -20,8 +20,8 @@ interface SettingGroupData {
     id: string;
     title: string;
     description: string;
-    icon: any;
-    color: string;
+    icon: unknown;
+    color: 'primary' | 'blue' | 'emerald' | 'amber' | 'red' | 'purple' | 'indigo' | 'orange' | 'pink';
     keys: string[];
     settings: Setting[];
     defaultExpanded: boolean;
@@ -40,7 +40,7 @@ interface MigrationLog {
 
 interface Props {
     settings: Setting[];
-    formData: Record<string, any>;
+    formData: Record<string, SettingValue>;
     errors?: Record<string, string[]>;
 }
 
@@ -50,10 +50,10 @@ const { confirm } = useConfirm()
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
-    (e: 'update:formData', value: Record<string, any>): void;
+    (e: 'update:formData', value: Record<string, SettingValue>): void;
 }>()
 
-const updateField = (key: string, value: any) => {
+const updateField = (key: string, value: SettingValue) => {
     emit('update:formData', { ...props.formData, [key]: value })
 }
 
@@ -186,10 +186,14 @@ const testConnection = async () => {
             config: props.formData
         });
         testResult.value = { success: true, message: response.data.message };
-    } catch (error: any) {
+    } catch (error: unknown) {
+        let msg = 'Connection failed. Please check your credentials.';
+        if (axios.isAxiosError(error)) {
+            msg = error.response?.data?.message || msg;
+        }
         testResult.value = { 
             success: false, 
-            message: error.response?.data?.message || 'Connection failed. Please check your credentials.' 
+            message: msg
         };
     } finally {
         testingConnection.value = false;
@@ -257,8 +261,14 @@ const startMigration = async () => {
                 });
                 
                 processedFiles.value += batch.length;
-            } catch (err: any) {
-                 migrationLogs.value.push({ type: 'error', message: `Batch failed: ${err.message}` });
+            } catch (err: unknown) {
+                 let msg = 'Batch failed';
+                 if (axios.isAxiosError(err)) {
+                     msg = err.message;
+                 } else if (err instanceof Error) {
+                     msg = err.message;
+                 }
+                 migrationLogs.value.push({ type: 'error', message: `Batch failed: ${msg}` });
             }
         }
         
@@ -267,9 +277,15 @@ const startMigration = async () => {
             migrationLogs.value.push({ type: 'success', message: 'Migration completed successfully.' });
         }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         migrationStatus.value = 'error';
-        migrationLogs.value.push({ type: 'error', message: error.response?.data?.message || error.message });
+        let msg = 'Migration failed';
+        if (axios.isAxiosError(error)) {
+            msg = error.response?.data?.message || error.message;
+        } else if (error instanceof Error) {
+            msg = error.message;
+        }
+        migrationLogs.value.push({ type: 'error', message: msg });
     }
 };
 
@@ -285,14 +301,14 @@ const handleStopMigration = () => {
             :key="group.id"
             :title="group.title"
             :description="group.description"
-            :icon="group.icon"
+            :icon="(group.icon as any)"
             :color="group.color as any"
             :default-expanded="group.defaultExpanded"
         >
             <SettingField
                 v-for="setting in group.settings"
                 :key="setting.id"
-                :model-value="formData[setting.key]"
+                :model-value="(formData[setting.key] as any)"
                 @update:model-value="(value) => updateField(setting.key, value)"
                 :field-key="setting.key"
                 :label="$t('features.settings.labels.' + setting.key)"

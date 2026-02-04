@@ -12,7 +12,7 @@
  * const debouncedSearch = debounce(() => fetchResults(), 300)
  * input.addEventListener('input', debouncedSearch)
  */
-export function debounce<T extends (...args: any[]) => void>(
+export function debounce<T extends (...args: unknown[]) => void>(
     fn: T,
     delay: number = 300
 ): (...args: Parameters<T>) => void {
@@ -41,7 +41,7 @@ export function debounce<T extends (...args: any[]) => void>(
  * const throttledScroll = throttle(() => updatePosition(), 100)
  * window.addEventListener('scroll', throttledScroll)
  */
-export function throttle<T extends (...args: any[]) => void>(
+export function throttle<T extends (...args: unknown[]) => void>(
     fn: T,
     limit: number = 300
 ): (...args: Parameters<T>) => void {

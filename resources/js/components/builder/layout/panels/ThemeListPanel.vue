@@ -61,7 +61,7 @@ import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
 import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 import { BaseInput } from '@/components/builder/ui';
-import type { BuilderInstance } from '@/types/builder';
+import type { BuilderInstance, ThemeData } from '@/types/builder';
 
 const { t } = useI18n();
 const builder = inject<BuilderInstance>('builder');
@@ -75,7 +75,7 @@ const themes = computed(() => builder?.availableThemes?.value || []);
 const filteredThemes = computed(() => {
   if (!searchQuery.value) return themes.value;
   const query = searchQuery.value.toLowerCase();
-  return themes.value.filter((t: any) => 
+  return themes.value.filter((t: ThemeData) => 
     t.name.toLowerCase().includes(query) || 
     t.slug.toLowerCase().includes(query)
   );

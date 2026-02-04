@@ -65,7 +65,7 @@ import { useFormValidation } from '@/composables/useFormValidation';
 import { folderSchema } from '@/schemas';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 
-const { t } = useI18n();
+useI18n();
 const toast = useToast();
 const { validateWithZod, setErrors, clearErrors } = useFormValidation(folderSchema);
 
@@ -100,11 +100,12 @@ const handleSubmit = async () => {
         toast.success.create('Folder');
         emit('created');
         emit('close');
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
+    } catch (error: unknown) {
+        const err = error as import('axios').AxiosError<{ errors?: Record<string, string[]> }>;
+        if (err.response?.status === 422) {
+            setErrors(err.response.data.errors || {});
         } else {
-            toast.error.fromResponse(error);
+            toast.error.fromResponse(err);
         }
     } finally {
         creating.value = false;

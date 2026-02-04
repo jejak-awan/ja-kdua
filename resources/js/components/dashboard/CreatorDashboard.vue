@@ -230,7 +230,6 @@ import LineChart from '@/components/charts/LineChart.vue';
 
 import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 import Image from 'lucide-vue-next/dist/esm/icons/image.js';
-import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
 import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';
 import Clock3 from 'lucide-vue-next/dist/esm/icons/clock-3.js';
 import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
@@ -240,17 +239,6 @@ import PieChart from 'lucide-vue-next/dist/esm/icons/chart-pie.js';
 import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
 import Trophy from 'lucide-vue-next/dist/esm/icons/trophy.js';
 
-interface CreatorStats {
-    myContents?: {
-        total: number;
-        published: number;
-        pending: number;
-        draft: number;
-    };
-    myMedia?: {
-        total: number;
-    };
-}
 
 import type { CreatorDashboardData, TrafficDataPoint, StatusDataPoint, TopContentItem } from '@/types/dashboard';
 
@@ -323,7 +311,7 @@ const fetchStats = async () => {
                  topContent.value = ensureArray<TopContentItem>(data.topContent);
             }
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch creator stats:', error);
     } finally {
         loading.value = false;

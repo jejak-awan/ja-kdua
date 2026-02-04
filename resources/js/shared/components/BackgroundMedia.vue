@@ -16,65 +16,66 @@
     <div 
       v-if="overlayColor" 
       class="video-overlay" 
-      :style="{ backgroundColor: overlayColor }"
+      :style="{ backgroundColor: (overlayColor as string) }"
     ></div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { computed, ref } from 'vue'
+import { computed, ref, type CSSProperties } from 'vue'
 import { getVal } from '../utils/styleUtils'
+import type { ModuleSettings } from '@/types/builder'
 
 const props = defineProps<{
-  settings: Record<string, any>;
-  device?: string;
+  settings: ModuleSettings;
+  device?: 'desktop' | 'tablet' | 'mobile';
 }>();
 
 const videoRef = ref<HTMLVideoElement | null>(null)
 
 const hasVideo = computed(() => {
-  return getVal(props.settings, 'backgroundVideoMp4', props.device || 'desktop') || 
-         getVal(props.settings, 'backgroundVideoWebm', props.device || 'desktop')
+  return getVal<string>(props.settings, 'backgroundVideoMp4', props.device || 'desktop') || 
+         getVal<string>(props.settings, 'backgroundVideoWebm', props.device || 'desktop')
 })
 
 const videoUrl = computed(() => {
-  return getVal(props.settings, 'backgroundVideoWebm', props.device || 'desktop') || 
-         getVal(props.settings, 'backgroundVideoMp4', props.device || 'desktop')
+  return getVal<string>(props.settings, 'backgroundVideoWebm', props.device || 'desktop') || 
+         getVal<string>(props.settings, 'backgroundVideoMp4', props.device || 'desktop')
 })
 
 const isMuted = computed(() => {
-  return getVal(props.settings, 'backgroundVideoMute', props.device || 'desktop') !== false
+  return getVal<boolean>(props.settings, 'backgroundVideoMute', props.device || 'desktop') !== false
 })
 
 const isLoop = computed(() => {
-  return getVal(props.settings, 'backgroundVideoLoop', props.device || 'desktop') !== false
+  return getVal<boolean>(props.settings, 'backgroundVideoLoop', props.device || 'desktop') !== false
 })
 
 const overlayColor = computed(() => {
-  return getVal(props.settings, 'backgroundVideoOverlayColor', props.device || 'desktop') || ''
+  return getVal<string>(props.settings, 'backgroundVideoOverlayColor', props.device || 'desktop') || ''
 })
 
-const videoStyles = computed(() => {
-    const styles: Record<string, string> = {}
+const videoStyles = computed((): CSSProperties => {
+    const styles: Record<string, string | number | undefined> = {}
     const device = props.device || 'desktop'
     
-    const w = getVal(props.settings, 'backgroundVideoWidth', device)
-    const h = getVal(props.settings, 'backgroundVideoHeight', device)
+    const w = getVal<string | number>(props.settings, 'backgroundVideoWidth', device)
+    const h = getVal<string | number>(props.settings, 'backgroundVideoHeight', device)
     
     if (w) {
-        styles.width = String(w)
+        styles.width = String(w).includes('%') || String(w).includes('px') ? String(w) : `${w}px`
         styles.minWidth = '0'
     }
     
     if (h) {
-        styles.height = String(h)
+        styles.height = String(h).includes('%') || String(h).includes('px') ? String(h) : `${h}px`
         styles.minHeight = '0'
     }
     
     styles.objectFit = (w || h) ? 'contain' : 'cover'
     
-    return styles
+    return styles as CSSProperties
 })
 
 const onVideoLoaded = () => {

@@ -30,11 +30,11 @@
       >
         <FieldRenderer
           v-if="isField(item)"
-          :field="item as any"
-          :value="getFieldValue((item as any).name)"
+          :field="item"
+          :value="getFieldValue(item.name!)"
           :module="module"
           :device="device"
-          @update="updateField((item as any).name, $event)"
+          @update="updateField(item.name!, $event)"
         />
         <SettingsGroup
           v-else
@@ -67,7 +67,7 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const emit = defineEmits<{
+defineEmits<{
   (e: 'toggle'): void
 }>()
 
@@ -85,11 +85,12 @@ const toggleNested = (id: string) => {
 
 // Type Guards
 const isField = (item: ModuleField): item is SettingDefinition => {
-  return (item as any).type !== undefined && (item as any).type !== 'group'
+  return 'type' in item && item.type !== 'group'
 }
 
 const getItemKey = (item: ModuleField) => {
-  return (item as any).name || (item as any).id || Math.random().toString()
+  if (isField(item)) return item.name || item.key || Math.random().toString()
+  return item.id || Math.random().toString()
 }
 
 // Computed
@@ -104,15 +105,15 @@ const getFieldValue = (name: string) => {
   return props.module.settings?.[name]
 }
 
-const updateField = (name: string, value: any) => {
+const updateField = (name: string, value: unknown) => {
   builder?.updateModuleSettings(props.module.id, { [name]: value })
 
   // Auto-reset loop fields if loop is enabled/disabled? 
   if (name === 'loop_enable' && value === false && props.group.id === 'loop') {
-    const fieldsToReset: Record<string, any> = {}
-    props.group.fields.forEach((field: any) => {
-       if (field.name !== 'loop_enable' && field.default !== undefined) {
-         fieldsToReset[field.name] = field.default
+    const fieldsToReset: Record<string, unknown> = {}
+    props.group.fields.forEach((field) => {
+       if (isField(field) && field.name !== 'loop_enable' && field.default !== undefined) {
+         fieldsToReset[field.name!] = field.default
        }
     })
     if (Object.keys(fieldsToReset).length > 0) {
@@ -129,7 +130,7 @@ const isItemVisible = (item: ModuleField): boolean => {
   // For groups, check if the group itself has a condition
   const groupItem = item as ModuleGroup
   if (groupItem.condition) {
-    return groupItem.condition(props.module.settings as Record<string, any>)
+    return groupItem.condition(props.module.settings)
   }
   return true
 }
@@ -138,15 +139,13 @@ const isFieldVisible = (field: ModuleField): boolean => {
   if (!isField(field)) return true
   
   const setting = field as SettingDefinition
-  if (Array.isArray(setting.show_if)) return true 
-  
-  const showIf = setting.show_if as any
-  if (!showIf || !showIf.field) return true
+  const showIf = setting.show_if
+  if (!showIf || Array.isArray(showIf) || !('field' in showIf)) return true
 
   const dependencyName = showIf.field as string
   
   // Find the dependency field in the same group to check its visibility recursively
-  const dependencyField = props.group.fields.find((f: any) => f.name === dependencyName)
+  const dependencyField = props.group.fields.find((f) => isField(f) && f.name === dependencyName)
   if (dependencyField && isField(dependencyField) && !isFieldVisible(dependencyField)) {
     return false
   }
@@ -155,13 +154,13 @@ const isFieldVisible = (field: ModuleField): boolean => {
   const expectedValue = showIf.value
   
   if (Array.isArray(expectedValue)) {
-    return (expectedValue as any[]).includes(dependencyValue)
+    return (expectedValue as unknown[]).includes(dependencyValue)
   }
   
   return dependencyValue === expectedValue
 }
 
-const handlePresetAction = (payload: { type: string; data: any }) => {
+const handlePresetAction = (payload: { type: string; data: import('@/types/builder').BuilderPreset | null }) => {
   const { type, data } = payload
   if (type === 'addNew' || type === 'newFromCurrent') {
     builder?.openSavePresetModal?.(props.module.id)

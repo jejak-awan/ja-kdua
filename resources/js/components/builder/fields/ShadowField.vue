@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue'
+import { reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Ban from 'lucide-vue-next/dist/esm/icons/ban.js';
 import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
@@ -88,11 +88,13 @@ interface ShadowValue {
   inset: boolean;
 }
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   field: SettingDefinition;
   value: ShadowValue;
-  placeholderValue?: any;
-}>()
+  placeholderValue?: ShadowValue | null;
+}>(), {
+  placeholderValue: null
+})
 
 const emit = defineEmits(['update:value'])
 const { t } = useI18n()
@@ -102,42 +104,42 @@ const presets = computed(() => ({
     none: { 
         label: t('builder.fields.shadow.presets.none'), 
         style: {}, 
-        values: { horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false } 
+        values: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false } 
     },
     outerSmall: { 
         label: t('builder.fields.shadow.presets.sm'), 
         style: { boxShadow: '0 2px 10px rgba(0,0,0,0.15)' }, 
-        values: { horizontal: 0, vertical: 2, blur: 10, spread: 0, color: 'rgba(0,0,0,0.15)', inset: false } 
+        values: { preset: 'outerSmall', horizontal: 0, vertical: 2, blur: 10, spread: 0, color: 'rgba(0,0,0,0.15)', inset: false } 
     },
     outerLarge: { 
         label: t('builder.fields.shadow.presets.lg'), 
         style: { boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }, 
-        values: { horizontal: 0, vertical: 10, blur: 40, spread: 0, color: 'rgba(0,0,0,0.2)', inset: false } 
+        values: { preset: 'outerLarge', horizontal: 0, vertical: 10, blur: 40, spread: 0, color: 'rgba(0,0,0,0.2)', inset: false } 
     },
     offsetBottom: { 
         label: t('builder.fields.shadow.presets.xl'), 
         style: { boxShadow: '0 15px 25px -10px rgba(0,0,0,0.3)' }, 
-        values: { horizontal: 0, vertical: 15, blur: 25, spread: -10, color: 'rgba(0,0,0,0.3)', inset: false } 
+        values: { preset: 'offsetBottom', horizontal: 0, vertical: 15, blur: 25, spread: -10, color: 'rgba(0,0,0,0.3)', inset: false } 
     },
     diagonal: { 
         label: 'Diagonal', 
         style: { boxShadow: '10px 10px 20px -5px rgba(0,0,0,0.25)' }, 
-        values: { horizontal: 10, vertical: 10, blur: 20, spread: -5, color: 'rgba(0,0,0,0.25)', inset: false } 
+        values: { preset: 'diagonal', horizontal: 10, vertical: 10, blur: 20, spread: -5, color: 'rgba(0,0,0,0.25)', inset: false } 
     },
     spread: { 
         label: 'Spread', 
         style: { boxShadow: '0 0 0 10px rgba(0,0,0,0.1)' }, 
-        values: { horizontal: 0, vertical: 0, blur: 0, spread: 10, color: 'rgba(0,0,0,0.1)', inset: false } 
+        values: { preset: 'spread', horizontal: 0, vertical: 0, blur: 0, spread: 10, color: 'rgba(0,0,0,0.1)', inset: false } 
     },
     insetSmall: { 
         label: t('builder.fields.shadow.presets.inner') + ' (S)', 
         style: { boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.15)' }, 
-        values: { horizontal: 0, vertical: 2, blur: 8, spread: 0, color: 'rgba(0,0,0,0.15)', inset: true } 
+        values: { preset: 'insetSmall', horizontal: 0, vertical: 2, blur: 8, spread: 0, color: 'rgba(0,0,0,0.15)', inset: true } 
     },
     insetLarge: { 
         label: t('builder.fields.shadow.presets.inner') + ' (L)', 
         style: { boxShadow: 'inset 0 10px 25px rgba(0,0,0,0.2)' }, 
-        values: { horizontal: 0, vertical: 10, blur: 25, spread: 0, color: 'rgba(0,0,0,0.2)', inset: true } 
+        values: { preset: 'insetLarge', horizontal: 0, vertical: 10, blur: 25, spread: 0, color: 'rgba(0,0,0,0.2)', inset: true } 
     },
 }))
 
@@ -155,7 +157,7 @@ watch(localValue, (newVal) => {
 
 const applyPreset = (key: string) => {
     localValue.preset = key
-    const p = (presets.value as any)[key].values
+    const p = (presets.value as Record<string, { values: ShadowValue }>)[key].values
     Object.assign(localValue, p)
 }
 </script>

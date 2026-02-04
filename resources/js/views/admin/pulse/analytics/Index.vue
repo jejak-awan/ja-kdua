@@ -228,9 +228,9 @@
                             <div>
                                 <h4 class="text-xs font-semibold text-muted-foreground capitalize tracking-wide mb-4">{{ $t('features.analytics.charts.topReferrers') }}</h4>
                                 <div class="space-y-2.5 max-h-[160px] overflow-y-auto pr-1 flex flex-col justify-center">
-                                    <div v-for="(ref, i) in referrers.slice(0, 5)" :key="i" class="flex items-center justify-between group">
-                                        <span class="text-xs truncate flex-1 text-foreground/80 group-hover:text-foreground transition-colors">{{ formatUrl(ref.referer) }}</span>
-                                        <Badge variant="outline" class="ml-2 h-5 px-1.5 text-[10px] tabular-nums">{{ ref.count }}</Badge>
+                                    <div v-for="(referrerItem, i) in referrers.slice(0, 5)" :key="i" class="flex items-center justify-between group">
+                                        <span class="text-xs truncate flex-1 text-foreground/80 group-hover:text-foreground transition-colors">{{ formatUrl(referrerItem.referer) }}</span>
+                                        <Badge variant="outline" class="ml-2 h-5 px-1.5 text-[10px] tabular-nums">{{ referrerItem.count }}</Badge>
                                     </div>
                                     <div v-if="referrers.length === 0" class="flex flex-col items-center justify-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
                                         <p class="text-[10px] italic">{{ $t('features.analytics.noData') }}</p>
@@ -312,20 +312,49 @@ interface AnalyticsOverview {
 }
 
 const overview = ref<AnalyticsOverview>({});
-const visits = ref<any[]>([]);
-const topPages = ref<any[]>([]);
-const topContent = ref<any[]>([]);
-const devices = ref<any[]>([]);
-const browsers = ref<any[]>([]);
-const countries = ref<any[]>([]);
-const referrers = ref<any[]>([]);
-const realtime = ref<any>({});
+
+interface VisitData {
+    period: string;
+    visits: number;
+}
+
+interface PageData {
+    url: string;
+    visits: number;
+}
+
+interface ContentData {
+    id: number;
+    title: string;
+    visits_count: number;
+    author?: { name: string };
+}
+
+interface RealtimeData {
+    active_sessions?: number;
+    visits_last_hour?: number;
+    top_pages_now?: unknown[];
+}
+
+interface StatItem {
+    count: number;
+    [key: string]: unknown;
+}
+
+const visits = ref<VisitData[]>([]);
+const topPages = ref<PageData[]>([]);
+const topContent = ref<ContentData[]>([]);
+const devices = ref<StatItem[]>([]);
+const browsers = ref<StatItem[]>([]);
+const countries = ref<StatItem[]>([]);
+const referrers = ref<{ referer: string; count: number }[]>([]);
+const realtime = ref<RealtimeData>({});
 let refreshInterval: ReturnType<typeof setInterval> | null = null;
 
 // Filter out API routes and error pages from top pages
 const filteredTopPages = computed(() => {
     const errorPatterns = ['/403', '/404', '/419', '/500', '/503'];
-    return topPages.value.filter((page: any) => {
+    return topPages.value.filter((page: PageData) => {
         if (!page.url) return true;
         // Exclude /api/ URLs
         if (page.url.includes('/api/')) return false;
@@ -378,7 +407,7 @@ const fetchAnalytics = async () => {
         countries.value = ensureArray(parseResponse(countriesRes).data);
         referrers.value = ensureArray(parseResponse(referrersRes).data);
         realtime.value = parseSingleResponse(realtimeRes) || {};
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch analytics:', error);
     } finally {
         loading.value = false;
@@ -411,7 +440,7 @@ const exportData = async (type: string) => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
         toast.success.action(t('features.analytics.export.success') || 'Export started');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to export:', error);
         toast.error.fromResponse(error);
     } finally {

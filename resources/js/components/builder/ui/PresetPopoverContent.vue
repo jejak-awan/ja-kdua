@@ -65,22 +65,24 @@ interface Props {
   fieldName?: string;
 }
 
+import type { BuilderInstance, BuilderPreset } from '@/types/builder';
+
 const props = withDefaults(defineProps<Props>(), {
   fieldName: ''
 });
 
 const emit = defineEmits<{
-  (e: 'action', payload: { type: string, data: any }): void;
+  (e: 'action', payload: { type: string, data: BuilderPreset | null }): void;
 }>();
 
-const builder = inject<any>('builder');
+const builder = inject<BuilderInstance>('builder');
 
 const filteredPresets = computed(() => {
-  if (!builder?.presets) return [];
-  return builder.presets.filter((p: any) => p.type === props.type);
+  if (!builder?.presets.value) return [];
+  return builder.presets.value.filter((p: BuilderPreset) => p.type === props.type);
 });
 
-const handleAction = (type: string, data: any = null) => {
+const handleAction = (type: string, data: BuilderPreset | null = null) => {
   emit('action', { type, data });
 };
 </script>

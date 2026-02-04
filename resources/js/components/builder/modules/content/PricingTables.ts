@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -17,8 +17,7 @@ import {
     interactionsSettings,
     scrollEffectsSettings,
     attributesSettings,
-    adminLabelSettings,
-    layoutSettings
+    adminLabelSettings
 } from '@/components/builder/modules/commonSettings';
 
 /**
@@ -141,7 +140,7 @@ const PricingTablesModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -150,7 +149,7 @@ const PricingTablesModule: ModuleDefinition = {
             {
                 id: 'priceTypography',
                 label: 'Price Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `price_${f.name}`,
                     label: `Price ${f.label}`

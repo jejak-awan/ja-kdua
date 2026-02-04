@@ -6,12 +6,14 @@ import { cn } from '@/lib/utils'
 
 const props = withDefaults(defineProps<TooltipContentProps & { class?: HTMLAttributes['class'] }>(), {
   sideOffset: 4,
+  class: undefined,
 })
 
 const emits = defineEmits<TooltipContentEmits>()
 
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props
+  void _
 
   return delegated
 })

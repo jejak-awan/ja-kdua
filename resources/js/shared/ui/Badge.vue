@@ -20,5 +20,6 @@ const props = withDefaults(defineProps<{
   variant?: keyof typeof variantClasses;
 }>(), {
   variant: 'default',
+  class: '',
 });
 </script>

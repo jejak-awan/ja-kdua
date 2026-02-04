@@ -7,6 +7,8 @@ use App\Services\CacheService;
 use App\Services\ContentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(name="Content")
@@ -196,23 +198,29 @@ class ContentController extends BaseApiController
             return $this->forbidden('Unauthorized to view content statistics');
         }
 
-        $query = Content::query();
+        $userId = $request->user()->id;
+        $canManage = $request->user()->can('manage content');
+        $cacheKey = "content_stats_{$userId}_" . ($canManage ? 'all' : 'scoped');
 
-        // Scope stats if not a content manager
-        if (! $request->user()->can('manage content')) {
-            $query->where('author_id', $request->user()->id);
-        }
+        return Cache::remember($cacheKey, 300, function () use ($request, $canManage) {
+            $query = Content::query();
 
-        $stats = [
-            'total' => (clone $query)->count(),
-            'published' => (clone $query)->where('status', 'published')->count(),
-            'pending' => (clone $query)->where('status', 'pending')->count(),
-            'draft' => (clone $query)->where('status', 'draft')->count(),
-            'archived' => (clone $query)->where('status', 'archived')->count(),
-            'trashed' => (clone $query)->onlyTrashed()->count(),
-        ];
+            // Scope stats if not a content manager
+            if (! $canManage) {
+                $query->where('author_id', $request->user()->id);
+            }
 
-        return $this->success($stats, 'Content statistics retrieved successfully');
+            $stats = [
+                'total' => (clone $query)->count(),
+                'published' => (clone $query)->where('status', 'published')->count(),
+                'pending' => (clone $query)->where('status', 'pending')->count(),
+                'draft' => (clone $query)->where('status', 'draft')->count(),
+                'archived' => (clone $query)->where('status', 'archived')->count(),
+                'trashed' => (clone $query)->onlyTrashed()->count(),
+            ];
+
+            return $this->success($stats, 'Content statistics retrieved successfully');
+        });
     }
 
     /**

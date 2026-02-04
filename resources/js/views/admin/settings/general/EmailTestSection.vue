@@ -139,7 +139,7 @@ import {
     AccordionItem,
     AccordionTrigger
 } from '@/components/ui';
-import type { CacheStatus, QueueStatus, EmailLog } from '@/types/settings';
+import type { QueueStatus, EmailLog } from '@/types/settings';
 
 interface TestEmail {
     to: string;
@@ -156,7 +156,7 @@ interface TestEmailResult {
 interface Props {
     sendingTestEmail?: boolean;
     testEmailResult?: TestEmailResult | null;
-    testEmail: TestEmail;
+    testEmail?: TestEmail;
     queueStatus?: QueueStatus | null;
     loadingQueueStatus?: boolean;
     emailLogs?: EmailLog[];
@@ -180,7 +180,7 @@ defineEmits<{
     (e: 'update:test-email', value: TestEmail): void;
 }>()
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return ''
     const date = new Date(dateString)
     return date.toLocaleString()

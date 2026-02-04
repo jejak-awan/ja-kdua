@@ -8,7 +8,7 @@ export function useAnalytics() {
     /**
      * Track a custom event
      */
-    const trackEvent = async (eventType: string, eventName: string, data: Record<string, any> = {}, contentId: number | null = null): Promise<void> => {
+    const trackEvent = async (eventType: string, eventName: string, data: Record<string, unknown> = {}, contentId: number | null = null): Promise<void> => {
         try {
             await api.post('/analytics/track', {
                 event_type: eventType,
@@ -46,7 +46,7 @@ export function useAnalytics() {
     /**
      * Track a form submission
      */
-    const trackFormSubmit = (formName: string, data: Record<string, any> = {}) => {
+    const trackFormSubmit = (formName: string, data: Record<string, unknown> = {}) => {
         return trackEvent('form_submit', `Form Submit: ${formName}`, {
             form_name: formName,
             ...data,
@@ -76,7 +76,7 @@ export function useAnalytics() {
     /**
      * Track multiple events in batch
      */
-    const trackBatch = async (events: Array<{ type: string; name: string; data: any; content_id?: number }>): Promise<void> => {
+    const trackBatch = async (events: Array<{ type: string; name: string; data: unknown; content_id?: number }>): Promise<void> => {
         if (!events || events.length === 0) return;
 
         try {

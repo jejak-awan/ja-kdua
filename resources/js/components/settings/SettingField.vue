@@ -101,6 +101,7 @@
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getFieldOptions, getMailPortOptions } from '@/config/settingsFieldOptions'
+import type { SettingValue } from '@/types/settings'
 import {
     Input,
     Textarea,
@@ -120,7 +121,6 @@ interface SettingOption {
 
 const { t } = useI18n()
 
-type SettingValue = string | number | boolean | null;
 
 const props = withDefaults(defineProps<{
     modelValue: SettingValue;

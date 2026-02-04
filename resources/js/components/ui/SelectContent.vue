@@ -21,6 +21,7 @@ import { computed, type HTMLAttributes } from 'vue';
 
 const props = withDefaults(defineProps<SelectContentProps & { class?: HTMLAttributes['class'] }>(), {
   position: 'popper',
+  class: undefined,
 });
 
 const delegatedProps = computed(() => {

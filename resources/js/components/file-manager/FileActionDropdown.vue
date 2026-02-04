@@ -12,14 +12,14 @@
                     class="w-full justify-start text-[13px] h-9 px-3 rounded-lg hover:bg-accent hover:text-accent-foreground"
                     @click="handleAction('open')"
                 >
-                    <FolderOpen v-if="isFolder" class="w-4 h-4 mr-2.5 opacity-70" />
+                    <FolderOpen v-if="isFolder(item)" class="w-4 h-4 mr-2.5 opacity-70" />
                     <Eye v-else class="w-4 h-4 mr-2.5 opacity-70" />
                     {{ t('features.file_manager.actions.open') }}
                 </Button>
 
                 <!-- Download -->
                 <Button 
-                    v-if="!isFolder"
+                    v-if="!isFolder(item)"
                     variant="ghost" 
                     size="sm" 
                     class="w-full justify-start text-[13px] h-9 px-3 rounded-lg hover:bg-accent hover:text-accent-foreground"
@@ -44,7 +44,7 @@
 
                 <!-- Copy URL -->
                 <Button 
-                    v-if="!isFolder"
+                    v-if="!isFolder(item)"
                     variant="ghost" 
                     size="sm" 
                     class="w-full justify-start text-[13px] h-9 px-3 rounded-lg hover:bg-accent hover:text-accent-foreground"
@@ -102,8 +102,10 @@ import {
 } from '@/components/ui';
 import { FileManagerKey } from '@/keys';
 
-const props = defineProps<{
-    item: any;
+import type { FileItem, FolderItem } from '@/types/file-manager';
+
+const { item } = defineProps<{
+    item: FileItem | FolderItem;
 }>();
 
 const emit = defineEmits(['preview']);
@@ -120,30 +122,30 @@ const {
     downloadFile
 } = inject(FileManagerKey)!;
 
-const isFolder = 'children' in props.item || !('extension' in props.item);
+const isFolder = (item: FileItem | FolderItem): item is FolderItem => 'children' in item || !('extension' in item);
 
 const handleAction = async (action: string) => {
     isOpen.value = false;
     
     switch (action) {
         case 'open':
-            if (isFolder) navigateToPath(props.item.path);
-            else emit('preview', props.item);
+            if (isFolder(item)) navigateToPath(item.path);
+            else emit('preview', item as FileItem);
             break;
         case 'download':
-            downloadFile(props.item);
+            if (!isFolder(item)) downloadFile(item);
             break;
         case 'copyPath':
-            await copyPath(props.item);
+            await copyPath(item);
             break;
         case 'copyUrl':
-            await copyUrl(props.item);
+            if (!isFolder(item)) await copyUrl(item);
             break;
         case 'copy':
-            copyToClipboard([props.item], 'copy');
+            copyToClipboard([item], 'copy');
             break;
         case 'delete':
-            await deleteItem(props.item);
+            await deleteItem(item);
             break;
     }
 };

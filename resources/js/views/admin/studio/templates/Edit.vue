@@ -148,7 +148,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -173,7 +173,7 @@ const templateId = route.params.id;
 
 const loading = ref(false);
 const saving = ref(false);
-const initialForm = ref<any>(null);
+const initialForm = ref<Record<string, unknown> | null>(null);
 
 const form = ref({
     name: '',
@@ -210,7 +210,7 @@ const fetchTemplate = async () => {
         
         // Save initial state for dirty checking
         initialForm.value = JSON.parse(JSON.stringify(form.value));
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch template:', error);
         toast.error.load(error);
         router.push({ name: 'studio', query: { tab: 'templates' } });
@@ -230,9 +230,12 @@ const handleSubmit = async () => {
         
         // Update initial form after successful save
         initialForm.value = JSON.parse(JSON.stringify(form.value));
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response: { status: number, data: { errors: Record<string, string[]> } } };
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors || {});
+            }
         } else {
             toast.error.fromResponse(error);
         }

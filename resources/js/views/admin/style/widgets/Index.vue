@@ -89,11 +89,19 @@ const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 
-const widgets = ref<any[]>([]);
+interface Widget {
+    id: number;
+    title: string;
+    type: string;
+    location?: string;
+    is_active?: boolean;
+}
+
+const widgets = ref<Widget[]>([]);
 const loading = ref(false);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
-const editingWidget = ref<any>(null);
+const editingWidget = ref<Widget | null>(null);
 
 const fetchWidgets = async () => {
     loading.value = true;
@@ -101,19 +109,19 @@ const fetchWidgets = async () => {
         const response = await api.get('/admin/ja/widgets');
         const { data } = parseResponse(response);
         widgets.value = ensureArray(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch widgets:', error);
     } finally {
         loading.value = false;
     }
 };
 
-const editWidget = (widget: any) => {
+const editWidget = (widget: Widget) => {
     editingWidget.value = widget;
     showEditModal.value = true;
 };
 
-const deleteWidget = async (widget: any) => {
+const deleteWidget = async (widget: Widget) => {
     const confirmed = await confirm({
         title: t('features.widgets.actions.delete'),
         message: t('features.widgets.confirm.delete', { title: widget.title }),
@@ -127,9 +135,9 @@ const deleteWidget = async (widget: any) => {
         await api.delete(`/admin/ja/widgets/${widget.id}`);
         toast.success.delete(t('features.widgets.title'));
         fetchWidgets();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to delete widget:', error);
-        toast.error.delete(error, t('features.widgets.title'));
+        toast.error.delete(error as Error, t('features.widgets.title'));
     }
 };
 

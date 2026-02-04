@@ -93,7 +93,7 @@ const currentOptionLabel = computed(() => {
 })
 
 // Parse initial value
-const parseValue = (val: any) => {
+const parseValue = (val: string | number | null | undefined) => {
     if (val === null || val === undefined || val === '') {
         currentOption.value = 'default'
         numericValue.value = 0
@@ -112,7 +112,7 @@ const parseValue = (val: any) => {
         return
     }
 
-    const num = parseFloat(val)
+    const num = parseFloat(String(val))
     if (!isNaN(num)) {
         numericValue.value = num
         currentOption.value = 'default'
@@ -129,7 +129,7 @@ const displayValue = computed({
         }
         return numericValue.value
     },
-    set: (val: any) => {
+    set: (val: string | number) => {
         const num = parseFloat(val as string)
         if (!isNaN(num)) {
             numericValue.value = num
@@ -139,7 +139,7 @@ const displayValue = computed({
     }
 })
 
-const handleInput = (e: Event) => {
+const handleInput = (_e: Event) => {
     // Basic validation could be added here
 }
 

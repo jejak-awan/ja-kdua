@@ -400,19 +400,15 @@
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
 import { ref, computed, nextTick, onMounted, inject, watch, defineAsyncComponent } from 'vue';
+import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
-import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
-import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import GripVertical from 'lucide-vue-next/dist/esm/icons/grip-vertical.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
-import Upload from 'lucide-vue-next/dist/esm/icons/upload.js';
 import draggable from 'vuedraggable';
 import { 
-    BaseCollapsible, BaseInput, BaseSlider, IconButton, BaseButton, BaseColorSlider,
-    Select, SelectTrigger, SelectValue, SelectContent, SelectItem
+    BaseCollapsible, BaseInput, BaseSlider, IconButton, BaseButton, BaseColorSlider
 } from '@/components/builder/ui';
 import MediaPicker from '@/components/media/MediaPicker.vue';
 import type { BuilderInstance } from '@/types/builder';
@@ -426,7 +422,6 @@ const { t } = useI18n();
 const builder = inject<BuilderInstance>('builder');
 
 const globalVariables = builder?.globalVariables;
-const activePanel = builder?.activePanel;
 const globalAction = builder?.globalAction;
 const globalNumbers = globalVariables?.globalNumbers;
 const globalText = globalVariables?.globalText;
@@ -468,17 +463,13 @@ const toggleCategory = (id: string) => {
 };
 
 // Unit Dropdown Logic
-const selectUnit = (index: number, unit: string) => {
-    if (globalNumbers?.value && globalNumbers.value[index]) {
-        globalNumbers.value[index].unit = unit;
-    }
-};
+
 
 // Validation helper
 const hasEmptyName = (arr: GlobalVariable[] | undefined) => Array.isArray(arr) && arr.some(item => !item.name || item.name.trim() === '');
 
-const checkAndAddVariable = (type: string, list: any) => {
-    if (hasEmptyName(list.value)) {
+const checkAndAddVariable = (type: string, list: Ref<GlobalVariable[] | undefined> | undefined) => {
+    if (list && hasEmptyName(list.value)) {
         // Determine singular name for alert
         const typeName = t(`builder.panels.globalVariables.${type}`).slice(0, -1); // simple singularization
         alert(t('builder.panels.globalVariables.messages.fillName', { type: typeName }));
@@ -495,7 +486,7 @@ const addColorVariable = () => checkAndAddVariable('colors', globalColors);
 const addFontVariable = () => checkAndAddVariable('fonts', globalFonts);
 
 // Media Picker Logic
-const handleMediaSelect = (index: number, media: any) => {
+const handleMediaSelect = (index: number, media: { url?: string }) => {
     if (media && media.url && globalImages?.value) {
         globalImages.value[index].value = media.url;
     }
@@ -549,7 +540,7 @@ const updateColorFromHex = (index: number, hex: string) => {
 };
 
 // Snapshots for Cancel
-const originalState = ref<any>({});
+const originalState = ref<Record<string, unknown>>({});
 
 const getSnapshot = () => {
     return JSON.parse(JSON.stringify({
@@ -579,7 +570,7 @@ if (globalAction) {
     });
 }
 
-const handleGlobalAction = (action: any) => {
+const handleGlobalAction = (action: { type: string; payload?: unknown }) => {
     if (action.type === 'add_color') {
         activeCategoryId.value = 'colors';
         nextTick(() => {
@@ -594,15 +585,15 @@ const validateInputs = () => {
     
     // Validate Names
     const allVars = [
-        ...(globalNumbers?.value || []).map((i: any) => ({...i, type: 'Number'})),
-        ...(globalText?.value || []).map((i: any) => ({...i, type: 'Text'})),
-        ...(globalImages?.value || []).map((i: any) => ({...i, type: 'Image'})),
-        ...(globalLinks?.value || []).map((i: any) => ({...i, type: 'Link'})),
-        ...(globalColors?.value || []).map((i: any) => ({...i, type: 'Color'})),
-        ...(globalFonts?.value || []).map((i: any) => ({...i, type: 'Font'}))
+        ...(globalNumbers?.value || []).map((i: GlobalVariable) => ({...i, type: 'Number'})),
+        ...(globalText?.value || []).map((i: GlobalVariable) => ({...i, type: 'Text'})),
+        ...(globalImages?.value || []).map((i: GlobalVariable) => ({...i, type: 'Image'})),
+        ...(globalLinks?.value || []).map((i: GlobalVariable) => ({...i, type: 'Link'})),
+        ...(globalColors?.value || []).map((i: GlobalVariable) => ({...i, type: 'Color'})),
+        ...(globalFonts?.value || []).map((i: GlobalVariable) => ({...i, type: 'Font'}))
     ];
     
-    allVars.forEach((v: any) => {
+    allVars.forEach((v) => {
         if (!v.name || v.name.trim() === '') {
             errors.push(t('builder.panels.globalVariables.messages.fillName', { type: v.type }));
         }
@@ -610,8 +601,8 @@ const validateInputs = () => {
 
     // Validate Colors
     const hexRegex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
-    (globalColors?.value || []).forEach((c: any) => {
-        if (!hexRegex.test(c.value)) {
+    (globalColors?.value || []).forEach((c) => {
+        if (typeof c.value === 'string' && !hexRegex.test(c.value)) {
             errors.push(t('builder.panels.globalVariables.messages.invalidHex', { value: c.value, name: c.name }));
         }
     });
@@ -633,7 +624,7 @@ const cancelChanges = async () => {
     });
     if (confirmed) {
         // Use loadVariables to restore state
-        if (loadVariables) loadVariables(originalState.value);
+        if (loadVariables) loadVariables(originalState.value as Record<string, GlobalVariable[]>);
     }
 };
 

@@ -2,6 +2,8 @@ import Image from '@tiptap/extension-image'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import ImageNodeView from '../nodes/ImageNodeView.vue'
 
+import { type Component } from 'vue'
+
 export const CustomImage = Image.extend({
     draggable: true,
     selectable: true,
@@ -55,6 +57,6 @@ export const CustomImage = Image.extend({
     },
 
     addNodeView() {
-        return VueNodeViewRenderer(ImageNodeView)
+        return VueNodeViewRenderer(ImageNodeView as unknown as Component)
     },
-})
+});

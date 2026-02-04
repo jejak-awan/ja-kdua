@@ -90,7 +90,7 @@ interface Category {
     is_active: boolean;
     parent_id?: number | string | null;
     children?: Category[];
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 const props = defineProps<{
@@ -98,7 +98,7 @@ const props = defineProps<{
     allCategories?: Category[];
 }>();
 
-const emit = defineEmits<{
+defineEmits<{
     (e: 'edit', category: Category): void;
     (e: 'delete', category: Category): void;
     (e: 'move', category: Category): void;

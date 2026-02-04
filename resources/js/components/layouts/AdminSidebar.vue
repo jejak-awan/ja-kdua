@@ -176,7 +176,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, nextTick } from 'vue';
+import { computed, ref, watch, onMounted, nextTick, type Component } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { navigationGroups, type NavItem } from '@/utils/navigation';
@@ -196,20 +196,16 @@ import type { User } from '@/types/auth';
 interface SidebarSection {
     key: string;
     labelKey: string;
-    icon: any;
+    icon: Component | string;
 }
 
-const props = withDefaults(defineProps<{
+defineProps<{
     sidebarMinimized?: boolean;
     sidebarOpen?: boolean;
     user?: User | null;
-}>(), {
-    sidebarMinimized: false,
-    sidebarOpen: false,
-    user: null,
-});
+}>();
 
-const emit = defineEmits<{
+defineEmits<{
     (e: 'toggle-minimize'): void;
     (e: 'close'): void;
     (e: 'logout'): void;
@@ -350,7 +346,7 @@ const getVisitTooltip = computed(() => {
     try {
         const url = new URL(siteUrl.startsWith('http') ? siteUrl : `https://${siteUrl}`);
         domain = url.hostname;
-    } catch (e) {
+    } catch (_e) {
         // fallback
     }
     return t('common.navigation.visit_site', { url: domain });

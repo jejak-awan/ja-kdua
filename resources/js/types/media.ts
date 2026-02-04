@@ -16,6 +16,7 @@ export interface Media {
     extension?: string;
     is_shared?: boolean;
     tag_names?: string[];
+    caption?: string | null;
     folder?: {
         id: number;
         name: string;
@@ -44,4 +45,14 @@ export interface MediaConstraints {
     minHeight?: number | null;
     maxWidth?: number | null;
     maxHeight?: number | null;
+}
+export interface MediaStats {
+    total_count: number;
+    total_size: number;
+    types: {
+        type: string;
+        count: number;
+        size: number;
+    }[];
+    trash_count?: number;
 }

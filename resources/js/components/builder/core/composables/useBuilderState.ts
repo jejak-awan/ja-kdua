@@ -1,4 +1,4 @@
-import { ref, computed, watch, type Ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type {
     BlockInstance,
     Canvas,
@@ -44,6 +44,7 @@ export function useBuilderState(initialData = { blocks: [] as BlockInstance[] },
     // Selection State
     const selectedModuleId = ref<string | null>(null)
     const hoveredModuleId = ref<string | null>(null)
+    const insertTargetId = ref<string | null>(null)
 
     // UI State
     const activeTab = ref('content') // content | design | advanced
@@ -155,10 +156,10 @@ export function useBuilderState(initialData = { blocks: [] as BlockInstance[] },
     const loadingThemes = ref(false)
 
     // Clipboard State
-    const clipboard = ref<any>(null) // { type: 'module' | 'styles', data: any }
+    const clipboard = ref<{ type: 'module' | 'styles', data: Record<string, unknown>, sourceType?: string } | null>(null)
 
     // Global Action State
-    const globalAction = ref<any>(null)
+    const globalAction = ref<{ type: string; payload: unknown } | null>(null)
 
     // Versioning & Dirty State (Optimized: No JSON.stringify on interaction)
     const dataVersion = ref(0)
@@ -213,6 +214,7 @@ export function useBuilderState(initialData = { blocks: [] as BlockInstance[] },
         dataVersion,
         lastSavedVersion,
         markAsDirty,
-        isDirty
+        isDirty,
+        insertTargetId
     }
 }

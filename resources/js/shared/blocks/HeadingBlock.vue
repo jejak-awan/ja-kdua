@@ -1,63 +1,63 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device" v-slot="{ mode: blockMode, settings, device: blockDevice, getAttributes }">
-      <div class="heading-container" :style="getLayoutStyles(settings, blockDevice)">
+      <div class="heading-container" :style="getLayoutStyles(settings as ModuleSettings, blockDevice)">
         <component 
-          :is="tag(settings)"
-          :id="getVal(settings, 'html_id') || undefined"
+          :is="tag(settings as ModuleSettings)"
+          :id="getVal(settings as ModuleSettings, 'html_id') || undefined"
           class="heading-block transition-colors duration-300"
-          :style="headingStyles(settings, blockDevice)"
-          :class="[sizeClass(settings)]"
-          :aria-label="getVal(settings, 'aria_label') || undefined"
-          v-bind="getAttributes('title')"
+          :style="(headingStyles(settings as ModuleSettings, blockDevice) as CSSProperties)"
+          :class="[sizeClass(settings as ModuleSettings)]"
+          :aria-label="getVal<string>(settings as ModuleSettings, 'aria_label') || undefined"
+          v-bind="(getAttributes('title') as Record<string, any>)"
         >
-          <template v-if="getVal(settings, 'use_link')">
+          <template v-if="getVal(settings as ModuleSettings, 'use_link')">
              <a 
-               :href="getVal(settings, 'link_url') || '#'" 
-               :target="getVal(settings, 'link_target') || '_self'"
-               :rel="Array.isArray(getVal(settings, 'link_rel')) ? getVal(settings, 'link_rel').join(' ') : undefined"
+               :href="getVal(settings as ModuleSettings, 'link_url') || '#'" 
+               :target="getVal(settings as ModuleSettings, 'link_target') || '_self'"
+                :rel="Array.isArray(getVal<string[]>(settings as ModuleSettings, 'link_rel')) ? (getVal<string[]>(settings as ModuleSettings, 'link_rel') as string[]).join(' ') : undefined"
              >
-                <template v-if="blockMode === 'edit' && !isDynamic(settings)">
+                <template v-if="blockMode === 'edit' && !isDynamic(settings as ModuleSettings)">
                   <div 
                     ref="editableRef"
                     contenteditable="true"
-                    @blur="onTextBlur($event, settings)"
-                    v-html="displayText(settings)"
+                    @blur="onTextBlur($event, settings as ModuleSettings)"
+                    v-html="(displayText(settings as ModuleSettings) as string)"
                     style="display: inline-block; width: 100%; outline: none;"
                   ></div>
                 </template>
                 <template v-else>
-                  {{ displayText(settings) }}
+                  {{ displayText(settings as ModuleSettings) }}
                 </template>
              </a>
           </template>
           <template v-else>
-            <template v-if="blockMode === 'edit' && !isDynamic(settings)">
+            <template v-if="blockMode === 'edit' && !isDynamic(settings as ModuleSettings)">
               <div 
                 ref="editableRef"
                 contenteditable="true"
-                @blur="onTextBlur($event, settings)"
-                v-html="displayText(settings)"
+                @blur="onTextBlur($event, settings as ModuleSettings)"
+                v-html="(displayText(settings as ModuleSettings) as string)"
                 style="display: block; width: 100%; outline: none;"
               ></div>
             </template>
             <template v-else>
-              {{ displayText(settings) }}
+              {{ displayText(settings as ModuleSettings) }}
             </template>
           </template>
         </component>
 
         <component 
-          :is="subtitleTag(settings)"
-          v-if="subtitle(settings) || blockMode === 'edit'" 
+          :is="subtitleTag(settings as ModuleSettings)"
+          v-if="subtitle(settings as ModuleSettings) || blockMode === 'edit'" 
           class="heading-subtitle" 
-          :class="subtitleSizeClass(settings)" 
-          :style="subtitleStyles(settings, blockDevice)" 
-          v-bind="getAttributes('subtitle')"
+          :class="subtitleSizeClass(settings as ModuleSettings)" 
+          :style="(subtitleStyles(settings as ModuleSettings, blockDevice) as CSSProperties)" 
+          v-bind="(getAttributes('subtitle') as Record<string, any>)"
         >
           <div 
             :contenteditable="blockMode === 'edit'"
-            @blur="onSubtitleBlur($event, settings)"
-            v-html="subtitle(settings) || (blockMode === 'edit' ? 'Add a subtitle...' : '')"
+            @blur="onSubtitleBlur($event, settings as ModuleSettings)"
+            v-html="(subtitle(settings as ModuleSettings) as string) || (blockMode === 'edit' ? 'Add a subtitle...' : '')"
             style="display: block; width: 100%; outline: none;"
           ></div>
         </component>
@@ -66,38 +66,40 @@
 </template>
 
 <script setup lang="ts">
-import { inject } from 'vue'
+import { inject, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { 
     getTypographyStyles, 
     getVal,
     getTextGradientStyles,
     generateGradientCSS,
-    getLayoutStyles
+    getLayoutStyles,
+    type Gradient
 } from '../utils/styleUtils'
-import type { BlockInstance, BuilderInstance, BlockProps } from '../../types/builder'
+import type { BuilderInstance, BlockProps, ModuleSettings } from '@/types/builder'
+
 
 const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })
 
-const builder = inject<BuilderInstance>('builder', null as any)
+const builder = inject<BuilderInstance | null>('builder', null)
 
-const tag = (settings: any) => getVal(settings, 'tag') || 'h2'
-const subtitleTag = (settings: any) => getVal(settings, 'subtitle_tag') || 'div'
-const subtitle = (settings: any) => getVal(settings, 'subtitle') || ''
-const isDynamic = (settings: any) => {
-    const text = getVal(settings, 'text')
+const tag = (settings: ModuleSettings) => getVal<string>(settings, 'tag') || 'h2'
+const subtitleTag = (settings: ModuleSettings) => getVal<string>(settings, 'subtitle_tag') || 'div'
+const subtitle = (settings: ModuleSettings) => getVal<string>(settings, 'subtitle') || ''
+const isDynamic = (settings: ModuleSettings) => {
+    const text = getVal<string>(settings, 'text')
     return typeof text === 'string' && text.startsWith('{{')
 }
 
-const displayText = (settings: any) => {
-    return getVal(settings, 'text') || 'Heading Text'
+const displayText = (settings: ModuleSettings) => {
+    return getVal<string>(settings, 'text') || 'Heading Text'
 }
 
-const headingStyles = (settings: any, device: string) => {
-    const styles: Record<string, any> = { width: '100%' }
+const headingStyles = (settings: ModuleSettings, device: string) => {
+    const styles: Record<string, string | number> = { width: '100%' }
     
     // 1. Core Typography
     Object.assign(styles, getTypographyStyles(settings, '', device))
@@ -122,10 +124,10 @@ const headingStyles = (settings: any, device: string) => {
             hard: '4px 4px 0px rgba(0,0,0,0.2)',
             glow: '0 0 20px rgba(var(--primary-rgb, 32, 89, 234), 0.5)'
         }
-        styles.textShadow = presets[shadowPreset]
+        styles.textShadow = presets[shadowPreset as string]
     }
 
-    const alignment = getVal(settings, 'alignment', device)
+    const alignment = getVal<string>(settings, 'alignment', device) as string | undefined
     if (alignment) styles.textAlign = alignment
 
     // 5. Background Clip Text (Uses module background as text fill)
@@ -137,21 +139,21 @@ const headingStyles = (settings: any, device: string) => {
     }
 
     // 6. Hover States (Via CSS Variables)
-    const hoverColor = getVal(settings, 'hover_text_color', device)
+    const hoverColor = getVal<string>(settings, 'hover_text_color', device) as string | undefined
     if (hoverColor) styles['--hover-color'] = hoverColor
 
-    if (getVal(settings, 'hover_use_gradient', device)) {
-        const hg = getVal(settings, 'hover_gradient', device)
-        if (hg && hg.stops && hg.stops.length >= 2) {
+    if (getVal<boolean>(settings, 'hover_use_gradient', device)) {
+        const hg = getVal<unknown>(settings, 'hover_gradient', device) as Gradient | undefined
+        if (hg && Array.isArray(hg.stops) && hg.stops.length >= 2) {
             styles['--hover-gradient'] = generateGradientCSS(hg)
         }
     }
     
-    return styles
+    return styles as CSSProperties
 }
 
-const sizeClass = (settings: any) => {
-    const size = getVal(settings, 'size') || 'large'
+const sizeClass = (settings: ModuleSettings) => {
+    const size = getVal<string>(settings, 'size') || 'large'
     
     const sizes: Record<string, { mobile: string; desktop: string }> = {
         small: { mobile: 'text-lg', desktop: 'text-2xl' },
@@ -172,8 +174,8 @@ const sizeClass = (settings: any) => {
     return `${s.mobile} md:${s.desktop}`
 }
 
-const subtitleSizeClass = (settings: any) => {
-    const size = getVal(settings, 'size') || 'large'
+const subtitleSizeClass = (settings: ModuleSettings) => {
+    const size = getVal<string>(settings, 'size') || 'large'
     
     const sizes: Record<string, { mobile: string; desktop: string }> = {
         small: { mobile: 'text-sm', desktop: 'text-sm' },
@@ -195,8 +197,8 @@ const subtitleSizeClass = (settings: any) => {
     return `${s.mobile} md:${s.desktop}`
 }
 
-const subtitleStyles = (settings: any, device: string) => {
-    const s = getTypographyStyles(settings, '', device)
+const subtitleStyles = (settings: ModuleSettings, device: string) => {
+    const s = getTypographyStyles(settings, '', device) as Record<string, string | number>
     return {
         textAlign: s.textAlign || 'left',
         opacity: 0.8,
@@ -205,20 +207,22 @@ const subtitleStyles = (settings: any, device: string) => {
     }
 }
 
-const onTextBlur = (e: any, settings: any) => {
+const onTextBlur = (e: FocusEvent, settings: ModuleSettings) => {
   if (props.mode !== 'edit' || !builder) return
-  const newText = e.target.innerText
-  if (newText !== getVal(settings, 'text')) {
+  const target = e.target as HTMLElement
+  const newText = target.innerText
+  if (newText !== getVal<string>(settings, 'text')) {
     builder.updateModule(props.module.id, {
       settings: { ...settings, text: newText }
     })
   }
 }
 
-const onSubtitleBlur = (e: any, settings: any) => {
+const onSubtitleBlur = (e: FocusEvent, settings: ModuleSettings) => {
   if (props.mode !== 'edit' || !builder) return
-  const newSubtitle = e.target.innerText
-  if (newSubtitle !== getVal(settings, 'subtitle') && newSubtitle !== 'Add a subtitle...') {
+  const target = e.target as HTMLElement
+  const newSubtitle = target.innerText
+  if (newSubtitle !== getVal<string>(settings, 'subtitle') && newSubtitle !== 'Add a subtitle...') {
     builder.updateModule(props.module.id, {
       settings: { ...settings, subtitle: newSubtitle }
     })

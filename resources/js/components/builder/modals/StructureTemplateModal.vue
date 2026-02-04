@@ -84,7 +84,8 @@ import {
     flexMultiColumnPresets, 
     gridMultiRowPresets,
     masonryPresets,
-    sidebarPresets
+    sidebarPresets,
+    type LayoutPreset
 } from '@/components/builder/constants/layouts.js';
 
 interface Props {
@@ -95,7 +96,7 @@ const props = defineProps<Props>();
 
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'insert', layout: any): void;
+  (e: 'insert', layout: LayoutPreset): void;
 }>();
 
 const { t } = useI18n();
@@ -122,7 +123,7 @@ const filteredGroups = computed(() => {
   return allGroups.filter(g => g.type === 'grid');
 });
 
-const selectLayout = (layout: any) => {
+const selectLayout = (layout: LayoutPreset) => {
   emit('insert', layout);
 };
 </script>

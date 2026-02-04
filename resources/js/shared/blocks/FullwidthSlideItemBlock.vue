@@ -1,8 +1,8 @@
 <template>
   <div 
     class="fullwidth-slide-item-block" 
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Slide Item'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Slide Item'"
     :class="{ 'slider-slide--active': isActive }"
     :style="slideStyles"
   >
@@ -29,7 +29,7 @@
       
       <div v-if="settings.buttonText || mode === 'edit'" class="mt-8">
         <a 
-          :href="settings.buttonUrl || '#'" 
+          :href="(settings.buttonUrl as string) || '#'" 
           class="slide-button inline-block py-3.5 px-8 rounded-md no-underline font-semibold transition-transform duration-200 hover:-translate-y-0.5" 
           :style="buttonStyles"
           :contenteditable="mode === 'edit'"
@@ -43,8 +43,16 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import { getTypographyStyles, getResponsiveValue } from '../utils/styleUtils'
-import type { BlockInstance, BuilderInstance } from '@/types/builder'
+import { getTypographyStyles, getVal } from '../utils/styleUtils'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
+
+interface FullwidthSliderState {
+    parentSettings: ComputedRef<ModuleSettings>
+    currentSlide: ComputedRef<number>
+    mode: ComputedRef<'view' | 'edit'>
+}
+
+import type { ComputedRef, CSSProperties } from 'vue'
 
 const props = defineProps<{
   module: BlockInstance
@@ -52,14 +60,14 @@ const props = defineProps<{
 }>()
 
 const builder = inject<BuilderInstance>('builder')
-const device = computed(() => builder?.device?.value || 'desktop')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const device = computed(() => (builder?.device?.value || 'desktop') as 'desktop' | 'tablet' | 'mobile')
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 // Injected from FullwidthSliderBlock
-const fullwidthSliderState = inject<any>('fullwidthSliderState', {
-    parentSettings: computed(() => ({})),
+const fullwidthSliderState = inject<FullwidthSliderState>('fullwidthSliderState', {
+    parentSettings: computed(() => ({} as ModuleSettings)),
     currentSlide: computed(() => 0),
-    mode: computed(() => 'view')
+    mode: computed(() => 'view' as const)
 })
 
 const parentSettings = computed(() => fullwidthSliderState.parentSettings.value || {})
@@ -74,11 +82,11 @@ const updateText = (key: string, event: FocusEvent) => {
 
 const handleLinkClick = () => {
     if (mode.value === 'edit') return
-    if (settings.value.buttonUrl) window.location.href = settings.value.buttonUrl
+    if (settings.value.buttonUrl) window.location.href = (settings.value.buttonUrl as string)
 }
 
-const slideStyles = computed(() => {
-    const styles: Record<string, any> = {
+const slideStyles = computed((): CSSProperties => {
+    const styles: Record<string, string | number> = {
         position: 'absolute',
         inset: 0,
         display: 'flex',
@@ -96,30 +104,30 @@ const slideStyles = computed(() => {
         styles.backgroundSize = 'cover'
         styles.backgroundPosition = 'center'
     } else if (settings.value.backgroundColor) {
-        styles.backgroundColor = settings.value.backgroundColor
+        styles.backgroundColor = settings.value.backgroundColor as string
     }
     
-    return styles
+    return styles as CSSProperties
 })
 
-const overlayStyles = computed(() => ({ 
-  backgroundColor: parentSettings.value.overlayColor || 'rgba(0,0,0,0.4)',
-}))
+const overlayStyles = computed((): CSSProperties => ({ 
+  backgroundColor: (parentSettings.value.overlayColor as string) || 'rgba(0,0,0,0.4)',
+} as CSSProperties))
 
-const contentStyles = computed(() => ({ 
-  textAlign: getResponsiveValue(parentSettings.value, 'contentAlignment', device.value) || 'center', 
-}))
+const contentStyles = computed((): CSSProperties => ({ 
+  textAlign: getVal<string>(parentSettings.value, 'contentAlignment', device.value) as CSSProperties['textAlign'] || 'center', 
+} as CSSProperties))
 
-const titleStyles = computed(() => getTypographyStyles(parentSettings.value, 'title_', device.value))
-const subtitleStyles = computed(() => getTypographyStyles(parentSettings.value, 'subtitle_', device.value))
+const titleStyles = computed(() => getTypographyStyles(parentSettings.value, 'title_', device.value) as CSSProperties)
+const subtitleStyles = computed(() => getTypographyStyles(parentSettings.value, 'subtitle_', device.value) as CSSProperties)
 
-const buttonStyles = computed(() => {
+const buttonStyles = computed((): CSSProperties => {
   const styles = getTypographyStyles(parentSettings.value, 'button_', device.value)
   return {
     ...styles,
-    backgroundColor: parentSettings.value.buttonBackgroundColor || styles.backgroundColor || '#fff',
-    color: parentSettings.value.buttonTextColor || styles.color || '#333',
-  }
+    backgroundColor: (parentSettings.value.buttonBackgroundColor as string) || (styles.backgroundColor as string) || '#fff',
+    color: (parentSettings.value.buttonTextColor as string) || (styles.color as string) || '#333',
+  } as CSSProperties
 })
 </script>
 

@@ -4,14 +4,14 @@
     :mode="mode"
     :settings="settings"
     class="search-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Search'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Search'"
   >
-    <div class="search-form-wrapper mx-auto w-full" :style="containerStyles">
+    <div class="search-form-wrapper mx-auto w-full" :style="(containerStyles as any)">
       <form 
         @submit.prevent="handleSearch" 
         class="search-form group flex items-stretch bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-800/50 overflow-hidden focus-within:ring-4 focus-within:ring-primary/10 transition-[width] duration-500 hover:shadow-primary/5"
-        :style="formStyles"
+        :style="(formStyles as any)"
       >
         <label for="search-input" class="sr-only">Search</label>
         <div class="relative flex-1 flex items-center h-full">
@@ -26,7 +26,7 @@
               class="w-full bg-transparent border-none shadow-none focus-visible:ring-0 h-full text-slate-900 dark:text-white font-medium"
               :class="currentButtonStyle === 'text' ? 'pl-14 pr-6' : 'px-8'"
               :placeholder="placeholderValue"
-              :style="inputStyles"
+              :style="(inputStyles as any)"
               v-model="searchQuery"
             />
         </div>
@@ -34,7 +34,7 @@
             v-if="showButton" 
             type="submit"
             class="h-auto px-10 font-black uppercase tracking-widest text-[10px] transition-[width] duration-500 hover:brightness-110 active:scale-95 whitespace-nowrap rounded-none bg-primary text-white border-none shadow-xl group-focus-within:px-12" 
-            :style="buttonStyles"
+            :style="(buttonStyles as any)"
         >
           <LucideIcon v-if="currentButtonStyle !== 'text'" name="Search" class="w-5 h-5" :class="currentButtonStyle === 'both' ? 'mr-3' : ''" />
           <span v-if="currentButtonStyle !== 'icon'">{{ buttonTextValue }}</span>
@@ -54,16 +54,16 @@ import {
   getLayoutStyles,
   getTypographyStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = defineProps<{
   module: BlockInstance
   mode: 'view' | 'edit'
 }>()
 
-const builder = inject<any>('builder', null)
+const builder = inject<BuilderInstance | null>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const searchQuery = ref('')
 
@@ -73,35 +73,36 @@ const handleSearch = () => {
     window.location.href = `/search?q=${encodeURIComponent(searchQuery.value)}`
 }
 
-const currentButtonStyle = computed(() => getVal(settings.value, 'buttonStyle', device.value) || 'icon')
-const placeholderValue = computed(() => getVal(settings.value, 'placeholder', device.value) || 'Search...')
-const buttonTextValue = computed(() => getVal(settings.value, 'buttonText', device.value) || 'Search')
-const showButton = computed(() => getVal(settings.value, 'showButton', device.value) !== false)
+const currentButtonStyle = computed(() => getVal<string>(settings.value, 'buttonStyle', device.value) || 'icon')
+const placeholderValue = computed(() => getVal<string>(settings.value, 'placeholder', device.value) || 'Search...')
+const buttonTextValue = computed(() => getVal<string>(settings.value, 'buttonText', device.value) || 'Search')
+const showButton = computed(() => getVal<boolean>(settings.value, 'showButton', device.value) !== false)
 
 const containerStyles = computed(() => getLayoutStyles(settings.value, device.value))
 
 const formStyles = computed(() => {
-  const h = getVal(settings.value, 'height', device.value) || 64
-  return {
+  const h = getVal<string | number>(settings.value, 'height', device.value) || 64
+  const styles: Record<string, string | number> = {
     height: typeof h === 'number' ? `${h}px` : h
   }
+  return styles
 })
 
 const inputStyles = computed(() => {
-  const styles = getTypographyStyles(settings.value, 'input_', device.value)
+  const typography = (getTypographyStyles(settings.value, 'input_', device.value) || {}) as Record<string, string | number>
   return {
-    ...styles,
+    ...typography,
     height: '100%'
   }
 })
 
 const buttonStyles = computed(() => {
-  const styles = getTypographyStyles(settings.value, 'button_', device.value)
-  const bgColor = getVal(settings.value, 'buttonBackgroundColor', device.value) || ''
-  const textColor = getVal(settings.value, 'buttonTextColor', device.value) || ''
+  const typography = (getTypographyStyles(settings.value, 'button_', device.value) || {}) as Record<string, string | number>
+  const bgColor = getVal<string>(settings.value, 'buttonBackgroundColor', device.value) || ''
+  const textColor = getVal<string>(settings.value, 'buttonTextColor', device.value) || ''
   
   return {
-    ...styles,
+    ...typography,
     backgroundColor: bgColor,
     color: textColor
   }

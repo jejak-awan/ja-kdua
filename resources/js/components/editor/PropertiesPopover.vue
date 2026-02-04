@@ -298,12 +298,7 @@ import {
     AccordionTrigger, 
     AccordionContent, 
     ColorPicker, 
-    Switch, 
-    Select, 
-    SelectContent, 
-    SelectItem, 
-    SelectTrigger, 
-    SelectValue 
+    Switch
 } from '@/components/ui';
 import { PopoverAnchor } from 'radix-vue';
 import { useI18n } from 'vue-i18n';
@@ -345,13 +340,13 @@ const { t } = useI18n();
 
 const props = defineProps<{
     open: boolean;
-    node: { type: string; attrs: Record<string, any> } | null;
+    node: { type: string; attrs: Record<string, unknown> } | null;
     anchor: HTMLElement | null;
 }>();
 
 const emit = defineEmits<{
     (e: 'update:open', value: boolean): void;
-    (e: 'save', attrs: Record<string, any>): void;
+    (e: 'save', attrs: Record<string, unknown>): void;
 }>();
 
 const constrainProportions = ref(true);
@@ -429,39 +424,39 @@ watch(() => props.open, (isOpen) => {
         dragOffset.y = 0;
         
         if (props.node) {
-            const attrs = props.node.attrs;
+            const attrs = props.node.attrs as Record<string, unknown>;
             form.value = {
-                src: attrs.src || '',
-                width: attrs.width || '',
-                height: attrs.height || '',
-                title: attrs.title || '',
-                className: attrs.class || '',
+                src: (attrs.src as string) || '',
+                width: (attrs.width as string) || '',
+                height: (attrs.height as string) || '',
+                title: (attrs.title as string) || '',
+                className: (attrs.class as string) || '',
 
                 // Icon attrs
-                name: attrs.name || 'Circle',
-                size: attrs.size || '1em',
-                color: attrs.color || 'currentColor',
-                strokeWidth: attrs.strokeWidth || 2,
-                rotate: attrs.rotate || 0,
-                backgroundColor: attrs.backgroundColor || '',
-                opacity: attrs.opacity !== undefined ? attrs.opacity : 1,
+                name: (attrs.name as string) || 'Circle',
+                size: (attrs.size as string) || '1em',
+                color: (attrs.color as string) || 'currentColor',
+                strokeWidth: (attrs.strokeWidth as number) || 2,
+                rotate: (attrs.rotate as number) || 0,
+                backgroundColor: (attrs.backgroundColor as string) || '',
+                opacity: attrs.opacity !== undefined ? (attrs.opacity as number) : 1,
                 
-                borderRadius: attrs.borderRadius || '0',
-                borderWidth: parseInt(attrs.borderWidth) || 0,
-                borderColor: attrs.borderColor || '',
-                padding: attrs.padding || '0',
-                align: attrs.align || 'center',
-                alt: attrs.alt || '',
-                displayMode: attrs.displayMode || 'block',
-                margin: attrs.margin ? parseInt(attrs.margin) : 16,
+                borderRadius: (attrs.borderRadius as string) || '0',
+                borderWidth: parseInt(attrs.borderWidth as string) || 0,
+                borderColor: (attrs.borderColor as string) || '',
+                padding: (attrs.padding as string) || '0',
+                align: (attrs.align as string) || 'center',
+                alt: (attrs.alt as string) || '',
+                displayMode: (attrs.displayMode as string) || 'block',
+                margin: attrs.margin ? parseInt(attrs.margin as string) : 16,
                 // Video attrs
-                autoplay: attrs.autoplay !== undefined ? attrs.autoplay : false,
-                controls: attrs.controls !== undefined ? attrs.controls : true,
-                loop: attrs.loop !== undefined ? attrs.loop : false,
-                muted: attrs.muted !== undefined ? attrs.muted : false,
+                autoplay: attrs.autoplay !== undefined ? (attrs.autoplay as boolean) : false,
+                controls: attrs.controls !== undefined ? (attrs.controls as boolean) : true,
+                loop: attrs.loop !== undefined ? (attrs.loop as boolean) : false,
+                muted: attrs.muted !== undefined ? (attrs.muted as boolean) : false,
                 // Embed specific
-                html: attrs.html || '',
-                borderStyle: attrs.borderStyle || 'none'
+                html: (attrs.html as string) || '',
+                borderStyle: (attrs.borderStyle as string) || 'none'
             };
 
             // Sync controls state from YouTube URL if applicable
@@ -494,8 +489,8 @@ watch(form, () => {
 }, { deep: true });
 
 const emitChanges = () => {
-    const baseAttrs: Record<string, any> = {
-        ...form.value,
+    const baseAttrs: Record<string, unknown> = {
+        ...(form.value as unknown as Record<string, unknown>),
         borderRadius: form.value.borderRadius ? ensureUnit(form.value.borderRadius) : null,
         borderWidth: form.value.borderWidth ? `${form.value.borderWidth}px` : '0px',
         borderColor: form.value.borderColor || null,
@@ -564,8 +559,9 @@ const emitChanges = () => {
         baseAttrs.html = html;
         
         if (baseAttrs.html && (!baseAttrs.width || baseAttrs.width === 'auto' || !baseAttrs.height || baseAttrs.height === 'auto')) {
-            const widthMatch = baseAttrs.html.match(/(?:width|WIDTH)=["']?(\d+)(?:px)?["']?/);
-            const heightMatch = baseAttrs.html.match(/(?:height|HEIGHT)=["']?(\d+)(?:px)?["']?/);
+            const htmlString = baseAttrs.html as string;
+            const widthMatch = htmlString.match(/(?:width|WIDTH)=["']?(\d+)(?:px)?["']?/);
+            const heightMatch = htmlString.match(/(?:height|HEIGHT)=["']?(\d+)(?:px)?["']?/);
             
             if (widthMatch && widthMatch[1]) {
                 baseAttrs.width = `${widthMatch[1]}px`;

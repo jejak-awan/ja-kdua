@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -107,7 +107,7 @@ const FilterablePortfolioModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -116,7 +116,7 @@ const FilterablePortfolioModule: ModuleDefinition = {
             {
                 id: 'categoryTypography',
                 label: 'Category Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `category_${f.name}`,
                     label: `Category ${f.label}`
@@ -125,7 +125,7 @@ const FilterablePortfolioModule: ModuleDefinition = {
             {
                 id: 'filterTypography',
                 label: 'Filter Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `filter_${f.name}`,
                     label: `Filter ${f.label}`

@@ -41,7 +41,7 @@ interface TableConfig {
     cols: number;
 }
 
-const props = defineProps<{
+defineProps<{
     open: boolean;
 }>();
 

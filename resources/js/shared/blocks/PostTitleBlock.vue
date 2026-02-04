@@ -4,19 +4,21 @@
     :mode="mode"
     :device="device"
     class="post-title-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Post Title'"
-    :style="cardStyles"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Post Title'"
+    :style="(cardStyles as any)"
   >
-    <div class="w-full" :style="containerStyles">
+    <div class="w-full" :style="(containerStyles as any)">
       <component 
         :is="tag" 
         class="post-title transition-[width] duration-500 font-serif leading-tight outline-none" 
         :class="alignmentClass"
-        :style="titleStyles"
+        :style="(titleStyles as any)"
         :contenteditable="mode === 'edit'"
         @blur="updateTitle"
-      >{{ displayTitle }}</component>
+      >
+{{ displayTitle }}
+</component>
     </div>
   </BaseBlock>
 </template>
@@ -29,7 +31,7 @@ import {
   getLayoutStyles,
   getTypographyStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -40,23 +42,23 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const builder = inject<BuilderInstance | null>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 // Dynamic data injection
 const postTitle = inject<string>('postTitle', 'Dynamic Post Title')
 
 const displayTitle = computed(() => {
-    if (props.mode === 'edit') return settings.value.title || postTitle
+    if (props.mode === 'edit') return (settings.value.title as string) || postTitle
     return postTitle
 })
 
-const tag = computed(() => getVal(settings.value, 'tag', props.device) || 'h1')
+const tag = computed(() => getVal<string>(settings.value, 'tag', props.device) || 'h1')
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -69,7 +71,7 @@ const containerStyles = computed(() => {
 })
 
 const alignmentClass = computed(() => {
-    const align = getVal(settings.value, 'alignment', props.device) || 'left'
+    const align = getVal<string>(settings.value, 'alignment', props.device) || 'left'
     return `text-${align}`
 })
 

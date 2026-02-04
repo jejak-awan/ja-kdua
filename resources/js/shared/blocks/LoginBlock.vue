@@ -4,46 +4,46 @@
     :mode="mode" 
     :device="device"
     class="login-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Login Form'"
-    :style="cardStyles"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Login Form'"
+    :style="(cardStyles as any)"
   >
     <template #default="{ settings: blockSettings }">
       <Card 
         class="login-form-container mx-auto p-2 overflow-visible border-none bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md" 
-        :style="containerStyles"
+        :style="(containerStyles as any)"
       >
         <!-- Header -->
         <CardHeader v-if="blockSettings.title || blockSettings.subtitle" class="text-center pb-8">
-          <CardTitle v-if="blockSettings.title" class="text-2xl font-bold mb-2 border-none" :style="titleStyles">{{ blockSettings.title }}</CardTitle>
-          <CardDescription v-if="blockSettings.subtitle" class="opacity-70 text-sm" :style="subtitleStyles">{{ blockSettings.subtitle }}</CardDescription>
+          <CardTitle v-if="blockSettings.title" class="text-2xl font-bold mb-2 border-none" :style="(titleStyles as any)">{{ blockSettings.title }}</CardTitle>
+          <CardDescription v-if="blockSettings.subtitle" class="opacity-70 text-sm" :style="(subtitleStyles as any)">{{ blockSettings.subtitle }}</CardDescription>
         </CardHeader>
         
         <CardContent>
           <form @submit.prevent="handleLogin" class="flex flex-col gap-5">
             <div class="form-field flex flex-col gap-2">
-              <Label v-if="blockSettings.showLabels !== false" class="text-sm font-medium" :style="labelStyles">{{ blockSettings.usernameLabel || 'Email' }}</Label>
+              <Label v-if="blockSettings.showLabels !== false" class="text-sm font-medium" :style="(labelStyles as any)">{{ blockSettings.usernameLabel || 'Email' }}</Label>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground z-10"><User class="w-4 h-4" /></span>
                 <Input 
                   type="email" 
                   class="pl-10 h-11"
-                  :style="inputStyles"
-                  :placeholder="blockSettings.usernamePlaceholder || 'Email address'"
+                  :style="(inputStyles as any)"
+                  :placeholder="(blockSettings.usernamePlaceholder as string) || 'Email address'"
                   required
                 />
               </div>
             </div>
 
             <div class="form-field flex flex-col gap-2">
-              <Label v-if="blockSettings.showLabels !== false" class="text-sm font-medium" :style="labelStyles">{{ blockSettings.passwordLabel || 'Password' }}</Label>
+              <Label v-if="blockSettings.showLabels !== false" class="text-sm font-medium" :style="(labelStyles as any)">{{ blockSettings.passwordLabel || 'Password' }}</Label>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground z-10"><Lock class="w-4 h-4" /></span>
                 <Input 
                   :type="showPassword ? 'text' : 'password'" 
                   class="pl-10 pr-12 h-11"
-                  :style="inputStyles"
-                  :placeholder="blockSettings.passwordPlaceholder || 'Password'"
+                  :style="(inputStyles as any)"
+                  :placeholder="(blockSettings.passwordPlaceholder as string) || 'Password'"
                   required
                 />
                 <button 
@@ -65,7 +65,7 @@
               </div>
               <a 
                 v-if="blockSettings.showForgotPassword !== false"
-                :href="mode === 'view' ? (blockSettings.forgotPasswordUrl || '#') : undefined"
+                :href="mode === 'view' ? ((blockSettings.forgotPasswordUrl as string) || '#') : undefined"
                 class="forgot-password text-primary hover:underline font-medium"
                 @click="handleLinkClick"
               >
@@ -77,7 +77,7 @@
             <Button 
                 type="submit" 
                 class="w-full h-12 mt-2 font-bold shadow-lg shadow-primary/20 transition-colors hover:-translate-y-1 active:translate-y-0" 
-                :style="buttonStyles"
+                :style="(buttonStyles as any)"
                 :disabled="loading"
             >
               <Loader2 v-if="loading" class="w-5 h-5 animate-spin mr-2" />
@@ -86,7 +86,7 @@
 
             <p v-if="blockSettings.showSignupLink !== false" class="text-center text-sm mt-4 opacity-70">
                 Don't have an account? 
-                <a :href="mode === 'view' ? (blockSettings.signupUrl || '#') : undefined" class="text-primary font-semibold hover:underline" @click="handleLinkClick">Sign Up</a>
+                <a :href="mode === 'view' ? ((blockSettings.signupUrl as string) || '#') : undefined" class="text-primary font-semibold hover:underline" @click="handleLinkClick">Sign Up</a>
             </p>
           </form>
         </CardContent>
@@ -103,12 +103,13 @@ import User from 'lucide-vue-next/dist/esm/icons/user.js';
 import Lock from 'lucide-vue-next/dist/esm/icons/lock.js';
 import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
 import EyeOff from 'lucide-vue-next/dist/esm/icons/eye-off.js';
-import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';import { 
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import { 
   getTypographyStyles,
   getLayoutStyles,
   getVal
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance
@@ -119,7 +120,7 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const showPassword = ref(false)
 const loading = ref(false)
@@ -135,9 +136,9 @@ const handleLinkClick = (event: MouseEvent) => {
 }
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -154,11 +155,11 @@ const subtitleStyles = computed(() => getTypographyStyles(settings.value, 'subti
 const labelStyles = computed(() => getTypographyStyles(settings.value, 'label_', props.device))
 const inputStyles = computed(() => getTypographyStyles(settings.value, 'input_', props.device))
 const buttonStyles = computed(() => {
-    const styles = getTypographyStyles(settings.value, 'button_', props.device)
+    const styles = (getTypographyStyles(settings.value, 'button_', props.device) || {}) as Record<string, string | number>
     return {
         ...styles,
-        backgroundColor: settings.value.button_backgroundColor || '',
-        color: settings.value.button_textColor || ''
+        backgroundColor: (settings.value.button_backgroundColor as string) || '',
+        color: (settings.value.button_textColor as string) || ''
     }
 })
 </script>

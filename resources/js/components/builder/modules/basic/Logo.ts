@@ -1,3 +1,4 @@
+import type { ModuleDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -23,7 +24,7 @@ import {
 /**
  * Logo Module Definition
  */
-export default {
+const LogoModule: ModuleDefinition = {
     name: 'logo',
     title: 'Logo',
     icon: 'Image',
@@ -114,3 +115,5 @@ export default {
         ]
     }
 }
+
+export default LogoModule;

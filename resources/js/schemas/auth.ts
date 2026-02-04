@@ -12,7 +12,7 @@ import { z } from 'zod';
  * Helper to create translatable error message
  * This creates an object that useFormValidation will translate
  */
-const t = (key: string, params: Record<string, any> = {}) => JSON.stringify({ key, params });
+const t = (key: string, params: Record<string, unknown> = {}) => JSON.stringify({ key, params });
 
 /**
  * Login form schema

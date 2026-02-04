@@ -90,7 +90,7 @@
 
         <div v-if="!loading">
             <!-- Tabs Navigation -->
-            <Tabs defaultValue="fields" class="w-full">
+            <Tabs default-value="fields" class="w-full">
                 <div class="flex items-center justify-between mb-2">
                     <TabsList class="bg-muted/50 p-1 rounded-lg">
                         <TabsTrigger value="fields" class="px-6 py-2 rounded-md transition-all active:scale-95">
@@ -195,7 +195,6 @@
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
 import { ref, reactive, onMounted, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import type { BlockInstance } from '@/types/builder';
 import api from '@/services/api';
@@ -203,20 +202,16 @@ import { useToast } from '@/composables/useToast';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { formBuilderSchema } from '@/schemas';
 import { Button, Card, Checkbox, Input, Textarea, Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui';
-import { 
-    ArrowLeft, 
-    Link as LinkIcon, 
-    Save, 
-    Loader2, 
-    LayoutDashboard, 
-    Settings2, 
-    Globe, 
-    Info 
-} from 'lucide-vue-next';
+import Save from 'lucide-vue-next/dist/esm/icons/save.js';
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import LinkIcon from 'lucide-vue-next/dist/esm/icons/link.js';
+import LayoutDashboard from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import Settings2 from 'lucide-vue-next/dist/esm/icons/settings-2.js';
+import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
+import Info from 'lucide-vue-next/dist/esm/icons/info.js';
 
 import Builder from '@/components/builder/Builder.vue';
 
-const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const toast = useToast();
@@ -236,7 +231,7 @@ const formData = reactive({
     blocks: [] as BlockInstance[]
 });
 
-const initialForm = ref<any>(null);
+const initialForm = ref<Record<string, unknown> | null>(null);
 
 const isDirty = computed(() => {
     if (!initialForm.value) return false;
@@ -278,7 +273,7 @@ const fetchForm = async () => {
         }
         
         initialForm.value = JSON.parse(JSON.stringify(formData));
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch form:', error);
         toast.error.load(error);
         router.push({ name: 'forms' });
@@ -307,9 +302,12 @@ const handleSubmit = async () => {
         initialForm.value = JSON.parse(JSON.stringify(formData));
         toast.success.update('Form');
         router.push({ name: 'forms' });
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response: { status: number, data: { errors: Record<string, string[]> } } };
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors || {});
+            }
         } else {
             toast.error.fromResponse(error);
         }

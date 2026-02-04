@@ -71,8 +71,8 @@
         v-if="showInsertRowModal"
         :mode="insertRowMode"
         @close="showInsertRowModal = false"
-        @insert="(type, payload) => insertRow(payload)"
-        @update="updateRow"
+        @insert="(type, payload) => insertRow(payload as Record<string, unknown>)"
+        @update="(payload) => updateRow(payload as any)"
       />
       <InsertSectionModal
         v-if="showInsertSectionModal"
@@ -84,7 +84,7 @@
         v-if="showStructureTemplateModal"
         :target-type="(structureTemplateTargetType as string)"
         @close="showStructureTemplateModal = false"
-        @insert="handleStructureTemplateInsert"
+        @insert="(payload) => handleStructureTemplateInsert(payload as Record<string, unknown>)"
       />
       <ResponsiveFieldModal
         v-if="builder.responsiveModal.value && builder.responsiveModal.value.baseKey"
@@ -167,7 +167,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, provide, watch, onMounted, onUnmounted } from 'vue'
-import type { Ref } from 'vue'
+
 
 // Layout Components
 import TopToolbar from './layout/TopToolbar.vue'
@@ -200,7 +200,7 @@ import { useBuilder } from './core'
 import ModuleRegistry from './core/ModuleRegistry'
 import { useCmsStore } from '@/stores/cms'
 import { throttle, debounce } from '@/shared/utils/performance'
-import type { BlockInstance, BuilderInstance, Canvas as ICanvas } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, Canvas as ICanvas, BuilderPreset } from '@/types/builder'
 
 // Register Module Definitions (side-effect import)
 import './modules'
@@ -222,6 +222,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   initialData: () => ({ blocks: [] }),
+  modelValue: () => [],
   contentId: null,
   mode: 'site'
 })
@@ -279,35 +280,29 @@ const structureTemplateTargetId = ref<string | null>(null)
 const structureTemplateTargetType = ref<string | null>(null)
 
 const builder = {
-  ...builderBase,
+  ...(builderBase as unknown as BuilderInstance),
   darkMode,
   sidebarVisible,
   activePanel,
   globalAction,
   insertTargetId,
   insertTargetIndex
-} as any as BuilderInstance & { 
-  darkMode: Ref<boolean>; 
-  sidebarVisible: Ref<boolean>; 
-  activePanel: Ref<string | null>; 
-  globalAction: Ref<string|null>;
-  insertTargetId: Ref<string|null>;
-  insertTargetIndex: Ref<number>;
-}
+} as BuilderInstance
 
 // Provide builder for child components
 provide('builder', builder)
 
-watch(() => (builder as any).isFullscreen, (val) => {
+watch(() => builder.isFullscreen.value, (val) => {
   emit('update:fullscreen', val)
 })
 
-watch(builder.blocks, debounce((newBlocks) => {
-  emit('update', { blocks: newBlocks })
-  emit('update:modelValue', newBlocks)
+watch(builder.blocks, debounce((newBlocks: unknown) => {
+  const blocks = newBlocks as BlockInstance[]
+  emit('update', { blocks })
+  emit('update:modelValue', blocks)
 }, 500), { deep: true })
 
-watch(() => (builder as any).autoSave, (val) => {
+watch(() => builder.autoSave.value, (val) => {
   emit('update:autoSave', val)
 }, { immediate: true })
 
@@ -387,28 +382,28 @@ const insertModule = (type: string) => {
   showInsertModal.value = false
 }
 
-const handleModuleInsert = (type: string, payload: any) => {
+const handleModuleInsert = (type: string, payload: unknown) => {
   if (type === 'row') {
     insertRowTargetId.value = insertTargetId.value
-    insertRow(payload)
+    insertRow(payload as Record<string, unknown>)
     return
   }
   if (type === 'preset') {
-    builder.insertFromPreset(payload, insertTargetId.value, insertTargetIndex.value)
+    builder.insertFromPreset(payload as BuilderPreset, insertTargetId.value, insertTargetIndex.value)
     showInsertModal.value = false
     return
   }
   insertModule(type)
 }
 
-const handleStructureTemplateInsert = (payload: any) => {
+const handleStructureTemplateInsert = (payload: Record<string, unknown>) => {
     insertRow(payload)
     showStructureTemplateModal.value = false
 }
 
-const insertRow = (layout: any) => {
+const insertRow = (layout: Record<string, unknown>) => {
   
-  const createSingleRow = (config: any, parentId = insertRowTargetId.value) => {
+  const createSingleRow = (config: Record<string, unknown>, parentId = insertRowTargetId.value) => {
     // Insert the row using builder (handles selection and basic insertion into tree)
     const row = builder.insertModule('row', parentId);
     
@@ -418,7 +413,7 @@ const insertRow = (layout: any) => {
 
       if (config.cols) {
         // Complex nested layout
-        config.cols.forEach((colConfig: any) => {
+        (config.cols as { width: number, rows?: Record<string, unknown>[] }[]).forEach((colConfig) => {
           const col = ModuleRegistry.createInstance('column');
           if (col) {
              col.settings = { ...col.settings, flexGrow: colConfig.width };
@@ -426,7 +421,7 @@ const insertRow = (layout: any) => {
 
             if (colConfig.rows) {
               // Now that col is in the tree, we can insert rows into it
-              colConfig.rows.forEach((nestedRowConfig: any) => {
+              colConfig.rows.forEach((nestedRowConfig: Record<string, unknown>) => {
                 createSingleRow(nestedRowConfig, col.id)
               })
             }
@@ -434,8 +429,8 @@ const insertRow = (layout: any) => {
         })
       } else {
         // Standard/Flat layout
-        const structure = config.structure || config
-        const widths = config.widths || (typeof structure === 'string' ? structure.split('-').map(() => 1) : [1])
+        const structure = (config.structure || config) as string | Record<string, unknown>
+        const widths = (config.widths || (typeof structure === 'string' ? structure.split('-').map(() => 1) : [1])) as number[]
         
         // Calculate and set explicit column structure for RowBlock
         const totalWidth = widths.reduce((a: number, b: number) => a + b, 0)
@@ -460,14 +455,14 @@ const insertRow = (layout: any) => {
   }
 
   if (layout.rows) {
-      layout.rows.forEach((rowConfig: any) => createSingleRow(rowConfig))
+      (layout.rows as Record<string, unknown>[]).forEach((rowConfig: Record<string, unknown>) => createSingleRow(rowConfig))
   } else {
       createSingleRow(layout)
   }
   showInsertRowModal.value = false
 }
 
-const updateRow = (layout: any) => {
+const updateRow = (layout: string | Record<string, unknown>) => {
     if (!insertRowTargetId.value) return
     const success = builder.updateRowLayout(insertRowTargetId.value, layout)
     if (!success) {
@@ -476,7 +471,7 @@ const updateRow = (layout: any) => {
     showInsertRowModal.value = false
 }
 
-const handleResponsiveUpdate = (updates: any) => {
+const handleResponsiveUpdate = (updates: Record<string, unknown>) => {
   if (builder.responsiveModal.value) {
     const moduleId = builder.responsiveModal.value.module.id
     builder.updateModuleSettings(moduleId, updates)
@@ -544,7 +539,8 @@ onMounted(async () => {
     builder.fetchMetadata()
     
     if (canvasAreaRef.value) {
-        const handleResize = throttle((entries: ResizeObserverEntry[]) => {
+        const handleResize = throttle((...args: unknown[]) => {
+            const entries = args[0] as ResizeObserverEntry[]
             if (builder.deviceModeType.value !== 'auto') return
 
             for (let entry of entries) {
@@ -569,6 +565,7 @@ onMounted(async () => {
       try {
         await builder.loadContent(props.contentId)
       } catch (err) {
+        console.error(err)
         toast.error.load('Failed to load content')
       }
     }
@@ -726,14 +723,14 @@ const handleAddCanvas = (data: { title: string }) => {
     showAddCanvasModal.value = false
 }
 
-const handleExportCanvas = (_data: any) => {
+const handleExportCanvas = (_data: unknown) => {
     if (activeCanvasForModal.value) {
         builder.exportCanvas(activeCanvasForModal.value)
     }
     showImportExportModal.value = false
 }
 
-const handleImportCanvas = (_data: any) => {
+const handleImportCanvas = (_data: unknown) => {
     showImportExportModal.value = false
 }
 
@@ -742,8 +739,8 @@ const handleSaveCanvasSettings = (data: { title: string, isGlobal: boolean, appe
         builder.renameCanvas(activeCanvasForModal.value, data.title)
         const canvas = getCanvasById(activeCanvasForModal.value)
         if (canvas) {
-            (canvas as any).isGlobal = data.isGlobal;
-            (canvas as any).append = data.append;
+            canvas.isGlobal = data.isGlobal;
+            canvas.append = data.append === 'true' || data.append === '1';
         }
     }
     showCanvasSettingsModal.value = false

@@ -60,7 +60,8 @@ import { parseResponse, ensureArray } from '@/utils/responseParser';
 import toast from '@/services/toast';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import type { Content, Category } from '@/types/cms';
-
+import type { EventClickArg, EventContentArg, EventDropArg } from '@fullcalendar/core';
+import type { DateClickArg } from '@fullcalendar/interaction';
 import {
     Card,
     Button,
@@ -73,7 +74,16 @@ import {
 
 const { t } = useI18n();
 const router = useRouter();
-const calendar = ref<any>(null);
+
+// Replace interfaces with imported types or localized ones for extendedProps
+interface ExtendedProps {
+    status: string;
+    category?: { name?: string };
+    [key: string]: unknown;
+}
+
+const calendar = ref<{ getApi: () => { refetchEvents: () => void } } | null>(null);
+
 const contents = ref<Content[]>([]);
 const categories = ref<Category[]>([]);
 const statusFilter = ref('all');
@@ -129,14 +139,14 @@ const getStatusColor = (status: string) => {
     return colors[status] || '#6b7280';
 };
 
-const getEventClassNames = (arg: any) => {
-    const status = arg.event.extendedProps.status;
+const getEventClassNames = (arg: EventContentArg) => {
+    const status = (arg.event.extendedProps as ExtendedProps).status;
     return [`status-${status}`];
 };
 
-const renderEventContent = (arg: any) => {
-    const content = arg.event.extendedProps;
-    const categoryName = content.category?.name || '';
+const renderEventContent = (arg: EventContentArg) => {
+    const properties = arg.event.extendedProps as ExtendedProps;
+    const categoryName = properties.category?.name || '';
     return {
         html: `
             <div class="fc-event-title-container">
@@ -147,27 +157,29 @@ const renderEventContent = (arg: any) => {
     };
 };
 
-const handleEventDrop = async (info: any) => {
+const handleEventDrop = async (info: EventDropArg) => {
     const contentId = info.event.id;
     const newDate = info.event.start;
+
+    if (!newDate) return;
 
     try {
         await api.put(`/admin/ja/contents/${contentId}`, {
             published_at: newDate.toISOString().split('T')[0],
         });
         await fetchContents();
-    } catch (error: any) {
-        logger.error('Failed to reschedule content:', error);
+    } catch (_error: unknown) {
+        logger.error('Failed to reschedule content:', _error);
         toast.error(t('features.content.messages.rescheduleFailed'));
         info.revert();
     }
 };
 
-const handleEventClick = (info: any) => {
+const handleEventClick = (info: EventClickArg) => {
     router.push({ name: 'contents.edit', params: { id: info.event.id } });
 };
 
-const handleDateClick = (info: any) => {
+const handleDateClick = (info: DateClickArg) => {
     router.push({
         name: 'contents.create',
         query: { date: info.dateStr },
@@ -183,8 +195,8 @@ const fetchContents = async () => {
         });
         const { data } = parseResponse(response);
         contents.value = ensureArray(data);
-    } catch (error: any) {
-        logger.error('Failed to fetch contents:', error);
+    } catch (_error: unknown) {
+        logger.error('Failed to fetch contents:', _error);
         contents.value = [];
     }
 };
@@ -194,8 +206,8 @@ const fetchCategories = async () => {
         const response = await api.get('/admin/ja/categories');
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
-    } catch (error: any) {
-        logger.error('Failed to fetch categories:', error);
+    } catch (_error: unknown) {
+        logger.error('Failed to fetch categories:', _error);
         categories.value = [];
     }
 };

@@ -45,7 +45,7 @@ import { ref, computed, type Component } from 'vue'
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';const props = withDefaults(defineProps<{
     title: string;
     description: string;
-    icon: Component | any;
+    icon: string | Component;
     defaultExpanded?: boolean;
     color?: 'primary' | 'blue' | 'emerald' | 'amber' | 'red' | 'purple' | 'indigo' | 'orange' | 'pink';
 }>(), {

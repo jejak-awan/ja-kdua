@@ -6,14 +6,14 @@ import type { BlockInstance } from '../types/builder';
 export interface VisibilityRule {
     type: string;
     condition: string;
-    value: any;
+    value: unknown;
     key?: string;
 }
 
 export interface RenderingContext {
     user?: {
         roles?: Array<{ name: string; slug: string }>;
-        [key: string]: any;
+        [key: string]: unknown;
     };
     post?: {
         title?: string;
@@ -23,17 +23,29 @@ export interface RenderingContext {
         featured_image?: string;
         post_type: string;
         categories?: Array<{ id: number | string; name: string; slug: string }>;
+        category?: { id: number | string; name: string; slug: string };
         tags?: Array<{ id: number | string; name: string; slug: string }>;
         author?: { id: number | string; name: string; user_nicename: string };
-        meta?: Record<string, any>;
-        [key: string]: any;
+        meta?: Record<string, unknown>;
+        [key: string]: unknown;
     };
     site?: {
         name: string;
         tagline: string;
-        [key: string]: any;
+        [key: string]: unknown;
     };
-    [key: string]: any;
+    product?: {
+        name?: string;
+        sku?: string;
+        price?: string | number;
+        regular_price?: string | number;
+        currency?: string;
+        description?: string;
+        rating?: string | number;
+        [key: string]: unknown;
+    };
+    data?: Record<string, unknown>;
+    [key: string]: unknown;
 }
 
 export class ConditionEvaluator {
@@ -108,7 +120,7 @@ export class ConditionEvaluator {
                     const currentDay = days[now.getDay()];
                     return condition === 'is' ? currentDay === value : currentDay !== value;
                 }
-                const targetDate = new Date(value);
+                const targetDate = new Date(value as string | number | Date);
                 if (condition === 'before') return now < targetDate;
                 if (condition === 'after') return now > targetDate;
                 return true;
@@ -166,7 +178,7 @@ export class ConditionEvaluator {
 
             case 'os': {
                 const ua = navigator.userAgent.toLowerCase();
-                const pf = (navigator as any).platform?.toLowerCase() || '';
+                const pf = (navigator as unknown as { platform: string }).platform?.toLowerCase() || '';
                 if (value === 'mac') return pf.includes('mac');
                 if (value === 'windows') return pf.includes('win');
                 if (value === 'linux') return pf.includes('linux');
@@ -182,8 +194,8 @@ export class ConditionEvaluator {
                 if (condition === 'is') return String(fieldValue) === String(value);
                 if (condition === 'is_not') return String(fieldValue) !== String(value);
                 if (condition === 'contains') return String(fieldValue).includes(String(value));
-                if (condition === 'empty') return !fieldValue || fieldValue.length === 0;
-                if (condition === 'not_empty') return !!fieldValue && fieldValue.length > 0;
+                if (condition === 'empty') return !fieldValue || (fieldValue as { length: number }).length === 0;
+                if (condition === 'not_empty') return !!fieldValue && (fieldValue as { length: number }).length > 0;
 
                 // Numeric comparisons if value is number
                 const numField = Number(fieldValue);

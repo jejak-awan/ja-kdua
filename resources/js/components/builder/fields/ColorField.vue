@@ -203,12 +203,31 @@ const modeDropdownRef = ref<HTMLElement | null>(null)
 const mainInputRef = ref<HTMLElement | null>(null)
 const hexInputRef = ref<HTMLElement | null>(null)
 
+// Computed Props
+const opacityPercentage = computed(() => {
+    const val = props.value || ''
+    if (val.startsWith('color-mix(')) {
+        const match = val.match(/color-mix\(in srgb,\s*.+?,\s*transparent\s*(\d+(\.\d+)?)%\)/)
+        if (match) {
+            return 100 - parseFloat(match[1]) // if transparent 20%, alpha is 80%
+        }
+    }
+    const { a } = parseColor(val || '#ffffff')
+    // Hex parsing returns a from 0-1
+    return Math.round(a * 100)
+})
+
+const cssPreviewValue = computed(() => {
+    // Basic preview logic
+    return props.value || props.placeholderValue || '#ffffff'
+})
+
 const modalMode = computed(() => inputMode.value as 'hex' | 'css_var' | undefined)
 
 // Check if color has a value
 const hasColorValue = computed(() => {
     const val = props.value
-    return val && val.trim() !== '' && val !== 'transparent'
+    return !!(val && val.trim() !== '' && val !== 'transparent')
 })
 
 // Initialize local state from prop
@@ -259,7 +278,7 @@ const alphaTrackColor = computed(() => {
 const allSuggestions = computed(() => {
     const staticVars = themeVariables || []
     const colors = globalColors?.value || []
-    const dynamicVars = (colors as any[]).map((c: any) => toCssVarName(c?.name || ''))
+    const dynamicVars = (colors as { name: string }[]).map((c) => toCssVarName(c?.name || ''))
     return [...new Set([...staticVars, ...dynamicVars])]
 })
 
@@ -358,12 +377,13 @@ onUnmounted(() => {
     window.removeEventListener('mousedown', handleClickOutside)
 })
 
-const handleHexInput = (e: any) => {
-    hexDisplayValue.value = e.target.value
-    emit('update:value', e.target.value)
+const handleHexInput = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    hexDisplayValue.value = target.value
+    emit('update:value', target.value)
 }
 
-const handleVarInput = (e: Event) => {
+const handleVarInput = (_e: Event) => {
     emitUpdateVar()
 }
 
@@ -376,15 +396,17 @@ const emitUpdateVar = () => {
     emit('update:value', val)
 }
 
-const handleOpacityInput = (e: any) => {
-    let val = parseInt(e.target.value)
+const handleOpacityInput = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    let val = parseInt(target.value)
     if (isNaN(val)) return 
     processOpacityUpdate(val)
 }
 
-const handleOpacityBlur = (e: any) => {
-    if (e.target.value === '') {
-        e.target.value = (opacityPercentage.value as any).toString()
+const handleOpacityBlur = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    if (target.value === '') {
+        target.value = (opacityPercentage.value).toString()
     }
 }
 
@@ -421,24 +443,6 @@ const processOpacityUpdate = (alpha: number) => {
     }
 }
 
-// Computed Props
-const opacityPercentage = computed(() => {
-    const val = props.value || ''
-    if (val.startsWith('color-mix(')) {
-        const match = val.match(/color-mix\(in srgb,\s*.+?,\s*transparent\s*(\d+(\.\d+)?)%\)/)
-        if (match) {
-            return 100 - parseFloat(match[1]) // if transparent 20%, alpha is 80%
-        }
-    }
-    const { a } = parseColor(val || '#ffffff')
-    // Hex parsing returns a from 0-1
-    return Math.round(a * 100)
-})
-
-const cssPreviewValue = computed(() => {
-    // Basic preview logic
-    return props.value || props.placeholderValue || '#ffffff'
-})
 
 defineExpose({ openPicker })
 </script>

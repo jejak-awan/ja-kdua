@@ -4,25 +4,25 @@
     :mode="mode" 
     :device="device"
     class="tabs-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Tabs'"
-    :style="cardStyles"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Tabs'"
+    :style="(cardStyles as any)"
   >
     <template #default="{ settings: blockSettings, device: blockDevice }">
       <div 
         class="tabs-container" 
-        :style="containerStyles"
+        :style="(containerStyles as any)"
       >
         <Tabs 
           v-model="activeTabValue" 
-          :orientation="getVal(blockSettings, 'orientation', blockDevice) === 'vertical' && blockDevice !== 'mobile' ? 'vertical' : 'horizontal'"
-          :class="layoutClasses(blockSettings, blockDevice)"
+          :orientation="getVal<string>(blockSettings as ModuleSettings, 'orientation', (blockDevice as string)) === 'vertical' && blockDevice !== 'mobile' ? 'vertical' : 'horizontal'"
+          :class="layoutClasses(blockSettings as ModuleSettings, blockDevice as string)"
         >
           <!-- Tab Headers -->
           <TabsList 
               class="tabs-header shrink-0 no-scrollbar overflow-x-auto bg-transparent border-none p-0 h-auto" 
-              :class="headerClasses(blockSettings, blockDevice)"
-              :style="headerContainerStyles(blockSettings)"
+              :class="headerClasses(blockSettings as ModuleSettings, blockDevice as string)"
+              :style="(headerContainerStyles(blockSettings as ModuleSettings) as any)"
           >
             <TabsTrigger 
               v-for="(tab, index) in items" 
@@ -30,12 +30,12 @@
               :value="`tab-${index}`"
               class="tab-button group whitespace-nowrap transition-colors duration-300 relative shadow-none"
               :class="[
-                  buttonClasses(blockSettings, activeTabIndex === index),
+                  buttonClasses(blockSettings as ModuleSettings, activeTabIndex === index),
               ]"
-              :style="getTabStyles(blockSettings, activeTabIndex === index)"
+              :style="(getTabStyles(blockSettings as ModuleSettings, activeTabIndex === index) as any)"
               @click="activeTabIndex = (index as number)"
             >
-               <span class="flex items-center gap-2 relative z-10" :style="tabTypographyStyles(blockSettings, activeTabIndex === index)">
+               <span class="flex items-center gap-2 relative z-10" :style="(tabTypographyStyles(blockSettings as ModuleSettings, activeTabIndex === index) as any)">
                  <component 
                   v-if="tab.icon" 
                   :is="getIcon(tab.icon)" 
@@ -46,22 +46,22 @@
                
                <!-- Active Indicator for Underline style -->
                <div 
-                  v-if="isUnderline(blockSettings) && activeTabIndex === index" 
+                  v-if="isUnderline(blockSettings as ModuleSettings) && activeTabIndex === index" 
                   class="absolute bottom-0 left-0 w-full h-[2px] bg-primary"
-                  :style="{ backgroundColor: getVal(blockSettings, 'activeColor') || '#4f46e5' }"
+                  :style="{ backgroundColor: (getVal<string>(blockSettings as ModuleSettings, 'activeColor') || '#4f46e5') }"
                ></div>
             </TabsTrigger>
           </TabsList>
           
           <!-- Tab Content -->
-          <div class="tabs-content grow pt-8 md:pt-0" :style="contentContainerStyles(blockSettings)">
+          <div class="tabs-content grow pt-8 md:pt-0" :style="(contentContainerStyles(blockSettings as ModuleSettings) as Record<string, string>)">
             <TabsContent 
                v-for="(tab, index) in items" 
                :key="index"
                :value="`tab-${index}`"
                class="tab-pane animate-in fade-in slide-in-from-bottom-3 duration-500 mt-0"
             >
-               <div class="prose max-w-none text-slate-600 leading-relaxed font-medium" :style="contentTypographyStyles(blockSettings)" v-html="tab.content || 'Content goes here...'"></div>
+               <div class="prose max-w-none text-slate-600 leading-relaxed font-medium" :style="(contentTypographyStyles(blockSettings as ModuleSettings) as Record<string, string>)" v-html="(tab as any).content || 'Content goes here...'"></div>
             </TabsContent>
           </div>
         </Tabs>
@@ -71,17 +71,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui'
-import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
-import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
-import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
-import User from 'lucide-vue-next/dist/esm/icons/user.js';
-import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
-import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
-import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
-import Bell from 'lucide-vue-next/dist/esm/icons/bell.js';
 import Calendar from 'lucide-vue-next/dist/esm/icons/calendar.js';
 import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
 import Star from 'lucide-vue-next/dist/esm/icons/star.js';
@@ -89,14 +81,14 @@ import Heart from 'lucide-vue-next/dist/esm/icons/heart.js';
 import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
 import Info from 'lucide-vue-next/dist/esm/icons/info.js';
 import Check from 'lucide-vue-next/dist/esm/icons/check.js';
-import X from 'lucide-vue-next/dist/esm/icons/x.js';import { getVal, getLayoutStyles, getTypographyStyles } from '../utils/styleUtils'
+import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import { getVal, getLayoutStyles, getTypographyStyles } from '../utils/styleUtils'
 import type { Component } from 'vue'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const iconMap: Record<string, Component> = {
-  Layers, Layout, Settings, User, Globe, FileText, Mail, Bell, 
   Calendar, Zap, Star, Heart, HelpCircle, Info, Check, X
 }
-import type { BlockInstance } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance
@@ -107,8 +99,13 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const settings = computed(() => (props.module?.settings || {}) as Record<string, any>)
-const items = computed(() => settings.value.items || [])
+interface TabItem {
+    title?: string;
+    icon?: string;
+    content?: string;
+}
+const settings = computed(() => (props.module?.settings || {}) as ModuleSettings)
+const items = computed(() => (settings.value.items as TabItem[]) || [])
 const activeTabIndex = ref(0)
 const activeTabValue = computed({
     get: () => `tab-${activeTabIndex.value}`,
@@ -118,38 +115,39 @@ const activeTabValue = computed({
     }
 })
 
-const getIcon = (name: any) => {
+const getIcon = (name: string | null) => {
+    if (!name) return iconMap.Zap
     const cleanName = typeof name === 'string' ? name.replace('lucide:', '') : name
     return iconMap[cleanName] || iconMap.Zap
 }
 
-const isVertical = (settings: any, device: string) => {
-    return getVal(settings, 'orientation', device) === 'vertical' && device !== 'mobile'
+const isVertical = (settings: ModuleSettings, device: string) => {
+    return getVal<string>(settings, 'orientation', device) === 'vertical' && device !== 'mobile'
 }
 
-const isUnderline = (settings: any) => {
-    return (getVal(settings, 'style') || 'underline') === 'underline'
+const isUnderline = (settings: ModuleSettings) => {
+    return (getVal<string>(settings, 'style') || 'underline') === 'underline'
 }
 
-const layoutClasses = (settings: any, device: string) => {
+const layoutClasses = (settings: ModuleSettings, device: string) => {
     return isVertical(settings, device) 
         ? 'flex flex-row gap-8 items-start' 
         : 'flex flex-col gap-6'
 }
 
-const headerClasses = (settings: any, device: string) => {
+const headerClasses = (settings: ModuleSettings, device: string) => {
     if (isVertical(settings, device)) {
         return 'flex flex-col w-48 lg:w-64 border-r border-gray-100'
     }
     return 'flex w-full border-b border-gray-200'
 }
 
-const headerContainerStyles = (settings: any) => {
-    return {}
+const headerContainerStyles = (_settings: ModuleSettings) => {
+    return {} as CSSProperties
 }
 
-const buttonClasses = (settings: any, isActive: any) => {
-    const style = getVal(settings, 'style') || 'underline'
+const buttonClasses = (settings: ModuleSettings, isActive: boolean) => {
+    const style = getVal<string>(settings, 'style') || 'underline'
     let base = 'px-6 py-4 font-medium text-sm focus:outline-none '
     
     if (style === 'underline') {
@@ -165,9 +163,9 @@ const buttonClasses = (settings: any, isActive: any) => {
 }
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -176,36 +174,37 @@ const cardStyles = computed(() => {
 })
 
 const containerStyles = computed(() => {
-    return getLayoutStyles(settings.value, props.device)
+    return (getLayoutStyles(settings.value, props.device) || {}) as Record<string, string | number>
 })
 
-const getTabStyles = (settings: any, isActive: any) => {
-    const style = getVal(settings, 'style') || 'underline'
-    const activeColor = getVal(settings, 'activeColor') || '#4f46e5'
+const getTabStyles = (settings: ModuleSettings, isActive: boolean) => {
+    const style = getVal<string>(settings, 'style') || 'underline'
+    const activeColor = getVal<string>(settings, 'activeColor') || '#4f46e5'
     
+    const styles: Record<string, string | number> = {}
     if (style === 'pills' && isActive) {
-        return { backgroundColor: activeColor }
+        styles.backgroundColor = activeColor
     }
     if (style === 'underline' && isActive) {
-        return { color: activeColor } 
+        styles.color = activeColor
     }
-    return {}
+    return styles
 }
 
-const tabTypographyStyles = (settings: any, isActive: boolean) => {
-    return getTypographyStyles(settings, isActive ? 'tab_active_' : 'tab_', props.device)
+const tabTypographyStyles = (settings: ModuleSettings, isActive: boolean) => {
+    return (getTypographyStyles(settings, isActive ? 'tab_active_' : 'tab_', props.device) || {}) as Record<string, string | number>
 }
 
-const contentTypographyStyles = (settings: any) => {
-    return getTypographyStyles(settings, 'content_', props.device)
+const contentTypographyStyles = (settings: ModuleSettings) => {
+    return (getTypographyStyles(settings, 'content_', props.device) || {}) as Record<string, string | number>
 }
 
-const contentContainerStyles = (settings: any) => {
-    const style = getVal(settings, 'style') || 'underline'
-    const bgColor = getVal(settings, 'contentBackgroundColor') || 'transparent'
-    const padding = getVal(settings, 'contentPadding')
+const contentContainerStyles = (settings: ModuleSettings) => {
+    const style = getVal<string>(settings, 'style') || 'underline'
+    const bgColor = getVal<string>(settings, 'contentBackgroundColor') || 'transparent'
+    const padding = getVal<string | number>(settings, 'contentPadding')
     
-    const styles: any = {
+    const styles: Record<string, string | number> = {
         backgroundColor: bgColor
     }
     

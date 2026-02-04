@@ -4,8 +4,8 @@
     :mode="mode" 
     :device="device"
     class="fullwidth-slider-block transition-colors duration-300 group"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Fullwidth Slider'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Fullwidth Slider'"
     :style="cardStyles"
   >
     <template #default="{ settings: blockSettings }">
@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, provide } from 'vue'
+import { computed, inject, provide, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import Carousel from '../ui/Carousel.vue'
 import CarouselContent from '../ui/CarouselContent.vue'
@@ -57,12 +57,12 @@ import CarouselItem from '../ui/CarouselItem.vue'
 import CarouselNext from '../ui/CarouselNext.vue'
 import CarouselPrevious from '../ui/CarouselPrevious.vue'
 import Autoplay from 'embla-carousel-autoplay'
+import type { EmblaPluginType } from 'embla-carousel'
 import { 
     getVal, 
-    getLayoutStyles,
-    getResponsiveValue 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance, BuilderInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance
@@ -74,7 +74,7 @@ const props = withDefaults(defineProps<{
 })
 
 const builder = inject<BuilderInstance>('builder')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 // Fallback currentSlide for provided state (Embla handles this internally)
 const currentSlide = computed(() => 0) 
@@ -92,36 +92,36 @@ const carouselOptions = computed(() => ({
 }))
 
 const carouselPlugins = computed(() => {
-    const plugins = []
+    const plugins: EmblaPluginType[] = []
     if (settings.value.autoplay !== false && props.mode === 'view') {
         plugins.push(Autoplay({
-            delay: settings.value.autoplaySpeed || 5000,
+            delay: (settings.value.autoplaySpeed as number) || 5000,
             stopOnInteraction: false
-        }))
+        }) as EmblaPluginType)
     }
-    return plugins
+    return plugins 
 })
 
-const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+const cardStyles = computed((): CSSProperties => {
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
     
-    return styles
+    return styles as CSSProperties
 })
 
-const containerStyles = computed(() => {
+const containerStyles = computed((): CSSProperties => {
     const layoutStyles = getLayoutStyles(settings.value, props.device)
     return { 
         ...layoutStyles,
-        position: 'relative' as const, 
-        overflow: 'hidden' as const, 
+        position: 'relative', 
+        overflow: 'hidden', 
         width: '100%',
-        height: `${getResponsiveValue(settings.value, 'height', props.device) || 600}px`
-    }
+        height: `${getVal<number>(settings.value, 'height', props.device) || 600}px`
+    } as CSSProperties
 })
 
 const getChildComponent = (type: string) => {

@@ -117,15 +117,16 @@ import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue'
 import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js'
 
 import type { Content } from '@/types/cms'
+import type { BlockInstance } from '@/types/builder'
 
-interface Article extends Partial<Content> {
+interface Article extends Omit<Partial<Content>, 'category'> {
+    category: string;
     readTime: string;
     image: string; // Alias for featured_image
 }
 
 interface PageData extends Content {
-    title: string;
-    blocks?: any[]; 
+    blocks?: BlockInstance[]; 
 }
 
 const pageData = ref<PageData | null>(null)
@@ -160,7 +161,7 @@ const fetchPosts = async () => {
             }
         });
         
-        let posts: any[] = [];
+        let posts: Content[] = [];
         
         // Defensive handling of response structure
         if (response.data && Array.isArray(response.data.data)) {

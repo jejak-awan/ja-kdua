@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import type { BlockInstance, SettingDefinition } from '@/types/builder'
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Settings2 from 'lucide-vue-next/dist/esm/icons/settings.js';

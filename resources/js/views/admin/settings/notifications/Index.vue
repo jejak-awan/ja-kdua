@@ -156,11 +156,19 @@ import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import BellOff from 'lucide-vue-next/dist/esm/icons/bell-off.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 
+interface Notification {
+    id: number | string;
+    title: string;
+    message: string;
+    type: string;
+    read_at: string | null;
+    created_at: string;
+}
+
 // UI Components
 import { 
     Card, 
     CardHeader, 
-    CardTitle, 
     CardContent, 
     Button, 
     Input, 
@@ -176,12 +184,12 @@ const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 
-const notifications = ref<any[]>([]);
+const notifications = ref<Notification[]>([]);
 const loading = ref(false);
 const search = ref('');
 const typeFilter = ref('all');
 const readFilter = ref('all');
-const pollingInterval = ref<any>(null);
+const pollingInterval = ref<ReturnType<typeof setInterval> | null>(null);
 
 const unreadCount = computed(() => {
     if (!Array.isArray(notifications.value)) return 0;
@@ -214,10 +222,10 @@ const filteredNotifications = computed(() => {
     return filtered;
 });
 
-const getBadgeVariant = (type: any) => {
+const getBadgeVariant = (type: string) => {
     switch (type) {
         case 'error': return 'destructive';
-        case 'warning': return 'secondary'; // Fallback to secondary if warning is not a standard variant
+        case 'warning': return 'secondary';
         case 'success': return 'default';
         case 'info': return 'secondary';
         default: return 'outline';
@@ -252,14 +260,14 @@ const fetchNotifications = async () => {
         }
         
         notifications.value = data;
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch notifications:', error);
     } finally {
         loading.value = false;
     }
 };
 
-const markAsRead = async (notification: any) => {
+const markAsRead = async (notification: Notification) => {
     try {
         await api.put(`/admin/ja/notifications/${notification.id}/read`);
         toast.success.default(t('features.notifications.messages.markReadSuccess'));
@@ -270,7 +278,7 @@ const markAsRead = async (notification: any) => {
             notifications.value[index].read_at = new Date().toISOString();
         }
         
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to mark notification as read:', error);
         toast.error.default(t('features.notifications.messages.markReadFailed'));
     }
@@ -281,13 +289,13 @@ const markAllAsRead = async () => {
         await api.put('/admin/ja/notifications/read-all');
         toast.success.default(t('features.notifications.messages.markAllReadSuccess'));
         fetchNotifications();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to mark all notifications as read:', error);
         toast.error.default(t('features.notifications.messages.markAllReadFailed'));
     }
 };
 
-const deleteNotification = async (notification: any) => {
+const deleteNotification = async (notification: Notification) => {
     const confirmed = await confirm({
         title: t('features.notifications.actions.delete'),
         message: t('features.notifications.confirm.delete'),
@@ -304,7 +312,7 @@ const deleteNotification = async (notification: any) => {
         // Optimistic update
         notifications.value = notifications.value.filter(n => n.id !== notification.id);
         
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to delete notification:', error);
         toast.error.default(t('features.notifications.messages.deleteFailed'));
     }

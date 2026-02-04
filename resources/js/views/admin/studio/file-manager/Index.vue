@@ -199,18 +199,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, provide } from 'vue';
-import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';
 import CircleHelp from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
-import Home from 'lucide-vue-next/dist/esm/icons/house.js';
 import FolderPlus from 'lucide-vue-next/dist/esm/icons/folder-plus.js';
 import Upload from 'lucide-vue-next/dist/esm/icons/upload.js';
 import ClipboardPaste from 'lucide-vue-next/dist/esm/icons/clipboard-paste.js';
 import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
 import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js';
 import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
-import Search from 'lucide-vue-next/dist/esm/icons/search.js';
-import LayoutGrid from 'lucide-vue-next/dist/esm/icons/layout-grid.js';
-import List from 'lucide-vue-next/dist/esm/icons/list.js';
 import { 
     Button, 
     Dialog, 
@@ -224,10 +219,8 @@ import {
     ContextMenuContent,
     ContextMenuItem,
     ContextMenuSeparator,
-    Spinner,
-    Input
+    Spinner
 } from '@/components/ui';
-import Info from 'lucide-vue-next/dist/esm/icons/info.js';
 
 // Composable and Components
 import { useFileManager } from '@/composables/useFileManager';

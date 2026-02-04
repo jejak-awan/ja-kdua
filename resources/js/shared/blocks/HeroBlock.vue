@@ -3,12 +3,12 @@
     <template #default="{ settings, device: blockDevice }">
       <div 
         class="hero-block-container"
-        :id="getVal(settings, 'html_id', blockDevice)"
-        :style="containerStyles(settings, blockDevice)"
+        :id="(getVal<string>(settings, 'html_id', blockDevice) as string)"
+        :style="(containerStyles(settings, blockDevice) as CSSProperties)"
       >
         <div 
             class="hero-inner relative overflow-hidden transition-colors duration-700 group" 
-            :style="innerStyles(settings, blockDevice)"
+            :style="(innerStyles(settings, blockDevice) as CSSProperties)"
         >
             <!-- Decorative Orbs -->
             <div class="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl transition-transform duration-1000 group-hover:scale-125"></div>
@@ -20,13 +20,13 @@
                 class="absolute inset-0 z-0"
             >
                 <img 
-                    :src="getVal(settings, 'bgImage', blockDevice)"
+                    :src="(getVal<string>(settings, 'bgImage', blockDevice) as string)"
                     class="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110"
                     alt=""
                 />
                 <div 
                     class="absolute inset-0 bg-black transition-opacity duration-500"
-                    :style="{ opacity: (getVal(settings, 'overlayOpacity', blockDevice) || 0) / 100 }"
+                    :style="{ opacity: (getVal<number>(settings, 'overlayOpacity', blockDevice) || 0) / 100 }"
                 ></div>
             </div>
 
@@ -34,12 +34,12 @@
             <div 
                 class="hero-content relative z-10 w-full flex"
                 :class="layoutClasses(settings, blockDevice)"
-                :style="contentWrapperStyles(settings, blockDevice)"
+                :style="(contentWrapperStyles(settings, blockDevice) as CSSProperties)"
             >
                 <!-- Text Area -->
                 <div 
                     class="hero-text-area"
-                    :style="{ maxWidth: toCSS(getVal(settings, 'contentMaxWidth', blockDevice) || 1200) }"
+                    :style="{ maxWidth: toCSS(getVal<string | number>(settings, 'contentMaxWidth', blockDevice) || 1200) }"
                     :class="[
                        isCenter(settings, blockDevice) ? 'text-center mx-auto' : 'text-left'
                     ]"
@@ -53,17 +53,17 @@
 
                     <h1 
                         class="hero-title font-black leading-tight mb-8 tracking-tighter transition-[width] duration-500" 
-                        :style="getTypographyStyles(settings, 'title_', blockDevice)"
+                        :style="(getTypographyStyles(settings, 'title_', blockDevice) as CSSProperties)"
                         :contenteditable="mode === 'edit'"
                         @blur="e => updateField('title', (e.target as HTMLElement).innerText)"
                     >
-                        {{ getVal(settings, 'title', blockDevice) }}
+                        {{ getVal<string>(settings, 'title', blockDevice) }}
                     </h1>
                     
                     <div 
                         v-if="mode === 'edit' || getVal(settings, 'subtitle', blockDevice)"
                         class="hero-subtitle text-xl opacity-90 leading-relaxed font-medium mb-12 transition-[width] duration-500" 
-                        :style="getTypographyStyles(settings, 'subtitle_', blockDevice)"
+                        :style="(getTypographyStyles(settings, 'subtitle_', blockDevice) as CSSProperties)"
                         :contenteditable="mode === 'edit'"
                         @blur="e => updateField('subtitle', (e.target as HTMLElement).innerText)"
                     >
@@ -76,7 +76,7 @@
                         class="hero-split-image mt-12 rounded-3xl overflow-hidden shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]"
                     >
                          <img 
-                            :src="getVal(settings, 'image', blockDevice)"
+                            :src="(getVal<string>(settings, 'image', blockDevice) as string)"
                             class="w-full h-auto object-cover"
                             alt="Hero"
                         />
@@ -90,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject } from 'vue'
+import { inject, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Badge } from '../ui'
 import { 
@@ -99,60 +99,60 @@ import {
     getLayoutStyles,
     toCSS
 } from '../utils/styleUtils'
-import type { BlockInstance, BuilderInstance, BlockProps } from '../../types/builder'
+import type { BuilderInstance, BlockProps, ModuleSettings } from '../../types/builder'
 
 const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })
 
-const builder = inject<BuilderInstance>('builder', null as any)
+const builder = inject<BuilderInstance | null>('builder', null)
 
-const containerStyles = (settings: any, device: string) => {
+const containerStyles = (settings: ModuleSettings, device: string) => {
     return {
         width: '100%',
         ...getLayoutStyles(settings, device)
     }
 }
 
-const innerStyles = (settings: any, device: string) => {
-    const style: Record<string, any> = {
-        minHeight: toCSS(getVal(settings, 'minHeight', device) || 700),
+const innerStyles = (settings: ModuleSettings, device: string): CSSProperties => {
+    const style: Record<string, string | number | undefined> = {
+        minHeight: toCSS(getVal<string | number>(settings, 'minHeight', device) || 700),
         willChange: 'transform, filter',
         transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
         display: 'flex',
-        alignItems: getVal(settings, 'verticalAlign', device) || 'center'
+        alignItems: getVal<string>(settings, 'verticalAlign', device) || 'center'
     }
 
     // Background logic
-    const baseColor = getVal(settings, 'bgColor') || 'transparent'
-    const gradStart = getVal(settings, 'gradientStart') || '#4f46e5'
-    const gradEnd = getVal(settings, 'gradientEnd') || '#7c3aed'
+    const baseColor = getVal<string>(settings, 'bgColor') || 'transparent'
+    const gradStart = getVal<string>(settings, 'gradientStart') || '#4f46e5'
+    const gradEnd = getVal<string>(settings, 'gradientEnd') || '#7c3aed'
     
     if (baseColor === 'transparent') {
         style.background = `linear-gradient(135deg, ${gradStart}, ${gradEnd})`
     }
 
     // Interactive Variables
-    style['--hover-scale'] = `scale(${getVal(settings, 'hover_scale', device) || 1})`;
-    style['--hover-brightness'] = `brightness(${getVal(settings, 'hover_brightness', device) || 100}%)`;
+    style['--hover-scale'] = `scale(${getVal<number>(settings, 'hover_scale', device) || 1})`;
+    style['--hover-brightness'] = `brightness(${getVal<number>(settings, 'hover_brightness', device) || 100}%)`;
 
-    return style
+    return style as CSSProperties
 }
 
-const contentWrapperStyles = (settings: any, device: string) => {
+const contentWrapperStyles = (_settings: ModuleSettings, _device: string) => {
     return {
         padding: '0 2rem'
     }
 }
 
-const isCenter = (settings: any, device: string) => {
-    const align = getVal(settings, 'alignment', device) || 'center'
+const isCenter = (settings: ModuleSettings, device: string) => {
+    const align = getVal<string>(settings, 'alignment', device) || 'center'
     return align === 'center'
 }
 
-const layoutClasses = (settings: any, device: string) => {
-    const layout = getVal(settings, 'layout', device) || 'centered'
+const layoutClasses = (settings: ModuleSettings, device: string) => {
+    const layout = getVal<string>(settings, 'layout', device) || 'centered'
     if (layout === 'split') {
         return 'flex-col lg:flex-row items-center justify-between gap-16'
     }

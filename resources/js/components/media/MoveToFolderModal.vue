@@ -57,7 +57,7 @@ import {
 } from '@/components/ui';
 import type { MediaFolder } from '@/types/cms';
 
-const props = defineProps<{
+defineProps<{
     folders?: MediaFolder[];
 }>();
 

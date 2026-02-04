@@ -17,33 +17,39 @@ class TrackAnalytics
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $response = $next($request);
+        return $next($request);
+    }
 
+    /**
+     * Handle tasks after the response has been sent to the browser.
+     */
+    public function terminate(Request $request, Response $response): void
+    {
         // Only track GET requests and successful responses
         if ($request->method() === 'GET' && $response->getStatusCode() === 200) {
             // Skip tracking for admin/api routes
             if (! $this->shouldTrack($request)) {
-                return $response;
+                return;
             }
 
             try {
                 $sessionId = session()->getId();
 
                 // Start or get session
-                $session = AnalyticsSession::start($request, $sessionId);
+                $session = \App\Models\AnalyticsSession::start($request, $sessionId);
 
                 // Track visit
-                AnalyticsVisit::trackVisit($request, $sessionId);
+                \App\Models\AnalyticsVisit::trackVisit($request, $sessionId);
 
                 // Update session
-                $session->incrementPageViews();
+                if ($session) {
+                    $session->incrementPageViews();
+                }
             } catch (\Exception $e) {
-                // Log error but don't break the request
+                // Log error but don't break anything
                 \Log::error('Analytics tracking failed: '.$e->getMessage());
             }
         }
-
-        return $response;
     }
 
     protected function shouldTrack(Request $request): bool

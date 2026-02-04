@@ -60,7 +60,7 @@ type NewsletterVariant = 'default' | 'compact' | 'inline';
 
 const { t } = useI18n();
 
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   variant?: NewsletterVariant;
   title?: string;
   description?: string;
@@ -70,8 +70,12 @@ const props = withDefaults(defineProps<{
   successMessage?: string;
 }>(), {
   variant: 'default' as const,
+  title: '',
+  description: '',
+  buttonText: '',
   showIcon: true,
   showPrivacy: true,
+  successMessage: '',
 });
 
 const email = ref('');
@@ -100,8 +104,9 @@ const handleSubscribe = async () => {
         success.value = false;
       }, 5000);
     }
-  } catch (err: any) {
-    error.value = err.response?.data?.message || t('common.messages.error.generic');
+  } catch (err: unknown) {
+    const errorData = err as { response?: { data?: { message?: string } } };
+    error.value = errorData.response?.data?.message || t('common.messages.error.generic');
   } finally {
     loading.value = false;
   }

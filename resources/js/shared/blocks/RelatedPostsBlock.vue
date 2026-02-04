@@ -4,22 +4,22 @@
     :mode="mode"
     :device="device"
     class="related-posts-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Related Posts'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Related Posts'"
     :style="cardStyles"
   >
-    <div class="related-wrapper w-full" :style="containerStyles">
+    <div class="related-wrapper w-full" :style="(containerStyles as CSSProperties)">
       <h3 
         v-if="titleValue" 
         class="related-posts-main-title mb-12 font-black tracking-tighter outline-none" 
-        :style="mainTitleStyles"
+        :style="(mainTitleStyles as CSSProperties)"
         :contenteditable="mode === 'edit'"
-        @blur="(e: any) => updateField('title', (e.target as HTMLElement).innerText)"
+        @blur="(e: FocusEvent) => updateField('title', (e.target as HTMLElement).innerText)"
       >
 {{ titleValue }}
 </h3>
       
-      <div class="related-posts-grid grid transition-[width] duration-500" :style="gridStyles">
+      <div class="related-posts-grid grid transition-[width] duration-500" :style="(gridStyles as CSSProperties)">
         <article 
             v-for="(post, index) in displayPosts" 
             :key="index" 
@@ -32,13 +32,13 @@
           </div>
           
           <div class="post-content flex-1 p-8 relative z-20">
-            <span v-if="showMeta" class="post-meta block mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-primary/60" :style="metaStyles">
+            <span v-if="showMeta" class="post-meta block mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-primary/60" :style="(metaStyles as CSSProperties)">
                 {{ post.date || 'JAN 25, 2026' }}
             </span>
-            <h4 class="post-title mb-4 text-xl font-black leading-tight tracking-tight group-hover:text-primary transition-colors" :style="postTitleStyles">
+            <h4 class="post-title mb-4 text-xl font-black leading-tight tracking-tight group-hover:text-primary transition-colors" :style="(postTitleStyles as CSSProperties)">
                 {{ post.title }}
             </h4>
-            <p v-if="showExcerpt" class="post-excerpt text-sm font-medium text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed" :style="excerptStyles">
+            <p v-if="showExcerpt" class="post-excerpt text-sm font-medium text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed" :style="(excerptStyles as CSSProperties)">
                 {{ post.excerpt }}
             </p>
           </div>
@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, inject, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { LucideIcon } from '@/components/ui';
 import { 
@@ -57,7 +57,7 @@ import {
   getLayoutStyles,
   getTypographyStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -68,23 +68,24 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const builder = inject<BuilderInstance | null>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 // Mock dynamic data
-const injectedRelatedPosts = inject<any[]>('relatedPosts', [
+const injectedRelatedPosts = inject<Record<string, string>[]>('relatedPosts', [
     { title: 'The Future of Agency Design: Dynamic Interfaces', excerpt: 'Deep dive into specialized layout controls and unmatched interactive aesthetics...', date: 'JAN 25, 2026', image: 'https://picsum.photos/600/400?random=41' },
     { title: 'Crafting Digital Excellence with Antigravity', excerpt: 'Explore the latest techniques in modern web design and performance...', date: 'JAN 22, 2026', image: 'https://picsum.photos/600/400?random=42' },
     { title: 'Luminous Branding Strategies', excerpt: 'How to build brands that resonate in the digital ecosystem...', date: 'JAN 20, 2026', image: 'https://picsum.photos/600/400?random=43' }
 ])
 
-const titleValue = computed(() => props.mode === 'edit' ? (settings.value.title || 'Related Insights') : 'Related Insights')
-const showImage = computed(() => getVal(settings.value, 'showImage', props.device) !== false)
-const showMeta = computed(() => getVal(settings.value, 'showMeta', props.device) !== false)
-const showExcerpt = computed(() => getVal(settings.value, 'showExcerpt', props.device) !== false)
+const titleValue = computed(() => props.mode === 'edit' ? ((settings.value.title as string) || 'Related Insights') : 'Related Insights')
+const showImage = computed(() => getVal<boolean>(settings.value, 'showImage', props.device) !== false)
+const showMeta = computed(() => getVal<boolean>(settings.value, 'showMeta', props.device) !== false)
+const showExcerpt = computed(() => getVal<boolean>(settings.value, 'showExcerpt', props.device) !== false)
 
 const displayPosts = computed(() => {
-    const count = getVal(settings.value, 'postsCount', props.device) || 3
+    const countVal = getVal<string | number>(settings.value, 'postsCount', props.device)
+    const count = (typeof countVal === 'number' ? countVal : parseInt(countVal as string)) || 3
     return injectedRelatedPosts.slice(0, count)
 })
 
@@ -93,10 +94,10 @@ const updateField = (key: string, value: string) => {
     builder.updateModuleSettings(props.module.id, { [key]: value })
 }
 
-const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+const cardStyles = computed((): CSSProperties => {
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -104,10 +105,10 @@ const cardStyles = computed(() => {
     return styles
 })
 
-const containerStyles = computed(() => getLayoutStyles(settings.value, props.device))
+const containerStyles = computed(() => getLayoutStyles(settings.value, props.device) as CSSProperties)
 
-const gridStyles = computed(() => {
-  const columns = getVal(settings.value, 'columns', props.device) || 3
+const gridStyles = computed((): CSSProperties => {
+  const columns = getVal<string | number>(settings.value, 'columns', props.device) || 3
   return { 
     display: 'grid',
     gridTemplateColumns: props.device === 'mobile' ? '1fr' : (props.device === 'tablet' ? 'repeat(2, 1fr)' : `repeat(${columns}, 1fr)`),
@@ -115,10 +116,10 @@ const gridStyles = computed(() => {
   }
 })
 
-const mainTitleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
-const metaStyles = computed(() => getTypographyStyles(settings.value, 'meta_', props.device))
-const postTitleStyles = computed(() => getTypographyStyles(settings.value, 'post_title_', props.device))
-const excerptStyles = computed(() => getTypographyStyles(settings.value, 'excerpt_', props.device))
+const mainTitleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device) as CSSProperties)
+const metaStyles = computed(() => getTypographyStyles(settings.value, 'meta_', props.device) as CSSProperties)
+const postTitleStyles = computed(() => getTypographyStyles(settings.value, 'post_title_', props.device) as CSSProperties)
+const excerptStyles = computed(() => getTypographyStyles(settings.value, 'excerpt_', props.device) as CSSProperties)
 </script>
 
 <style scoped>

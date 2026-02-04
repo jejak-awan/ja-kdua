@@ -21,16 +21,16 @@ interface ToastSuccessHandlers {
 }
 
 interface ToastErrorHandlers {
-    create: (error: any, item?: string) => void;
-    update: (error: any, item?: string) => void;
-    delete: (error: any, item?: string) => void;
-    load: (error: any) => void;
-    action: (error: any) => void;
-    fromResponse: (error: any) => void;
+    create: (error: unknown, item?: string) => void;
+    update: (error: unknown, item?: string) => void;
+    delete: (error: unknown, item?: string) => void;
+    load: (error: unknown) => void;
+    action: (error: unknown) => void;
+    fromResponse: (error: unknown) => void;
     validation: (message?: string) => void;
     permission: () => void;
     fileTooLarge: () => void;
-    templateCreateContent: (error: any) => void;
+    templateCreateContent: (error: unknown) => void;
     default: (message: string) => void;
 }
 
@@ -153,13 +153,14 @@ export function useToast() {
     /**
      * Extracts message from error object or returns default
      */
-    const getErrorMessage = (error: any, defaultKey?: string, params?: Record<string, any>): string => {
+    const getErrorMessage = (error: unknown, defaultKey?: string, params?: Record<string, unknown>): string => {
+        const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
         // If it's a validation error (422), always use the validation translation
-        if (error?.response?.status === 422) {
+        if (err?.response?.status === 422) {
             return t('common.messages.error.validation');
         }
 
-        const message = error?.response?.data?.message || error?.message || (defaultKey ? t(defaultKey, params || {}) : '');
+        const message = err?.response?.data?.message || err?.message || (defaultKey ? t(defaultKey, params || {}) : '');
         return translateMessage(message);
     };
 
@@ -193,10 +194,10 @@ export function useToast() {
         } as ToastSuccessHandlers,
 
         error: {
-            create: (error, item = 'Item') => toast.error(t('common.messages.toast.error'), getErrorMessage(error, 'common.messages.error.action')),
-            update: (error, item = 'Item') => toast.error(t('common.messages.toast.error'), getErrorMessage(error, 'common.messages.error.action')),
+            create: (error, _item = 'Item') => toast.error(t('common.messages.toast.error'), getErrorMessage(error, 'common.messages.error.action')),
+            update: (error, _item = 'Item') => toast.error(t('common.messages.toast.error'), getErrorMessage(error, 'common.messages.error.action')),
             delete: (error, item = 'Item') => toast.error(t('common.messages.toast.error'), getErrorMessage(error, 'common.messages.error.deleteFailed', { item })),
-            load: (error) => toast.error(t('common.messages.toast.error'), t('common.messages.error.loadFailed')),
+            load: (_error) => toast.error(t('common.messages.toast.error'), t('common.messages.error.loadFailed')),
             action: (error) => toast.error(t('common.messages.toast.error'), getErrorMessage(error, 'common.messages.error.action')),
             fromResponse: (error) => toast.error(t('common.messages.toast.error'), getErrorMessage(error, 'common.messages.error.action')),
             validation: (message) => toast.error(t('common.messages.toast.error'), message || t('common.messages.error.validation')),

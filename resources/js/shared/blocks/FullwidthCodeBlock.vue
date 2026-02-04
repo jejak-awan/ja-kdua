@@ -4,8 +4,8 @@
     :mode="mode" 
     :device="device"
     class="fullwidth-code-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Fullwidth Code'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Fullwidth Code'"
     :style="cardStyles"
   >
     <div class="code-wrapper w-full h-full" :style="containerStyles">
@@ -20,19 +20,20 @@
           </p>
           <pre class="bg-slate-900 p-6 rounded-2xl text-[10px] text-primary/70 font-mono overflow-auto border border-white/5">{{ settings.rawContent || '<!-- Empty -->' }}</pre>
       </div>
-      <div v-else class="raw-code-container h-full" v-html="settings.rawContent"></div>
+      <div v-else class="raw-code-container h-full" v-html="(settings.rawContent as string)"></div>
     </div>
   </BaseBlock>
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import Code from 'lucide-vue-next/dist/esm/icons/code.js';import { 
+import Code from 'lucide-vue-next/dist/esm/icons/code.js';
+import { 
     getVal,
     getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -43,21 +44,20 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+const cardStyles = computed((): CSSProperties => {
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
     
-    return styles
+    return styles as CSSProperties
 })
 
-const containerStyles = computed(() => getLayoutStyles(settings.value, props.device))
+const containerStyles = computed((): CSSProperties => getLayoutStyles(settings.value, props.device) as CSSProperties)
 </script>
 
 <style scoped>

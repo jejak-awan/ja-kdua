@@ -18,8 +18,7 @@ import {
     conditionsSettings,
     interactionsSettings,
     scrollEffectsSettings,
-    attributesSettings,
-    layoutSettings
+    attributesSettings
 } from '@/components/builder/modules/commonSettings';
 
 /**

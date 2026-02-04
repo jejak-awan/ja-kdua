@@ -75,8 +75,8 @@ const fetchAlerts = async () => {
     try {
         const response = await api.get('/admin/ja/security/alerts');
         alerts.value = response.data?.data?.alerts || [];
-    } catch (error: any) {
-        console.debug('Failed to fetch security alerts:', error);
+    } catch (error: unknown) {
+        console.warn('Failed to fetch security alerts:', error);
     }
 };
 

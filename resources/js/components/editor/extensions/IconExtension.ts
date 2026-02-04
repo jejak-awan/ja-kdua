@@ -2,6 +2,8 @@ import { Node, mergeAttributes } from '@tiptap/core';
 import { VueNodeViewRenderer } from '@tiptap/vue-3';
 import IconComponent from '../nodes/IconComponent.vue';
 
+import { type Component } from 'vue';
+
 export const Icon = Node.create({
     name: 'icon',
 
@@ -60,6 +62,6 @@ export const Icon = Node.create({
     },
 
     addNodeView() {
-        return VueNodeViewRenderer(IconComponent);
+        return VueNodeViewRenderer(IconComponent as unknown as Component);
     },
 });

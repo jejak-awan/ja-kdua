@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, shallowRef, watch, onBeforeUnmount, onMounted, computed, nextTick, type Ref } from 'vue';
+import { ref, shallowRef, watch, onBeforeUnmount, onMounted, computed, nextTick } from 'vue';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import { Underline } from '@tiptap/extension-underline';

@@ -7,6 +7,7 @@ const props = withDefaults(defineProps<{
   class?: HTMLAttributes['class'];
 }>(), {
   orientation: 'vertical',
+  class: undefined,
 });
 </script>
 

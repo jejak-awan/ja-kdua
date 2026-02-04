@@ -9,6 +9,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  defaultValue: undefined,
+  modelValue: undefined,
   class: '',
 });
 

@@ -1,6 +1,5 @@
 import { logger } from '@/utils/logger';
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosError, type AxiosResponse } from 'axios';
-import router from '../router';
 import { SystemMonitor } from './SystemMonitor';
 import { useSystemError } from '@/composables/useSystemError';
 
@@ -20,7 +19,7 @@ window.__isSessionTerminated = false;
 let abortController = new AbortController();
 
 // Add custom property to config for skipping checks
-interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
     _skipManualRedirect?: boolean;
 }
 
@@ -106,7 +105,7 @@ api.interceptors.request.use(
 // Response interceptor - Handle errors
 api.interceptors.response.use(
     (response: AxiosResponse) => response,
-    async (error: AxiosError<any> & { config: CustomAxiosRequestConfig }) => {
+    async (error: AxiosError<{ message?: string; retry_after?: number }> & { config: CustomAxiosRequestConfig }) => {
         const originalRequest = error.config;
 
         // Skip global redirect if requested by the caller

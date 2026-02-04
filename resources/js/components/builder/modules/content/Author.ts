@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -105,7 +105,7 @@ const AuthorModule: ModuleDefinition = {
             {
                 id: 'nameTypography',
                 label: 'Name Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `name_${f.name}`,
                     label: `Name ${f.label}`
@@ -114,7 +114,7 @@ const AuthorModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -123,7 +123,7 @@ const AuthorModule: ModuleDefinition = {
             {
                 id: 'bioTypography',
                 label: 'Bio Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `bio_${f.name}`,
                     label: `Bio ${f.label}`

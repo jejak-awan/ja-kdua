@@ -1,8 +1,8 @@
-import { logger } from '@/utils/logger';
 import { computed, triggerRef } from 'vue'
 import ModuleRegistry from '../ModuleRegistry'
 import ValidationService from '../ValidationService'
-import type { BlockInstance, BuilderState, ModuleSettings, BuilderPreset } from '@/types/builder'
+import type { BlockInstance, BuilderState, ModuleSettings, BuilderPreset, BlockDefinition } from '@/types/builder'
+import { logger } from '@/utils/logger'
 
 export interface HistoryManager {
     takeSnapshot: (options?: { immediate?: boolean; delay?: number }) => void;
@@ -26,7 +26,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
 
     // Registry proxies
     const definitions = computed(() => {
-        const defs: Record<string, any> = {}
+        const defs: Record<string, BlockDefinition> = {}
         ModuleRegistry.getAll().forEach(m => {
             if (m.name) defs[m.name] = m
         })
@@ -44,7 +44,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
     // We don't have async loading state for internal registry yet
     const loadingModules = computed(() => false)
 
-    function registerModule(definition: any) {
+    function registerModule(definition: BlockDefinition) {
         ModuleRegistry.register(definition)
     }
 
@@ -428,7 +428,7 @@ export function useBuilderModules(state: BuilderState, historyManager: HistoryMa
         const module = findModuleById(blocks.value, id)
         if (!module) return false
         if (!module.settings.design) module.settings.design = {}
-        module.settings.design = { ...(module.settings.design as Record<string, any>), ...(clipboard.value.data as Record<string, any>) }
+        module.settings.design = { ...(module.settings.design as Record<string, unknown>), ...(clipboard.value.data as Record<string, unknown>) }
         triggerRef(blocks)
         markAsDirty()
         takeSnapshot({ immediate: true })

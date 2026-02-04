@@ -4,21 +4,21 @@
     :mode="mode"
     :settings="settings"
     class="group-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Group Container'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Group Container'"
   >
     <component
       :is="settings.link_url ? 'a' : 'div'"
       class="group-inner relative transition-colors duration-300 w-full min-h-[50px]"
-      :href="mode === 'view' ? settings.link_url : undefined"
-      :target="mode === 'view' && settings.link_url ? (settings.link_target || '_self') : undefined"
-      :style="containerStyles"
+      :href="mode === 'view' ? (settings.link_url as string) : undefined"
+      :target="mode === 'view' && settings.link_url ? ((settings.link_target as string) || '_self') : undefined"
+      :style="(containerStyles as any)"
     >
         <!-- Overlay -->
-        <div v-if="settings.overlayColor" class="group-overlay absolute inset-0 pointer-events-none z-0" :style="overlayStyles" />
+        <div v-if="settings.overlayColor" class="group-overlay absolute inset-0 pointer-events-none z-0" :style="(overlayStyles as any)" />
         
         <!-- Content Container -->
-        <div class="group-content relative z-10 w-full h-full" :style="contentStyles">
+        <div class="group-content relative z-10 w-full h-full" :style="(contentStyles as any)">
             <!-- Builder Mode -->
             <template v-if="mode === 'edit'">
                 <slot />
@@ -53,31 +53,33 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, inject, type Component } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import Square from 'lucide-vue-next/dist/esm/icons/square.js';import { 
+import Square from 'lucide-vue-next/dist/esm/icons/square.js';
+import { 
   getVal,
   getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = defineProps<{
   module: BlockInstance
   mode: 'view' | 'edit'
 }>()
 
-const builder = inject<any>('builder', null)
+const builder = inject<BuilderInstance | null>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const BlockRenderer = inject<any>('BlockRenderer', null)
+const BlockRenderer = inject<Component | null>('BlockRenderer', null)
 
 const containerStyles = computed(() => {
-    const styles = getLayoutStyles(settings.value, device.value)
-    return {
-        ...styles,
+    const layoutStyles = getLayoutStyles(settings.value, device.value)
+    const styles: Record<string, string | number> = {
+        ...layoutStyles,
         overflow: 'hidden'
     }
+    return styles
 })
 
 const overlayStyles = computed(() => ({
@@ -85,20 +87,21 @@ const overlayStyles = computed(() => ({
 }))
 
 const contentStyles = computed(() => {
-  const direction = getVal(settings.value, 'direction', device.value) || 'column'
-  const alignItems = getVal(settings.value, 'alignItems', device.value) || 'stretch'
-  const justifyContent = getVal(settings.value, 'justifyContent', device.value) || 'flex-start'
-  const gap = parseInt(getVal(settings.value, 'gap', device.value)) ?? 20
-  const wrap = getVal(settings.value, 'wrap', device.value)
+  const direction = getVal<string>(settings.value, 'direction', device.value) || 'column'
+  const alignItems = getVal<string>(settings.value, 'alignItems', device.value) || 'stretch'
+  const justifyContent = getVal<string>(settings.value, 'justifyContent', device.value) || 'flex-start'
+  const gap = parseInt(getVal<string>(settings.value, 'gap', device.value) || '20')
+  const wrap = getVal<boolean>(settings.value, 'wrap', device.value)
 
-  return {
+  const styles: Record<string, string | number> = {
     display: 'flex',
     flexDirection: direction,
     alignItems: alignItems,
     justifyContent: justifyContent,
     gap: `${gap}px`,
-    flexWrap: (wrap ? 'wrap' : 'nowrap') as any
+    flexWrap: (wrap ? 'wrap' : 'nowrap') as 'wrap' | 'nowrap'
   }
+  return styles
 })
 </script>
 

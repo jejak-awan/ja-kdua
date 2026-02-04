@@ -4,8 +4,8 @@
     :mode="mode"
     :device="device"
     class="post-content-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Post Content'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Post Content'"
     :style="cardStyles"
   >
     <div 
@@ -19,9 +19,9 @@
           <div v-if="!settings.content && !postContent" class="opacity-30 italic font-medium p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-center">
               Post content will appear here in the live article.
           </div>
-          <div v-else class="post-content-inner prose prose-slate dark:prose-invert max-w-none" v-html="displayContent" />
+          <div v-else class="post-content-inner prose prose-slate dark:prose-invert max-w-none" v-html="(displayContent as string)" />
       </div>
-      <div v-else class="post-content-inner prose prose-slate dark:prose-invert max-w-none" v-html="postContent" />
+      <div v-else class="post-content-inner prose prose-slate dark:prose-invert max-w-none" v-html="(postContent as string)" />
     </div>
   </BaseBlock>
 </template>
@@ -34,7 +34,7 @@ import {
   getLayoutStyles,
   getTypographyStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -45,20 +45,19 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 // Dynamic content injection
 const postContent = inject<string>('postContent', '')
 
 const displayContent = computed(() => {
-    return settings.value.content || postContent || '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>'
+    return (settings.value.content as string) || (postContent as string) || '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>'
 })
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -70,15 +69,16 @@ const containerStyles = computed(() => {
   const layout = getLayoutStyles(settings.value, props.device)
   const typo = getTypographyStyles(settings.value, '', props.device)
   
-  const linkColors = getTypographyStyles(settings.value, 'link_', props.device)
+  const linkColors = (getTypographyStyles(settings.value, 'link_', props.device) || {}) as Record<string, string | number>
   
-  return {
+  const styles: Record<string, string | number> = {
     ...layout,
     ...typo,
-    '--link-color': linkColors.color || 'var(--primary)',
-    '--link-font-weight': linkColors.fontWeight || '700',
-    '--link-decoration': linkColors.textDecoration || 'underline'
-  } as any
+    '--link-color': (linkColors.color as string) || 'var(--primary)',
+    '--link-font-weight': (linkColors.fontWeight as string) || '700',
+    '--link-decoration': (linkColors.textDecoration as string) || 'underline'
+  }
+  return styles
 })
 </script>
 

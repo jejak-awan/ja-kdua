@@ -173,7 +173,7 @@ const handleResize = async () => {
         });
         toast.success.action(t('features.media.modals.resize.success') || 'Image resized successfully');
         emit('resized');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to resize media:', error);
         toast.error.fromResponse(error);
     } finally {

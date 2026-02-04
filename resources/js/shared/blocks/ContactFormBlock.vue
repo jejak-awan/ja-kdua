@@ -4,19 +4,19 @@
     :mode="mode" 
     :device="device"
     class="contact-form-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Contact Form'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Contact Form'"
     :style="cardStyles"
   >
     <template #default="{ settings: blockSettings }">
       <div 
         class="contact-form-container mx-auto" 
-        :style="containerStyles"
+        :style="(containerStyles as any)"
       >
         <!-- Header -->
         <div v-if="blockSettings.title || blockSettings.description" class="form-header text-center mb-10">
-          <h2 v-if="blockSettings.title" class="form-title text-3xl font-bold mb-3" :style="titleStyles">{{ blockSettings.title }}</h2>
-          <p v-if="blockSettings.description" class="form-description opacity-70" :style="descriptionStyles">{{ blockSettings.description }}</p>
+          <h2 v-if="blockSettings.title" class="form-title text-3xl font-bold mb-3" :style="(titleStyles as any)">{{ blockSettings.title }}</h2>
+          <p v-if="blockSettings.description" class="form-description opacity-70" :style="(descriptionStyles as any)">{{ blockSettings.description }}</p>
         </div>
         
         <!-- Fields Container -->
@@ -41,7 +41,7 @@
             <Button 
               type="submit" 
               class="h-14 px-12 rounded-full font-bold shadow-xl shadow-primary/20 transition-colors hover:-translate-y-1 active:translate-y-0"
-              :style="buttonStyles"
+              :style="(buttonStyles as any)"
               :disabled="isSubmitting"
             >
               <Loader2 v-if="isSubmitting" class="w-5 h-5 animate-spin mr-2" />
@@ -65,25 +65,26 @@ import BaseBlock from '../components/BaseBlock.vue'
 import ContactFieldBlock from './ContactFieldBlock.vue'
 import { Button } from '../ui'
 import Send from 'lucide-vue-next/dist/esm/icons/send.js';
-import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';import { 
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import { 
   getTypographyStyles,
   getLayoutStyles,
   getVal
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance
   mode?: 'view' | 'edit'
   device?: 'desktop' | 'tablet' | 'mobile'
-  nestedBlocks?: any[]
+  nestedBlocks?: BlockInstance[]
 }>(), {
   mode: 'view',
   device: 'desktop',
   nestedBlocks: () => []
 })
 
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const isSubmitting = ref(false)
 const submitted = ref(false)
@@ -98,9 +99,9 @@ const handleSubmit = () => {
 }
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -116,11 +117,11 @@ const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_',
 const descriptionStyles = computed(() => getTypographyStyles(settings.value, 'description_', props.device))
 
 const buttonStyles = computed(() => {
-    const styles = getTypographyStyles(settings.value, 'button_', props.device)
+    const styles = (getTypographyStyles(settings.value, 'button_', props.device) || {}) as Record<string, string | number>
     return {
         ...styles,
-        backgroundColor: settings.value.buttonBackgroundColor || '',
-        color: settings.value.buttonTextColor || ''
+        backgroundColor: (settings.value.buttonBackgroundColor as string) || '',
+        color: (settings.value.buttonTextColor as string) || ''
     }
 })
 </script>

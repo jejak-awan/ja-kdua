@@ -42,7 +42,7 @@
                                 v-else
                                 :list="pages"
                                 :group="{ name: 'menu', pull: 'clone', put: false }"
-                                :clone="(item: any) => createItem('page', item)"
+                                :clone="(item: unknown) => createItem('page', item)"
                                 item-key="id"
                                 class="space-y-2"
                             >
@@ -88,7 +88,7 @@
                                 v-else
                                 :list="posts"
                                 :group="{ name: 'menu', pull: 'clone', put: false }"
-                                :clone="(item: any) => createItem('post', item)"
+                                :clone="(item: unknown) => createItem('post', item)"
                                 item-key="id"
                                 class="space-y-2"
                             >
@@ -134,7 +134,7 @@
                                 v-else
                                 :list="categories"
                                 :group="{ name: 'menu', pull: 'clone', put: false }"
-                                :clone="(item: any) => createItem('category', item)"
+                                :clone="(item: unknown) => createItem('category', item)"
                                 item-key="id"
                                 class="space-y-2"
                             >
@@ -248,9 +248,9 @@ defineEmits<{
 }>();
 
 // Data sources
-const pages = ref<any[]>([]);
-const posts = ref<any[]>([]);
-const categories = ref<any[]>([]);
+const pages = ref<unknown[]>([]);
+const posts = ref<unknown[]>([]);
+const categories = ref<unknown[]>([]);
 const loadingPages = ref(false);
 const loadingPosts = ref(false);
 const loadingCategories = ref(false);
@@ -299,17 +299,18 @@ const fetchCategories = async () => {
 };
 
 // Create menu item from source
-const createItem = (type: string, sourceItem: any) => {
+const createItem = (type: string, sourceItem: unknown) => {
+    const si = sourceItem as Record<string, unknown>;
     const item = menuItemRegistry.createInstance(type, {
-        title: sourceItem.title || sourceItem.name,
-        target_id: sourceItem.id,
-        url: sourceItem.url || null
+        title: (si.title as string) || (si.name as string),
+        target_id: si.id as number,
+        url: (si.url as string) || undefined
     });
     return item;
 };
 
 // Add single item
-const addItem = (type: string, sourceItem: any) => {
+const addItem = (type: string, sourceItem: unknown) => {
     const item = createItem(type, sourceItem);
     if (item) {
         menuContext.addItem(item);
@@ -317,7 +318,7 @@ const addItem = (type: string, sourceItem: any) => {
 };
 
 // Add all items of a type
-const addAll = (type: string, items: any[]) => {
+const addAll = (type: string, items: unknown[]) => {
     items.forEach(sourceItem => {
         addItem(type, sourceItem);
     });

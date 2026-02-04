@@ -105,7 +105,6 @@ import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import { useToast } from '@/composables/useToast';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { redirectSchema } from '@/schemas/common';
-import { z } from 'zod';
 
 interface Redirect {
     id: number | string;
@@ -184,9 +183,10 @@ const handleSubmit = async () => {
             toast.success.create(t('features.redirects.title'));
         }
         emit('saved');
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors);
+    } catch (error: unknown) {
+        const err = error as { response?: { status?: number; data?: { errors?: Record<string, string[]> } } };
+        if (err.response?.status === 422) {
+            setErrors(((err.response?.data?.errors) || {}) as Record<string, string[]>);
         } else {
             toast.error.fromResponse(error);
         }

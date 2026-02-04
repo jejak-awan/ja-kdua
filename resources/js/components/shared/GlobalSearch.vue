@@ -131,7 +131,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, computed, watch, onMounted, onUnmounted, nextTick, type Component } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, type Component } from 'vue';
 import { useRouter, type RouteLocationRaw } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -145,7 +145,6 @@ import Home from 'lucide-vue-next/dist/esm/icons/house.js';
 import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
 import UserCircle from 'lucide-vue-next/dist/esm/icons/circle-user.js';
 import PlusCircle from 'lucide-vue-next/dist/esm/icons/circle-plus.js';
-import LogOut from 'lucide-vue-next/dist/esm/icons/log-out.js';
 
 interface SearchItem {
     id?: number | string;

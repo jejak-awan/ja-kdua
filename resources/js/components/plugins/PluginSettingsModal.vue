@@ -28,7 +28,7 @@ const { t } = useI18n();
 
 interface Plugin {
     name: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 defineProps<{

@@ -4,8 +4,8 @@
     :mode="mode"
     :settings="settings"
     class="countdown-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Countdown Timer'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Countdown Timer'"
     :style="cardStyles"
   >
     <div class="countdown-items flex flex-wrap" :style="containerStyles">
@@ -19,7 +19,7 @@
             <div 
               class="countdown-label uppercase text-[10px] font-black tracking-[0.2em] text-slate-400 group-hover:text-primary transition-colors duration-300" 
               :style="labelStyles"
-              v-text="getVal(settings, 'daysLabel', device) || 'Days'"
+              v-text="getVal<string>(settings, 'daysLabel', device) || 'Days'"
             ></div>
         </CardContent>
       </Card>
@@ -34,7 +34,7 @@
             <div 
               class="countdown-label uppercase text-[10px] font-black tracking-[0.2em] text-slate-400 group-hover:text-primary transition-colors duration-300" 
               :style="labelStyles"
-              v-text="getVal(settings, 'hoursLabel', device) || 'Hours'"
+              v-text="getVal<string>(settings, 'hoursLabel', device) || 'Hours'"
             ></div>
         </CardContent>
       </Card>
@@ -49,7 +49,7 @@
             <div 
               class="countdown-label uppercase text-[10px] font-black tracking-[0.2em] text-slate-400 group-hover:text-primary transition-colors duration-300" 
               :style="labelStyles"
-              v-text="getVal(settings, 'minutesLabel', device) || 'Minutes'"
+              v-text="getVal<string>(settings, 'minutesLabel', device) || 'Minutes'"
             ></div>
         </CardContent>
       </Card>
@@ -64,7 +64,7 @@
             <div 
               class="countdown-label uppercase text-[10px] font-black tracking-[0.2em] text-slate-400 group-hover:text-primary transition-colors duration-300" 
               :style="labelStyles"
-              v-text="getVal(settings, 'secondsLabel', device) || 'Seconds'"
+              v-text="getVal<string>(settings, 'secondsLabel', device) || 'Seconds'"
             ></div>
         </CardContent>
       </Card>
@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, inject } from 'vue'
+import { computed, ref, onMounted, onUnmounted, inject, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Card, CardContent } from '../ui'
 import { 
@@ -81,23 +81,29 @@ import {
   getLayoutStyles,
   getTypographyStyles 
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = defineProps<{
   module: BlockInstance
   mode: 'view' | 'edit'
 }>()
 
-const builder = inject<any>('builder', null)
+const builder = inject<BuilderInstance | null>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const timeLeft = ref({ days: 0, hours: 0, minutes: 0, seconds: 0 })
-let interval: any = null
+interface TimeLeft {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+}
+const timeLeft = ref<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+let interval: ReturnType<typeof setInterval> | null = null
 
 const calculateTimeLeft = () => {
-  const endDate = getVal(settings.value, 'endDate', device.value) || new Date(Date.now() + 864000000).toISOString().split('T')[0]
-  const endTime = getVal(settings.value, 'endTime', device.value) || '00:00'
+  const endDate = getVal<string>(settings.value, 'endDate', device.value) || new Date(Date.now() + 864000000).toISOString().split('T')[0]
+  const endTime = getVal<string>(settings.value, 'endTime', device.value) || '00:00'
   const target = new Date(`${endDate}T${endTime}:00`)
   const now = new Date()
   const diff = target.getTime() - now.getTime()
@@ -124,37 +130,37 @@ onUnmounted(() => {
   if (interval) clearInterval(interval)
 })
 
-const containerStyles = computed(() => {
+const containerStyles = computed((): CSSProperties => {
   const layout = getLayoutStyles(settings.value, device.value)
-  const align = getVal(settings.value, 'alignment', device.value) || 'center'
-  const gap = parseInt(getVal(settings.value, 'gap', device.value)) || 24
+  const align = getVal<string>(settings.value, 'alignment', device.value) || 'center'
+  const gap = parseInt(getVal<string>(settings.value, 'gap', device.value) || '24')
   
   return {
     ...layout,
     gap: `${gap}px`,
     justifyContent: align === 'center' ? 'center' : (align === 'right' ? 'flex-end' : 'flex-start'),
-  }
+  } as CSSProperties
 })
 
-const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', device.value) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', device.value) || 100
+const cardStyles = computed((): CSSProperties => {
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', device.value) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', device.value) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
     
-    return styles
+    return styles as CSSProperties
 })
 
-const unitBaseStyles = computed(() => ({
-    backgroundColor: getVal(settings.value, 'itemBackgroundColor', device.value) || '',
-    borderRadius: `${parseInt(getVal(settings.value, 'itemBorderRadius', device.value)) || 32}px`,
-    padding: `${parseInt(getVal(settings.value, 'itemPadding', device.value)) || 24}px`
-}))
+const unitBaseStyles = computed((): CSSProperties => ({
+    backgroundColor: getVal<string>(settings.value, 'itemBackgroundColor', device.value) || '',
+    borderRadius: `${parseInt(getVal<string>(settings.value, 'itemBorderRadius', device.value) || '32')}px`,
+    padding: `${parseInt(getVal<string>(settings.value, 'itemPadding', device.value) || '24')}px`
+}) as CSSProperties)
 
-const numberStyles = computed(() => getTypographyStyles(settings.value, 'number_', device.value))
-const labelStyles = computed(() => getTypographyStyles(settings.value, 'label_', device.value))
+const numberStyles = computed(() => getTypographyStyles(settings.value, 'number_', device.value) as CSSProperties)
+const labelStyles = computed(() => getTypographyStyles(settings.value, 'label_', device.value) as CSSProperties)
 
 </script>
 

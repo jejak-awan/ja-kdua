@@ -13,7 +13,7 @@
                     type="boolean"
                     :label="$t('features.settings.ai.enable_ai', 'Enable AI Features')"
                     :description="$t('features.settings.ai.enable_ai_desc', 'Enable or disable AI assistance in the editor.')"
-                    v-model="localFormData.ai_enabled"
+                    v-model="(localFormData.ai_enabled as any)"
                     @update:model-value="v => updateField('ai_enabled', v)"
                     :error="errors?.ai_enabled"
                 />
@@ -27,7 +27,7 @@
                         {{ $t('features.settings.ai.default_provider_desc', 'Select which AI provider to use by default.') }}
                     </p>
                     <Select 
-                        :model-value="localFormData.ai_default_provider" 
+                        :model-value="(localFormData.ai_default_provider as string)" 
                         @update:model-value="v => updateField('ai_default_provider', v)"
                         :disabled="!localFormData.ai_enabled"
                     >
@@ -86,7 +86,7 @@
                                 <Input 
                                     :type="showKey[provider.id] ? 'text' : 'password'"
                                     :placeholder="$t('features.settings.ai.api_key_placeholder', 'Enter API Key')"
-                                    :model-value="localFormData[`${provider.id}_api_key`]"
+                                    :model-value="(localFormData[`${provider.id}_api_key`] as string)"
                                     @update:model-value="v => updateField(`${provider.id}_api_key`, v)"
                                     class="pr-10"
                                 />
@@ -111,13 +111,13 @@
                             </label>
                             <div class="flex gap-2">
                                 <Select 
-                                    :model-value="localFormData[`${provider.id}_model`]" 
+                                    :model-value="(localFormData[`${provider.id}_model`] as string)" 
                                     @update:model-value="v => updateField(`${provider.id}_model`, v)"
                                     :disabled="!localFormData[`${provider.id}_api_key`] || loadingModels[provider.id]"
                                     @update:open="(open) => { if(open) fetchModels(provider.id) }"
                                 >
                                     <SelectTrigger class="w-full">
-                                        <SelectValue :placeholder="loadingModels[provider.id] ? 'Loading...' : (formData[`${provider.id}_model`] || 'Select Model')" />
+                                        <SelectValue :placeholder="loadingModels[provider.id] ? 'Loading...' : ((formData[`${provider.id}_model`] as string) || 'Select Model')" />
                                     </SelectTrigger>
                                     <SelectContent class="max-h-[300px]">
                                         <SelectItem v-for="model in availableModels[provider.id] || []" :key="model.id" :value="model.id">
@@ -190,7 +190,7 @@ import axios from 'axios';
 interface Setting {
     id: number | string;
     key: string;
-    value: any;
+    value: unknown;
     type: string;
     group: string;
 }
@@ -208,13 +208,13 @@ interface Model {
 
 interface Props {
     settings: Setting[];
-    formData: Record<string, any>;
+    formData: Record<string, unknown>;
     errors?: Record<string, string[] | string>;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
-    (e: 'update:formData', value: Record<string, any>): void;
+    (e: 'update:formData', value: Record<string, unknown>): void;
 }>();
 
 const localFormData = ref({ ...props.formData });
@@ -224,7 +224,7 @@ watch(() => props.formData, (newVal) => {
     localFormData.value = { ...newVal };
 }, { deep: true });
 
-const updateField = (key: string, value: any) => {
+const updateField = (key: string, value: unknown) => {
     localFormData.value[key] = value;
     emit('update:formData', { ...localFormData.value });
 };
@@ -256,7 +256,7 @@ const fetchProviders = async () => {
         if (!localFormData.value.ai_default_provider && providers.value.length > 0) {
             updateField('ai_default_provider', 'gemini');
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch AI providers', error);
     }
 };
@@ -282,7 +282,7 @@ const fetchModels = async (providerId: string, force = false) => {
         if (force) {
             toast.success.action('Models fetched successfully');
         }
-    } catch (error: any) {
+    } catch {
         // If 401/403, might be invalid key
     } finally {
         loadingModels.value = { ...loadingModels.value, [providerId]: false };
@@ -302,7 +302,7 @@ const testConnection = async (providerId: string) => {
         toast.success.action('Connection successful');
         testSuccess.value = { ...testSuccess.value, [providerId]: true };
         fetchModels(providerId, true); // Auto fetch models on success
-    } catch (error: any) {
+    } catch (error: unknown) {
         toast.error.fromResponse(error);
     } finally {
         testing.value = { ...testing.value, [providerId]: false };

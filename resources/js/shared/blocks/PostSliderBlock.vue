@@ -4,17 +4,17 @@
     :mode="mode"
     :device="device"
     class="post-slider-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Post Slider'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Post Slider'"
     :style="cardStyles"
   >
     <div class="slider-container w-full" :style="containerStyles">
       <h2 
         v-if="settings.title || mode === 'edit'" 
         class="slider-main-heading text-center mb-16 outline-none tracking-tighter" 
-        :style="mainTitleStyles"
+        :style="(mainTitleStyles as any)"
         :contenteditable="mode === 'edit'"
-        @blur="(e: any) => updateField('title', (e.target as HTMLElement).innerText)"
+        @blur="(e: FocusEvent) => updateField('title', (e.target as HTMLElement).innerText)"
       >
         {{ settings.title || (mode === 'edit' ? 'Curated Experiences' : '') }}
       </h2>
@@ -23,7 +23,7 @@
           <Carousel 
               class="w-full" 
               :opts="carouselOptions"
-              :plugins="carouselPlugins"
+              :plugins="(carouselPlugins as any)"
           >
               <CarouselContent class="-ml-0">
                   <CarouselItem 
@@ -31,11 +31,11 @@
                       :key="index" 
                       class="pl-0 basis-full"
                   >
-                      <div class="relative overflow-hidden rounded-[4rem] shadow-2xl transition-colors duration-1000 group/item" :style="slideStyles">
+                      <div class="relative overflow-hidden rounded-[4rem] shadow-2xl transition-colors duration-1000 group/item" :style="(slideStyles as any)">
                           <!-- Image Area -->
                           <div v-if="post.image" class="absolute inset-0 z-0 transition-transform duration-[2000ms] group-hover/item:scale-110">
                                <img :src="post.image" class="w-full h-full object-cover" />
-                               <div v-if="overlayEnabled" class="absolute inset-0 z-10" :style="overlayStyles" />
+                               <div v-if="overlayEnabled" class="absolute inset-0 z-10" :style="(overlayStyles as any)" />
                           </div>
                           <div v-else class="absolute inset-0 bg-slate-900 z-0" />
                           
@@ -44,16 +44,16 @@
                               <Badge 
                                   v-if="settings.showMeta !== false" 
                                   class="mb-8 bg-white/10 backdrop-blur-2xl border-white/20 text-white rounded-2xl px-8 py-2 font-black uppercase tracking-[0.3em] text-[10px] transform -translate-y-8 opacity-0 group-hover/item:translate-y-0 group-hover/item:opacity-100 transition-colors duration-700"
-                                  :style="metaStyles"
+                                  :style="(metaStyles as any)"
                               >
                                   {{ post.date }} • {{ post.readTime }}
                               </Badge>
                               
-                              <h2 class="text-4xl md:text-7xl font-black mb-10 leading-[0.9] tracking-tighter max-w-5xl transition-colors duration-700 delay-100 transform -translate-y-4 group-hover/item:translate-y-0" :style="itemTitleStyles">
+                              <h2 class="text-4xl md:text-7xl font-black mb-10 leading-[0.9] tracking-tighter max-w-5xl transition-colors duration-700 delay-100 transform -translate-y-4 group-hover/item:translate-y-0" :style="(itemTitleStyles as any)">
                                   {{ post.title }}
                               </h2>
                               
-                              <p v-if="settings.showExcerpt !== false" class="text-lg md:text-2xl font-medium opacity-80 mb-12 max-w-2xl leading-relaxed transition-colors duration-700 delay-200 transform translate-y-4 group-hover/item:translate-y-0" :style="excerptStyles">
+                              <p v-if="settings.showExcerpt !== false" class="text-lg md:text-2xl font-medium opacity-80 mb-12 max-w-2xl leading-relaxed transition-colors duration-700 delay-200 transform translate-y-4 group-hover/item:translate-y-0" :style="(excerptStyles as any)">
                                   {{ post.excerpt }}
                               </p>
                               
@@ -62,8 +62,8 @@
                                   as="a"
                                   :href="mode === 'view' ? post.url : '#'" 
                                   class="h-16 px-16 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl hover:scale-105 active:scale-95 transition-[width] duration-500 delay-300 transform translate-y-8 opacity-0 group-hover/item:translate-y-0 group-hover/item:opacity-100" 
-                                  :style="buttonDisplayStyles"
-                                  @click="(e: any) => mode === 'edit' ? e.preventDefault() : null"
+                                  :style="(buttonDisplayStyles as any)"
+                                  @click="(e: MouseEvent) => mode === 'edit' ? e.preventDefault() : null"
                               >
                                   {{ settings.buttonText || 'Explore Case Study' }}
                                   <LucideIcon name="ArrowRight" class="ml-3 w-5 h-5" />
@@ -100,7 +100,7 @@ import {
   getLayoutStyles,
   getTypographyStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -111,25 +111,34 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const builder = inject<BuilderInstance | null>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const overlayEnabled = computed(() => settings.value.overlayEnabled !== false)
 
+interface Post {
+    title: string;
+    excerpt: string;
+    date: string;
+    readTime: string;
+    image: string;
+    url: string;
+}
+
 // Mock dynamic data
-const injectedPosts = inject<any[]>('injectedPosts', [
+const injectedPosts = inject<Post[]>('injectedPosts', [
     { title: 'The Future of Agency Design: Dynamic Interfaces', excerpt: 'Deep dive into specialized layout controls, responsive typography, and unmatched interactive aesthetics.', date: 'JAN 25, 2026', readTime: '5 MIN READ', image: 'https://picsum.photos/1600/900?random=31', url: '#' },
     { title: 'Crafting Digital Excellence with Antigravity', excerpt: 'Explore the latest techniques in modern web design, focus on accessibility and performance.', date: 'JAN 22, 2026', readTime: '8 MIN READ', image: 'https://picsum.photos/1600/900?random=32', url: '#' },
     { title: 'Interactive Storytelling in CMS Ecosystems', excerpt: 'Learn the secrets to high-converting hero sections and seamless user journeys.', date: 'JAN 20, 2026', readTime: '12 MIN READ', image: 'https://picsum.photos/1600/900?random=33', url: '#' }
 ])
 
 const displayPosts = computed(() => {
-    const count = getVal(settings.value, 'totalPosts', props.device) || 5
+    const count = getVal<number>(settings.value, 'totalPosts', props.device) || 5
     return injectedPosts.slice(0, count)
 })
 
 const carouselOptions = computed(() => ({
-    align: 'start',
+    align: 'start' as const,
     loop: settings.value.loop !== false,
 }))
 
@@ -137,7 +146,7 @@ const carouselPlugins = computed(() => {
     const plugins = []
     if (settings.value.autoplay !== false && props.mode === 'view') {
         plugins.push(Autoplay({
-            delay: settings.value.autoplaySpeed || 5000,
+            delay: (settings.value.autoplaySpeed as number) || 5000,
             stopOnInteraction: false
         }))
     }
@@ -145,9 +154,9 @@ const carouselPlugins = computed(() => {
 })
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -158,7 +167,7 @@ const cardStyles = computed(() => {
 const containerStyles = computed(() => getLayoutStyles(settings.value, props.device))
 
 const slideStyles = computed(() => {
-    const h = getVal(settings.value, 'height', props.device) || 600
+    const h = getVal<string | number>(settings.value, 'height', props.device) || 600
     return {
         height: typeof h === 'number' ? `${h}px` : h,
         background: 'linear-gradient(135deg, #020617 0%, #0f172a 100%)'
@@ -166,7 +175,7 @@ const slideStyles = computed(() => {
 })
 
 const overlayStyles = computed(() => ({ 
-    backgroundColor: getVal(settings.value, 'overlayColor', props.device) || 'rgba(0,0,0,0.5)',
+    backgroundColor: getVal<string>(settings.value, 'overlayColor', props.device) || 'rgba(0,0,0,0.5)',
 }))
 
 const mainTitleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
@@ -175,10 +184,10 @@ const metaStyles = computed(() => getTypographyStyles(settings.value, 'meta_', p
 const excerptStyles = computed(() => getTypographyStyles(settings.value, 'excerpt_', props.device))
 
 const buttonDisplayStyles = computed(() => {
-    const styles = getTypographyStyles(settings.value, 'button_', props.device)
+    const typography = (getTypographyStyles(settings.value, 'button_', props.device) || {}) as Record<string, string | number>
     return {
-        ...styles,
-        backgroundColor: getVal(settings.value, 'buttonBackgroundColor', props.device) || '#ffffff',
+        ...typography,
+        backgroundColor: getVal<string>(settings.value, 'buttonBackgroundColor', props.device) || '#ffffff',
         color: '#0f172a',
     }
 })

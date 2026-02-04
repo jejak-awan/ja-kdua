@@ -22,7 +22,7 @@
             <div v-if="activeTab === 'scale'" class="control-group">
                 <div class="control-row">
                     <BaseLabel>{{ t('builder.settings.fields.scale') }}</BaseLabel>
-                    <BaseSliderInput v-model.number="localValue.scale" :min="0" :max="200" unit="%" :placeholder-value="100" />
+                    <BaseSliderInput :model-value="(localValue.scale as number)" @update:model-value="localValue.scale = $event" :min="0" :max="200" unit="%" :placeholder-value="100" />
                 </div>
             </div>
 
@@ -30,11 +30,11 @@
             <div v-if="activeTab === 'translate'" class="control-group">
                 <div class="control-row">
                     <BaseLabel>{{ t('builder.settings.fields.translateX') }}</BaseLabel>
-                    <BaseSliderInput v-model.number="localValue.translate_x" :min="-500" :max="500" unit="px" :placeholder-value="0" />
+                    <BaseSliderInput :model-value="(localValue.translate_x as number)" @update:model-value="localValue.translate_x = $event" :min="-500" :max="500" unit="px" :placeholder-value="0" />
                 </div>
                 <div class="control-row mt-3">
                     <BaseLabel>{{ t('builder.settings.fields.translateY') }}</BaseLabel>
-                    <BaseSliderInput v-model.number="localValue.translate_y" :min="-500" :max="500" unit="px" :placeholder-value="0" />
+                    <BaseSliderInput :model-value="(localValue.translate_y as number)" @update:model-value="localValue.translate_y = $event" :min="-500" :max="500" unit="px" :placeholder-value="0" />
                 </div>
             </div>
 
@@ -42,15 +42,15 @@
             <div v-if="activeTab === 'rotate'" class="control-group">
                 <div class="control-row">
                     <BaseLabel>{{ t('builder.settings.fields.rotateX') }}</BaseLabel>
-                    <BaseSliderInput v-model.number="localValue.rotate_x" :min="0" :max="360" unit="deg" :placeholder-value="0" />
+                    <BaseSliderInput :model-value="(localValue.rotate_x as number)" @update:model-value="localValue.rotate_x = $event" :min="0" :max="360" unit="deg" :placeholder-value="0" />
                 </div>
                 <div class="control-row mt-3">
                     <BaseLabel>{{ t('builder.settings.fields.rotateY') }}</BaseLabel>
-                    <BaseSliderInput v-model.number="localValue.rotate_y" :min="0" :max="360" unit="deg" :placeholder-value="0" />
+                    <BaseSliderInput :model-value="(localValue.rotate_y as number)" @update:model-value="localValue.rotate_y = $event" :min="0" :max="360" unit="deg" :placeholder-value="0" />
                 </div>
                 <div class="control-row mt-3">
                     <BaseLabel>{{ t('builder.settings.fields.rotateZ') }}</BaseLabel>
-                    <BaseSliderInput v-model.number="localValue.rotate_z" :min="0" :max="360" unit="deg" :placeholder-value="0" />
+                    <BaseSliderInput :model-value="(localValue.rotate_z as number)" @update:model-value="localValue.rotate_z = $event" :min="0" :max="360" unit="deg" :placeholder-value="0" />
                 </div>
             </div>
 
@@ -58,11 +58,11 @@
             <div v-if="activeTab === 'skew'" class="control-group">
                 <div class="control-row">
                     <BaseLabel>{{ t('builder.settings.fields.skewX') }}</BaseLabel>
-                    <BaseSliderInput v-model.number="localValue.skew_x" :min="-180" :max="180" unit="deg" :placeholder-value="0" />
+                    <BaseSliderInput :model-value="(localValue.skew_x as number)" @update:model-value="localValue.skew_x = $event" :min="-180" :max="180" unit="deg" :placeholder-value="0" />
                 </div>
                 <div class="control-row mt-3">
                     <BaseLabel>{{ t('builder.settings.fields.skewY') }}</BaseLabel>
-                    <BaseSliderInput v-model.number="localValue.skew_y" :min="-180" :max="180" unit="deg" :placeholder-value="0" />
+                    <BaseSliderInput :model-value="(localValue.skew_y as number)" @update:model-value="localValue.skew_y = $event" :min="-180" :max="180" unit="deg" :placeholder-value="0" />
                 </div>
             </div>
 
@@ -91,18 +91,18 @@
 import { ref, watch, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Move from 'lucide-vue-next/dist/esm/icons/move.js';
-import Maximize from 'lucide-vue-next/dist/esm/icons/maximize.js';
-import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
-import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
-import GitMerge from 'lucide-vue-next/dist/esm/icons/git-merge.js';
+
 import { BaseLabel, BaseSliderInput, BaseCollapsible, BaseSegmentedControl } from '@/components/builder/ui'
 import type { SettingDefinition } from '@/types/builder'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   field?: SettingDefinition;
-  value: Record<string, any>;
-  placeholderValue?: any;
-}>()
+  value: Record<string, unknown>;
+  placeholderValue?: unknown;
+}>(), {
+  field: undefined,
+  placeholderValue: undefined
+})
 
 const emit = defineEmits(['update:value'])
 const { t } = useI18n()
@@ -117,7 +117,7 @@ const translatedTabs = computed(() => [
 ])
 
 // Local state
-const localValue = reactive<Record<string, any>>({ 
+const localValue = reactive<Record<string, unknown>>({ 
     scale: 100,
     translate_x: 0,
     translate_y: 0,

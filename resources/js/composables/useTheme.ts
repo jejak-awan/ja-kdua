@@ -7,14 +7,14 @@ export interface ThemeManifest {
     version?: string;
     author?: string;
     settings_schema?: Record<string, ThemeSettingSchema>;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface ThemeSettingSchema {
     type: 'text' | 'color' | 'font' | 'typography' | 'select' | 'boolean';
     label?: string;
-    default?: any;
-    options?: any[];
+    default?: unknown;
+    options?: unknown[];
 }
 
 export interface Theme {
@@ -22,18 +22,18 @@ export interface Theme {
     slug: string;
     type: string;
     manifest?: ThemeManifest;
-    settings?: Record<string, any>;
+    settings?: Record<string, unknown>;
     assets?: {
         css?: string[];
         js?: string[];
     };
     custom_css?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 // Global shared state
 const activeTheme = ref<Theme | null>(null);
-const themeSettings = ref<Record<string, any>>({});
+const themeSettings = ref<Record<string, unknown>>({});
 const themeAssets = ref<{ css: string[]; js: string[] }>({ css: [], js: [] });
 const customCss = ref('');
 const cssVariables = ref('');
@@ -90,9 +90,10 @@ export function useTheme() {
             }
 
             applyThemeStyles();
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const errorObj = err as Error;
             logger.warning('Failed to load active theme:', err);
-            error.value = err.message || 'Failed to load theme';
+            error.value = errorObj.message || 'Failed to load theme';
             activeTheme.value = null;
             themeSettings.value = {};
         } finally {
@@ -104,7 +105,7 @@ export function useTheme() {
     /**
      * Get theme setting with fallback
      */
-    const getSetting = (key: string, defaultValue: any = null) => {
+    const getSetting = (key: string, defaultValue: unknown = null) => {
         if (!activeTheme.value) {
             return defaultValue;
         }
@@ -181,10 +182,11 @@ export function useTheme() {
                 const cssKey = '--theme-' + key.replace(/_/g, '-');
 
                 if (setting.type === 'color') {
-                    variables.push(`${cssKey}: ${value};`);
+                    const colorValue = value as string;
+                    variables.push(`${cssKey}: ${colorValue};`);
 
                     // Inject HSL version for Shadcn compatibility
-                    const hslValue = hexToHsl(value);
+                    const hslValue = hexToHsl(colorValue);
                     if (hslValue) {
                         variables.push(`${cssKey}-hsl: ${hslValue};`);
                     }

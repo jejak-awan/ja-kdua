@@ -291,11 +291,11 @@ const fetchSystemInfo = async (): Promise<void> => {
         try {
             const cacheResponse = await api.get('/admin/ja/system/cache-status');
             cacheStatus.value = parseSingleResponse<CacheData>(cacheResponse)?.status || 'Active';
-        } catch (error: any) {
+        } catch (error: unknown) {
             logger.warning('Failed to fetch cache status:', error);
             cacheStatus.value = 'Active';
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch system info:', error);
     } finally {
         loading.value = false;

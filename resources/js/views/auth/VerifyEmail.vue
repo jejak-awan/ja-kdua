@@ -1,8 +1,7 @@
 <template>
     <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-background via-muted/20 to-background px-4 py-2 sm:px-6 lg:px-8">
         <div class="w-full max-w-5xl flex flex-col md:flex-row bg-card rounded-3xl shadow-2xl shadow-primary/5 overflow-hidden border border-border/40 min-h-0 animate-fade-up">
-            
-            <!-- Left Column: Decorative Graphic -->
+<!-- Left Column: Decorative Graphic -->
             <div class="hidden md:flex md:w-1/2 relative overflow-hidden items-center justify-center p-6">
                 <!-- Premium Background Image -->
                 <div class="absolute inset-0 z-0">
@@ -98,8 +97,7 @@
                     <p class="text-[10px] text-success/70 mt-0.5">{{ t('features.auth.verifyEmail.redirecting') }}</p>
                 </div>
             </div>
-
-        </div>
+</div>
     </div>
 </template>
 
@@ -167,8 +165,13 @@ const handleVerify = async (token: string, email: string) => {
             message.value = response.data.message || t('features.auth.verifyEmail.failed');
             messageType.value = 'error';
         }
-    } catch (error: any) {
-        message.value = error.response?.data?.message || t('features.auth.verifyEmail.failed');
+    } catch (error: unknown) {
+        if (typeof error === 'object' && error !== null && 'response' in error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            message.value = err.response?.data?.message || t('features.auth.verifyEmail.failed');
+        } else {
+            message.value = t('features.auth.verifyEmail.failed');
+        }
         messageType.value = 'error';
     } finally {
         loading.value = false;
@@ -203,8 +206,13 @@ const handleResend = async () => {
             message.value = response.data.message || t('features.auth.verifyEmail.failed');
             messageType.value = 'error';
         }
-    } catch (error: any) {
-        message.value = error.response?.data?.message || t('features.auth.verifyEmail.failed');
+    } catch (error: unknown) {
+        if (typeof error === 'object' && error !== null && 'response' in error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            message.value = err.response?.data?.message || t('features.auth.verifyEmail.failed');
+        } else {
+            message.value = t('features.auth.verifyEmail.failed');
+        }
         messageType.value = 'error';
     } finally {
         loading.value = false;

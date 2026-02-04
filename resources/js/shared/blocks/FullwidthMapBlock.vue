@@ -3,47 +3,68 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="fullwidth-map-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Fullwidth Map'"
-    :style="cardStyles"
+    class="fullwidth-map-block transition-all duration-700 group hover:scale-[1.02]"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Location Map'"
   >
-    <div class="map-wrapper relative w-full overflow-hidden" :style="containerStyles">
-      <div v-if="mode === 'edit'" class="builder-placeholder h-full bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-12 text-center">
-          <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6 shadow-2xl">
-              <MapPin class="w-10 h-10 text-primary animate-bounce" />
-          </div>
-          <h3 class="text-xl font-black tracking-tighter mb-3 uppercase">{{ settings.address || 'Global Hub' }}</h3>
-          <p class="text-xs font-black tracking-widest text-slate-400 dark:text-slate-500 uppercase opacity-60">Interactive Map Preview</p>
-          <div class="mt-8 flex gap-4 opacity-50">
-              <div class="bg-slate-200 dark:bg-slate-800 h-10 w-32 rounded-full"></div>
-              <div class="bg-slate-200 dark:bg-slate-800 h-10 w-10 rounded-full"></div>
-          </div>
-      </div>
-      <div v-else class="map-container h-full" :class="{ 'grayscale': settings.grayscale }">
-          <iframe 
-            width="100%" 
-            height="100%" 
-            frameborder="0" 
-            scrolling="no" 
-            marginheight="0" 
-            marginwidth="0" 
-            :src="mapUrl"
-          ></iframe>
-      </div>
+    <div class="map-container relative w-full overflow-hidden bg-slate-100 dark:bg-slate-900 border-y-2 border-slate-100 dark:border-slate-800" :style="containerStyles">
+        <!-- Static Map Overlay if provided -->
+        <img v-if="settings.staticMapUrl" :src="(settings.staticMapUrl as string)" class="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" alt="Map" />
+        
+        <!-- Interactive Elements Overlay -->
+        <div class="absolute inset-0 pointer-events-none group-hover:bg-primary/5 transition-colors duration-700 "></div>
+        
+        <!-- Center Destination UI -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 gap-6">
+             <div class="w-24 h-24 rounded-full bg-white dark:bg-slate-950 shadow-2xl flex items-center justify-center transition-all duration-700 group-hover:scale-110 group-hover:shadow-primary/40 relative">
+                <div class="absolute inset-0 rounded-full border-4 border-primary/20 animate-ping"></div>
+                <MapPin class="w-10 h-10 text-primary" />
+             </div>
+             
+             <div class="text-center group-hover:translate-y-2 transition-transform duration-700">
+                <span class="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2 block">Our Base</span>
+                <h3 class="font-black text-slate-900 dark:text-white text-3xl tracking-tighter">{{ settings.locationName || 'Global Operations Hub' }}</h3>
+                <p class="font-medium opacity-60 text-lg">{{ settings.address || 'Click to view directions' }}</p>
+             </div>
+        </div>
+
+        <!-- Simulated Map Patterns (Replaces static images for premium feel) -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" stroke-width="0.5" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+        </div>
+
+        <!-- Controls UI -->
+        <div class="absolute bottom-12 right-12 z-20 flex flex-col gap-4">
+             <Button variant="secondary" size="icon" class="rounded-2xl shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200/50 hover:bg-primary hover:text-white transition-all w-14 h-14">
+                <Plus class="w-6 h-6" />
+             </Button>
+             <Button variant="secondary" size="icon" class="rounded-2xl shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200/50 hover:bg-primary hover:text-white transition-all w-14 h-14">
+                <Minus class="w-6 h-6" />
+             </Button>
+        </div>
     </div>
   </BaseBlock>
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import MapPin from 'lucide-vue-next/dist/esm/icons/map-pin.js';import { 
+import { Button } from '../ui'
+import MapPin from 'lucide-vue-next/dist/esm/icons/map-pin.js';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Minus from 'lucide-vue-next/dist/esm/icons/minus.js';
+import { 
     getVal,
-    getLayoutStyles,
-    getResponsiveValue 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -54,47 +75,19 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const mapUrl = computed(() => {
-  const address = encodeURIComponent(settings.value.address || 'New York, NY')
-  const zoom = settings.value.zoom || 14
-  return `https://maps.google.com/maps?q=${address}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`
-})
-
-const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
-    
-    styles['--hover-scale'] = hoverScale
-    styles['--hover-brightness'] = `${hoverBrightness}%`
-    
-    return styles
-})
-
-const containerStyles = computed(() => {
+const containerStyles = computed((): CSSProperties => {
     const layout = getLayoutStyles(settings.value, props.device)
-    const height = getResponsiveValue(settings.value, 'height', props.device) || 500
+    const height = getVal<number>(settings.value, 'height', props.device) || 600
     return { 
         ...layout,
         width: '100%', 
-        height: `${height}px` 
-    }
+        height: `${height}px`
+    } as CSSProperties
 })
 </script>
 
 <style scoped>
-.fullwidth-map-block {
-    width: 100%;
-    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.4s ease;
-}
-.fullwidth-map-block:hover {
-    transform: scale(var(--hover-scale, 1));
-    filter: brightness(var(--hover-brightness, 100%));
-}
-.map-container.grayscale iframe {
-    filter: grayscale(1) invert(0.1) contrast(1.1);
-}
+.fullwidth-map-block { width: 100%; position: relative; }
 </style>

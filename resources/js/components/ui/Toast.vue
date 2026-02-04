@@ -67,8 +67,10 @@ const variantClasses: Record<string, string> = {
   info: 'bg-blue-500/95 border-blue-600 text-white',
 };
 
+import type { Component } from 'vue';
+
 const getIcon = (variant: string | undefined): VNode => {
-  const icons: Record<string, any> = {
+  const icons: Record<string, Component> = {
     success: {
       render() {
         return h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
@@ -141,7 +143,7 @@ defineExpose({ addToast, removeToast });
 
 // Make toast available globally via window
 if (typeof window !== 'undefined') {
-  (window as any).__toastInstance = { addToast, removeToast };
+  (window as unknown as { __toastInstance: unknown }).__toastInstance = { addToast, removeToast };
 }
 </script>
 

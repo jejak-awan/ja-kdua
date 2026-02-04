@@ -37,7 +37,7 @@
                     <ImageIcon class="h-3.5 w-3.5 text-muted-foreground/50" />
                 </div>
                 <div>
-                    <div class="text-xl font-bold">{{ stats?.types?.find((t: any) => t.type === 'image')?.count || 0 }}</div>
+                    <div class="text-xl font-bold">{{ stats?.types?.find((t) => t.type === 'image')?.count || 0 }}</div>
                     <p class="text-[10px] text-muted-foreground/70">
                         {{ $t('features.media.stats.images') }}
                     </p>
@@ -52,7 +52,7 @@
                     <VideoIcon class="h-3.5 w-3.5 text-muted-foreground/50" />
                 </div>
                 <div>
-                    <div class="text-xl font-bold">{{ stats?.types?.find((t: any) => t.type === 'video')?.count || 0 }}</div>
+                    <div class="text-xl font-bold">{{ stats?.types?.find((t) => t.type === 'video')?.count || 0 }}</div>
                     <p class="text-[10px] text-muted-foreground/70">
                         {{ $t('features.media.stats.videos') }}
                     </p>
@@ -68,8 +68,10 @@ import VideoIcon from 'lucide-vue-next/dist/esm/icons/video.js';
 import HardDrive from 'lucide-vue-next/dist/esm/icons/hard-drive.js';
 import { Card, CardContent } from '@/components/ui';
 
+import type { MediaStats } from '@/types/cms';
+
 defineProps<{
-    stats: any;
+    stats: MediaStats | null;
 }>();
 
 const formatFileSize = (bytes: number) => {

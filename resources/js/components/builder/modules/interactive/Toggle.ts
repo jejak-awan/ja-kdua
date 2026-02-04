@@ -1,3 +1,4 @@
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -25,7 +26,7 @@ import {
 /**
  * Toggle Module Definition (Single collapsible)
  */
-export default {
+const ToggleModule: ModuleDefinition = {
     name: 'toggle',
     title: 'Toggle',
     icon: 'ChevronDown',
@@ -165,7 +166,7 @@ export default {
             {
                 id: 'headerTypography',
                 label: 'Header Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `header_${f.name}`,
                     label: `Header ${f.label}`
@@ -192,7 +193,7 @@ export default {
             {
                 id: 'contentTypography',
                 label: 'Content Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `content_${f.name}`,
                     label: `Content ${f.label}`
@@ -225,4 +226,6 @@ export default {
             cssSettings
         ]
     }
-}
+};
+
+export default ToggleModule;

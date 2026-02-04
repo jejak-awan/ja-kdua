@@ -14,33 +14,33 @@
         variant="none"
         :class="cn(
             'button-element group relative',
-            `btn-variant-${getVal(settings, 'variant', blockDevice) || 'solid'}`,
-            `btn-hover-${getVal(settings, 'hover_effect', blockDevice) || 'lift'}`,
-            { 'overflow-hidden': getVal(settings, 'hover_effect', blockDevice) === 'shine' || getVal(settings, 'hover_effect', blockDevice) === 'sweep' }
+            `btn-variant-${getVal<string>(settings, 'variant', blockDevice) || 'solid'}`,
+            `btn-hover-${getVal<string>(settings, 'hover_effect', blockDevice) || 'lift'}`,
+            { 'overflow-hidden': getVal<string>(settings, 'hover_effect', blockDevice) === 'shine' || getVal<string>(settings, 'hover_effect', blockDevice) === 'sweep' }
         )"
-        :style="buttonStyles(settings, blockDevice, baseStyles)"
+        :style="(buttonStyles(settings, blockDevice, baseStyles as any) as any)"
         :as="mode === 'edit' ? 'button' : 'a'"
-        :href="mode === 'edit' ? undefined : (getVal(settings, 'url', blockDevice) || getVal(settings, 'link_url', blockDevice) || '#')"
-        :target="getVal(settings, 'openNewTab', blockDevice) || getVal(settings, 'link_target', blockDevice) ? '_blank' : '_self'"
-        :rel="Array.isArray(getVal(settings, 'link_rel', blockDevice)) ? getVal(settings, 'link_rel', blockDevice).join(' ') : undefined"
-        :download="getVal(settings, 'download', blockDevice) ? '' : undefined"
-        :aria-label="getVal(settings, 'aria_label', blockDevice)"
-        :type="getVal(settings, 'button_type', blockDevice) || 'button'"
+        :href="mode === 'edit' ? undefined : (getVal<string>(settings, 'url', blockDevice) || getVal<string>(settings, 'link_url', blockDevice) || '#')"
+        :target="getVal<boolean>(settings, 'openNewTab', blockDevice) || getVal<boolean>(settings, 'link_target', blockDevice) ? '_blank' : '_self'"
+        :rel="Array.isArray(getVal<string[]>(settings, 'link_rel', blockDevice)) ? (getVal<string[]>(settings, 'link_rel', blockDevice) as string[]).join(' ') : undefined"
+        :download="getVal<boolean>(settings, 'download', blockDevice) ? '' : undefined"
+        :aria-label="getVal<string>(settings as ModuleSettings, 'aria_label', blockDevice as string)"
+        :type="getVal<any>(settings as ModuleSettings, 'button_type', blockDevice as string) || 'button'"
         @click="onButtonClick"
         v-bind="getAttributes('button')"
       >
         <!-- Shine Element -->
-        <div v-if="getVal(settings, 'hover_effect', blockDevice) === 'shine'" class="btn-shine-overlay"></div>
+        <div v-if="getVal<string>(settings, 'hover_effect', blockDevice) === 'shine'" class="btn-shine-overlay"></div>
         
         <!-- Sweep Element -->
-        <div v-if="getVal(settings, 'hover_effect', blockDevice) === 'sweep'" class="btn-sweep-overlay"></div>
+        <div v-if="getVal<string>(settings, 'hover_effect', blockDevice) === 'sweep'" class="btn-sweep-overlay"></div>
 
         <!-- Icon Left -->
         <component 
-          v-if="getVal(settings, 'use_icon', blockDevice) && getVal(settings, 'iconName', blockDevice) && getVal(settings, 'iconPosition', blockDevice) === 'left'"
-          :is="getIconComponent(getVal(settings, 'iconName', blockDevice))"
+          v-if="getVal<boolean>(settings, 'use_icon', blockDevice) && getVal<string>(settings, 'iconName', blockDevice) && getVal<string>(settings, 'iconPosition', blockDevice) === 'left'"
+          :is="getIconComponent(getVal<string>(settings, 'iconName', blockDevice) || '')"
           class="btn-icon-left transition-transform duration-300 group-hover:-translate-x-1"
-          :style="iconStyles(settings, blockDevice)"
+          :style="iconStyles(settings, blockDevice) as any"
         />
 
         <!-- Editable Text -->
@@ -48,15 +48,15 @@
           :contenteditable="blockMode === 'edit'"
           @blur="onTextBlur($event, settings)"
           class="outline-none relative z-10"
-          v-html="getVal(settings, 'text', blockDevice) || 'Button Text'"
+          v-html="getVal<string>(settings, 'text', blockDevice) || 'Button Text'"
         ></span>
 
         <!-- Icon Right -->
         <component 
-          v-if="getVal(settings, 'use_icon', blockDevice) && getVal(settings, 'iconName', blockDevice) && getVal(settings, 'iconPosition', blockDevice) === 'right'"
-          :is="getIconComponent(getVal(settings, 'iconName', blockDevice))"
+          v-if="getVal<boolean>(settings, 'use_icon', blockDevice) && getVal<string>(settings, 'iconName', blockDevice) && getVal<string>(settings, 'iconPosition', blockDevice) === 'right'"
+          :is="getIconComponent(getVal<string>(settings, 'iconName', blockDevice) || '')"
           class="btn-icon-right transition-transform duration-300 group-hover:translate-x-1"
-          :style="iconStyles(settings, blockDevice)"
+          :style="iconStyles(settings, blockDevice) as any"
         />
       </Button>
     </div>
@@ -69,12 +69,12 @@ import BaseBlock from '../components/BaseBlock.vue'
 import { Button } from '../ui'
 import { cn } from '../../lib/utils'
 import { 
-    getTypographyStyles, 
     getVal, 
-    getGlassStyles, 
-    getTextGradientStyles,
+    getTypographyStyles, 
+    getGlassStyles,
     generateGradientCSS
 } from '../utils/styleUtils'
+import type { Gradient } from '../utils/styleUtils'
 import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js';
 import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
 import Download from 'lucide-vue-next/dist/esm/icons/download.js';
@@ -85,26 +85,27 @@ import Save from 'lucide-vue-next/dist/esm/icons/save.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Send from 'lucide-vue-next/dist/esm/icons/send.js';
-import User from 'lucide-vue-next/dist/esm/icons/user.js';import type { Component } from 'vue'
+import User from 'lucide-vue-next/dist/esm/icons/user.js';
+import type { Component } from 'vue'
 
 const iconMap: Record<string, Component> = {
     ArrowRight, ChevronRight, Download, ExternalLink, Mail, Play, Save, Plus, Search, Send, User
 }
-import type { BlockInstance, BuilderInstance, BlockProps } from '../../types/builder'
+import type { BuilderInstance, BlockProps, ModuleSettings } from '../../types/builder'
 
 const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })
 
-const builder = inject<BuilderInstance>('builder', null as any)
+const builder = inject<BuilderInstance | null>('builder', null)
 
 const getIconComponent = (name: string) => {
     return iconMap[name] || iconMap.ArrowRight
 }
 
-const alignmentClass = (settings: any, device: string) => {
-  const align = getVal(settings, 'alignment', device) || 'left'
+const alignmentClass = (settings: ModuleSettings, device: string) => {
+  const align = getVal<string>(settings, 'alignment', device) || 'left'
   return {
     'flex justify-start text-left': align === 'left',
     'flex justify-center text-center': align === 'center',
@@ -112,8 +113,8 @@ const alignmentClass = (settings: any, device: string) => {
   }
 }
 
-const buttonStyles = (settings: any, device: string, baseStyles: any) => {
-    let styles: Record<string, any> = {}
+const buttonStyles = (settings: ModuleSettings, device: string, baseStyles: Record<string, string | number | undefined>) => {
+    const styles: Record<string, string | number> = {}
     const variant = getVal(settings, 'variant', device) || 'solid'
     const useCustom = getVal(settings, 'use_custom_styles', device)
 
@@ -134,21 +135,20 @@ const buttonStyles = (settings: any, device: string, baseStyles: any) => {
     // 3. Variant Overrides & Color Defaults
     const defaultWhite = '#ffffff'
     const defaultDark = '#111827'
-
     if (variant === 'glass') {
-        const glass = getGlassStyles(settings, '', device)
+        const glass = (getGlassStyles(settings, '', device) || {}) as Record<string, string | number>
         if (Object.keys(glass).length === 0) {
             // Premium Default Glass
             styles.backdropFilter = 'blur(12px)'
             styles.webkitBackdropFilter = 'blur(12px)'
             styles.backgroundColor = 'rgba(0, 0, 0, 0.1)' // Darken slightly for better visibility
             styles.border = '1px solid rgba(255, 255, 255, 0.2)'
-            styles.color = styles.color || defaultWhite
+            styles.color = (styles.color as string) || defaultWhite
         } else {
             Object.assign(styles, glass)
         }
     } else if (variant === 'gradient') {
-        const gradient = getVal(settings, 'gradient', device)
+        const gradient = getVal<Gradient>(settings, 'gradient', device)
         if (gradient && gradient.stops) {
             styles.backgroundImage = generateGradientCSS(gradient)
         } else {
@@ -156,7 +156,7 @@ const buttonStyles = (settings: any, device: string, baseStyles: any) => {
             styles.backgroundImage = 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)'
         }
         styles.border = 'none'
-        styles.color = styles.color || defaultWhite
+        styles.color = (styles.color as string) || defaultWhite
     } else if (variant === 'outline' || variant === 'ghost') {
         styles.backgroundColor = 'transparent'
         
@@ -185,31 +185,33 @@ const buttonStyles = (settings: any, device: string, baseStyles: any) => {
     styles.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
 
     // 4. Hover Colors (Via CSS Variables)
-    const hoverBg = getVal(settings, 'hover_background_color', device)
-    const hoverText = getVal(settings, 'hover_text_color', device)
+    const hoverBg = getVal<string>(settings, 'hover_background_color', device)
+    const hoverText = getVal<string>(settings, 'hover_text_color', device)
     if (hoverBg) styles['--hover-bg'] = hoverBg
     if (hoverText) styles['--hover-color'] = hoverText
 
     return styles
 }
 
-const iconStyles = (settings: any, device: string) => {
-  const size = getVal(settings, 'iconSize', device) || 16
-  return {
+const iconStyles = (settings: ModuleSettings, device: string) => {
+  const size = getVal<string | number>(settings, 'iconSize', device) || 16
+  const styles: Record<string, string | number> = {
     width: `${size}px`,
     height: `${size}px`,
-    marginLeft: getVal(settings, 'iconPosition', device) === 'right' ? '8px' : '0',
-    marginRight: getVal(settings, 'iconPosition', device) === 'left' ? '8px' : '0',
+    marginLeft: getVal<string>(settings, 'iconPosition', device) === 'right' ? '8px' : '0',
+    marginRight: getVal<string>(settings, 'iconPosition', device) === 'left' ? '8px' : '0',
   }
+  return styles
 }
 
 const onButtonClick = (e: MouseEvent) => {
   if (props.mode === 'edit') e.preventDefault()
 }
 
-const onTextBlur = (e: any, settings: any) => {
+const onTextBlur = (e: FocusEvent, settings: ModuleSettings) => {
   if (props.mode !== 'edit' || !builder) return
-  const newText = e.target.innerText
+  const target = e.target as HTMLElement
+  const newText = target.innerText
   if (newText !== getVal(settings, 'text')) {
     builder.updateModule(props.module.id, {
       settings: { ...settings, text: newText }

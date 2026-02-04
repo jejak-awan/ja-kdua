@@ -258,7 +258,7 @@ const fetchThemes = async () => {
         const response = await api.get('/admin/ja/themes', { params });
         const { data } = parseResponse(response);
         themes.value = ensureArray(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch themes:', error);
         themes.value = [];
     }
@@ -271,7 +271,7 @@ const scanThemes = async () => {
         await fetchThemes();
         const count = response.data?.data?.count || 0;
         toast.success(t('features.themes.messages.scanSuccess', { count }));
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to scan themes:', error);
         toast.error('Error', t('features.themes.messages.scanFailed'));
     } finally {
@@ -293,7 +293,7 @@ const activateTheme = async (theme: Theme) => {
         await api.post(`/admin/ja/themes/${theme.slug}/activate`);
         await fetchThemes();
         toast.success(t('features.themes.messages.activateSuccess'));
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to activate theme:', error);
         toast.error(error instanceof Error ? error.message : 'Failed to activate theme');
     }
@@ -314,7 +314,7 @@ const validateTheme = async (theme: Theme) => {
         }
         
         await fetchThemes();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to validate theme:', error);
         toast.error('Error', t('features.themes.messages.validateError'));
     }

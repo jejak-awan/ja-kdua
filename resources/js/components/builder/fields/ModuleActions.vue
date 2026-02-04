@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+
 import { useI18n } from 'vue-i18n'
 import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
 import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';

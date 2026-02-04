@@ -43,8 +43,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-
 const props = withDefaults(defineProps<{
   type?: 'post-card' | 'table-row' | 'list-item' | 'card' | 'generic';
   lines?: number;

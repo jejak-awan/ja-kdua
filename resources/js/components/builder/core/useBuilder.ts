@@ -1,5 +1,5 @@
 import { logger } from '@/utils/logger';
-import { watch, computed, ref, type Ref, type ComputedRef } from 'vue'
+import { computed, ref } from 'vue'
 import ModuleRegistry from './ModuleRegistry'
 import api from '@/services/api'
 import { useTheme } from '@/composables/useTheme'
@@ -51,8 +51,7 @@ export default function useBuilder(initialData = { blocks: [] as BlockInstance[]
     // THEME LOADING (Specific to Builder Facade)
     // ============================================
 
-    async function loadTheme(slug: string | null = null): Promise<void> {
-        const themeSlug = slug || state.activeTheme.value
+    async function loadTheme(_slug: string | null = null): Promise<void> {
         try {
             const response = await api.get(`/cms/themes/active?type=frontend`)
             const data = response.data?.data || response.data
@@ -119,7 +118,7 @@ export default function useBuilder(initialData = { blocks: [] as BlockInstance[]
     const activePanel = ref<string | null>(null)
     const sidebarVisible = ref(true)
     const darkMode = ref(false)
-    const globalAction = ref<{ type: string; payload: any } | null>(null)
+
 
     // ============================================
     // RETURN (EXACT SAME INTERFACE)
@@ -186,7 +185,7 @@ export default function useBuilder(initialData = { blocks: [] as BlockInstance[]
             return Array.from(categories);
         }),
         loadingModules: ref(false),
-        registerModule: (def: any) => ModuleRegistry.register(def),
+        registerModule: (def: BlockDefinition) => ModuleRegistry.register(def),
         fetchWidgets: async () => [],
         getComponent: (type: string) => ModuleRegistry.getComponent(type),
 

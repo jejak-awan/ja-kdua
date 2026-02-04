@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, inject } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import { BaseButton, BaseInput, BaseDropdown } from '@/components/builder/ui'

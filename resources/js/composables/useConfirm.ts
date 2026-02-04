@@ -30,9 +30,8 @@ const confirmState = ref<ConfirmState>({
 });
 
 export function useConfirm() {
-    const confirm = (options: ConfirmOptions): Promise<any> => {
+    const confirm = (options: ConfirmOptions): Promise<string | boolean> => {
         return new Promise((resolve) => {
-            const inputValue = ref('');
             confirmState.value = {
                 isOpen: true,
                 title: options.title || 'Confirm',
@@ -42,9 +41,8 @@ export function useConfirm() {
                 confirmText: options.confirmText || 'OK',
                 cancelText: options.cancelText || 'Cancel',
                 input: options.input || false,
-                inputPlaceholder: options.inputPlaceholder || '',
                 onConfirm: (val?: string | boolean) => {
-                    resolve(options.input ? val : true);
+                    resolve(options.input ? (val ?? '') : true);
                     confirmState.value.isOpen = false;
                 },
                 onCancel: () => {

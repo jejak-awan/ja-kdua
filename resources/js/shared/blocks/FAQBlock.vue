@@ -2,163 +2,98 @@
   <BaseBlock 
     :module="module" 
     :mode="mode" 
-    :settings="settings"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Frequently Asked Questions'"
+    :device="device"
+    class="faq-block transition-colors duration-300 group"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'FAQ'"
+    :style="cardStyles"
   >
     <div 
-      class="faq-block mx-auto w-full transition-colors duration-300"
-      :style="containerStyles"
+        class="faq-container relative w-full" 
+        :style="containerStyles"
     >
-      <Accordion 
-        :type="getVal(settings, 'allowMultiple', device) ? 'multiple' : 'single'" 
-        collapsible 
-        class="w-full"
-        :class="[getVal(settings, 'variant', device) === 'boxed' ? 'space-y-4' : '']"
-      >
-        <AccordionItem 
-          v-for="(item, index) in faqItems" 
-          :key="index" 
-          :value="`item-${index}`"
-          :class="getItemClasses(index as number)"
-          :style="getItemStyles(index as number)"
-          class="faq-item transition-colors duration-300"
-        >
-          <AccordionTrigger 
-            class="w-full text-left font-bold text-lg hover:no-underline group"
-            :class="headerPadding"
-          >
-            <template #default>
-               <span 
-                  class="faq-question transition-colors group-hover:text-primary"
-                  :style="questionStyles"
+        <div class="space-y-4">
+                <Accordion type="single" collapsible class="w-full">
+                <AccordionItem 
+                    v-for="(item, index) in faqItems" 
+                    :key="index" 
+                    :value="`item-${index}`"
+                    class="border border-slate-200 dark:border-slate-800 rounded-2xl px-6 mb-4 overflow-hidden bg-white dark:bg-slate-900 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300"
                 >
-                  {{ item.question || 'Question text...' }}
-                </span>
-            </template>
-            <template #icon>
-                <div 
-                  v-if="layoutMode === 'accordion'"
-                  class="faq-icon ml-4 shrink-0 transition-transform duration-200"
-                >
-                  <ChevronDown 
-                      class="w-5 h-5 opacity-60 group-hover:opacity-100" 
-                      :style="{ color: accentColor }"
-                  />
-                </div>
-            </template>
-          </AccordionTrigger>
-          <AccordionContent>
-            <div 
-                class="leading-relaxed max-w-4xl faq-answer"
-                :style="answerStyles"
-                :contenteditable="mode === 'edit'"
-                @blur="e => updateItemField(index as number, 'answer', (e.target as HTMLElement).innerText)"
-                v-text="item.answer || 'Answer text goes here...'"
-            >
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+                    <AccordionTrigger class="py-6 hover:no-underline group/trigger">
+                        <div class="flex items-center gap-4 text-left">
+                            <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs transition-colors group-hover/trigger:bg-primary group-hover/trigger:text-white">
+                                {{ index + 1 }}
+                            </div>
+                            <span class="text-lg font-black tracking-tight leading-tight group-hover/trigger:text-primary transition-colors">
+                                {{ (item as Record<string, any>).question }}
+                            </span>
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent class="pb-6">
+                        <div 
+                            class="prose prose-slate dark:prose-invert max-w-none text-slate-500 dark:text-slate-400 font-medium leading-relaxed pl-12"
+                            v-html="(item as Record<string, any>).answer"
+                        ></div>
+                    </AccordionContent>
+                </AccordionItem>
+                </Accordion>
+        </div>
     </div>
   </BaseBlock>
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../ui'
-import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';import { 
-  getVal,
-  getLayoutStyles,
-  getTypographyStyles,
-  getResponsiveValue
+import { 
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from '../ui'
+import { 
+    getVal, 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   module: BlockInstance
-  mode: 'view' | 'edit'
-}>()
+  mode?: 'view' | 'edit'
+  device?: 'desktop' | 'tablet' | 'mobile'
+}>(), {
+  mode: 'view',
+  device: 'desktop'
+})
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
-const device = computed(() => builder?.device?.value || 'desktop')
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const faqItems = computed(() => settings.value.items || [])
+const faqItems = computed(() => (settings.value.items as unknown[]) || [
+  { question: 'Example Question 1', answer: 'This is the answer for the first question.' },
+  { question: 'Example Question 2', answer: 'This is the answer for the second question.' }
+])
 
-const layoutMode = computed(() => getVal(settings.value, 'layout', device.value) || 'accordion')
-const accentColor = computed(() => getVal(settings.value, 'accentColor', device.value) || 'currentColor')
-
-const getItemClasses = (index: number) => {
-    const variant = getVal(settings.value, 'variant', device.value) || 'boxed'
-    let classes = ''
-    
-    if (variant === 'boxed') {
-        classes = 'rounded-3xl bg-white shadow-xl border border-transparent transition-colors duration-300 data-[state=open]:shadow-2xl data-[state=open]:border-primary/10'
-    } else if (variant === 'minimal') {
-        classes = 'border-b border-gray-100'
-    } else {
-        classes = 'border-b border-gray-200'
-    }
-    
-    return classes
-}
-
-const getItemStyles = (index: number) => {
-    const styles: Record<string, any> = {}
-    const variant = getVal(settings.value, 'variant', device.value) || 'boxed'
-    
-    if (variant === 'boxed') {
-        styles.backgroundColor = getVal(settings.value, 'activeBgColor', device.value) || 'white'
-    }
-    
-    const hoverScale = getVal(settings.value, 'hover_scale', device.value) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', device.value) || 100
+const cardStyles = computed((): CSSProperties => {
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
     
-    const itemBorderColor = getVal(settings.value, 'itemBorderColor', device.value)
-    if (itemBorderColor) styles.borderColor = itemBorderColor
-    
-    return styles
-}
-
-const headerPadding = computed(() => {
-    const variant = getVal(settings.value, 'variant', device.value) || 'boxed'
-    return variant === 'boxed' ? 'px-6 py-4' : 'py-6'
+    return styles as CSSProperties
 })
 
-const containerStyles = computed(() => getLayoutStyles(settings.value, device.value))
-const questionStyles = computed(() => getTypographyStyles(settings.value, 'question_', device.value))
-const answerStyles = computed(() => getTypographyStyles(settings.value, 'answer_', device.value))
-
-const updateItemField = (index: number, key: string, value: string) => {
-    if (props.mode !== 'edit') return
-    const newItems = [...faqItems.value]
-    newItems[index] = { ...newItems[index], [key]: value }
-    builder?.updateModuleSettings(props.module.id, { items: newItems })
-}
+const containerStyles = computed((): CSSProperties => {
+    const layoutStyles = getLayoutStyles(settings.value, props.device)
+    return { 
+        ...layoutStyles,
+        width: '100%'
+    } as CSSProperties
+})
 </script>
 
 <style scoped>
-.faq-block { 
-  width: 100%; 
-}
-
-.faq-item {
-  transform: scale(var(--hover-scale, 1));
-  filter: brightness(var(--hover-brightness, 100%));
-}
-
-.faq-item:hover {
-  transform: scale(var(--hover-scale, 1));
-  filter: brightness(var(--hover-brightness, 100%));
-}
-
-.faq-icon {
-  color: var(--accent-color, currentColor);
-}
+.faq-block { width: 100%; position: relative; }
 </style>
-

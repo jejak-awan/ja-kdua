@@ -75,7 +75,7 @@ import MousePointer from 'lucide-vue-next/dist/esm/icons/mouse-pointer.js';
 
 const builder = inject<BuilderInstance>('builder')!
 
-const props = defineProps<{
+defineProps<{
   label: string;
   responsive?: boolean;
   showResponsive?: boolean;

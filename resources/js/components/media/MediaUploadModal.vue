@@ -104,7 +104,6 @@
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
 import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useToast } from '@/composables/useToast';
 import CloudUpload from 'lucide-vue-next/dist/esm/icons/cloud-upload.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
@@ -121,7 +120,6 @@ import {
     DialogFooter 
 } from '@/components/ui';
 
-const { t } = useI18n();
 const toast = useToast();
 
 const props = defineProps<{
@@ -232,7 +230,7 @@ const handleUpload = async () => {
         cleanupPreviews();
         selectedFiles.value = [];
         uploadProgress.value = 0;
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Upload error:', error);
         toast.error.fromResponse(error);
     } finally {

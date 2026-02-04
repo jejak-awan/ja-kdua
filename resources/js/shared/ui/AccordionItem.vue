@@ -1,7 +1,7 @@
 <template>
   <AccordionItem
     :class="cn('border-b', props.class)"
-    v-bind="delegatedProps"
+    v-bind="forwardedProps"
   >
     <slot />
   </AccordionItem>
@@ -15,7 +15,8 @@ import { cn } from '../../lib/utils';
 const props = defineProps<AccordionItemProps & { class?: HTMLAttributes['class'] }>();
 
 const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props;
+  const delegated = { ...props };
+  delete delegated.class;
   return delegated;
 });
 

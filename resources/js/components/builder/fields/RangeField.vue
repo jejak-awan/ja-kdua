@@ -16,7 +16,7 @@
 import { BaseSliderInput } from '@/components/builder/ui'
 import type { SettingDefinition } from '@/types/builder'
 
-const props = defineProps<{
+defineProps<{
   field: SettingDefinition;
   value?: number | string;
   placeholderValue?: number | string | null;

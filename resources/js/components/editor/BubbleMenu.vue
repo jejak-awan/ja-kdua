@@ -30,11 +30,12 @@ import UnderlineIcon from 'lucide-vue-next/dist/esm/icons/underline.js';
 import Strikethrough from 'lucide-vue-next/dist/esm/icons/strikethrough.js';
 import type { Editor } from '@tiptap/vue-3';
 
-const props = defineProps<{
+defineProps<{
     editor: Editor | undefined;
 }>();
 
-const shouldShow = ({ editor }: { editor: any }) => {
+const shouldShow = (props: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    const { editor } = props;
     // Don't show if image or video is selected (we will have a different bubble for that)
     if (editor.isActive('image') || editor.isActive('video') || editor.isActive('htmlEmbed') || editor.isActive('icon')) {
         return false;

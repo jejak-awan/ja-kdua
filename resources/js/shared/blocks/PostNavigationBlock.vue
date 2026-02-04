@@ -4,32 +4,32 @@
     :mode="mode"
     :device="device"
     class="post-nav-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Post Navigation'"
-    :style="cardStyles"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Post Navigation'"
+    :style="(cardStyles as any)"
   >
-    <div class="post-nav-container w-full" :style="containerStyles">
+    <div class="post-nav-container w-full" :style="(containerStyles as any)">
         <div class="flex flex-col md:flex-row items-stretch justify-between gap-8 w-full">
             <!-- Previous Post -->
             <a 
                 v-if="prevPost || mode === 'edit'" 
                 :href="mode === 'view' ? (prevPost?.url || '#') : '#'" 
                 class="post-nav-item post-nav-item--prev group flex-1 flex items-center gap-8 p-10 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-50 dark:border-slate-800 transition-colors duration-700 hover:-translate-x-2 hover:shadow-primary/10" 
-                :style="itemStyles"
+                :style="(itemStyles as any)"
                 @click="handleLinkClick"
             >
               <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-950 flex items-center justify-center transition-[width] duration-500 group-hover:bg-primary group-hover:text-white group-hover:scale-110 shadow-xl">
-                  <LucideIcon name="ChevronLeft" class="w-7 h-7" :style="iconStyles" />
+                  <LucideIcon name="ChevronLeft" class="w-7 h-7" :style="(iconStyles as any)" />
               </div>
               <div class="post-nav-content flex flex-col gap-2">
                 <span 
                   v-if="settings.showLabels !== false" 
                   class="post-nav-label text-[10px] font-black uppercase tracking-[0.3em] text-primary/60 outline-none" 
-                  :style="labelStyles"
+                  :style="(labelStyles as any)"
                   :contenteditable="mode === 'edit'"
-                  @blur="(e: any) => updateField('prevLabel', (e.target as HTMLElement).innerText)"
+                  @blur="(e: FocusEvent) => updateField('prevLabel', (e.target as HTMLElement).innerText)"
                 >{{ settings.prevLabel || 'Back' }}</span>
-                <span class="post-nav-title text-2xl font-black leading-tight tracking-tighter text-slate-900 dark:text-white" :style="titleStyles">
+                <span class="post-nav-title text-2xl font-black leading-tight tracking-tighter text-slate-900 dark:text-white" :style="(titleStyles as any)">
                     {{ prevPost?.title || (mode === 'edit' ? 'The Art of Digital Influence' : '') }}
                 </span>
               </div>
@@ -41,21 +41,21 @@
                 v-if="nextPost || mode === 'edit'" 
                 :href="mode === 'view' ? (nextPost?.url || '#') : '#'" 
                 class="post-nav-item post-nav-item--next group flex-1 flex flex-row-reverse items-center text-right gap-8 p-10 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-50 dark:border-slate-800 transition-colors duration-700 hover:translate-x-2 hover:shadow-primary/10" 
-                :style="itemStyles"
+                :style="(itemStyles as any)"
                 @click="handleLinkClick"
             >
               <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-950 flex items-center justify-center transition-[width] duration-500 group-hover:bg-primary group-hover:text-white group-hover:scale-110 shadow-xl">
-                  <LucideIcon name="ChevronRight" class="w-7 h-7" :style="iconStyles" />
+                  <LucideIcon name="ChevronRight" class="w-7 h-7" :style="(iconStyles as any)" />
               </div>
               <div class="post-nav-content flex flex-col gap-2">
                 <span 
                   v-if="settings.showLabels !== false" 
                   class="post-nav-label text-[10px] font-black uppercase tracking-[0.3em] text-primary/60 outline-none" 
-                  :style="labelStyles"
+                  :style="(labelStyles as any)"
                   :contenteditable="mode === 'edit'"
-                  @blur="(e: any) => updateField('nextLabel', (e.target as HTMLElement).innerText)"
+                  @blur="(e: FocusEvent) => updateField('nextLabel', (e.target as HTMLElement).innerText)"
                 >{{ settings.nextLabel || 'Up Next' }}</span>
-                <span class="post-nav-title text-2xl font-black leading-tight tracking-tighter text-slate-900 dark:text-white" :style="titleStyles">
+                <span class="post-nav-title text-2xl font-black leading-tight tracking-tighter text-slate-900 dark:text-white" :style="(titleStyles as any)">
                     {{ nextPost?.title || (mode === 'edit' ? 'Mastering Advanced Layouts' : '') }}
                 </span>
               </div>
@@ -75,7 +75,7 @@ import {
   getLayoutStyles,
   getTypographyStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -86,12 +86,12 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const builder = inject<BuilderInstance | null>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 // Mock dynamic data
-const prevPost = inject<any>('prevPost', { title: 'The Art of Digital Influence', url: '#' })
-const nextPost = inject<any>('nextPost', { title: 'Mastering Advanced Layouts', url: '#' })
+const prevPost = inject<{title: string, url: string} | null>('prevPost', { title: 'The Art of Digital Influence', url: '#' })
+const nextPost = inject<{title: string, url: string} | null>('nextPost', { title: 'Mastering Advanced Layouts', url: '#' })
 
 const updateField = (key: string, value: string) => {
     if (props.mode !== 'edit' || !builder) return
@@ -103,9 +103,9 @@ const handleLinkClick = (event: MouseEvent) => {
 }
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -121,7 +121,7 @@ const itemStyles = computed(() => ({
 }))
 
 const iconStyles = computed(() => ({ 
-    color: getVal(settings.value, 'label_color', props.device) || 'currentColor'
+    color: getVal<string>(settings.value, 'label_color', props.device) || 'currentColor'
 }))
 
 const labelStyles = computed(() => getTypographyStyles(settings.value, 'label_', props.device))

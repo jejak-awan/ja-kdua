@@ -58,21 +58,14 @@ import Folder from 'lucide-vue-next/dist/esm/icons/folder.js';
 import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
-import Link from 'lucide-vue-next/dist/esm/icons/link.js';
-import Archive from 'lucide-vue-next/dist/esm/icons/archive.js';
-import Clipboard from 'lucide-vue-next/dist/esm/icons/clipboard.js';
-import ClipboardPaste from 'lucide-vue-next/dist/esm/icons/clipboard-paste.js';
-import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import { 
-    Button,
     ContextMenu,
     ContextMenuTrigger
 } from '@/components/ui';
 import FileContextMenu from './FileContextMenu.vue';
 import { FileManagerKey } from '@/keys';
 import type { FolderItem } from '@/types/file-manager';
-import { useToast } from '@/composables/useToast';
-import api from '@/services/api';
+
 
 const props = defineProps<{
     folder: FolderItem;
@@ -82,45 +75,18 @@ const props = defineProps<{
 const {
     currentPath,
     dropTarget,
-    clipboard,
     navigateToPath,
     toggleFolderExpanded: toggleExpanded,
     isFolderExpanded,
-    copyToClipboard,
-    pasteFromClipboard,
-    deleteItem,
-    moveItem,
-    fetchAllFolders,
-    fetchCurrentPath
+    moveItem
 } = inject(FileManagerKey)!;
 
-const toast = useToast();
+
 
 const hasChildren = computed(() => (props.folder.children?.length ?? 0) > 0);
 const isExpanded = computed(() => isFolderExpanded(props.folder.path));
 const isActive = computed(() => currentPath.value === props.folder.path);
 const isParentOfActive = computed(() => currentPath.value.startsWith(props.folder.path + '/'));
-const clipboardCount = computed(() => clipboard.value.items.length);
-
-const copyPath = async (item: FolderItem) => {
-    try {
-        await navigator.clipboard.writeText(item.path);
-        toast.success.action('Path copied to clipboard');
-    } catch (err) {
-        toast.error.default('Failed to copy path');
-    }
-};
-
-const compressItems = async (paths: string[]) => {
-    try {
-        await api.post('/admin/ja/file-manager/compress', { paths });
-        toast.success.action('Items compressed');
-        await fetchCurrentPath();
-    } catch (error) {
-        toast.error.default('Compression failed');
-    }
-};
-
 const onDragOver = (event: DragEvent, folder: FolderItem) => {
     event.preventDefault();
     dropTarget.value = folder.path;

@@ -4,13 +4,13 @@
     :mode="mode"
     :settings="settings"
     class="code-block-wrapper transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Code Block'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Code Block'"
   >
     <div 
         class="code-container transition-colors duration-300" 
         :class="[themeClass]"
-        :style="containerStyles"
+        :style="(containerStyles as any)"
     >
       <div class="code-header">
         <div v-if="windowChrome" class="code-chrome">
@@ -31,7 +31,7 @@
       
       <pre 
         class="code-pre custom-scrollbar" 
-        :style="codeStyles"
+        :style="(codeStyles as any)"
       ><code
         class="code-content"
         :contenteditable="mode === 'edit'"
@@ -45,40 +45,41 @@
 <script setup lang="ts">
 import { computed, ref, inject } from 'vue'
 import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
-import Check from 'lucide-vue-next/dist/esm/icons/check.js';import BaseBlock from '../components/BaseBlock.vue'
+import Check from 'lucide-vue-next/dist/esm/icons/check.js';
+import BaseBlock from '../components/BaseBlock.vue'
 import { 
   getVal, 
   getLayoutStyles,
   getTypographyStyles 
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = defineProps<{
   module: BlockInstance
   mode: 'view' | 'edit'
 }>()
 
-const builder = inject<any>('builder', null)
+const builder = inject<BuilderInstance | null>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const copied = ref(false)
 
-const language = computed(() => getVal(settings.value, 'language', device.value) || 'html')
-const showCopyButton = computed(() => getVal(settings.value, 'showCopyButton', device.value) !== false)
-const windowChrome = computed(() => getVal(settings.value, 'windowChrome', device.value) === true)
-const themeClass = computed(() => `code--${getVal(settings.value, 'theme', device.value) || 'dark'}`)
-const codeValue = computed(() => getVal(settings.value, 'code', device.value) || '')
+const language = computed(() => getVal<string>(settings.value, 'language', device.value) || 'html')
+const showCopyButton = computed(() => getVal<boolean>(settings.value, 'showCopyButton', device.value) !== false)
+const windowChrome = computed(() => getVal<boolean>(settings.value, 'windowChrome', device.value) === true)
+const themeClass = computed(() => `code--${getVal<string>(settings.value, 'theme', device.value) || 'dark'}`)
+const codeValue = computed(() => getVal<string>(settings.value, 'code', device.value) || '')
 
 const containerStyles = computed(() => {
     return getLayoutStyles(settings.value, device.value)
 })
 
 const codeStyles = computed(() => {
-  const s = getTypographyStyles(settings.value, 'code_', device.value) || {}
-  const maxHeight = getVal(settings.value, 'maxHeight', device.value)
+  const s = (getTypographyStyles(settings.value, 'code_', device.value) || {}) as Record<string, string | number>
+  const maxHeight = getVal<string | number>(settings.value, 'maxHeight', device.value)
   if (maxHeight) {
-    s.maxHeight = maxHeight
+    s.maxHeight = typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight
   }
   return s
 })
@@ -91,9 +92,10 @@ const copyCode = () => {
   })
 }
 
-const onCodeInput = (e: any) => {
+const onCodeInput = (e: Event) => {
   if (props.mode !== 'edit' || !builder) return
-  builder.updateModuleSettings(props.module.id, { code: e.target.innerText })
+  const target = e.target as HTMLElement
+  builder.updateModuleSettings(props.module.id, { code: target.innerText })
 }
 </script>
 

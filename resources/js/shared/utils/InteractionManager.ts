@@ -4,14 +4,14 @@ import { reactive } from 'vue'
 export interface BlockState {
     classes: string[];
     activeAnimation: string | null;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface InteractionTrigger {
     trigger: string;
     action: string;
     targetId: string;
-    params: Record<string, any>;
+    params: Record<string, unknown>;
     timestamp: number;
 }
 
@@ -41,21 +41,21 @@ class InteractionManager {
      * @param targetId - The ID of the block to affect
      * @param params - Additional parameters for the action
      */
-    triggerAction(trigger: string, action: string, targetId: string, params: Record<string, any> = {}): void {
+    triggerAction(trigger: string, action: string, targetId: string, params: Record<string, unknown> = {}): void {
         this.state.lastTrigger = { trigger, action, targetId, params, timestamp: Date.now() };
 
         switch (action) {
             case 'toggle-class':
-                this.toggleClass(targetId, params.className || 'is-active');
+                this.toggleClass(targetId, (params.className as string) || 'is-active');
                 break;
             case 'add-class':
-                this.addClass(targetId, params.className || 'is-active');
+                this.addClass(targetId, (params.className as string) || 'is-active');
                 break;
             case 'remove-class':
-                this.removeClass(targetId, params.className || 'is-active');
+                this.removeClass(targetId, (params.className as string) || 'is-active');
                 break;
             case 'play-animation':
-                this.playAnimation(targetId, params.animationName);
+                this.playAnimation(targetId, params.animationName as string);
                 break;
             default:
                 logger.warning(`[InteractionManager] Unknown action: ${action}`);

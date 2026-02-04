@@ -21,11 +21,11 @@
     <template v-else>
       <div class="pages-list">
         <div 
-          v-for="page in filteredPages" 
-          :key="page.id" 
+          v-for="(page, index) in filteredPages" 
+          :key="page.id || `page-${index}`" 
           class="page-item" 
           :class="{ 'page-item--active': currentPageId === page.id }"
-          @click="selectPage(page.id)"
+          @click="selectPage(page.id as string | number)"
         >
           <div class="page-info">
             <span class="page-title">{{ page.title }}</span>
@@ -34,7 +34,7 @@
           </div>
           <div v-if="builder?.mode.value === 'site'" class="page-actions">
             <!-- Normal edit button (switching page in builder) -->
-            <button class="action-btn" :title="t('builder.panels.pages.actions.edit')" @click.stop="selectPage(page.id)">
+            <button class="action-btn" :title="t('builder.panels.pages.actions.edit')" @click.stop="selectPage(page.id as string | number)">
               <Edit2 :size="14" />
             </button>
             <button class="action-btn" :title="t('builder.panels.pages.actions.delete')" @click.stop="handleDelete(page)">
@@ -68,19 +68,12 @@ import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import { BaseInput } from '@/components/builder/ui';
-import type { BuilderInstance } from '@/types/builder';
-
-interface Page {
-  id: number | string;
-  title: string;
-  slug: string;
-  status?: string;
-}
+import type { BuilderInstance, PageMetadata } from '@/types/builder';
 
 const { t } = useI18n();
 const builder = inject<BuilderInstance>('builder');
 // Fix types for reactive values coming from builder
-const pages = computed(() => (builder?.pages?.value || []) as Page[]);
+const pages = computed(() => (builder?.pages?.value || []) as PageMetadata[]);
 const currentPageId = computed(() => builder?.currentPageId?.value);
 const loading = computed(() => builder?.pagesLoading?.value || false);
 
@@ -99,27 +92,17 @@ const selectPage = (id: number | string) => {
   if (builder?.switchCanvas) {
       builder.switchCanvas(String(id)); // Assuming switchCanvas handles page switching logic if mapped
   }
-  // Or referencing builder method from previous code:
-  // builder?.setCurrentPage(id) -- this method was not in BuilderInstance interface I saw.
-  // Previous code used builder.setCurrentPage(id). I should check if it exists in my interface update.
-  // I didn't see setCurrentPage in BuilderInstance. 
-  // Let me double check usage. 
-  // Wait, builder.ts has `currentPageId` ref.
-  // The logic in previous PagesPanel.vue: `builder?.setCurrentPage(id)`.
-  // If it's missing from interface, I should cast to any or add it.
-  // For now I will cast builder to any for this specific call if not present.
-  (builder as any)?.setCurrentPage(id);
+  builder?.setCurrentPage(id);
 };
 
 const handleCreate = () => {
   const title = prompt(t('builder.panels.pages.promptTitle'));
   if (title) {
-    // builder?.addPage(title)
-     (builder as any)?.addPage(title);
+     builder?.addPage(title);
   }
 };
 
-const handleDelete = async (page: Page) => {
+const handleDelete = async (page: PageMetadata) => {
     const confirmed = await builder?.confirm?.({
         title: t('builder.modals.confirm.deletePage'),
         message: t('builder.modals.confirm.deletePageDesc'),
@@ -129,8 +112,7 @@ const handleDelete = async (page: Page) => {
     });
     if (confirmed) {
         try {
-            // await builder?.deletePage(page.id)
-            await (builder as any)?.deletePage(page.id);
+            await builder?.deletePage(page.id as string | number);
         } catch (error) {
             logger.error('Delete failed:', error);
         }
@@ -138,8 +120,7 @@ const handleDelete = async (page: Page) => {
 };
 
 onMounted(() => {
-    // builder?.fetchPages()
-    (builder as any)?.fetchPages();
+    builder?.fetchPages();
 });
 </script>
 

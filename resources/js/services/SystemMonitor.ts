@@ -66,7 +66,7 @@ export const SystemMonitor = {
                     window.location.reload();
                     return;
                 }
-            } catch (e) {
+            } catch {
                 // Still down
             }
 

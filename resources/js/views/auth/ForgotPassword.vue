@@ -1,8 +1,7 @@
 <template>
     <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-background via-muted/20 to-background px-4 py-2 sm:px-6 lg:px-8">
         <div class="w-full max-w-5xl flex flex-col md:flex-row bg-card rounded-3xl shadow-2xl shadow-primary/5 overflow-hidden border border-border/40 min-h-0 animate-fade-up">
-            
-            <!-- Left Column: Decorative Graphic -->
+<!-- Left Column: Decorative Graphic -->
             <div class="hidden md:flex md:w-1/2 relative overflow-hidden items-center justify-center p-6">
                 <!-- Premium Background Image -->
                 <div class="absolute inset-0 z-0">
@@ -89,8 +88,7 @@
                     </div>
                 </form>
             </div>
-
-        </div>
+</div>
     </div>
 </template>
 
@@ -108,11 +106,6 @@ import authBg from '../../../images/auth-bg.png';
 
 // Shadcn Components
 import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardContent,
     Button,
     Input,
     Label

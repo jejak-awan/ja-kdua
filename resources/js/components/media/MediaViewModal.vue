@@ -392,7 +392,7 @@ const generateThumbnail = async () => {
         // We need a proper success toast for thumbnail
         toast.success.action(t('features.media.modals.view.thumbnailGenerated') || 'Thumbnail generated successfully');
         emit('updated');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to generate thumbnail:', error);
         toast.error.fromResponse(error);
     } finally {

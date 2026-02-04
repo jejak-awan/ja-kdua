@@ -63,7 +63,7 @@
                         <Label>
                             {{ $t('features.categories.form.parent') }}
                         </Label>
-                        <Select :model-value="form.parent_id || 'null_value'" @update:model-value="(val) => form.parent_id = val === 'null_value' ? null : val">
+                        <Select :model-value="String(form.parent_id ?? 'null_value')" @update:model-value="(val) => form.parent_id = val === 'null_value' ? null : val">
                             <SelectTrigger>
                                 <SelectValue :placeholder="$t('features.categories.form.noParent')" />
                             </SelectTrigger>
@@ -152,12 +152,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { ref, computed, watch } from 'vue';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { categorySchema } from '@/schemas';
+import type { z } from 'zod';
 import MediaPicker from '@/components/media/MediaPicker.vue';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
@@ -188,7 +188,7 @@ interface CategoryForm {
     slug: string;
     description: string;
     image: string | null;
-    parent_id: string | null;
+    parent_id: string | number | null;
     is_active: boolean;
     sort_order: number;
 }
@@ -210,15 +210,14 @@ const emit = defineEmits<{
     'success': [];
 }>();
 
-const { t } = useI18n();
 const toast = useToast();
-const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(categorySchema);
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation<z.infer<typeof categorySchema>>(categorySchema);
 
 const saving = ref(false);
 const isEdit = computed(() => !!props.category);
 const isMediaPickerOpen = ref(false);
 
-const form = ref<any>({
+const form = ref<CategoryForm>({
     name: '',
     slug: '',
     description: '',
@@ -262,16 +261,16 @@ const isValid = computed(() => {
 });
 
 // Prevent closing modal when clicking inside MediaPicker (which is effectively outside the dialog content)
-const handlePointerDownOutside = (e: any) => {
+const handlePointerDownOutside = (e: Event) => {
     if (isMediaPickerOpen.value) {
         e.preventDefault();
     }
 };
 
 // Flatten categories for parent selection
-const flattenTree = (nodes: Category[], depth = 0): any[] => {
+const flattenTree = (nodes: Category[], depth = 0): FlattenedCategory[] => {
     if (!nodes) return [];
-    let result: any[] = [];
+    let result: FlattenedCategory[] = [];
     nodes.forEach(node => {
         // Prevent selecting self or children as parent (circular)
         if (isEdit.value && (node.id === props.category?.id)) return;
@@ -317,17 +316,18 @@ const slugify = (text: string) => {
 };
 
 const handleSubmit = async () => {
-    if (!validateWithZod(form.value as any)) return;
+    const payload = { 
+        ...form.value,
+        parent_id: (form.value.parent_id === 'null_value' || !form.value.parent_id) 
+            ? null 
+            : parseInt(String(form.value.parent_id), 10)
+    };
+
+    if (!validateWithZod(payload)) return;
 
     saving.value = true;
     clearErrors();
     try {
-        const payload = { ...form.value };
-        // Handle select returning string 'null_value'
-        if (payload.parent_id === 'null_value' || !payload.parent_id) {
-            payload.parent_id = null;
-        }
-
         if (isEdit.value) {
             await api.put(`/admin/ja/categories/${props.category?.id}`, payload);
             toast.success.update('Category');
@@ -338,9 +338,10 @@ const handleSubmit = async () => {
         
         emit('success');
         emit('update:open', false);
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
+    } catch (error: unknown) {
+        const err = error as { response?: { status?: number, data?: { errors?: Record<string, string[]> } } };
+        if (err.response?.status === 422) {
+            setErrors(err.response.data?.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

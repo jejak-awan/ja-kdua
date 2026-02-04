@@ -6,11 +6,11 @@ export interface TemplateData {
     name: string;
     body_template?: string;
     type?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export default {
-    getTemplates(params: Record<string, any>): Promise<AxiosResponse> {
+    getTemplates(params?: Record<string, unknown>): Promise<AxiosResponse> {
         return api.get('/admin/ja/content-templates', { params });
     },
     saveTemplate(data: TemplateData): Promise<AxiosResponse> {

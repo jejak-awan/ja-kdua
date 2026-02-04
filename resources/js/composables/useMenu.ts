@@ -221,7 +221,7 @@ export function useMenu(menuId?: Ref<number | string | null>) {
             .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
             .map(item => ({
                 ...item,
-                children: buildTree(flatItems, (item.id as any))
+                children: buildTree(flatItems, item.id as number | string | null)
             }));
     };
 
@@ -232,13 +232,13 @@ export function useMenu(menuId?: Ref<number | string | null>) {
         let result: MenuItemDTO[] = [];
         treeItems.forEach((item, index) => {
             result.push({
-                id: item.id as any,
-                parent_id: parentId as any,
+                id: item.id as number | null,
+                parent_id: parentId as number | null,
                 sort_order: index,
-                title: (item.title as any) || '',
-                type: (item.type as any) || 'custom',
-                target_id: item.target_id as any,
-                url: item.url as any,
+                title: (item.title as string) || '',
+                type: (item.type as 'custom' | 'page' | 'post' | 'category' | 'tag' | 'external') || 'custom',
+                target_id: item.target_id as number | null,
+                url: item.url as string | undefined,
                 icon: item.icon || null,
                 css_class: item.css_class || null,
                 description: item.description || null,
@@ -257,7 +257,7 @@ export function useMenu(menuId?: Ref<number | string | null>) {
                 is_active: item.is_active ? 1 : 0,
             });
             if (item.children && item.children.length > 0) {
-                result = result.concat(flattenTree(item.children, item.id as any));
+                result = result.concat(flattenTree(item.children, item.id as number | null));
             }
         });
         return result;
@@ -514,7 +514,7 @@ export function useMenu(menuId?: Ref<number | string | null>) {
                     title: item.title || '',
                     type: item.type || 'custom',
                     target_id: item.target_id,
-                    url: item.url,
+                    url: item.url || undefined,
                     icon: item.icon || null,
                     css_class: item.css_class || null,
                     description: item.description || null,
@@ -560,11 +560,11 @@ export function useMenu(menuId?: Ref<number | string | null>) {
     // ==================== WATCHERS ====================
 
     // Debounced snapshot on items change
-    let snapshotTimeout: any;
+    const snapshotTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
     watch(items, () => {
         if (isUndoing.value) return;
-        clearTimeout(snapshotTimeout);
-        snapshotTimeout = setTimeout(() => {
+        if (snapshotTimeout.value) clearTimeout(snapshotTimeout.value);
+        snapshotTimeout.value = setTimeout(() => {
             takeSnapshot();
         }, 500);
     }, { deep: true });

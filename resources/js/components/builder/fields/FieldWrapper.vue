@@ -39,14 +39,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject } from 'vue'
-import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
+import { ref } from 'vue'
+
 import FieldActions from './FieldActions.vue'
-import type { BuilderInstance } from '@/types/builder'
 
-const builder = inject<BuilderInstance>('builder')!
 
-const props = defineProps<{
+
+defineProps<{
   label: string;
   description?: string;
   responsive?: boolean;
@@ -63,9 +62,7 @@ defineEmits(['reset', 'responsive', 'reset-field', 'assign-preset', 'select-dyna
 
 const showInfo = ref(false)
 
-const toggleInfo = () => {
-    showInfo.value = !showInfo.value
-}
+
 </script>
 
 <style scoped>

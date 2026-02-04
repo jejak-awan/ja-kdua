@@ -261,7 +261,7 @@ interface ActivityLog {
     description: string;
     user?: User | null;
     model_type: string | null;
-    properties?: any;
+    properties?: Record<string, unknown>;
     created_at: string;
 }
 
@@ -313,7 +313,7 @@ const fetchLogs = async (page: number = 1) => {
     loading.value = true;
     try {
         // Build query params for server-side filtering
-        const params: Record<string, any> = {
+        const params: Record<string, string | number> = {
             page,
             per_page: perPage.value
         };
@@ -334,7 +334,7 @@ const fetchLogs = async (page: number = 1) => {
         try {
             const statsResponse = await api.get('/admin/ja/activity-journal/statistics');
             statistics.value = statsResponse.data?.data || statsResponse.data;
-        } catch (error: any) {
+        } catch {
             // Fallback stats if endpoint fails
             statistics.value = {
                 total: pagination.value?.total || logs.value.length,
@@ -343,8 +343,8 @@ const fetchLogs = async (page: number = 1) => {
                 active_users: 0
             };
         }
-    } catch (error: any) {
-        logger.error('Failed to fetch activity logs:', error.message);
+    } catch (error: unknown) {
+        logger.error('Failed to fetch activity logs:', (error as Error).message);
         toast.error.fromResponse(error);
     } finally {
         loading.value = false;
@@ -371,8 +371,8 @@ const clearLogs = async () => {
         await api.post('/admin/ja/activity-journal/clear');
         toast.success.action(t('features.system.logs.messages.cleared'));
         fetchLogs();
-    } catch (error: any) {
-        logger.error('Failed to clear logs:', error.message);
+    } catch (error: unknown) {
+        logger.error('Failed to clear logs:', (error as Error).message);
         toast.error.fromResponse(error);
     }
 };
@@ -400,8 +400,8 @@ const exportLogs = async () => {
         link.remove();
         window.URL.revokeObjectURL(url);
         toast.success.action(t('features.analytics.export.success') || 'Export started');
-    } catch (error: any) {
-        logger.error('Failed to export activity logs:', error.message);
+    } catch (error: unknown) {
+        logger.error('Failed to export activity logs:', (error as Error).message);
         toast.error.fromResponse(error);
     } finally {
         exporting.value = false;
@@ -413,7 +413,7 @@ const fetchUsers = async () => {
         const response = await api.get('/admin/ja/users');
         const data = response.data?.data?.data || response.data?.data || response.data || [];
         users.value = Array.isArray(data) ? data : [];
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch users:', error);
         users.value = [];
     }

@@ -39,7 +39,7 @@ const viewportStyle = computed(() => {
 
   const width = widths[props.device]
   
-  const styles: Record<string, any> = {
+  const styles: Record<string, string | number> = {
     transform: `scale(${props.zoom / 100}) translateZ(0)`, // translateZ forces containing block
     transformOrigin: 'top center',
     willChange: 'transform, width'

@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -126,7 +126,7 @@ const LoginModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -135,7 +135,7 @@ const LoginModule: ModuleDefinition = {
             {
                 id: 'subtitleTypography',
                 label: 'Subtitle Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `subtitle_${f.name}`,
                     label: `Subtitle ${f.label}`
@@ -144,7 +144,7 @@ const LoginModule: ModuleDefinition = {
             {
                 id: 'labelTypography',
                 label: 'Label Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `label_${f.name}`,
                     label: `Label ${f.label}`
@@ -153,7 +153,7 @@ const LoginModule: ModuleDefinition = {
             {
                 id: 'inputTypography',
                 label: 'Input Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `input_${f.name}`,
                     label: `Input ${f.label}`
@@ -162,7 +162,7 @@ const LoginModule: ModuleDefinition = {
             {
                 id: 'buttonTypography',
                 label: 'Button Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `button_${f.name}`,
                     label: `Button ${f.label}`

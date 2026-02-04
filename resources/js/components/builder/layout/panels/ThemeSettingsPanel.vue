@@ -22,23 +22,23 @@
               <div v-if="setting.type === 'color'" class="color-field-container">
                 <ColorField 
                   :field="{ name: setting.key, type: 'color', label: setting.label || setting.key }"
-                  :value="formValues[setting.key]"
+                  :value="String(formValues[setting.key] || '')"
                   @update:value="formValues[setting.key] = $event; handleInput()"
-                  :placeholder-value="setting.default"
+                  :placeholder-value="setting.default as string"
                 />
               </div>
 
               <div v-else-if="setting.type === 'media' || setting.type === 'upload'" class="media-field-container">
                 <UploadField 
                   :field="{ name: setting.key, type: 'upload', label: setting.label || setting.key }"
-                  :value="formValues[setting.key]"
+                  :value="String(formValues[setting.key] || '')"
                   @update:value="formValues[setting.key] = $event; handleInput()"
-                  :placeholder-value="setting.default"
+                  :placeholder-value="setting.default as string"
                 />
               </div>
 
               <select v-else-if="setting.type === 'select'" v-model="formValues[setting.key]" class="select-input" @change="handleInput">
-                <option v-for="opt in setting.options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                <option v-for="opt in setting.options" :key="String(opt.value)" :value="opt.value">{{ opt.label }}</option>
               </select>
 
               <div v-else-if="setting.type === 'checkbox'" class="checkbox-setting">
@@ -48,7 +48,7 @@
 
               <div v-else-if="setting.type === 'range'" class="range-setting">
                 <input type="range" v-model.number="formValues[setting.key]" :min="setting.min" :max="setting.max" :step="setting.step" @input="handleInput" />
-                <span class="range-value">{{ formValues[setting.key] }}{{ setting.unit || 'px' }}</span>
+                <span class="range-value">{{ formValues[setting.key] }}{{ (setting as any).unit || 'px' }}</span>
               </div>
 
               <textarea v-else-if="setting.type === 'textarea'" v-model="formValues[setting.key]" class="textarea-input" rows="3" @input="handleInput"></textarea>
@@ -82,7 +82,12 @@ import { logger } from '@/utils/logger';
 import { ref, computed, inject, watch, onMounted, defineAsyncComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Palette from 'lucide-vue-next/dist/esm/icons/palette.js';
-import type { BuilderInstance } from '@/types/builder';
+import type { BuilderInstance, ThemeData } from '@/types/builder';
+import type { ThemeSetting } from '@/types/theme';
+
+interface SettingItem extends ThemeSetting {
+  key: string;
+}
 
 const ColorField = defineAsyncComponent(() => import('@/components/builder/fields/ColorField.vue'));
 const UploadField = defineAsyncComponent(() => import('@/components/builder/fields/UploadField.vue'));
@@ -93,20 +98,21 @@ const builder = inject<BuilderInstance>('builder');
 const loading = ref(false);
 const saving = ref(false);
 const isDirty = ref(false);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const formValues = ref<Record<string, any>>({});
 
 const selectedThemeSlug = computed(() => builder?.selectedThemeSlug?.value);
 const themes = computed(() => builder?.availableThemes?.value || []);
 
 const currentTheme = computed(() => {
-  return themes.value.find((t: any) => t.slug === selectedThemeSlug.value);
+  return themes.value.find((t: ThemeData) => t.slug === selectedThemeSlug.value);
 });
 
 const settingsSections = computed(() => {
   if (!currentTheme.value?.manifest?.settings_schema) return [];
   
   const schema = currentTheme.value.manifest.settings_schema;
-  const sections: Record<string, any> = {};
+  const sections: Record<string, { id: string; label: string; settings: SettingItem[] }> = {};
 
   Object.keys(schema).forEach(key => {
     const setting = schema[key];
@@ -124,7 +130,7 @@ const loadThemeSettings = () => {
     if (!currentTheme.value) return;
     const theme = currentTheme.value;
     const schema = theme.manifest?.settings_schema || {};
-    const defaults: any = {};
+    const defaults: Record<string, unknown> = {};
     
     Object.keys(schema).forEach(key => {
         defaults[key] = schema[key].default ?? '';

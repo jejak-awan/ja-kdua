@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { BlockInstance, SettingDefinition } from '@/types/builder'
+import type { BlockInstance, SettingDefinition, ModuleField } from '@/types/builder'
 import { useI18n } from 'vue-i18n'
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
@@ -67,7 +67,7 @@ import FieldRenderer from '@/components/builder/fields/FieldRenderer.vue'
 
 const props = defineProps<{
   field: SettingDefinition;
-  value: any[];
+  value: Record<string, unknown>[];
   module: BlockInstance;
 }>()
 
@@ -82,35 +82,46 @@ const toggleItem = (index: number) => {
 
 // Map 'key' from definition to 'name' for FieldRenderer
 const mappedFields = computed(() => {
-    if (!props.field.fields) return []
-    return props.field.fields.map((f: any) => ({
-        ...f,
-        name: f.name || f.key, // Support both but prefer name
-        nativeKey: f.name || f.key, 
-        responsive: false // Disable responsive for sub-fields by default for now
-    }))
+    return (props.field.fields || []).map((f) => {
+        const key = getFieldKey(f)
+        return {
+            ...f,
+            name: key || '',
+            nativeKey: key || '', 
+            responsive: false 
+        } as SettingDefinition & { nativeKey: string }
+    })
 })
 
-const getItemLabel = (item: any, index: number) => {
-    if (item.label) return item.label
-    if (item.title) return item.title
-    if (item.text) return item.text
-    if (item.question) return item.question // For Accordion
+const getItemLabel = (item: Record<string, unknown>, index: number) => {
+    if (item.label) return String(item.label)
+    if (item.title) return String(item.title)
+    if (item.text) return String(item.text)
+    if (item.question) return String(item.question) // For Accordion
     
     return `${props.field.itemLabel || 'Item'} ${index + 1}`
 }
 
 const addItem = () => {
-    const newItem: Record<string, any> = {}
+    const newItem: Record<string, unknown> = {}
     if (props.field.fields) {
-        props.field.fields.forEach((f: any) => {
-            newItem[f.name || f.key] = f.default !== undefined ? f.default : ''
+        props.field.fields.forEach((f) => {
+            const key: string = getFieldKey(f)
+            const defaultValue = (f as SettingDefinition).default
+            newItem[key] = defaultValue !== undefined ? defaultValue : ''
         })
     }
     
     const newList = [...(props.value || []), newItem]
     emit('update:value', newList)
     openIndex.value = newList.length - 1
+}
+
+const getFieldKey = (f: ModuleField): string => {
+    if ('key' in f && f.key) return String(f.key)
+    if ('name' in f && f.name) return String(f.name)
+    if ('id' in f && f.id) return String(f.id)
+    return ''
 }
 
 const deleteItem = (index: number) => {
@@ -120,7 +131,7 @@ const deleteItem = (index: number) => {
     if (openIndex.value === index) openIndex.value = null
 }
 
-const updateItemField = (index: number, key: string, val: any) => {
+const updateItemField = (index: number, key: string, val: unknown) => {
     const newList = [...props.value]
     newList[index] = { ...newList[index], [key]: val }
     emit('update:value', newList)

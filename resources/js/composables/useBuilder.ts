@@ -24,8 +24,8 @@ export function useBuilder() {
     });
 
     const getGlobalSetting = (key: string) => globalSettings.value[key];
-    const setGlobalSetting = (key: string, value: any) => {
-        globalSettings.value[key] = value;
+    const setGlobalSetting = (key: string, value: unknown) => {
+        (globalSettings.value as Record<string, unknown>)[key] = value;
         takeSnapshot();
     };
 
@@ -270,14 +270,14 @@ export function useBuilder() {
             if (block.id === id) return block;
             // Search in Columns (column.blocks)
             if (block.settings && Array.isArray(block.settings.columns)) {
-                for (const column of (block.settings.columns as any[])) {
-                    const found = findBlockById(id, column.blocks || []);
+                for (const column of (block.settings.columns as Array<Record<string, unknown>>)) {
+                    const found = findBlockById(id, column.blocks as BlockInstance[] || []);
                     if (found) return found;
                 }
             }
             // Search in Section nested blocks (settings.blocks)
             if (block.settings && Array.isArray(block.settings.blocks)) {
-                const found = findBlockById(id, block.settings.blocks);
+                const found = findBlockById(id, block.settings.blocks as BlockInstance[]);
                 if (found) return found;
             }
         }
@@ -295,8 +295,9 @@ export function useBuilder() {
 
     const getBlockPath = (id: string) => {
         if (!id) return [];
-        const path: any[] = [];
-        const find = (items: BlockInstance[], targetId: string, currentPath: any[] = []): boolean => {
+        interface PathEntry { id: string; type: string; label?: string; }
+        const path: PathEntry[] = [];
+        const find = (items: BlockInstance[], targetId: string, currentPath: PathEntry[] = []): boolean => {
             if (!Array.isArray(items)) return false;
             for (const block of items) {
                 const newPath = [...currentPath, {
@@ -310,13 +311,13 @@ export function useBuilder() {
                 }
                 // Handle Columns
                 if (block.settings && Array.isArray(block.settings.columns)) {
-                    for (const column of (block.settings.columns as any[])) {
-                        if (column && Array.isArray(column.blocks) && find(column.blocks, targetId, newPath)) return true;
+                    for (const column of (block.settings.columns as Array<Record<string, unknown>>)) {
+                        if (column && Array.isArray(column.blocks) && find(column.blocks as BlockInstance[], targetId, newPath)) return true;
                     }
                 }
                 // Handle Section nested blocks
                 if (block.settings && Array.isArray(block.settings.blocks)) {
-                    if (find(block.settings.blocks, targetId, newPath)) return true;
+                    if (find(block.settings.blocks as BlockInstance[], targetId, newPath)) return true;
                 }
             }
             return false;
@@ -325,7 +326,7 @@ export function useBuilder() {
         return path;
     };
 
-    const handleMediaSelect = (media: any) => {
+    const handleMediaSelect = (media: { url?: string } | null) => {
         if (!activeMediaField.value || !activeBlockId.value || !media?.url) return;
 
         const block = findBlockById(activeBlockId.value);
@@ -334,9 +335,10 @@ export function useBuilder() {
         const path = activeMediaField.value; // e.g., "bgImage" or "slides[0].image"
 
         // Helper to set nested value by path
-        const setByPath = (obj: any, path: string, value: any) => {
+        const setByPath = (obj: Record<string, unknown>, path: string, value: unknown) => {
             const parts = path.split(/[.\[\]]+/).filter(Boolean);
-            let current = obj;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            let current = obj as any;
             for (let i = 0; i < parts.length - 1; i++) {
                 const part = parts[i];
                 if (!(part in current)) {

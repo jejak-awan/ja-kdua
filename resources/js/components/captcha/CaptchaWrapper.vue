@@ -23,12 +23,17 @@ interface Props {
     action?: 'login' | 'register' | 'comment' | 'contact'
 }
 
+export interface CaptchaPayload {
+    token: string;
+    answer: string;
+}
+
 const props = withDefaults(defineProps<Props>(), {
     action: 'login',
 })
 
 const emit = defineEmits<{
-    (e: 'verified', payload: any): void
+    (e: 'verified', payload: CaptchaPayload): void
 }>()
 
 const loading = ref(true)
@@ -67,7 +72,7 @@ const fetchSettings = async () => {
     }
 }
 
-const onVerified = (payload: any) => {
+const onVerified = (payload: CaptchaPayload) => {
     emit('verified', payload)
 }
 

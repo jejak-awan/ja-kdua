@@ -168,17 +168,34 @@ import BarChart3 from 'lucide-vue-next/dist/esm/icons/chart-bar-stacked.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import { parseResponse, ensureArray, parseSingleResponse } from '@/utils/responseParser';
 
+interface Redirect {
+    id: number | string;
+    from_url: string;
+    to_url: string;
+    status_code: number;
+    hits: number;
+    is_active: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
+
+interface RedirectStatistics {
+    total: number;
+    active: number;
+    total_hits: number;
+}
+
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 
-const redirects = ref<any[]>([]);
-const statistics = ref<any>(null);
+const redirects = ref<Redirect[]>([]);
+const statistics = ref<RedirectStatistics | null>(null);
 const loading = ref(false);
 const search = ref('');
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
-const editingRedirect = ref<any>(null);
+const editingRedirect = ref<Redirect | null>(null);
 
 const filteredRedirects = computed(() => {
     if (!search.value) return redirects.value;
@@ -195,33 +212,34 @@ const fetchRedirects = async () => {
     try {
         const response = await api.get('/admin/ja/redirects');
         const { data } = parseResponse(response);
-        redirects.value = ensureArray(data);
+        redirects.value = ensureArray(data) as Redirect[];
         
         // Fetch statistics
         try {
             const statsResponse = await api.get('/admin/ja/redirects/statistics');
-            statistics.value = parseSingleResponse(statsResponse);
-        } catch (error: any) {
+            statistics.value = parseSingleResponse(statsResponse) as RedirectStatistics;
+        } catch (error: unknown) {
             // Calculate from redirects if endpoint doesn't exist
             statistics.value = {
                 total: redirects.value.length,
                 active: redirects.value.filter(r => r.is_active).length,
                 total_hits: redirects.value.reduce((sum, r) => sum + (r.hits || 0), 0),
             };
+            logger.error('Failed to fetch statistics:', error);
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch redirects:', error);
     } finally {
         loading.value = false;
     }
 };
 
-const editRedirect = (redirect: any) => {
+const editRedirect = (redirect: Redirect) => {
     editingRedirect.value = redirect;
     showEditModal.value = true;
 };
 
-const deleteRedirect = async (redirect: any) => {
+const deleteRedirect = async (redirect: Redirect) => {
     const confirmed = await confirm({
         title: t('features.redirects.actions.delete'),
         message: t('features.redirects.messages.deleteConfirm', { from: redirect.from_url }),
@@ -235,7 +253,7 @@ const deleteRedirect = async (redirect: any) => {
         await api.delete(`/admin/ja/redirects/${redirect.id}`);
         toast.success.delete(t('features.redirects.title'));
         fetchRedirects();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to delete redirect:', error);
         toast.error.delete(error, t('features.redirects.title'));
     }

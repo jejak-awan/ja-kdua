@@ -4,13 +4,13 @@
     :mode="mode"
     :device="device"
     class="post-meta-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Post Metadata'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Post Metadata'"
     :style="cardStyles"
   >
     <div 
         class="meta-inner flex flex-wrap items-center transition-[width] duration-500" 
-        :class="alignmentClass"
+        :class="(alignmentClass as string)"
         :style="containerStyles"
     >
         <template v-for="(item, index) in activeMetaItems" :key="item.key">
@@ -19,7 +19,7 @@
                 <span v-if="item.key === 'author'" class="text-slate-400 dark:text-slate-500 font-bold text-[10px] uppercase">By </span>
                 <a 
                     v-if="item.link" 
-                    :href="mode === 'view' ? item.link : '#'" 
+                    :href="mode === 'view' ? (item.link as string) : '#'" 
                     :style="linkStyles"
                     class="hover:text-primary transition-colors duration-300"
                     @click.prevent="mode === 'edit' ? null : null"
@@ -39,12 +39,13 @@ import Calendar from 'lucide-vue-next/dist/esm/icons/calendar.js';
 import User from 'lucide-vue-next/dist/esm/icons/user.js';
 import Tag from 'lucide-vue-next/dist/esm/icons/tag.js';
 import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
-import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';import { 
+import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
+import { 
   getVal,
   getLayoutStyles,
   getTypographyStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -55,8 +56,7 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 // Dynamic data injection
 const postAuthor = inject<string>('postAuthor', 'John Doe')
@@ -67,22 +67,22 @@ const postCategoryUrl = inject<string>('postCategoryUrl', '#')
 const postReadTime = inject<string>('postReadTime', '5 min read')
 const postCommentsCount = inject<number>('postCommentsCount', 12)
 
-const separator = computed(() => getVal(settings.value, 'separator', props.device) || '•')
+const separator = computed(() => getVal<string>(settings.value, 'separator', props.device) || '•')
 
 const metaItems = computed(() => [
     { key: 'author', value: postAuthor, link: postAuthorUrl, icon: User, show: settings.value.showAuthor !== false },
     { key: 'date', value: postDate, icon: Calendar, show: settings.value.showDate !== false },
     { key: 'category', value: postCategory, link: postCategoryUrl, icon: Tag, show: settings.value.showCategories !== false || settings.value.showCategory !== false },
-    { key: 'readTime', value: postReadTime, icon: Clock, show: settings.value.showReadTime || settings.value.show_reading_time },
-    { key: 'comments', value: `${postCommentsCount} Comments`, icon: MessageSquare, show: settings.value.showComments }
+    { key: 'readTime', value: postReadTime, icon: Clock, show: (settings.value.showReadTime as boolean) || (settings.value.show_reading_time as boolean) },
+    { key: 'comments', value: `${postCommentsCount} Comments`, icon: MessageSquare, show: settings.value.showComments as boolean }
 ])
 
 const activeMetaItems = computed(() => metaItems.value.filter(item => item.show))
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -95,7 +95,7 @@ const containerStyles = computed(() => {
 })
 
 const alignmentClass = computed(() => {
-    const align = getVal(settings.value, 'alignment', props.device) || 'left'
+    const align = getVal<string>(settings.value, 'alignment', props.device) || 'left'
     if (align === 'center') return 'justify-center'
     if (align === 'right' || align === 'end') return 'justify-end'
     return 'justify-start'

@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -11,7 +11,6 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    orderSettings,
     adminLabelSettings,
     cssSettings,
     typographySettings,
@@ -82,7 +81,7 @@ const PricingFeatureModule: ModuleDefinition = {
             {
                 id: 'typography',
                 label: 'Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `text_${f.name}`,
                     label: `Text ${f.label}`

@@ -5,8 +5,8 @@
     :device="device"
     tag="header"
     class="fullwidth-post-title-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Fullwidth Post Title'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Fullwidth Post Title'"
     :style="cardStyles"
   >
     <div class="relative w-full h-full overflow-hidden flex items-center justify-center" :style="containerStyles">
@@ -42,15 +42,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, inject, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { 
     getVal,
     getTypographyStyles,
-    getLayoutStyles,
-    getResponsiveValue 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -61,16 +60,16 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const builder = inject<BuilderInstance | null>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 // Post data would normally come from context/prop
-const postTitle = inject('postTitle', 'Amazing Post Title Goes Here')
-const postCategory = inject('postCategory', 'Technology')
-const postDate = inject('postDate', 'January 10, 2026')
-const postAuthor = inject('postAuthor', 'John Doe')
-const postComments = inject('postComments', 12)
-const postFeaturedImage = inject('postFeaturedImage', '')
+const postTitle = inject<string>('postTitle', 'Amazing Post Title Goes Here')
+const postCategory = inject<string>('postCategory', 'Technology')
+const postDate = inject<string>('postDate', 'January 10, 2026')
+const postAuthor = inject<string>('postAuthor', 'John Doe')
+const postComments = inject<number>('postComments', 12)
+const postFeaturedImage = inject<string>('postFeaturedImage', '')
 
 const updateText = (key: string, event: FocusEvent) => {
     if (props.mode !== 'edit' || !event.target || !builder) return
@@ -78,54 +77,54 @@ const updateText = (key: string, event: FocusEvent) => {
     builder.updateModuleSettings(props.module.id, { [key]: value })
 }
 
-const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+const cardStyles = computed((): CSSProperties => {
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
     
-    return styles
+    return styles as CSSProperties
 })
 
-const containerStyles = computed(() => {
+const containerStyles = computed((): CSSProperties => {
     const layoutStyles = getLayoutStyles(settings.value, props.device)
-    const height = getResponsiveValue(settings.value, 'height', props.device) || 400
+    const height = getVal<number>(settings.value, 'height', props.device) || 400
     return { 
         ...layoutStyles,
         width: '100%', 
         minHeight: `${height}px`
-    }
+    } as CSSProperties
 })
 
-const featuredBgStyles = computed(() => ({
+const featuredBgStyles = computed((): CSSProperties => ({
     backgroundImage: postFeaturedImage ? `url(${postFeaturedImage})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-}))
+} as CSSProperties))
 
-const overlayStyles = computed(() => {
-    const opacity = (settings.value.overlayOpacity ?? 50) / 100
-    const color = settings.value.overlayColor || 'rgba(0,0,0,0.5)'
+const overlayStyles = computed((): CSSProperties => {
+    const opacity = (settings.value.overlayOpacity ?? 50) as number / 100
+    const color = (settings.value.overlayColor as string) || 'rgba(0,0,0,0.5)'
     return {
         backgroundColor: color,
         opacity: opacity
-    }
+    } as CSSProperties
 })
 
-const contentStyles = computed(() => {
-  const alignment = getResponsiveValue(settings.value, 'contentAlignment', props.device) || 'center'
+const contentStyles = computed((): CSSProperties => {
+  const alignment = getVal<string>(settings.value, 'contentAlignment', props.device) || 'center'
   return {
     alignItems: alignment === 'left' ? 'flex-start' : alignment === 'right' ? 'flex-end' : 'center',
-    textAlign: alignment as any,
+    textAlign: alignment as CSSProperties['textAlign'],
     justifyContent: settings.value.contentPosition === 'top' ? 'flex-start' : 
                     settings.value.contentPosition === 'bottom' ? 'flex-end' : 'center'
-  }
+  } as CSSProperties
 })
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
-const metaStyles = computed(() => getTypographyStyles(settings.value, 'meta_', props.device))
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device) as CSSProperties)
+const metaStyles = computed(() => getTypographyStyles(settings.value, 'meta_', props.device) as CSSProperties)
 </script>
 
 <style scoped>

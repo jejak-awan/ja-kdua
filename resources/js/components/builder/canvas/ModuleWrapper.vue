@@ -207,8 +207,8 @@ onUnmounted(() => {
 const currentDevice = computed(() => builder?.device.value || 'desktop')
 
 const animationClasses = computed(() => {
-    const anim = getResponsiveValue(props.module.settings, 'animation', currentDevice.value)
-    const effect = (anim && anim.effect) ? anim.effect : getResponsiveValue(props.module.settings, 'animation_effect', currentDevice.value)
+    const anim = getResponsiveValue(props.module.settings, 'animation', currentDevice.value) as { effect?: string } | undefined
+    const effect = (anim && anim.effect) ? anim.effect : (getResponsiveValue(props.module.settings, 'animation_effect', currentDevice.value) as string | undefined)
     return effect ? [effect] : []
 })
 
@@ -301,11 +301,11 @@ const wrapperClasses = computed(() => ({
 }))
 
 const wrapperStyles = computed(() => {
-    const styles: Record<string, any> = {}
+    const styles: Record<string, string | number> = {}
     
     if (isColumn.value) {
-        const width = getResponsiveValue(props.module.settings, 'width', currentDevice.value)
-        const flexGrow = getResponsiveValue(props.module.settings, 'flexGrow', currentDevice.value)
+        const width = getResponsiveValue(props.module.settings, 'width', currentDevice.value) as string | undefined
+        const flexGrow = getResponsiveValue(props.module.settings, 'flexGrow', currentDevice.value) as number | undefined
         
         styles.height = '100%' 
         

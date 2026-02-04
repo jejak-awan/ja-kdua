@@ -3,7 +3,7 @@
     <template #default="{ settings, device: blockDevice }">
       <div 
         class="spacer-block" 
-        :id="getVal(settings, 'html_id', blockDevice)"
+        :id="(getVal<string>(settings, 'html_id', blockDevice) as string)"
         :class="{ 'spacer-block--edit': mode === 'edit' }" 
         :style="spacerStyles(settings, blockDevice)"
         aria-hidden="true"
@@ -18,31 +18,34 @@
 </template>
 
 <script setup lang="ts">
-import ArrowUpDown from 'lucide-vue-next/dist/esm/icons/arrow-up-down.js';import BaseBlock from '../components/BaseBlock.vue'
+import ArrowUpDown from 'lucide-vue-next/dist/esm/icons/arrow-up-down.js';
+import BaseBlock from '../components/BaseBlock.vue'
 import { 
     getVal,
     getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockProps } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
-const props = withDefaults(defineProps<BlockProps>(), {
-  mode: 'view',
-  device: 'desktop'
-})
+defineProps<{
+  module: BlockInstance
+  mode: 'view' | 'edit'
+  device?: 'desktop' | 'tablet' | 'mobile'
+}>()
 
-const getHeight = (settings: any, device: string) => {
-    const h = getVal(settings, 'height', device) || 50
-    return typeof h === 'number' ? h : parseInt(h) || 50
+const getHeight = (settings: ModuleSettings, device: string) => {
+    const h = getVal<string | number>(settings, 'height', device) || 50
+    return typeof h === 'number' ? h : (parseInt(h as string) || 50)
 }
 
-const spacerStyles = (settings: any, device: string) => {
+const spacerStyles = (settings: ModuleSettings, device: string) => {
   const h = getHeight(settings, device)
-  return {
+  const styles: Record<string, string | number> = {
     height: `${h}px`,
     minHeight: `${h}px`,
     width: '100%',
     ...getLayoutStyles(settings, device)
   }
+  return styles
 }
 </script>
 

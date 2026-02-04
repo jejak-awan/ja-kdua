@@ -1,5 +1,5 @@
+import type { ModuleDefinition } from '@/types/builder';
 import {
-    backgroundSettings,
     spacingSettings,
     borderSettings,
     boxShadowSettings,
@@ -10,7 +10,6 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    orderSettings,
     adminLabelSettings,
     cssSettings,
     conditionsSettings,
@@ -24,7 +23,7 @@ import {
 /**
  * Icon Module Definition
  */
-export default {
+const IconModule: ModuleDefinition = {
     name: 'icon',
     title: 'Icon',
     icon: 'Star',
@@ -147,3 +146,5 @@ export default {
         ]
     }
 }
+
+export default IconModule;

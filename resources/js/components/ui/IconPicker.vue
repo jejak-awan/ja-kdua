@@ -94,8 +94,10 @@ import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import Circle from 'lucide-vue-next/dist/esm/icons/circle.js';
 import { iconCategories } from '../../config/icon-categories';
 
+import type { Component } from 'vue';
+
 // Keep a few common icons for the trigger and initial render
-const commonIcons: Record<string, any> = { Circle };
+const commonIcons: Record<string, Component> = { Circle };
 
 const props = withDefaults(defineProps<{
   modelValue?: string;
@@ -115,14 +117,14 @@ const activeTab = ref('General');
 
 const selectedIcon = computed(() => props.modelValue);
 
-const LucideIconsBatch = ref<any>(null);
+const LucideIconsBatch = ref<Record<string, unknown> | null>(null);
 const isLoadingIcons = ref(false);
 
 const loadIcons = async () => {
     if (LucideIconsBatch.value || isLoadingIcons.value) return;
     isLoadingIcons.value = true;
     try {
-        LucideIconsBatch.value = await import('lucide-vue-next');
+        LucideIconsBatch.value = await import('lucide-vue-next') as unknown as Record<string, unknown>;
     } catch (err) {
         logger.error('Failed to load icons:', err);
     } finally {
@@ -143,7 +145,7 @@ const allIconNames = computed(() => {
         if (key === 'default' || key === 'createLucideIcon' || key === 'Icon' || !/^[A-Z]/.test(key)) {
             return false;
         }
-        const exp = (LucideIconsBatch.value as any)[key];
+        const exp = (LucideIconsBatch.value as Record<string, unknown>)[key];
         return typeof exp === 'object' || typeof exp === 'function';
     });
 });
@@ -172,7 +174,7 @@ const filteredIcons = computed(() => {
 
 const getIconComponent = (iconName: string) => {
   if (commonIcons[iconName]) return commonIcons[iconName];
-  if (LucideIconsBatch.value && LucideIconsBatch.value[iconName]) return LucideIconsBatch.value[iconName];
+  if (LucideIconsBatch.value && LucideIconsBatch.value[iconName]) return LucideIconsBatch.value[iconName] as Component;
   return commonIcons.Circle;
 };
 

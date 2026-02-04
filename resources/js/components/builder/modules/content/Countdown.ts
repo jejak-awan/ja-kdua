@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -163,7 +163,7 @@ const CountdownModule: ModuleDefinition = {
             {
                 id: 'numberTypography',
                 label: 'Number Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `number_${f.name}`,
                     label: `Number ${f.label}`
@@ -172,7 +172,7 @@ const CountdownModule: ModuleDefinition = {
             {
                 id: 'labelTypography',
                 label: 'Label Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `label_${f.name}`,
                     label: `Label ${f.label}`

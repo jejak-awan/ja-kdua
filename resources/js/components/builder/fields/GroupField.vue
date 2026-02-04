@@ -8,16 +8,16 @@
       <div class="group-fields">
         <div 
           v-for="subField in (field.fields as SettingDefinition[])" 
-          :key="subField.key || (subField as any).name" 
+          :key="subField.key || subField.name" 
           v-show="isFieldVisible(subField)"
           class="sub-field-row"
         >
           <FieldRenderer
             :field="subField"
-            :value="getFieldValue(subField.key || (subField as any).name)"
+            :value="getFieldValue(subField.key || subField.name || '')"
             :module="module"
             :device="device"
-            @update="(val: any) => updateField(subField.key || (subField as any).name, val)"
+            @update="(val: unknown) => updateField(subField.key || subField.name || '', val)"
           />
         </div>
       </div>
@@ -28,14 +28,13 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { BaseCollapsible, BaseButton } from '@/components/builder/ui'
-import ModuleActions from '@/components/builder/fields/ModuleActions.vue'
+import { BaseCollapsible } from '@/components/builder/ui'
 import FieldRenderer from '@/components/builder/fields/FieldRenderer.vue'
 import type { BlockInstance, BuilderInstance, SettingDefinition } from '@/types/builder'
 
 const props = defineProps<{
   field: SettingDefinition;
-  value: Record<string, any>;
+  value: Record<string, unknown>;
   module: BlockInstance;
   device?: string;
   isNested?: boolean;
@@ -46,7 +45,7 @@ const { t, te } = useI18n()
 
 const translatedLabel = computed(() => {
   const type = props.module.type
-  const name = props.field.key || (props.field as any).name
+  const name = props.field.key || props.field.name || ''
 
   if (te(`builder.settings.${type}.${name}.label`)) {
     return t(`builder.settings.${type}.${name}.label`)
@@ -63,7 +62,7 @@ const getFieldValue = (name: string) => {
   return props.module.settings?.[name]
 }
 
-const updateField = (name: string, value: any) => {
+const updateField = (name: string, value: unknown) => {
   builder?.updateModuleSettings(props.module.id, { [name]: value })
 }
 

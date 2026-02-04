@@ -32,7 +32,7 @@ interface Props {
   noPadding?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   align: 'left',
   width: 200,
   noPadding: false

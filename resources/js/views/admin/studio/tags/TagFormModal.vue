@@ -71,7 +71,6 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { useFormValidation } from '@/composables/useFormValidation';
@@ -109,7 +108,6 @@ const emit = defineEmits<{
     'success': [];
 }>();
 
-const { t } = useI18n();
 const toast = useToast();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(tagSchema);
 
@@ -181,9 +179,12 @@ const handleSubmit = async () => {
         
         emit('success');
         emit('update:open', false);
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response: { status: number, data: { errors: Record<string, string[]> } } };
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors || {});
+            }
         } else {
             toast.error.fromResponse(error);
         }

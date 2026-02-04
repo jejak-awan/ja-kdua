@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -35,89 +36,81 @@ class AppServiceProvider extends ServiceProvider
         // This avoids making separate API calls for basic configuration data
         \Illuminate\Support\Facades\View::composer('app', function ($view) {
             try {
-                // 1. Post Types
-                // Fetch distinct types from Content table
-                $postTypes = \App\Models\Content::distinct()->pluck('type')->filter()->values()->all();
-                if (empty($postTypes)) {
-                    $postTypes = ['post', 'page'];
-                }
-                // Map to label/value format
-                $postTypeOptions = array_map(function($type) {
-                    return ['label' => ucfirst($type), 'value' => $type];
-                }, $postTypes);
+                $data = Cache::remember('ja_cms_global_data', 3600, function () {
+                    // 1. Post Types
+                    $postTypes = \App\Models\Content::distinct()->pluck('type')->filter()->values()->all();
+                    if (empty($postTypes)) {
+                        $postTypes = ['post', 'page'];
+                    }
+                    $postTypeOptions = array_map(function($type) {
+                        return ['label' => ucfirst($type), 'value' => $type];
+                    }, $postTypes);
 
-                // 2. Roles
-                // Fetch all roles
-                $roles = \Spatie\Permission\Models\Role::pluck('name')->all();
-                $roleOptions = array_map(function($role) {
-                    return ['label' => ucfirst($role), 'value' => $role];
-                }, $roles);
+                    // 2. Roles
+                    $roles = \Spatie\Permission\Models\Role::pluck('name')->all();
+                    $roleOptions = array_map(function($role) {
+                        return ['label' => ucfirst($role), 'value' => $role];
+                    }, $roles);
 
-                // 3. Taxonomies (Static map for now as they are model-based)
-                $taxonomyOptions = [
-                    ['label' => 'Categories', 'value' => 'category'],
-                    ['label' => 'Tags', 'value' => 'post_tag'],
-                    ['label' => 'Project Categories', 'value' => 'project_category'],
-                    ['label' => 'Project Tags', 'value' => 'project_tag']
-                ];
-
-                // 4. Users (for include_users)
-                $users = \App\Models\User::select('id', 'name')->get();
-                $userOptions = $users->map(function($user) {
-                    return ['label' => $user->name, 'value' => $user->id];
-                })->all();
-
-                // 5. Posts (for include_posts) - Grouped by Type? Or just flat with 'type' property for filtering
-                // We fetch ID, Title, Type. Limit to reasonable amount or all?
-                // For now, let's try fetching all non-revision content.
-                $posts = \App\Models\Content::where('type', '!=', 'revision')
-                    ->select('id', 'title', 'type')
-                    ->latest()
-                    ->get();
-                
-                $postOptions = $posts->map(function($post) {
-                    return [
-                        'label' => $post->title, 
-                        'value' => $post->id, 
-                        'type' => $post->type // Included for filtering
+                    // 3. Taxonomies
+                    $taxonomyOptions = [
+                        ['label' => 'Categories', 'value' => 'category'],
+                        ['label' => 'Tags', 'value' => 'post_tag'],
+                        ['label' => 'Project Categories', 'value' => 'project_category'],
+                        ['label' => 'Project Tags', 'value' => 'project_tag']
                     ];
-                })->all();
 
-                // 6. Terms (for include_terms) - Categories and Tags
-                // We need to fetch Categories and Tags.
-                $categories = \App\Models\Category::select('id', 'name')->get()->map(function($c) {
-                    return ['label' => $c->name, 'value' => $c->id, 'taxonomy' => 'category'];
-                });
-                
-                $tags = \App\Models\Tag::select('id', 'name')->get()->map(function($t) {
-                    return ['label' => $t->name, 'value' => $t->id, 'taxonomy' => 'post_tag'];
-                });
-                
-                // Merge terms
-                $termOptions = $categories->merge($tags)->values()->all();
+                    // 4. Users
+                    $userOptions = \App\Models\User::select('id', 'name')->get()->map(function($user) {
+                        return ['label' => $user->name, 'value' => $user->id];
+                    })->all();
 
-                // 7. Forms (for FormPicker)
-                $forms = \App\Models\Form::where('is_active', true)
-                    ->select('id', 'name', 'slug')
-                    ->latest()
-                    ->get();
-                
-                $formOptions = $forms->map(function($form) {
+                    // 5. Posts
+                    $postOptions = \App\Models\Content::where('type', '!=', 'revision')
+                        ->select('id', 'title', 'type')
+                        ->latest()
+                        ->get()
+                        ->map(function($post) {
+                            return [
+                                'label' => $post->title, 
+                                'value' => $post->id, 
+                                'type' => $post->type
+                            ];
+                        })->all();
+
+                    // 6. Terms
+                    $categories = \App\Models\Category::select('id', 'name')->get()->map(function($c) {
+                        return ['label' => $c->name, 'value' => $c->id, 'taxonomy' => 'category'];
+                    });
+                    $tags = \App\Models\Tag::select('id', 'name')->get()->map(function($t) {
+                        return ['label' => $t->name, 'value' => $t->id, 'taxonomy' => 'post_tag'];
+                    });
+                    $termOptions = $categories->merge($tags)->values()->all();
+
+                    // 7. Forms
+                    $formOptions = \App\Models\Form::where('is_active', true)
+                        ->select('id', 'name', 'slug')
+                        ->latest()
+                        ->get()
+                        ->map(function($form) {
+                            return [
+                                'label' => $form->name,
+                                'value' => $form->slug
+                            ];
+                        })->all();
+
                     return [
-                        'label' => $form->name,
-                        'value' => $form->slug
+                        'postTypes' => $postTypeOptions,
+                        'roles' => $roleOptions,
+                        'taxonomies' => $taxonomyOptions,
+                        'users' => $userOptions,
+                        'posts' => $postOptions,
+                        'terms' => $termOptions,
+                        'forms' => $formOptions
                     ];
-                })->all();
+                });
 
-                $view->with('jaCmsData', [
-                    'postTypes' => $postTypeOptions,
-                    'roles' => $roleOptions,
-                    'taxonomies' => $taxonomyOptions,
-                    'users' => $userOptions,
-                    'posts' => $postOptions,
-                    'terms' => $termOptions,
-                    'forms' => $formOptions
-                ]);
+                $view->with('jaCmsData', $data);
 
             } catch (\Exception $e) {
                 // Fallback if DB fails

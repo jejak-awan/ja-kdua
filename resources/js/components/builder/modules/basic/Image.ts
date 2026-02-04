@@ -1,6 +1,5 @@
 import type { ModuleDefinition } from '@/types/builder';
 import {
-    backgroundSettings,
     spacingSettings,
     borderSettings,
     boxShadowSettings,
@@ -14,7 +13,6 @@ import {
     linkSettings,
     adminLabelSettings,
     cssSettings,
-    typographySettings,
     conditionsSettings,
     interactionsSettings,
     scrollEffectsSettings,

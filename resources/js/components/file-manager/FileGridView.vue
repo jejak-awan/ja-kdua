@@ -122,21 +122,10 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { inject, computed } from 'vue';
-import Folder from 'lucide-vue-next/dist/esm/icons/folder.js';
-import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';
+import { inject } from 'vue';
 import Video from 'lucide-vue-next/dist/esm/icons/video.js';
 import PlayCircle from 'lucide-vue-next/dist/esm/icons/circle-play.js';
 import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
-import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
-import Download from 'lucide-vue-next/dist/esm/icons/download.js';
-import Link from 'lucide-vue-next/dist/esm/icons/link.js';
-import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
-import PackageOpen from 'lucide-vue-next/dist/esm/icons/package-open.js';
-import Archive from 'lucide-vue-next/dist/esm/icons/archive.js';
-import Clipboard from 'lucide-vue-next/dist/esm/icons/clipboard.js';
-import ClipboardPaste from 'lucide-vue-next/dist/esm/icons/clipboard-paste.js';
-import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import { 
     Checkbox, 
     ContextMenu, 
@@ -145,10 +134,9 @@ import {
 } from '@/components/ui';
 import FileContextMenu from './FileContextMenu.vue';
 import FileActionDropdown from './FileActionDropdown.vue';
-import { useToast } from '@/composables/useToast';
 import MoreVertical from 'lucide-vue-next/dist/esm/icons/ellipsis-vertical.js';
-import api from '@/services/api';
 import type { FileItem, FolderItem } from '@/types/file-manager';
+import Folder from 'lucide-vue-next/dist/esm/icons/folder.js';
 import { FileManagerKey } from '@/keys';
 
 const {
@@ -156,25 +144,21 @@ const {
     paginatedFiles,
     selectedItems,
     dropTarget,
-    clipboard,
     navigateToPath,
     toggleSelection,
-    copyToClipboard,
-    pasteFromClipboard,
-    deleteItem,
     moveItem,
-    fetchCurrentPath,
     formatFileSize,
     isImage,
     isVideo,
-    isArchive,
     selectItem
 } = inject(FileManagerKey)!;
 
-const toast = useToast();
-const clipboardCount = computed(() => clipboard.value.items.length);
+defineEmits<{
+    (e: 'preview', item: FileItem): void
+}>();
 
-const isSelected = (path: string) => selectedItems.value.some((item: any) => item.path === path);
+
+const isSelected = (path: string) => selectedItems.value.some((item: FileItem | FolderItem) => item.path === path);
 
 const onDragStart = (event: DragEvent, item: FileItem | FolderItem, type: 'file' | 'folder') => {
     if (event.dataTransfer) {
@@ -183,9 +167,11 @@ const onDragStart = (event: DragEvent, item: FileItem | FolderItem, type: 'file'
     }
 };
 
-const onDragEnd = (event: DragEvent) => {
+const onDragEnd = () => {
     // Handled by global state
 };
+
+
 
 const onDragOver = (event: DragEvent, folder: FolderItem) => {
     event.preventDefault();
@@ -205,30 +191,12 @@ const onDrop = async (event: DragEvent, targetFolder: FolderItem) => {
         const { path: sourcePath, type } = JSON.parse(data);
         if (sourcePath === targetFolder.path) return;
         await moveItem(sourcePath, targetFolder.path, type);
-    } catch (e) {
+    } catch (e: unknown) {
         logger.error('Drop failed', e);
     } finally {
         dropTarget.value = null;
     }
 };
 
-const extractFile = async (file: FileItem) => {
-    try {
-        await api.post('/admin/ja/file-manager/extract', { path: file.path.replace(/^\//, '') });
-        toast.success.action('Archive extracted');
-        await fetchCurrentPath();
-    } catch (error) {
-        toast.error.default('Extraction failed');
-    }
-};
 
-const compressItems = async (paths: string[]) => {
-    try {
-        await api.post('/admin/ja/file-manager/compress', { paths: paths.map(p => p.replace(/^\//, '')) });
-        toast.success.action('Items compressed');
-        await fetchCurrentPath();
-    } catch (error) {
-        toast.error.default('Compression failed');
-    }
-};
 </script>

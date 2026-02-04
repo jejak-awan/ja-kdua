@@ -213,13 +213,13 @@
         <!-- Pagination -->
         <div class="py-4 border-t border-border mt-auto">
             <Pagination
-                v-if="pagination && pagination.total > 0"
-                :current-page="pagination.current_page"
-                :total-items="pagination.total"
+                v-if="pagination && (pagination.total as number) > 0"
+                :current-page="(pagination.current_page as number)"
+                :total-items="(pagination.total as number)"
                 :per-page="Number(pagination.per_page || 15)"
                 :show-page-numbers="true"
                 @page-change="loadPage"
-                @update:per-page="(val) => { pagination.per_page = val; loadPage(1); }"
+                @update:per-page="(val: number) => { if (pagination) { pagination.per_page = val; loadPage(1); } }"
             />
         </div>
 
@@ -229,7 +229,13 @@
                 <DialogHeader class="flex flex-row items-center justify-between space-y-0">
                     <DialogTitle>{{ $t('features.forms.submissions.detailTitle') }}</DialogTitle>
                     <div class="flex items-center gap-2 mr-6">
-                        <Button variant="outline" size="sm" @click="exportPdf(selectedSubmission)" class="h-8">
+                        <Button 
+                            v-if="selectedSubmission"
+                            variant="outline" 
+                            size="sm" 
+                            @click="exportPdf(selectedSubmission)" 
+                            class="h-8"
+                        >
                             <Download class="w-4 h-4 mr-2" />
                             PDF
                         </Button>
@@ -286,7 +292,7 @@
 import { logger } from '@/utils/logger';
 import { h, ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { 
     useVueTable, 
     getCoreRowModel, 
@@ -294,7 +300,7 @@ import {
     FlexRender
 } from '@tanstack/vue-table';
 import api from '@/services/api';
-import { parseSingleResponse, ensureArray } from '@/utils/responseParser';
+import { parseSingleResponse } from '@/utils/responseParser';
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
 import { BackToTop, Badge, Button, Card, Checkbox, Dialog, DialogContent, DialogHeader, DialogTitle, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Popover, PopoverTrigger, PopoverContent } from '@/components/ui';
@@ -312,22 +318,54 @@ import ArrowUp from 'lucide-vue-next/dist/esm/icons/arrow-up.js';
 import ArrowDown from 'lucide-vue-next/dist/esm/icons/arrow-down.js';
 import ArrowUpDown from 'lucide-vue-next/dist/esm/icons/arrow-up-down.js';
 
+interface SubmissionUser {
+    name?: string;
+    email?: string;
+}
+
+interface Submission {
+    id: number | string;
+    status: 'new' | 'read' | 'archived';
+    created_at: string;
+    ip_address?: string;
+    user?: SubmissionUser;
+    data: Record<string, unknown>;
+}
+
+interface Form {
+    id: number | string;
+    name: string;
+}
+
+interface SubmissionStatistics {
+    total: number;
+    new: number;
+    read: number;
+    archived: number;
+}
+
+interface SubmissionsPagination {
+    current_page: number;
+    total: number;
+    per_page: number | string;
+    last_page: number;
+}
+
 const { t } = useI18n();
 const route = useRoute();
-const router = useRouter();
 const { confirm } = useConfirm();
 const toast = useToast();
 
-const form = ref<any>(null);
-const submissions = ref<any[]>([]);
+const form = ref<Form | null>(null);
+const submissions = ref<Submission[]>([]);
 const loading = ref(true);
-const statistics = ref<any>(null);
-const pagination = ref<any>(null);
+const statistics = ref<SubmissionStatistics | null>(null);
+const pagination = ref<SubmissionsPagination | null>(null);
 const search = ref('');
 const statusFilter = ref('all');
 const dateFrom = ref('');
 const dateTo = ref('');
-const selectedSubmission = ref<any>(null);
+const selectedSubmission = ref<Submission | null>(null);
 const showDetail = ref(false);
 const rowSelection = ref({});
 const sorting = ref([{ id: 'created_at', desc: true }]);
@@ -341,7 +379,7 @@ const renderSortIcon = (isSorted: string | boolean) => {
 };
 
 // --- TanStack Table Setup ---
-const columnHelper = createColumnHelper<any>();
+const columnHelper = createColumnHelper<Submission>();
 
 const columns = [
     columnHelper.display({
@@ -484,8 +522,8 @@ const selectedRowsCount = computed(() => Object.keys(rowSelection.value).length)
 const fetchForm = async () => {
     try {
         const response = await api.get(`/admin/ja/forms/${formId.value}`);
-        form.value = response.data?.data || response.data;
-    } catch (error: any) {
+        form.value = (response.data?.data || response.data) as Form;
+    } catch (error: unknown) {
         logger.error('Error fetching form:', error);
     }
 };
@@ -522,7 +560,7 @@ const fetchSubmissions = async (page = 1) => {
             last_page: paginatedData?.last_page || 1
         };
         table.resetRowSelection();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Error fetching submissions:', error);
     } finally {
         loading.value = false;
@@ -532,7 +570,7 @@ const fetchSubmissions = async (page = 1) => {
 const fetchStatistics = async () => {
     try {
         const response = await api.get(`/admin/ja/forms/${formId.value}/submissions/statistics`);
-        statistics.value = parseSingleResponse(response);
+        statistics.value = parseSingleResponse(response) as SubmissionStatistics;
     } catch (error) {
         logger.error('Failed to fetch statistics:', error);
     }
@@ -542,7 +580,7 @@ const loadPage = (page: number) => {
     fetchSubmissions(page);
 };
 
-const viewSubmission = async (submission: any) => {
+const viewSubmission = async (submission: Submission) => {
     selectedSubmission.value = submission;
     showDetail.value = true;
     if (submission.status === 'new') {
@@ -550,7 +588,7 @@ const viewSubmission = async (submission: any) => {
     }
 };
 
-const markAsRead = async (submission: any, refresh = true) => {
+const markAsRead = async (submission: Submission, refresh = true) => {
     try {
         await api.put(`/admin/ja/form-submissions/${submission.id}/read`);
         if (refresh) {
@@ -559,22 +597,22 @@ const markAsRead = async (submission: any, refresh = true) => {
         } else {
             submission.status = 'read';
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Error marking as read:', error);
     }
 };
 
-const archiveSubmission = async (submission: any) => {
+const archiveSubmission = async (submission: Submission) => {
     try {
         await api.put(`/admin/ja/form-submissions/${submission.id}/archive`);
         fetchSubmissions(pagination.value?.current_page || 1);
         fetchStatistics();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Error archiving submission:', error);
     }
 };
 
-const deleteSubmission = async (submission: any) => {
+const deleteSubmission = async (submission: Submission) => {
     const confirmed = await confirm({
         title: t('features.forms.submissions.actions.delete'),
         message: t('features.forms.submissions.messages.deleteConfirm'),
@@ -590,7 +628,7 @@ const deleteSubmission = async (submission: any) => {
         toast.success.default(t('features.forms.submissions.messages.deleteSuccess'));
         fetchStatistics();
         table.resetRowSelection();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Error deleting submission:', error);
         toast.error.fromResponse(error);
     }
@@ -606,7 +644,7 @@ const handleBulkMarkRead = async () => {
         toast.success.default(t('features.forms.submissions.messages.bulkReadSuccess', { count: selectedIds.length }));
         fetchSubmissions(pagination.value?.current_page || 1);
         fetchStatistics();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Error in bulk mark read:', error);
         toast.error.fromResponse(error);
     }
@@ -630,7 +668,7 @@ const handleBulkArchive = async () => {
         toast.success.default(t('features.forms.submissions.messages.bulkArchiveSuccess', { count: selectedIds.length }));
         fetchSubmissions(pagination.value?.current_page || 1);
         fetchStatistics();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Error in bulk archive:', error);
         toast.error.fromResponse(error);
     }
@@ -654,7 +692,7 @@ const handleBulkDelete = async () => {
         toast.success.default(t('features.forms.submissions.messages.bulkDeleteSuccess', { count: selectedIds.length }));
         fetchSubmissions(pagination.value?.current_page || 1);
         fetchStatistics();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Error in bulk delete:', error);
         toast.error.fromResponse(error);
     }
@@ -688,19 +726,19 @@ const exportSubmissions = async (format = 'xlsx') => {
         link.click();
         document.body.removeChild(link);
         toast.success.default(t('features.forms.submissions.messages.exportSuccess'));
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Error exporting submissions:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const exportPdf = (submission: any) => {
+const exportPdf = (submission: Submission) => {
     if (!submission) return;
     try {
         const baseUrl = import.meta.env.VITE_API_URL || '';
         const exportUrl = `${baseUrl}/api/v1/admin/ja/form-submissions/${submission.id}/export-pdf`;
         window.open(exportUrl, '_blank');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to export PDF:', error);
         toast.error.default('Failed to export PDF');
     }
@@ -723,13 +761,13 @@ const formatDate = (date: string | null | undefined) => {
     return parsed.toLocaleString();
 };
 
-const formatValue = (value: any) => {
+const formatValue = (value: unknown) => {
     if (Array.isArray(value)) return value.join(', ');
     if (typeof value === 'object') return JSON.stringify(value);
     return String(value || '-');
 };
 
-const getFirstFields = (data: any) => {
+const getFirstFields = (data: Record<string, unknown>) => {
     if (!data) return {};
     const entries = Object.entries(data);
     return Object.fromEntries(entries.slice(0, 3));
@@ -746,8 +784,8 @@ const scrollToTop = () => {
 };
 
 // --- Watchers with Debounce ---
-let searchDebounceTimer: any = null;
-watch(search, (newVal) => {
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+watch(search, () => {
     if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
     searchDebounceTimer = setTimeout(() => {
         fetchSubmissions(1);

@@ -6,7 +6,7 @@ import { z } from 'zod';
 /**
  * Helper to create translatable error message
  */
-const t = (key: string, params: Record<string, any> = {}) => JSON.stringify({ key, params });
+const t = (key: string, params: Record<string, unknown> = {}) => JSON.stringify({ key, params });
 
 /**
  * Content form schema
@@ -26,7 +26,7 @@ export const contentSchema = z.object({
         .or(z.literal('')),
     status: z.enum(['draft', 'published', 'scheduled', 'archived']).optional(),
     type: z.string().optional(),
-    category_id: z.number().nullable().optional(),
+    category_id: z.union([z.number(), z.string()]).nullable().optional(),
     featured_image: z.string().nullable().optional(),
     meta_title: z.string()
         .max(60, t('common.validation.max', { field: 'Meta Title', max: 60 }))
@@ -53,7 +53,10 @@ export const categorySchema = z.object({
         .max(1000, t('common.validation.max', { field: 'Description', max: 1000 }))
         .optional()
         .or(z.literal('')),
-    parent_id: z.number().nullable().optional(),
+    parent_id: z.union([z.number(), z.string()]).nullable().optional(),
+    image: z.string().nullable().optional(),
+    is_active: z.boolean().optional(),
+    sort_order: z.number().optional()
 });
 
 /**
@@ -77,5 +80,5 @@ export const tagSchema = z.object({
  * Move category schema
  */
 export const moveCategorySchema = z.object({
-    parent_id: z.number().nullable().optional(),
+    parent_id: z.union([z.number(), z.string()]).nullable().optional(),
 });

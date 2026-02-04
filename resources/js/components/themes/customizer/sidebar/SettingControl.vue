@@ -19,7 +19,7 @@
                 >
                 <div 
                     class="w-full h-full"
-                    :style="{ backgroundColor: modelValue }"
+                    :style="{ backgroundColor: (modelValue as string) }"
                 ></div>
             </div>
             <input
@@ -34,7 +34,7 @@
         <!-- Select -->
         <div v-else-if="setting.type === 'select'" class="relative">
             <select
-                :value="modelValue"
+                :value="(modelValue as string)"
                 @change="handleInput(($event.target as HTMLSelectElement).value); $emit('change')"
                 class="w-full h-9 pl-3 pr-8 bg-background border rounded-lg text-sm appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors cursor-pointer"
             >
@@ -54,7 +54,7 @@
                 :min="setting.min || 0"
                 :max="setting.max || 100"
                 :step="setting.step || 1"
-                :value="modelValue"
+                :value="(modelValue as number)"
                 @input="handleInput(($event.target as HTMLInputElement).value)"
                 @change="$emit('change')"
                 class="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
@@ -67,7 +67,7 @@
         <!-- Textarea -->
         <textarea 
             v-else-if="setting.type === 'textarea'"
-            :value="modelValue"
+            :value="(modelValue as string)"
             @input="handleInput(($event.target as HTMLTextAreaElement).value)"
             @change="$emit('change')"
             rows="3"
@@ -80,7 +80,7 @@
                 <input 
                     type="checkbox" 
                     class="sr-only" 
-                    :checked="modelValue"
+                    :checked="(modelValue as boolean)"
                     @change="handleInput(($event.target as HTMLInputElement).checked); $emit('change')"
                 >
                 <span class="translate-x-1 inline-block h-3 w-3 transform rounded-full bg-background shadow-sm transition-transform" :class="modelValue ? 'translate-x-5' : 'translate-x-1'"></span>
@@ -91,7 +91,7 @@
         <!-- Media Picker -->
         <div v-else-if="setting.type === 'media'" class="space-y-2">
             <div v-if="modelValue" class="relative group h-32 bg-muted/50 rounded-lg overflow-hidden border shadow-sm">
-                <img :src="modelValue" class="w-full h-full object-contain p-2" alt="Preview">
+                <img :src="(modelValue as string)" class="w-full h-full object-contain p-2" alt="Preview">
                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <button @click="$emit('pick-media')" class="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition-colors" title="Change Image">
                         <Pencil class="w-4 h-4" />
@@ -115,7 +115,7 @@
         <input
             v-else
             :type="setting.type || 'text'"
-            :value="modelValue"
+            :value="(modelValue as string)"
             @input="handleInput(($event.target as HTMLInputElement).value)"
             @change="$emit('change')"
             :placeholder="setting.placeholder"
@@ -135,18 +135,18 @@ import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import Image from 'lucide-vue-next/dist/esm/icons/image.js';
 
-const props = defineProps<{
+defineProps<{
     setting: ThemeSetting;
-    modelValue: any;
+    modelValue: unknown;
 }>();
 
 const emit = defineEmits<{
-    (e: 'update:modelValue', value: any): void;
+    (e: 'update:modelValue', value: unknown): void;
     (e: 'change'): void;
     (e: 'pick-media'): void;
 }>();
 
-const handleInput = (val: any) => {
+const handleInput = (val: unknown) => {
     emit('update:modelValue', val);
 };
 </script>

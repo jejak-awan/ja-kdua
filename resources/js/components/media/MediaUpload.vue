@@ -148,7 +148,7 @@ const handleFileSelect = async (event: Event) => {
     }
 
     // Check size
-    const maxSizeInBytes = (effectiveConstraints.value.maxSize || ((settings.value as any).max_upload_size || 10240)) * 1024;
+    const maxSizeInBytes = (effectiveConstraints.value.maxSize || (Number(settings.value.max_upload_size) || 10240)) * 1024;
     if (file.size > maxSizeInBytes) {
         const msg = `File size exceeds limit of ${formatSize(maxSizeInBytes)}`;
         error.value = msg;
@@ -239,9 +239,11 @@ const uploadFile = async () => {
         setTimeout(() => {
             clearPreview();
         }, 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
         logger.error('Upload error:', err);
-        const backendError = err.response?.data?.errors?.file?.[0] || err.response?.data?.message || 'Failed to upload file';
+        const errorResponse = (err as { response?: { data?: Record<string, unknown> } })?.response?.data;
+        const errors = errorResponse?.errors as Record<string, string[]> | undefined;
+        const backendError = errors?.file?.[0] || (typeof errorResponse?.message === 'string' ? errorResponse.message : '') || 'Failed to upload file';
         error.value = backendError;
     } finally {
         uploading.value = false;

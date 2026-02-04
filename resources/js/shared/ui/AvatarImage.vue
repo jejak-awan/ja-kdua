@@ -13,7 +13,8 @@ import { cn } from '../../lib/utils';
 const props = defineProps<AvatarImageProps & { class?: HTMLAttributes['class'] }>();
 
 const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props;
+  const delegated = { ...props };
+  delete delegated.class;
   return delegated;
 });
 </script>

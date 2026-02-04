@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import { type HTMLAttributes } from 'vue';
 import { Primitive, type PrimitiveProps } from 'radix-vue';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
 
 const buttonVariants = cva(

@@ -260,7 +260,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted, reactive, watch, computed } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
@@ -268,10 +268,7 @@ import { useConfirm } from '@/composables/useConfirm';
 import Send from 'lucide-vue-next/dist/esm/icons/send.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
-import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
-import Info from 'lucide-vue-next/dist/esm/icons/info.js';
 import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';
-import CheckCircle2 from 'lucide-vue-next/dist/esm/icons/circle-check-big.js';
 import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import { parseResponse, parseSingleResponse } from '@/utils/responseParser';
@@ -414,9 +411,9 @@ const fetchData = async (): Promise<void> => {
         ]);
         roles.value = parseResponse<Role>(rolesRes).data;
         users.value = parseResponse<User>(usersRes).data;
-        const data = parseSingleResponse<any>(healthRes);
+        const data = parseSingleResponse<{ queue_health?: QueueHealth }>(healthRes);
         queueHealth.value = data?.queue_health || null;
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch data:', error);
     }
 };
@@ -432,13 +429,13 @@ const fetchHistory = async (page = 1) : Promise<void> => {
         
         // Clear selection on page change or refresh
         selectedItems.value = [];
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch history:', error);
     }
 };
 
 const isSelected = (item: Notification) => {
-    return selectedItems.value.some(i => 
+    return selectedItems.value.some((i: SelectedItem) => 
         i.title === item.title && 
         i.message === item.message && 
         i.created_at === item.created_at
@@ -446,7 +443,7 @@ const isSelected = (item: Notification) => {
 };
 
 const toggleSelect = (item: Notification) => {
-    const index = selectedItems.value.findIndex(i => 
+    const index = selectedItems.value.findIndex((i: SelectedItem) => 
         i.title === item.title && 
         i.message === item.message && 
         i.created_at === item.created_at
@@ -471,7 +468,7 @@ const toggleSelectAll = () => {
     if (isAllSelected.value) {
         selectedItems.value = [];
     } else {
-        history.value.forEach(item => {
+        history.value.forEach((item: Notification) => {
             if (!isSelected(item)) {
                 selectedItems.value.push({
                     title: item.title,
@@ -501,7 +498,7 @@ const handleBulkRevoke = async () => {
         toast.success.action(t('features.system.notifications.messages.revoked'));
         selectedItems.value = [];
         fetchHistory(pagination.value?.current_page || 1);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to bulk revoke:', error);
         toast.error.validation(t('features.system.notifications.messages.failed'));
     } finally {
@@ -530,7 +527,7 @@ const handleRevoke = async (notification: Notification) => {
         });
         toast.success.action(t('features.system.notifications.messages.revoked'));
         fetchHistory(pagination.value?.current_page || 1);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to revoke:', error);
         toast.error.validation(t('features.system.notifications.messages.failed'));
     } finally {
@@ -572,7 +569,7 @@ const handleSend = async () => {
         
         // Refresh history
         fetchHistory();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to send:', error);
         toast.error.validation(t('features.system.notifications.messages.failed'));
     } finally {

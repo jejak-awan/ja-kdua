@@ -1,58 +1,52 @@
 <template>
-  <div 
-    v-if="totalSteps > 1" 
-    class="form-progress-bar-block"
-    :style="getLayoutStyles(settings, device)"
-  >
-    <div class="flex justify-between items-center mb-2 px-1">
-      <span v-if="settings.show_steps" class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-        Step {{ currentStep + 1 }} of {{ totalSteps }}
-      </span>
-      <span v-if="settings.show_percentage" class="text-xs font-bold text-primary">
-        {{ progressPercentage }}% Complete
-      </span>
+  <div class="form-progress-bar-block py-8">
+    <div class="flex justify-between items-center mb-4">
+      <span class="text-xs font-black uppercase tracking-widest opacity-60">Progress</span>
+      <span class="text-xs font-black uppercase tracking-widest text-primary">{{ Math.round(progress) }}%</span>
     </div>
     
-    <Progress 
-      :model-value="progressPercentage" 
-      class="w-full"
-      :style="{ 
-        height: (settings.height || 8) + 'px',
-        '--primary': settings.bar_color || ''
-      }"
-    />
+    <div class="progress-track w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+      <div 
+        class="progress-fill h-full bg-primary transition-all duration-700 ease-out shadow-[0_0_20px_rgba(var(--primary-rgb),0.4)]"
+        :style="{ width: `${progress}%` }"
+      />
+    </div>
+
+    <!-- Step Progress Dots -->
+    <div v-if="totalStepsValue > 1" class="flex justify-between mt-6 px-1">
+        <div 
+            v-for="i in totalStepsValue" 
+            :key="i"
+            class="w-2.5 h-2.5 rounded-full transition-all duration-500 border-2"
+            :class="[
+                i - 1 <= currentStepValue ? 'bg-primary border-primary scale-125' : 'bg-transparent border-slate-300 dark:border-slate-700'
+            ]"
+        />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
-import { Progress } from '../ui'
-import { getLayoutStyles } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import { computed, inject, type ComputedRef } from 'vue'
 
-const props = withDefaults(defineProps<{
-  module: BlockInstance
-  mode?: 'view' | 'edit'
-  device?: 'desktop' | 'tablet' | 'mobile'
-}>(), {
-  mode: 'view',
-  device: 'desktop'
+interface FormState {
+  value: number
+}
+
+// Inject state from FormRenderer
+const currentStep = inject<ComputedRef<number> | FormState>('currentStep', { value: 0 })
+const totalSteps = inject<ComputedRef<number> | FormState>('totalSteps', { value: 1 })
+
+const currentStepValue = computed(() => {
+  return typeof currentStep === 'object' && 'value' in currentStep ? currentStep.value : 0
 })
 
-const settings = computed(() => props.module.settings || {})
+const totalStepsValue = computed(() => {
+  return typeof totalSteps === 'object' && 'value' in totalSteps ? totalSteps.value : 1
+})
 
-// Inject from FormRenderer
-const currentStep = inject<any>('currentStep', { value: 0 })
-const totalSteps = inject<any>('totalSteps', { value: 1 })
-
-const progressPercentage = computed(() => {
-    if (totalSteps.value <= 1) return 100
-    return Math.round(((currentStep.value + 1) / totalSteps.value) * 100)
+const progress = computed(() => {
+  if (totalStepsValue.value <= 1) return 100
+  return ((currentStepValue.value) / (totalStepsValue.value - 1)) * 100
 })
 </script>
-
-<style scoped>
-.form-progress-bar-block {
-  width: 100%;
-}
-</style>

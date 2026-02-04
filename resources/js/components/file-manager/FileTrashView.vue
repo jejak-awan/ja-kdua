@@ -91,10 +91,6 @@ import Folder from 'lucide-vue-next/dist/esm/icons/folder.js';
 import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 import { 
     Button,
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger
 } from '@/components/ui';
 import { FileManagerKey } from '@/keys';
 
@@ -107,13 +103,5 @@ const {
     deleteFromTrashPermanent
 } = inject(FileManagerKey)!;
 
-const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return '—';
-    return new Date(dateString).toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-};
+
 </script>

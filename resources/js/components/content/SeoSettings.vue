@@ -120,7 +120,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useI18n } from 'vue-i18n';
 import MediaPicker from '@/components/media/MediaPicker.vue';
 import {
     Card,
@@ -146,13 +145,12 @@ interface SeoData {
     og_image: string | null;
 }
 
-const { t } = useI18n();
 const cmsStore = useCmsStore();
 const { settings } = storeToRefs(cmsStore);
 
 const maxUploadSizeMB = computed(() => {
     // Setting is in KB, convert to MB
-    const sizeKB = (settings.value as any).max_upload_size || 10240;
+    const sizeKB = (settings.value as Record<string, unknown>).max_upload_size as number || 10240;
     return sizeKB / 1024;
 });
 
@@ -162,7 +160,7 @@ onMounted(async () => {
 });
 
 withDefaults(defineProps<{
-    modelValue: SeoData;
+    modelValue?: SeoData;
 }>(), {
     modelValue: () => ({
         meta_title: '',

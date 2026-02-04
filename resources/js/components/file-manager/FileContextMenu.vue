@@ -91,9 +91,10 @@ import {
 import { useToast } from '@/composables/useToast';
 import api from '@/services/api';
 import { FileManagerKey } from '@/keys';
+import type { FileItem, FolderItem } from '@/types/file-manager';
 
-const props = defineProps<{
-    item: any;
+defineProps<{
+    item: FileItem | FolderItem;
 }>();
 
 defineEmits(['preview']);
@@ -112,30 +113,30 @@ const {
     togglePropertiesSidebar
 } = inject(FileManagerKey)!;
 
-const isFolder = (item: any) => 'children' in item || !('extension' in item);
+const isFolder = (item: FileItem | FolderItem): item is FolderItem => 'children' in item || !('extension' in item);
 const clipboardCount = computed(() => clipboard.value.items.length);
 
-const copyPath = async (item: any) => {
+const copyPath = async (item: FileItem | FolderItem) => {
     try {
         await navigator.clipboard.writeText(item.path);
         toast.success.action(t('features.file_manager.messages.path_copied', 'Path copied'));
-    } catch (err) {
+    } catch (_err) {
         toast.error.default(t('features.file_manager.messages.copy_failed', 'Failed to copy'));
     }
 };
 
-const copyUrl = async (file: any) => {
+const copyUrl = async (file: FileItem) => {
     if (file.url) {
         try {
             await navigator.clipboard.writeText(file.url);
             toast.success.action(t('features.file_manager.messages.url_copied', 'URL copied'));
-        } catch (err) {
+        } catch (_err) {
             toast.error.default(t('features.file_manager.messages.copy_failed', 'Failed to copy'));
         }
     }
 };
 
-const downloadFile = (file: any) => {
+const downloadFile = (file: FileItem) => {
     if (file.url) {
         const link = document.createElement('a');
         link.href = file.url;
@@ -144,12 +145,12 @@ const downloadFile = (file: any) => {
     }
 };
 
-const extractFile = async (file: any) => {
+const extractFile = async (file: FileItem) => {
     try {
         await api.post('/admin/ja/file-manager/extract', { path: file.path.replace(/^\//, '') });
         toast.success.action(t('features.file_manager.messages.extracted', 'Extracted'));
         await fetchCurrentPath();
-    } catch (error) {
+    } catch (_error) {
         toast.error.default(t('features.file_manager.messages.extract_failed', 'Extraction failed'));
     }
 };
@@ -159,7 +160,7 @@ const compressItems = async (paths: string[]) => {
         await api.post('/admin/ja/file-manager/compress', { paths: paths.map(p => p.replace(/^\//, '')) });
         toast.success.action(t('features.file_manager.messages.compressed', 'Compressed'));
         await fetchCurrentPath();
-    } catch (error) {
+    } catch (_error) {
         toast.error.default(t('features.file_manager.messages.compress_failed', 'Compression failed'));
     }
 };

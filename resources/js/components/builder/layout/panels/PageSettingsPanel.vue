@@ -222,7 +222,7 @@
         >
           <div class="section-header-left">
             <div class="section-icon section-icon--purple">
-              <Image class="w-3.5 h-3.5" />
+              <ImageIcon class="w-3.5 h-3.5" />
             </div>
             <span class="section-title-text">{{ t('features.content.form.featuredImage') }}</span>
           </div>
@@ -250,7 +250,7 @@
                   </div>
                 </template>
                 <div v-else class="image-placeholder">
-                  <Image class="w-10 h-10" />
+                  <ImageIcon class="w-10 h-10" />
                   <span>{{ t('builder.panels.pageSettings.placeholders.selectImage') }}</span>
                 </div>
               </div>
@@ -365,7 +365,7 @@
           <div class="field-group">
             <label class="field-label">{{ t('features.content.form.ogImage') || 'OG Image' }}</label>
             <MediaPicker
-              @selected="(media: any) => content.og_image = media?.url || media"
+              @selected="(media: { url?: string } | string | null) => content.og_image = (typeof media === 'object' ? media?.url : media) || null"
               :constraints="{ allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'] }"
             >
               <template #trigger="{ open }">
@@ -376,7 +376,7 @@
                   </div>
                 </div>
                 <button v-else type="button" class="og-image-btn" @click="open">
-                  <Image class="w-3 h-3" />
+                  <ImageIcon class="w-3 h-3" />
                   {{ t('features.content.form.selectOgImage') || 'Select OG Image' }}
                 </button>
               </template>
@@ -438,7 +438,7 @@ interface Content {
   category_id?: number | string | null;
   tags: Tag[];
   menu_item?: MenuItem;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface MenuParentItem {

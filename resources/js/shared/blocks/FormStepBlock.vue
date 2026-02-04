@@ -1,86 +1,56 @@
 <template>
-  <div 
-    v-show="isCurrentStep || mode === 'edit'" 
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
+    :device="device"
     class="form-step-block"
-    :class="{ 'opacity-50 border-2 border-dashed border-primary/20 p-4 rounded-xl': mode === 'edit' }"
-    :style="getLayoutStyles(settings, device)"
   >
-    <div v-if="settings.title || settings.description" class="mb-6">
-      <h3 v-if="settings.title" class="text-xl font-bold mb-1">{{ settings.title }}</h3>
-      <p v-if="settings.description" class="text-muted-foreground text-sm">{{ settings.description }}</p>
-    </div>
-
-    <div class="step-content space-y-4">
-      <slot />
-    </div>
-
-    <div v-if="mode === 'view' && !hideButtons" class="flex justify-between mt-8 pt-4 border-t border-border/50">
-      <Button 
-        v-if="currentStepIndex > 0" 
-        type="button" 
-        variant="outline" 
-        @click="goToPrevStep"
+    <template #default="{ settings }">
+      <div 
+        class="form-step space-y-8" 
+        :style="stepStyles(settings)"
       >
-        <ChevronLeft class="w-4 h-4 mr-1" />
-        {{ settings.prev_label || 'Previous' }}
-      </Button>
-      <div v-else></div>
-
-      <Button 
-        v-if="currentStepIndex < totalSteps - 1" 
-        type="button" 
-        @click="goToNextStep"
-      >
-        {{ settings.next_label || 'Next' }}
-        <ChevronRight class="w-4 h-4 ml-1" />
-      </Button>
-      <Button v-else type="submit">
-        {{ submitButtonText }}
-      </Button>
-    </div>
-  </div>
+        <div class="step-header mb-10">
+          <Badge v-if="settings.showBadge !== false" variant="outline" class="mb-4 bg-primary/10 text-primary border-primary/20 px-4 py-1 rounded-full uppercase tracking-widest text-[10px] font-black">
+            Step {{ index + 1 }}
+          </Badge>
+          <h2 v-if="settings.title" class="text-3xl md:text-5xl font-black tracking-tighter mb-4">{{ settings.title }}</h2>
+          <p v-if="settings.description" class="text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-2xl">{{ settings.description }}</p>
+        </div>
+        
+        <div class="step-content">
+          <slot />
+        </div>
+      </div>
+    </template>
+  </BaseBlock>
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onMounted } from 'vue'
-import { Button } from '../ui'
-import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js'
-import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js'
-import { getLayoutStyles } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import { type CSSProperties } from 'vue'
+import BaseBlock from '../components/BaseBlock.vue'
+import { Badge } from '../ui'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
-const props = withDefaults(defineProps<{
-  module: BlockInstance
-  mode?: 'view' | 'edit'
-  device?: 'desktop' | 'tablet' | 'mobile'
-  index?: number
+withDefaults(defineProps<{
+  module: BlockInstance;
+  mode?: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile';
+  index?: number;
 }>(), {
   mode: 'view',
-  device: 'desktop'
+  device: 'desktop',
+  index: 0
 })
 
-const settings = computed(() => props.module.settings || {})
-
-// Inject from FormRenderer
-const currentStep = inject<any>('currentStep', { value: 0 })
-const totalSteps = inject<any>('totalSteps', { value: 1 })
-const setTotalSteps = inject<any>('setTotalSteps', () => {})
-const goToNextStep = inject<any>('goToNextStep', () => {})
-const goToPrevStep = inject<any>('goToPrevStep', () => {})
-const submitButtonText = inject<any>('submitButtonText', 'Submit')
-const hideButtons = inject<any>('hideStepButtons', false)
-
-// Find current index among siblings (handled by renderer)
-const currentStepIndex = computed(() => props.index ?? 0)
-const isCurrentStep = computed(() => currentStep.value === currentStepIndex.value)
-
-onMounted(() => {
-  // This is tricky because we don't know the exact index here easily without props from parent
-})
+const stepStyles = (settings: ModuleSettings): CSSProperties => {
+  return {
+    opacity: settings.visible === false ? 0.3 : 1,
+    pointerEvents: settings.visible === false ? 'none' : 'auto'
+  } as CSSProperties
+}
 </script>
 
 <style scoped>
-.form-step-block {
-  width: 100%;
-}
+.form-step-block { width: 100%; }
 </style>

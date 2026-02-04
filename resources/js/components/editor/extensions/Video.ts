@@ -2,10 +2,12 @@ import { Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import VideoNodeView from '../nodes/VideoNodeView.vue'
 
+import { type Component } from 'vue'
+
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         video: {
-            setVideo: (options: any) => ReturnType,
+            setVideo: (options: Record<string, unknown>) => ReturnType,
         }
     }
 }
@@ -66,7 +68,7 @@ export const VideoExtension = Node.create({
     },
 
     addNodeView() {
-        return VueNodeViewRenderer(VideoNodeView)
+        return VueNodeViewRenderer(VideoNodeView as unknown as Component)
     },
 
     addCommands() {

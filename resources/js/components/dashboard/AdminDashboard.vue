@@ -105,7 +105,7 @@
                     </div>
                     <!-- Time Range Filter -->
                     <div class="w-[180px]">
-                        <Select v-model="timeRange" @update:model-value="fetchTraffic">
+                        <Select v-model="timeRange">
                             <SelectTrigger class="w-full">
                                 <SelectValue :placeholder="$t('features.dashboard.traffic.filters.last7Days')" />
                             </SelectTrigger>
@@ -124,9 +124,9 @@
                         </div>
                         <LineChart
                             v-else-if="visitsDesktop.length > 0"
-                            :data="(visitsDesktop as any[])"
+                            :data="visitsDesktop"
                             label="Desktop"
-                            :compare-data="(visitsMobile as any[])"
+                            :compare-data="visitsMobile"
                             compare-label="Mobile"
                         />
                          <div v-else class="h-full flex flex-col items-center justify-center text-muted-foreground space-y-2">
@@ -165,12 +165,11 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { ref, onMounted, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import api from '@/services/api';
-import { parseSingleResponse, parseResponse, ensureArray } from '@/utils/responseParser';
-import type { SystemStats, ContentStats, MediaStats, TrafficItem } from '@/types/dashboard';
+import { parseSingleResponse, ensureArray } from '@/utils/responseParser';
+import type { SystemStats, TrafficItem, TrafficDataPoint, DashboardData } from '@/types/dashboard';
 
 import QuickActions from '@/components/admin/QuickActions.vue';
 import SystemHealthWidget from '@/components/admin/SystemHealthWidget.vue';
@@ -209,160 +208,113 @@ const stats = ref<SystemStats>({
     media: { total: 0 },
     users: { total: 0 },
 });
-const visitsDesktop = ref<TrafficItem[]>([]); 
-const visitsMobile = ref<TrafficItem[]>([]);
+const visitsDesktop = ref<TrafficDataPoint[]>([]); 
+const visitsMobile = ref<TrafficDataPoint[]>([]);
 const loadingVisits = ref(false);
 const timeRange = ref('7'); 
 const recentActivityWidget = ref<InstanceType<typeof RecentActivityWidget> | null>(null);
 
 const refreshDashboard = async () => {
+    if (loadingVisits.value) return;
     loadingVisits.value = true;
     try {
-        await Promise.all([
-            fetchStats(),
-            fetchTraffic(),
-            recentActivityWidget.value?.fetchActivities()
+        await Promise.allSettled([
+            fetchDashboardData(true),
+            recentActivityWidget.value?.fetchActivities() ?? Promise.resolve()
         ]);
-    } catch (error: any) {
-        if (error && typeof error === 'object' && 'code' in error && 'response' in error) {
-            const err = error as { code: string; response?: { status: number } };
+    } catch (error: unknown) {
+        if (typeof error === 'object' && error !== null && 'code' in error && 'response' in error) {
+            const err = error as { code?: string; response?: { status?: number } };
             if (err.code !== 'ERR_CANCELED' && err.response?.status !== 401) {
                 logger.error('Failed to refresh dashboard:', error);
             }
+        } else {
+            logger.error('Failed to refresh dashboard:', error);
         }
     } finally {
         loadingVisits.value = false;
     }
 };
 
-const fetchStats = async () => {
+const fetchDashboardData = async (skipLoading = false) => {
+    if (!skipLoading) loadingVisits.value = true;
     try {
-        if (authStore.hasPermission('manage system')) {
-            const response = await api.get('/admin/ja/system/statistics');
-            const data = parseSingleResponse<SystemStats>(response);
-            
-            if (data) {
+        let endpoint = '/dashboard/viewer';
+        if (authStore.hasPermission('manage users') || authStore.hasPermission('manage settings')) {
+            endpoint = '/dashboard/admin';
+        } else if (authStore.hasPermission('create content') || authStore.hasPermission('edit content')) {
+            endpoint = '/dashboard/creator';
+        }
+
+        const response = await api.get(endpoint, {
+            params: { days: timeRange.value }
+        });
+        const rawData = parseSingleResponse<Record<string, unknown>>(response);
+
+        // Handle potential double wrapping from Laravel Resources + BaseController
+        const data = (rawData?.data as DashboardData) || (rawData as DashboardData);
+
+        if (data) {
+            // Update stats
+            if (data.stats) {
                 stats.value = {
                     contents: {
-                        total: data.contents?.total ?? 0,
-                        published: data.contents?.published ?? 0,
-                        pending: data.contents?.pending ?? 0,
+                        total: data.stats.contents?.total ?? data.stats.myContents?.total ?? 0,
+                        published: data.stats.contents?.published ?? data.stats.myContents?.published ?? 0,
+                        pending: data.stats.contents?.pending ?? data.stats.myContents?.pending ?? 0,
                     },
                     media: {
-                        total: data.media?.total ?? 0,
+                        total: data.stats.media?.total ?? data.stats.myMedia?.total ?? 0,
                     },
                     users: {
-                        total: data.users?.total ?? 0,
+                        total: data.stats.users?.total ?? 0,
                     },
                 };
             }
-        } 
-        else if (authStore.hasPermission('view content')) {
-            const response = await api.get('/admin/ja/contents/stats');
-            const data = parseSingleResponse<ContentStats>(response);
-            
-            if (data) {
-                if (stats.value.contents) {
-                   stats.value.contents = {
-                        total: data.total ?? 0,
-                        published: data.published ?? 0,
-                        pending: data.pending ?? 0,
+
+            // Update traffic/charts
+            if (data.charts?.contentTraffic || data.charts?.userActivity) {
+                const trafficRaw = (data.charts.contentTraffic || data.charts.userActivity) as (TrafficItem | { date: string; count: number })[];
+                const traffic = ensureArray<TrafficItem | { date: string; count: number }>(trafficRaw);
+                
+                visitsDesktop.value = traffic.map(item => {
+                    const period = 'period' in item ? item.period : item.date;
+                    const visits = 'visits' in item ? item.visits : item.count;
+                    return {
+                        period: period || '',
+                        visits: Math.ceil((Number(visits) || 0) * 0.4)
                     };
-                }
-            }
-            
-            if (authStore.hasPermission('view media')) {
-                try {
-                    const mediaResponse = await api.get('/admin/ja/media/statistics');
-                    const mediaData = parseSingleResponse<MediaStats>(mediaResponse);
-                    if (mediaData && stats.value.media) {
-                        stats.value.media = { total: mediaData.total_count ?? mediaData.total ?? 0 };
-                    }
-                } catch (e) { /* Ignore */ }
+                });
+
+                visitsMobile.value = traffic.map(item => {
+                    const period = 'period' in item ? item.period : item.date;
+                    const visits = 'visits' in item ? item.visits : item.count;
+                    return {
+                        period: period || '',
+                        visits: Math.ceil((Number(visits) || 0) * 0.6)
+                    };
+                });
             }
         }
-    } catch (error: any) {
-        if (error && typeof error === 'object' && 'code' in error && 'response' in error) {
-            const err = error as { code: string; response?: { status: number } };
+    } catch (error: unknown) {
+        if (typeof error === 'object' && error !== null && 'code' in error && 'response' in error) {
+            const err = error as { code?: string; response?: { status?: number } };
             if (err.code !== 'ERR_CANCELED' && err.response?.status !== 401) {
-                logger.error('Failed to fetch statistics:', error);
+                logger.error('Failed to fetch dashboard data:', error);
             }
-        }
-    }
-};
-
-const fetchTraffic = async () => {
-    if (!authStore.user || !authStore.hasPermission('view analytics')) {
-        // Fallback for simple traffic if not specifically analytics-enabled
-        loadingVisits.value = true;
-        try {
-            const response = await api.get('/admin/ja/system/traffic', {
-                params: { days: timeRange.value }
-            });
-            const { data } = parseResponse(response);
-            const traffic = ensureArray<TrafficItem>(data);
-            
-            visitsDesktop.value = traffic.map(item => ({
-                period: item.period,
-                visits: typeof item.visits === 'number' ? item.visits : Number(item.desktop_visits || 0)
-            }));
-            
-            visitsMobile.value = traffic.map(item => ({
-                period: item.period,
-                visits: typeof item.visits === 'number' ? 0 : Number(item.mobile_visits || 0)
-            }));
-        } catch (error: any) {
-             logger.error('Failed to fetch traffic:', error);
-        } finally {
-            loadingVisits.value = false;
-        }
-        return;
-    }
-
-    loadingVisits.value = true;
-    try {
-        const days = parseInt(timeRange.value);
-        const endDate = new Date();
-        const startDate = new Date();
-        startDate.setDate(endDate.getDate() - days);
-
-        const params = {
-            date_from: startDate.toISOString().split('T')[0],
-            date_to: endDate.toISOString().split('T')[0],
-        };
-
-        const response = await api.get('/admin/ja/analytics/visits', { params });
-        const data = parseResponse(response);
-        const totalVisits = ensureArray<TrafficItem>(data.data);
-        
-        if (totalVisits.length > 0) {
-            visitsDesktop.value = totalVisits.map(item => ({
-                period: item.period,
-                visits: Math.round(((item.visits as number) || 0) * 0.4) 
-            }));
-
-            visitsMobile.value = totalVisits.map(item => ({
-                period: item.period,
-                visits: Math.round(((item.visits as number) || 0) * 0.6)
-            }));
         } else {
-             visitsDesktop.value = [];
-             visitsMobile.value = [];
-        }
-    } catch (error: any) {
-        if (error && typeof error === 'object' && 'code' in error && 'response' in error) {
-            const err = error as { code: string; response?: { status: number } };
-            if (err.code !== 'ERR_CANCELED' && err.response?.status !== 401) {
-                logger.error('Failed to fetch traffic samples:', error);
-            }
+            logger.error('Failed to fetch dashboard data:', error);
         }
     } finally {
-        loadingVisits.value = false;
+        if (!skipLoading) loadingVisits.value = false;
     }
 };
 
+watch(timeRange, () => {
+    fetchDashboardData();
+});
+
 onMounted(() => {
-    fetchStats();
-    fetchTraffic();
+    fetchDashboardData();
 });
 </script>

@@ -96,7 +96,7 @@ const emit = defineEmits<{
     (e: 'submitted'): void;
 }>();
 
-const { t } = useI18n();
+const { t: _t } = useI18n();
 const authStore = useAuthStore();
 const toast = useToast();
 const { validateWithZod, setErrors, clearErrors } = useFormValidation(commentSchema);
@@ -110,9 +110,9 @@ const form = ref<CommentForm>({
     captcha_input: '',
 });
 
-const handleCaptchaVerified = (payload: any) => {
+const handleCaptchaVerified = (payload: { token: string; answer?: string; position?: string; code?: string }) => {
     form.value.captcha_token = payload.token;
-    form.value.captcha_input = payload.answer || payload.position || payload.code;
+    form.value.captcha_input = payload.answer || payload.position || payload.code || '';
 };
 
 const loading = ref(false);
@@ -137,11 +137,12 @@ const handleSubmit = async () => {
 
         emit('submitted');
         toast.success.create('Comment');
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
+    } catch (error: unknown) {
+        const err = error as import('axios').AxiosError<{ errors?: Record<string, string[]> }>;
+        if (err.response?.status === 422) {
+            setErrors(err.response.data?.errors || {});
         } else {
-            toast.error.fromResponse(error);
+            toast.error.fromResponse(err);
         }
     } finally {
         loading.value = false;

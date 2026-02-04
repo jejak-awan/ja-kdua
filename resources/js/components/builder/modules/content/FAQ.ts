@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -103,7 +103,7 @@ const FAQModule: ModuleDefinition = {
             {
                 id: 'questionTypography',
                 label: 'Question Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `question_${f.name}`,
                     label: `Question ${f.label}`
@@ -112,7 +112,7 @@ const FAQModule: ModuleDefinition = {
             {
                 id: 'answerTypography',
                 label: 'Answer Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `answer_${f.name}`,
                     label: `Answer ${f.label}`

@@ -108,18 +108,18 @@ export const borderDefaults: ModuleSettings = {
  * Generate CSS border style object
  */
 export const getBorderStyle = (settings: ModuleSettings) => {
-    const style: any = {};
+    const style: Record<string, string | number | undefined> = {};
 
     if (settings.borderStyle && settings.borderStyle !== 'none') {
-        style.borderStyle = settings.borderStyle;
-        style.borderWidth = `${settings.borderWidth || 1}px`;
-        style.borderColor = settings.borderColor || '#e5e7eb';
+        style.borderStyle = settings.borderStyle as string;
+        style.borderWidth = `${(settings.borderWidth as number) || 1}px`;
+        style.borderColor = (settings.borderColor as string) || '#e5e7eb';
     }
 
     if (settings.borderRadius) {
         style.borderRadius = typeof settings.borderRadius === 'number'
             ? `${settings.borderRadius}px`
-            : settings.borderRadius;
+            : settings.borderRadius as string;
     }
 
     return style;

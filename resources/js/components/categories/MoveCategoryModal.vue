@@ -75,12 +75,12 @@ interface Category {
     id: number | string;
     name: string;
     parent_id?: number | string | null;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 const { t } = useI18n();
 const toast = useToast();
-const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(moveCategorySchema);
+const { errors: _errors, validateWithZod, setErrors, clearErrors } = useFormValidation(moveCategorySchema);
 
 const props = defineProps<{
     category: Category;
@@ -129,7 +129,7 @@ const getCategoryPath = (category: Category) => {
 };
 
 const handleSubmit = async () => {
-    if (!validateWithZod({ parent_id: selectedParentId.value } as any)) return;
+    if (!validateWithZod({ parent_id: selectedParentId.value })) return;
 
     saving.value = true;
     clearErrors();
@@ -139,11 +139,12 @@ const handleSubmit = async () => {
         });
         toast.success.action(t('features.categories.messages.moveSuccess'));
         emit('moved');
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
+    } catch (error: unknown) {
+        const err = error as import('axios').AxiosError<{ errors: Record<string, string[]> }>;
+        if (err.response?.status === 422) {
+            setErrors(err.response.data.errors || {});
         } else {
-            toast.error.fromResponse(error);
+            toast.error.fromResponse(err);
         }
     } finally {
         saving.value = false;

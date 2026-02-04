@@ -259,7 +259,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, watch, computed } from 'vue';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import Folder from 'lucide-vue-next/dist/esm/icons/folder.js';
@@ -270,9 +270,6 @@ import Grid from 'lucide-vue-next/dist/esm/icons/grid-2x2.js';
 import ListIcon from 'lucide-vue-next/dist/esm/icons/list.js';
 import Home from 'lucide-vue-next/dist/esm/icons/house.js';
 import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
-import Search from 'lucide-vue-next/dist/esm/icons/search.js';
-import ArrowUp from 'lucide-vue-next/dist/esm/icons/arrow-up.js';
-import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
 import { Button } from '@/components/ui';
 import MediaUpload from './MediaUpload.vue';
 import type { Media, MediaFolder, MediaConstraints } from '@/types/cms';
@@ -358,7 +355,6 @@ const breadcrumbs = ref<MediaFolder[]>([]);
 const folders = ref<MediaFolder[]>([]);
 const mediaList = ref<Media[]>([]);
 const selectedMedia = ref<Media | null>(null);
-const searchQuery = ref('');
 
 const fetchMedia = async () => {
     loading.value = true;
@@ -411,25 +407,13 @@ const fetchMedia = async () => {
     }
 };
 
-// Restore backdrop click
-const handleBackdropClick = () => {
-    showModal.value = false;
-};
+
 
 const selectedMediaId = computed(() => selectedMedia.value ? selectedMedia.value.id : null);
 
 const navigateToFolder = (folder: MediaFolder) => {
     currentFolderId.value = folder.id;
     breadcrumbs.value.push(folder);
-    selectedMedia.value = null;
-    fetchMedia();
-};
-
-const navigateUp = () => {
-    if (breadcrumbs.value.length === 0) return;
-    breadcrumbs.value.pop();
-    const lastFolder = breadcrumbs.value[breadcrumbs.value.length - 1];
-    currentFolderId.value = lastFolder ? lastFolder.id : null;
     selectedMedia.value = null;
     fetchMedia();
 };
@@ -467,8 +451,8 @@ const confirmSelection = () => {
     }
 };
 
-const handleMediaUploaded = (response: any) => {
-    const media = response.media || response;
+const handleMediaUploaded = (response: Record<string, unknown> | Media) => {
+    const media = (response as Record<string, unknown>).media as Media || response as Media;
     if (media) {
         mediaList.value.unshift(media);
         showUpload.value = false;

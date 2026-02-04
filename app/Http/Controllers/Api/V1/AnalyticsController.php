@@ -90,27 +90,37 @@ class AnalyticsController extends BaseApiController
             "analytics_top_content_{$dateFrom}_{$dateTo}_{$limit}",
             now()->addMinutes(30),
             function () use ($dateFrom, $dateTo, $limit) {
-                // Get content IDs with most visits in date range
+                // Get content URLs with most visits in date range
                 $visitCounts = AnalyticsVisit::whereBetween('visited_at', [$dateFrom, $dateTo])
                     ->select('url', DB::raw('count(*) as visits_count'))
                     ->groupBy('url')
                     ->orderByDesc('visits_count')
-                    ->limit($limit * 2)  // Get extra to match with content
-                    ->pluck('visits_count', 'url');
+                    ->limit($limit * 5) // Increased limit to ensure we find enough content slugs
+                    ->get();
 
+                // Extract potential slugs from URLs (basename of /path/to/slug)
+                $slugToVisits = [];
+                foreach ($visitCounts as $visit) {
+                    $path = parse_url($visit->url, PHP_URL_PATH);
+                    if ($path) {
+                        $slug = basename($path);
+                        if ($slug && $slug !== 'admin' && $slug !== 'api') {
+                            $slugToVisits[$slug] = ($slugToVisits[$slug] ?? 0) + $visit->visits_count;
+                        }
+                    }
+                }
+
+                if (empty($slugToVisits)) {
+                    return collect();
+                }
+
+                // Query only the contents that match the extracted slugs
                 return Content::with('author')
+                    ->whereIn('slug', array_keys($slugToVisits))
                     ->where('status', 'published')
                     ->get()
-                    ->map(function ($content) use ($visitCounts) {
-                        // Match content slug to URL visits
-                        $visits = 0;
-                        foreach ($visitCounts as $url => $count) {
-                            if (str_contains($url, $content->slug)) {
-                                $visits += $count;
-                            }
-                        }
-                        $content->visits_count = $visits;
-
+                    ->map(function ($content) use ($slugToVisits) {
+                        $content->visits_count = $slugToVisits[$content->slug] ?? 0;
                         return $content;
                     })
                     ->sortByDesc('visits_count')

@@ -1688,8 +1688,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, inject } from 'vue'
-import type { BlockInstance, BuilderInstance, SettingDefinition } from '@/types/builder'
+import { ref, computed, inject } from 'vue'
+import type { BlockInstance, BuilderInstance, SettingDefinition, SubFieldGroup } from '@/types/builder'
 import { useI18n } from 'vue-i18n'
 import PaintBucket from 'lucide-vue-next/dist/esm/icons/paint-bucket.js';
 import Image from 'lucide-vue-next/dist/esm/icons/image.js';
@@ -1700,28 +1700,24 @@ import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Component from 'lucide-vue-next/dist/esm/icons/component.js';
 import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
-import Maximize2 from 'lucide-vue-next/dist/esm/icons/maximize.js';
 import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
 import FlipHorizontal from 'lucide-vue-next/dist/esm/icons/flip-horizontal.js';
 import FlipVertical from 'lucide-vue-next/dist/esm/icons/flip-vertical.js';
 import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
-import RotateCw from 'lucide-vue-next/dist/esm/icons/rotate-cw.js';
-import Lock from 'lucide-vue-next/dist/esm/icons/lock.js';
 import Link from 'lucide-vue-next/dist/esm/icons/link.js';
 import Unlink from 'lucide-vue-next/dist/esm/icons/unlink.js';
 import Square from 'lucide-vue-next/dist/esm/icons/square.js';
 import RectangleHorizontal from 'lucide-vue-next/dist/esm/icons/rectangle-horizontal.js';
 import RectangleVertical from 'lucide-vue-next/dist/esm/icons/rectangle-vertical.js';
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
-import Check from 'lucide-vue-next/dist/esm/icons/check.js';
-import Ban from 'lucide-vue-next/dist/esm/icons/ban.js';
+
 import Contrast from 'lucide-vue-next/dist/esm/icons/contrast.js';
 import ColorField from '@/components/builder/fields/ColorField.vue'
 import GradientField from '@/components/builder/fields/GradientField.vue'
 import UploadField from '@/components/builder/fields/UploadField.vue'
 import ToggleField from '@/components/builder/fields/ToggleField.vue'
 import SelectField from '@/components/builder/fields/SelectField.vue'
-import TextField from '@/components/builder/fields/TextField.vue'
+
 import DimensionField from '@/components/builder/fields/DimensionField.vue'
 import PatternField from '@/components/builder/fields/PatternField.vue'
 import MaskField from '@/components/builder/fields/MaskField.vue'
@@ -1731,19 +1727,23 @@ import ResponsiveFieldModal from '@/components/builder/modals/ResponsiveFieldMod
 import FieldActions from '@/components/builder/fields/FieldActions.vue'
 import { BaseDropdown } from '@/components/builder/ui'
 import { getHarmoniousGradientColors, getBackgroundStyles, generateGradientCSS } from '@/shared/utils/styleUtils'
+import type { Gradient } from '@/shared/utils/styleUtils'
 import { BackgroundPatterns, BackgroundMasks } from '@/shared/utils/AssetLibrary'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   field?: SettingDefinition
   module: BlockInstance
   device?: string
-}>()
+}>(), {
+  field: undefined,
+  device: undefined
+})
 
 const { t } = useI18n()
 const builder = inject<BuilderInstance>('builder')
 
 const activeTab = ref('color')
-const colorFieldRef = ref<any>(null)
+const colorFieldRef = ref<{ focus: () => void, openPicker: () => void } | null>(null)
 const isColorHovered = ref(false)
 const isImageHovered = ref(false)
 const isVideoHovered = ref(false)
@@ -1755,8 +1755,8 @@ interface ResponsiveModalState {
     label: string;
     baseKey: string;
     type: string;
-    options?: any;
-    subFields?: any;
+    options?: unknown[] | Record<string, unknown>;
+    subFields?: SubFieldGroup[];
 }
 
 const responsiveModal = ref<ResponsiveModalState>({
@@ -1764,7 +1764,7 @@ const responsiveModal = ref<ResponsiveModalState>({
     label: '',
     baseKey: '',
     type: 'color',
-    options: null,
+    options: undefined,
     subFields: []
 })
 
@@ -1836,13 +1836,13 @@ const getInfoContent = (baseKey: string) => {
     return null
 }
 
-const openResponsiveModal = (label: string, baseKey: string, type: string = 'color', options: any = null, subFields: any[] = []) => {
+const openResponsiveModal = (label: string, baseKey: string, type: string = 'color', options: unknown[] | Record<string, unknown> | null = null, subFields: SubFieldGroup[] = []) => {
     responsiveModal.value = {
         show: true,
         label,
         baseKey,
         type,
-        options,
+        options: options || undefined,
         subFields
     }
 }
@@ -1850,7 +1850,7 @@ const openResponsiveModal = (label: string, baseKey: string, type: string = 'col
 // Computed module settings to ensure reactivity
 const moduleSettings = computed(() => {
     // Explicitly track blocks to ensure reactivity
-    if (builder?.blocks) { const _ = builder?.blocks }
+    if (builder?.blocks) { void builder.blocks }
     
     const currentModule = builder?.findModule(props.module.id)
     return currentModule?.settings || {}
@@ -1912,46 +1912,7 @@ const activePattern = computed(() => {
     return BackgroundPatterns.find(p => p.id === val)
 })
 
-const resolvedPatternSvg = computed(() => {
-    const pattern = activePattern.value
-    if (!pattern) return ''
-    
-    // Ensure boolean conversion - values might be string 'true'/'false' or '0'/'1'
-    const rotateVal = getResolvedValue('backgroundPatternRotate')
-    const invertVal = getResolvedValue('backgroundPatternInvert')
-    const rotate = rotateVal === true || rotateVal === 'true' || rotateVal === 1 || rotateVal === '1'
-    const invert = invertVal === true || invertVal === 'true' || invertVal === 1 || invertVal === '1'
-    
-    let path = ''
-    
-    // Check for Divi 5 nested structure (regular/inverted)
-    if (pattern.svg && typeof pattern.svg === 'object') {
-        const svg = pattern.svg as any
-        if (svg.regular || svg.inverted) {
-            const stateKey = invert ? 'inverted' : 'regular'
-            const rotateKey = rotate ? 'rotated' : 'default'
-            const stateObj = svg[stateKey] || svg.regular
-            path = stateObj?.[rotateKey] || stateObj?.default || ''
-        } else {
-            // Legacy flat structure
-            if (invert && svg.inverted) {
-                path = svg.inverted
-            } else if (rotate && svg.rotated) {
-                path = svg.rotated
-            } else {
-                path = svg.default || svg
-            }
-        }
-    } else {
-        path = (pattern.svg as any) || ''
-    }
-    
-    if (typeof path === 'object') {
-        path = (path as any).landscape || (path as any).square || (path as any).default || ''
-    }
-    
-    return typeof path === 'string' ? path : ''
-})
+
 
 const patternOptions = computed(() => {
     return BackgroundPatterns.map(p => ({ 
@@ -2001,55 +1962,10 @@ const maskAspectRatioOptions = computed(() => [
     { label: t('builder.fields.background.mask.aspectRatio.options.portrait'), value: 'portrait', icon: RectangleVertical }
 ])
 
-const resolvedMaskSvg = computed(() => {
-    const mask = activeMask.value
-    if (!mask) return ''
-    
-    // Ensure boolean conversion - values might be string 'true'/'false' or '0'/'1'
-    const rotateVal = getResolvedValue('backgroundMaskRotate')
-    const invertVal = getResolvedValue('backgroundMaskInvert')
-    const rotate = rotateVal === true || rotateVal === 'true' || rotateVal === 1 || rotateVal === '1'
-    const invert = invertVal === true || invertVal === 'true' || invertVal === 1 || invertVal === '1'
-    const aspectRatio = getResolvedValue('backgroundMaskAspectRatio') || 'landscape'
-    
-    let svgStr = ''
-    
-    // Check for Divi 5 nested structure (regular.default/inverted.default)
-    if (mask.svg && typeof mask.svg === 'object' && (mask.svg as any).regular) {
-        const svg = mask.svg as any
-        const stateKey = invert ? 'inverted' : 'regular'
-        const rotateKey = rotate ? 'rotated' : 'default'
-        const stateObj = svg[stateKey] || svg.regular
-        const rotateObj = stateObj?.[rotateKey] || stateObj?.default || stateObj
-        
-        if (typeof rotateObj === 'string') {
-            svgStr = rotateObj
-        } else {
-            svgStr = rotateObj?.[aspectRatio] || rotateObj?.landscape || rotateObj?.square || ''
-        }
-    } else if (mask.svg && typeof mask.svg === 'object') {
-        const svg = mask.svg as any
-        // Structure: svg.default/rotated/inverted with aspect ratios directly inside
-        let stateKey = 'default'
-        if (invert && svg.inverted) {
-            stateKey = 'inverted'
-        } else if (rotate && svg.rotated) {
-            stateKey = 'rotated'
-        }
-        
-        const stateObj = svg[stateKey] || svg.default || svg
-        if (typeof stateObj === 'string') {
-            svgStr = stateObj
-        } else {
-            svgStr = stateObj[aspectRatio] || stateObj.landscape || stateObj.square || ''
-        }
-    }
-    
-    return svgStr
-})
+
 
 const activeMask = computed(() => {
-    const val = getResolvedValue('backgroundMask')
+    const val = getResolvedValue<string | null>('backgroundMask')
     if (!val || val === 'none') return null
     return BackgroundMasks.find(m => m.id === val)
 })
@@ -2071,21 +1987,23 @@ const currentDevice = computed(() => {
     return builder?.device.value || 'desktop'
 })
 
-const getResponsiveValue = (baseKey: string): any => {
+const getResponsiveValue = <T = unknown>(baseKey: string): T => {
     // builder?.device.value is a string (primitive) if accessed via useBuilder's return, 
     // but here we are using the computed wrapper locally.
     const dev = currentDevice.value
     const suffix = dev === 'desktop' ? '' : (dev === 'mobile' ? '_mobile' : `_${dev}`)
     const val = moduleSettings.value[baseKey + suffix]
     
-    return (val === undefined || val === null) ? '' : val
+    // Return empty string if undefined/null or empty object
+    const isEmpty = val === undefined || val === null || (typeof val === 'object' && val !== null && !Array.isArray(val) && Object.keys(val).length === 0)
+    return isEmpty ? '' as unknown as T : val as T
 }
 
-const getResolvedValue = (baseKey: string): any => {
-    const val = getResponsiveValue(baseKey)
-    if (val === '' && currentDevice.value !== 'desktop') {
-        const placeholder = getResponsivePlaceholder(baseKey)
-        return (placeholder === undefined || placeholder === null) ? '' : placeholder
+const getResolvedValue = <T = unknown>(baseKey: string): T => {
+    const val = getResponsiveValue<T>(baseKey)
+    if ((val as unknown) === '' && currentDevice.value !== 'desktop') {
+        const placeholder = getResponsivePlaceholder<T>(baseKey)
+        return (placeholder === undefined || placeholder === null) ? '' as unknown as T : placeholder
     }
     return val
 }
@@ -2097,35 +2015,24 @@ const hasOverride = (baseKey: string) => {
     return val !== undefined && val !== null && val !== ''
 }
 
-const getMaskOptionPreview = (mask: any) => {
-    if (!mask || !mask.svg) return ''
-    const aspectRatio = getResolvedValue('backgroundMaskAspectRatio') || 'landscape'
-    const svg = mask.svg
-    
-    // Check regular structure first
-    const stateObj = svg.regular || svg.default || svg
-    const rotateObj = stateObj.default || stateObj
-    
-    if (typeof rotateObj === 'string') return rotateObj
-    return rotateObj[aspectRatio] || rotateObj.landscape || rotateObj.square || ''
-}
 
-const getResponsivePlaceholder = (baseKey: string): any => {
-    if (currentDevice.value === 'desktop') return ''
+
+const getResponsivePlaceholder = <T = unknown>(baseKey: string): T => {
+    if (currentDevice.value === 'desktop') return '' as unknown as T
     const settings = moduleSettings.value
     const desktopValue = settings[baseKey] || ''
     const tabletValue = settings[baseKey + '_tablet']
     
     // In builder logic, '' means inherited.
-    if (currentDevice.value === 'tablet') return desktopValue
+    if (currentDevice.value === 'tablet') return desktopValue as T
     
     // For phone/mobile: if tablet has value, use it. Otherwise use desktop.
-    if (tabletValue !== undefined && tabletValue !== null && tabletValue !== '') return tabletValue
-    return desktopValue
+    if (tabletValue !== undefined && tabletValue !== null && tabletValue !== '') return tabletValue as T
+    return desktopValue as T
 }
 
-const getSyncedDimensionData = (key: string, value: any, suffix: string) => {
-    const finalData = { [key + suffix]: value }
+const getSyncedDimensionData = (key: string, value: string | number | null, suffix: string) => {
+    const finalData: Record<string, string | number | null> = { [key + suffix]: value }
     const syncMap: Record<string, string> = {
         'backgroundImageWidth': 'backgroundImageHeight',
         'backgroundImageHeight': 'backgroundImageWidth',
@@ -2150,11 +2057,11 @@ const getSyncedDimensionData = (key: string, value: any, suffix: string) => {
             return finalData
         }
 
-        const newValue = parseFloat(value)
+        const newValue = parseFloat(String(value))
         if (isNaN(newValue)) return finalData
 
-        let currentW = parseFloat(getResolvedValue(baseKey + 'Width'))
-        let currentH = parseFloat(getResolvedValue(baseKey + 'Height'))
+        let currentW = parseFloat(String(getResolvedValue(baseKey + 'Width')))
+        let currentH = parseFloat(String(getResolvedValue(baseKey + 'Height')))
         
         // If one is auto/NaN/0, treat it as 1:1 relative to the other
         if (isNaN(currentW) || currentW <= 0) currentW = !isNaN(currentH) && currentH > 0 ? currentH : newValue
@@ -2191,7 +2098,7 @@ const getSyncedDimensionData = (key: string, value: any, suffix: string) => {
 
 const colorPreviewStyle = computed(() => {
     void lastUpdate.value
-    const val = getResolvedValue('backgroundColor')
+    const val = getResolvedValue<string>('backgroundColor')
     return {
         backgroundColor: val || 'transparent'
     }
@@ -2200,8 +2107,8 @@ const colorPreviewStyle = computed(() => {
 const gradientPreviewStyle = computed(() => {
     // Track moduleSettings for reactivity
     void lastUpdate.value
-    const gradient = getResolvedValue('backgroundGradient')
-    if (!gradient) return {}
+    const gradient = getResolvedValue<Gradient>('backgroundGradient')
+    if (!gradient || (typeof gradient === 'object' && !('stops' in gradient))) return {}
 
     return {
         background: generateGradientCSS(gradient)
@@ -2214,16 +2121,16 @@ const imagePreviewStyle = computed(() => {
     const imageUrl = getResolvedValue('backgroundImage')
     if (!imageUrl) return {}
 
-    const styles: Record<string, any> = {
+    const styles: Record<string, string | number | undefined> = {
         backgroundImage: `url(${imageUrl})`,
-        backgroundRepeat: getResolvedValue('backgroundImageRepeat') || 'no-repeat',
-        backgroundPosition: getResolvedValue('backgroundImagePosition') || 'center'
+        backgroundRepeat: getResolvedValue<string>('backgroundImageRepeat') || 'no-repeat',
+        backgroundPosition: getResolvedValue<string>('backgroundImagePosition') || 'center'
     }
 
-    let size = getResolvedValue('backgroundImageSize') || 'cover'
+    let size = (getResolvedValue('backgroundImageSize') as string) || 'cover'
     if (size === 'custom') {
-        const w = getResolvedValue('backgroundImageWidth') || 'auto'
-        const h = getResolvedValue('backgroundImageHeight') || 'auto'
+        const w = (getResolvedValue('backgroundImageWidth') as string) || 'auto'
+        const h = (getResolvedValue('backgroundImageHeight') as string) || 'auto'
         size = `${w} ${h}`
     } else if (size === 'stretch') {
         size = '100% 100%'
@@ -2237,14 +2144,14 @@ const imagePreviewStyle = computed(() => {
 })
 
 const videoPreviewStyle = computed(() => {
-    const styles: Record<string, any> = {}
-    const w = getResolvedValue('backgroundVideoWidth')
-    const h = getResolvedValue('backgroundVideoHeight')
+    const styles: Record<string, string | number | undefined> = {}
+    const w = getResolvedValue<string | number>('backgroundVideoWidth')
+    const h = getResolvedValue<string | number>('backgroundVideoHeight')
     
     // For videos, we apply the dimension directly to the element
     // but we constrain it to the 120px box
-    if (w) styles.width = w
-    if (h) styles.height = h
+    if (w && typeof w !== 'object') styles.width = w
+    if (h && typeof h !== 'object') styles.height = h
     
     styles.maxWidth = '100%'
     styles.maxHeight = '100%'
@@ -2264,8 +2171,8 @@ const lastUpdate = ref(0)
 
 const combinedBackgroundStyle = computed(() => {
     // Explicitly track moduleSettings and lastUpdate for reactivity
-    const settings = moduleSettings.value
-    const trigger = lastUpdate.value
+    void moduleSettings.value
+    void lastUpdate.value
     
     // List of all background-related keys to resolve
     const backgroundKeys = [
@@ -2282,7 +2189,7 @@ const combinedBackgroundStyle = computed(() => {
         'backgroundMaskRepeat', 'backgroundMaskRepeatOrigin', 'backgroundMaskBlendMode'
     ]
     
-    const resolvedSettings: Record<string, any> = {}
+    const resolvedSettings: Record<string, unknown> = {}
     backgroundKeys.forEach(key => {
         resolvedSettings[key] = getResolvedValue(key)
     })
@@ -2290,13 +2197,13 @@ const combinedBackgroundStyle = computed(() => {
     return getBackgroundStyles(resolvedSettings)
 })
 
-const updateSetting = (key: string, value: any) => {
+const updateSetting = (key: string, value: string | number | boolean | object | null) => {
     // If key is already responsive-specific (has suffix), use it directly
     if (key.includes('_tablet') || key.includes('_mobile')) {
         const baseKey = key.replace(/(_tablet|_mobile)$/, '')
         const match = key.match(/(_tablet|_mobile)$/)
         const suffix = match ? match[0] : ''
-        const syncedData = getSyncedDimensionData(baseKey, value, suffix)
+        const syncedData = getSyncedDimensionData(baseKey, value as string | number | null, suffix)
         builder?.updateModuleSettings(props.module.id, syncedData)
         lastUpdate.value++
         return
@@ -2304,7 +2211,7 @@ const updateSetting = (key: string, value: any) => {
 
     // Otherwise, append suffix based on current device
     const suffix = currentDevice.value === 'desktop' ? '' : (currentDevice.value === 'mobile' ? '_mobile' : `_${currentDevice.value}`)
-    const syncedData = getSyncedDimensionData(key, value, suffix)
+    const syncedData = getSyncedDimensionData(key, value as string | number | null, suffix)
 
     builder?.updateModuleSettings(props.module.id, syncedData)
     lastUpdate.value++
@@ -2338,27 +2245,27 @@ const handleResponsiveUpdate = (data: Record<string, unknown>) => {
                 const baseKey = parentPath.replace(/(_tablet|_mobile)$/, '')
                 existingParent = currentSettings[baseKey] || {}
             }
-            (finalData as any)[parentPath] = { ...(existingParent as object), [childKey]: value }
+            (finalData as Record<string, unknown>)[parentPath] = { ...(existingParent as object), [childKey]: value }
         } else {
             // Flat keys - Check for unit sync
             const baseKey = key.replace(/(_tablet|_mobile)$/, '')
             const suffix = key.match(/(_tablet|_mobile)$/)?.[0] || ''
-            const syncedData = getSyncedDimensionData(baseKey, value, suffix)
+            const syncedData = getSyncedDimensionData(baseKey, value as string | number | null, suffix)
             Object.assign(finalData, syncedData)
         }
     })
 
-    builder?.updateModuleSettings(props.module.id, finalData as any)
+    builder?.updateModuleSettings(props.module.id, finalData as Record<string, unknown>)
 }
 
 const initDefaultGradient = () => {
     // 1. Check current Background Color first
-    let baseColor = getResponsiveValue('backgroundColor')
+    let baseColor = getResponsiveValue<string>('backgroundColor')
     
     if (!baseColor) {
         // 2. Fallback to Global Variables (Primary Color)
-        const colors = builder?.globalVariables?.globalColors.value || []
-        baseColor = colors.find((c: any) => (c as any).name.toLowerCase().includes('primary'))?.value
+        const colors = builder?.globalVariables?.globalColors.value as { name: string; value: string }[] || []
+        baseColor = colors.find((c: { name: string; value: string }) => c.name.toLowerCase().includes('primary'))?.value as string
     }
 
     if (!baseColor) {
@@ -2369,7 +2276,7 @@ const initDefaultGradient = () => {
     // Generate a harmonious modern gradient pair
     const [c1, c2] = getHarmoniousGradientColors(baseColor)
 
-    const newGradient = {
+    const newGradient: Gradient = {
         type: 'linear',
         direction: '180deg',
         repeat: false,

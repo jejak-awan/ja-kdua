@@ -127,7 +127,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, reactive, computed, watch } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import { 
     Popover, 
     PopoverTrigger, 
@@ -164,7 +164,6 @@ const emit = defineEmits<{
 const hsv = reactive({ h: 0, s: 0, v: 0 });
 const saturationArea = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
-const hasEyeDropper = ref((window as any).EyeDropper !== undefined);
 
 // Helper: Hex to HSV
 const hexToHsv = (hex: string) => {
@@ -258,11 +257,12 @@ const updateFromPreset = (color: string) => {
 };
 
 const pickEyeDropper = async () => {
-    if (!(window as any).EyeDropper) {
+    if (!(window as unknown as { EyeDropper: unknown }).EyeDropper) {
         alert('Your browser does not support the Eyedropper API. Test in Chrome/Edge.');
         return;
     }
-    const eyeDropper = new (window as any).EyeDropper();
+    const EyeDropper = (window as unknown as { EyeDropper: new () => { open: () => Promise<{ sRGBHex: string }> } }).EyeDropper;
+    const eyeDropper = new EyeDropper();
     try {
         const result = await eyeDropper.open();
         if (result && result.sRGBHex) {

@@ -290,7 +290,7 @@
             <div class="flex-1 relative flex items-center separate-input-box">
                 <input 
                   type="number" 
-                  :value="parseInt(localSettings.length) || 100" 
+                  :value="parseInt(localSettings.length || '100%') || 100" 
                   @input="updateControl('length', ($event.target as HTMLInputElement).value + '%')"
                   class="base-input w-full pr-8"
                 />
@@ -312,7 +312,7 @@
             <BaseSlider 
                :min="0" 
                :max="100" 
-               :model-value="parseInt(localSettings.length) || 100" 
+               :model-value="parseInt(localSettings.length || '100%') || 100" 
                @update:model-value="updateControl('length', $event + '%')"
                class="flex-1"
              />
@@ -323,15 +323,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, inject, watch, nextTick } from 'vue'
-import type { BlockInstance, BuilderInstance } from '../../../types/builder'
+import { ref, computed, inject, watch, nextTick } from 'vue'
+import type { BuilderInstance, SettingDefinition, BlockInstance } from '@/types/builder'
+import type { Gradient, GradientStop } from '@/shared/utils/styleUtils'
 import { useI18n } from 'vue-i18n'
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import Copy from 'lucide-vue-next/dist/esm/icons/copy.js';
 import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
-import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';import ColorField from './ColorField.vue'
+import ColorField from './ColorField.vue'
 import SelectField from './SelectField.vue'
 import ToggleField from './ToggleField.vue'
 import { IconButton, BaseSlider, BaseDropdown } from '../ui'
@@ -339,10 +340,10 @@ import FieldActions from './FieldActions.vue'
 import { generateGradientCSS, getHarmoniousGradientColors } from '../../../shared/utils/styleUtils'
 
 const props = defineProps<{
-  field: any;
-  value?: any;
-  placeholderValue?: any;
-  module: any;
+  field?: SettingDefinition;
+  value?: Gradient;
+  placeholderValue?: Gradient;
+  module?: BlockInstance;
   minimal?: boolean;
   hidePreview?: boolean;
 }>()
@@ -352,7 +353,7 @@ const emit = defineEmits(['update:value', 'responsive'])
 const builder = inject<BuilderInstance>('builder')
 
 const sliderRef = ref(null)
-const activeColorFieldRef = ref<any>(null)
+const activeColorFieldRef = ref<{ openPicker: () => void } | null>(null)
 const activeStopIndex = ref(0)
 const isDragging = ref(false)
 const isHovered = ref(false)
@@ -390,8 +391,9 @@ const isDirectionDirty = computed(() => {
     return (localSettings.value.direction || '180deg') !== '180deg'
 })
 
-const handleDirectionNumberInput = (e: any) => {
-    updateControl('direction', e.target.value + directionUnit.value)
+const handleDirectionNumberInput = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    updateControl('direction', target.value + directionUnit.value)
 }
 
 const updateDirectionValue = (delta: number) => {
@@ -412,13 +414,13 @@ const setDirectionUnit = (unit: string) => {
 }
 
 const updateLengthValue = (delta: number) => {
-    let current = parseInt((localSettings.value as any).length) || 100
+    let current = parseInt(localSettings.value.length || '100') || 100
     let newVal = Math.max(0, Math.min(100, current + delta))
     updateControl('length', newVal + '%')
 }
 
 // Default settings for reset
-const defaultSettings = {
+const defaultSettings: Gradient = {
   type: 'linear',
   direction: '180deg',
   repeat: false,
@@ -430,7 +432,7 @@ const defaultSettings = {
 }
 
 // Internal state
-const localSettings = ref({ ...defaultSettings })
+const localSettings = ref<Gradient>({ ...defaultSettings })
 
 // Sync from props
 watch(() => props.value, (newVal) => {
@@ -466,8 +468,8 @@ const placeholderCSS = computed(() => {
 })
 
 const trackCSS = computed(() => {
-    const stops = [...localStops.value].sort((a: any, b: any) => a.position - b.position)
-    const stopString = stops.map((s: any) => `${s.color} ${s.position}%`).join(', ')
+    const stops = [...localStops.value].sort((a: GradientStop, b: GradientStop) => a.position - b.position)
+    const stopString = stops.map((s: GradientStop) => `${s.color} ${s.position}%`).join(', ')
     return `linear-gradient(to right, ${stopString})`
 })
 
@@ -482,8 +484,8 @@ const updateStopColor = (color: string) => {
   }
 }
 
-const updateControl = (key: string, val: any) => {
-  (localSettings.value as any)[key] = val
+const updateControl = <K extends keyof Gradient>(key: K, val: Gradient[K]) => {
+  localSettings.value[key] = val
   emitUpdate()
 }
 
@@ -494,8 +496,8 @@ const clearGradient = () => {
 
 const initDefaultGradient = () => {
     // Standard addition logic (copying from BackgroundField)
-    const colors: any[] = builder?.globalVariables?.globalColors.value || []
-    const baseColor = colors.find((c: any) => c.name.toLowerCase().includes('primary'))?.value || '#2EA3F2'
+    const colors = builder?.globalVariables?.globalColors.value || []
+    const baseColor = (colors as { name: string; value: string }[]).find((c) => c.name.toLowerCase().includes('primary'))?.value || '#2EA3F2'
     
     const [c1, c2] = getHarmoniousGradientColors(baseColor)
 
@@ -517,10 +519,10 @@ const initDefaultGradient = () => {
 const duplicateGradient = () => {
     // Implement Duplication as Mirroring for immediate visual change in the same box
     const duplicated = JSON.parse(JSON.stringify(localSettings.value))
-    duplicated.stops = (duplicated.stops as any[]).map((s: any) => ({
+    duplicated.stops = (duplicated.stops as GradientStop[]).map((s: GradientStop) => ({
         ...s,
         position: 100 - s.position
-    })).sort((a: any, b: any) => a.position - b.position)
+    })).sort((a: GradientStop, b: GradientStop) => a.position - b.position)
     
     // Update local state immediately for instant visual feedback
     localSettings.value = duplicated

@@ -10,8 +10,8 @@ export default {
     component: defineAsyncComponent(() => import('@/shared/blocks/LogoBlock.vue')),
     settings: [
         { key: 'type', type: 'select', label: 'Type', options: [{ label: 'Image', value: 'image' }, { label: 'Text', value: 'text' }], default: 'image' },
-        { key: 'src', type: 'image', label: 'Logo Image', default: '', condition: (s: any) => s.type === 'image' },
-        { key: 'text', type: 'text', label: 'Logo Text', default: 'Brand', condition: (s: any) => s.type === 'text' }
+        { key: 'src', type: 'image', label: 'Logo Image', default: '', condition: (s: Record<string, unknown>) => s.type === 'image' },
+        { key: 'text', type: 'text', label: 'Logo Text', default: 'Brand', condition: (s: Record<string, unknown>) => s.type === 'text' }
     ],
     defaultSettings: {
         type: 'image',

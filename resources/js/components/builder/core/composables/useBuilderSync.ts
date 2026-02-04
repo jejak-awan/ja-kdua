@@ -2,7 +2,9 @@ import { logger } from '@/utils/logger';
 import api from '@/services/api'
 import { triggerRef } from 'vue'
 import ModuleRegistry from '../ModuleRegistry'
-import type { BuilderState, PageMetadata, BlockInstance } from '@/types/builder'
+import type { BuilderState } from '@/types/builder'
+import type { Category, Tag } from '@/types/taxonomy'
+import type { Menu } from '@/types/menu'
 import type { HistoryManager } from './useBuilderModules'
 import type { GlobalVariablesManager } from '../useGlobalVariables'
 
@@ -38,7 +40,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
                 params: { type: 'page', per_page: 100 }
             })
             const data = response.data?.data || response.data
-            pages.value = (data.data || data || []).map((p: any) => ({
+            pages.value = (data.data || data || []).map((p: { id: number | null, title: string, slug: string, status: string }) => ({
                 id: p.id,
                 title: p.title,
                 slug: p.slug,
@@ -51,7 +53,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         }
     }
 
-    async function loadContent(id: number | string): Promise<any> {
+    async function loadContent(id: number | string): Promise<void> {
         try {
             const response = await api.get(`/admin/ja/contents/${id}`)
             const data = response.data?.data || response.data
@@ -129,7 +131,6 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
                     globalVariables.loadVariables(data.global_variables)
                 }
             }
-            return data
         } catch (error: unknown) {
             logger.error('Failed to load content for builder:', error instanceof Error ? error.message : String(error));
             throw error
@@ -146,7 +147,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         }
     }
 
-    async function addPage(title: string): Promise<any> {
+    async function addPage(title: string): Promise<void> {
         try {
             const payload = {
                 title,
@@ -165,7 +166,6 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
                 await fetchPages()
                 await setCurrentPage(newPage.id)
             }
-            return newPage
         } catch (error: unknown) {
             let message = 'Failed to create page'
             if (error && typeof error === 'object' && 'response' in error) {
@@ -179,7 +179,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         }
     }
 
-    async function deletePage(id: number | string): Promise<boolean> {
+    async function deletePage(id: number | string): Promise<void> {
         try {
             await api.delete(`/admin/ja/contents/${id}`)
             await fetchPages()
@@ -201,24 +201,23 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
                     }
                 }
             }
-            return true
         } catch (error: unknown) {
             logger.error('Failed to delete page:', error instanceof Error ? error.message : String(error));
             throw error
         }
     }
 
-    async function saveContent(): Promise<any> {
+    async function saveContent(): Promise<Record<string, unknown> | false> {
         if (!content.value.id) return false
         try {
-            const payload: any = {
+            const payload: Record<string, unknown> = {
                 ...content.value,
                 blocks: blocks.value,
                 global_variables: globalVariables.getVariables()
             }
             if (content.value.tags) {
-                payload.tags = content.value.tags.filter((t: any) => t.id).map((t: any) => t.id)
-                payload.new_tags = content.value.tags.filter((t: any) => !t.id).map((t: any) => t.name)
+                payload.tags = content.value.tags.filter((t: { id?: number }) => t.id).map((t: { id?: number }) => t.id)
+                payload.new_tags = content.value.tags.filter((t: { id?: number, name?: string }) => !t.id).map((t: { id?: number, name?: string }) => t.name)
             }
             const response = await api.put(`/admin/ja/contents/${content.value.id}`, payload)
             markAsSaved()
@@ -229,7 +228,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         }
     }
 
-    async function saveGlobalVariables(): Promise<any> {
+    async function saveGlobalVariables(): Promise<void> {
         const vars = globalVariables.getVariables()
         if (content.value.id) {
             try {
@@ -262,13 +261,14 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
                 api.get('/admin/ja/tags'),
                 api.get('/admin/ja/menus')
             ])
-            const ensureArray = (res: any) => {
-                const data = res?.data?.data || res?.data || []
+            const ensureArray = (res: unknown) => {
+                const response = res as { data?: { data?: unknown[] } | unknown[] };
+                const data = response?.data && (typeof response.data === 'object' && 'data' in response.data) ? response.data.data : response?.data || []
                 return Array.isArray(data) ? data : []
             }
-            categories.value = ensureArray(catsRes)
-            availableTags.value = ensureArray(tagsRes)
-            menus.value = ensureArray(menusRes)
+            categories.value = ensureArray(catsRes) as Category[]
+            availableTags.value = ensureArray(tagsRes) as Tag[]
+            menus.value = ensureArray(menusRes) as Menu[]
         } catch (error: unknown) {
             logger.error('Failed to fetch builder metadata:', error instanceof Error ? error.message : String(error));
         }
@@ -309,7 +309,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         }
     }
 
-    async function updateThemeSettings(themeSlug: string, settings: any): Promise<void> {
+    async function updateThemeSettings(themeSlug: string, settings: Record<string, unknown>): Promise<void> {
         try {
             await api.put(`/admin/ja/themes/${themeSlug}/settings`, { settings })
             themeSettings.value = { ...settings }
@@ -319,7 +319,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         }
     }
 
-    async function fetchTemplates(): Promise<any[]> {
+    async function fetchTemplates(): Promise<unknown[]> {
         try {
             const response = await api.get('/admin/ja/contents', {
                 params: { type: 'layout', per_page: 100 }
@@ -332,7 +332,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         }
     }
 
-    async function createTemplate(data: { name: string, type: string }): Promise<any> {
+    async function createTemplate(data: { name: string, type: string }): Promise<Record<string, unknown>> {
         try {
             const payload = {
                 title: data.name,
@@ -360,7 +360,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         }
     }
 
-    async function updateContentMeta(id: number | string, meta: any): Promise<any> {
+    async function updateContentMeta(id: number | string, meta: Record<string, unknown>): Promise<Record<string, unknown>> {
         try {
             const response = await api.put(`/admin/ja/contents/${id}`, { meta })
             return response.data?.data || response.data

@@ -109,7 +109,7 @@ import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import LogOut from 'lucide-vue-next/dist/esm/icons/log-out.js';
 
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   isVisible?: boolean;
   timeRemaining?: number;
 }>(), {

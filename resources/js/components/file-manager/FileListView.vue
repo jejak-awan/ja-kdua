@@ -98,13 +98,9 @@
 <script setup lang="ts">
 import { inject } from 'vue';
 import Folder from 'lucide-vue-next/dist/esm/icons/folder.js';
-import FolderOpen from 'lucide-vue-next/dist/esm/icons/folder-open.js';
 import Video from 'lucide-vue-next/dist/esm/icons/video.js';
 import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 import MoreVertical from 'lucide-vue-next/dist/esm/icons/ellipsis-vertical.js';
-import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
-import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
-import Download from 'lucide-vue-next/dist/esm/icons/download.js';
 import { 
     Checkbox, 
     Button, 
@@ -116,6 +112,10 @@ import FileActionDropdown from './FileActionDropdown.vue';
 import type { FileItem, FolderItem } from '@/types/file-manager';
 import { FileManagerKey } from '@/keys';
 
+defineEmits<{
+    (e: 'preview', item: FileItem): void;
+}>();
+
 const {
     paginatedFolders,
     paginatedFiles,
@@ -124,7 +124,6 @@ const {
     navigateToPath,
     toggleSelection,
     toggleSelectAll,
-    deleteItem,
     formatFileSize,
     isImage,
     isVideo,
@@ -142,5 +141,5 @@ const formatDate = (dateString: string | null | undefined) => {
     });
 };
 
-const isSelected = (path: string) => selectedItems.value.some((item: any) => item.path === path);
+const isSelected = (path: string) => selectedItems.value.some((item: FileItem | FolderItem) => item.path === path);
 </script>

@@ -1,18 +1,19 @@
 <template>
   <div 
     class="map-pin-block" 
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Map Pin'"
-    :style="pinStyles"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Map Pin'"
+    :style="(pinStyles as any)"
   >
      <MapPin class="marker-icon" />
-     <span>{{ settings.title || 'Pin' }}</span>
+     <span>{{ (settings.title as string) || 'Pin' }}</span>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import MapPin from 'lucide-vue-next/dist/esm/icons/map-pin.js';import type { BlockInstance } from '@/types/builder'
+import MapPin from 'lucide-vue-next/dist/esm/icons/map-pin.js';
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance
@@ -25,13 +26,16 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 // Just for simulation, we offset pins visually so they don't overlap in the simulation
-const pinStyles = computed(() => ({
-    top: `${50 + props.index * 40}px`, 
-    left: '20px'
-}))
+const pinStyles = computed(() => {
+    const styles: Record<string, string | number> = {
+        top: `${50 + props.index * 40}px`, 
+        left: '20px'
+    }
+    return styles
+})
 </script>
 
 <style scoped>

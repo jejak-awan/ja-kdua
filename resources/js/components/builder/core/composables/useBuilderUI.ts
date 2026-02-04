@@ -1,4 +1,4 @@
-import { triggerRef } from 'vue'
+
 import type { BuilderState, Canvas, ResponsiveModalState, ConfirmModalState, InputModalState, ModuleManager } from '@/types/builder'
 import type { HistoryManager } from './useBuilderModules'
 
@@ -6,23 +6,18 @@ export function useBuilderUI(state: BuilderState, historyManager: HistoryManager
     const {
         canvases,
         activeCanvasId,
-        blocks,
-        selectedModuleId,
         device,
         deviceModeType,
         customViewportWidth,
-        zoom,
-        wireframeMode,
         gridViewMode,
-        isFullscreen,
         responsiveModal,
         confirmModal,
         inputModal,
         savePresetModal
     } = state
 
-    const { takeSnapshot } = historyManager
-    const { findModule, clearSelection } = moduleManager
+
+    const { clearSelection } = moduleManager
 
     // ============================================
     // CANVAS MANAGEMENT

@@ -6,7 +6,7 @@ import { z } from 'zod';
 /**
  * Helper to create translatable error message
  */
-const t = (key: string, params: Record<string, any> = {}) => JSON.stringify({ key, params });
+const t = (key: string, params: Record<string, unknown> = {}) => JSON.stringify({ key, params });
 
 /**
  * Create user form schema

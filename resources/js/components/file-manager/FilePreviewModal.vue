@@ -111,7 +111,7 @@ import { FileManagerKey } from '@/keys';
 import type { FileItem } from '@/types/file-manager';
 import { useToast } from '@/composables/useToast';
 
-const props = defineProps<{
+defineProps<{
     file: FileItem | null;
 }>();
 
@@ -139,7 +139,7 @@ const copyUrl = async (file: FileItem) => {
         try {
             await navigator.clipboard.writeText(file.url);
             toast.success.action('URL copied to clipboard');
-        } catch (err) {
+        } catch (_err) {
             toast.error.default('Failed to copy URL');
         }
     }

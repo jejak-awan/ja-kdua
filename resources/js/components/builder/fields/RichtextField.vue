@@ -58,9 +58,7 @@
 import { ref, watch, onBeforeUnmount, onMounted } from 'vue'
 import LucideImage from 'lucide-vue-next/dist/esm/icons/image.js';
 import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
-import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
-import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
-import { BaseLabel, BaseToggle } from '@/components/builder/ui'
+
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { Underline } from '@tiptap/extension-underline'

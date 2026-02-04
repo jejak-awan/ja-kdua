@@ -4,24 +4,24 @@
     :settings="settings" 
     :mode="mode"
     class="toc-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Table of Contents'"
-    :style="cardStyles"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Table of Contents'"
+    :style="(cardStyles as any)"
   >
-    <div class="toc-container bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm" :style="containerStyles">
+    <div class="toc-container bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm" :style="(containerStyles as any)">
         <div v-if="collapsibleValue" class="toc-header flex justify-between items-center cursor-pointer group" @click="expanded = !expanded">
-          <span class="toc-title font-bold text-lg" :style="titleStyles">{{ titleValue }}</span>
+          <span class="toc-title font-bold text-lg" :style="(titleStyles as any)">{{ titleValue }}</span>
           <div class="toc-toggle-icon w-8 h-8 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 shadow-sm transition-shadow group-hover:scale-110">
             <ChevronDown class="w-4 h-4 transition-transform duration-300" :class="{ 'rotate-180': expanded }" />
           </div>
         </div>
-        <h4 v-else class="toc-title font-bold text-lg mb-6" :style="titleStyles">{{ titleValue }}</h4>
+        <h4 v-else class="toc-title font-bold text-lg mb-6" :style="(titleStyles as any)">{{ titleValue }}</h4>
         
         <transition name="toc-slide">
             <nav v-show="!collapsibleValue || expanded" class="toc-nav pt-4">
               <component :is="showNumbersValue ? 'ol' : 'ul'" class="toc-list" :class="{ 'toc-list--numbered': showNumbersValue }">
                 <li v-for="(item, index) in displayItems" :key="index" :class="[`toc-item toc-item--${item.level}`, item.level === 'h3' ? 'ml-6' : '']" class="my-3">
-                  <a :href="`#${item.id}`" class="toc-link block py-1 hover:text-blue-500 transition-colors" :style="linkStyles">{{ item.text }}</a>
+                  <a :href="`#${item.id}`" class="toc-link block py-1 hover:text-blue-500 transition-colors" :style="(linkStyles as any)">{{ item.text }}</a>
                 </li>
               </component>
             </nav>
@@ -33,27 +33,27 @@
 <script setup lang="ts">
 import { computed, ref, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';import { 
+import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
+import { 
   getVal,
   getLayoutStyles,
-  getTypographyStyles,
-  getResponsiveValue
+  getTypographyStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = defineProps<{
   module: BlockInstance
   mode: 'view' | 'edit'
 }>()
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const builder = inject<BuilderInstance | null>('builder', null)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 const device = computed(() => builder?.device?.value || 'desktop')
 
-const titleValue = computed(() => getVal(settings.value, 'title', device.value) || 'Table of Contents')
-const showNumbersValue = computed(() => getVal(settings.value, 'showNumbers', device.value) !== false)
-const collapsibleValue = computed(() => getVal(settings.value, 'collapsible', device.value))
-const expanded = ref(getVal(settings.value, 'defaultExpanded', device.value) !== false)
+const titleValue = computed(() => getVal<string>(settings.value, 'title', device.value) || 'Table of Contents')
+const showNumbersValue = computed(() => getVal<boolean>(settings.value, 'showNumbers', device.value) !== false)
+const collapsibleValue = computed(() => getVal<boolean>(settings.value, 'collapsible', device.value))
+const expanded = ref(getVal<boolean>(settings.value, 'defaultExpanded', device.value) !== false)
 
 const displayItems = computed(() => {
     // In builder mode, we show mock items
@@ -77,11 +77,11 @@ const displayItems = computed(() => {
 })
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
+    const styles: Record<string, string | number> = {}
     
     // Interactive states
-    const hoverScale = getVal(settings.value, 'hover_scale', device.value) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', device.value) || 100
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', device.value) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', device.value) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -89,9 +89,9 @@ const cardStyles = computed(() => {
     return styles
 })
 
-const containerStyles = computed(() => getLayoutStyles(settings.value, device.value))
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
-const linkStyles = computed(() => getTypographyStyles(settings.value, 'link_', device.value))
+const containerStyles = computed(() => (getLayoutStyles(settings.value, device.value) || {}) as Record<string, string | number>)
+const titleStyles = computed(() => (getTypographyStyles(settings.value, 'title_', device.value) || {}) as Record<string, string | number>)
+const linkStyles = computed(() => (getTypographyStyles(settings.value, 'link_', device.value) || {}) as Record<string, string | number>)
 </script>
 
 <style scoped>

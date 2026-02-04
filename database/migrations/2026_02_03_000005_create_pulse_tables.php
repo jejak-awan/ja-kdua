@@ -44,7 +44,7 @@ return new class extends Migration
             $table->string('ip_address', 45);
             $table->string('user_agent')->nullable();
             $table->string('referer')->nullable();
-            $table->string('url');
+            $table->string('url')->index();
             $table->string('method')->default('GET');
             $table->integer('status_code')->default(200);
             $table->integer('duration')->nullable();

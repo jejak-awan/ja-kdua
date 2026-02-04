@@ -1,4 +1,4 @@
-import { render, h, type VNode } from 'vue';
+import { render, h } from 'vue';
 import Circle from 'lucide-vue-next/dist/esm/icons/circle.js';
 import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
 import Star from 'lucide-vue-next/dist/esm/icons/star.js';

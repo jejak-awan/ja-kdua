@@ -4,30 +4,30 @@
     :mode="mode"
     :settings="settings"
     class="progressbar-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Progress Bar'"
-    :style="cardStyles"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Progress Bar'"
+    :style="(cardStyles as any)"
   >
-    <div class="progressbar-container w-full" :style="containerStyles">
+    <div class="progressbar-container w-full" :style="(containerStyles as any)">
       <!-- Title above -->
       <div v-if="titlePosition === 'above'" class="flex justify-between items-end mb-2">
         <span 
           class="font-semibold block" 
-          :style="titleStyles"
+          :style="(titleStyles as any)"
           v-text="titleValue"
         ></span>
-        <span v-if="showPercentage" class="font-bold block" :style="percentageStyles">{{ percentageValue }}%</span>
+        <span v-if="showPercentage" class="font-bold block" :style="(percentageStyles as any)">{{ percentageValue }}%</span>
       </div>
       
       <!-- Progress Bar -->
       <Progress 
         :model-value="percentageValue" 
         :class="progressBarClass"
-        :style="trackStyles"
+        :style="(trackStyles as any)"
       />
             
       <!-- Inside Text -->
-      <div v-if="titlePosition === 'inside'" class="relative px-3 flex justify-between items-center text-xs font-bold text-white z-10 w-full" :style="insideStyles">
+      <div v-if="titlePosition === 'inside'" class="relative px-3 flex justify-between items-center text-xs font-bold text-white z-10 w-full" :style="(insideStyles as any)">
           <span>{{ titleValue }}</span>
           <span v-if="showPercentage">{{ percentageValue }}%</span>
       </div>
@@ -45,72 +45,78 @@ import {
   getTypographyStyles 
 } from '../utils/styleUtils'
 import { cn } from '../../lib/utils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = defineProps<{
   module: BlockInstance
   mode: 'view' | 'edit'
 }>()
 
-const builder = inject<any>('builder', null)
+const builder = inject<BuilderInstance | null>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const percentageValue = computed(() => {
-  const p = parseInt(getVal(settings.value, 'percentage', device.value)) || 75
-  return Math.min(100, Math.max(0, p))
+    const val = getVal<string | number>(settings.value, 'percentage', device.value)
+    const p = (typeof val === 'number' ? val : parseInt(val as string)) || 75
+    return Math.min(100, Math.max(0, p))
 })
 
-const showPercentage = computed(() => getVal(settings.value, 'showPercentage', device.value) !== false)
-const titlePosition = computed(() => getVal(settings.value, 'titlePosition', device.value) || 'above')
-const titleValue = computed(() => getVal(settings.value, 'title', device.value) || 'Progress')
+const showPercentage = computed(() => getVal<boolean>(settings.value, 'showPercentage', device.value) !== false)
+const titlePosition = computed(() => getVal<string>(settings.value, 'titlePosition', device.value) || 'above')
+const titleValue = computed(() => getVal<string>(settings.value, 'title', device.value) || 'Progress')
 
 const progressBarClass = computed(() => {
     return cn(
         "w-full overflow-hidden rounded-full bg-secondary",
-        getVal(settings.value, 'striped', device.value) ? 'progress-striped' : '',
-        getVal(settings.value, 'animated', device.value) ? 'progress-animated' : ''
+        getVal<boolean>(settings.value, 'striped', device.value) ? 'progress-striped' : '',
+        getVal<boolean>(settings.value, 'animated', device.value) ? 'progress-animated' : ''
     )
 })
 
 const containerStyles = computed(() => {
   const styles = getLayoutStyles(settings.value, device.value)
-  const align = getVal(settings.value, 'alignment', device.value) || 'left'
+  const align = getVal<string>(settings.value, 'alignment', device.value) || 'left'
   
   return {
     ...styles,
-    textAlign: (align === 'center' ? 'center' : (align === 'right' ? 'right' : 'left')) as any
+    textAlign: (align === 'center' ? 'center' : (align === 'right' ? 'right' : 'left'))
   }
 })
 
 const trackStyles = computed(() => {
-  const height = parseInt(getVal(settings.value, 'height', device.value)) || 20
-  const radius = parseInt(getVal(settings.value, 'borderRadius', device.value)) || 10
-  const trackColor = getVal(settings.value, 'trackColor', device.value) || '#e0e0e0'
-  const barColor = getVal(settings.value, 'barColor', device.value) || 'var(--primary)'
+  const hVal = getVal<string | number>(settings.value, 'height', device.value)
+  const height = (typeof hVal === 'number' ? hVal : parseInt(hVal as string)) || 20
+  const rVal = getVal<string | number>(settings.value, 'borderRadius', device.value)
+  const radius = (typeof rVal === 'number' ? rVal : parseInt(rVal as string)) || 10
+  const trackColor = getVal<string>(settings.value, 'trackColor', device.value) || '#e0e0e0'
+  const barColor = getVal<string>(settings.value, 'barColor', device.value) || 'var(--primary)'
   
-  return {
+  const styles: Record<string, string | number> = {
     height: `${height}px`,
     borderRadius: `${radius}px`,
     backgroundColor: trackColor,
     '--progress-background': barColor 
   }
+  return styles
 })
 
 const insideStyles = computed(() => {
-  const height = parseInt(getVal(settings.value, 'height', device.value)) || 20
-  return {
+  const hVal = getVal<string | number>(settings.value, 'height', device.value)
+  const height = (typeof hVal === 'number' ? hVal : parseInt(hVal as string)) || 20
+  const styles: Record<string, string | number> = {
     marginTop: `-${height / 2 + 6}px`
   }
+  return styles
 })
 
 const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
 const percentageStyles = computed(() => getTypographyStyles(settings.value, 'percentage_', device.value))
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', device.value) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', device.value) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', device.value) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', device.value) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`

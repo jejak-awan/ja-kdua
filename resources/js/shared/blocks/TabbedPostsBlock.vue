@@ -2,7 +2,7 @@
   <BaseBlock :module="module" :mode="mode" :settings="settings" class="tabbed-posts-block">
     <div class="container mx-auto">
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
-            <h2 v-if="settings.title" class="text-2xl md:text-3xl font-bold tracking-tight" :style="titleStyles">{{ settings.title }}</h2>
+            <h2 v-if="(settings as any).title" class="text-2xl md:text-3xl font-bold tracking-tight" :style="(titleStyles as any)">{{ (settings as any).title }}</h2>
             
             <Tabs v-model="activeTab" class="w-full md:w-auto">
                 <TabsList class="bg-transparent border-b border-slate-200 dark:border-slate-800 p-0 h-auto gap-8 rounded-none">
@@ -61,24 +61,25 @@ import { ref, computed, onMounted, watch, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Tabs, TabsList, TabsTrigger, Card, CardContent, CardTitle, CardDescription } from '../ui'
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
-import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';import { 
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
+import { 
   getTypographyStyles,
   getResponsiveValue
 } from '../utils/styleUtils'
-import type { BlockProps, BuilderInstance } from '@/types/builder'
+import type { BlockProps, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<BlockProps>(), {
   mode: 'view',
   device: 'desktop'
 })
 
-const builder = inject<BuilderInstance>('builder', null as any)
-const settings = computed(() => props.settings || props.module?.settings || {})
+const builder = inject<BuilderInstance | null>('builder', null)
+const settings = computed(() => (props.settings || props.module?.settings || {}) as ModuleSettings)
 const currentDevice = computed(() => props.device || builder?.device?.value || 'desktop')
 
 const activeTab = ref<string>('')
 const tabs = ref<{ id: string; label: string }[]>([])
-const posts = ref<Record<string, any[]>>({})
+const posts = ref<Record<string, {id: string, title: string, excerpt: string, featured_image: string | null}[]>>({})
 const loading = ref(false)
 
 const parseCategories = () => {
@@ -87,14 +88,14 @@ const parseCategories = () => {
         cats = cats.split(',').map((c: string) => c.trim()).filter(Boolean)
     }
     
-    if (!cats || (cats as any[]).length === 0) {
+    if (!cats || (cats as Array<string | {id: string, name: string}>).length === 0) {
          tabs.value = [
              { id: 'tech', label: 'Technology' },
              { id: 'life', label: 'Lifestyle' },
              { id: 'news', label: 'News' }
          ]
     } else {
-        tabs.value = (cats as any[]).map(cat => ({
+        tabs.value = (cats as Array<string | {id: string, name: string}>).map(cat => ({
             id: typeof cat === 'object' ? cat.id : cat,
             label: typeof cat === 'object' ? cat.name : cat
         }))
@@ -110,7 +111,7 @@ watch(() => settings.value.categories, parseCategories)
 
 const currentPosts = computed(() => {
     const catId = activeTab.value
-    const limit = getResponsiveValue(settings.value, 'limit', currentDevice.value) || 4
+    const limit = getResponsiveValue<string | number>(settings.value, 'limit', currentDevice.value) || 4
     return Array.from({ length: Number(limit) }, (_, i) => ({
         id: `${catId}-${i}`,
         title: `${tabs.value.find(t => t.id === catId)?.label || 'Latest'} Article: Breaking the Boundaries of Design`,
@@ -120,13 +121,14 @@ const currentPosts = computed(() => {
 })
 
 const gridClass = computed(() => {
-    const cols = getResponsiveValue(settings.value, 'columns', currentDevice.value) || 3
+    const colsVal = getResponsiveValue<string | number>(settings.value, 'columns', currentDevice.value)
+    const cols = typeof colsVal === 'number' ? colsVal : parseInt(colsVal as string) || 3
     if (cols == 2) return 'grid-cols-1 md:grid-cols-2'
     if (cols == 4) return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
     return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
 })
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, '', currentDevice.value))
+const titleStyles = computed(() => (getTypographyStyles(settings.value, '', currentDevice.value) || {}) as Record<string, string | number>)
 </script>
 
 <style scoped>

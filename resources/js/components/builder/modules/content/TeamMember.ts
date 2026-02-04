@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -208,7 +208,7 @@ const TeamMemberModule: ModuleDefinition = {
             {
                 id: 'nameTypography',
                 label: 'Name Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `name_${f.name}`,
                     label: `Name ${f.label}`
@@ -217,7 +217,7 @@ const TeamMemberModule: ModuleDefinition = {
             {
                 id: 'positionTypography',
                 label: 'Position Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `position_${f.name}`,
                     label: `Position ${f.label}`
@@ -226,7 +226,7 @@ const TeamMemberModule: ModuleDefinition = {
             {
                 id: 'bioTypography',
                 label: 'Bio Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `bio_${f.name}`,
                     label: `Bio ${f.label}`

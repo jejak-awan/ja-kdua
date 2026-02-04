@@ -199,9 +199,8 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import TagIcon from 'lucide-vue-next/dist/esm/icons/tag.js';
 import BarChart3 from 'lucide-vue-next/dist/esm/icons/chart-bar-stacked.js';
 import MousePointer2 from 'lucide-vue-next/dist/esm/icons/mouse-pointer-2.js';
@@ -209,7 +208,6 @@ import Edit from 'lucide-vue-next/dist/esm/icons/pen.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import SearchIcon from 'lucide-vue-next/dist/esm/icons/search.js';
-import Filter from 'lucide-vue-next/dist/esm/icons/list-filter.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import api from '@/services/api';
 import { useConfirm } from '@/composables/useConfirm';
@@ -226,8 +224,6 @@ import {
     Badge,
     Checkbox,
     Card,
-    CardHeader,
-    CardContent,
     Pagination,
     Table,
     TableBody,
@@ -245,18 +241,17 @@ import {
 import { useAuthStore } from '@/stores/auth';
 import type { Tag } from '@/types/cms';
 
-const props = defineProps<{
+defineProps<{
     isEmbedded?: boolean;
 }>();
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
-const router = useRouter();
 const authStore = useAuthStore();
 const loading = ref(true);
 const tags = ref<Tag[]>([]);
-const statistics = ref<any>(null);
+const statistics = ref<Record<string, number> | null>(null);
 const search = ref('');
 const filterUsage = ref('all');
 const selectedIds = ref<number[]>([]);
@@ -280,7 +275,7 @@ const onSearchInput = debounce(() => {
 const fetchTags = async (page = 1) => {
     loading.value = true;
     try {
-        const params: Record<string, any> = {
+        const params: Record<string, unknown> = {
             page: page,
             per_page: pagination.value.per_page,
             search: search.value,
@@ -300,21 +295,13 @@ const fetchTags = async (page = 1) => {
              pagination.value = { ...pagination.value, total: tags.value.length, current_page: 1 };
         }
 
-        // Fetch statistics
         try {
             const statsResponse = await api.get('/admin/ja/tags/statistics');
             statistics.value = statsResponse.data.data || statsResponse.data;
-        } catch (error: any) {
-            // Fallback
-            if (!statistics.value) {
-                statistics.value = {
-                    total_tags: pagination.value.total || tags.value.length,
-                    used_tags: tags.value.filter(t => (t.contents_count || 0) > 0).length,
-                    total_usage: tags.value.reduce((sum, t) => sum + (t.contents_count || 0), 0),
-                };
-            }
+        } catch (error: unknown) {
+            logger.error('Failed to fetch statistics:', error);
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch tags:', error);
     } finally {
         loading.value = false;
@@ -367,7 +354,7 @@ const bulkDelete = async () => {
         selectedIds.value = [];
         await fetchTags(pagination.value.current_page);
         toast.success.delete('Tags');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Bulk delete failed:', error);
         toast.error.fromResponse(error);
     }
@@ -402,7 +389,7 @@ const deleteTag = async (tag: Tag) => {
         await api.delete(`/admin/ja/tags/${tag.id}`);
         await fetchTags();
         toast.success.delete('Tag');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to delete tag:', error);
         toast.error.delete(error, 'Tag');
     }

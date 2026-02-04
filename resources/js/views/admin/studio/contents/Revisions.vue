@@ -207,14 +207,35 @@ import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 import { useConfirm } from '@/composables/useConfirm';
 import toast from '@/services/toast';
 
+interface Revision {
+    id: number;
+    version: number;
+    author_id?: number;
+    author?: {
+        id: number;
+        name: string;
+    } | null;
+    data: {
+        title?: string;
+        content?: string;
+        status?: string;
+        type?: string;
+        [key: string]: unknown;
+    };
+    changes_summary?: string;
+    is_current: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const contentId = route.params.id as string;
-const revisions = ref<any[]>([]);
+const revisions = ref<Revision[]>([]);
 const loading = ref(false);
 const contentTitle = ref('');
-const viewingRevision = ref<any>(null);
+const viewingRevision = ref<Revision | null>(null);
 const { confirm } = useConfirm();
 
 const fetchRevisions = async () => {
@@ -230,28 +251,28 @@ const fetchRevisions = async () => {
             try {
                 const contentResponse = await api.get(`/admin/ja/contents/${contentId}`);
                 contentTitle.value = contentResponse.data.data?.title || contentResponse.data.title || 'Content';
-            } catch (error: any) {
+            } catch {
                 contentTitle.value = 'Content';
             }
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch revisions:', error);
     } finally {
         loading.value = false;
     }
 };
 
-const viewRevision = async (revision: any) => {
+const viewRevision = async (revision: Revision) => {
     try {
         const response = await api.get(`/admin/ja/contents/${contentId}/revisions/${revision.id}`);
         viewingRevision.value = response.data.data || response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch revision detail:', error);
         viewingRevision.value = revision;
     }
 };
 
-const restoreRevision = async (revision: any) => {
+const restoreRevision = async (revision: Revision) => {
     const confirmed = await confirm({
         title: 'Restore Revision',
         message: `Are you sure you want to restore revision v${revision.version}? This will replace the current content.`,
@@ -267,9 +288,9 @@ const restoreRevision = async (revision: any) => {
         await api.post(`/admin/ja/contents/${contentId}/revisions/${revision.id}/restore`);
         toast.success(t('common.messages.success.restored', { item: `v${revision.version}` }));
         router.push({ name: 'contents.edit', params: { id: contentId } });
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to restore revision:', error);
-        toast.error(t('common.messages.toast.error'), error.response?.data?.message || t('features.content.messages.restoreFailed'));
+        toast.error(t('common.messages.toast.error'), (error as { response?: { data?: { message?: string } } })?.response?.data?.message || t('features.content.messages.restoreFailed'));
     }
 };
 

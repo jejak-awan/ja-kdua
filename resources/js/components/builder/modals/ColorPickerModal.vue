@@ -336,7 +336,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
-import X from 'lucide-vue-next/dist/esm/icons/x.js';
+
 import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
 import ChevronUp from 'lucide-vue-next/dist/esm/icons/chevron-up.js';
 import LayoutGrid from 'lucide-vue-next/dist/esm/icons/layout-grid.js';
@@ -348,7 +348,7 @@ import { parseColor, hsvToRgb, rgbToHex, rgbToHsv, hexToRgb } from '@/components
 import { themeVariables, toCssVarName } from '@/components/builder/core/cssVariables';
 import { BaseModal, BaseColorSlider } from '@/components/builder/ui';
 import { MATERIAL_COLORS } from '@/components/builder/core/MaterialColors';
-import type { BuilderInstance } from '@/types/builder';
+import type { BuilderInstance, GlobalVariable } from '@/types/builder';
 
 // Props
 interface Props {
@@ -412,7 +412,7 @@ const allSuggestions = computed(() => {
     
     // 2. Dynamic Global Colors (converted to --slug)
     const colors = globalColors.value || [];
-    const dynamicVars = colors.map((c: any) => toCssVarName(c?.name || ''));
+    const dynamicVars = colors.map((c: GlobalVariable) => toCssVarName(c?.name || ''));
     
     // Merge and deduplicate
     return [...new Set([...staticVars, ...dynamicVars])];
@@ -659,10 +659,10 @@ const addGlobalColor = () => {
 };
 
 const openGlobalManager = () => {
-    if (builder && (builder as any).activePanel) {
-        (builder as any).activePanel.value = 'global_variables';
-        if ((builder as any).globalAction) {
-            (builder as any).globalAction.value = { type: 'add_color', timestamp: Date.now() };
+    if (builder && builder.activePanel) {
+        builder.activePanel.value = 'global_variables';
+        if (builder.globalAction) {
+            builder.globalAction.value = { type: 'add_color', payload: { timestamp: Date.now() } };
         }
     }
     emit('close');

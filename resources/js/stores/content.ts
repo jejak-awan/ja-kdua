@@ -1,9 +1,10 @@
 import { logger } from '@/utils/logger';
 import { defineStore } from 'pinia';
 import api from '@/services/api';
+import type { Content } from '../types/cms';
 
 interface ContentState {
-    currentContent: any | null; // Replace 'any' with specific Content interface if available
+    currentContent: Content | null;
     loading: boolean;
 }
 

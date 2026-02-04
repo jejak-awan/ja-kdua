@@ -90,8 +90,8 @@ import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 interface FieldGroup {
     id: number | string;
     name: string;
-    description?: string;
-    attachable_type?: string | null;
+    description: string | null;
+    attachable_type: string | null;
 }
 
 const { t } = useI18n();
@@ -164,7 +164,7 @@ const handleSubmit = async () => {
             toast.success.create(t('features.developer.custom_fields.tabs.groups'));
         }
         emit('saved');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to save field group:', error);
         toast.error.fromResponse(error);
     } finally {

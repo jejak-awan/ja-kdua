@@ -1,6 +1,7 @@
-import { BackgroundPatterns, BackgroundMasks } from './AssetLibrary'
-import type { ModuleSettings } from '../../types/builder'
 import type { CSSProperties } from 'vue'
+import type { ModuleSettings } from '@/types/builder'
+import { BackgroundPatterns, BackgroundMasks } from '../assets'
+import type { BackgroundPattern, BackgroundMask } from '@/types/assets'
 
 export interface GradientStop {
     color: string;
@@ -135,10 +136,11 @@ export function getVal<T = unknown>(settings: ModuleSettings, key: string, devic
 
     const bgObj = settings.background
     if (bgObj && typeof bgObj === 'object') {
+        const bgSettings = bgObj as ModuleSettings
         for (const k of tryKeys) {
             if (backgroundProps[k]) {
                 const subKey = backgroundProps[k]
-                const val = getResponsiveValue<T>(bgObj as ModuleSettings, subKey, device)
+                const val = getResponsiveValue<T>(bgSettings, subKey, device)
                 if (val !== undefined && val !== null && val !== '') return val
             }
         }
@@ -156,7 +158,6 @@ export function toCSS(val: string | number | undefined | null | unknown, unit: s
 }
 
 export function getTypographyStyles(settings: ModuleSettings, prefix: string = '', device: string = 'desktop'): CSSProperties {
-    const css: CSSProperties & Record<string, string | number | undefined> = {}
     const fields = [
         { key: 'font_family', prop: 'fontFamily' },
         { key: 'font_size', prop: 'fontSize', unit: 'px' },
@@ -171,6 +172,8 @@ export function getTypographyStyles(settings: ModuleSettings, prefix: string = '
         { key: 'text_shadow', prop: 'textShadow' }
     ]
 
+    const cssMap: Record<string, string | number | undefined> = {}
+
     fields.forEach(f => {
         const sep = (prefix && !prefix.endsWith('_')) ? '_' : ''
         const fullKey = prefix ? `${prefix}${sep}${f.key}` : f.key
@@ -178,15 +181,14 @@ export function getTypographyStyles(settings: ModuleSettings, prefix: string = '
         if (val !== undefined && val !== null && val !== '') {
             if (f.key === 'text_shadow') {
                 const shadowStyles = getTextShadowStyles(settings, fullKey, device)
-                if (shadowStyles.textShadow) css.textShadow = shadowStyles.textShadow
+                if (shadowStyles.textShadow) cssMap.textShadow = shadowStyles.textShadow
             } else {
-                const finalVal = f.unit ? toCSS(val, f.unit) : val as string | number | undefined
-                css[f.prop as keyof CSSProperties] = finalVal as any
+                cssMap[f.prop] = f.unit ? toCSS(val, f.unit) : val as string | number | undefined
             }
         }
     })
 
-    return css as CSSProperties
+    return cssMap as CSSProperties
 }
 
 export function getSpacingStyles(settings: ModuleSettings, baseKey: string, device: string = 'desktop', type: string = 'padding'): CSSProperties {
@@ -225,14 +227,15 @@ export function getBorderStyles(settings: ModuleSettings, baseKey: string = 'bor
 
     // Border Sides
     if (borderSettings.styles) {
+        const cssMap = css as Record<string, string | number | undefined>
         const sides = ['top', 'right', 'bottom', 'left']
         sides.forEach(side => {
             const sideStyles = (borderSettings.styles as Record<string, { width: number, style: string, color: string }>)[side]
             if (sideStyles && sideStyles.width > 0 && sideStyles.style !== 'none') {
                 const sideCap = side.charAt(0).toUpperCase() + side.slice(1)
-                css[`border${sideCap}Width` as keyof CSSProperties] = toCSS(sideStyles.width) as any
-                css[`border${sideCap}Style` as keyof CSSProperties] = (sideStyles.style || 'solid') as any
-                css[`border${sideCap}Color` as keyof CSSProperties] = (sideStyles.color || 'transparent') as any
+                cssMap[`border${sideCap}Width`] = toCSS(sideStyles.width)
+                cssMap[`border${sideCap}Style`] = sideStyles.style || 'solid'
+                cssMap[`border${sideCap}Color`] = sideStyles.color || 'transparent'
             }
         })
     }
@@ -259,13 +262,13 @@ export function getTextShadowStyles(settings: ModuleSettings, baseKey: string = 
 }
 
 export function getSizingStyles(settings: ModuleSettings, device: string = 'desktop'): CSSProperties {
-    const css: CSSProperties & Record<string, string | number | undefined> = {}
+    const css: Record<string, string | number | undefined> = {}
     const props = ['width', 'maxWidth', 'minWidth', 'height', 'maxHeight', 'minHeight', 'zIndex']
 
     props.forEach(p => {
         const val = getVal(settings, p, device)
         if (val !== undefined && val !== null && val !== '') {
-            css[p] = ((p === 'zIndex') ? val : toCSS(val)) as any
+            css[p] = ((p === 'zIndex') ? val : toCSS(val)) as string | number | undefined
         }
     })
 
@@ -300,13 +303,24 @@ export function getBackgroundStyles(settings: ModuleSettings, device: string = '
 
     const patternId = getVal<string>(settings, 'backgroundPattern', device)
     if (patternId && patternId !== 'none') {
-        const patternObj = BackgroundPatterns.find((p: { id: string }) => p.id === patternId) as Record<string, any>
+        const patternObj = BackgroundPatterns.find((p: { id: string }) => p.id === patternId) as BackgroundPattern | undefined
         if (patternObj) {
             const rawSvg = patternObj.svg
             // Resolve object structure if necessary
-            let svg: string = typeof rawSvg === 'object'
-                ? ((rawSvg as any).default || (rawSvg as any).regular || '')
-                : (rawSvg as string)
+            let svg: string = ''
+            if (typeof rawSvg === 'object' && rawSvg !== null) {
+                if ('default' in rawSvg && typeof rawSvg.default === 'string') {
+                    svg = rawSvg.default
+                } else {
+                    // It might be nested like cubes pattern
+                    const reg = (rawSvg as { regular?: { default?: string } }).regular
+                    if (reg && typeof reg === 'object') {
+                        svg = reg.default || ''
+                    }
+                }
+            } else if (typeof rawSvg === 'string') {
+                svg = rawSvg
+            }
 
             if (svg) {
                 // Wrap in full SVG tag if it's just a fragment
@@ -407,15 +421,22 @@ export function getBackgroundStyles(settings: ModuleSettings, device: string = '
     // --- 3. Mask ---
     const maskId = getVal<string>(settings, 'backgroundMask', device)
     if (maskId && maskId !== 'none') {
-        const maskObj = BackgroundMasks.find((m: { id: string }) => m.id === maskId) as Record<string, any>
+        const maskObj = BackgroundMasks.find((m: { id: string }) => m.id === maskId) as BackgroundMask | undefined
         if (maskObj) {
             const variant = device === 'mobile' || device === 'phone' ? 'portrait' : (device === 'tablet' ? 'square' : 'landscape')
             const rawSvgSet = maskObj.svg?.default || maskObj.svg
-            let maskSvg = typeof rawSvgSet === 'object' ? ((rawSvgSet as any)[variant] || (rawSvgSet as any).landscape || (rawSvgSet as any).default || '') : (rawSvgSet as string)
+
+            let maskSvg: string = ''
+            if (rawSvgSet && typeof rawSvgSet === 'object' && rawSvgSet !== null) {
+                // BackgroundMask.svg.default or BackgroundMask.svg itself can be an object with variant keys
+                maskSvg = (rawSvgSet as Record<string, string>)[variant] || (rawSvgSet as Record<string, string>).landscape || (rawSvgSet as Record<string, string>).default || ''
+            } else if (typeof rawSvgSet === 'string') {
+                maskSvg = rawSvgSet
+            }
 
             if (maskSvg) {
                 if (!maskSvg.startsWith('<svg')) {
-                    const vb = (maskObj as any).viewBox?.[variant] || (maskObj as any).viewBox?.landscape || '0 0 100 100'
+                    const vb = maskObj.viewBox?.[variant] || maskObj.viewBox?.landscape || '0 0 100 100'
                     const safeSvg = maskSvg.replace(/currentColor/g, 'black')
                     maskSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" width="100%" height="100%" preserveAspectRatio="none">${safeSvg}</svg>`
                 } else {
@@ -504,7 +525,7 @@ export function getFilterStyles(settings: ModuleSettings, device: string = 'desk
     if (opacity !== undefined && opacity != 100) css.opacity = opacity / 100
 
     const blendMode = (getFilterVal('blendMode') || getFilterVal('blend_mode')) as string | undefined
-    if (blendMode && blendMode !== 'normal') css.mixBlendMode = blendMode as any
+    if (blendMode && blendMode !== 'normal') css.mixBlendMode = blendMode as CSSProperties['mixBlendMode']
 
     const blur = Number(getFilterVal('blur') || 0)
     if (blur > 0) filters.push(`blur(${blur}px)`)
@@ -692,10 +713,10 @@ export function getVisibilityStyles(settings: ModuleSettings, device: string = '
     }
 
     // Overflow logic
-    const ox = getVal(settings, 'overflow_x', device) as any
-    const oy = getVal(settings, 'overflow_y', device) as any
-    if (ox && ox !== 'visible') css.overflowX = ox
-    if (oy && oy !== 'visible') css.overflowY = oy
+    const ox = getVal<string>(settings, 'overflow_x', device)
+    const oy = getVal<string>(settings, 'overflow_y', device)
+    if (ox && ox !== 'visible') css.overflowX = ox as CSSProperties['overflowX']
+    if (oy && oy !== 'visible') css.overflowY = oy as CSSProperties['overflowY']
 
     return css as CSSProperties
 }
@@ -727,7 +748,7 @@ export function getPositioningStyles(settings: ModuleSettings, device: string = 
 
     const pos = getVal<string>(settings, 'position', device)
     if (pos && pos !== 'static' && pos !== 'default') {
-        (styles as any).position = pos
+        styles.position = pos as CSSProperties['position']
         const top = getVal<string | number>(settings, 'top', device); if (top) styles.top = toCSS(top)
         const bottom = getVal<string | number>(settings, 'bottom', device); if (bottom) styles.bottom = toCSS(bottom)
         const left = getVal<string | number>(settings, 'left', device); if (left) styles.left = toCSS(left)
@@ -796,14 +817,14 @@ export function getGlassStyles(settings: ModuleSettings, prefix: string = '', de
         }
     }
 
-    return css
+    return css as CSSProperties
 }
 
 /**
  * Premium Utility: Text Gradient Styles
  */
 export function getTextGradientStyles(settings: ModuleSettings, prefix: string = '', device: string = 'desktop'): CSSProperties {
-    const css: any = {}
+    const css: Record<string, string | number | undefined> = {}
     const p = prefix ? `${prefix}_` : ''
 
     if (getVal<boolean>(settings, `${p}use_gradient`, device)) {
@@ -817,14 +838,14 @@ export function getTextGradientStyles(settings: ModuleSettings, prefix: string =
         }
     }
 
-    return css
+    return css as CSSProperties
 }
 
 /**
  * Premium Utility: Mask Styles
  */
 export function getMaskStyles(settings: ModuleSettings, prefix: string = '', device: string = 'desktop'): CSSProperties {
-    const css: any = {}
+    const css: Record<string, string | number | undefined> = {}
     const p = prefix ? `${prefix}_` : ''
     const shape = getVal<string>(settings, `${p}mask_shape`, device)
 
@@ -843,5 +864,5 @@ export function getMaskStyles(settings: ModuleSettings, prefix: string = '', dev
         }
     }
 
-    return css
+    return css as CSSProperties
 }

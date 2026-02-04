@@ -60,8 +60,10 @@ defineEmits<{
 
 const { t } = useI18n()
 
+import type { Component } from 'vue';
+
 // Icons map
-const icons: Record<string, any> = {
+const icons: Record<string, Component> = {
   Layers, FileText, Clock, Layout, Settings, Palette,
   Sparkles, Share2, HelpCircle: CircleQuestion, Settings2, Database, Grid
 }

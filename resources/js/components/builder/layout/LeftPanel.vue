@@ -139,7 +139,9 @@ import ThemeListPanel from './panels/ThemeListPanel.vue'
 import TemplatesPanel from './panels/TemplatesPanel.vue'
 import type { BuilderInstance, BlockInstance } from '../../../types/builder'
 
-const icons: Record<string, any> = { X, Construction, ChevronsLeft, Plus, LayoutGrid, Eye, Search, Filter, MoreVertical }
+import type { Component } from 'vue';
+
+const icons: Record<string, Component> = { X, Construction, ChevronsLeft, Plus, LayoutGrid, Eye, Search, Filter, MoreVertical }
 
 interface Props {
   activePanel: string;
@@ -154,7 +156,7 @@ defineEmits<{
   (e: 'close'): void;
 }>()
 
-const builder = inject<BuilderInstance>('builder') as any // Using any for simplicity with complex reactive proxy
+const builder = inject<BuilderInstance>('builder')!
 const { t } = useI18n()
 const blocks = computed<BlockInstance[]>(() => builder?.blocks.value || [])
 const selectedModuleId = computed(() => builder?.selectedModuleId.value)

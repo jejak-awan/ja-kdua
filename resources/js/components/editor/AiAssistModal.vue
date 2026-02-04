@@ -117,14 +117,10 @@ const handleCommand = async (prompt: string) => {
             emit('update:open', false);
             customPrompt.value = '';
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('AI Ops Error:', error);
-        if (error && typeof error === 'object' && 'response' in error) {
-            const err = error as { response?: { data?: { message?: string } } };
-            toast.service.error('AI Error', err.response?.data?.message || 'Failed to generate content.');
-        } else {
-            toast.service.error('AI Error', 'Failed to generate content.');
-        }
+        const err = error as { response?: { data?: { message?: string } } };
+        toast.service.error('AI Error', err.response?.data?.message || 'Failed to generate content.');
     } finally {
         loading.value = false;
     }

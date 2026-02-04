@@ -139,7 +139,14 @@ import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
 import toast from '@/services/toast';
 import { useConfirm } from '@/composables/useConfirm';
 
-const cacheStats = ref<any>({
+interface CacheStats {
+    status: string;
+    hits: number;
+    misses: number;
+    details?: Record<string, string | number> | null;
+}
+
+const cacheStats = ref<CacheStats>({
     status: 'Active',
     hits: 0,
     misses: 0,
@@ -152,7 +159,7 @@ const fetchCacheStats = async () => {
     try {
         // Try to get cache stats from SystemController
         const response = await api.get('/admin/ja/system/cache-status');
-        const data = parseSingleResponse<any>(response);
+        const data = parseSingleResponse<CacheStats>(response);
         if (data) {
             cacheStats.value = {
                 status: data.status || 'Active',
@@ -161,7 +168,7 @@ const fetchCacheStats = async () => {
                 details: data.details || null,
             };
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch cache stats:', error);
         // Keep default values on error
         cacheStats.value = {
@@ -187,7 +194,7 @@ const clearAllCache = async () => {
         await api.post('/admin/ja/cache/clear');
         toast.success('All cache cleared successfully');
         await fetchCacheStats();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to clear cache:', error);
         toast.error('Error', 'Failed to clear cache');
     } finally {
@@ -210,7 +217,7 @@ const clearContentCache = async () => {
         await api.post('/admin/ja/cache/clear-content');
         toast.success('Content cache cleared successfully');
         await fetchCacheStats();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to clear content cache:', error);
         toast.error('Error', 'Failed to clear content cache');
     } finally {
@@ -224,7 +231,7 @@ const warmUpCache = async () => {
         await api.post('/admin/ja/cache/warm-up');
         toast.success('Cache warmed up successfully');
         await fetchCacheStats();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to warm up cache:', error);
         toast.error('Error', 'Failed to warm up cache');
     } finally {

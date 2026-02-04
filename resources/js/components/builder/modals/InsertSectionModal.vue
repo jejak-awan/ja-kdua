@@ -156,7 +156,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject } from 'vue';
+import { ref, computed, inject, type Component } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { BaseModal, BaseInput } from '@/components/builder/ui';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
@@ -168,10 +168,11 @@ import {
     flexMultiColumnPresets, 
     gridMultiRowPresets,
     masonryPresets,
-    sidebarPresets
-} from '@/components/builder/constants/layouts.js';
-import { sectionTemplates } from '@/components/builder/templates/SectionTemplates.js';
-import { pageTemplates } from '@/components/builder/templates/PageTemplates.js';
+    sidebarPresets,
+    type LayoutPreset
+} from '@/components/builder/constants/layouts';
+import { sectionTemplates, type SectionTemplate } from '@/components/builder/templates/SectionTemplates';
+import { pageTemplates, type PageTemplate } from '@/components/builder/templates/PageTemplates';
 import Sparkles from 'lucide-vue-next/dist/esm/icons/sparkles.js';
 import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
 import Users from 'lucide-vue-next/dist/esm/icons/users.js';
@@ -191,7 +192,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'inserted', type?: string, payload?: any): void;
+  (e: 'inserted', type?: string, payload?: unknown): void;
 }>();
 
 const builder = inject<BuilderInstance>('builder');
@@ -217,7 +218,7 @@ const filteredPresets = computed(() => {
 });
 
 const groupedPresets = computed(() => {
-  const groups: Record<string, any[]> = {};
+  const groups: Record<string, import('@/types/builder').BuilderPreset[]> = {};
   filteredPresets.value.forEach(preset => {
     const type = preset.type.charAt(0).toUpperCase() + preset.type.slice(1);
     if (!groups[type]) groups[type] = [];
@@ -226,7 +227,7 @@ const groupedPresets = computed(() => {
   return groups;
 });
 
-const selectPreset = (preset: any) => {
+const selectPreset = (preset: import('@/types/builder').BuilderPreset) => {
   emit('inserted', 'preset', preset);
   emit('close');
 };
@@ -249,14 +250,13 @@ const allGroups = computed(() => [
 ]);
 
 // Extract unique categories including Pages
-const categories = computed(() => {
-    const cats = new Set(sectionTemplates.map(t => t.category).filter(Boolean));
-    return ['all', 'pages', ...Array.from(cats).sort()];
-});
+
+
+type LocalTemplate = (SectionTemplate | (PageTemplate & { category: 'pages' })) & { templateType: 'section' | 'page' };
 
 // Template groups for library tab
 const templateGroups = computed(() => {
-    const categoriesMap: Record<string, any> = {
+    const categoriesMap: Record<string, { id: string, title: string, icon: string, templates: LocalTemplate[] }> = {
         pages: { id: 'pages', title: 'Full Pages', icon: '📄', templates: [] },
         hero: { id: 'hero', title: 'Hero Sections', icon: '🚀', templates: [] },
         features: { id: 'features', title: 'Features', icon: '✨', templates: [] },
@@ -269,21 +269,21 @@ const templateGroups = computed(() => {
     // Add sections
     sectionTemplates.forEach(tpl => {
         const cat = categoriesMap[tpl.category] || categoriesMap.content;
-        cat.templates.push({ ...tpl, templateType: 'section' });
+        cat.templates.push({ ...tpl, templateType: 'section' } as LocalTemplate);
     });
 
     // Add pages
     pageTemplates.forEach(tpl => {
-        categoriesMap.pages.templates.push({ ...tpl, category: 'pages', templateType: 'page' });
+        categoriesMap.pages.templates.push({ ...tpl, category: 'pages', templateType: 'page' } as LocalTemplate);
     });
     
     return Object.values(categoriesMap).filter(c => c.templates.length > 0);
 });
 
-const getPreviewIcon = (template: any) => {
+const getPreviewIcon = (template: Partial<LocalTemplate>) => {
     if (template.templateType === 'page') return LayoutTemplate;
     
-    const iconMap: Record<string, any> = {
+    const iconMap: Record<string, Component> = {
         hero: Sparkles,
         features: Layout,
         content: FileText,
@@ -292,10 +292,10 @@ const getPreviewIcon = (template: any) => {
         header: FileText,
         contact: MessageSquare
     };
-    return iconMap[template.category] || Layout;
+    return iconMap[template.category || ''] || Layout;
 };
 
-const insertTemplate = async (template: any) => {
+const insertTemplate = async (template: LocalTemplate) => {
     if (!builder || !template.factory) return;
     
     // Handle Page Templates (Full Content Replacement)
@@ -308,10 +308,10 @@ const insertTemplate = async (template: any) => {
             type: 'warning'
         });
         if (confirmed) {
-            const blocks = template.factory();
+            const blocks = template.factory() as import('@/types/builder').BlockInstance[];
             
             // Regenerate all IDs for safety
-            const regenerateAll = (nodes: BlockInstance[]) => {
+            const regenerateAll = (nodes: import('@/types/builder').BlockInstance[]) => {
                 nodes.forEach(node => {
                     node.id = ModuleRegistry.generateId();
                     if (node.children) regenerateAll(node.children);
@@ -328,8 +328,8 @@ const insertTemplate = async (template: any) => {
     }
 
     // Handle Section Templates
-    const clonedSection = template.factory();
-    const regenerateIds = (node: BlockInstance) => {
+    const clonedSection = template.factory() as import('@/types/builder').BlockInstance;
+    const regenerateIds = (node: import('@/types/builder').BlockInstance) => {
         node.id = ModuleRegistry.generateId();
         if (node.children) {
             node.children.forEach(regenerateIds);
@@ -349,7 +349,7 @@ const insertTemplate = async (template: any) => {
     emit('close');
 };
 
-const selectLayout = (layout: any) => {
+const selectLayout = (layout: LayoutPreset) => {
     if (!builder) return;
     
     // 1. Create Section
@@ -357,7 +357,7 @@ const selectLayout = (layout: any) => {
     if (!section) return;
 
     // Helper to create row
-    const createRow = (config: any, parent: BlockInstance = section) => {
+    const createRow = (config: LayoutPreset, parent: BlockInstance = section) => {
         const row = ModuleRegistry.createInstance('row');
         if (!row) return;
 
@@ -368,7 +368,7 @@ const selectLayout = (layout: any) => {
         if (!row.children) row.children = [];
         
         if (config.cols) {
-            config.cols.forEach((colConfig: any) => {
+            config.cols.forEach((colConfig) => {
                 const col = ModuleRegistry.createInstance('column');
                 if (!col) return;
                 
@@ -377,7 +377,7 @@ const selectLayout = (layout: any) => {
                 row.children!.push(col);
                 
                 if (colConfig.rows) {
-                    colConfig.rows.forEach((nestedRowConfig: any) => {
+                    colConfig.rows.forEach((nestedRowConfig) => {
                         createRow(nestedRowConfig, col);
                     });
                 }
@@ -396,7 +396,7 @@ const selectLayout = (layout: any) => {
     };
 
     if (layout.rows) {
-        layout.rows.forEach((rowConfig: any) => createRow(rowConfig));
+        layout.rows.forEach((rowConfig) => createRow(rowConfig));
     } else {
         createRow(layout);
     }

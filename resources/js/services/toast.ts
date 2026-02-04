@@ -15,7 +15,8 @@ export interface ToastOptions {
 
 export interface ToastInstance {
     addToast: (options: ToastOptions) => void;
-    [key: string]: any;
+    removeToast?: (id: string | number) => void;
+    [key: string]: unknown;
 }
 
 let toastInstance: ToastInstance | null = null;
@@ -23,13 +24,13 @@ let toastInstance: ToastInstance | null = null;
 export const setToastInstance = (instance: ToastInstance) => {
     toastInstance = instance;
     if (typeof window !== 'undefined') {
-        (window as any).__toastInstance = instance;
+        (window as unknown as { __toastInstance: ToastInstance }).__toastInstance = instance;
     }
 };
 
 export const toast = {
     show(options: ToastOptions) {
-        const instance = toastInstance || (typeof window !== 'undefined' ? (window as any).__toastInstance : null);
+        const instance = toastInstance || (typeof window !== 'undefined' ? (window as unknown as { __toastInstance: ToastInstance }).__toastInstance : null);
         if (instance?.addToast) {
             return instance.addToast(options);
         }

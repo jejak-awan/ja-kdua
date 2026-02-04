@@ -30,7 +30,7 @@ class FormController extends BaseApiController
             }
         }
 
-        $forms = $query->latest()->get();
+        $forms = $query->withCount(['submissions as submission_count'])->latest()->get();
 
         return $this->success($forms, 'Forms retrieved successfully');
     }

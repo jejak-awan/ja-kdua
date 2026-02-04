@@ -1,5 +1,4 @@
 import { logger } from '@/utils/logger';
-import { ref } from 'vue';
 
 export function useSocialShare() {
     /**
@@ -16,7 +15,7 @@ export function useSocialShare() {
     /**
      * Share on Facebook
      */
-    const shareFacebook = (url: string, title: string = '') => {
+    const shareFacebook = (url: string, _title: string = '') => {
         const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
         openPopup(shareUrl);
     };
@@ -41,7 +40,7 @@ export function useSocialShare() {
     /**
      * Share on LinkedIn
      */
-    const shareLinkedIn = (url: string, title: string = '', summary: string = '') => {
+    const shareLinkedIn = (url: string, _title: string = '', _summary: string = '') => {
         const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
         openPopup(shareUrl);
     };

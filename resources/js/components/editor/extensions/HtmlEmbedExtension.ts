@@ -10,6 +10,8 @@ declare module '@tiptap/core' {
     }
 }
 
+import { type Component } from 'vue'
+
 export const HtmlEmbed = Node.create({
     name: 'htmlEmbed',
 
@@ -62,7 +64,7 @@ export const HtmlEmbed = Node.create({
     },
 
     addNodeView() {
-        return VueNodeViewRenderer(HtmlEmbedComponent)
+        return VueNodeViewRenderer(HtmlEmbedComponent as unknown as Component)
     },
 
     addCommands() {

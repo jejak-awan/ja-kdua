@@ -23,6 +23,7 @@ const props = defineProps<SelectTriggerProps & { class?: HTMLAttributes['class']
 
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props
+  void _
 
   return delegated
 })

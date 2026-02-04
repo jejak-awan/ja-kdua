@@ -190,11 +190,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, provide } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useToast } from '@/composables/useToast';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import FolderPlus from 'lucide-vue-next/dist/esm/icons/folder-plus.js';
-import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js';
 import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
@@ -226,8 +223,6 @@ import MediaListView from '@/components/media/MediaListView.vue';
 
 import { MediaManagerKey } from '@/keys';
 
-const toast = useToast();
-const { t } = useI18n();
 const mediaManager = useMediaManager();
 const {
     viewMode,
@@ -242,7 +237,6 @@ const {
     statistics,
     bulkProcessing,
     bulkProgress,
-    breadcrumbs,
     fetchMedia,
     fetchStatistics,
     fetchFolders,
@@ -259,7 +253,6 @@ const {
     showFolderModal,
     showMoveFolderModal,
     showUpdateAltModal,
-    editingMedia,
     viewingMedia,
 } = mediaManager;
 
@@ -282,19 +275,6 @@ const handleMediaUploaded = () => {
     showUploadModal.value = false;
 };
 
-const handleMediaUpdated = () => {
-    fetchMedia();
-    fetchTags();
-    fetchStatistics();
-    editingMedia.value = null;
-    if (viewingMedia.value) {
-        const mediaId = viewingMedia.value.id;
-        fetchMedia().then(() => {
-            const updated = mediaList.value.find(m => m.id === mediaId);
-            if (updated) viewingMedia.value = updated;
-        });
-    }
-};
 
 const handleFolderCreated = () => {
     fetchFolders();

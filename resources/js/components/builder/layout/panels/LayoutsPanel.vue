@@ -84,10 +84,11 @@ import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 import Megaphone from 'lucide-vue-next/dist/esm/icons/megaphone.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import draggable from 'vuedraggable';
-import { sectionTemplates } from '@/components/builder/templates/SectionTemplates.js';
-import { pageTemplates } from '@/components/builder/templates/PageTemplates.js';
+import { sectionTemplates } from '@/components/builder/templates/SectionTemplates';
+import { pageTemplates } from '@/components/builder/templates/PageTemplates';
 import ModuleRegistry from '@/components/builder/core/ModuleRegistry';
 import type { BuilderInstance, BlockInstance } from '@/types/builder';
+import type { SectionTemplate } from '@/components/builder/templates/SectionTemplates';
 
 interface Template {
   id: string;
@@ -95,7 +96,7 @@ interface Template {
   description?: string;
   category: string;
   templateType: 'section' | 'page';
-  factory?: () => BlockInstance[];
+  factory?: () => BlockInstance | BlockInstance[];
 }
 
 const { t } = useI18n();
@@ -106,7 +107,7 @@ const activeCategory = ref('all');
 
 // Extract unique categories including 'pages'
 const categories = computed(() => {
-    const cats = new Set(sectionTemplates.map((t: any) => t.category).filter(Boolean));
+    const cats = new Set(sectionTemplates.map((t: SectionTemplate) => t.category).filter(Boolean));
     return ['all', 'pages', ...Array.from(cats).sort()] as string[];
 });
 
@@ -115,10 +116,17 @@ const filteredTemplates = computed<Template[]>(() => {
     let all: Template[] = [];
     
     // Add sections
-    sectionTemplates.forEach((s: any) => all.push({ ...s, templateType: 'section' }));
+    sectionTemplates.forEach((s) => all.push({ 
+        ...s, 
+        templateType: 'section' 
+    } as Template));
     
     // Add pages
-    pageTemplates.forEach((p: any) => all.push({ ...p, category: 'pages', templateType: 'page' }));
+    (pageTemplates as import('@/components/builder/templates/PageTemplates').PageTemplate[]).forEach((p) => all.push({ 
+        ...p, 
+        category: 'pages', 
+        templateType: 'page' 
+    } as Template));
 
     return all.filter(template => {
         const matchesSearch = template.name.toLowerCase().includes(searchTerm.value.toLowerCase()) || 
@@ -133,7 +141,7 @@ const filteredTemplates = computed<Template[]>(() => {
 const getPreviewIcon = (template: Template) => {
   if (template.templateType === 'page') return LayoutTemplate;
   
-  const iconMap: Record<string, any> = {
+  const iconMap: Record<string, import('vue').Component> = {
     hero: Sparkles,
     features: Layout,
     content: FileText,
@@ -154,17 +162,12 @@ const cloneTemplate = (template: Template) => {
     // For now, let's treat Page templates as "Click to Insert/Replace" only or return first block if dragged.
     if (template.templateType === 'page') {
         const blocks = template.factory();
-        return blocks[0]; // Dragging a page only drags the first block for now
+        return Array.isArray(blocks) ? blocks[0] : blocks; // Dragging a page only drags the first block for now
     }
     
     const blocks = template.factory();
     // Factory might return array or single object depending on template implementation.
-    // Assuming sections return an array of blocks or a single block?
-    // Usually sectionTemplates factory returns a single BlockInstance (root section).
-    // Let's assume it returns BlockInstance based on usage.
-    // Actually, looking at previous code: `const block = template.factory()`
-    
-    const block = Array.isArray(blocks) ? blocks[0] : blocks as unknown as BlockInstance;
+    const block = Array.isArray(blocks) ? blocks[0] : (blocks as BlockInstance);
 
     const regenerateIds = (node: BlockInstance) => {
         node.id = ModuleRegistry.generateId();
@@ -191,6 +194,7 @@ const insertTemplate = async (template: Template) => {
         });
         if (confirmed) {
             const blocks = template.factory();
+            const blocksArray = Array.isArray(blocks) ? blocks : [blocks as BlockInstance];
             
             // Regenerate all IDs for safety
             const regenerateAll = (nodes: BlockInstance[]) => {
@@ -199,9 +203,9 @@ const insertTemplate = async (template: Template) => {
                     if (node.children) regenerateAll(node.children);
                 });
             };
-            regenerateAll(blocks);
+            regenerateAll(blocksArray);
             
-            builder.blocks.value = blocks;
+            builder.blocks.value = blocksArray;
             builder.takeSnapshot();
         }
         return;

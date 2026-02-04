@@ -4,8 +4,8 @@
     :mode="mode"
     :settings="settings"
     class="number-counter-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Number Counter'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Number Counter'"
     :style="cardStyles"
   >
     <div 
@@ -22,12 +22,12 @@
         <div class="number-display flex items-baseline font-black tracking-tighter bg-primary/5 px-8 py-6 rounded-[24px] transition-colors" :style="wrapperStyles">
           <span v-if="settings.prefix" class="number-prefix opacity-40 mr-2 text-2xl" :style="prefixStyles">{{ settings.prefix }}</span>
           <span class="number-value bg-clip-text text-5xl lg:text-6xl tabular-nums" :style="numberStyles">{{ displayNumber }}</span>
-          <span v-if="settings.suffix" class="number-suffix opacity-40 ml-2 text-2xl" :style="suffixStyles">{{ settings.suffix || '%' }}</span>
+          <span v-if="settings.suffix" class="number-suffix opacity-40 ml-2 text-2xl" :style="suffixStyles">{{ (settings.suffix as string) || '%' }}</span>
         </div>
         
         <div class="counter-text flex-1">
-          <h4 v-if="settings.title" class="counter-title text-[10px] font-black uppercase tracking-[0.2em] mb-3 text-slate-400 dark:text-slate-500 transition-colors duration-300" :style="titleStyles">{{ settings.title || 'Performance' }}</h4>
-          <p v-if="settings.description" class="counter-description text-slate-500 dark:text-slate-400 font-medium text-sm leading-relaxed max-w-sm opacity-80" :style="descriptionStyles">{{ settings.description }}</p>
+          <h4 v-if="settings.title" class="counter-title text-[10px] font-black uppercase tracking-[0.2em] mb-3 text-slate-400 dark:text-slate-500 transition-colors duration-300" :style="titleStyles">{{ (settings.title as string) || 'Performance' }}</h4>
+          <p v-if="settings.description" class="counter-description text-slate-500 dark:text-slate-400 font-medium text-sm leading-relaxed max-w-sm opacity-80" :style="descriptionStyles">{{ (settings.description as string) }}</p>
         </div>
       </div>
     </div>
@@ -35,33 +35,36 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, inject } from 'vue'
+import { computed, ref, onMounted, inject, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { 
   getVal,
   getLayoutStyles,
   getTypographyStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = defineProps<{
   module: BlockInstance
   mode: 'view' | 'edit'
 }>()
 
-const builder = inject<any>('builder', null)
+const builder = inject<BuilderInstance | null>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const animatedValue = ref(0)
-const targetNumber = computed(() => parseFloat(getVal(settings.value, 'number', device.value)) || 100)
-const decimals = computed(() => parseInt(getVal(settings.value, 'decimals', device.value)) || 0)
-const layout = computed(() => getVal(settings.value, 'layout', device.value) || 'vertical')
-const alignment = computed(() => getVal(settings.value, 'alignment', device.value) || 'center')
+const targetNumber = computed(() => parseFloat(getVal<string | number>(settings.value, 'number', device.value) as string) || 100)
+const decimals = computed(() => {
+    const val = getVal<string | number>(settings.value, 'decimals', device.value)
+    return typeof val === 'number' ? val : (parseInt(val as string) || 0)
+})
+const layout = computed(() => getVal<string>(settings.value, 'layout', device.value) || 'vertical')
+const alignment = computed(() => getVal<string>(settings.value, 'alignment', device.value) || 'center')
 
 const displayNumber = computed(() => {
   let num = animatedValue.value
-  const useSeparator = getVal(settings.value, 'separator', device.value) !== false
+  const useSeparator = getVal<boolean>(settings.value, 'separator', device.value) !== false
   if (useSeparator) {
     return num.toLocaleString('en-US', { minimumFractionDigits: decimals.value, maximumFractionDigits: decimals.value })
   }
@@ -74,8 +77,9 @@ onMounted(() => {
       return
   }
   
-  const duration = parseInt(getVal(settings.value, 'duration', device.value)) || 2000
-  const easing = getVal(settings.value, 'easing', device.value) || 'easeOut'
+  const durationVal = getVal<string | number>(settings.value, 'duration', device.value)
+  const duration = (typeof durationVal === 'number' ? durationVal : parseInt(durationVal as string)) || 2000
+  const easing = getVal<string>(settings.value, 'easing', device.value) || 'easeOut'
   const start = performance.now()
   
   const animate = (now: number) => {
@@ -90,32 +94,32 @@ onMounted(() => {
   requestAnimationFrame(animate)
 })
 
-const containerStyles = computed(() => {
+const containerStyles = computed((): CSSProperties => {
   const styles = getLayoutStyles(settings.value, device.value)
-  return styles
+  return styles as CSSProperties
 })
 
-const wrapperStyles = computed(() => ({
-    color: settings.value.numberColor || 'currentColor'
-}))
+const wrapperStyles = computed((): CSSProperties => ({
+    color: (settings.value.numberColor as string) || 'currentColor'
+} as CSSProperties))
 
-const numberStyles = computed(() => getTypographyStyles(settings.value, 'number_', device.value))
-const prefixStyles = computed(() => getTypographyStyles(settings.value, 'prefix_', device.value))
-const suffixStyles = computed(() => getTypographyStyles(settings.value, 'suffix_', device.value))
+const numberStyles = computed(() => getTypographyStyles(settings.value, 'number_', device.value) as CSSProperties)
+const prefixStyles = computed(() => getTypographyStyles(settings.value, 'prefix_', device.value) as CSSProperties)
+const suffixStyles = computed(() => getTypographyStyles(settings.value, 'suffix_', device.value) as CSSProperties)
 
-const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', device.value) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', device.value) || 100
+const cardStyles = computed((): CSSProperties => {
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', device.value) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', device.value) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
     
-    return styles
+    return styles as CSSProperties
 })
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
-const descriptionStyles = computed(() => getTypographyStyles(settings.value, 'description_', device.value))
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value) as CSSProperties)
+const descriptionStyles = computed(() => getTypographyStyles(settings.value, 'description_', device.value) as CSSProperties)
 </script>
 
 <style scoped>

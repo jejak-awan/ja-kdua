@@ -4,14 +4,14 @@
     :mode="mode" 
     :device="device"
     class="map-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Interactive Map'"
-    :style="cardStyles"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Interactive Map'"
+    :style="(cardStyles as any)"
   >
     <template #default="{ settings: blockSettings }">
       <div 
         class="map-container relative overflow-hidden rounded-[24px]" 
-        :style="containerStyles"
+        :style="(containerStyles as any)"
       >
         <iframe
           :src="mapUrl"
@@ -46,13 +46,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import MapPin from 'lucide-vue-next/dist/esm/icons/map-pin.js';import BaseBlock from '../components/BaseBlock.vue'
+import MapPin from 'lucide-vue-next/dist/esm/icons/map-pin.js';
+import BaseBlock from '../components/BaseBlock.vue'
 import { 
     getVal, 
-    getLayoutStyles,
-    getResponsiveValue 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance
@@ -63,22 +63,22 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const mapUrl = computed(() => {
-  const address = encodeURIComponent(settings.value.address || 'New York, NY')
-  const zoom = getVal(settings.value, 'zoom', props.device) || 14
+  const address = encodeURIComponent((settings.value.address as string) || 'New York, NY')
+  const zoom = getVal<number>(settings.value, 'zoom', props.device) || 14
   const mapType = settings.value.mapType === 'satellite' ? 'k' : (settings.value.mapType === 'terrain' ? 'p' : 'm')
   
-  if (settings.value.embedUrl) return settings.value.embedUrl
+  if (settings.value.embedUrl) return settings.value.embedUrl as string
   
   return `https://maps.google.com/maps?q=${address}&z=${zoom}&t=${mapType}&output=embed`
 })
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -88,13 +88,14 @@ const cardStyles = computed(() => {
 
 const containerStyles = computed(() => {
     const layoutStyles = getLayoutStyles(settings.value, props.device)
-    const height = getResponsiveValue(settings.value, 'height', props.device) || 400
+    const height = getVal<string | number>(settings.value, 'height', props.device) || 400
     
-    return {
+    const styles: Record<string, string | number> = {
         ...layoutStyles,
         height: typeof height === 'number' ? `${height}px` : height,
         backgroundColor: '#f8fafc'
     }
+    return styles
 })
 
 const childPins = computed(() => {

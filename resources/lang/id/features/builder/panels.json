@@ -205,23 +205,34 @@
         "comingSoon": "segera hadir",
         "fallbackTitle": "Panel",
         "templates": {
-            "searchPlaceholder": "Search templates...",
-            "loading": "Loading templates...",
-            "empty": "No templates found.",
-            "addNew": "Add New Template",
-            "promptTitle": "Enter template name:",
-            "assignmentTitle": "Assignment Rules",
-            "applyTo": "Apply To",
-            "contentType": "Content Type",
-            "category": "Category"
+            "searchPlaceholder": "Cari templat...",
+            "loading": "Memuat templat...",
+            "empty": "Tidak ada templat ditemukan.",
+            "addNew": "Tambah Templat Baru",
+            "promptTitle": "Masukkan nama templat:",
+            "assignmentTitle": "Aturan Penugasan",
+            "applyTo": "Terapkan Ke",
+            "contentType": "Tipe Konten",
+            "category": "Kategori",
+            "applyOptions": {
+                "all": "Semua Halaman",
+                "specific_type": "Tipe Konten Tertentu",
+                "specific_category": "Kategori Tertentu",
+                "front_page": "Halaman Depan Saja"
+            },
+            "contentTypeOptions": {
+                "post": "Postingan",
+                "page": "Halaman",
+                "custom": "Konten Kustom"
+            }
         },
         "theme": {
-            "loading": "Loading theme settings...",
-            "noActive": "No active theme found.",
-            "save": "Save Theme Settings",
-            "settings": "Settings",
-            "selectHint": "Select a theme from the left to configure its properties.",
-            "activate": "Activate Theme"
+            "loading": "Memuat pengaturan tema...",
+            "noActive": "Tidak ada tema aktif ditemukan.",
+            "save": "Simpan Pengaturan Tema",
+            "settings": "Pengaturan",
+            "selectHint": "Pilih tema dari kiri untuk mengonfigurasi propertinya.",
+            "activate": "Aktifkan Tema"
         }
     }
 }

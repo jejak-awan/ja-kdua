@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   type?: 'circular' | 'dots' | 'bars';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   color?: 'primary' | 'white' | 'gray';

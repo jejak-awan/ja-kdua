@@ -209,7 +209,7 @@ import Link from 'lucide-vue-next/dist/esm/icons/link.js';
 import Info from 'lucide-vue-next/dist/esm/icons/info.js';
 import { Button, Input, Checkbox } from '@/components/ui';
 import { MediaManagerKey } from '@/keys';
-import type { Media } from '@/types/cms';
+
 
 const { t } = useI18n();
 const toast = useToast();
@@ -223,7 +223,6 @@ const {
     fetchMedia
 } = inject(MediaManagerKey)!;
 
-const loading = ref(false);
 const saving = ref(false);
 const tagInput = ref('');
 
@@ -247,9 +246,7 @@ const form = ref<MediaEditForm>({
 
 const initialForm = ref<MediaEditForm | null>(null);
 
-const Separator = {
-  template: '<div class="h-px bg-border/40 w-full my-4"></div>'
-}
+
 
 const isDirty = computed(() => {
     if (!initialForm.value) return false;
@@ -283,7 +280,7 @@ watch(activeMedia, (media) => {
             name: media.name || '',
             alt: media.alt || '',
             description: media.description || '',
-            caption: (media as any).caption || '',
+            caption: media.caption || '',
             is_shared: media.is_shared || false,
             tags: [...(media.tag_names || [])],
         };
@@ -315,7 +312,7 @@ const copyUrl = async () => {
         try {
             await navigator.clipboard.writeText(activeMedia.value.url);
             toast.success.action(t('features.media.toast.urlCopied'));
-        } catch (err) {
+        } catch (_err) {
             toast.error.default('Failed to copy URL');
         }
     }

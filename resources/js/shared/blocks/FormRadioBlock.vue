@@ -14,7 +14,7 @@
         </label>
         
         <div class="space-y-2">
-          <div v-for="option in getVal(settings, 'options')" :key="option.value" class="flex items-center space-x-2">
+          <div v-for="option in getVal<RadioOption[]>(settings, 'options') || []" :key="option.value" class="flex items-center space-x-2">
             <input 
               type="radio"
               :id="`radio-${module.id}-${option.value}`"
@@ -42,12 +42,17 @@ import BaseBlock from '../components/BaseBlock.vue'
 import { getVal, getLayoutStyles } from '../utils/styleUtils'
 import type { BlockProps } from '../../types/builder'
 
+interface RadioOption {
+  label: string;
+  value: string;
+}
+
 const props = defineProps<BlockProps>()
 
-const formState = inject<Record<string, any>>('formState', {})
-const updateFormValue = inject<(id: string, val: any) => void>('updateFormValue', () => {})
+const formState = inject<Record<string, unknown>>('formState', {})
+const updateFormValue = inject<(id: string, val: unknown) => void>('updateFormValue', () => {})
 
-const fieldId = computed(() => getVal(props.settings || {}, 'field_id'))
+const fieldId = computed(() => getVal<string>(props.settings || {}, 'field_id'))
 
 const value = computed({
   get: () => fieldId.value ? formState[fieldId.value] : '',

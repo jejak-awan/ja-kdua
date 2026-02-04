@@ -197,16 +197,16 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useConfirm } from '@/composables/useConfirm';
 import { useToast } from '@/composables/useToast';
-import { parseResponse, ensureArray, parseSingleResponse } from '@/utils/responseParser';
+import { parseResponse, ensureArray, parseSingleResponse, type PaginationData } from '@/utils/responseParser';
 import { debounce } from '@/utils/debounce';
 import { useAuthStore } from '@/stores/auth';
-import { Badge, Button, Card, CardContent, CardHeader, Checkbox, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
+import { Badge, Button, Card, CardContent, Checkbox, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
 
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
@@ -216,7 +216,6 @@ import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import CopyPlus from 'lucide-vue-next/dist/esm/icons/copy-plus.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
-import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js';
 
 interface Template {
     id: number;
@@ -233,18 +232,15 @@ const toast = useToast();
 const router = useRouter();
 const authStore = useAuthStore();
 
-const props = defineProps({
-    isEmbedded: {
-        type: Boolean,
-        default: false
-    }
-});
+defineProps<{
+    isEmbedded: boolean;
+}>();
 const templates = ref<Template[]>([]);
 const loading = ref(false);
 const search = ref('');
 const typeFilter = ref('all');
 const trashedFilter = ref('without');
-const pagination = ref<any>(null); // Use any for pagination due to complex structure
+const pagination = ref<PaginationData | null>(null); 
 const perPage = ref('10');
 const selectedTemplates = ref<number[]>([]);
 const bulkAction = ref('');
@@ -275,7 +271,7 @@ const fetchTemplates = async (page: number | string = 1) => {
         templates.value = ensureArray(data);
         pagination.value = pag;
         selectedTemplates.value = []; // Reset selection on page change
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch templates:', error);
         templates.value = [];
     } finally {
@@ -286,14 +282,14 @@ const fetchTemplates = async (page: number | string = 1) => {
 const createFromTemplate = async (template: Template) => {
     try {
         const response = await api.post(`/admin/ja/content-templates/${template.id}/create-content`);
-        const content = parseSingleResponse<any>(response);
+        const content = parseSingleResponse<{ id: string | number }>(response);
         if (content && content.id) {
             toast.success.createFromTemplate();
             router.push({ name: 'contents.edit', params: { id: content.id } });
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to create content from template:', error);
-        toast.error.templateCreateContent(error);
+        toast.error.templateCreateContent(error as Record<string, unknown>);
     }
 };
 
@@ -319,7 +315,7 @@ const handleDelete = async (template: Template) => {
             toast.success.delete('Template');
         }
         await fetchTemplates(pagination.value?.current_page || 1);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to delete template:', error);
         toast.error.delete(error, 'Template');
     }
@@ -339,7 +335,7 @@ const handleRestore = async (template: Template) => {
         await api.post(`/admin/ja/content-templates/${template.id}/restore`);
         toast.success.restore('Template');
         await fetchTemplates(pagination.value?.current_page || 1);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to restore template:', error);
         toast.error.fromResponse(error);
     }
@@ -391,9 +387,9 @@ const handleBulkAction = async () => {
             await fetchTemplates(pagination.value?.current_page || 1);
             bulkAction.value = '';
             toast.success.delete('Templates');
-        } catch (error: any) {
+        } catch (error: unknown) {
             logger.error('Bulk action failed:', error);
-            toast.error.action(error);
+            toast.error.action(error as Record<string, unknown>);
         }
     } else if (action === 'restore') {
         try {
@@ -404,9 +400,9 @@ const handleBulkAction = async () => {
             await fetchTemplates(pagination.value?.current_page || 1);
             bulkAction.value = '';
             toast.success.restore('Templates');
-        } catch (error: any) {
+        } catch (error: unknown) {
             logger.error('Bulk action failed:', error);
-            toast.error.action(error);
+            toast.error.action(error as Record<string, unknown>);
         }
     }
 };

@@ -241,12 +241,20 @@ import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import LanguagesIcon from 'lucide-vue-next/dist/esm/icons/languages.js';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
 import { getLocale, getAvailableLocales, getBrowserLocale } from '@/i18n';
+interface Language {
+    id: number;
+    code: string;
+    name: string;
+    is_default: boolean;
+    has_ui_translations?: boolean;
+    translation_keys?: number;
+}
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 
-const languages = ref<any[]>([]);
+const languages = ref<Language[]>([]);
 const loading = ref(false);
 const showCreateModal = ref(false);
 const showImportModal = ref(false);
@@ -278,7 +286,7 @@ const fetchLanguages = async () => {
         const response = await api.get('/admin/ja/languages');
         const { data } = parseResponse(response);
         languages.value = ensureArray(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch languages:', error);
         languages.value = [];
     } finally {
@@ -286,17 +294,17 @@ const fetchLanguages = async () => {
     }
 };
 
-const setDefault = async (lang: any) => {
+const setDefault = async (lang: Language) => {
     try {
         await api.post(`/admin/ja/languages/${lang.id}/set-default`);
         await fetchLanguages();
         toast.success.action(t('features.languages.messages.set_default_success') || 'Default language updated');
-    } catch (error: any) {
-        toast.error.fromResponse(error);
+    } catch (error: unknown) {
+        toast.error.fromResponse(error as Record<string, unknown>);
     }
 };
 
-const deleteLanguage = async (lang: any) => {
+const deleteLanguage = async (lang: Language) => {
     const confirmed = await confirm({
         title: t('features.languages.actions.delete'),
         message: t('features.languages.actions.confirmDelete', { name: lang.name }),
@@ -310,8 +318,8 @@ const deleteLanguage = async (lang: any) => {
         await api.delete(`/admin/ja/languages/${lang.id}`);
         await fetchLanguages();
         toast.success.delete('Language');
-    } catch (error: any) {
-        toast.error.fromResponse(error);
+    } catch (error: unknown) {
+        toast.error.fromResponse(error as Record<string, unknown>);
     }
 };
 
@@ -331,19 +339,19 @@ const createLanguage = async () => {
         form.value = { code: '', name: '', create_from_template: true };
         await fetchLanguages();
         toast.success.create(t('features.languages.title'));
-    } catch (err: any) {
-        const error = err as any;
-        if (error.response?.status === 422) {
+    } catch (err: unknown) {
+        const error = err as { response?: { status?: number; data?: { errors?: Record<string, string[]> } } };
+        if (error.response?.status === 422 && error.response.data?.errors) {
             setErrors(error.response.data.errors);
         } else {
-            toast.error.action(error);
+            toast.error.action(error as Record<string, unknown>);
         }
     } finally {
         creating.value = false;
     }
 };
 
-const exportPack = async (lang: any) => {
+const exportPack = async (lang: Language) => {
     exporting.value = lang.id;
     try {
         const response = await api.get(`/admin/ja/languages/${lang.id}/export-pack`, {
@@ -361,8 +369,8 @@ const exportPack = async (lang: any) => {
         link.remove();
         window.URL.revokeObjectURL(url);
         toast.success.action(t('features.languages.messages.export_success') || 'Language pack exported successfully');
-    } catch (error: any) {
-        toast.error.fromResponse(error);
+    } catch (error: unknown) {
+        toast.error.fromResponse(error as Record<string, unknown>);
     } finally {
         exporting.value = null;
     }
@@ -391,8 +399,8 @@ const importPack = async () => {
         selectedFile.value = null;
         await fetchLanguages();
         toast.success.action(t('features.languages.messages.importSuccess'));
-    } catch (error: any) {
-        toast.error.fromResponse(error);
+    } catch (error: unknown) {
+        toast.error.fromResponse(error as Record<string, unknown>);
     } finally {
         importing.value = false;
     }

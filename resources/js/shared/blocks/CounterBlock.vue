@@ -4,8 +4,8 @@
     :mode="mode"
     :settings="settings"
     class="counter-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Number Counter'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Number Counter'"
   >
     <div class="counter-container flex flex-col items-center" :style="containerStyles">
         <div 
@@ -26,33 +26,33 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, inject } from 'vue'
+import { computed, ref, onMounted, inject, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { 
   getVal, 
   getLayoutStyles,
   getTypographyStyles 
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = defineProps<{
   module: BlockInstance
   mode: 'view' | 'edit'
 }>()
 
-const builder = inject<any>('builder', null)
+const builder = inject<BuilderInstance | null>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const targetNumber = computed(() => parseFloat(getVal(settings.value, 'number', device.value)) || 0)
-const prefixValue = computed(() => getVal(settings.value, 'prefix', device.value) || '')
-const suffixValue = computed(() => getVal(settings.value, 'suffix', device.value) || '')
-const titleValue = computed(() => getVal(settings.value, 'title', device.value))
+const targetNumber = computed(() => parseFloat(getVal<string>(settings.value, 'number', device.value) || '0'))
+const prefixValue = computed(() => getVal<string>(settings.value, 'prefix', device.value) || '')
+const suffixValue = computed(() => getVal<string>(settings.value, 'suffix', device.value) || '')
+const titleValue = computed(() => getVal<string>(settings.value, 'title', device.value))
 
 const displayNumber = ref(0)
 
-const decimals = computed(() => parseInt(getVal(settings.value, 'decimals', device.value)) || 0)
-const useSeparator = computed(() => getVal(settings.value, 'separator', device.value) !== false)
+const decimals = computed(() => parseInt(getVal<string>(settings.value, 'decimals', device.value) || '0'))
+const useSeparator = computed(() => getVal<boolean>(settings.value, 'separator', device.value) !== false)
 
 const formattedDisplayNumber = computed(() => {
     let num = displayNumber.value.toFixed(decimals.value)
@@ -69,7 +69,7 @@ onMounted(() => {
 })
 
 const animateNumber = () => {
-    const duration = parseInt(getVal(settings.value, 'duration', device.value)) || 2000
+    const duration = parseInt(getVal<string>(settings.value, 'duration', device.value) || '2000')
     let start: number | null = null
     
     const step = (timestamp: number) => {
@@ -91,19 +91,20 @@ const animateNumber = () => {
     window.requestAnimationFrame(step)
 }
 
-const containerStyles = computed(() => {
+const containerStyles = computed((): CSSProperties => {
   const layout = getLayoutStyles(settings.value, device.value)
-  const align = getVal(settings.value, 'alignment', device.value) || 'center'
+  const align = getVal<string>(settings.value, 'alignment', device.value) || 'center'
   
-  return {
+  const styles: Record<string, string | number | undefined> = {
     ...layout,
     alignItems: align === 'center' ? 'center' : (align === 'right' ? 'flex-end' : 'flex-start'),
-    textAlign: align
+    textAlign: align as CSSProperties['textAlign']
   }
+  return styles as CSSProperties
 })
 
-const numberStyles = computed(() => getTypographyStyles(settings.value, 'number_', device.value))
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
+const numberStyles = computed(() => getTypographyStyles(settings.value, 'number_', device.value) as CSSProperties)
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value) as CSSProperties)
 </script>
 
 <style scoped>

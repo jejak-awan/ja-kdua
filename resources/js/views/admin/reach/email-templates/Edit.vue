@@ -195,7 +195,7 @@ const form = ref({
     body: '',
 });
 
-const initialForm = ref<any>(null);
+const initialForm = ref<Record<string, unknown> | null>(null);
 
 const isDirty = computed(() => {
     if (!initialForm.value) return false;
@@ -215,16 +215,16 @@ const fetchTemplate = async () => {
     loading.value = true;
     try {
         const response = await api.get(`/admin/ja/email-templates/${templateId}`);
-        const template = parseSingleResponse(response) || {} as any;
+        const template = parseSingleResponse<Record<string, unknown>>(response) || {};
         
         form.value = {
-            name: (template as any).name || '',
-            subject: (template as any).subject || '',
-            type: (template as any).type || 'custom',
-            body: (template as any).body || '',
+            name: (template.name as string) || '',
+            subject: (template.subject as string) || '',
+            type: (template.type as string) || 'custom',
+            body: (template.body as string) || '',
         };
         initialForm.value = JSON.parse(JSON.stringify(form.value));
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch template:', error);
         toast.error.load(error);
         router.push({ name: 'email-templates' });
@@ -240,7 +240,7 @@ const previewTemplate = async () => {
         if (previewWindow) {
             previewWindow.document.write(response.data.html);
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to preview template:', error);
         toast.error.default(t('features.email_templates.form.previewFailed'));
     }
@@ -250,15 +250,16 @@ const handleSendTest = async () => {
     try {
         await api.post(`/admin/ja/email-templates/${templateId}/send-test`);
         toast.success.action(t('features.email_templates.form.testSent'));
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to send test email:', error);
-        toast.error.default(error.response?.data?.message || t('features.email_templates.form.testFailed'));
+        const errorMessage = (error as { response?: { data?: { message?: string } } }).response?.data?.message || t('features.email_templates.form.testFailed');
+        toast.error.default(errorMessage);
     }
 };
 
 const handleSubmit = async () => {
-    const validationData: Record<string, any> = { name: form.value.name, subject: form.value.subject, content: form.value.body };
-    if (!validateWithZod(validationData as any)) return;
+    const validationData = { name: form.value.name, subject: form.value.subject, content: form.value.body };
+    if (!validateWithZod(validationData)) return;
 
     saving.value = true;
     clearErrors();
@@ -267,9 +268,12 @@ const handleSubmit = async () => {
         initialForm.value = JSON.parse(JSON.stringify(form.value));
         toast.success.update('Email Template');
         router.push({ name: 'email-templates' });
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response: { status: number, data: { errors: Record<string, string[]> } } };
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors || {});
+            }
         } else {
             toast.error.fromResponse(error);
         }

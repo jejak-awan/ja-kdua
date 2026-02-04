@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { computed, ref, watch, type CSSProperties } from 'vue';
+import { computed, ref, type CSSProperties } from 'vue';
 
 interface Settings {
     backgroundVideoMp4?: string;
@@ -95,10 +95,7 @@ const onVideoLoaded = () => {
     }
 };
 
-// Watch for pause settings (advanced)
-watch(() => props.settings.backgroundVideoPauseOnPlay, (val) => {
-    // This would typically involve communication with a global play/pause state
-});
+
 </script>
 
 <style scoped>

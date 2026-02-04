@@ -39,11 +39,12 @@ const props = defineProps<{
     editor: Editor | undefined;
 }>();
 
-const emit = defineEmits<{
+defineEmits<{
     (e: 'openProperties'): void;
 }>();
 
-const shouldShow = ({ editor }: { editor: any }) => {
+const shouldShow = (props: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    const { editor } = props;
     return editor.isActive('image') || editor.isActive('video');
 };
 

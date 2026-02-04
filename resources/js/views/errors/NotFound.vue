@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import ErrorLayout from '@/layouts/ErrorLayout.vue';
@@ -57,27 +57,13 @@ import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
 
 const router = useRouter();
 const { t } = useI18n();
-const searchQuery = ref('');
 const traceId = ref(`TRC-${Date.now().toString().slice(-6)}-${Math.random().toString(36).substring(7).toUpperCase()}`);
-
-const popularLinks = computed(() => [
-  { path: '/', label: t('common.navigation.breadcrumbs.home') || 'Home' },
-  { path: '/blog', label: 'Blog' },
-  { path: '/about', label: 'About Us' },
-  { path: '/contact', label: 'Contact Support' },
-]);
 
 const goBack = () => {
   if (window.history.length > 1) {
     router.go(-1);
   } else {
     router.push('/');
-  }
-};
-
-const search = () => {
-  if (searchQuery.value.trim()) {
-    router.push({ path: '/search', query: { q: searchQuery.value } });
   }
 };
 </script>

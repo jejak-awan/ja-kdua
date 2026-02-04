@@ -164,7 +164,7 @@ import {
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
 import { useCmsStore } from '@/stores/cms';
-import type { CacheStatus, QueueStatus, EmailLog } from '@/types/settings';
+import type { CacheStatus, QueueStatus, EmailLog, SettingValue } from '@/types/settings';
 import SettingsIcon from 'lucide-vue-next/dist/esm/icons/settings.js';
 import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
 import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
@@ -213,8 +213,8 @@ const validTabs = ['general', 'email', 'seo', 'security', 'performance', 'media'
 const initialTab = validTabs.includes(route.query.tab as string) ? (route.query.tab as string) : 'general';
 const activeTab = ref(initialTab);
 const settings = ref<Setting[]>([]);
-const formData = ref<Record<string, unknown>>({});
-const initialFormData = ref<Record<string, unknown>>({}); // Track initial state
+const formData = ref<Record<string, SettingValue>>({});
+const initialFormData = ref<Record<string, SettingValue>>({}); // Track initial state
 const errors = ref<Record<string, string[]>>({});
 
 const isDirty = computed(() => {
@@ -288,7 +288,7 @@ const fetchSettings = async () => {
     try {
         const response = await api.get('/admin/ja/settings');
         const { data } = parseResponse(response);
-        settings.value = ensureArray(data);
+        settings.value = ensureArray(data) as Setting[];
 
         // Inject missing CDN settings with defaults
         const ensureSetting = (key: string, value: unknown, type: string, group: string, description = '') => {
@@ -338,7 +338,8 @@ const fetchSettings = async () => {
         ensureSetting('gemini_api_key', '', 'password', 'ai');
 
         initializeFormData();
-    } catch {
+    } catch (error: unknown) {
+        logger.error('Failed to fetch settings:', error);
         settings.value = [];
     } finally {
         loading.value = false;
@@ -368,7 +369,7 @@ const initializeFormData = () => {
             }
         }
         
-        formData.value[setting.key] = value;
+        formData.value[setting.key] = value as SettingValue;
     });
     initialFormData.value = JSON.parse(JSON.stringify(formData.value));
 };

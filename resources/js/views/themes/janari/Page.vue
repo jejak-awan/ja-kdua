@@ -57,11 +57,11 @@ import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue';
 import Archive from 'lucide-vue-next/dist/esm/icons/archive.js';
 
 import type { Content } from '@/types/cms'
+import type { BlockInstance } from '@/types/builder'
 
 interface PageData extends Content {
-    title: string;
-    body?: string;
-    blocks?: any[]; 
+    // Add specific page extension properties if any, otherwise this interface might be redundant
+    blocks?: BlockInstance[]; 
 }
 
 const route = useRoute();

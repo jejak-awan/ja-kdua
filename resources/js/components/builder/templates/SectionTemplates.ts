@@ -9,7 +9,7 @@ const generateId = (): string => `tpl_${Math.random().toString(36).substr(2, 9)}
 interface TemplateNode {
     id: string;
     type: string;
-    settings?: Record<string, any>;
+    settings?: Record<string, unknown>;
     children?: TemplateNode[];
 }
 
@@ -531,7 +531,7 @@ export const contactSection = (): TemplateNode => ({
     }]
 })
 
-interface SectionTemplate {
+export interface SectionTemplate {
     id: string;
     name: string;
     category: string;

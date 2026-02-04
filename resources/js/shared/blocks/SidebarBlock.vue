@@ -4,8 +4,8 @@
     :settings="settings" 
     :mode="mode"
     class="sidebar-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Sidebar'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Sidebar'"
   >
     <div class="sidebar-widgets-container flex flex-col" :style="containerStyles">
       <!-- Builder Mode -->
@@ -47,34 +47,32 @@
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { 
-  getVal,
-  getLayoutStyles,
-  getResponsiveValue
+  getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
+import type { Component } from 'vue'
 
 // We avoid direct import of BlockRenderer to prevent circular dependencies
 // In the renderer environment, it will be globally available or passed down
-const BlockRenderer = inject<any>('BlockRenderer', null)
+const BlockRenderer = inject<Component | null>('BlockRenderer', null)
 
 const props = defineProps<{
   module: BlockInstance
   mode: 'view' | 'edit'
-  nestedBlocks?: any[]
+  nestedBlocks?: BlockInstance[]
 }>()
 
-const builder = inject<any>('builder', null)
+const builder = inject<BuilderInstance | null>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
-
-const showTitle = computed(() => getVal(settings.value, 'showTitle', device.value) !== false)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const containerStyles = computed(() => {
     const layout = getLayoutStyles(settings.value, device.value)
-    return {
+    const styles: Record<string, string | number> = {
         ...layout,
         gap: '2.5rem' // Standard 10 spacing
     }
+    return styles
 })
 </script>
 

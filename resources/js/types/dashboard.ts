@@ -8,7 +8,7 @@ export interface ContentStats {
     trashed?: number;
 }
 
-export interface MediaStats {
+export interface DashboardMediaStats {
     total: number;
     total_count?: number; // Some endpoints return total_count
     size?: number;
@@ -31,14 +31,14 @@ export interface TrafficItem {
 
 export interface SystemStats {
     contents?: ContentStats;
-    media?: MediaStats;
+    media?: DashboardMediaStats;
     users?: UserStats;
 }
 
 export interface CreatorDashboardData {
     stats?: {
         myContents: ContentStats;
-        myMedia: MediaStats;
+        myMedia: DashboardMediaStats;
     };
     charts?: {
         myContentByStatus: { status: string; count: number }[];
@@ -67,3 +67,21 @@ export type StatusDataPoint = {
     count: number;
     [key: string]: unknown;
 };
+
+export interface DashboardStats {
+    contents?: ContentStats;
+    myContents?: ContentStats;
+    media?: DashboardMediaStats;
+    myMedia?: DashboardMediaStats;
+    users?: UserStats;
+}
+
+export interface DashboardCharts {
+    contentTraffic?: (TrafficDataPoint | { date: string; count: number })[];
+    userActivity?: (TrafficDataPoint | { date: string; count: number })[];
+}
+
+export interface DashboardData {
+    stats?: DashboardStats;
+    charts?: DashboardCharts;
+}

@@ -22,7 +22,7 @@
     <div class="p-6 flex flex-col flex-1 gap-4">
       <div class="flex-1 space-y-2">
           <h3 class="text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">
-            {{ (post as any).title }}
+            {{ post.title }}
           </h3>
           <p class="text-muted-foreground text-sm line-clamp-3 leading-relaxed">
             {{ excerpt }}
@@ -53,16 +53,8 @@ import { useI18n } from 'vue-i18n'
 import type { Content } from '@/types/cms'
 import Calendar from 'lucide-vue-next/dist/esm/icons/calendar.js'
 
-interface Article extends Partial<Content> {
-    featured_image?: string | null;
-    category?: any;
-    author?: any;
-    published_at?: string;
-    body?: string;
-}
-
 interface Props {
-  post: Article;
+  post: Content;
 }
 
 const props = defineProps<Props>()

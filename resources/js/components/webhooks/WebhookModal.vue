@@ -206,7 +206,7 @@ const handleSubmit = async () => {
             toast.success.create('Webhook');
         }
         emit('saved');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to save webhook:', error);
         toast.error.fromResponse(error);
     } finally {

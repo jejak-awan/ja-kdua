@@ -188,12 +188,12 @@ interface Field {
     label: string;
     name: string;
     type: string;
-    field_group_id?: number | string | null;
-    default_value?: string;
-    options?: string | string[];
-    instructions?: string;
-    is_required: boolean;
-    is_searchable: boolean;
+    field_group_id: number | string | null;
+    default_value: unknown;
+    options: string | string[] | (string | number | Record<string, unknown>)[];
+    instructions: string | null;
+    is_required: boolean | number;
+    is_searchable: boolean | number;
 }
 
 interface FieldForm {
@@ -274,11 +274,11 @@ const loadField = () => {
             name: props.field.name || '',
             type: props.field.type || 'text',
             field_group_id: props.field.field_group_id || null,
-            default_value: props.field.default_value || '',
-            options: Array.isArray(props.field.options) ? props.field.options.join(',') : (props.field.options || ''),
+            default_value: String(props.field.default_value ?? ''),
+            options: Array.isArray(props.field.options) ? props.field.options.join(',') : (String(props.field.options || '')),
             instructions: props.field.instructions || '',
-            is_required: props.field.is_required || false,
-            is_searchable: props.field.is_searchable || false,
+            is_required: !!props.field.is_required,
+            is_searchable: !!props.field.is_searchable,
         };
     } else {
         form.value = {
@@ -312,7 +312,7 @@ const handleSubmit = async () => {
             toast.success.create(t('features.developer.custom_fields.fields.title'));
         }
         emit('saved');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to save field:', error);
         toast.error.fromResponse(error);
     } finally {

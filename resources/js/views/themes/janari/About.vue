@@ -112,10 +112,11 @@ interface TeamMember {
 }
 
 import type { Content } from '@/types/cms'
+import type { BlockInstance } from '@/types/builder'
 
 interface PageData extends Content {
     title: string;
-    blocks?: any[];
+    blocks?: BlockInstance[];
 }
 
 const pageData = ref<PageData | null>(null)

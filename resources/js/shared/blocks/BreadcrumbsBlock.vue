@@ -1,96 +1,80 @@
 <template>
   <BaseBlock 
     :module="module" 
-    :settings="settings" 
-    :mode="mode"
-    class="breadcrumbs-block"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Breadcrumb'"
+    :mode="mode" 
+    :device="device"
+    class="breadcrumbs-block py-6"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Breadcrumbs'"
+    :style="cardStyles"
   >
-    <div :style="containerStyles">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <template v-for="(item, index) in breadcrumbItems" :key="index">
-            <BreadcrumbItem>
-              <template v-if="(index as number) < breadcrumbItems.length - 1">
-                <BreadcrumbLink 
-                  v-if="item.url" 
-                  :href="mode === 'view' ? item.url : null" 
-                  class="flex items-center transition-colors hover:text-primary" 
-                  :style="linkStyles"
-                  @click="handleLinkClick"
+    <div class="breadcrumbs-container flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide" :style="containerStyles">
+        <template v-for="(crumb, index) in crumbs" :key="index">
+            <div class="flex items-center gap-2">
+                <a 
+                    :href="(crumb as Record<string, any>).url || '#'" 
+                    class="text-xs font-black uppercase tracking-widest transition-colors"
+                    :class="[
+                        index === crumbs.length - 1 
+                            ? 'text-primary' 
+                            : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ]"
                 >
-                  <LucideIcon v-if="(index as number) === 0 && settings.homeIcon !== false && settings.showHome !== false" name="Home" class="w-4 h-4 mr-1.5" />
-                  <span>{{ item.text }}</span>
-                </BreadcrumbLink>
-                <span v-else class="opacity-60" :style="linkStyles">{{ item.text }}</span>
-              </template>
-              <BreadcrumbPage v-else :style="currentStyles" class="font-medium">
-                {{ item.text }}
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-            
-            <BreadcrumbSeparator v-if="(index as number) < breadcrumbItems.length - 1" :style="separatorStyles">
-              <template #default v-if="settings.separator">
-                 <span class="text-xs">{{ settings.separator }}</span>
-              </template>
-            </BreadcrumbSeparator>
-          </template>
-        </BreadcrumbList>
-      </Breadcrumb>
+                    {{ (crumb as Record<string, any>).label }}
+                </a>
+                <span v-if="index < crumbs.length - 1" class="text-slate-300 dark:text-slate-700 font-bold">/</span>
+            </div>
+        </template>
     </div>
   </BaseBlock>
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '../ui'
-import { LucideIcon } from '@/components/ui';
 import { 
-  getVal,
-  getLayoutStyles,
-  getTypographyStyles,
-  getResponsiveValue
+    getVal, 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   module: BlockInstance
-  mode: 'view' | 'edit'
-}>()
-
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
-const device = computed(() => builder?.device?.value || 'desktop')
-
-const breadcrumbItems = computed(() => {
-  const items = getVal(settings.value, 'items', device.value)
-  if (Array.isArray(items)) return items
-  if (typeof items === 'string') { try { return JSON.parse(items) } catch { return [] } }
-  return [
-    { text: 'Home', url: '/' },
-    { text: 'Resource', url: '/resource' },
-    { text: 'Current Page', url: '' }
-  ]
+  mode?: 'view' | 'edit'
+  device?: 'desktop' | 'tablet' | 'mobile'
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const handleLinkClick = (event: MouseEvent) => {
-    if (props.mode === 'edit') event.preventDefault()
-}
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const containerStyles = computed(() => getLayoutStyles(settings.value, device.value))
-const linkStyles = computed(() => getTypographyStyles(settings.value, 'links_', device.value))
-const currentStyles = computed(() => getTypographyStyles(settings.value, 'active_', device.value))
+const crumbs = computed(() => (settings.value.items as unknown[]) || [
+  { label: 'Home', url: '/' },
+  { label: 'Products', url: '/products' },
+  { label: 'Professional Tier', url: '/products/pro' }
+])
 
-const separatorStyles = computed(() => ({ 
-  color: getVal(settings.value, 'separatorColor', device.value) || 'currentColor',
-}))
+const cardStyles = computed((): CSSProperties => {
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
+    
+    styles['--hover-scale'] = hoverScale
+    styles['--hover-brightness'] = `${hoverBrightness}%`
+    
+    return styles as CSSProperties
+})
+
+const containerStyles = computed((): CSSProperties => {
+    const layoutStyles = getLayoutStyles(settings.value, props.device)
+    return { 
+        ...layoutStyles,
+        width: '100%'
+    } as CSSProperties
+})
 </script>
 
 <style scoped>
-.breadcrumbs-block { 
-  width: 100%; 
-}
+.breadcrumbs-block { width: 100%; position: relative; }
 </style>
-

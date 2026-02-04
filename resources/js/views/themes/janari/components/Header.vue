@@ -20,8 +20,8 @@
                         </router-link>
                     </div>
                     <div class="flex items-center gap-4">
-                        <a v-if="getSetting('social_twitter')" :href="getSetting('social_twitter')" target="_blank" class="text-muted-foreground hover:text-primary">Twitter</a>
-                        <a v-if="getSetting('social_github')" :href="getSetting('social_github')" target="_blank" class="text-muted-foreground hover:text-primary">GitHub</a>
+                        <a v-if="getSetting('social_twitter')" :href="(getSetting('social_twitter') as string)" target="_blank" class="text-muted-foreground hover:text-primary">Twitter</a>
+                        <a v-if="getSetting('social_github')" :href="(getSetting('social_github') as string)" target="_blank" class="text-muted-foreground hover:text-primary">GitHub</a>
                     </div>
                 </div>
             </div>
@@ -560,7 +560,7 @@ const siteName = computed(() => (getSetting('site_title') as string) || siteSett
 const siteLogo = computed(() => (getSetting('brand_logo') as string) || siteSettings?.site_logo || '');
 const siteVersion = computed(() => siteSettings?.site_version || 'v1.0 Janari');
 const headerCtaText = computed(() => getSetting('header_cta_text', 'Get Started'));
-const headerCtaUrl = computed(() => getSetting('header_cta_url', '/register'));
+const headerCtaUrl = computed(() => getSetting('header_cta_url', '/register') as string);
 
 const headerStyleClasses = computed(() => {
     switch (headerStyle.value) {

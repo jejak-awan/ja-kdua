@@ -66,8 +66,12 @@ class LogController extends BaseApiController
         if ($filename) {
             $logFile = $logPath . '/' . basename($filename);
             if (File::exists($logFile)) {
-                File::put($logFile, '');
-                return $this->success(null, 'Log file cleared successfully');
+                try {
+                    File::put($logFile, '');
+                    return $this->success(null, 'Log file cleared successfully');
+                } catch (\Exception $e) {
+                    return $this->error('Failed to clear log file: ' . $e->getMessage(), 500);
+                }
             }
             return $this->notFound('Log file');
         }
@@ -77,7 +81,13 @@ class LogController extends BaseApiController
             $files = File::files($logPath);
             foreach ($files as $file) {
                 if ($file->getExtension() === 'log') {
-                    File::put($file->getPathname(), '');
+                    try {
+                        File::put($file->getPathname(), '');
+                    } catch (\Exception $e) {
+                        // Ignore permission errors or read-only files
+                        // We continue clearing other files
+                        continue;
+                    }
                 }
             }
             return $this->success(null, 'All log files cleared successfully');

@@ -46,7 +46,7 @@ defineProps<{
     processing: boolean;
 }>();
 
-const emit = defineEmits(['close', 'submit']);
+defineEmits(['close', 'submit']);
 
 const altText = ref('');
 </script>

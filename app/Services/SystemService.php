@@ -228,36 +228,32 @@ class SystemService
     public function getCpuUsage(): array
     {
         try {
-            // 1. Get Core Count (Try nproc first, then /proc/cpuinfo)
+            // 1. Get Core Count
             $cores = 1;
             if (function_exists('shell_exec')) {
-                if (\shell_exec('which nproc')) {
-                    $cores = (int) trim(\shell_exec('nproc'));
+                // Try nproc
+                if ($nproc = @shell_exec('nproc')) {
+                    $cores = (int) trim($nproc);
+                } 
+                // Fallback to reading cpuinfo lines
+                elseif (file_exists('/proc/cpuinfo')) {
+                    $cpuinfo = file_get_contents('/proc/cpuinfo');
+                    $cores = substr_count($cpuinfo, 'processor');
                 }
-            }
-
-            if ($cores === 1 && file_exists('/proc/cpuinfo')) {
+            } elseif (file_exists('/proc/cpuinfo')) {
                 $cpuinfo = file_get_contents('/proc/cpuinfo');
                 $cores = substr_count($cpuinfo, 'processor');
             }
-            if ($cores < 1) {
-                $cores = 1;
-            }
+            
+            if ($cores < 1) $cores = 1;
 
             // 2. Get Real-Time CPU Usage from /proc/stat
+            // We sample for 200ms to get an accurate instantaneous reading
             if (file_exists('/proc/stat')) {
-                // Read first sample
                 $stat1 = file_get_contents('/proc/stat');
-                $time1 = microtime(true);
-
-                // Small sleep to get a delta (100ms)
-                usleep(100000); // 0.1 seconds
-
-                // Read second sample
+                usleep(200000); // Sleep 200ms
                 $stat2 = file_get_contents('/proc/stat');
-                $time2 = microtime(true);
 
-                // Parse stats
                 $info1 = $this->parseProcStat($stat1);
                 $info2 = $this->parseProcStat($stat2);
 
@@ -266,9 +262,10 @@ class SystemService
                     $diffTotal = $info2['total'] - $info1['total'];
                     $diffIdle = $info2['idle'] - $info1['idle'];
 
+                    // Prevent division by zero
                     if ($diffTotal > 0) {
                         $cpuPercent = (($diffTotal - $diffIdle) / $diffTotal) * 100;
-
+                        
                         // Get load average just for display
                         $load = sys_getloadavg();
 
@@ -285,6 +282,8 @@ class SystemService
             // Fallback to Load Average if /proc/stat fails
             if (file_exists('/proc/loadavg')) {
                 $load = sys_getloadavg();
+                // Load is number of runnable processes. 
+                // Load 1.0 on 1 core = 100%. Load 8.0 on 8 cores = 100%.
                 $cpuPercent = min(100, ($load[0] * 100) / $cores);
 
                 return [

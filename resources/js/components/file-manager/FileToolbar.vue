@@ -313,8 +313,6 @@ import SortAsc from 'lucide-vue-next/dist/esm/icons/arrow-up-narrow-wide.js';
 import SortDesc from 'lucide-vue-next/dist/esm/icons/arrow-down-wide-narrow.js';
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
 import FilterIcon from 'lucide-vue-next/dist/esm/icons/list-filter.js';
-import UploadIcon from 'lucide-vue-next/dist/esm/icons/upload.js';
-import FolderPlus from 'lucide-vue-next/dist/esm/icons/folder-plus.js';
 import Home from 'lucide-vue-next/dist/esm/icons/house.js';
 import MenuIcon from 'lucide-vue-next/dist/esm/icons/menu.js';
 import { 
@@ -332,7 +330,6 @@ import {
 } from '@/components/ui';
 import { FileManagerKey } from '@/keys';
 
-const emit = defineEmits(['new-folder', 'upload']);
 const showAdvancedFilters = ref(false);
 
 const {
@@ -353,13 +350,10 @@ const {
     clearSelection,
     copyToClipboard,
     bulkDelete,
-    showTrashView,
-    propertiesSidebarVisible,
-    sidebarCollapsed,
     toggleSidebar
 } = inject(FileManagerKey)!;
 
-const isCompact = computed(() => propertiesSidebarVisible.value);
+
 const clearFilters = () => {
     authorFilter.value = 'all';
     minSizeFilter.value = '';

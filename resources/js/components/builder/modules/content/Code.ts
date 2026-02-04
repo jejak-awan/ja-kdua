@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -142,7 +142,7 @@ const CodeModule: ModuleDefinition = {
             {
                 id: 'typography',
                 label: 'Code Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `code_${f.name}`,
                     label: `Code ${f.label}`

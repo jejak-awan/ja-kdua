@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -108,7 +108,7 @@ const StarRatingModule: ModuleDefinition = {
             {
                 id: 'textTypography',
                 label: 'Text Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `text_${f.name}`,
                     label: `Text ${f.label}`
@@ -117,7 +117,7 @@ const StarRatingModule: ModuleDefinition = {
             {
                 id: 'reviewTypography',
                 label: 'Review Info Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `review_${f.name}`,
                     label: `Review Info ${f.label}`

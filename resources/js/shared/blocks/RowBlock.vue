@@ -4,8 +4,8 @@
     :mode="mode" 
     :device="device" 
     class="row-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Row'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Row'"
     :style="cardStyles"
   >
     <div class="row-inner flex flex-wrap w-full transition-[width] duration-500" :style="rowStyles">
@@ -40,12 +40,13 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import LayoutIcon from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';import { 
+import LayoutIcon from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';
+import { 
     getVal,
-    getLayoutStyles,
-    getResponsiveValue 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance, BuilderInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
+import type { Component } from 'vue'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -58,15 +59,14 @@ const props = withDefaults(defineProps<{
   nestedBlocks: () => []
 })
 
-const builder = inject<BuilderInstance | null>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const BlockRenderer = inject<any>('BlockRenderer', null)
+const BlockRenderer = inject<Component | null>('BlockRenderer', null)
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -76,18 +76,18 @@ const cardStyles = computed(() => {
 
 const rowStyles = computed(() => {
     const layoutStyles = getLayoutStyles(settings.value, props.device)
-    const layout = getVal(settings.value, 'layout_type', props.device) || 'flex'
-    const gutterX = getVal(settings.value, 'gap_x', props.device) || 0
-    const gutterY = getVal(settings.value, 'gap_y', props.device) || 0
-    const vAlign = getVal(settings.value, 'align_items', props.device) || 'stretch'
-    const justify = getVal(settings.value, 'justify_content', props.device) || 'flex-start'
+    const layout = getVal<string>(settings.value, 'layout_type', props.device) || 'flex'
+    const gutterX = getVal<string | number>(settings.value, 'gap_x', props.device) || 0
+    const gutterY = getVal<string | number>(settings.value, 'gap_y', props.device) || 0
+    const vAlign = getVal<string>(settings.value, 'align_items', props.device) || 'stretch'
+    const justify = getVal<string>(settings.value, 'justify_content', props.device) || 'flex-start'
     
     // Auto-stacking logic for mobile/tablet
     const isMobile = props.device === 'mobile'
     const isTablet = props.device === 'tablet'
     const hasResponsiveColumns = settings.value[`columns_${props.device}`] || (isMobile && settings.value.columns_mobile)
     
-    const styles: Record<string, any> = {
+    const styles: Record<string, string | number> = {
         ...layoutStyles,
         '--row-align': vAlign,
         '--row-gutter-x': typeof gutterX === 'number' ? `${gutterX}px` : gutterX,
@@ -102,7 +102,7 @@ const rowStyles = computed(() => {
         styles.alignItems = 'var(--row-align)'
         styles.justifyContent = justify
         
-        const columns = getVal(settings.value, 'columns', props.device) || '1-1'
+        const columns = getVal<string>(settings.value, 'columns', props.device) || '1-1'
         const colCount = (!hasResponsiveColumns && (isMobile || isTablet)) ? 1 : columns.split('-').length
         styles.gridTemplateColumns = `repeat(${colCount}, 1fr)`
     } else if (layout === 'block') {
@@ -113,12 +113,12 @@ const rowStyles = computed(() => {
         styles.flexDirection = (!hasResponsiveColumns && (isMobile || isTablet)) ? 'column' : 'row'
         styles.flexWrap = 'wrap' 
         styles.alignItems = 'var(--row-align)'
-        styles.gap = 'var(--row-gutter-x)'
+        styles.gap = 'var(--row-gutter-x)' as string
         styles.justifyContent = justify
     }
     
     // Legacy column widths support (for flex mode)
-    const columns = getVal(settings.value, 'columns', props.device) || '1-1'
+    const columns = getVal<string>(settings.value, 'columns', props.device) || '1-1'
     const colWidths = columns.split('-').map((fraction: string) => {
         const parts = fraction.split('/').map(Number)
         if (parts.length === 2) return `${(parts[0] / parts[1]) * 100}%`

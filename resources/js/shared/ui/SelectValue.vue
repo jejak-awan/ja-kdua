@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { SelectValue } from 'radix-vue';
 
-const props = defineProps<{
+defineProps<{
   placeholder?: string;
 }>();
 </script>

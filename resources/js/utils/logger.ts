@@ -1,5 +1,5 @@
-
 import api from '@/services/api';
+import type { App, ComponentPublicInstance } from 'vue';
 
 interface ErrorLog {
     message: string;
@@ -7,7 +7,7 @@ interface ErrorLog {
     url: string;
     user_agent: string;
     user_id?: number;
-    data?: any;
+    data?: unknown;
     level: 'debug' | 'info' | 'warning' | 'error' | 'critical';
 }
 
@@ -43,14 +43,16 @@ class Logger {
         };
     }
 
-    public log(level: ErrorLog['level'], message: string, data: any = {}) {
+    public log(level: ErrorLog['level'], message: string, data: unknown = {}) {
         // Also log to console in development
         if (import.meta.env.DEV) {
             const consoleMethod = level === 'critical' ? 'error' : (level === 'warning' ? 'warn' : (level === 'debug' ? 'debug' : 'log'));
 
-            if (Object.keys(data).length > 0) {
+            if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+                // eslint-disable-next-line no-console
                 console[consoleMethod](`[${level.toUpperCase()}] ${message}`, data);
             } else {
+                // eslint-disable-next-line no-console
                 console[consoleMethod](`[${level.toUpperCase()}] ${message}`);
             }
         }
@@ -61,7 +63,7 @@ class Logger {
             url: window.location.href,
             user_agent: navigator.userAgent,
             data,
-            stack: data.stack
+            stack: data && typeof data === 'object' ? (data as Record<string, unknown>).stack as string : undefined
         };
 
         // Try to add user ID if available in localStorage or store
@@ -72,25 +74,25 @@ class Logger {
                 const user = JSON.parse(userStr);
                 errorLog.user_id = user.id;
             }
-        } catch (e) {
+        } catch {
             // Ignore
         }
 
         this.send(errorLog);
     }
-    public info(message: string, data?: any) {
+    public info(message: string, data: unknown = {}) {
         this.log('info', message, data);
     }
 
-    public debug(message: string, data?: any) {
+    public debug(message: string, data: unknown = {}) {
         this.log('debug', message, data);
     }
 
-    public warning(message: string, data?: any) {
+    public warning(message: string, data: unknown = {}) {
         this.log('warning', message, data);
     }
 
-    public error(message: string, data?: any) {
+    public error(message: string, data: unknown = {}) {
         this.log('error', message, data);
     }
 
@@ -138,10 +140,11 @@ export const logger = new Logger();
 
 // Vue Plugin
 export default {
-    install(app: any) {
-        app.config.errorHandler = (err: any, instance: any, info: string) => {
-            logger.error(err.message || 'Vue Error', {
-                stack: err.stack,
+    install(app: App) {
+        app.config.errorHandler = (err: unknown, instance: ComponentPublicInstance | null, info: string) => {
+            const error = err as Error;
+            logger.error(error.message || 'Vue Error', {
+                stack: error.stack,
                 component: instance?.$options?.__file || instance?.$options?.name,
                 info
             });

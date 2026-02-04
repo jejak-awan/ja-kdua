@@ -91,10 +91,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, reactive, computed } from 'vue'
+import { watch, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Droplets from 'lucide-vue-next/dist/esm/icons/droplets.js';
-import { BaseLabel, BaseSliderInput, BaseCollapsible, BaseSegmentedControl } from '@/components/builder/ui'
+import { BaseLabel, BaseSliderInput, BaseCollapsible } from '@/components/builder/ui'
 import type { SettingDefinition } from '@/types/builder'
 
 interface FilterState {
@@ -112,8 +112,8 @@ interface FilterState {
 
 const props = defineProps<{
   field?: SettingDefinition;
-  value: Record<string, any>;
-  placeholderValue?: any;
+  value: Partial<FilterState>;
+  placeholderValue?: Partial<FilterState>;
 }>()
 
 const emit = defineEmits(['update:value'])
@@ -139,7 +139,7 @@ watch(() => props.value, (newVal) => {
         Object.keys(localValue).forEach(key => {
             const k = key as keyof FilterState
             if (newVal[k] !== undefined) {
-                (localValue as any)[k] = newVal[k]
+                (localValue as Record<string, unknown>)[k] = newVal[k]
             }
         })
     }

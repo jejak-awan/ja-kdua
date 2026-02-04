@@ -8,30 +8,10 @@ import { heroGradient, featuresGrid, ctaDark, aboutSplit, teamGrid, blogHeader, 
 interface TemplateNode {
     id: string;
     type: string;
-    settings?: Record<string, any>;
+    settings?: Record<string, unknown>;
     children?: TemplateNode[];
 }
 
-// Simple text section helper for quick additions
-const textSection = (text: string): TemplateNode => ({
-    id: `tpl_${Math.random().toString(36).substr(2, 9)}`,
-    type: 'section',
-    settings: { padding: { top: '60', bottom: '60' } },
-    children: [{
-        id: `tpl_${Math.random().toString(36).substr(2, 9)}`,
-        type: 'row',
-        settings: { columns: '1' },
-        children: [{
-            id: `tpl_${Math.random().toString(36).substr(2, 9)}`,
-            type: 'column',
-            children: [{
-                id: `tpl_${Math.random().toString(36).substr(2, 9)}`,
-                type: 'text',
-                settings: { content: text }
-            }]
-        }]
-    }]
-})
 
 export const homePage = (): TemplateNode[] => [
     heroGradient(),
@@ -110,7 +90,7 @@ export const contactPage = (): TemplateNode[] => [
     })()
 ]
 
-interface PageTemplate {
+export interface PageTemplate {
     id: string;
     name: string;
     description: string;

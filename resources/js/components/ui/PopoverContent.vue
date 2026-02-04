@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 const props = withDefaults(defineProps<PopoverContentProps & { class?: HTMLAttributes['class'] }>(), {
   sideOffset: 4,
   align: 'center',
+  class: undefined,
 })
 const emits = defineEmits<PopoverContentEmits>()
 

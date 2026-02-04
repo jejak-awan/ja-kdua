@@ -33,3 +33,5 @@ export interface EmailLog {
     subject: string;
     sent_at: string;
 }
+
+export type SettingValue = string | number | boolean | null;

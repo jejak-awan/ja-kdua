@@ -56,24 +56,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
-import { useHead } from '@vueuse/head';
-import { useCmsStore } from '@/stores/cms';
 import {
     Tabs,
     TabsList,
     TabsTrigger,
-    TabsContent,
-    Button
+    TabsContent
 } from '@/components/ui';
-import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 import Layers from 'lucide-vue-next/dist/esm/icons/layers.js';
 import Tag from 'lucide-vue-next/dist/esm/icons/tag.js';
 import LayoutTemplate from 'lucide-vue-next/dist/esm/icons/layout-template.js';
-import { useAuthStore } from '@/stores/auth';
+import { useCmsStore } from '@/stores/cms';
+import { useHead } from '@vueuse/head';
+import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { ref, watch, computed } from 'vue';
 
 // Lazy load actual index components
 import ContentsIndex from './contents/Index.vue';
@@ -84,7 +81,6 @@ import TemplatesIndex from './templates/Index.vue';
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
-const authStore = useAuthStore();
 const cmsStore = useCmsStore();
 
 useHead({
@@ -98,18 +94,6 @@ watch(activeTab, (newTab) => {
         query: { ...route.query, tab: newTab } 
     });
 });
-
-const handleCreateContent = () => {
-    router.push({ name: 'contents.create' });
-};
-
-const handleCreateCategory = () => {
-    router.push({ name: 'categories.create' });
-};
-
-const handleCreateTag = () => {
-    router.push({ name: 'tags.create' });
-};
 </script>
 
 

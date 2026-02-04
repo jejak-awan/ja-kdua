@@ -1,12 +1,12 @@
-import type { UnwrapRef } from 'vue';
-import { inject } from 'vue';
+import { type UnwrapRef, inject } from 'vue';
 import type emblaCarouselVue from 'embla-carousel-vue';
+import type { EmblaCarouselType, EmblaOptionsType, EmblaPluginType } from 'embla-carousel';
 
-export type CarouselApi = any;
+export type CarouselApi = EmblaCarouselType;
 
 export interface CarouselProps {
-    opts?: any;
-    plugins?: any[];
+    opts?: EmblaOptionsType;
+    plugins?: EmblaPluginType[];
     orientation?: 'horizontal' | 'vertical';
 }
 

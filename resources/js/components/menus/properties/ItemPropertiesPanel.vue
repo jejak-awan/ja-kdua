@@ -128,7 +128,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMenuContext } from '@/composables/useMenu';
 import { menuItemRegistry } from '../registry';
-import type { MenuItem, MenuItemSetting } from '@/types/menu';
+import type { MenuItem, MenuItemSetting, PropertyValue } from '@/types/menu';
 
 // UI Components
 import {
@@ -269,7 +269,7 @@ const formatGroupName = (name: string) => {
     return name.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 };
 
-const updateField = (key: string, value: any) => {
+const updateField = (key: string, value: PropertyValue) => {
     if (!selectedItem.value) return;
     const itemId = selectedItem.value.id || selectedItem.value._temp_id!;
     menuContext.updateItem(itemId, { [key]: value });

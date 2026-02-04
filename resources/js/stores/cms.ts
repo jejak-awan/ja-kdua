@@ -71,7 +71,7 @@ export const useCmsStore = defineStore('cms', {
             }
         },
 
-        async fetchContents(params: any = {}) {
+        async fetchContents(params: Record<string, unknown> = {}) {
             this.loading = true;
             try {
                 const response = await api.get('/cms/contents', { params });

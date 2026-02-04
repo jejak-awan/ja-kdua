@@ -102,7 +102,7 @@ const fetchDashboard = async () => {
         if (data && 'recentContent' in data) {
              recentContent.value = ensureArray<ContentItem>(data.recentContent as ContentItem[]);
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch viewer dashboard:', error);
     } finally {
         loading.value = false;

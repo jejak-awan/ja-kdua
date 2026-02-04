@@ -5,7 +5,8 @@ import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
 import api from '@/services/api';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
-import type { Media, MediaFolder } from '@/types/cms';
+import type { Media, MediaFolder, Tag, MediaStats } from '@/types/cms';
+import type { PaginationData } from '@/utils/responseParser';
 
 export function useMediaManager() {
     const { t } = useI18n();
@@ -22,8 +23,8 @@ export function useMediaManager() {
     const selectedFolder = ref<number | null>(null);
     const selectedMedia = ref<number[]>([]);
     const selectedFolders = ref<number[]>([]);
-    const pagination = ref<any>(null);
-    const statistics = ref<any>(null);
+    const pagination = ref<PaginationData | null>(null);
+    const statistics = ref<MediaStats | null>(null);
     const search = ref('');
     const mimeFilter = ref('all');
     const usageFilter = ref('all');
@@ -33,8 +34,8 @@ export function useMediaManager() {
     const maxSizeFilter = ref<number | string>('');
     const dateFromFilter = ref('');
     const dateToFilter = ref('');
-    const tags = ref<any[]>([]);
-    const availableFilters = ref<{ tags: any[], authors: any[] }>({ tags: [], authors: [] });
+    const tags = ref<Tag[]>([]);
+    const availableFilters = ref<{ tags: Tag[], authors: { id: number, name: string }[] }>({ tags: [], authors: [] });
     const bulkAction = ref('');
     const bulkProcessing = ref(false);
     const bulkProgress = ref(0);
@@ -81,7 +82,7 @@ export function useMediaManager() {
     const fetchMedia = async () => {
         loading.value = true;
         try {
-            const params: any = {
+            const params: Record<string, unknown> = {
                 page: pagination.value?.current_page || 1,
                 per_page: pagination.value?.per_page || 15,
                 view: viewMode.value,
@@ -106,7 +107,7 @@ export function useMediaManager() {
             const { data, pagination: paginationData } = parseResponse(response);
             mediaList.value = ensureArray(data);
             if (paginationData) pagination.value = paginationData;
-        } catch (error: any) {
+        } catch {
             // logger.error('Failed to fetch media:', error);
         } finally {
             loading.value = false;
@@ -117,7 +118,7 @@ export function useMediaManager() {
         try {
             const response = await api.get('/admin/ja/media/statistics');
             statistics.value = response.data?.data || response.data;
-        } catch (error: any) {
+        } catch {
             // logger.error('Failed to fetch media statistics:', error);
         }
     };
@@ -139,7 +140,7 @@ export function useMediaManager() {
                 return result;
             };
             folders.value = flatten(treeFolders.value);
-        } catch (error: any) {
+        } catch {
             // logger.error('Failed to fetch folders:', error);
         }
     };
@@ -192,7 +193,7 @@ export function useMediaManager() {
             await fetchMedia();
             fetchStatistics();
             toast.success.action(t('features.media.messages.restoreSuccess') || 'Media restored successfully');
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error.fromResponse(error);
         }
     };
@@ -203,7 +204,7 @@ export function useMediaManager() {
             await fetchFolders();
             fetchStatistics();
             toast.success.action(t('features.media.messages.folderRestoreSuccess') || 'Folder restored successfully');
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error.fromResponse(error);
         }
     };
@@ -223,7 +224,7 @@ export function useMediaManager() {
             await fetchFolders();
             fetchStatistics();
             toast.success.action(t('features.media.messages.emptyTrashSuccess') || 'Trash emptied successfully');
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error.fromResponse(error);
         }
     };
@@ -244,7 +245,7 @@ export function useMediaManager() {
             toast.success.action(t('features.media.messages.deleteSuccess') || 'Media deleted successfully');
             await fetchMedia();
             fetchStatistics();
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error.fromResponse(error);
         }
     };
@@ -266,7 +267,7 @@ export function useMediaManager() {
             await fetchFolders();
             if (selectedFolder.value === folder.id) selectedFolder.value = folder.parent_id || null;
             fetchStatistics();
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error.fromResponse(error);
         }
     };
@@ -309,7 +310,7 @@ export function useMediaManager() {
         selectedFolders.value = [];
     };
 
-    const handleBulkAction = async (action: string, options: any = {}) => {
+    const handleBulkAction = async (action: string, options: { folderId?: number | null; altText?: string } = {}) => {
         if (!action || (selectedMedia.value.length === 0 && selectedFolders.value.length === 0)) return;
 
         if (action === 'delete') {
@@ -328,7 +329,7 @@ export function useMediaManager() {
                 fetchStatistics();
                 selectedMedia.value = [];
                 toast.success.action(t('features.media.messages.bulkDeleted') || 'Items deleted successfully');
-            } catch (error: any) {
+            } catch (error: unknown) {
                 toast.error.fromResponse(error);
             } finally {
                 bulkProcessing.value = false;
@@ -363,7 +364,7 @@ export function useMediaManager() {
                     : (t('features.media.messages.bulkDeletedPermanent') || 'Items permanently deleted');
 
                 toast.success.action(successMsg);
-            } catch (error: any) {
+            } catch (error: unknown) {
                 toast.error.fromResponse(error);
             } finally {
                 bulkProcessing.value = false;
@@ -379,7 +380,7 @@ export function useMediaManager() {
                 await fetchMedia();
                 selectedMedia.value = [];
                 toast.success.action(t('features.media.messages.bulkMoved') || 'Items moved successfully');
-            } catch (error: any) {
+            } catch (error: unknown) {
                 toast.error.fromResponse(error);
             } finally {
                 bulkProcessing.value = false;
@@ -395,7 +396,7 @@ export function useMediaManager() {
                 await fetchMedia();
                 selectedMedia.value = [];
                 toast.success.action(t('features.media.messages.bulkAltUpdated') || 'Alt text updated successfully');
-            } catch (error: any) {
+            } catch (error: unknown) {
                 toast.error.fromResponse(error);
             } finally {
                 bulkProcessing.value = false;
@@ -415,7 +416,7 @@ export function useMediaManager() {
                 window.URL.revokeObjectURL(url);
                 selectedMedia.value = [];
                 toast.success.action(t('features.media.messages.bulkDownloadSuccess') || 'Media downloaded successfully');
-            } catch (error: any) {
+            } catch (error: unknown) {
                 toast.error.fromResponse(error);
             } finally {
                 bulkProcessing.value = false;

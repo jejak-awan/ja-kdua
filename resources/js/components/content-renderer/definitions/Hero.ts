@@ -12,22 +12,17 @@ import { defineAsyncComponent } from 'vue';
 
 // Import reusable presets
 import {
-    typographyDefaults,
-    headingTypographyDefaults,
     fontFamilyOptions,
-    fontWeightOptions,
-    textAlignOptions
+    fontWeightOptions
 } from './presets/typography';
 
 import {
-    backgroundDefaults,
     bgSizeOptions,
     bgPositionOptions,
     gradientDirectionOptions
 } from './presets/background';
 
 import { borderRadiusPresets } from './presets/border';
-import { shadowOptions } from './presets/effects';
 
 export default {
     name: 'hero',

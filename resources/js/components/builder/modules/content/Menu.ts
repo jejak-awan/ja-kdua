@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -17,8 +17,7 @@ import {
     interactionsSettings,
     scrollEffectsSettings,
     attributesSettings,
-    adminLabelSettings,
-    layoutSettings
+    adminLabelSettings
 } from '@/components/builder/modules/commonSettings';
 
 /**
@@ -102,7 +101,7 @@ const MenuModule: ModuleDefinition = {
                 id: 'menuTypography',
                 label: 'Menu Typography',
                 fields: [
-                    ...((typographySettings.fields as any[])).map(f => ({
+                    ...(typographySettings.fields as SettingDefinition[]).map(f => ({
                         ...f,
                         name: `menu_${f.name}`,
                         label: `Menu ${f.label}`

@@ -74,7 +74,7 @@ import Check from 'lucide-vue-next/dist/esm/icons/check.js';
 import Save from 'lucide-vue-next/dist/esm/icons/save.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Layout from 'lucide-vue-next/dist/esm/icons/layout-dashboard.js';import { IconButton, BaseDropdown, BaseDivider } from '@/components/builder/ui'
-import type { BuilderInstance } from '@/types/builder'
+import type { BuilderInstance, BuilderPreset } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   type: string;
@@ -88,7 +88,7 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  (e: 'action', payload: { type: string; data: any }): void
+  (e: 'action', payload: { type: string; data: BuilderPreset | null }): void
 }>()
 
 // Inject builder
@@ -97,10 +97,10 @@ const builder = inject<BuilderInstance>('builder')
 // Computed - builder.presets is a ref, needs .value
 const filteredPresets = computed(() => {
   if (!builder?.presets?.value) return []
-  return builder.presets.value.filter((p: any) => p.type === props.type)
+  return builder.presets.value.filter((p: BuilderPreset) => p.type === props.type)
 })
 
-const handleAction = (type: string, close: () => void, data: any = null) => {
+const handleAction = (type: string, close: () => void, data: BuilderPreset | null = null) => {
   emit('action', { type, data })
   close()
 }

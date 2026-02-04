@@ -323,7 +323,7 @@
                 :per-page="Number(pagination.per_page || 10)"
                 :show-page-numbers="true"
                 @page-change="changePage"
-                @update:per-page="(val) => { if(pagination) { pagination.per_page = String(val); pagination.current_page = 1; fetchComments(); } }"
+                @update:per-page="(val) => { if(pagination) { pagination.per_page = Number(val); pagination.current_page = 1; fetchComments(); } }"
                 class="border-none shadow-none mt-4"
             />
         </div>
@@ -339,6 +339,7 @@ import { useConfirm } from '@/composables/useConfirm';
 import { useToast } from '@/composables/useToast';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
 import { Badge, Button, Card, Checkbox, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
+import type { PaginationData } from '@/utils/responseParser';
 
 import MessageSquare from 'lucide-vue-next/dist/esm/icons/message-square.js';
 import Check from 'lucide-vue-next/dist/esm/icons/check.js';
@@ -349,8 +350,6 @@ import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import ArrowUpRight from 'lucide-vue-next/dist/esm/icons/arrow-up-right.js';
 import Reply from 'lucide-vue-next/dist/esm/icons/reply.js';
 import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
-import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js';
-import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
 
 import type { Comment, CommentStatus, CommentStatistics } from '@/types/comments';
 
@@ -362,7 +361,7 @@ const loading = ref(false);
 const comments = ref<Comment[]>([]);
 const search = ref('');
 const statusFilter = ref<CommentStatus | 'all'>('pending');
-const pagination = ref<any>(null);
+const pagination = ref<PaginationData | null>(null);
 const statistics = ref<CommentStatistics | null>(null);
 const selectedIds = ref<number[]>([]);
 
@@ -370,7 +369,7 @@ const fetchStatistics = async () => {
     try {
         const response = await api.get('/admin/ja/comments/statistics');
         statistics.value = (response.data?.data || response.data) as CommentStatistics;
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch statistics:', error);
     }
 };
@@ -417,7 +416,7 @@ const bulkAction = async (action: string) => {
     }
     
     try {
-        const response = await api.post('/admin/ja/comments/bulk', {
+        await api.post('/admin/ja/comments/bulk', {
             ids: selectedIds.value,
             action: action
         });
@@ -425,18 +424,18 @@ const bulkAction = async (action: string) => {
         await fetchComments();
         await fetchStatistics();
         toast.success.update('Action');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Bulk action failed:', error);
-        toast.error.action(error);
+        toast.error.action(error as Record<string, unknown>);
     }
 };
 
 const fetchComments = async () => {
     loading.value = true;
     try {
-        const params: any = {
+        const params: Record<string, string | number> = {
             page: pagination.value?.current_page || 1,
-            per_page: pagination.value?.per_page || 10,
+            per_page: Number(pagination.value?.per_page || 10),
         };
 
         if (statusFilter.value && statusFilter.value !== 'all') {
@@ -449,7 +448,7 @@ const fetchComments = async () => {
         if (paginationData) {
             pagination.value = paginationData;
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch comments:', error);
     } finally {
         loading.value = false;
@@ -468,9 +467,9 @@ const approveComment = async (comment: Comment) => {
         await api.put(`/admin/ja/comments/${comment.id}/approve`);
         await fetchComments();
         toast.success.approve('Comment');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to approve comment:', error);
-        toast.error.update(error, 'Comment');
+        toast.error.update(error as Record<string, unknown>, 'Comment');
     }
 };
 
@@ -480,9 +479,9 @@ const rejectComment = async (comment: Comment) => {
         await fetchComments();
         await fetchStatistics();
         toast.success.reject('Comment');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to reject comment:', error);
-        toast.error.update(error, 'Comment');
+        toast.error.update(error as Record<string, unknown>, 'Comment');
     }
 };
 
@@ -492,9 +491,9 @@ const markAsSpam = async (comment: Comment) => {
         await fetchComments();
         await fetchStatistics();
         toast.success.markSpam('Comment');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to mark as spam:', error);
-        toast.error.update(error, 'Comment');
+        toast.error.update(error as Record<string, unknown>, 'Comment');
     }
 };
 
@@ -521,9 +520,9 @@ const deleteComment = async (comment: Comment) => {
         await api.delete(`/admin/ja/comments/${comment.id}`);
         await fetchComments();
         toast.success.delete('Comment');
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to delete comment:', error);
-        toast.error.delete(error, 'Comment');
+        toast.error.delete(error as Record<string, unknown>, 'Comment');
     }
 };
 

@@ -60,7 +60,7 @@ export default {
                 { label: '↑', value: 'column-reverse' }
             ],
             default: 'column',
-            condition: (settings: any) => settings.stackOn !== 'never',
+            condition: (settings: Record<string, unknown>) => settings.stackOn !== 'never',
             tab: 'style'
         },
         {

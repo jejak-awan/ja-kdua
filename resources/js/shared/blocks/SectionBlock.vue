@@ -5,11 +5,11 @@
     :device="device" 
     tag="section"
     class="section-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Section'"
-    :style="cardStyles"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Section'"
+    :style="(cardStyles as any)"
   >
-    <div class="section-container relative w-full transition-[width] duration-500" :style="containerStyles">
+    <div class="section-container relative w-full transition-[width] duration-500" :style="(containerStyles as any)">
       <!-- Builder Mode -->
       <template v-if="mode === 'edit'">
         <slot />
@@ -38,12 +38,13 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import PlusIcon from 'lucide-vue-next/dist/esm/icons/plus.js';import { 
+import PlusIcon from 'lucide-vue-next/dist/esm/icons/plus.js';
+import { 
     getVal,
-    getLayoutStyles,
-    getResponsiveValue 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance, BuilderInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
+import type { Component } from 'vue'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -57,14 +58,14 @@ const props = withDefaults(defineProps<{
 })
 
 const builder = inject<BuilderInstance | null>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const BlockRenderer = inject<any>('BlockRenderer', null)
+const BlockRenderer = inject<Component | null>('BlockRenderer', null)
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -74,15 +75,16 @@ const cardStyles = computed(() => {
 
 const containerStyles = computed(() => {
     const layoutStyles = getLayoutStyles(settings.value, props.device)
-    const vAlign = getResponsiveValue(settings.value, 'verticalAlignment', props.device) || 'start'
+    const vAlign = getVal<string>(settings.value, 'verticalAlignment', props.device) || 'start'
     
-    return {
+    const styles: Record<string, string | number> = {
         ...layoutStyles,
         display: 'flex',
         flexDirection: 'column' as const,
         justifyContent: vAlign === 'center' ? 'center' : (vAlign === 'end' ? 'flex-end' : 'flex-start'),
         minHeight: '80px'
     }
+    return styles
 })
 
 const addRow = () => {

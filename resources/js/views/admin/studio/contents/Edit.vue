@@ -144,7 +144,6 @@ import { useCmsStore } from '@/stores/cms';
 import api from '@/services/api';
 import { useAuthStore } from '@/stores/auth';
 
-import Save from 'lucide-vue-next/dist/esm/icons/save.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import Lock from 'lucide-vue-next/dist/esm/icons/lock.js';
 import Unlock from 'lucide-vue-next/dist/esm/icons/lock-open.js';
@@ -177,7 +176,7 @@ import { useAutoSave } from '@/composables/useAutoSave';
 import { useToast } from '@/composables/useToast';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { contentSchema } from '@/schemas';
-import type { Content, Category, Tag, ContentForm, Menu, MenuItem, ContentTemplate } from '@/types/cms';
+import type { Content, Category, Tag, ContentForm, Menu } from '@/types/cms';
 
 interface LockStatus {
     is_locked: boolean;
@@ -197,7 +196,7 @@ const authStore = useAuthStore();
 
 const isSidebarOpen = ref(true);
 const contentId = route.params.id as string;
-const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(contentSchema);
+const { validateWithZod, setErrors, clearErrors } = useFormValidation(contentSchema);
 
 const loading = ref(false);
 const categories = ref<Category[]>([]);
@@ -283,10 +282,8 @@ const formWithTags = computed(() => ({
 // Auto-save setup
 const autoSaveEnabled = ref(false);
 const {
-    isSaving: autoSaving,
     lastSaved,
     saveStatus: autoSaveStatus,
-    hasChanges,
     startAutoSave,
 } = useAutoSave(formWithTags as Ref<Record<string, unknown>>, contentId as string | number, {
     interval: 30000, // 30 seconds
@@ -504,6 +501,7 @@ const handleSubmit = async (status: string | null = null) => {
         form.value.status = status;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!validateWithZod(form.value as any)) return;
 
     loading.value = true;

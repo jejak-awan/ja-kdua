@@ -38,7 +38,7 @@
                     <option :value="module.id">This Block (Self)</option>
                     <optgroup label="Other Blocks">
                         <option v-for="m in allModules" :key="m.id" :value="m.id">
-                            {{ m.title || m.type }} ({{ m.id.substring(0,5) }})
+                            {{ getBlockTitle(m) }} ({{ m.id.substring(0,5) }})
                         </option>
                     </optgroup>
                 </select>
@@ -146,8 +146,9 @@ const availableActions = [
 
 const allModules = computed(() => {
     // Collect all modules from builder for target selection
-    if (!builder || !(builder as any).allModules) return []
-    return (builder as any).allModules.value.filter((m: BlockInstance) => m.id !== props.module.id)
+    if (!builder) return []
+    const modules = (builder as BuilderInstance & { allModules?: { value: BlockInstance[] } }).allModules?.value || builder.blocks.value || []
+    return modules.filter((m: BlockInstance) => m.id !== props.module.id)
 })
 
 const getInteractionLabel = (id: string) => {
@@ -160,8 +161,15 @@ const getActionLabel = (id: string) => {
 
 const getTargetLabel = (id: string) => {
     if (id === props.module.id) return 'Self'
-    const m = (builder as any)?.allModules?.value.find((mod: BlockInstance) => mod.id === id)
-    return m ? (m.title || m.type) : id.substring(0, 8)
+    const modules = (builder as BuilderInstance & { allModules?: { value: BlockInstance[] } })?.allModules?.value || builder?.blocks.value || []
+    const m = modules.find((mod: BlockInstance) => mod.id === id)
+    return m ? getBlockTitle(m) : id.substring(0, 8)
+}
+
+const getBlockTitle = (m: BlockInstance) => {
+    if (m.settings?._label) return String(m.settings._label)
+    const def = builder?.getModuleDefinition(m.type)
+    return def?.title || def?.label || m.type
 }
 
 const togglePicker = () => {

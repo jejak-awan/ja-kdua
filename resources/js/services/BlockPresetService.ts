@@ -4,7 +4,7 @@ import { ref, type Ref } from 'vue';
 export interface BlockPreset {
     id: number;
     name: string;
-    settings: Record<string, any>;
+    settings: Record<string, unknown>;
     createdAt: string;
 }
 
@@ -37,7 +37,7 @@ class BlockPresetService {
      * @param {string} name Preset name
      * @param {object} settings Settings object
      */
-    savePreset(type: string, name: string, settings: Record<string, any>) {
+    savePreset(type: string, name: string, settings: Record<string, unknown>) {
         if (!this.presets.value[type]) {
             this.presets.value[type] = [];
         }

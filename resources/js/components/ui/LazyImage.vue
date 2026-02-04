@@ -87,7 +87,7 @@ onMounted(() => {
     }
     
     // Check if IntersectionObserver is supported AND lazy loading is enabled via config
-    const lazyEnabled = (window as any).siteConfig?.lazyLoading ?? true;
+    const lazyEnabled = (window as unknown as { siteConfig?: { lazyLoading?: boolean } }).siteConfig?.lazyLoading ?? true;
 
     if ('IntersectionObserver' in window && lazyEnabled) {
         observer = new IntersectionObserver(

@@ -42,7 +42,7 @@ export function useFileManager() {
     const maxSizeFilter = ref<number | string>('');
     const dateFromFilter = ref('');
     const dateToFilter = ref('');
-    const availableFilters = ref<{ authors: any[] }>({ authors: [] });
+    const availableFilters = ref<{ authors: { id: number | string, name: string }[] }>({ authors: [] });
 
     // Selection state
     const selectedItems = ref<(FileItem | FolderItem)[]>([]);
@@ -285,7 +285,7 @@ export function useFileManager() {
                     direction: sortDirection.value
                 },
             });
-            const data = (parseSingleResponse(response) || {}) as any;
+            const data = parseSingleResponse<{ files: FileItem[], folders: FolderItem[] }>(response) || { files: [], folders: [] };
             files.value = Array.isArray(data.files) ? data.files : [];
             const newFolders = Array.isArray(data.folders) ? data.folders : [];
 
@@ -297,7 +297,7 @@ export function useFileManager() {
             });
             folders.value = allFolders.value;
             filesCache.value.set(currentPath.value, files.value);
-        } catch (error: any) {
+        } catch (error: unknown) {
             logger.error('Failed to fetch files:', error);
         } finally {
             loading.value = false;
@@ -311,7 +311,7 @@ export function useFileManager() {
             const response = await api.get('/admin/ja/file-manager', {
                 params: { path },
             });
-            const data = (parseSingleResponse(response) || {}) as any;
+            const data = parseSingleResponse<{ folders: FolderItem[] }>(response) || { folders: [] };
             const newFolders = Array.isArray(data.folders) ? data.folders : [];
 
             newFolders.forEach((folder: FolderItem) => {
@@ -420,7 +420,7 @@ export function useFileManager() {
             await fetchCurrentPath();
             fetchTrash();
             toast.success.action(isFolder ? t('features.file_manager.messages.folderDeleted') : t('features.file_manager.messages.fileDeleted'));
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error.fromResponse(error);
         }
     };
@@ -446,7 +446,7 @@ export function useFileManager() {
             await fetchCurrentPath();
             fetchTrash();
             toast.success.action(t('features.file_manager.messages.bulkDeleted'));
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error.fromResponse(error);
         }
     };
@@ -479,7 +479,7 @@ export function useFileManager() {
             await fetchAllFolders();
             await fetchCurrentPath();
             toast.success.action(t('features.file_manager.messages.pasted'));
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error.fromResponse(error);
         } finally {
             loading.value = false;
@@ -497,7 +497,7 @@ export function useFileManager() {
             await fetchAllFolders();
             await fetchCurrentPath();
             toast.success.action(t('features.file_manager.messages.moved'));
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error.fromResponse(error);
         }
     };
@@ -565,7 +565,7 @@ export function useFileManager() {
         try {
             await navigator.clipboard.writeText(item.path);
             toast.success.action(t('features.file_manager.messages.path_copied', 'Path copied'));
-        } catch (err) {
+        } catch {
             toast.error.default(t('features.file_manager.messages.copy_failed', 'Failed to copy'));
         }
     };
@@ -575,7 +575,7 @@ export function useFileManager() {
             try {
                 await navigator.clipboard.writeText(file.url);
                 toast.success.action(t('features.file_manager.messages.url_copied', 'URL copied'));
-            } catch (err) {
+            } catch {
                 toast.error.default(t('features.file_manager.messages.copy_failed', 'Failed to copy'));
             }
         }

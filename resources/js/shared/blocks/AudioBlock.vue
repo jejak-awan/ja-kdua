@@ -4,14 +4,14 @@
     :mode="mode" 
     :device="device"
     class="audio-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Audio Player'"
-    :style="cardStyles"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Audio Player'"
+    :style="(cardStyles as any)"
   >
     <template #default="{ settings: blockSettings }">
       <Card 
         class="audio-player-card group w-full border-none shadow-xl rounded-[32px] overflow-hidden bg-white dark:bg-slate-900 px-8 py-6 transition-[width] duration-500 hover:shadow-2xl hover:-translate-y-1"
-        :style="containerStyles"
+        :style="(containerStyles as any)"
       >
         <div class="audio-player flex items-center gap-6">
           <!-- Play Button -->
@@ -19,7 +19,7 @@
               <div v-if="isPlaying" class="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
               <Button 
                 class="play-button w-14 h-14 rounded-full shadow-lg transition-colors duration-300 hover:scale-110 active:scale-95 flex items-center justify-center p-0 border-none" 
-                :style="playButtonStyles" 
+                :style="(playButtonStyles as any)" 
                 @click="togglePlay"
               >
                 <component :is="isPlaying ? Pause : Play" class="w-6 h-6 fill-current translate-x-0.5" />
@@ -30,10 +30,10 @@
           <div class="flex-grow flex flex-col gap-4">
               <div class="audio-header flex justify-between items-end">
                   <div class="audio-info flex flex-col">
-                    <div class="audio-title font-black text-slate-900 dark:text-white tracking-tight leading-none mb-1" :style="trackNameStyles">
+                    <div class="audio-title font-black text-slate-900 dark:text-white tracking-tight leading-none mb-1" :style="(trackNameStyles as any)">
                         {{ blockSettings.trackName || 'Ethereal Soundscapes' }}
                     </div>
-                    <div v-if="blockSettings.artistName" class="audio-artist text-[10px] font-black uppercase tracking-[0.2em] text-slate-400" :style="artistNameStyles">
+                    <div v-if="blockSettings.artistName" class="audio-artist text-[10px] font-black uppercase tracking-[0.2em] text-slate-400" :style="(artistNameStyles as any)">
                         {{ blockSettings.artistName || 'Antigravity Ensemble' }}
                     </div>
                   </div>
@@ -45,7 +45,7 @@
               
               <!-- Progress -->
               <div class="audio-progress relative w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div class="progress-fill absolute inset-y-0 left-0 transition-[width] duration-500 rounded-full" :style="progressFillStyles" />
+                <div class="progress-fill absolute inset-y-0 left-0 transition-[width] duration-500 rounded-full" :style="(progressFillStyles as any)" />
               </div>
           </div>
           
@@ -70,15 +70,15 @@
 import { computed, ref } from 'vue'
 import Play from 'lucide-vue-next/dist/esm/icons/play.js';
 import Pause from 'lucide-vue-next/dist/esm/icons/pause.js';
-import Download from 'lucide-vue-next/dist/esm/icons/download.js';import BaseBlock from '../components/BaseBlock.vue'
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import BaseBlock from '../components/BaseBlock.vue'
 import { Card, Button } from '../ui'
 import { 
     getVal, 
     getTypographyStyles,
-    getLayoutStyles,
-    getResponsiveValue 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance
@@ -89,18 +89,18 @@ const props = withDefaults(defineProps<{
   device: 'desktop'
 })
 
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed<ModuleSettings>(() => (props.module.settings || {}) as ModuleSettings)
 
-const isPlaying = ref(false)
-const togglePlay = () => {
+const isPlaying = ref<boolean>(false)
+const togglePlay = (): void => {
     if (props.mode === 'edit') return
     isPlaying.value = !isPlaying.value
 }
 
 const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
@@ -113,22 +113,24 @@ const containerStyles = computed(() => {
 })
 
 const playButtonStyles = computed(() => {
-  const accent = getVal(settings.value, 'accentColor', props.device) || 'currentColor'
-  return {
+  const accent = getVal<string>(settings.value, 'accentColor', props.device) || 'currentColor'
+  const styles: Record<string, string | number> = {
     backgroundColor: accent,
     color: '#ffffff',
   }
+  return styles
 })
 
 const trackNameStyles = computed(() => getTypographyStyles(settings.value, 'trackName_', props.device))
 const artistNameStyles = computed(() => getTypographyStyles(settings.value, 'artistName_', props.device))
 
 const progressFillStyles = computed(() => {
-  const accent = getVal(settings.value, 'accentColor', props.device) || '#2059ea'
-  return {
+  const accent = getVal<string>(settings.value, 'accentColor', props.device) || '#2059ea'
+  const styles: Record<string, string | number> = {
     width: '30%',
     backgroundColor: accent
   }
+  return styles
 })
 </script>
 

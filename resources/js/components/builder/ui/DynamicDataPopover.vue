@@ -76,7 +76,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-  import { ref, computed, onMounted, inject, type Ref } from 'vue';
+  import { ref, computed, onMounted, inject } from 'vue';
   import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
@@ -84,6 +84,7 @@ import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
 import SearchX from 'lucide-vue-next/dist/esm/icons/search-x.js';
   import { Input, Badge, Button } from '@/components/ui';
   import api from '@/services/api';
+  import type { BuilderInstance } from '@/types/builder';
 
   interface Props {
     source?: string;
@@ -114,7 +115,7 @@ import SearchX from 'lucide-vue-next/dist/esm/icons/search-x.js';
     (e: 'close'): void;
   }>();
   
-  const builder = inject<any>('builder', null);
+  const builder = inject<BuilderInstance | null>('builder', null);
 
   const searchQuery = ref('');
   const dataGroups = ref<Record<string, DynamicGroup>>({});
@@ -129,7 +130,7 @@ import SearchX from 'lucide-vue-next/dist/esm/icons/search-x.js';
     try {
       const params = {
         context: props.source,
-        content_id: props.contentId || builder?.contentId
+        content_id: props.contentId || builder?.content.value.id
       };
       
       const response = await api.get('/admin/ja/builder/dynamic-sources', { params });

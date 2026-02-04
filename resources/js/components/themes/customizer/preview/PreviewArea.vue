@@ -78,7 +78,7 @@ defineProps<{
     previewUrl?: string;
 }>();
 
-const themePreviewRef = ref<any>(null);
+const themePreviewRef = ref<{ refreshPreview: () => Promise<void> } | null>(null);
 const isRefreshing = ref(false);
 
 const refreshPreview = async () => {

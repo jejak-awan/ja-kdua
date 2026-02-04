@@ -7,8 +7,8 @@
         <BaseLabel>{{ t(`builder.fields.spacing.sides.${side}`) }}</BaseLabel>
         <BaseInput 
           type="number" 
-          :model-value="localValue[side]" 
-          :placeholder="localValue[side] === 0 || localValue[side] === '' ? (placeholderValue?.[side] ?? '') : ''"
+          :model-value="(localValue[side] as string | number)" 
+          :placeholder="(localValue[side] === 0 || localValue[side] === '' ? (placeholderValue?.[side] as string ?? '') : '')"
           @update:model-value="updateValue(side, $event)"
           class="text-center"
         />
@@ -48,17 +48,19 @@ import type { SettingDefinition } from '@/types/builder'
 
 const { t } = useI18n()
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   field: SettingDefinition;
-  value: Record<string, any> | string;
-  placeholderValue?: Record<string, any> | null;
-}>()
+  value: Record<string, unknown> | string;
+  placeholderValue?: Record<string, unknown> | null;
+}>(), {
+  placeholderValue: null
+})
 
 const emit = defineEmits(['update:value'])
 
 // State
 const sideKeys = ['top', 'right', 'bottom', 'left']
-const localValue = ref<Record<string, any>>({ top: 0, right: 0, bottom: 0, left: 0, unit: 'px' })
+const localValue = ref<Record<string, string | number>>({ top: 0, right: 0, bottom: 0, left: 0, unit: 'px' })
 const isLinked = ref(false)
 
 const hasUnits = computed(() => Array.isArray(props.field.units) && props.field.units.length > 0)
@@ -70,18 +72,18 @@ const unitOptions = computed(() => {
 // Sync with prop
 watch(() => props.value, (newVal) => {
   if (typeof newVal === 'object' && newVal !== null) { localValue.value = { 
-        top: (newVal as any).top ?? 0, 
-        right: (newVal as any).right ?? 0, 
-        bottom: (newVal as any).bottom ?? 0, 
-        left: (newVal as any).left ?? 0,
-        unit: (newVal as any).unit || 'px'
+        top: (newVal as Record<string, unknown>).top as number ?? 0, 
+        right: (newVal as Record<string, unknown>).right as number ?? 0, 
+        bottom: (newVal as Record<string, unknown>).bottom as number ?? 0, 
+        left: (newVal as Record<string, unknown>).left as number ?? 0,
+        unit: (newVal as Record<string, unknown>).unit as string || 'px'
     }
   } else {
     localValue.value = { top: 0, right: 0, bottom: 0, left: 0, unit: 'px' }
   }
 }, { immediate: true, deep: true })
 
-const updateValue = (side: string, val: any) => {
+const updateValue = (side: string, val: string | number | boolean) => {
   const num = parseFloat(val as string) || 0
   
   if (isLinked.value) {

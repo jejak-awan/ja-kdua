@@ -73,19 +73,19 @@
             <div class="setting-group">
                 <label>{{ t('builder.panels.templates.applyTo') }}</label>
                 <select v-model="editingRules.apply_to" class="select-input">
-                    <option value="all">Everywhere</option>
-                    <option value="specific_type">Specific Content Type</option>
-                    <option value="specific_category">Specific Category</option>
-                    <option value="front_page">Front Page Only</option>
+                    <option value="all">{{ t('builder.panels.templates.applyOptions.all') }}</option>
+                    <option value="specific_type">{{ t('builder.panels.templates.applyOptions.specific_type') }}</option>
+                    <option value="specific_category">{{ t('builder.panels.templates.applyOptions.specific_category') }}</option>
+                    <option value="front_page">{{ t('builder.panels.templates.applyOptions.front_page') }}</option>
                 </select>
             </div>
 
             <div v-if="editingRules.apply_to === 'specific_type'" class="setting-group">
                 <label>{{ t('builder.panels.templates.contentType') }}</label>
                 <select v-model="editingRules.type_id" class="select-input">
-                    <option value="post">Posts</option>
-                    <option value="page">Pages</option>
-                    <option value="custom">Custom Content</option>
+                    <option value="post">{{ t('builder.panels.templates.contentTypeOptions.post') }}</option>
+                    <option value="page">{{ t('builder.panels.templates.contentTypeOptions.page') }}</option>
+                    <option value="custom">{{ t('builder.panels.templates.contentTypeOptions.custom') }}</option>
                 </select>
             </div>
 
@@ -114,23 +114,39 @@ import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import Settings from 'lucide-vue-next/dist/esm/icons/settings.js';
 import { BaseInput, BaseModal } from '@/components/builder/ui';
-import type { BuilderInstance } from '@/types/builder';
+import type { BuilderInstance, PageMetadata, Category } from '@/types/builder';
+
+interface Template extends Omit<Partial<PageMetadata>, 'id'> {
+  id: number | string;
+  name?: string;
+  title?: string;
+  type?: string;
+  template_type?: string;
+  meta?: {
+    template_type?: string;
+    assignment_rules?: {
+      apply_to: string;
+      type_id?: string;
+      category_id?: string | number;
+    };
+  };
+}
 
 const { t } = useI18n();
 const builder = inject<BuilderInstance>('builder');
 
 const loading = ref(false);
 const searchQuery = ref('');
-const templates = ref<any[]>([]);
+const templates = ref<Template[]>([]);
 const currentPageId = computed(() => builder?.currentPageId?.value);
-const categories = computed(() => builder?.categories?.value || []);
+const categories = computed(() => (builder?.categories?.value || []) as Category[]);
 
 const showSettingsModal = ref(false);
-const currentTemplate = ref<any>(null);
+const activeEditingTemplate = ref<Template | null>(null);
 const editingRules = reactive({
     apply_to: 'all',
     type_id: '',
-    category_id: ''
+    category_id: '' as string | number
 });
 
 const templateCategories = [
@@ -146,7 +162,7 @@ const fetchTemplates = async () => {
   loading.value = true;
   try {
     const response = await builder.fetchTemplates();
-    templates.value = response || [];
+    templates.value = (response as Template[]) || [];
   } catch (error) {
     logger.error('Failed to fetch templates:', error);
   } finally {
@@ -163,26 +179,25 @@ const getCategoryTemplates = (categoryId: string) => {
   return filtered;
 };
 
-const getTemplateRules = (template: any) => {
+const getTemplateRules = (template: Template) => {
     const rules = template.meta?.assignment_rules;
     if (!rules) return null;
-    if (rules.apply_to === 'all') return 'All Pages';
-    if (rules.apply_to === 'specific_type') return `Type: ${rules.type_id}`;
-    if (rules.apply_to === 'specific_category') {
-        const cat = categories.value.find((c: any) => c.id === rules.category_id);
-        return `Category: ${cat?.name || rules.category_id}`;
+    if (rules.apply_to === 'all') return t('builder.panels.templates.applyOptions.all');
+    if (rules.apply_to === 'specific_type') {
+        const typeLabel = rules.type_id ? t(`builder.panels.templates.contentTypeOptions.${rules.type_id}`) : rules.type_id;
+        return `${t('builder.panels.templates.contentType')}: ${typeLabel}`;
     }
-    if (rules.apply_to === 'front_page') return 'Front Page';
+    if (rules.apply_to === 'specific_category') {
+        const cat = categories.value.find((c) => c.id === rules.category_id);
+        return `${t('builder.panels.templates.category')}: ${cat?.name || rules.category_id}`;
+    }
+    if (rules.apply_to === 'front_page') return t('builder.panels.templates.applyOptions.front_page');
     return null;
 };
 
-const selectTemplate = (id: any) => {
+const selectTemplate = (id: string | number) => {
   if (builder?.loadContent) {
       builder.loadContent(id);
-  } else {
-      // Fallback or explicit method check
-      // In builder.ts I see loadContent but not setCurrentPage logic clearly defined 
-      // but PagesPanel used it. Assuming loadContent switches page context.
   }
 };
 
@@ -190,7 +205,7 @@ const handleCreate = async (type: string) => {
   const name = prompt(`Enter ${type} template name:`);
   if (name && builder) {
     try {
-      await (builder as any).createTemplate({ name, type });
+      await builder.createTemplate({ name, type });
       fetchTemplates();
     } catch (error) {
       logger.error('Failed to create template:', error);
@@ -198,23 +213,23 @@ const handleCreate = async (type: string) => {
   }
 };
 
-const openSettings = (template: any) => {
-    currentTemplate.value = template;
+const openSettings = (template: Template) => {
+    activeEditingTemplate.value = template;
     const rules = template.meta?.assignment_rules || { apply_to: 'all', type_id: '', category_id: '' };
     editingRules.apply_to = rules.apply_to;
-    editingRules.type_id = rules.type_id;
-    editingRules.category_id = rules.category_id;
+    editingRules.type_id = rules.type_id || '';
+    editingRules.category_id = rules.category_id || '';
     showSettingsModal.value = true;
 };
 
 const saveRules = async () => {
-    if (!currentTemplate.value || !builder) return;
+    if (!activeEditingTemplate.value || !builder) return;
     try {
         const meta = { 
-            ...(currentTemplate.value.meta || {}), 
+            ...(activeEditingTemplate.value.meta || {}), 
             assignment_rules: { ...editingRules } 
         };
-        await (builder as any).updateContentMeta(currentTemplate.value.id, meta);
+        await builder.updateContentMeta(activeEditingTemplate.value.id, meta);
         showSettingsModal.value = false;
         fetchTemplates();
     } catch (error) {
@@ -222,7 +237,7 @@ const saveRules = async () => {
     }
 };
 
-const handleDelete = async (template: any) => {
+const handleDelete = async (template: Template) => {
     if (!builder) return;
     const confirmed = await builder.confirm({
         title: 'Delete Template',
@@ -231,7 +246,7 @@ const handleDelete = async (template: any) => {
     });
     if (confirmed) {
         try {
-            await (builder as any).deleteTemplate(template.id);
+            await builder.deleteTemplate(template.id);
             fetchTemplates();
         } catch (error) {
             logger.error('Delete failed:', error);

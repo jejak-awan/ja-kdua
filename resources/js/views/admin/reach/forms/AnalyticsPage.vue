@@ -104,13 +104,13 @@
                 <div class="flex items-end gap-2">
                     <h3 class="text-3xl font-bold text-primary">{{ statistics.total || 0 }}</h3>
                     <div 
-                        v-if="statistics.growth !== undefined" 
+                        v-if="statistics?.growth !== undefined && statistics?.growth !== null" 
                         class="text-xs font-medium px-1.5 py-0.5 rounded-sm flex items-center mb-1"
-                        :class="statistics.growth >= 0 ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-600'"
+                        :class="Number(statistics.growth) >= 0 ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-600'"
                     >
-                        <ArrowUp v-if="statistics.growth >= 0" class="w-3 h-3 mr-0.5" />
+                        <ArrowUp v-if="Number(statistics.growth) >= 0" class="w-3 h-3 mr-0.5" />
                         <ArrowDown v-else class="w-3 h-3 mr-0.5" />
-                        {{ Math.abs(statistics.growth) }}%
+                        {{ Math.abs(Number(statistics.growth)) }}%
                     </div>
                 </div>
                 <p class="text-[10px] text-muted-foreground mt-1">vs previous period ({{ statistics.previous_total || 0 }})</p>
@@ -145,7 +145,7 @@
                     <component 
                         :is="chartType === 'line' ? LineChart : BarChart"
                         v-if="statistics?.daily_stats?.length"
-                        :data="statistics.daily_stats" 
+                        :data="(statistics.daily_stats as any)" 
                         :label="$t('features.forms.submissions.title')"
                         label-key="period"
                         value-key="visits"
@@ -189,7 +189,7 @@
                 <div class="flex-1 w-full flex items-center justify-center overflow-hidden">
                     <DoughnutChart 
                         v-if="selectedAggregateField && statistics?.field_distribution"
-                        :data="statistics.field_distribution" 
+                        :data="(statistics.field_distribution as any)" 
                         label-key="label"
                         value-key="count"
                     />
@@ -210,7 +210,7 @@
                 </h3>
                 <div class="flex-1 relative">
                     <LineChart 
-                        :data="statistics.hourly_stats" 
+                        :data="(statistics?.hourly_stats as any) || []" 
                         label-key="hour" 
                         value-key="count" 
                         label="Submissions per Hour"
@@ -225,7 +225,7 @@
                 </h3>
                 <div class="flex-1 relative">
                     <BarChart 
-                        :data="statistics.weekly_stats" 
+                        :data="(statistics?.weekly_stats as any) || []" 
                         label-key="day" 
                         value-key="count" 
                         :horizontal="false"
@@ -285,7 +285,7 @@
                 </Table>
             </div>
             
-            <p v-if="statistics?.total > 20" class="mt-4 text-xs italic text-muted-foreground text-center print:hidden">
+            <p v-if="statistics && statistics.total > 20" class="mt-4 text-xs italic text-muted-foreground text-center print:hidden">
                 ... and {{ statistics.total - 20 }} more submissions. Export to Excel for full dataset.
             </p>
         </Card>
@@ -303,7 +303,9 @@ import {
     getCoreRowModel, 
     getSortedRowModel,
     createColumnHelper,
-    FlexRender 
+    FlexRender,
+    type ColumnDef,
+    type CellContext 
 } from '@tanstack/vue-table';
 import { 
     Button, 
@@ -321,36 +323,48 @@ import {
     TableHead,
     TableCell
 } from '@/components/ui';
-import { 
-    ArrowLeft, 
-    TrendingUp, 
-    PieChart, 
-    LineChart as LineChartIcon, 
-    BarChart3, 
-    Printer, 
-    Download,
-    FileText,
-    ArrowUp,
-    ArrowDown,
-    ArrowUpDown,
-    Clock,
-    CalendarDays
-} from 'lucide-vue-next';
+import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
+import TrendingUp from 'lucide-vue-next/dist/esm/icons/trending-up.js';
+import PieChart from 'lucide-vue-next/dist/esm/icons/chart-pie.js';
+import LineChartIcon from 'lucide-vue-next/dist/esm/icons/chart-line.js';
+import BarChart3 from 'lucide-vue-next/dist/esm/icons/chart-column.js';
+import Printer from 'lucide-vue-next/dist/esm/icons/printer.js';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
+import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
+import ArrowUp from 'lucide-vue-next/dist/esm/icons/arrow-up.js';
+import ArrowDown from 'lucide-vue-next/dist/esm/icons/arrow-down.js';
+import ArrowUpDown from 'lucide-vue-next/dist/esm/icons/arrow-up-down.js';
+import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
+import CalendarDays from 'lucide-vue-next/dist/esm/icons/calendar-days.js';
 
 import LineChart from '@/components/charts/LineChart.vue';
 import BarChart from '@/components/charts/BarChart.vue';
 import DoughnutChart from '@/components/charts/DoughnutChart.vue';
 
+interface AnalyticsStatistics {
+    total: number;
+    growth?: number;
+    previous_total?: number;
+    new?: number;
+    read?: number;
+    all_time_total?: number;
+    daily_stats?: Record<string, unknown>[];
+    field_distribution?: Record<string, unknown>[];
+    chartable_fields?: { name: string, label: string, id?: string | number }[];
+    hourly_stats?: Record<string, unknown>[];
+    weekly_stats?: Record<string, unknown>[];
+}
+
 const route = useRoute();
 const formId = computed(() => route.params.id);
-const form = ref<any>(null);
-const statistics = ref<any>(null);
+const form = ref<{ name: string } | null>(null);
+const statistics = ref<AnalyticsStatistics | null>(null);
 const analyticsDays = ref('30');
 const dateFrom = ref('');
 const dateTo = ref('');
 const chartType = ref<'line' | 'bar'>('line');
 const selectedAggregateField = ref('');
-const rawSamples = ref<any[]>([]);
+const rawSamples = ref<Record<string, unknown>[]>([]);
 const sorting = ref([{ id: 'created_at', desc: true }]);
 
 const fetchForm = async () => {
@@ -364,7 +378,7 @@ const fetchForm = async () => {
 
 const fetchStatistics = async () => {
     try {
-        const params: any = {
+        const params: Record<string, unknown> = {
             aggregate_field: selectedAggregateField.value
         };
 
@@ -379,9 +393,12 @@ const fetchStatistics = async () => {
         const response = await api.get(`/admin/ja/forms/${formId.value}/submissions/statistics`, { params });
         statistics.value = parseSingleResponse(response);
         
-        if (!selectedAggregateField.value && statistics.value?.chartable_fields?.length > 0) {
-            selectedAggregateField.value = statistics.value.chartable_fields[0].name;
-            fetchStatistics();
+        if (!selectedAggregateField.value && statistics.value && (statistics.value.chartable_fields?.length ?? 0) > 0) {
+            const firstField = statistics.value.chartable_fields?.[0];
+            if (firstField) {
+                selectedAggregateField.value = firstField.name;
+                fetchStatistics();
+            }
         }
     } catch (error) {
         logger.error('Failed to fetch statistics:', error);
@@ -401,8 +418,8 @@ const fetchSamples = async () => {
         const response = await api.get(`/admin/ja/forms/${formId.value}/submissions`, {
             params: { per_page: 20, sort_by: 'created_at', sort_order: 'desc' }
         });
-        const data = parseSingleResponse(response) as any;
-        rawSamples.value = data?.data || [];
+        const data = parseSingleResponse(response) as { data: Record<string, unknown>[] };
+        rawSamples.value = (data?.data as Record<string, unknown>[]) || [];
     } catch (error) {
         logger.error('Failed to fetch samples:', error);
     }
@@ -414,11 +431,11 @@ const reportFields = computed(() => {
 });
 
 const getSelectedFieldLabel = computed(() => {
-    return statistics.value?.chartable_fields?.find((f: any) => f.name === selectedAggregateField.value)?.label || '';
+    return statistics.value?.chartable_fields?.find((f: { name: string, label: string }) => f.name === selectedAggregateField.value)?.label || '';
 });
 
 // --- TanStack Table Setup ---
-const columnHelper = createColumnHelper<any>();
+const columnHelper = createColumnHelper<Record<string, unknown>>();
 
 const renderSortIcon = (isSorted: string | boolean) => {
     if (isSorted === 'asc') return ArrowUp;
@@ -427,7 +444,7 @@ const renderSortIcon = (isSorted: string | boolean) => {
 };
 
 const columns = computed(() => {
-    const cols: any[] = [
+    const cols: ColumnDef<Record<string, unknown>, unknown>[] = [
         columnHelper.accessor('created_at', {
             header: ({ column }) => h(Button, {
                 variant: 'ghost',
@@ -438,13 +455,13 @@ const columns = computed(() => {
                 'Date',
                 h(renderSortIcon(column.getIsSorted()), { class: 'ml-2 h-4 w-4' })
             ]),
-            cell: (info: any) => h('span', { class: 'text-sm font-mono whitespace-nowrap' }, formatDate(info.getValue())),
+            cell: (info: CellContext<Record<string, unknown>, unknown>) => h('span', { class: 'text-sm font-mono whitespace-nowrap' }, formatDate(info.getValue() as string)),
         }),
     ];
 
     // Add dynamic data fields
-    reportFields.value.forEach(field => {
-        cols.push(columnHelper.accessor(row => row.data?.[field], {
+    reportFields.value.forEach((field: string) => {
+        cols.push(columnHelper.accessor(row => (row.data as Record<string, unknown>)?.[field], {
             id: field,
             header: ({ column }) => h(Button, {
                 variant: 'ghost',
@@ -455,7 +472,7 @@ const columns = computed(() => {
                 field,
                 h(renderSortIcon(column.getIsSorted()), { class: 'ml-2 h-4 w-4' })
             ]),
-            cell: (info: any) => h('span', { class: 'text-sm' }, String(info.getValue() || '-')),
+            cell: (info: CellContext<Record<string, unknown>, unknown>) => h('span', { class: 'text-sm' }, String(info.getValue() || '-')),
         }));
     });
 
@@ -469,7 +486,7 @@ const columns = computed(() => {
             'IP Address',
             h(renderSortIcon(column.getIsSorted()), { class: 'ml-2 h-4 w-4' })
         ]),
-        cell: (info: any) => h('span', { class: 'text-sm font-mono opacity-60' }, info.getValue() || '-'),
+        cell: (info: CellContext<Record<string, unknown>, unknown>) => h('span', { class: 'text-sm font-mono opacity-60' }, (info.getValue() as string) || '-'),
     }));
 
     return cols;
@@ -518,9 +535,7 @@ const exportData = (format = 'xlsx') => {
     window.open(url, '_blank');
 };
 
-const exportPdfReport = () => {
-    window.print();
-};
+
 
 onMounted(() => {
     fetchForm();

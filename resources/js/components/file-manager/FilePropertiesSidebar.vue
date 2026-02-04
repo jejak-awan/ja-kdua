@@ -100,7 +100,10 @@ const {
     isImage,
 } = inject(FileManagerKey)!;
 
-const isFolder = (item: any) => 'children' in item || !('extension' in item);
+const isFolder = (item: unknown) => {
+    if (typeof item !== 'object' || item === null) return false;
+    return 'children' in item || !('extension' in item);
+};
 const activeFile = computed(() => {
     if (activeItem.value && !isFolder(activeItem.value)) {
         return activeItem.value as FileItem;
@@ -116,20 +119,20 @@ const formatDate = (dateString: string) => {
     });
 };
 
-const downloadFile = (file: any) => {
+const downloadFile = (file: { url?: string; name?: string }) => {
     if (file.url) {
         const link = document.createElement('a');
         link.href = file.url;
-        link.download = file.name;
+        link.download = file.name || 'download';
         link.click();
     }
 };
 
-const copyPath = async (item: any) => {
+const copyPath = async (item: { path: string }) => {
     try {
         await navigator.clipboard.writeText(item.path);
         toast.success.action(t('common.messages.path_copied', 'Path copied to clipboard'));
-    } catch (err) {
+    } catch (_err) {
         toast.error.default(t('common.messages.copy_failed', 'Failed to copy path'));
     }
 };

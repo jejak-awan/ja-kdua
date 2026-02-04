@@ -143,7 +143,7 @@
                 <Badge :variant="getStatusVariant(vuln.status)">{{ vuln.status }}</Badge>
               </td>
               <td class="px-4 py-3">
-                <select @change="updateStatus(vuln, ($event.target as any).value)" :value="vuln.status" class="text-xs rounded border border-input bg-background px-2 py-1">
+                <select @change="updateStatus(vuln, ($event.target as HTMLSelectElement).value)" :value="vuln.status" class="text-xs rounded border border-input bg-background px-2 py-1">
                   <option value="new">New</option>
                   <option value="acknowledged">Acknowledged</option>
                   <option value="patched">Patched</option>
@@ -188,7 +188,17 @@ import Shield from 'lucide-vue-next/dist/esm/icons/shield.js';
 import ShieldCheck from 'lucide-vue-next/dist/esm/icons/shield-check.js';
 
 const toast = useToast();
-const vulnerabilities = ref<any[]>([]);
+interface Vulnerability {
+  id: number;
+  package_name: string;
+  version: string;
+  severity: string;
+  cve: string | null;
+  source: string;
+  status: string;
+}
+
+const vulnerabilities = ref<Vulnerability[]>([]);
 const loading = ref(false);
 const auditing = ref(false);
 
@@ -201,7 +211,15 @@ const filters = ref({
   per_page: 50,
 });
 
-const pagination = ref({ total: 0, from: 0, to: 0, current_page: 1, last_page: 1 });
+interface PaginationInfo {
+  total: number;
+  from: number;
+  to: number;
+  current_page: number;
+  last_page: number;
+}
+
+const pagination = ref<PaginationInfo>({ total: 0, from: 0, to: 0, current_page: 1, last_page: 1 });
 
 const stats = computed(() => {
   const all = vulnerabilities.value;
@@ -226,7 +244,7 @@ async function fetchVulnerabilities() {
       current_page: response.data.data.current_page || 1,
       last_page: response.data.data.last_page || 1,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to fetch vulnerabilities:', error);
   } finally {
     loading.value = false;
@@ -239,20 +257,20 @@ async function runAudit() {
     await api.post('/admin/ja/security/run-dependency-audit');
     toast.success.action('Dependency audit completed');
     fetchVulnerabilities();
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.error.fromResponse(error);
-    logger.error(error instanceof Error ? error.message : String(error), { error: error });
+    logger.error('Audit failed:', error);
   } finally {
     auditing.value = false;
   }
 }
 
-async function updateStatus(vuln: any, status: string) {
+async function updateStatus(vuln: Vulnerability, status: string) {
   try {
     await api.put(`/admin/ja/security/dependency-vulnerabilities/${vuln.id}`, { status });
     vuln.status = status;
     toast.success.action('Status updated');
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.error.fromResponse(error);
   }
 }
@@ -272,14 +290,14 @@ function changePage(page: number) {
   fetchVulnerabilities();
 }
 
-function getSeverityVariant(severity: string) {
+function getSeverityVariant(severity: string): "default" | "destructive" | "secondary" | "success" | "outline" | null | undefined {
   const variants: Record<string, string> = { critical: 'destructive', high: 'secondary', medium: 'secondary', low: 'outline' };
-  return (variants[severity] || 'secondary') as any;
+  return (variants[severity] || 'secondary') as "default" | "destructive" | "secondary" | "success" | "outline" | null | undefined;
 }
 
-function getStatusVariant(status: string) {
+function getStatusVariant(status: string): "default" | "destructive" | "secondary" | "success" | "outline" | null | undefined {
   const variants: Record<string, string> = { new: 'destructive', acknowledged: 'secondary', patched: 'default', ignored: 'secondary' };
-  return (variants[status] || 'secondary') as any;
+  return (variants[status] || 'secondary') as "default" | "destructive" | "secondary" | "success" | "outline" | null | undefined;
 }
 
 onMounted(fetchVulnerabilities);

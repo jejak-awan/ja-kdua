@@ -1,8 +1,6 @@
 export * from './auth';
 export * from './cms';
-export * from './taxonomy';
-export * from './media';
-export * from './settings';
+
 export * from './menu';
 export * from './builder';
 export * from './dashboard';

@@ -67,7 +67,7 @@ import { IconButton, BaseDivider, BaseDropdown } from '../ui';
 import type { BuilderInstance } from '@/types/builder';
 
 // Props & Emits
-const emit = defineEmits<{
+defineEmits<{
   (e: 'save'): void;
 }>();
 

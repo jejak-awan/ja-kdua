@@ -3,142 +3,84 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="fullwidth-image-block transition-[width] duration-500"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Fullwidth Image'"
+    class="fullwidth-image-block transition-colors duration-300 group"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Fullwidth Image'"
     :style="cardStyles"
   >
-    <div class="image-wrapper relative w-full overflow-hidden" :style="containerStyles">
-      <a 
-          v-if="settings.link" 
-          :href="mode === 'view' ? settings.link : '#'" 
-          :target="settings.target" 
-          class="block w-full h-full"
-          @click="handleLinkClick"
-      >
-          <img 
-            :src="settings.image || 'https://picsum.photos/1920/1080?random=image'" 
-            :alt="settings.alt || 'Fullwidth image'"
-            class="w-full h-full transition-transform duration-1000 group-hover:scale-110"
-            :style="imageStyles"
-          />
-      </a>
+    <div class="image-container relative w-full overflow-hidden" :style="containerStyles">
       <img 
-        v-else 
-        :src="settings.image || 'https://picsum.photos/1920/1080?random=image'" 
-        :alt="settings.alt || 'Fullwidth image'"
-        class="w-full h-full transition-transform duration-1000 group-hover:scale-110"
-        :style="imageStyles"
+        v-if="imageUrl" 
+        :src="imageUrl" 
+        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        :alt="(settings.alt_text as string) || 'Fullwidth Image'"
+        loading="lazy"
       />
-      
-      <!-- Overlay Content -->
-      <div 
-        v-if="settings.showOverlay" 
-        class="absolute inset-0 z-10 flex flex-col items-center justify-center p-12 transition-opacity duration-700 opacity-0 group-hover:opacity-100" 
-        :style="overlayStyles"
-      >
-        <div 
-          v-if="settings.overlayText || mode === 'edit'" 
-          class="overlay-text max-w-4xl text-center transform translate-y-8 group-hover:translate-y-0 transition-transform duration-700" 
-          :style="overlayTextStyles"
-          :contenteditable="mode === 'edit'"
-          @blur="(e: any) => updateField('overlayText', (e.target as HTMLElement).innerText)"
-        >
-{{ settings.overlayText || (mode === 'edit' ? 'Premium Aesthetic Design' : '') }}
-</div>
+      <div v-else-if="mode === 'edit'" class="flex items-center justify-center bg-slate-100 dark:bg-slate-900 w-full h-full text-slate-400 gap-3">
+        <ImageIcon class="w-8 h-8 opacity-40 text-primary" />
+        <span class="font-bold tracking-tight">Fullwidth Image Block</span>
       </div>
       
+      <!-- Overlay -->
+      <div 
+        v-if="settings.overlayEnabled" 
+        class="absolute inset-0 z-10 pointer-events-none" 
+        :style="{ backgroundColor: (settings.overlayColor as string) || 'rgba(0,0,0,0.3)' }"
+      ></div>
+
       <!-- Caption -->
-      <p 
-        v-if="settings.caption || mode === 'edit'" 
-        class="absolute bottom-10 left-10 z-20 bg-black/40 backdrop-blur-md px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white/90 transform translate-x--4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-[width] duration-500"
-        :style="captionStyles"
-        :contenteditable="mode === 'edit'"
-        @blur="(e: any) => updateField('caption', (e.target as HTMLElement).innerText)"
+      <div 
+        v-if="settings.caption" 
+        class="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 text-white font-bold text-center px-6 py-3 bg-black/40 backdrop-blur-md rounded-full shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500"
       >
-{{ settings.caption || (mode === 'edit' ? 'Project Insight' : '') }}
-</p>
+        {{ settings.caption }}
+      </div>
     </div>
   </BaseBlock>
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
+import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
 import { 
-    getVal,
-    getTypographyStyles,
-    getLayoutStyles,
-    getResponsiveValue 
+    getVal, 
+    getLayoutStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
 const props = withDefaults(defineProps<{
-  module: BlockInstance;
-  mode?: 'view' | 'edit';
-  device?: 'desktop' | 'tablet' | 'mobile';
+  module: BlockInstance
+  mode?: 'view' | 'edit'
+  device?: 'desktop' | 'tablet' | 'mobile'
 }>(), {
   mode: 'view',
   device: 'desktop'
 })
 
-const builder = inject<any>('builder', null)
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
+const imageUrl = computed(() => getVal<string>(settings.value, 'imageUrl', props.device))
 
-const handleLinkClick = (event: MouseEvent) => {
-    if (props.mode === 'edit') event.preventDefault()
-}
-
-const updateField = (key: string, value: string) => {
-    if (props.mode !== 'edit' || !builder) return
-    builder.updateModuleSettings(props.module.id, { [key]: value })
-}
-
-const cardStyles = computed(() => {
-    const styles: Record<string, any> = {}
-    const hoverScale = getVal(settings.value, 'hover_scale', props.device) || 1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', props.device) || 100
+const cardStyles = computed((): CSSProperties => {
+    const styles: Record<string, string | number> = {}
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', props.device) || 1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', props.device) || 100
     
     styles['--hover-scale'] = hoverScale
     styles['--hover-brightness'] = `${hoverBrightness}%`
     
-    return styles
+    return styles as CSSProperties
 })
 
-const containerStyles = computed(() => {
-    const layout = getLayoutStyles(settings.value, props.device)
-    const height = getResponsiveValue(settings.value, 'height', props.device) || 500
+const containerStyles = computed((): CSSProperties => {
+    const layoutStyles = getLayoutStyles(settings.value, props.device)
     return { 
-        ...layout,
-        width: '100%', 
-        height: `${height}px` 
-    }
+        ...layoutStyles,
+        height: `${getVal<number>(settings.value, 'height', props.device) || 600}px`
+    } as CSSProperties
 })
-
-const imageStyles = computed(() => ({ 
-    objectFit: settings.value.objectFit || 'cover' 
-}))
-
-const overlayStyles = computed(() => ({ 
-    backgroundColor: settings.value.overlayColor || 'rgba(0,0,0,0.4)' 
-}))
-
-const overlayTextStyles = computed(() => {
-    const typo = getTypographyStyles(settings.value, 'overlay_', props.device)
-    return { ...typo, color: settings.value.overlayTextColor || '#ffffff' }
-})
-
-const captionStyles = computed(() => getTypographyStyles(settings.value, 'caption_', props.device))
 </script>
 
 <style scoped>
-.fullwidth-image-block {
-    width: 100%;
-    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.4s ease;
-}
-.fullwidth-image-block:hover {
-    transform: scale(var(--hover-scale, 1));
-    filter: brightness(var(--hover-brightness, 100%));
-}
-.overlay-text { outline: none; }
+.fullwidth-image-block { width: 100%; position: relative; }
 </style>

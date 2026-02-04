@@ -1,10 +1,7 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
-    backgroundSettings,
     spacingSettings,
-    borderSettings,
     boxShadowSettings,
-    sizingSettings,
     filterSettings,
     transformSettings,
     animationSettings,
@@ -127,7 +124,7 @@ const ButtonModule: ModuleDefinition = {
             {
                 id: 'text',
                 label: 'Text',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: f.name === 'text_align' ? 'button_text_align' : f.name
                 }))

@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -106,7 +106,7 @@ const NumberBoxModule: ModuleDefinition = {
                 label: 'Number Typography',
                 fields: [
                     { name: 'number_backgroundColor', type: 'color', label: 'Background Color' },
-                    ...((typographySettings.fields as any[])).map(f => ({
+                    ...(typographySettings.fields as SettingDefinition[]).map(f => ({
                         ...f,
                         name: `number_${f.name}`,
                         label: `Number ${f.label}`
@@ -116,7 +116,7 @@ const NumberBoxModule: ModuleDefinition = {
             {
                 id: 'titleTypography',
                 label: 'Title Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `title_${f.name}`,
                     label: `Title ${f.label}`
@@ -125,7 +125,7 @@ const NumberBoxModule: ModuleDefinition = {
             {
                 id: 'descriptionTypography',
                 label: 'Description Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `description_${f.name}`,
                     label: `Description ${f.label}`

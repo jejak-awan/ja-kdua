@@ -224,7 +224,7 @@ import api from '@/services/api';
 import { parseSingleResponse } from '@/utils/responseParser';
 import QRCode from 'qrcode';
 import toast from '@/services/toast';
-import { useConfirm } from '@/composables/useConfirm';
+
 
 // Shadcn Components
 import {
@@ -271,7 +271,7 @@ interface GenerateResponse {
 }
 
 const { t } = useI18n();
-const { confirm } = useConfirm();
+
 
 const status = ref<TwoFactorStatus>({
     enabled: false,
@@ -330,7 +330,7 @@ const generateSecret = async () => {
         if (data.backup_codes) {
             backupCodes.value = data.backup_codes;
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         if (error && typeof error === 'object' && 'response' in error) {
             const err = error as { response?: { data?: { message?: string } } };
             toast.error('Error', err.response?.data?.message || 'Failed to generate 2FA secret');
@@ -359,7 +359,7 @@ const enable2FA = async () => {
         qrCodeUrl.value = null;
         secret.value = null;
         await fetchStatus();
-    } catch (error: any) {
+    } catch (error: unknown) {
         if (error && typeof error === 'object' && 'response' in error) {
             const err = error as { response?: { data?: { message?: string } } };
             toast.error(t('common.status.failed'), err.response?.data?.message || t('features.auth.messages.error'));
@@ -383,7 +383,7 @@ const disable2FA = async () => {
         showDisableConfirm.value = false;
         backupCodes.value = [];
         await fetchStatus();
-    } catch (error: any) {
+    } catch (error: unknown) {
         if (error && typeof error === 'object' && 'response' in error) {
             const err = error as { response?: { data?: { message?: string } } };
             toast.error(t('common.status.failed'), err.response?.data?.message || t('features.auth.messages.error'));
@@ -410,7 +410,7 @@ const regenerateBackupCodes = async () => {
         passwordConfirm.value = '';
         showRegenPassword.value = false;
         await fetchStatus();
-    } catch (error: any) {
+    } catch (error: unknown) {
         if (error && typeof error === 'object' && 'response' in error) {
             const err = error as { response?: { data?: { message?: string } } };
             toast.error(t('common.status.failed'), err.response?.data?.message || t('features.auth.messages.error'));

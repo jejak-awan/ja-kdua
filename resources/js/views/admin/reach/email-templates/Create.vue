@@ -201,7 +201,7 @@ const previewTemplate = async () => {
         if (previewWindow) {
             previewWindow.document.write(response.data.html);
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to preview template:', error);
         toast.error.default(t('features.email_templates.form.previewFailed'));
     }
@@ -218,9 +218,12 @@ const handleSubmit = async () => {
         await api.post('/admin/ja/email-templates', form.value);
         toast.success.create('Email Template');
         router.push({ name: 'email-templates' });
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response: { status: number, data: { errors: Record<string, string[]> } } };
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors || {});
+            }
         } else {
             toast.error.fromResponse(error);
         }

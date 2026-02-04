@@ -7,7 +7,7 @@ export interface DynamicContentSource {
     label: string;
     group: string;
     icon?: string;
-    handler: (context: RenderingContext) => any;
+    handler: (context: RenderingContext) => unknown;
 }
 
 class DynamicContentService {
@@ -26,7 +26,7 @@ class DynamicContentService {
         return this.sources.value;
     }
 
-    public resolve(sourceId: string, context: RenderingContext): any {
+    public resolve(sourceId: string, context: RenderingContext): unknown {
         const source = this.sources.value.find(s => s.id === sourceId);
         if (!source) return null;
         try {
@@ -93,7 +93,7 @@ class DynamicContentService {
             label: 'Product Title',
             group: 'Shop',
             icon: 'Package',
-            handler: (ctx) => (ctx as any)?.product?.name || ctx?.post?.title || 'Product Title'
+            handler: (ctx) => ctx?.product?.name || ctx?.post?.title || 'Product Title'
         });
 
         this.register({
@@ -102,7 +102,7 @@ class DynamicContentService {
             group: 'Shop',
             icon: 'DollarSign',
             handler: (ctx) => {
-                const p = (ctx as any)?.product || ctx?.post;
+                const p = ctx?.product || ctx?.post;
                 return p ? `${p.currency || '$'}${p.price || p.regular_price || '0.00'}` : '$0.00';
             }
         });
@@ -112,7 +112,7 @@ class DynamicContentService {
             label: 'Product SKU',
             group: 'Shop',
             icon: 'Hash',
-            handler: (ctx) => (ctx as any)?.product?.sku || 'SKU-001'
+            handler: (ctx) => ctx?.product?.sku || 'SKU-001'
         });
 
         this.register({
@@ -120,7 +120,7 @@ class DynamicContentService {
             label: 'Product Description',
             group: 'Shop',
             icon: 'AlignLeft',
-            handler: (ctx) => (ctx as any)?.product?.description || ctx?.post?.body || 'Product description goes here...'
+            handler: (ctx) => ctx?.product?.description || ctx?.post?.body || 'Product description goes here...'
         });
 
         this.register({
@@ -128,7 +128,7 @@ class DynamicContentService {
             label: 'Product Rating',
             group: 'Shop',
             icon: 'Star',
-            handler: (ctx) => (ctx as any)?.product?.rating || '4.5'
+            handler: (ctx) => ctx?.product?.rating || '4.5'
         });
 
         // Site Data

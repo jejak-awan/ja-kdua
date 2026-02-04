@@ -162,7 +162,7 @@ const fetchLogFiles = async () : Promise<void> => {
         const response = await api.get('admin/ja/system-journal');
         const { data } = parseResponse<LogFile[]>(response);
         logFiles.value = ensureArray(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch log files:', error);
         logFiles.value = [];
     }
@@ -175,7 +175,7 @@ const selectLogFile = async (logFile: LogFile) : Promise<void> => {
         const response = await api.get(`admin/ja/system-journal/${logFile.name}`);
         const data = parseSingleResponse<LogResponse>(response) || { content: '' };
         logContent.value = data.content || '';
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch log content:', error);
         logContent.value = t('features.system.logs.failed_load') || 'Failed to load log content';
     } finally {
@@ -202,8 +202,8 @@ const downloadLog = async (logFile: LogFile) : Promise<void> => {
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
-    } catch (error: any) {
-        logger.error('Failed to download logs:', error.message);
+    } catch (error: unknown) {
+        logger.error('Failed to download logs:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -224,8 +224,8 @@ const clearLogs = async () : Promise<void> => {
         toast.success.action(t('features.system.logs.messages.cleared'));
         logContent.value = '';
         fetchLogFiles();
-    } catch (error: any) {
-        logger.error('Failed to clear logs:', error.message);
+    } catch (error: unknown) {
+        logger.error('Failed to clear logs:', error);
         toast.error.fromResponse(error);
     } finally {
         clearing.value = false;

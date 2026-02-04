@@ -112,7 +112,7 @@
                                     <Checkbox 
                                         v-if="authStore.hasPermission('delete categories')"
                                         :checked="selectedIds.includes(category.id)" 
-                                        @update:checked="(checked: any) => toggleSelect(!!checked, category.id)"
+                                        @update:checked="(checked: boolean | string) => toggleSelect(!!checked, category.id)"
                                     />
                                 </TableCell>
                                 <TableCell>
@@ -135,7 +135,7 @@
                                 </TableCell>
                                 <TableCell class="text-muted-foreground font-mono text-xs">{{ category.slug }}</TableCell>
                                 <TableCell>
-                                    <Badge :variant="(category.is_active ? 'default' : 'secondary') as any">
+                                    <Badge :variant="(category.is_active ? 'default' : 'secondary')">
                                         {{ category.is_active ? $t('features.categories.status.active') : $t('features.categories.status.inactive') }}
                                     </Badge>
                                 </TableCell>
@@ -192,7 +192,6 @@
 import { logger } from '@/utils/logger';
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import api from '@/services/api';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
@@ -202,7 +201,6 @@ import Edit2 from 'lucide-vue-next/dist/esm/icons/pen-line.js';
 import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
 import Filter from 'lucide-vue-next/dist/esm/icons/list-filter.js';
 import { debounce } from '@/utils/debounce';
-import { cn } from '@/lib/utils';
 import CategoryFormModal from './CategoryFormModal.vue';
 
 // UI Components
@@ -212,7 +210,6 @@ import {
     Badge,
     Checkbox,
     Card,
-    CardHeader,
     CardContent,
     Pagination,
     Table,
@@ -239,12 +236,11 @@ interface FlatCategory extends Category {
     _depth: number;
 }
 
-const props = defineProps<{
+defineProps<{
     isEmbedded?: boolean;
 }>();
 
 const { t } = useI18n();
-const router = useRouter();
 const authStore = useAuthStore();
 const toast = useToast();
 
@@ -324,9 +320,9 @@ const flatCategories = computed(() => {
 const fetchCategories = async (page = 1) => {
     loading.value = true;
     try {
-        const params: Record<string, any> = {
+        const params: Record<string, string | number | boolean> = {
             page: page,
-            per_page: pagination.value.per_page,
+            per_page: Number(pagination.value.per_page),
             tree: true 
         };
         
@@ -359,7 +355,7 @@ const fetchCategories = async (page = 1) => {
         }
         
         selectedIds.value = [];
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch categories:', error);
     } finally {
         loading.value = false;
@@ -422,7 +418,7 @@ const deleteCategory = async (category: Category) => {
             await api.delete(`/admin/ja/categories/${category.id}`);
             fetchCategories(pagination.value.current_page);
             toast.success.delete('Category');
-        } catch (error: any) {
+        } catch (error: unknown) {
             logger.error('Failed to delete category:', error);
             toast.error.delete(error, 'Category');
         }
@@ -441,7 +437,7 @@ const toggleSelect = (checked: boolean, id: number) => {
 const toggleSelectAll = (checked: boolean) => {
     if (checked) {
         // Select all VISIBLE items (flat)
-        selectedIds.value = flatCategories.value.map((c: any) => c.id);
+        selectedIds.value = flatCategories.value.map((c: FlatCategory) => c.id);
     } else {
         selectedIds.value = [];
     }
@@ -449,7 +445,7 @@ const toggleSelectAll = (checked: boolean) => {
 
 const isAllSelected = computed(() => {
     return flatCategories.value.length > 0 && 
-           flatCategories.value.every((c: any) => selectedIds.value.includes(c.id));
+           flatCategories.value.every((c: FlatCategory) => selectedIds.value.includes(c.id));
 });
 
 const confirmBulkDelete = async () => {
@@ -467,9 +463,9 @@ const confirmBulkDelete = async () => {
             selectedIds.value = [];
             fetchCategories(pagination.value.current_page);
             toast.success.delete(`${count} Categories`);
-        } catch (error: any) {
+        } catch (error: unknown) {
            logger.error('Bulk delete failed:', error);
-           toast.error.action(error);
+           toast.error.action(error as Record<string, unknown>);
         }
     }
 }

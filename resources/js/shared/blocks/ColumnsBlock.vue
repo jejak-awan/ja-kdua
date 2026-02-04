@@ -1,105 +1,56 @@
 <template>
-  <BaseBlock :module="module" :mode="mode" :settings="settings" class="columns-block">
-    <div class="columns-inner flex flex-wrap" :class="[reverseClasses]" :style="flexStyles">
-      <!-- Builder Mode -->
-      <template v-if="mode === 'edit'">
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
+    :device="device"
+    class="columns-block py-12"
+  >
+    <div 
+        class="columns-container container mx-auto flex flex-wrap" 
+        :class="[gapClass]"
+        :style="containerStyles"
+    >
         <slot />
-        <div v-if="!module.children?.length" class="columns-empty w-full p-8 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-xl text-center text-gray-300">
-           No columns added.
-        </div>
-      </template>
-
-      <!-- Renderer Mode -->
-      <template v-else>
-        <template v-for="(column, index) in computedColumns" :key="column.id || index">
-            <div 
-                class="column-wrapper relative flex items-stretch flex-shrink-0 flex-grow-0"
-                :class="getColumnClasses()"
-                :style="{ '--desktop-width': colWidths[index] }"
-            >
-                 <BlockRenderer 
-                    :block="column" 
-                    :mode="mode"
-                    class="h-full w-full"
-                />
-            </div>
-        </template>
-      </template>
     </div>
   </BaseBlock>
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, type CSSProperties } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { getVal } from '../utils/styleUtils'
-import type { BlockProps, BuilderInstance } from '@/types/builder'
+import { 
+    getVal, 
+    getLayoutStyles
+} from '../utils/styleUtils'
+import type { BlockInstance, ModuleSettings } from '@/types/builder'
 
-const props = withDefaults(defineProps<BlockProps>(), {
+const props = withDefaults(defineProps<{
+  module: BlockInstance
+  mode?: 'view' | 'edit'
+  device?: 'desktop' | 'tablet' | 'mobile'
+}>(), {
   mode: 'view',
-  device: 'desktop',
-  nestedBlocks: () => []
+  device: 'desktop'
 })
 
-const builder = inject<BuilderInstance>('builder', null as any)
-const settings = computed(() => props.settings || props.module?.settings || {})
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const BlockRenderer = inject<any>('BlockRenderer', null)
-const computedColumns = computed(() => props.nestedBlocks || [])
-
-const colWidths = computed(() => {
-    const numCols = computedColumns.value.length
-    if (numCols === 0) return []
-    
-    let widths: number[] = []
-    const layout = getVal(settings.value, 'layout') || '1-1'
-    
-    switch (layout) {
-        case '1': widths = [100]; break
-        case '1-1': widths = [50, 50]; break
-        case '1-2': widths = [33.333, 66.667]; break
-        case '2-1': widths = [66.667, 33.333]; break
-        case '1-1-1': widths = [33.333, 33.333, 33.333]; break
-        default: widths = Array(numCols).fill(100 / numCols)
+const gapClass = computed(() => {
+    const gap = getVal<string>(settings.value, 'gap', props.device) || 'medium'
+    const gaps: Record<string, string> = {
+        none: 'gap-0',
+        small: 'gap-4',
+        medium: 'gap-8',
+        large: 'gap-12'
     }
-
-    const gap = 2 // rem
-    const totalGap = (numCols - 1) * gap
-    return widths.map(w => {
-        const gapSubtraction = (totalGap * (w / 100)).toFixed(3)
-        return `calc(${w}% - ${gapSubtraction}rem)`
-    })
+    return gaps[gap] || 'gap-8'
 })
 
-const getColumnClasses = () => {
-    const stackOn = getVal(settings.value, 'stackOn') || 'sm'
-    if (stackOn === 'never') return 'w-[var(--desktop-width)]'
-    const bp = stackOn === 'sm' ? 'md' : (stackOn === 'md' ? 'lg' : 'xl')
-    return `w-full ${bp}:w-[var(--desktop-width)]`
-}
-
-const reverseClasses = computed(() => {
-    const stackOn = getVal(settings.value, 'stackOn') || 'sm'
-    const mobileDir = getVal(settings.value, 'mobileDirection') || 'column'
-    const desktopDir = getVal(settings.value, 'direction') || 'row'
-    
-    const directionMap: Record<string, string> = {
-        'row': 'flex-row',
-        'row-reverse': 'flex-row-reverse',
-        'column': 'flex-col',
-        'column-reverse': 'flex-col-reverse'
-    }
-    
-    if (stackOn === 'never') return directionMap[desktopDir] || 'flex-row'
-    
-    const bp = stackOn === 'sm' ? 'md' : (stackOn === 'md' ? 'lg' : 'xl')
-    return `${directionMap[mobileDir] || 'flex-col'} ${bp}:${directionMap[desktopDir] || 'flex-row'}`
+const containerStyles = computed((): CSSProperties => {
+    return getLayoutStyles(settings.value, props.device) as CSSProperties
 })
-
-const flexStyles = computed(() => ({}))
 </script>
 
 <style scoped>
-.columns-block { width: 100%; }
-.column-wrapper { min-width: 0; }
+.columns-block { width: 100%; position: relative; }
 </style>

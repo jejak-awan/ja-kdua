@@ -4,13 +4,13 @@
     :mode="mode"
     :settings="settings"
     class="share-buttons-block transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Social Share'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Social Share'"
   >
-    <div class="share-buttons-container flex flex-wrap items-center w-full" :style="wrapperStyles">
-        <Badge v-if="labelValue" variant="secondary" class="share-label mr-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 font-black text-[10px] uppercase tracking-[0.2em] px-4 py-1.5 border-none" :style="labelStyles">{{ labelValue }}</Badge>
+    <div class="share-buttons-container flex flex-wrap items-center w-full" :style="(wrapperStyles as any)">
+        <Badge v-if="labelValue" variant="secondary" class="share-label mr-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 font-black text-[10px] uppercase tracking-[0.2em] px-4 py-1.5 border-none" :style="(labelStyles as any)">{{ labelValue }}</Badge>
         
-        <div class="share-buttons-list flex flex-wrap" :style="listStyles">
+        <div class="share-buttons-list flex flex-wrap" :style="(listStyles as any)">
           <Button 
             v-for="(item, index) in platformList" 
             :key="index" 
@@ -19,7 +19,7 @@
                 showLabels ? 'px-6 h-12' : 'p-0 w-12 h-12',
                 currentSize === 'small' ? 'h-10 w-10' : (currentSize === 'large' ? 'h-16 w-16' : 'h-12 w-12')
             ]"
-            :style="buttonStyles(item.network)"
+            :style="(buttonStyles(item.network) as any)"
             variant="ghost"
             @click="handleShare(item.network)"
           >
@@ -40,27 +40,28 @@ import Twitter from 'lucide-vue-next/dist/esm/icons/twitter.js';
 import Linkedin from 'lucide-vue-next/dist/esm/icons/linkedin.js';
 import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
 import MessageCircle from 'lucide-vue-next/dist/esm/icons/message-circle.js';
-import Link2 from 'lucide-vue-next/dist/esm/icons/link.js';import { 
+import Link2 from 'lucide-vue-next/dist/esm/icons/link.js';
+import { 
   getVal,
   getLayoutStyles,
-  getTypographyStyles,
-  getResponsiveValue
+  getTypographyStyles
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
+import type { Component } from 'vue'
 
 const props = defineProps<{
   module: BlockInstance
   mode: 'view' | 'edit'
 }>()
 
-const builder = inject<any>('builder', null)
+const builder = inject<BuilderInstance | null>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const labelValue = computed(() => getVal(settings.value, 'label', device.value))
-const showLabels = computed(() => getVal(settings.value, 'showLabels', device.value))
-const currentStyle = computed(() => getVal(settings.value, 'style', device.value) || 'filled')
-const currentSize = computed(() => getVal(settings.value, 'size', device.value) || 'medium')
+const labelValue = computed(() => getVal<string>(settings.value, 'label', device.value))
+const showLabels = computed(() => getVal<boolean>(settings.value, 'showLabels', device.value))
+const currentStyle = computed(() => getVal<string>(settings.value, 'style', device.value) || 'filled')
+const currentSize = computed(() => getVal<string>(settings.value, 'size', device.value) || 'medium')
 
 const platformList = computed(() => {
   const children = props.module.children || []
@@ -73,8 +74,8 @@ const platformList = computed(() => {
     ]
   }
   return children.map(child => ({
-    network: (child.settings as any).network || 'facebook',
-    label: (child.settings as any).customLabel || ''
+    network: ((child.settings || {}) as ModuleSettings).network as string || 'facebook',
+    label: ((child.settings || {}) as ModuleSettings).customLabel as string || ''
   }))
 })
 
@@ -86,8 +87,8 @@ const platformColors: Record<string, string> = {
     email: '#ea4335' 
 }
 
-const getIcon = (p: string) => {
-    const icons: Record<string, any> = { 
+const getIcon = (p: string): Component => {
+    const icons: Record<string, Component> = { 
         facebook: Facebook, 
         twitter: Twitter, 
         linkedin: Linkedin, 
@@ -115,27 +116,29 @@ const handleShare = (network: string) => {
 }
 
 const wrapperStyles = computed(() => {
-  const align = getVal(settings.value, 'alignment', device.value) || 'left'
-  return { 
+  const align = getVal<string>(settings.value, 'alignment', device.value) || 'left'
+  const styles: Record<string, string | number> = { 
     justifyContent: align === 'center' ? 'center' : (align === 'right' ? 'flex-end' : 'flex-start')
   }
+  return styles
 })
 
 const listStyles = computed(() => {
     const layout = getLayoutStyles(settings.value, device.value)
-    const gap = getVal(settings.value, 'gap', device.value) ?? 12
-    const hoverScale = getVal(settings.value, 'hover_scale', device.value) || 1.1
-    const hoverBrightness = getVal(settings.value, 'hover_brightness', device.value) || 110
+    const gap = getVal<number>(settings.value, 'gap', device.value) ?? 12
+    const hoverScale = getVal<number>(settings.value, 'hover_scale', device.value) || 1.1
+    const hoverBrightness = getVal<number>(settings.value, 'hover_brightness', device.value) || 110
 
-    return {
+    const styles: Record<string, string | number> = {
         ...layout,
         gap: `${gap}px`,
         '--hover-scale': hoverScale,
         '--hover-brightness': `${hoverBrightness}%`
     }
+    return styles
 })
 
-const labelStyles = computed(() => getTypographyStyles(settings.value, 'label_', device.value))
+const labelStyles = computed(() => (getTypographyStyles(settings.value, 'label_', device.value) || {}) as Record<string, string | number>)
 
 const iconSizeClass = computed(() => [
     currentSize.value === 'small' ? 'w-4 h-4' : 
@@ -145,7 +148,7 @@ const iconSizeClass = computed(() => [
 
 const buttonStyles = (platform: string) => {
   const color = platformColors[platform] || '#666'
-  const styles: Record<string, any> = {
+  const styles: Record<string, string | number> = {
       filter: 'brightness(var(--hover-brightness, 100%)) transition-colors duration-300'
   }
   

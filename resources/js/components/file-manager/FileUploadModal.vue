@@ -107,7 +107,6 @@
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
 import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import {
     Button,
@@ -116,8 +115,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
-    DialogFooter,
-    Input
+    DialogFooter
 } from '@/components/ui';
 import CloudUpload from 'lucide-vue-next/dist/esm/icons/cloud-upload.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
@@ -127,10 +125,8 @@ import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 import FileVideo from 'lucide-vue-next/dist/esm/icons/file-video-camera.js';
 import FileAudio from 'lucide-vue-next/dist/esm/icons/audio-lines.js';
 import FileArchive from 'lucide-vue-next/dist/esm/icons/file-archive.js';
-import ImageIcon from 'lucide-vue-next/dist/esm/icons/image.js';
 import { useToast } from '@/composables/useToast';
 
-const { t } = useI18n();
 const toast = useToast();
 
 const props = withDefaults(defineProps<{
@@ -240,8 +236,8 @@ const handleUpload = async () => {
         emit('uploaded');
         emit('close');
         cleanupPreviews();
-    } catch (error: any) {
-        toast.error.fromResponse(error);
+    } catch (error: unknown) {
+        toast.error.fromResponse(error as import('axios').AxiosError);
         logger.error('Failed to upload files:', error);
     } finally {
         uploading.value = false;

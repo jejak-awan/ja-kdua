@@ -75,7 +75,7 @@
                         <div class="dropdown-preview-container">
                             <component 
                                 :is="FieldComponent"
-                                :field="{ name: baseKey, label: label, options: options }"
+                                :field="{ name: baseKey, label: label, type: type, options: options }"
                                 :value="getModeValue(mode.id)"
                                 :placeholder-value="getPlaceholder(mode.id)"
                                 :module="module"
@@ -102,7 +102,7 @@
           <component 
             v-else
             :is="FieldComponent"
-            :field="{ name: baseKey, label: label, options: options }"
+            :field="{ name: baseKey, label: label, type: type, options: options }"
             :value="getModeValue(mode.id)"
             :placeholder-value="getPlaceholder(mode.id)"
             :module="module"
@@ -121,7 +121,7 @@
         <template v-if="subFields && subFields.length">
             <template v-for="(group, gIndex) in subFields" :key="gIndex">
                 <div v-if="!group.match || getModeValue(mode.id) === group.match" class="sub-fields-container">
-                    <div v-for="(field, fIndex) in group.fields" :key="fIndex" class="sub-field-item">
+                    <div v-for="(field, fIndex) in (group.fields as SettingDefinition[])" :key="fIndex" class="sub-field-item">
                          <div class="sub-field-label">{{ translateFieldLabel(field) }}</div>
                          
                          <!-- Transform Controls Special UI -->
@@ -152,7 +152,7 @@
                              </div>
                              <div 
                                 class="action-icon-btn transform-btn"
-                                :class="{ 'is-active': getGenericValue(`${field.name}Invert`, mode.id) }"
+                                :class="{ 'is-active': getGenericValue(`${field.name!}Invert`, mode.id) }"
                                 :title="$t('builder.fields.background.pattern.invert')"
                                 @click="updateGenericValue(`${field.name}Invert`, mode.id, !getGenericValue(`${field.name}Invert`, mode.id))"
                              >
@@ -163,12 +163,12 @@
                          <component 
                             v-else
                             :is="fieldComponents[field.type] || fieldComponents.text"
-                            :field="{ name: field.name, label: field.label, options: field.options }"
-                            :value="getGenericValue(field.name, mode.id)"
-                            :placeholder-value="getGenericPlaceholder(field.name, mode.id)"
+                            :field="{ name: field.name!, label: field.label, type: field.type, options: field.options }"
+                            :value="getGenericValue(field.name!, mode.id)"
+                            :placeholder-value="getGenericPlaceholder(field.name!, mode.id)"
                             :module="module"
                             :hide-label="true"
-                            @update:value="updateGenericValue(field.name, mode.id, $event)"
+                            @update:value="updateGenericValue(field.name!, mode.id, $event)"
                         />
                     </div>
                 </div>
@@ -180,7 +180,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, inject, ref, watch, reactive, onMounted, type CSSProperties, type Component } from 'vue';
+import { computed, defineAsyncComponent, inject, ref, watch, reactive, onMounted, type Component } from 'vue';
 import Monitor from 'lucide-vue-next/dist/esm/icons/monitor.js';
 import Tablet from 'lucide-vue-next/dist/esm/icons/tablet.js';
 import Smartphone from 'lucide-vue-next/dist/esm/icons/smartphone.js';
@@ -193,24 +193,21 @@ import FlipVertical from 'lucide-vue-next/dist/esm/icons/flip-vertical.js';
 import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
 import Contrast from 'lucide-vue-next/dist/esm/icons/contrast.js';
 import { useI18n } from 'vue-i18n';
-import { BaseModal, BaseButton, BaseDropdown } from '@/components/builder/ui';
+import { BaseModal, BaseDropdown } from '@/components/builder/ui';
 import FieldActions from '@/components/builder/fields/FieldActions.vue';
 import { getBackgroundStyles } from '@/shared/utils/styleUtils';
 import { BackgroundPatterns, BackgroundMasks } from '@/shared/utils/AssetLibrary';
-import type { BuilderInstance, BlockInstance } from '@/types/builder';
+import type { BuilderInstance, BlockInstance, ModuleField, SubFieldGroup, SettingDefinition } from '@/types/builder';
 
-interface SubFieldGroup {
-  match?: string;
-  fields: any[];
-}
+// Local alias for clarity if needed, but we'll use ModuleField/SettingDefinition
 
 interface Props {
   label: string;
   baseKey: string;
   type?: string;
-  options?: any[] | Record<string, any>;
-  module: BlockInstance; // Or generic object if needed, but usually BlockInstance
-  settings: Record<string, any>;
+  options?: unknown[] | Record<string, unknown>;
+  module: BlockInstance;
+  settings: Record<string, unknown>;
   subFields?: SubFieldGroup[];
 }
 
@@ -222,16 +219,17 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'update', payload: Record<string, any>): void;
+  (e: 'update', payload: Record<string, unknown>): void;
 }>();
 
 const builder = inject<BuilderInstance>('builder');
 const { t, te } = useI18n();
 
 // Helper to translate field labels
-const translateFieldLabel = (field: any) => {
+const translateFieldLabel = (field: ModuleField) => {
+    const f = field as SettingDefinition;
     const moduleType = props.module?.type || 'common';
-    const name = field.name;
+    const name = f.key || f.name || '';
 
     // 1. Try module-specific: builder.settings.{moduleType}.{name}.label
     if (te(`builder.settings.${moduleType}.${name}.label`)) {
@@ -252,7 +250,7 @@ const currentDevice = computed(() => builder?.device.value || 'desktop');
 // Live settings from builder store (reactive source of truth)
 const liveSettings = computed(() => {
     // Explicitly track blocks to ensure reactivity if needed
-    if (builder?.blocks.value) { const _ = builder?.blocks.value; }
+
 
     // We fetch it from builder.findModule to ensure we are tracking the actual state in blocks array
     const moduleItem = builder?.findModule?.(props.module?.id);
@@ -283,7 +281,7 @@ const toggleInfo = (id: string, show: boolean) => {
     visibleInfoItems[id] = show;
 };
 
-const getInfoContent = (id: string) => {
+const getInfoContent = (_id: string) => {
     const moduleType = props.module?.type || 'common';
     const key = props.baseKey.includes('.') ? props.baseKey.split('.').pop() : props.baseKey;
     
@@ -318,7 +316,7 @@ const backgroundKeys = [
 ];
 
 const getCombinedStyle = (modeId: string) => {
-    const resolvedSettings: Record<string, any> = {};
+    const resolvedSettings: Record<string, unknown> = {};
     backgroundKeys.forEach(key => {
         resolvedSettings[key] = getGenericValue(key, modeId);
     });
@@ -349,30 +347,30 @@ const initDefaultMask = (modeId: string) => {
 
 // Dynamic field components
 const fieldComponents: Record<string, Component> = {
-  color: defineAsyncComponent<any>(() => import('../fields/ColorField.vue')),
-  upload: defineAsyncComponent<any>(() => import('../fields/UploadField.vue')),
-  text: defineAsyncComponent<any>(() => import('../fields/TextField.vue')),
-  textarea: defineAsyncComponent<any>(() => import('../fields/TextareaField.vue')),
-  select: defineAsyncComponent<any>(() => import('../fields/SelectField.vue')),
-  toggle: defineAsyncComponent<any>(() => import('../fields/ToggleField.vue')),
-  range: defineAsyncComponent<any>(() => import('../fields/RangeField.vue')),
-  spacing: defineAsyncComponent<any>(() => import('../fields/SpacingField.vue')),
-  border: defineAsyncComponent<any>(() => import('../fields/BorderField.vue')),
-  shadow: defineAsyncComponent<any>(() => import('../fields/ShadowField.vue')),
-  buttonGroup: defineAsyncComponent<any>(() => import('../fields/ButtonGroupField.vue')),
-  gradient: defineAsyncComponent<any>(() => import('../fields/GradientField.vue')),
-  dimension: defineAsyncComponent<any>(() => import('../fields/DimensionField.vue')),
-  pattern: defineAsyncComponent<any>(() => import('../fields/PatternField.vue')),
-  mask: defineAsyncComponent<any>(() => import('../fields/MaskField.vue')),
-  advanced_number: defineAsyncComponent<any>(() => import('../fields/AdvancedNumberField.vue')),
-  icon: defineAsyncComponent<any>(() => import('../fields/IconField.vue')),
-  font: defineAsyncComponent<any>(() => import('../fields/FontFamilyField.vue')),
-  filters: defineAsyncComponent<any>(() => import('../fields/FilterField.vue')),
-  transform: defineAsyncComponent<any>(() => import('../fields/TransformField.vue')),
-  animation: defineAsyncComponent<any>(() => import('../fields/AnimationField.vue')),
-  number: defineAsyncComponent<any>(() => import('../fields/NumberField.vue')),
-  richtext: defineAsyncComponent<any>(() => import('../fields/RichtextField.vue')),
-  background: defineAsyncComponent<any>(() => import('../fields/BackgroundField.vue'))
+  color: defineAsyncComponent(() => import('../fields/ColorField.vue')),
+  upload: defineAsyncComponent(() => import('../fields/UploadField.vue')),
+  text: defineAsyncComponent(() => import('../fields/TextField.vue')),
+  textarea: defineAsyncComponent(() => import('../fields/TextareaField.vue')),
+  select: defineAsyncComponent(() => import('../fields/SelectField.vue')),
+  toggle: defineAsyncComponent(() => import('../fields/ToggleField.vue')),
+  range: defineAsyncComponent(() => import('../fields/RangeField.vue')),
+  spacing: defineAsyncComponent(() => import('../fields/SpacingField.vue')),
+  border: defineAsyncComponent(() => import('../fields/BorderField.vue')),
+  shadow: defineAsyncComponent(() => import('../fields/ShadowField.vue')),
+  buttonGroup: defineAsyncComponent(() => import('../fields/ButtonGroupField.vue')),
+  gradient: defineAsyncComponent(() => import('../fields/GradientField.vue')),
+  dimension: defineAsyncComponent(() => import('../fields/DimensionField.vue')),
+  pattern: defineAsyncComponent(() => import('../fields/PatternField.vue')),
+  mask: defineAsyncComponent(() => import('../fields/MaskField.vue')),
+  advanced_number: defineAsyncComponent(() => import('../fields/AdvancedNumberField.vue')),
+  icon: defineAsyncComponent(() => import('../fields/IconField.vue')),
+  font: defineAsyncComponent(() => import('../fields/FontFamilyField.vue')),
+  filters: defineAsyncComponent(() => import('../fields/FilterField.vue')),
+  transform: defineAsyncComponent(() => import('../fields/TransformField.vue')),
+  animation: defineAsyncComponent(() => import('../fields/AnimationField.vue')),
+  number: defineAsyncComponent(() => import('../fields/NumberField.vue')),
+  richtext: defineAsyncComponent(() => import('../fields/RichtextField.vue')),
+  background: defineAsyncComponent(() => import('../fields/BackgroundField.vue'))
 };
 
 const FieldComponent = computed(() => {
@@ -392,10 +390,10 @@ const getModeValue = (id: string) => {
   const getVal = (deviceId: string) => {
     const suffix = deviceId === 'desktop' ? '' : (deviceId === 'mobile' ? '_mobile' : `_${deviceId}`);
     const fullParentKey = parentPath ? (parentPath + suffix) : (childKey + suffix);
-    const settingsObj = (liveSettings.value as any)[fullParentKey];
+    const settingsObj = (liveSettings.value as Record<string, unknown>)[fullParentKey];
     
     if (parentPath && childKey) {
-      return settingsObj?.[childKey] ?? null;
+      return (settingsObj as Record<string, unknown>)?.[childKey] ?? null;
     }
     return settingsObj ?? null;
   };
@@ -410,10 +408,10 @@ const getGenericValue = (key: string, id: string) => {
   const getVal = (deviceId: string) => {
     const suffix = deviceId === 'desktop' ? '' : (deviceId === 'mobile' ? '_mobile' : `_${deviceId}`);
     const fullParentKey = parentPath ? (parentPath + suffix) : (childKey + suffix);
-    const settingsObj = (liveSettings.value as any)[fullParentKey];
+    const settingsObj = (liveSettings.value as Record<string, unknown>)[fullParentKey];
     
     if (parentPath && childKey) {
-      return settingsObj?.[childKey] ?? null;
+      return (settingsObj as Record<string, unknown>)?.[childKey] ?? null;
     }
     return settingsObj ?? null;
   };
@@ -452,7 +450,7 @@ const getPlaceholder = (id: string) => {
   return null;
 };
 
-const getPreviewStyle = (id: string): any => {
+const getPreviewStyle = (id: string): Record<string, unknown> => {
     if (props.type !== 'upload') return {};
     
     const isVideo = props.baseKey === 'backgroundVideoMp4' || props.baseKey === 'backgroundVideoWebm';
@@ -460,16 +458,16 @@ const getPreviewStyle = (id: string): any => {
     
     if (!isVideo && !isImage) return {};
 
-    const styles: any = {};
+    const styles: Record<string, unknown> = {};
     
     // Resolve helper
-    const getVal = (base: string, modeId: string) => {
+    const getVal = (base: string, modeId: string): string | number | null | undefined => {
         const suffix = modeId === 'desktop' ? '' : (modeId === 'mobile' ? '_mobile' : `_${modeId}`);
-        const val = liveSettings.value[base + suffix];
+        const val = (liveSettings.value as Record<string, unknown>)[base + suffix] as string | number | null | undefined;
         
         if ((val === undefined || val === null || val === '') && modeId !== 'desktop') {
-            const desktop = liveSettings.value[base];
-            const tablet = liveSettings.value[base + '_tablet'];
+            const desktop = (liveSettings.value as Record<string, unknown>)[base] as string | number | null | undefined;
+            const tablet = (liveSettings.value as Record<string, unknown>)[base + '_tablet'] as string | number | null | undefined;
             return modeId === 'tablet' ? desktop : (tablet ?? desktop);
         }
         return val;
@@ -482,7 +480,7 @@ const getPreviewStyle = (id: string): any => {
             height: getVal('backgroundImageHeight', id),
             size: getVal('backgroundImageSize', id),
             repeat: getVal('backgroundImageRepeat', id),
-            position: getVal('backgroundImagePosition', id)
+            position: getVal('backgroundImagePosition', id) as string
         };
 
         styles.width = '100%';
@@ -525,7 +523,7 @@ const getPreviewStyle = (id: string): any => {
     return styles;
 };
 
-const updateModeValue = (id: string, value: any) => {
+const updateModeValue = (id: string, value: unknown) => {
   const suffix = id === 'desktop' ? '' : (id === 'mobile' ? '_mobile' : `_${id}`);
   const [parentPath, childKey] = props.baseKey.includes('.') ? props.baseKey.split('.') : [null, props.baseKey];
   
@@ -560,7 +558,7 @@ const updateModeValue = (id: string, value: any) => {
   }
 };
 
-const updateGenericValue = (key: string, id: string, value: any) => {
+const updateGenericValue = (key: string, id: string, value: unknown) => {
   const suffix = id === 'desktop' ? '' : (id === 'mobile' ? '_mobile' : `_${id}`);
   const [parentPath, childKey] = key.includes('.') ? key.split('.') : [null, key];
   
@@ -579,7 +577,7 @@ const updateGenericValue = (key: string, id: string, value: any) => {
 
 // Auto-scroll to active device
 const itemRefs = ref<Record<string, HTMLElement>>({});
-const setItemRef = (el: any, id: string) => {
+const setItemRef = (el: Element | null | Component, id: string) => {
   if (el) itemRefs.value[id] = el as HTMLElement;
 };
 

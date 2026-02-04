@@ -1035,7 +1035,7 @@ interface Statistics {
     total_events: number;
     failed_logins: number;
     blocked_ips: number;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface IpManagementItem {
@@ -1050,7 +1050,7 @@ interface IpManagementItem {
 interface IpStatus {
     is_blocked: boolean;
     reason?: string | null;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface CspReport {
@@ -1068,7 +1068,7 @@ interface CspStats {
     new?: number;
     by_directive?: { violated_directive: string; count: number }[];
     recent_trend?: { date: string; count: number }[];
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface SlowQuery {
@@ -1112,6 +1112,36 @@ interface PaginationInfo {
     last_page: number;
 }
 
+interface CspFilters {
+    status: string;
+    directive: string;
+    date_from: string;
+    date_to: string;
+    page: number;
+    per_page: number;
+    [key: string]: string | number; // For flexibility with params spreading
+}
+
+interface SlowQueryFilters {
+    route: string;
+    min_duration: string | number;
+    date_from: string;
+    date_to: string;
+    page: number;
+    per_page: number;
+    [key: string]: string | number;
+}
+
+interface VulnFilters {
+    source: string;
+    severity: string;
+    status: string;
+    package: string;
+    page: number;
+    per_page: number;
+    [key: string]: string | number;
+}
+
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
@@ -1128,7 +1158,6 @@ const logFilter = ref<string>('all');
 const logSearch = ref<string>('');
 const ipToBlock = ref<string>('');
 const ipToCheck = ref<string>('');
-const ipToUnblock = ref<string>('');
 const ipToWhitelist = ref<string>('');
 const ipStatus = ref<IpStatus | null>(null);
 const selectedLogIds = ref<string[]>([]);
@@ -1159,12 +1188,6 @@ const isValidBlockIp = computed(() => !!ipToBlock.value?.trim());
 const isValidCheckIp = computed(() => !!ipToCheck.value?.trim());
 const isValidWhitelistIp = computed(() => !!ipToWhitelist.value?.trim());
 
-// Tabs
-const tabs = computed(() => [
-    { key: 'overview', label: t('features.security.tabs.overview') },
-    { key: 'blocklist', label: t('features.security.tabs.blocklist') },
-    { key: 'whitelist', label: t('features.security.tabs.whitelist') },
-]);
 
 // Filtered logs
 const filteredLogs = computed<Log[]>(() => {
@@ -1187,17 +1210,14 @@ const filteredLogs = computed<Log[]>(() => {
 });
 
 // Paginated data
-const logsTotalPages = computed(() => Math.max(1, Math.ceil(filteredLogs.value.length / Number(logsPerPage.value))));
 const logsStartIndex = computed(() => (logsCurrentPage.value - 1) * Number(logsPerPage.value));
 const logsEndIndex = computed(() => Math.min(logsStartIndex.value + Number(logsPerPage.value), filteredLogs.value.length));
 const paginatedLogs = computed<Log[]>(() => filteredLogs.value.slice(logsStartIndex.value, logsEndIndex.value));
 
-const blocklistTotalPages = computed(() => Math.max(1, Math.ceil(blocklist.value.length / Number(blocklistPerPage.value))));
 const blocklistStartIndex = computed(() => (blocklistCurrentPage.value - 1) * Number(blocklistPerPage.value));
 const blocklistEndIndex = computed(() => Math.min(blocklistStartIndex.value + Number(blocklistPerPage.value), blocklist.value.length));
 const paginatedBlocklist = computed<IpManagementItem[]>(() => blocklist.value.slice(blocklistStartIndex.value, blocklistEndIndex.value));
 
-const whitelistTotalPages = computed(() => Math.max(1, Math.ceil(whitelist.value.length / Number(whitelistPerPage.value))));
 const whitelistStartIndex = computed(() => (whitelistCurrentPage.value - 1) * Number(whitelistPerPage.value));
 const whitelistEndIndex = computed(() => Math.min(whitelistStartIndex.value + Number(whitelistPerPage.value), whitelist.value.length));
 const paginatedWhitelist = computed<IpManagementItem[]>(() => whitelist.value.slice(whitelistStartIndex.value, whitelistEndIndex.value));
@@ -1209,9 +1229,9 @@ const fetchLogs = async () : Promise<void> => {
         const response = await api.get('/admin/ja/security/journal', {
             params: { per_page: logsPerPage.value }
         });
-        const result = parseResponse(response);
-        logs.value = (result.data as unknown as Log[]) || [];
-    } catch (error: any) {
+        const { data } = parseResponse<Log[]>(response);
+        logs.value = ensureArray(data);
+    } catch (error: unknown) {
         logger.error('Failed to fetch logs:', error);
     } finally {
         loading.value = false;
@@ -1232,7 +1252,7 @@ const clearLogs = async () : Promise<void> => {
         await api.delete('admin/ja/security/journal');
         toast.success.action(t('features.system.logs.messages.cleared'));
         fetchLogs();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to clear logs:', error);
         toast.error.fromResponse(error);
     }
@@ -1242,7 +1262,7 @@ const fetchStats = async () : Promise<void> => {
     try {
         const response = await api.get('admin/ja/security/stats');
         statistics.value = (parseSingleResponse<Statistics>(response) as Statistics) || null;
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch stats:', error);
     }
 };
@@ -1251,7 +1271,7 @@ const fetchBlocklist = async () : Promise<void> => {
     try {
         const response = await api.get('admin/ja/security/blocklist');
         blocklist.value = ensureArray(parseSingleResponse<IpManagementItem[]>(response)) as IpManagementItem[];
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch blocklist:', error);
     }
 };
@@ -1260,7 +1280,7 @@ const fetchWhitelist = async () : Promise<void> => {
     try {
         const response = await api.get('admin/ja/security/whitelist');
         whitelist.value = ensureArray(parseSingleResponse<IpManagementItem[]>(response)) as IpManagementItem[];
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch whitelist:', error);
     }
 };
@@ -1287,7 +1307,7 @@ const blockIP = async () => {
         ipToBlock.value = '';
         await fetchBlocklist();
         await fetchLogs();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to block IP:', error);
         toast.error.fromResponse(error);
     }
@@ -1301,39 +1321,12 @@ const checkIPStatus = async () : Promise<void> => {
     try {
         const response = await api.get('admin/ja/security/check-ip', { params: { ip_address: ipToCheck.value } });
         ipStatus.value = (parseSingleResponse<IpStatus>(response) as IpStatus) || null;
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to check IP status:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const unblockIP = async () => {
-    if (!ipToUnblock.value) {
-        toast.error.validation(t('features.security.messages.enterIp'));
-        return;
-    }
-
-    const confirmed = await confirm({
-        title: t('features.security.ipManagement.unblock.button'),
-        message: t('features.security.messages.confirmUnblock', { ip: ipToUnblock.value }),
-        variant: 'warning',
-        confirmText: t('features.security.ipManagement.unblock.button'),
-    });
-
-    if (!confirmed) return;
-
-    try {
-        await api.post('admin/ja/security/unblock-ip', { ip_address: ipToUnblock.value });
-        await api.post('admin/ja/security/clear-failed-attempts', { ip_address: ipToUnblock.value });
-        toast.success.action(t('features.security.messages.unblockSuccess'));
-        ipToUnblock.value = '';
-        await fetchBlocklist();
-        await fetchLogs();
-    } catch (error: any) {
-        logger.error('Failed to unblock IP:', error);
-        toast.error.fromResponse(error);
-    }
-};
 
 const blockIPFromLog = async (ip: string) : Promise<void> => {
     const confirmed = await confirm({
@@ -1350,7 +1343,7 @@ const blockIPFromLog = async (ip: string) : Promise<void> => {
         toast.success.action(t('features.security.messages.blockSuccess'));
         await fetchBlocklist();
         await fetchLogs();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to block IP:', error);
         toast.error.fromResponse(error);
     }
@@ -1375,7 +1368,7 @@ const bulkBlockFromLogs = async () : Promise<void> => {
         selectedLogIds.value = [];
         await fetchBlocklist();
         await fetchLogs();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to bulk block:', error);
         toast.error.fromResponse(error);
     }
@@ -1412,7 +1405,7 @@ const removeFromBlocklist = async (ip: string) : Promise<void> => {
         await api.post('admin/ja/security/unblock-ip', { ip_address: ip });
         toast.success.action(t('features.security.messages.unblockSuccess'));
         await fetchBlocklist();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to remove from blocklist:', error);
         toast.error.fromResponse(error);
     }
@@ -1434,7 +1427,7 @@ const moveToWhitelist = async (ip: string) : Promise<void> => {
         toast.success.action(t('features.security.messages.movedToWhitelist'));
         await fetchBlocklist();
         await fetchWhitelist();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to move to whitelist:', error);
         toast.error.fromResponse(error);
     }
@@ -1457,7 +1450,7 @@ const bulkUnblock = async () : Promise<void> => {
         toast.success.action(t('features.security.messages.bulkUnblockSuccess'));
         selectedBlocklistIds.value = [];
         await fetchBlocklist();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to bulk unblock:', error);
         toast.error.fromResponse(error);
     }
@@ -1491,7 +1484,7 @@ const addToWhitelist = async (ip: string) : Promise<void> => {
         toast.success.action(t('features.security.messages.whitelistSuccess'));
         ipToWhitelist.value = '';
         await fetchWhitelist();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to add to whitelist:', error);
         toast.error.fromResponse(error);
     }
@@ -1511,7 +1504,7 @@ const removeFromWhitelist = async (ip: string) : Promise<void> => {
         await api.post('/admin/ja/security/remove-whitelist', { data: { ip_address: ip } });
         toast.success.action(t('features.security.messages.whitelistRemoveSuccess'));
         await fetchWhitelist();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to remove from whitelist:', error);
         toast.error.fromResponse(error);
     }
@@ -1534,7 +1527,7 @@ const bulkRemoveWhitelist = async () : Promise<void> => {
         toast.success.action(t('features.security.messages.bulkWhitelistRemoveSuccess'));
         selectedWhitelistIds.value = [];
         await fetchWhitelist();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to bulk remove whitelist:', error);
         toast.error.fromResponse(error);
     }
@@ -1610,7 +1603,7 @@ const cspReports = ref<CspReport[]>([]);
 const cspStats = ref<CspStats | null>(null);
 const cspLoading = ref(false);
 const selectedCspReports = ref<number[]>([]);
-const cspFilters = ref<Record<string, any>>({ status: 'all', directive: '', date_from: '', date_to: '', page: 1, per_page: 50 });
+const cspFilters = ref<CspFilters>({ status: 'all', directive: '', date_from: '', date_to: '', page: 1, per_page: 50 });
 const cspPagination = ref<PaginationInfo>({ total: 0, current_page: 1, last_page: 1 });
 
 const cspTopViolation = computed<string>(() => {
@@ -1627,7 +1620,7 @@ const cspRecentCount = computed<number>(() => {
 const fetchCspReports = async () : Promise<void> => {
     cspLoading.value = true;
     try {
-        const params: Record<string, any> = { ...cspFilters.value };
+        const params: Record<string, string | number> = { ...cspFilters.value };
         if (params.status === 'all') params.status = '';
         
         const response = await api.get('admin/ja/security/csp-reports', { params });
@@ -1638,7 +1631,7 @@ const fetchCspReports = async () : Promise<void> => {
             current_page: result.current_page || 1,
             last_page: result.last_page || 1,
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch CSP reports:', error);
     } finally {
         cspLoading.value = false;
@@ -1649,7 +1642,7 @@ const fetchCspStats = async () : Promise<void> => {
     try {
         const response = await api.get('admin/ja/security/csp-reports/statistics');
         cspStats.value = (response.data?.data as CspStats) || {};
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch CSP stats:', error);
     }
 };
@@ -1684,7 +1677,7 @@ const cspBulkAction = async (action: string) : Promise<void> => {
         selectedCspReports.value = [];
         fetchCspReports();
         fetchCspStats();
-    } catch (error: any) {
+    } catch (error: unknown) {
         toast.error.fromResponse(error);
     }
 };
@@ -1705,7 +1698,7 @@ const getCspStatusLabel = (status: string) : string => {
 const slowQueries = ref<SlowQuery[]>([]);
 const slowQueryStats = ref<SlowQueryStats | null>(null);
 const slowQueryLoading = ref(false);
-const slowQueryFilters = ref<Record<string, any>>({ route: '', min_duration: '', date_from: '', date_to: '', page: 1, per_page: 50 });
+const slowQueryFilters = ref<SlowQueryFilters>({ route: '', min_duration: '', date_from: '', date_to: '', page: 1, per_page: 50 });
 const slowQueryPagination = ref<PaginationInfo>({ total: 0, current_page: 1, last_page: 1 });
 
 const fetchSlowQueries = async () : Promise<void> => {
@@ -1718,7 +1711,7 @@ const fetchSlowQueries = async () : Promise<void> => {
             current_page: response.data?.data?.current_page || 1,
             last_page: response.data?.data?.last_page || 1,
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch slow queries:', error);
     } finally {
         slowQueryLoading.value = false;
@@ -1729,7 +1722,7 @@ const fetchSlowQueryStats = async () : Promise<void> => {
     try {
         const response = await api.get('/admin/ja/security/slow-queries/statistics');
         slowQueryStats.value = (response.data?.data as SlowQueryStats) || {};
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch slow query stats:', error);
     }
 };
@@ -1749,7 +1742,7 @@ const getSlowQueryDurationVariant = (duration: number) : "destructive" | "warnin
 const vulnerabilities = ref<Vulnerability[]>([]);
 const vulnLoading = ref(false);
 const auditRunning = ref(false);
-const vulnFilters = ref<Record<string, any>>({ source: 'all', severity: 'all', status: 'all', package: '', page: 1, per_page: 50 });
+const vulnFilters = ref<VulnFilters>({ source: 'all', severity: 'all', status: 'all', package: '', page: 1, per_page: 50 });
 const vulnPagination = ref<PaginationInfo>({ total: 0, current_page: 1, last_page: 1 });
 
 const vulnStats = ref<VulnStats>({
@@ -1770,7 +1763,7 @@ const fetchVulnStats = async () : Promise<void> => {
             medium: 0,
             low: 0
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch vulnerability stats:', error);
     }
 };
@@ -1778,7 +1771,7 @@ const fetchVulnStats = async () : Promise<void> => {
 const fetchVulnerabilities = async () : Promise<void> => {
     vulnLoading.value = true;
     try {
-        const params: Record<string, any> = { ...vulnFilters.value };
+        const params: Record<string, string | number> = { ...vulnFilters.value };
         if (params.source === 'all') params.source = '';
         if (params.severity === 'all') params.severity = '';
         if (params.status === 'all') params.status = '';
@@ -1791,7 +1784,7 @@ const fetchVulnerabilities = async () : Promise<void> => {
             current_page: result.current_page || 1,
             last_page: result.last_page || 1,
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch vulnerabilities:', error);
     } finally {
         vulnLoading.value = false;
@@ -1805,7 +1798,7 @@ const runDependencyAudit = async () : Promise<void> => {
         toast.success.action(t('features.security.vulnerabilities.auditCompleted'));
         fetchVulnerabilities();
         fetchVulnStats();
-    } catch (error: any) {
+    } catch (error: unknown) {
         toast.error.fromResponse(error);
     } finally {
         auditRunning.value = false;
@@ -1817,7 +1810,7 @@ const updateVulnStatus = async (vuln: Vulnerability, status: string | number) : 
         await api.put(`/admin/ja/security/dependency-vulnerabilities/${vuln.id}`, { status });
         vuln.status = status as Vulnerability['status'];
         toast.success.action(t('common.messages.success.updated', { item: 'Status' }));
-    } catch (error: any) {
+    } catch (error: unknown) {
         toast.error.fromResponse(error);
     }
 };

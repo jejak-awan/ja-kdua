@@ -26,9 +26,9 @@
         <div v-else class="flex-1">
             <MenuBuilder 
                 ref="builderRef"
-                :menu-id="selectedMenuId" 
-                :key="selectedMenuId"
-                :menus="menus"
+                :menu-id="(selectedMenuId as string | number)" 
+                :key="(selectedMenuId as string | number)"
+                :menus="(menus as any[])"
                 :trashed-filter="trashedFilter"
                 :trashed-count="trashedCount"
                 :is-trashed="!!selectedMenu?.deleted_at"
@@ -54,43 +54,36 @@
 import { logger } from '@/utils/logger';
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter, useRoute } from 'vue-router';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
 import MenuBuilder from '@/components/menus/MenuBuilder.vue';
 import MenuModal from '@/components/menus/MenuModal.vue';
 import { 
-    Button, 
-    Select, 
-    SelectTrigger, 
-    SelectValue, 
-    SelectContent, 
-    SelectItem 
+    Button
 } from '@/components/ui';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
-import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import MenuSquare from 'lucide-vue-next/dist/esm/icons/square-menu.js';
-import Save from 'lucide-vue-next/dist/esm/icons/save.js';
-import RotateCcw from 'lucide-vue-next/dist/esm/icons/rotate-ccw.js';
-import Undo2 from 'lucide-vue-next/dist/esm/icons/undo-2.js';
-import Redo2 from 'lucide-vue-next/dist/esm/icons/redo-2.js';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
 
 const { t } = useI18n();
-const router = useRouter();
-const route = useRoute();
 const toast = useToast();
 const { confirm } = useConfirm();
 
-const menus = ref<any[]>([]);
+interface Menu {
+    id: string | number;
+    name: string;
+    deleted_at?: string | null;
+}
+
+const menus = ref<Menu[]>([]);
 const showCreateModal = ref(false);
-const selectedMenuId = ref<any>(null);
+const selectedMenuId = ref<string | number | null>(null);
 const isLoading = ref(true);
 const trashedFilter = ref('without');
 const trashedCount = ref(0);
-const builderRef = ref<any>(null);
+const builderRef = ref<{ refresh?: () => void } | null>(null);
 
 // Computed
 const selectedMenu = computed(() => {
@@ -136,7 +129,7 @@ const fetchMenus = async () => {
         } else {
             selectedMenuId.value = null;
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch menus:', error);
         toast.error.action(t('features.menus.messages.loadingFailed') || 'Failed to load menus');
     } finally {
@@ -148,7 +141,7 @@ const openCreateModal = () => {
     showCreateModal.value = true;
 };
 
-const handleMenuCreated = async (newMenu: any) => {
+const handleMenuCreated = async (newMenu: { id?: string | number }) => {
     showCreateModal.value = false;
     await fetchMenus();
     if (newMenu && newMenu.id) {
@@ -157,7 +150,7 @@ const handleMenuCreated = async (newMenu: any) => {
     // Toast is already shown in MenuModal.vue
 };
 
-const handleSelectMenu = (menuId: any) => {
+const handleSelectMenu = (menuId: string | number) => {
     selectedMenuId.value = menuId;
 };
 
@@ -192,7 +185,7 @@ const deleteCurrentMenu = async () => {
         }
         selectedMenuId.value = null;
         await fetchMenus();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Error deleting menu:', error);
         toast.error.delete(error, t('features.menus.title'));
     }
@@ -214,7 +207,7 @@ const restoreCurrentMenu = async () => {
         await api.post(`/admin/ja/menus/${selectedMenuId.value}/restore`);
         toast.success.restore('Menu');
         await fetchMenus();
-    } catch (error: any) {
+    } catch (error: unknown) {
          logger.error('Error restoring menu:', error);
         toast.error.fromResponse(error);
     }

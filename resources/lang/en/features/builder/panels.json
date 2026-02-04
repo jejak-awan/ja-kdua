@@ -22,7 +22,18 @@
             "assignmentTitle": "Assignment Rules",
             "applyTo": "Apply To",
             "contentType": "Content Type",
-            "category": "Category"
+            "category": "Category",
+            "applyOptions": {
+                "all": "Everywhere",
+                "specific_type": "Specific Content Type",
+                "specific_category": "Specific Category",
+                "front_page": "Front Page Only"
+            },
+            "contentTypeOptions": {
+                "post": "Posts",
+                "page": "Pages",
+                "custom": "Custom Content"
+            }
         },
         "theme": {
             "loading": "Loading theme settings...",

@@ -35,7 +35,7 @@ import type { MenuItem } from '../../../types/menu';
 const menuContext = useMenuContext();
 
 const props = withDefaults(defineProps<{
-    items: MenuItem[];
+    items?: MenuItem[];
     depth?: number;
     maxDepth?: number;
 }>(), {

@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -154,7 +154,7 @@ const SocialLinksModule: ModuleDefinition = {
             {
                 ...layoutSettings,
                 fields: [
-                    ...layoutSettings.fields!,
+                    ...(layoutSettings.fields as SettingDefinition[]),
                     {
                         name: 'alignment',
                         type: 'buttonGroup',

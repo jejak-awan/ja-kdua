@@ -30,7 +30,7 @@ import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';
 import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
 import Info from 'lucide-vue-next/dist/esm/icons/info.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
-import HelpCircle from 'lucide-vue-next/dist/esm/icons/circle-question-mark.js';
+
 import { BaseModal, BaseButton } from '@/components/builder/ui';
 
 interface Props {

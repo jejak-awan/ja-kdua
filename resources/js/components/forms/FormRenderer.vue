@@ -70,7 +70,7 @@ const submitting = ref(false)
 const success = ref(false)
 const error = ref<string | null>(null)
 
-const formData = reactive<Record<string, any>>({})
+const formData = reactive<Record<string, unknown>>({})
 const currentStep = ref(0)
 const hasStarted = ref(false)
 
@@ -78,20 +78,20 @@ const trackEvent = async (event: 'view' | 'start') => {
   if (props.previewMode) return
   try {
     await api.post(`/cms/forms/${props.slug}/track`, { event })
-  } catch (err) {
+  } catch (_err) {
     // Silent fail for analytics tracking
   }
 }
 
 // Provide form state to child blocks
 provide('formState', formData)
-provide('updateFormValue', (fieldId: string, value: any) => {
+provide('updateFormValue', (fieldId: string, value: unknown) => {
   formData[fieldId] = value
 })
 
 const steps = computed(() => {
     if (!form.value?.blocks) return []
-    return form.value.blocks.filter((b: any) => b.type === 'form_step')
+    return form.value.blocks.filter((b: { type: string }) => b.type === 'form_step')
 })
 
 const isMultiStep = computed(() => steps.value.length > 0)
@@ -125,7 +125,7 @@ const fetchForm = async () => {
     const response = await api.get(`/cms/forms/${props.slug}`)
     form.value = response.data
     // Initialize form data with default values if any
-  } catch (err: any) {
+  } catch (err: unknown) {
     error.value = 'Failed to load form.'
     logger.error(err instanceof Error ? err.message : String(err), { error: err })
   } finally {
@@ -158,8 +158,9 @@ const handleSubmit = async () => {
         handleRedirect()
       }, 3000)
     }
-  } catch (err: any) {
-    error.value = err.response?.data?.message || 'An error occurred while submitting the form.'
+  } catch (err: unknown) {
+    const errorData = (err as { response?: { data?: Record<string, unknown> } })?.response?.data;
+    error.value = typeof errorData?.message === 'string' ? errorData.message : 'An error occurred while submitting the form.'
   } finally {
     submitting.value = false
   }

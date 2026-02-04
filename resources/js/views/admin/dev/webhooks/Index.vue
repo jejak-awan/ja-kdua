@@ -188,19 +188,38 @@ const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 
-const webhooks = ref<any[]>([]);
-const statistics = ref<any>(null);
+interface Webhook {
+    id: string | number;
+    name: string;
+    url: string;
+    events: string[];
+    total_calls: number;
+    failed_calls: number;
+    is_active: boolean;
+    secret?: string;
+    created_at?: string;
+}
+
+interface WebhookStats {
+    total: number;
+    active: number;
+    total_calls: number;
+    failed_calls: number;
+}
+
+const webhooks = ref<Webhook[]>([]);
+const statistics = ref<WebhookStats | null>(null);
 const loading = ref(false);
 const search = ref('');
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
-const editingWebhook = ref<any>(null);
+const editingWebhook = ref<Webhook | null>(null);
 
 const filteredWebhooks = computed(() => {
     if (!search.value) return webhooks.value;
     
     const searchLower = search.value.toLowerCase();
-    return webhooks.value.filter((webhook: any) => 
+    return webhooks.value.filter((webhook: Webhook) => 
         webhook.name.toLowerCase().includes(searchLower) ||
         webhook.url.toLowerCase().includes(searchLower)
     );
@@ -216,8 +235,8 @@ const fetchWebhooks = async () => {
         // Fetch statistics
         try {
             const statsResponse = await api.get('/admin/ja/webhooks/statistics');
-            statistics.value = parseSingleResponse(statsResponse);
-        } catch (error: any) {
+            statistics.value = parseSingleResponse<WebhookStats>(statsResponse);
+        } catch {
             // Calculate from webhooks if endpoint doesn't exist
             statistics.value = {
                 total: webhooks.value.length,
@@ -226,29 +245,29 @@ const fetchWebhooks = async () => {
                 failed_calls: webhooks.value.reduce((sum, w) => sum + (w.failed_calls || 0), 0),
             };
         }
-        } catch (err) {
+        } catch (err: unknown) {
             logger.error('Failed to fetch webhooks:', err);
     } finally {
         loading.value = false;
     }
 };
 
-const editWebhook = (webhook: any) => {
+const editWebhook = (webhook: Webhook) => {
     editingWebhook.value = webhook;
     showEditModal.value = true;
 };
 
-const testWebhook = async (webhook: any) => {
+const testWebhook = async (webhook: Webhook) => {
     try {
         await api.post(`/admin/ja/webhooks/${webhook.id}/test`);
         toast.success.action(t('features.developer.webhooks.messages.test_success'));
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to test webhook:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const deleteWebhook = async (webhook: any) => {
+const deleteWebhook = async (webhook: Webhook) => {
     const confirmed = await confirm({
         title: t('features.developer.webhooks.actions.delete'),
         message: t('features.developer.webhooks.confirm.delete', { name: webhook.name }),
@@ -262,7 +281,7 @@ const deleteWebhook = async (webhook: any) => {
         await api.delete(`/admin/ja/webhooks/${webhook.id}`);
         toast.success.delete('Webhook');
         fetchWebhooks();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to delete webhook:', error);
         toast.error.delete(error, 'Webhook');
     }

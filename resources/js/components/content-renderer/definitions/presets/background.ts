@@ -216,23 +216,23 @@ export const backgroundDefaults: ModuleSettings = {
  * Generate CSS background style object
  */
 export const getBackgroundStyle = (settings: ModuleSettings) => {
-    const style: any = {};
+    const style: Record<string, string | number | undefined> = {};
 
     switch (settings.bgType) {
         case 'color':
-            style.backgroundColor = settings.bgColor;
+            style.backgroundColor = settings.bgColor as string;
             break;
         case 'image':
             if (settings.bgImage) {
                 style.backgroundImage = `url(${settings.bgImage})`;
-                style.backgroundSize = settings.bgSize || 'cover';
-                style.backgroundPosition = settings.bgPosition || 'center';
-                style.backgroundRepeat = settings.bgRepeat || 'no-repeat';
-                style.backgroundAttachment = settings.bgAttachment || 'scroll';
+                style.backgroundSize = (settings.bgSize as string) || 'cover';
+                style.backgroundPosition = (settings.bgPosition as string) || 'center';
+                style.backgroundRepeat = (settings.bgRepeat as string) || 'no-repeat';
+                style.backgroundAttachment = (settings.bgAttachment as string) || 'scroll';
             }
             break;
         case 'gradient': {
-            const direction = settings.gradientDirection || 'to right';
+            const direction = (settings.gradientDirection as string) || 'to right';
             if (direction === 'radial') {
                 style.backgroundImage = `radial-gradient(circle, ${settings.gradientStart}, ${settings.gradientEnd})`;
             } else {

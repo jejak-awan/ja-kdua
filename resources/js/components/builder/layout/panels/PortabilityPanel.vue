@@ -79,7 +79,7 @@ const handleImport = () => {
              builder.takeSnapshot(); // Add to history
              alert(t('builder.panels.portability.import.success'));
         }
-    } catch(e) {
+    } catch(_e) {
         alert(t('builder.panels.portability.import.invalid'));
     }
 };

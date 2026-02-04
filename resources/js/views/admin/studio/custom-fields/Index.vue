@@ -156,14 +156,14 @@
             v-if="showCreateGroupModal || showEditGroupModal"
             @close="closeGroupModal"
             @saved="handleGroupSaved"
-            :field-group="editingGroup"
+            :field-group="(editingGroup as any)"
         />
 
         <FieldModal
             v-if="showCreateFieldModal || showEditFieldModal"
             @close="closeFieldModal"
             @saved="handleFieldSaved"
-            :field="editingField"
+            :field="(editingField as any)"
             :field-groups="fieldGroups"
         />
     </div>
@@ -179,7 +179,7 @@ import { useConfirm } from '@/composables/useConfirm';
 import FieldGroupModal from '@/components/custom-fields/FieldGroupModal.vue';
 import FieldModal from '@/components/custom-fields/FieldModal.vue';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui';
+import { Badge, Button, Card, CardContent, CardHeader, Input, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui';
 
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
@@ -196,10 +196,6 @@ const { confirm } = useConfirm();
 const toast = useToast();
 
 const currentTab = ref('groups');
-const tabs = computed(() => [
-    { name: 'groups', label: t('features.developer.custom_fields.tabs.groups') },
-    { name: 'fields', label: t('features.developer.custom_fields.tabs.fields') },
-]);
 
 const fieldGroups = ref<FieldGroup[]>([]);
 const customFields = ref<CustomField[]>([]);
@@ -210,10 +206,10 @@ const fieldSearch = ref('');
 // Modals state
 const showCreateGroupModal = ref(false);
 const showEditGroupModal = ref(false);
-const editingGroup = ref<any>(null);
+const editingGroup = ref<FieldGroup | null>(null);
 const showCreateFieldModal = ref(false);
 const showEditFieldModal = ref(false);
-const editingField = ref<any>(null);
+const editingField = ref<CustomField | null>(null);
 
 const filteredFields = computed(() => {
     if (!fieldSearch.value) return customFields.value;
@@ -231,7 +227,7 @@ const fetchFieldGroups = async () => {
         const response = await api.get('/admin/ja/field-groups');
         const { data } = parseResponse<FieldGroup>(response);
         fieldGroups.value = ensureArray<FieldGroup>(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch field groups:', error);
     } finally {
         loadingGroups.value = false;
@@ -244,7 +240,7 @@ const fetchCustomFields = async () => {
         const response = await api.get('/admin/ja/custom-fields');
         const { data } = parseResponse<CustomField>(response);
         customFields.value = ensureArray<CustomField>(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch custom fields:', error);
     } finally {
         loadingFields.value = false;
@@ -252,12 +248,12 @@ const fetchCustomFields = async () => {
 };
 
 // Group Actions
-const editGroup = (group: any) => {
+const editGroup = (group: FieldGroup) => {
     editingGroup.value = group;
     showEditGroupModal.value = true;
 };
 
-const deleteGroup = async (group: any) => {
+const deleteGroup = async (group: FieldGroup) => {
     const confirmed = await confirm({
         title: t('features.developer.custom_fields.groups.actions.delete'),
         message: t('features.developer.custom_fields.groups.confirm.delete', { name: group.name }),
@@ -271,7 +267,7 @@ const deleteGroup = async (group: any) => {
         await api.delete(`/admin/ja/custom-fields/groups/${group.id}`);
         toast.success.delete(t('features.developer.custom_fields.tabs.groups'));
         fetchFieldGroups();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to delete group:', error);
         toast.error.delete(error, t('features.developer.custom_fields.tabs.groups'));
     }
@@ -308,7 +304,7 @@ const deleteField = async (field: CustomField) => {
         await api.delete(`/admin/ja/custom-fields/fields/${field.id}`);
         toast.success.delete(t('features.developer.custom_fields.tabs.fields'));
         fetchCustomFields();
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to delete field:', error);
         toast.error.delete(error, t('features.developer.custom_fields.tabs.fields'));
     }

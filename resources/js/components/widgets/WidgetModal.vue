@@ -167,9 +167,10 @@ const handleSubmit = async () => {
             toast.success.create(t('features.widgets.title'));
         }
         emit('saved');
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors);
+    } catch (error: unknown) {
+        const resp = (error as { response?: { status?: number, data?: { errors?: Record<string, string[]> } } }).response;
+        if (resp?.status === 422) {
+            setErrors(resp.data?.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

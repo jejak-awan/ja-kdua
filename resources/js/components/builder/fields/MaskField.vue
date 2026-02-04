@@ -42,26 +42,33 @@ import { useI18n } from 'vue-i18n'
 import { BackgroundMasks } from '@/shared/utils/AssetLibrary'
 import type { SettingDefinition } from '@/types/builder'
 
-const props = defineProps<{
+defineProps<{
   field?: SettingDefinition;
   value?: string;
 }>()
 
-const emit = defineEmits(['update:value'])
+defineEmits(['update:value'])
+interface MaskDefinition {
+  id: string;
+  label: string;
+  viewBox: { square: string; landscape: string; portrait: string };
+  svg: unknown; // SVG structure is complex and varies
+}
+
 const { t } = useI18n()
 
-const getMaskPreview = (mask: any) => {
+const getMaskPreview = (mask: MaskDefinition) => {
     if (!mask || !mask.svg) return ''
-    const svg = mask.svg
+    const svg = mask.svg as Record<string, unknown>
     // Check regular structure first
-    const stateObj = svg.regular || svg.default || svg
-    const rotateObj = stateObj.default || stateObj
+    const stateObj = (svg.regular || svg.default || svg) as Record<string, unknown>
+    const rotateObj = (stateObj.default || stateObj) as Record<string, unknown> | string
     
     let path = ''
     if (typeof rotateObj === 'string') {
         path = rotateObj
     } else {
-        path = rotateObj.square || rotateObj.landscape || rotateObj.portrait || ''
+        path = String(rotateObj.square || rotateObj.landscape || rotateObj.portrait || '')
     }
 
     // Ensure currentColor is visible in preview

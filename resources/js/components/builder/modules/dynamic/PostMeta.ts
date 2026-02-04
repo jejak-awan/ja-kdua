@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '@/types/builder';
+import type { ModuleDefinition, SettingDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -78,7 +78,7 @@ const PostMetaModule: ModuleDefinition = {
             {
                 id: 'typography',
                 label: 'Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: f.name,
                     label: f.label
@@ -87,7 +87,7 @@ const PostMetaModule: ModuleDefinition = {
             {
                 id: 'linkTypography',
                 label: 'Link Typography',
-                fields: ((typographySettings.fields as any[])).map(f => ({
+                fields: (typographySettings.fields as SettingDefinition[]).map(f => ({
                     ...f,
                     name: `link_${f.name}`,
                     label: `Link ${f.label}`

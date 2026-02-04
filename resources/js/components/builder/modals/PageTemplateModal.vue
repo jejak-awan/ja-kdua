@@ -48,6 +48,8 @@ import LayoutTemplate from 'lucide-vue-next/dist/esm/icons/layout-template.js';
 import AlertTriangle from 'lucide-vue-next/dist/esm/icons/triangle-alert.js';
 import type { BuilderInstance, BlockInstance } from '@/types/builder';
 
+import type { PageTemplate } from '@/components/builder/templates/PageTemplates.js';
+
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'inserted'): void;
@@ -59,7 +61,7 @@ const { t } = useI18n();
 const templates = computed(() => pageTemplates);
 
 // Insert a template into the builder (REPLACES CONTENT)
-const insertTemplate = async (template: any) => {
+const insertTemplate = async (template: PageTemplate) => {
   if (!builder || !template.factory) return;
   
   const confirmed = await builder.confirm({

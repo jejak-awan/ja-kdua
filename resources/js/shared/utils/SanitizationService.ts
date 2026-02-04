@@ -38,16 +38,16 @@ const SanitizationService = {
      * @param htmlFields - Keys that should be treated as HTML and sanitized
      * @returns Sanitized object
      */
-    sanitizeObject(obj: any, htmlFields: string[] = ['content', 'text', 'html', 'body', 'caption']): any {
+    sanitizeObject(obj: unknown, htmlFields: string[] = ['content', 'text', 'html', 'body', 'caption']): unknown {
         if (!obj || typeof obj !== 'object') return obj
 
         if (Array.isArray(obj)) {
             return obj.map(item => this.sanitizeObject(item, htmlFields))
         }
 
-        const newObj: Record<string, any> = {}
+        const newObj: Record<string, unknown> = {}
 
-        for (const [key, value] of Object.entries(obj)) {
+        for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
             if (typeof value === 'string' && htmlFields.includes(key)) {
                 newObj[key] = this.sanitize(value)
             } else if (typeof value === 'object' && value !== null) {

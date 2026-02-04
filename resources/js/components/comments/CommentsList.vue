@@ -128,7 +128,7 @@ const props = defineProps<{
     contentId: number | string;
 }>();
 
-const { t } = useI18n();
+const { t: _t } = useI18n();
 const comments = ref<Comment[]>([]);
 const loading = ref(true);
 const activeReplyId = ref<number | string | null>(null);
@@ -149,7 +149,7 @@ const fetchComments = async () => {
         const response = await api.get(`/cms/contents/${props.contentId}/comments`);
         const data = response.data?.data || response.data;
         comments.value = Array.isArray(data) ? data : [];
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Error fetching comments:', error);
     } finally {
         loading.value = false;

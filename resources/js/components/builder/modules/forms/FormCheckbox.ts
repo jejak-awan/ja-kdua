@@ -1,6 +1,5 @@
 import type { ModuleDefinition } from '@/types/builder';
 import {
-    backgroundSettings,
     spacingSettings,
     borderSettings,
     boxShadowSettings,

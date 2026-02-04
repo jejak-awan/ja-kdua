@@ -28,9 +28,11 @@ const badgeVariants = cva(
   }
 );
 
+import { type HTMLAttributes } from 'vue';
+
 interface Props {
   variant?: VariantProps<typeof badgeVariants>['variant'];
-  class?: any;
+  class?: HTMLAttributes['class'];
 }
 
 const props = defineProps<Props>();

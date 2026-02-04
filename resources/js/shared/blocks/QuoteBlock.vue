@@ -4,8 +4,8 @@
     :mode="mode"
     :settings="settings"
     class="quote-block-wrapper transition-colors duration-300"
-    :id="settings.html_id"
-    :aria-label="settings.aria_label || 'Quote'"
+    :id="(settings.html_id as string)"
+    :aria-label="(settings.aria_label as string) || 'Quote'"
   >
     <Card 
         class="quote-container relative overflow-hidden bg-white dark:bg-slate-900 border-none shadow-2xl rounded-[3rem] p-10 md:p-20 group transition-colors duration-700 hover:-translate-y-3"
@@ -23,31 +23,31 @@
           
           <div 
             class="quote-content font-black italic tracking-tight leading-tight text-slate-900 dark:text-white mb-12 transition-colors duration-500 group-hover:text-primary decoration-primary/20 decoration-8 underline-offset-8" 
-            :style="contentStyles"
+            :style="(contentStyles as any)"
             :contenteditable="mode === 'edit'"
-            @blur="(e: any) => updateField('content', (e.target as HTMLElement).innerText)"
-            v-text="getVal(settings, 'content', device) || 'Your voice, amplified with style and precision through our premium design system.'"
+            @blur="(e: FocusEvent) => updateField('content', (e.target as HTMLElement).innerText)"
+            v-text="getVal<string>(settings, 'content', device) || 'Your voice, amplified with style and precision through our premium design system.'"
           ></div>
           
           <footer v-if="hasAuthor" class="quote-footer flex items-center gap-8 mt-auto">
              <div class="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-primary font-black text-2xl uppercase shadow-sm border border-slate-100 dark:border-slate-700 transition-transform group-hover:rotate-6">
-                {{ (getVal(settings, 'author', device) || 'A')[0] }}
+                {{ (getVal<string>(settings, 'author', device) || 'A')[0] }}
              </div>
              <cite class="quote-author-wrapper not-italic flex flex-col gap-1">
                <span 
                  class="quote-author font-black text-slate-900 dark:text-white text-xl tracking-tight leading-none" 
-                 :style="authorStyles"
+                 :style="(authorStyles as any)"
                  :contenteditable="mode === 'edit'"
-                 @blur="(e: any) => updateField('author', (e.target as HTMLElement).innerText)"
-                 v-text="getVal(settings, 'author', device) || 'Creative Director'"
+                 @blur="(e: FocusEvent) => updateField('author', (e.target as HTMLElement).innerText)"
+                 v-text="getVal<string>(settings, 'author', device) || 'Creative Director'"
                ></span>
                <span 
                  v-if="hasTitle" 
                  class="author-title text-xs font-bold text-slate-500 uppercase tracking-[0.2em] mt-1" 
-                 :style="authorTitleStyles"
+                 :style="(authorTitleStyles as any)"
                  :contenteditable="mode === 'edit'"
-                 @blur="(e: any) => updateField('authorTitle', (e.target as HTMLElement).innerText)"
-                 v-text="getVal(settings, 'authorTitle', device) || 'Industrial Design Studio'"
+                 @blur="(e: FocusEvent) => updateField('authorTitle', (e.target as HTMLElement).innerText)"
+                 v-text="getVal<string>(settings, 'authorTitle', device) || 'Industrial Design Studio'"
                ></span>
              </cite>
           </footer>
@@ -57,27 +57,28 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
-import QuoteIcon from 'lucide-vue-next/dist/esm/icons/quote.js';import BaseBlock from '../components/BaseBlock.vue'
+import { computed, inject, type CSSProperties } from 'vue'
+import QuoteIcon from 'lucide-vue-next/dist/esm/icons/quote.js';
+import BaseBlock from '../components/BaseBlock.vue'
 import { Card } from '../ui'
 import { 
   getVal, 
   getLayoutStyles, 
   getTypographyStyles 
 } from '../utils/styleUtils'
-import type { BlockInstance } from '@/types/builder'
+import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
 
 const props = defineProps<{
   module: BlockInstance
   mode: 'view' | 'edit'
 }>()
 
-const builder = inject<any>('builder', null)
+const builder = inject<BuilderInstance | null>('builder', null)
 const device = computed(() => builder?.device?.value || 'desktop')
-const settings = computed(() => (props.module.settings || {}) as Record<string, any>)
+const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const hasAuthor = computed(() => props.mode === 'edit' || !!getVal(settings.value, 'author', device.value))
-const hasTitle = computed(() => props.mode === 'edit' || !!getVal(settings.value, 'authorTitle', device.value))
+const hasAuthor = computed(() => props.mode === 'edit' || !!getVal<string>(settings.value, 'author', device.value))
+const hasTitle = computed(() => props.mode === 'edit' || !!getVal<string>(settings.value, 'authorTitle', device.value))
 
 const containerStyles = computed(() => {
     return getLayoutStyles(settings.value, device.value)
@@ -85,12 +86,13 @@ const containerStyles = computed(() => {
 
 const contentStyles = computed(() => {
     const defaultSize = device.value === 'mobile' ? '32px' : '48px'
-    const styles = getTypographyStyles(settings.value, 'quote_', device.value)
-    return {
-        fontSize: styles.fontSize || defaultSize,
-        textAlign: (getVal(settings.value, 'alignment', device.value) || 'left') as any,
-        ...styles
+    const typography = (getTypographyStyles(settings.value, 'quote_', device.value) || {}) as Record<string, string | number>
+    const styles: Record<string, string | number | undefined> = {
+        fontSize: (typography.fontSize as string) || defaultSize,
+        textAlign: (getVal<string>(settings.value, 'alignment', device.value) || 'left') as CSSProperties['textAlign'],
+        ...typography
     }
+    return styles
 })
 
 const authorStyles = computed(() => getTypographyStyles(settings.value, 'author_', device.value))

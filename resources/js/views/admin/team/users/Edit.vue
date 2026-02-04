@@ -39,7 +39,7 @@
                         </div>
                         <div>
                             <MediaPicker
-                                @selected="(media: any) => form.avatar = media.url"
+                                @selected="(media: { url: string }) => form.avatar = media.url"
                                 :label="$t('features.users.form.selectAvatar')"
                             ></MediaPicker>
                             <Button
@@ -337,7 +337,7 @@ const fetchRoles = async () => {
         const response = await api.get('/admin/ja/roles');
         const { data } = parseResponse(response);
         availableRoles.value = ensureArray(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch roles:', error);
     } finally {
         loadingRoles.value = false;
@@ -374,7 +374,7 @@ const fetchUser = async () => {
             password_confirmation: '',
         };
         initialForm.value = JSON.parse(JSON.stringify(form.value));
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch user:', error);
         toast.error.load(error);
         router.push({ name: 'users.index' });
@@ -390,7 +390,7 @@ const handleSubmit = async () => {
         avatar: avatarUrl.value || null
     };
 
-    if (!validateWithZod(dataToValidate as any)) {
+    if (!validateWithZod(dataToValidate)) {
         return;
     }
 
@@ -403,7 +403,7 @@ const handleSubmit = async () => {
     clearErrors();
 
     try {
-        const payload: any = { 
+        const payload: Record<string, unknown> = { 
             ...dataToValidate
         };
         if (!payload.password) delete payload.password;
@@ -419,9 +419,10 @@ const handleSubmit = async () => {
         toast.success.update('User');
         initialForm.value = JSON.parse(JSON.stringify(form.value));
         router.push({ name: 'users.index' });
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            setErrors(error.response.data.errors || {});
+    } catch (error: unknown) {
+        const err = error as { response?: { status?: number; data?: { errors?: Record<string, string[]> } } };
+        if (err.response?.status === 422) {
+            setErrors(err.response.data?.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

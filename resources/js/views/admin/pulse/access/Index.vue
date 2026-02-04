@@ -248,8 +248,8 @@ const fetchHistory = async (page: number = 1) : Promise<void> => {
             totalRecords.value = data.length;
         }
         history.value = data;
-    } catch (error: any) {
-        logger.error('Failed to fetch login history:', error.message);
+    } catch (error: unknown) {
+        logger.error('Failed to fetch login history:', (error as Error).message);
     } finally {
         loading.value = false;
     }
@@ -259,7 +259,7 @@ const fetchStatistics = async () : Promise<void> => {
     try {
         const response = await api.get('/admin/ja/access-journal/statistics');
         statistics.value = response.data?.data || response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch statistics:', error);
     }
 };
@@ -269,7 +269,7 @@ const fetchUsers = async () : Promise<void> => {
         const response = await api.get('/admin/ja/users');
         const data = response.data?.data?.data || response.data?.data || [];
         users.value = Array.isArray(data) ? data : [];
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Failed to fetch users:', error);
         users.value = [];
     }
@@ -290,8 +290,8 @@ const clearLogs = async () : Promise<void> => {
         await fetchHistory();
         await fetchStatistics();
         toast.success.action(t('features.system.logs.messages.cleared') || 'Logs cleared successfully');
-    } catch (error: any) {
-        logger.error('Failed to clear logs:', error.message);
+    } catch (error: unknown) {
+        logger.error('Failed to clear logs:', (error as Error).message);
         toast.error.fromResponse(error);
     }
 };
@@ -318,8 +318,8 @@ const exportHistory = async () : Promise<void> => {
         link.remove();
         window.URL.revokeObjectURL(url);
         toast.success.action(t('features.analytics.export.success') || 'Export started');
-    } catch (error: any) {
-        logger.error('Failed to export:', error.message);
+    } catch (error: unknown) {
+        logger.error('Failed to export:', (error as Error).message);
         toast.error.fromResponse(error);
     } finally {
         exporting.value = false;

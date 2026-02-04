@@ -442,10 +442,11 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { debounce } from '@/utils/debounce';
 
+import axios from 'axios';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
@@ -705,7 +706,7 @@ async function fetchTasks(page = 1) : Promise<void> {
     }
     
     selectedTasks.value = [];
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to fetch tasks:', error);
     toast.error.fromResponse(error);
   } finally {
@@ -722,7 +723,7 @@ async function fetchAllowedCommands() : Promise<void> {
     } else {
         allowedCommands.value = response.data.data;
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to fetch allowed commands:', error);
   }
 }
@@ -779,7 +780,7 @@ const handleBulkAction = async (action: string) => {
             selectedTasks.value = [];
             bulkActionSelection.value = '';
             fetchTasks(pagination.value.current_page);
-        } catch (error: any) {
+        } catch (error: unknown) {
             logger.error('Bulk action failed:', error);
             toast.error.fromResponse(error);
         }
@@ -835,11 +836,10 @@ async function saveTask() {
     
     dialogOpen.value = false;
     await fetchTasks(pagination.value.current_page);
-  } catch (error: any) {
-    if (error && typeof error === 'object' && 'response' in error) {
-      const err = error as { response?: { status: number; data?: { errors?: Record<string, string | string[]> } } };
-      if (err.response?.status === 422) {
-        errors.value = err.response.data?.errors || {};
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 422) {
+        errors.value = (error.response.data as { errors?: Record<string, string | string[]> })?.errors || {};
       } else {
         toast.error.fromResponse(error);
       }
@@ -871,7 +871,7 @@ async function runTask(task: ScheduledTask) {
     outputDialogOpen.value = true;
     
     await fetchTasks(pagination.value.current_page);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to run task:', error);
     toast.error.fromResponse(error);
   } finally {
@@ -894,7 +894,7 @@ async function toggleActive(task: ScheduledTask) : Promise<void> {
     }
     
     await fetchTasks(pagination.value.current_page);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to toggle task:', error);
     toast.error.fromResponse(error);
   }
@@ -919,7 +919,7 @@ async function confirmDelete(task: ScheduledTask) {
     await api.delete(`/admin/ja/scheduled-tasks/${task.id}`);
     toast.success.delete();
     await fetchTasks(pagination.value.current_page);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to delete task:', error);
     toast.error.fromResponse(error);
   }
@@ -932,7 +932,7 @@ function getStatusVariant(status: string | null) {
     failed: 'destructive',
     pending: 'secondary'
   };
-  return (variants[status || ''] || 'secondary') as any;
+  return (variants[status || ''] || 'secondary') as "default" | "destructive" | "secondary" | "success" | "outline" | null | undefined;
 }
 
 function formatDate(dateString: string) {
@@ -964,12 +964,11 @@ async function runAdhocCommand() {
          // handle error visual if needed, but text is likely enough
     }
 
-  } catch (error: any) {
-    if (error && typeof error === 'object' && 'response' in error) {
-        const err = error as { response?: { data?: { message?: string } } };
-        adhocOutput.value = err.response?.data?.message || (error as any).message;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+        adhocOutput.value = (error.response?.data as { message?: string })?.message || error.message;
     } else {
-        adhocOutput.value = (error as any).message;
+        adhocOutput.value = (error as Error).message;
     }
     logger.error('Failed to execute command:', error);
   } finally {

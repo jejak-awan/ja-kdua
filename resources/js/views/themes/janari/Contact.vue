@@ -83,18 +83,14 @@ import { Card } from '@/components/ui'
 import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
 import Phone from 'lucide-vue-next/dist/esm/icons/phone.js';
 import MapPin from 'lucide-vue-next/dist/esm/icons/map-pin.js';
-import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';interface ContactField {
-    label: string;
-    type: string;
-    required: boolean;
-    width: string;
-}
+import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 
 import type { Content } from '@/types/cms'
+import type { BlockInstance } from '@/types/builder'
 
 interface PageData extends Content {
     title: string;
-    blocks?: any[];
+    blocks?: BlockInstance[];
 }
 
 const loading = ref(true)
