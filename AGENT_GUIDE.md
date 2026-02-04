@@ -27,12 +27,30 @@ This document outlines the mandatory standards and architecture that must be fol
 - **Validation**: Always use `$request->validate([...])` or FormRequests.
 - **Storage**: Never store files in `public/` directly. Use the relevant `disk` and symbolic links.
 
-## 6. Pre-Commit Checklist (Mandatory)
+## 6. Frontend Standards (Vue/TS)
+- **Component Style**: Use `<script setup lang="ts">`. Avoid Option API or class-based components.
+- **TypeScript**: 
+    - Define interfaces for all API responses in `resources/js/types/`.
+    - Minimize `as any`. Use proper casting or generics if a library type is missing.
+    - Export shared types from `resources/js/types/index.ts`.
+- **Imports**:
+    - Use `@/` alias for all internal imports.
+    - **Lucide Icons**: Import icons specifically from the ESM path for tree-shaking:
+      `import House from 'lucide-vue-next/dist/esm/icons/house.js';`
+- **i18n**: Never hardcode user-facing strings. Use `$t()` or `t()` from `vue-i18n`.
+- **State**: Use Pinia for global state. Use `pinia-plugin-persistedstate` only for Auth or critical UI preferences (not for large datasets).
+- **API**: Use the standard `@/services/api` instance for all requests to ensure circuit breaking and auth headers are applied.
+
+## 7. Pre-Commit Checklist (Mandatory)
 Before pushing or marking a task as complete:
-1. `./vendor/bin/phpstan` (Must be 0 errors)
-2. `./vendor/bin/pint` (Must be formatted)
-3. `php artisan test` (Must pass all relevant tests)
-4. Check `storage/logs/worker.log` to ensure background workers didn't crash.
+1. **Backend**:
+    - `./vendor/bin/phpstan` (0 errors)
+    - `./vendor/bin/pint` (Clean)
+    - `php artisan test` (Pass)
+2. **Frontend**:
+    - `npm run type-check` (0 errors)
+    - `npm run lint` (0 errors)
+3. **Logs**: Check `storage/logs/` for any new errors or worker crashes.
 
 ---
 *Follow these rules to ensure high-quality, maintainable, and secure contributions to JA-CMS.*
