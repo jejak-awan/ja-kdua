@@ -210,23 +210,7 @@ class FoundationSeeder extends Seeder
 
     protected function seedScheduledTasks(): void
     {
-        $tasks = [
-            ['name' => 'Run Daily Backup', 'command' => 'cms:backup', 'schedule' => '0 1 * * *', 'is_active' => true],
-            ['name' => 'Cleanup Activity Logs', 'command' => 'activitylog:clean', 'schedule' => '0 0 * * 0', 'is_active' => true],
-            ['name' => 'Prune Failed Jobs', 'command' => 'queue:prune-failed', 'schedule' => '0 2 * * *', 'is_active' => true],
-            ['name' => 'Cleanup Temp Files', 'command' => 'media:cleanup-temp', 'schedule' => '0 3 * * *', 'is_active' => true],
-            ['name' => 'Cleanup System Logs', 'command' => 'logs:cleanup', 'schedule' => '0 0 * * 1', 'is_active' => true],
-            ['name' => 'Cleanup Analytics', 'command' => 'analytics:cleanup', 'schedule' => '0 0 1 * *', 'is_active' => true],
-            ['name' => 'Update Cloudflare IPs', 'command' => 'security:update-cf-ips', 'schedule' => '0 4 * * *', 'is_active' => true],
-            ['name' => 'Prune Revoked Tokens', 'command' => 'sanctum:prune-tokens', 'schedule' => '0 5 * * *', 'is_active' => true],
-            ['name' => 'Cleanup Slow Query Logs', 'command' => 'logs:cleanup-slow-queries', 'schedule' => '0 0 * * 2', 'is_active' => true],
-            ['name' => 'Cleanup CSP Reports', 'command' => 'logs:cleanup-csp-reports', 'schedule' => '0 0 * * 3', 'is_active' => true],
-            ['name' => 'System Optimization', 'command' => 'optimize', 'schedule' => '0 6 * * *', 'is_active' => true],
-        ];
-
-        foreach ($tasks as $task) {
-            ScheduledTask::updateOrCreate(['command' => $task['command']], $task);
-        }
+        $this->call(ScheduledTaskSeeder::class);
     }
 
     protected function seedRedisSettings(): void

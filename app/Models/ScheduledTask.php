@@ -25,6 +25,7 @@ class ScheduledTask extends Model
         'options' => 'array',
         'is_active' => 'boolean',
         'last_run_at' => 'datetime',
+        'next_run_at' => 'datetime',
     ];
 
     /**
@@ -40,7 +41,7 @@ class ScheduledTask extends Model
         // Maintenance
         'logs:cleanup',
         'analytics:cleanup',
-        'media:thumbnails',
+        'media:generate-thumbnails',
         'media:cleanup-temp',
 
         // Health & diagnostics
@@ -74,8 +75,7 @@ class ScheduledTask extends Model
         // System Optimization
         'optimize',
         'optimize:clear',
-        'activitylog:clean',
-        'sanctum:prune-tokens',
+        'sanctum:prune-expired',
     ];
 
     /**

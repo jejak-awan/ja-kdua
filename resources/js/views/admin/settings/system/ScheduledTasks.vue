@@ -273,6 +273,7 @@
             :per-page="pagination.per_page"
             :current-page="pagination.current_page"
             @page-change="changePage"
+            @update:per-page="handlePerPageChange"
         />
     </div>
 
@@ -684,7 +685,7 @@ async function fetchTasks(page = 1) : Promise<void> {
     const params = {
         page,
         search: search.value,
-        limit: 10
+        per_page: pagination.value.per_page
     }
     const response = await api.get('/admin/ja/scheduled-tasks', { params });
     
@@ -698,9 +699,20 @@ async function fetchTasks(page = 1) : Promise<void> {
             total: response.data.meta.total
         };
     } else if (response.data?.data) {
-        // If API returns plain list, handle client-side if needed or just display all
-        tasks.value = response.data.data;
-        pagination.value.total = tasks.value.length;
+        // BaseApiController paginated response structure keys
+        if (response.data.data.current_page !== undefined) {
+             tasks.value = response.data.data.data;
+             pagination.value = {
+                current_page: response.data.data.current_page,
+                last_page: response.data.data.last_page,
+                per_page: response.data.data.per_page,
+                total: response.data.data.total
+             };
+        } else {
+             // Plain array fallback
+             tasks.value = response.data.data;
+             pagination.value.total = tasks.value.length;
+        }
     } else {
         tasks.value = [];
     }
@@ -734,6 +746,11 @@ const debouncedSearch = debounce(() => {
 
 const changePage = (page: number) => {
     fetchTasks(page);
+};
+
+const handlePerPageChange = (perPage: number) => {
+    pagination.value.per_page = perPage;
+    // fetchTasks will be called by the page-change event emitted by Pagination component immediately after
 };
 
 // Selection Logic

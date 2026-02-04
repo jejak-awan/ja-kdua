@@ -6,17 +6,19 @@ use App\Models\ScheduledTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\Console\Exception\CommandNotFoundException;
 
 class ScheduledTaskController extends BaseApiController
 {
     /**
      * List all scheduled tasks
      */
-    public function index(): \Illuminate\Http\JsonResponse
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        $tasks = ScheduledTask::orderBy('name')->get();
+        $perPage = (int) $request->input('per_page', 10);
+        $tasks = ScheduledTask::orderBy('name')->paginate($perPage);
 
-        return $this->success($tasks, 'Scheduled tasks retrieved successfully');
+        return $this->paginated($tasks, 'Scheduled tasks retrieved successfully');
     }
 
     public function allowedCommands(): \Illuminate\Http\JsonResponse
@@ -176,6 +178,10 @@ class ScheduledTaskController extends BaseApiController
             $exitCode = Artisan::call($task->command);
             $output = Artisan::output();
 
+            if (empty(trim($output)) && $exitCode === 0) {
+                $output = 'Task executed successfully (No output generated).';
+            }
+
             $status = $exitCode === 0 ? 'completed' : 'failed';
 
             $task->update([
@@ -195,6 +201,23 @@ class ScheduledTaskController extends BaseApiController
                 'exit_code' => $exitCode,
             ], 'Task executed successfully');
 
+        } catch (CommandNotFoundException $e) {
+            $task->update([
+                'status' => 'failed',
+                'output' => 'Command not found on server.',
+            ]);
+
+            Log::error('Scheduled task command not found', [
+                'task_id' => $task->id,
+                'command' => $task->command,
+            ]);
+
+            return $this->error(
+                'Command not found. The required package might be missing.',
+                422,
+                [],
+                'COMMAND_NOT_FOUND'
+            );
         } catch (\Throwable $e) {
             $task->update([
                 'status' => 'failed',

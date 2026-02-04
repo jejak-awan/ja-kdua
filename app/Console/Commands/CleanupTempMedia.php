@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
 class CleanupTempMedia extends Command
@@ -30,13 +29,14 @@ class CleanupTempMedia extends Command
         $hours = $this->option('hours');
         // Ensure hours is an integer
         $hours = is_numeric($hours) ? (int) $hours : 24;
-        
+
         $this->info("Cleaning up temporary files older than {$hours} hours...");
 
         $tempPath = storage_path('app/temp');
 
         if (! File::isDirectory($tempPath)) {
             $this->info('Temp directory does not exist. Nothing to cleanup.');
+
             return 0;
         }
 
@@ -48,7 +48,7 @@ class CleanupTempMedia extends Command
             $lastModified = $file->getMTime();
             // Convert timestamp to Carbon
             $lastModifiedDate = \Illuminate\Support\Carbon::createFromTimestamp($lastModified);
-            
+
             if ($lastModifiedDate->diffInHours($now) >= $hours) {
                 File::delete($file->getRealPath());
                 $count++;
