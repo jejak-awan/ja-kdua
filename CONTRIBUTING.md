@@ -176,6 +176,7 @@ public function createContent(array $data): Content
 
 - Open an issue for questions
 - Check existing documentation
+- Read the [Detailed Agent & Developer Guidelines](docs/guidelines/AGENT_GUIDE.md)
 - Ask in discussions
 
 Thank you for contributing! 🎉
