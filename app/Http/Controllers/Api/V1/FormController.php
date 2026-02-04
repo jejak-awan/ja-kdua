@@ -7,13 +7,23 @@ use Illuminate\Http\Request;
 
 class FormController extends BaseApiController
 {
-    public function index(Request $request)
+    /**
+     * List forms.
+     */
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         $query = Form::query();
 
         // Multi-tenancy scoping
-        if (! $request->user()->can('manage forms')) {
-            $query->where('author_id', auth()->id());
+        if (! $user->can('manage forms')) {
+            $userId = (int) $user->id;
+            $query->where('author_id', $userId);
         }
 
         if ($request->has('is_active')) {
@@ -22,7 +32,7 @@ class FormController extends BaseApiController
 
         // Soft deletes filter
         if ($request->has('trashed')) {
-            $trashed = $request->trashed;
+            $trashed = $request->input('trashed');
             if ($trashed === 'only') {
                 $query->onlyTrashed();
             } elseif ($trashed === 'with') {
@@ -35,8 +45,17 @@ class FormController extends BaseApiController
         return $this->success($forms, 'Forms retrieved successfully');
     }
 
-    public function store(Request $request)
+    /**
+     * Create new form.
+     */
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'required|string|unique:forms,slug',
@@ -48,7 +67,7 @@ class FormController extends BaseApiController
             'is_active' => 'boolean',
         ]);
 
-        $validated['author_id'] = auth()->id();
+        $validated['author_id'] = (int) $user->id;
 
         /** @var Form $form */
         $form = Form::create($validated);
@@ -56,18 +75,36 @@ class FormController extends BaseApiController
         return $this->success($form, 'Form created successfully', 201);
     }
 
-    public function show(Request $request, Form $form)
+    /**
+     * Display the specified form.
+     */
+    public function show(Request $request, Form $form): \Illuminate\Http\JsonResponse
     {
-        if (! $request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
+        if (! $user->can('manage forms') && $form->author_id !== $user->id) {
             return $this->forbidden('You do not have permission to view this form');
         }
 
         return $this->success($form, 'Form retrieved successfully');
     }
 
-    public function update(Request $request, Form $form)
+    /**
+     * Update the specified form.
+     */
+    public function update(Request $request, Form $form): \Illuminate\Http\JsonResponse
     {
-        if (! $request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
+        if (! $user->can('manage forms') && $form->author_id !== $user->id) {
             return $this->forbidden('You do not have permission to update this form');
         }
 
@@ -87,9 +124,18 @@ class FormController extends BaseApiController
         return $this->success($form, 'Form updated successfully');
     }
 
-    public function destroy(Request $request, Form $form)
+    /**
+     * Remove the specified form.
+     */
+    public function destroy(Request $request, Form $form): \Illuminate\Http\JsonResponse
     {
-        if (! $request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
+        if (! $user->can('manage forms') && $form->author_id !== $user->id) {
             return $this->forbidden('You do not have permission to delete this form');
         }
 
@@ -98,11 +144,22 @@ class FormController extends BaseApiController
         return $this->success(null, 'Form deleted successfully');
     }
 
-    public function restore($id, Request $request)
+    /**
+     * Restore trashed form.
+     *
+     * @param  int|string  $id
+     */
+    public function restore(Request $request, $id): \Illuminate\Http\JsonResponse
     {
-        $form = Form::withTrashed()->findOrFail($id);
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
 
-        if (! $request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+        $form = Form::withTrashed()->findOrFail($id);
+        /** @var Form $form */
+        if (! $user->can('manage forms') && $form->author_id !== $user->id) {
             return $this->forbidden('You do not have permission to restore this form');
         }
 
@@ -115,11 +172,22 @@ class FormController extends BaseApiController
         return $this->success(null, 'Form restored successfully');
     }
 
-    public function forceDelete($id, Request $request)
+    /**
+     * Permanently delete form.
+     *
+     * @param  int|string  $id
+     */
+    public function forceDelete(Request $request, $id): \Illuminate\Http\JsonResponse
     {
-        $form = Form::withTrashed()->findOrFail($id);
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
 
-        if (! $request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+        $form = Form::withTrashed()->findOrFail($id);
+        /** @var Form $form */
+        if (! $user->can('manage forms') && $form->author_id !== $user->id) {
             return $this->forbidden('You do not have permission to delete this form');
         }
 
@@ -133,13 +201,17 @@ class FormController extends BaseApiController
         return $this->success(null, 'Form permanently deleted');
     }
 
-    public function track(Request $request, Form $form)
+    /**
+     * Track form event.
+     */
+    public function track(Request $request, Form $form): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'event' => 'required|in:view,start',
         ]);
 
-        $event = $request->event;
+        $eventRaw = $request->input('event');
+        $event = is_string($eventRaw) ? $eventRaw : '';
 
         if ($event === 'view') {
             $form->incrementViewCount();
@@ -150,7 +222,10 @@ class FormController extends BaseApiController
         return $this->success(null, 'Event tracked successfully');
     }
 
-    public function submit(Request $request, Form $form)
+    /**
+     * Handle form submission.
+     */
+    public function submit(Request $request, Form $form): \Illuminate\Http\JsonResponse
     {
         if (! $form->is_active) {
             return $this->validationError(['form' => ['Form is not active']], 'Form is not active');
@@ -158,8 +233,9 @@ class FormController extends BaseApiController
 
         // Build validation rules from blocks
         $rules = [];
-        if (! empty($form->blocks)) {
-            $rules = $this->extractRulesFromBlocks($form->blocks);
+        $blocks = (array) $form->blocks;
+        if (! empty($blocks)) {
+            $rules = $this->extractRulesFromBlocks($blocks);
         }
 
         // Check for captcha if enabled for contact forms
@@ -170,66 +246,89 @@ class FormController extends BaseApiController
             ]);
 
             $captchaService = new \App\Services\CaptchaService;
-            if (! $captchaService->verify($request->captcha_token, $request->captcha_answer)) {
+            $captchaTokenRaw = $request->input('captcha_token');
+            $captchaAnswerRaw = $request->input('captcha_answer');
+            $captchaToken = is_string($captchaTokenRaw) ? $captchaTokenRaw : '';
+            $captchaAnswer = is_string($captchaAnswerRaw) ? $captchaAnswerRaw : '';
+
+            if (! $captchaService->verify($captchaToken, $captchaAnswer)) {
                 return $this->error('Invalid captcha', 422);
             }
         }
 
         $validated = $request->validate($rules);
 
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+
         // Create submission
-        $submission = $form->submissions()->create([
-            'user_id' => $request->user()?->id,
+        $submissionData = [
+            'user_id' => $user?->id,
             'data' => $validated,
             'ip_address' => \App\Helpers\IpHelper::getClientIp($request),
-            'user_agent' => $request->userAgent(),
-        ]);
+            'user_agent' => is_string($request->userAgent()) ? $request->userAgent() : '',
+        ];
 
         /** @var \App\Models\FormSubmission $submission */
+        $submission = $form->submissions()->create($submissionData);
 
         // Increment submission count
         $form->incrementSubmissionCount();
 
         // Send email notification if configured
-        if (isset($form->settings['email_notifications']) && $form->settings['email_notifications']) {
+        $settings = is_array($form->settings) ? $form->settings : [];
+        if (isset($settings['email_notifications']) && $settings['email_notifications']) {
             $this->sendFormNotification($form, $submission);
         }
 
         // Trigger webhook
         \App\Models\Webhook::triggerForEvent('form.submitted', [
             'form_id' => $form->id,
-            'form_name' => $form->name,
+            'form_name' => (string) $form->name,
             'submission_id' => $submission->id,
             'data' => $validated,
         ]);
 
         return $this->success([
             'submission_id' => $submission->id,
-            'redirect_url' => $form->redirect_url,
-        ], $form->success_message ?? 'Form submitted successfully', 201);
+            'redirect_url' => (string) $form->redirect_url,
+        ], is_string($form->success_message) ? $form->success_message : 'Form submitted successfully', 201);
     }
 
-    protected function sendFormNotification(Form $form, $submission)
+    /**
+     * Send form submission notification.
+     */
+    protected function sendFormNotification(Form $form, \App\Models\FormSubmission $submission): void
     {
         // Email notification logic
         // This can be enhanced with actual email sending
         \Log::info('Form submission notification', [
-            'form' => $form->name,
+            'form' => (string) $form->name,
             'submission_id' => $submission->id,
         ]);
     }
 
-    protected function extractRulesFromBlocks($blocks)
+    /**
+     * Extract validation rules from form blocks.
+     *
+     * @param  array<mixed, mixed>  $blocks
+     * @return array<string, array<int, string>>
+     */
+    protected function extractRulesFromBlocks(array $blocks): array
     {
         $rules = [];
         $formBlocks = ['form_input', 'form_textarea', 'form_select', 'form_checkbox', 'form_radio'];
 
         foreach ($blocks as $block) {
-            $type = $block['type'] ?? '';
-            $settings = $block['settings'] ?? [];
+            if (! is_array($block)) {
+                continue;
+            }
+            $type = is_string($block['type'] ?? null) ? $block['type'] : '';
+            $settingsRaw = $block['settings'] ?? null;
+            $settings = is_array($settingsRaw) ? $settingsRaw : [];
 
             if (in_array($type, $formBlocks)) {
-                $fieldId = $settings['field_id'] ?? null;
+                $fieldId = is_string($settings['field_id'] ?? null) ? $settings['field_id'] : null;
                 if ($fieldId) {
                     $fieldRules = [];
 
@@ -242,7 +341,7 @@ class FormController extends BaseApiController
 
                     // Type specific rules
                     if ($type === 'form_input') {
-                        $inputType = $settings['type'] ?? 'text';
+                        $inputType = is_string($settings['type'] ?? null) ? $settings['type'] : 'text';
                         if ($inputType === 'email') {
                             $fieldRules[] = 'email';
                         }
@@ -260,42 +359,49 @@ class FormController extends BaseApiController
             }
 
             // Recurse into children
-            if (isset($block['children']) && is_array($block['children'])) {
-                $rules = array_merge($rules, $this->extractRulesFromBlocks($block['children']));
+            $children = $block['children'] ?? null;
+            if (is_array($children)) {
+                $rules = array_merge($rules, $this->extractRulesFromBlocks($children));
             }
         }
 
         return $rules;
     }
 
-    public function duplicate(Request $request, Form $form)
+    /**
+     * Duplicate the specified form.
+     */
+    public function duplicate(Request $request, Form $form): \Illuminate\Http\JsonResponse
     {
-        if (! $request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
+        if (! $user->can('manage forms') && $form->author_id !== $user->id) {
             return $this->forbidden('You do not have permission to duplicate this form');
         }
 
-        $withSubmissions = $request->boolean('with_submissions');
-
-        $newForm = $form->replicate(['slug', 'name', 'submission_count', 'view_count', 'start_count']);
-        $newForm->name = $form->name.' (Copy)';
-        $newForm->slug = $form->slug.'-copy-'.time();
         $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:forms,slug',
             'copy_submissions' => 'boolean',
         ]);
 
-        $title = $request->input('title');
-        $slug = $request->input('slug');
+        $titleRaw = $request->input('title');
+        $title = is_string($titleRaw) ? $titleRaw : (string) $form->name.' (Copy)';
+        $slugRaw = $request->input('slug');
+        $slug = is_string($slugRaw) ? $slugRaw : (string) $form->slug.'-copy';
         $copySubmissions = $request->boolean('copy_submissions');
 
         $except = ['slug', 'name', 'submission_count', 'view_count', 'start_count'];
         /** @var Form $replicated */
         $replicated = $form->replicate($except);
-        $replicated->name = $title; // Use 'name' for the form's display name
+        $replicated->name = $title;
         $replicated->slug = $slug;
         $replicated->is_active = false;
-        $replicated->author_id = $request->user()->id;
+        $replicated->author_id = (int) $user->id;
         $replicated->submission_count = 0;
         $replicated->view_count = 0;
         $replicated->start_count = 0;
@@ -304,11 +410,10 @@ class FormController extends BaseApiController
         if ($copySubmissions) {
             // Bulk insert for performance
             $submissionsData = $form->submissions()->get()->map(function (\App\Models\FormSubmission $submission) use ($replicated) {
-                /** @var Form $replicated */
                 return [
                     'form_id' => $replicated->id,
                     'user_id' => $submission->user_id,
-                    'data' => $submission->data,
+                    'data' => json_encode($submission->data),
                     'ip_address' => $submission->ip_address,
                     'user_agent' => $submission->user_agent,
                     'created_at' => now()->toDateTimeString(),
@@ -326,24 +431,34 @@ class FormController extends BaseApiController
         return $this->success($replicated, 'Form duplicated successfully', 201);
     }
 
-    public function bulkAction(Request $request)
+    /**
+     * Bulk actions for forms.
+     */
+    public function bulkAction(Request $request): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:forms,id',
-
             'action' => 'required|in:delete,restore,force_delete',
         ]);
 
-        $ids = $request->ids;
-        $action = $request->action;
+        $idsRaw = $request->input('ids');
+        $ids = is_array($idsRaw) ? $idsRaw : [];
+        $actionRaw = $request->input('action');
+        $action = is_string($actionRaw) ? $actionRaw : '';
 
         try {
             if ($action === 'delete') {
                 $query = Form::whereIn('id', $ids);
 
-                if (! $request->user()->can('manage forms')) {
-                    $query->where('author_id', $request->user()->id);
+                if (! $user->can('manage forms')) {
+                    $query->where('author_id', $user->id);
                 }
 
                 $query->delete();
@@ -351,16 +466,16 @@ class FormController extends BaseApiController
                 return $this->success(null, 'Selected forms deleted successfully');
             } elseif ($action === 'restore') {
                 $query = Form::withTrashed()->whereIn('id', $ids);
-                if (! $request->user()->can('manage forms')) {
-                    $query->where('author_id', $request->user()->id);
+                if (! $user->can('manage forms')) {
+                    $query->where('author_id', $user->id);
                 }
                 $query->restore();
 
                 return $this->success(null, 'Selected forms restored successfully');
             } elseif ($action === 'force_delete') {
                 $query = Form::withTrashed()->whereIn('id', $ids);
-                if (! $request->user()->can('manage forms')) {
-                    $query->where('author_id', $request->user()->id);
+                if (! $user->can('manage forms')) {
+                    $query->where('author_id', $user->id);
                 }
 
                 $forms = $query->get();

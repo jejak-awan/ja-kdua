@@ -72,7 +72,7 @@ class SystemService
         }
 
         return [
-            'driver' => $driver,
+            'driver' => (string) $driver,
             'last_seen' => $lastSeen,
             'is_active' => $isActive,
             'status' => $isActive ? 'ok' : ($driver === 'sync' ? 'ok' : 'warning'),
@@ -145,6 +145,8 @@ class SystemService
 
     /**
      * Get default statistics on error
+     *
+     * @return array<string, mixed>
      */
     protected function getDefaultStatistics(): array
     {
@@ -299,7 +301,7 @@ class SystemService
             Log::debug('CPU usage error: '.$e->getMessage());
         }
 
-        return ['percent' => 0, 'load' => 0, 'cores' => 1, 'status' => 'unknown'];
+        return ['percent' => 0, 'load' => 0.0, 'cores' => 1, 'status' => 'unknown'];
     }
 
     /**
@@ -406,6 +408,8 @@ class SystemService
 
     /**
      * Check Redis connection
+     *
+     * @return array{status: string, message: string}
      */
     public function checkRedis(): array
     {
@@ -442,6 +446,7 @@ class SystemService
             if (is_dir($cachePath)) {
                 $size = 0;
                 $count = 0;
+                /** @var \SplFileInfo $file */
                 foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($cachePath)) as $file) {
                     if ($file->isFile()) {
                         $size += $file->getSize();
@@ -479,7 +484,7 @@ class SystemService
         $size = '0 B';
 
         // Check if driver is redis or redis_failover (starts with 'redis')
-        if (str_starts_with($driver, 'redis')) {
+        if (str_starts_with((string) $driver, 'redis')) {
             try {
                 $redis = \Illuminate\Support\Facades\Redis::connection();
                 $redis->ping();
@@ -509,7 +514,9 @@ class SystemService
             $enabled = true; // Assume active if config exists
             try {
                 if ($driver === 'database') {
-                    $keys = DB::table(config('cache.stores.database.table', 'cache'))->count();
+                    /** @var string $tableName */
+                    $tableName = config('cache.stores.database.table', 'cache');
+                    $keys = DB::table($tableName)->count();
                 }
             } catch (\Exception $e) {
                 $enabled = false;
@@ -519,7 +526,7 @@ class SystemService
         return [
             'status' => $enabled ? 'Active' : 'Inactive',
             'enabled' => $enabled,
-            'driver' => $driver,
+            'driver' => (string) $driver,
             'hits' => $hits,
             'misses' => $misses,
             'keys' => $keys,
@@ -529,19 +536,24 @@ class SystemService
 
     /**
      * Get database size information
+     *
+     * @return array{total_mb: float|int, formatted: string}
      */
     public function getDatabaseSize(): array
     {
         try {
             $database = DB::connection()->getDatabaseName();
+            /** @var array<int, \stdClass> $size */
             $size = DB::select('SELECT 
                 ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS size_mb
                 FROM information_schema.TABLES 
                 WHERE table_schema = ?', [$database]);
 
+            $sizeMb = $size[0]->size_mb ?? 0;
+
             return [
-                'total_mb' => $size[0]->size_mb ?? 0,
-                'formatted' => $this->formatBytes(($size[0]->size_mb ?? 0) * 1024 * 1024),
+                'total_mb' => $sizeMb,
+                'formatted' => $this->formatBytes($sizeMb * 1024 * 1024),
             ];
         } catch (\Exception $e) {
             return ['total_mb' => 0, 'formatted' => '0 B'];
@@ -550,11 +562,14 @@ class SystemService
 
     /**
      * Get table statistics
+     *
+     * @return array<int, array{name: string, size_mb: float|int, rows: int, formatted_size: string}>
      */
     public function getTableStatistics(): array
     {
         try {
             $database = DB::connection()->getDatabaseName();
+            /** @var array<int, \stdClass> $tables */
             $tables = DB::select('SELECT 
                 table_name,
                 ROUND((data_length + index_length) / 1024 / 1024, 2) AS size_mb,
@@ -580,7 +595,7 @@ class SystemService
     /**
      * Format bytes to human readable
      */
-    public function formatBytes($bytes, $precision = 2): string
+    public function formatBytes(int|float $bytes, int $precision = 2): string
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
         $bytes = max($bytes, 0);

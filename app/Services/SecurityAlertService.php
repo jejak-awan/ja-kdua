@@ -27,6 +27,7 @@ class SecurityAlertService
     public function getAlerts(): array
     {
         return Cache::remember('security_alerts', 60, function () {
+            /** @var array<int, array<string, mixed>> $alerts */
             $alerts = [];
             $since = Carbon::now()->subMinutes($this->checkWindowMinutes);
 
@@ -70,12 +71,18 @@ class SecurityAlertService
     /**
      * Check for failed login attempts
      */
+    /**
+     * Check for failed login attempts
+     *
+     * @return array<int, array<string, mixed>>
+     */
     protected function getFailedLoginAlerts(Carbon $since): array
     {
         $alerts = [];
 
         try {
             // Group failed logins by IP
+            /** @var \Illuminate\Database\Eloquent\Collection<int, SecurityLog> $failedByIp */
             $failedByIp = SecurityLog::where('created_at', '>=', $since)
                 ->where('event_type', 'login_failed')
                 ->selectRaw('ip_address, COUNT(*) as count')
@@ -84,14 +91,16 @@ class SecurityAlertService
                 ->get();
 
             foreach ($failedByIp as $record) {
+                $count = (int) $record->getAttribute('count');
+                $ipAddress = (string) $record->getAttribute('ip_address');
                 $alerts[] = [
-                    'id' => 'failed_login_'.md5($record->ip_address),
+                    'id' => 'failed_login_'.md5($ipAddress),
                     'type' => 'failed_login',
-                    'severity' => $record->count >= 10 ? 'critical' : 'warning',
+                    'severity' => $count >= 10 ? 'critical' : 'warning',
                     'title' => 'Multiple Failed Logins',
-                    'message' => "IP {$record->ip_address} has {$record->count} failed login attempts in the last hour",
-                    'ip_address' => $record->ip_address,
-                    'count' => $record->count,
+                    'message' => "IP {$ipAddress} has {$count} failed login attempts in the last hour",
+                    'ip_address' => $ipAddress,
+                    'count' => $count,
                     'timestamp' => now()->toISOString(),
                 ];
             }
@@ -105,11 +114,17 @@ class SecurityAlertService
     /**
      * Check for recently blocked IPs
      */
+    /**
+     * Check for recently blocked IPs
+     *
+     * @return array<int, array<string, mixed>>
+     */
     protected function getBlockedIpAlerts(Carbon $since): array
     {
         $alerts = [];
 
         try {
+            /** @var \Illuminate\Database\Eloquent\Collection<int, SecurityLog> $blockedIps */
             $blockedIps = SecurityLog::where('created_at', '>=', $since)
                 ->where('event_type', 'ip_blocked')
                 ->latest()
@@ -124,7 +139,7 @@ class SecurityAlertService
                     'title' => 'IP Blocked',
                     'message' => "IP {$log->ip_address} was blocked due to suspicious activity",
                     'ip_address' => $log->ip_address,
-                    'timestamp' => $log->created_at->toISOString(),
+                    'timestamp' => $log->created_at ? $log->created_at->toISOString() : now()->toISOString(),
                 ];
             }
         } catch (\Exception $e) {
@@ -137,12 +152,18 @@ class SecurityAlertService
     /**
      * Check for suspicious activity patterns
      */
+    /**
+     * Check for suspicious activity patterns
+     *
+     * @return array<int, array<string, mixed>>
+     */
     protected function getSuspiciousActivityAlerts(Carbon $since): array
     {
         $alerts = [];
 
         try {
             // Check for unusual login patterns (same user from multiple IPs)
+            /** @var \Illuminate\Database\Eloquent\Collection<int, LoginHistory> $multipleIpLogins */
             $multipleIpLogins = LoginHistory::where('created_at', '>=', $since)
                 ->where('status', 'success')
                 ->selectRaw('user_id, COUNT(DISTINCT ip_address) as ip_count')
@@ -152,21 +173,24 @@ class SecurityAlertService
                 ->get();
 
             foreach ($multipleIpLogins as $record) {
-                if ($record->user) {
+                $user = $record->user;
+                if ($user) {
+                    $ipCount = (int) $record->getAttribute('ip_count');
                     $alerts[] = [
                         'id' => 'multiple_ip_'.$record->user_id,
                         'type' => 'multiple_ip_login',
                         'severity' => 'info',
                         'title' => 'Multiple IP Login',
-                        'message' => "User {$record->user->name} logged in from {$record->ip_count} different IPs",
+                        'message' => "User {$user->name} logged in from {$ipCount} different IPs",
                         'user_id' => $record->user_id,
-                        'user_name' => $record->user->name,
+                        'user_name' => $user->name,
                         'timestamp' => now()->toISOString(),
                     ];
                 }
             }
 
             // Check for brute force attempts (many failed logins to same user)
+            /** @var \Illuminate\Database\Eloquent\Collection<int, SecurityLog> $bruteForce */
             $bruteForce = SecurityLog::where('created_at', '>=', $since)
                 ->where('event_type', 'login_failed')
                 ->whereNotNull('user_id')
@@ -176,14 +200,15 @@ class SecurityAlertService
                 ->get();
 
             foreach ($bruteForce as $record) {
+                $count = (int) $record->getAttribute('count');
                 $alerts[] = [
                     'id' => 'brute_force_'.$record->user_id,
                     'type' => 'brute_force',
                     'severity' => 'critical',
                     'title' => 'Possible Brute Force Attack',
-                    'message' => "User ID {$record->user_id} received {$record->count} failed login attempts",
+                    'message' => "User ID {$record->user_id} received {$count} failed login attempts",
                     'user_id' => $record->user_id,
-                    'count' => $record->count,
+                    'count' => $count,
                     'timestamp' => now()->toISOString(),
                 ];
             }

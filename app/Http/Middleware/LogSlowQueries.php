@@ -15,7 +15,9 @@ class LogSlowQueries
 
     public function __construct()
     {
-        $this->threshold = config('database.slow_query_threshold', 100); // milliseconds
+        /** @var mixed $threshold */
+        $threshold = config('database.slow_query_threshold', 100);
+        $this->threshold = is_numeric($threshold) ? floatval($threshold) : 100.0;
     }
 
     /**

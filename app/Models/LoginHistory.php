@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -23,8 +22,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class LoginHistory extends Model
 {
-    use HasFactory;
-
     protected $table = 'login_history';
 
     protected $fillable = [
@@ -43,23 +40,39 @@ class LoginHistory extends Model
         'logout_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
+     */
     public function scopeSuccessful($query)
     {
         return $query->where('status', 'success');
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
+     */
     public function scopeFailed($query)
     {
         return $query->where('status', 'failed');
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @param  int|null  $days
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
+     */
     public function scopeRecent($query, $days = 30)
     {
-        return $query->where('login_at', '>=', now()->subDays($days));
+        return $query->where('login_at', '>=', now()->subDays($days ?? 30));
     }
 }

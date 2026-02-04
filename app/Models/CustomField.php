@@ -30,16 +30,26 @@ class CustomField extends Model
         'is_searchable' => 'boolean',
     ];
 
+    /**
+     * @return BelongsTo<FieldGroup, $this>
+     */
     public function fieldGroup(): BelongsTo
     {
         return $this->belongsTo(FieldGroup::class);
     }
 
+    /**
+     * @return HasMany<ContentCustomField, $this>
+     */
     public function contentValues(): HasMany
     {
         return $this->hasMany(ContentCustomField::class);
     }
 
+    /**
+     * @param  int|string  $contentId
+     * @return mixed
+     */
     public function getValueForContent($contentId)
     {
         /** @var \App\Models\ContentCustomField|null $value */

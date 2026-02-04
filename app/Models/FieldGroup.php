@@ -22,13 +22,19 @@ class FieldGroup extends Model
         'is_active' => 'boolean',
     ];
 
+    /**
+     * @return HasMany<CustomField, $this>
+     */
     public function fields(): HasMany
     {
         return $this->hasMany(CustomField::class)->orderBy('sort_order');
     }
 
+    /**
+     * @return HasMany<CustomField, $this>
+     */
     public function activeFields(): HasMany
     {
-        return $this->hasMany(CustomField::class)->orderBy('sort_order');
+        return $this->hasMany(CustomField::class)->where('is_active', true)->orderBy('sort_order');
     }
 }

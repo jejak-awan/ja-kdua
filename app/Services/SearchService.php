@@ -7,6 +7,14 @@ use App\Models\SearchQuery;
 
 class SearchService
 {
+    /**
+     * Search the index
+     *
+     * @param  string  $query
+     * @param  array<string, mixed>  $filters
+     * @param  int  $limit
+     * @return array{results: \Illuminate\Support\Collection<int, array<string, mixed>>, total: int, query: string, suggestions: array<int, array{text: string, type: string}>, is_loose?: bool}
+     */
     public function search($query, $filters = [], $limit = 20)
     {
         if (empty(trim($query))) {
@@ -54,6 +62,7 @@ class SearchService
 
         return [
             'results' => $results->map(function ($index) {
+                /** @var SearchIndex $index */
                 return [
                     'id' => $index->id,
                     'type' => $index->type,
@@ -62,17 +71,21 @@ class SearchService
                     'url' => $index->url,
                     'searchable_type' => $index->searchable_type,
                     'searchable_id' => $index->searchable_id,
-                    'relevance_score' => $index->relevance_score,
+                    'relevance_score' => $index->getAttribute('relevance_score'),
                 ];
             }),
             'total' => $results->count(),
-            'query' => $query,
+            'query' => (string) $query,
             'is_loose' => $isLoose,
             'suggestions' => $suggestions,
         ];
     }
 
-    protected function applySearchLogic($queryBuilder, $query, $strict = true)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<SearchIndex>  $queryBuilder
+     * @param  string  $query
+     */
+    protected function applySearchLogic($queryBuilder, $query, $strict = true): void
     {
         if (config('database.default') === 'mysql' || config('database.default') === 'mariadb') {
             $prepared = $this->prepareSearchQuery($query, $strict);
@@ -101,7 +114,11 @@ class SearchService
         }
     }
 
-    protected function applyFilters($queryBuilder, $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<SearchIndex>  $queryBuilder
+     * @param  array<string, mixed>  $filters
+     */
+    protected function applyFilters($queryBuilder, $filters): void
     {
         if (isset($filters['type'])) {
             $queryBuilder->where('type', $filters['type']);
@@ -114,12 +131,26 @@ class SearchService
         }
     }
 
+    /**
+     * Search by specific type
+     *
+     * @param  string  $query
+     * @param  string  $type
+     * @return array<string, mixed>
+     */
     public function searchByType($query, $type, $limit = 20)
     {
         return $this->search($query, ['type' => $type], $limit);
     }
 
-    public function getSuggestions($query, $limit = 5)
+    /**
+     * Get search suggestions
+     *
+     * @param  string  $query
+     * @param  int  $limit
+     * @return array<int, array{text: string, type: string}>
+     */
+    public function getSuggestions($query, $limit = 5): array
     {
         if (empty(trim($query))) {
             return [];
@@ -152,7 +183,12 @@ class SearchService
         });
     }
 
-    protected function prepareSearchQuery($query, $strict = true)
+    /**
+     * Prepare query for MySQL FullText
+     *
+     * @param  string  $query
+     */
+    protected function prepareSearchQuery($query, $strict = true): string
     {
         // Prepare query for MySQL FULLTEXT search
         $terms = explode(' ', trim($query));
@@ -171,14 +207,19 @@ class SearchService
         return implode(' ', $prepared);
     }
 
-    public function reindexAll()
+    /**
+     * Reindex all searchable items
+     *
+     * @return array{contents: int, categories: int, tags: int}
+     */
+    public function reindexAll(): array
     {
         // Reindex all content
         $contents = \App\Models\Content::where('status', 'published')->get();
         foreach ($contents as $content) {
             SearchIndex::index($content, [
                 'title' => $content->title,
-                'content' => strip_tags($content->body),
+                'content' => strip_tags($content->body ?? ''),
                 'excerpt' => $content->excerpt,
                 'url' => url('/content/'.$content->slug),
                 'type' => $content->type,

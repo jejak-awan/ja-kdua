@@ -8,8 +8,10 @@ namespace App\Services;
  */
 class ThemeHooksService
 {
+    /** @var array<string, array<int, array{callback: callable, priority: int}>> */
     protected array $actions = [];
 
+    /** @var array<string, array<int, array{callback: callable, priority: int}>> */
     protected array $filters = [];
 
     /**
@@ -68,6 +70,10 @@ class ThemeHooksService
 
     /**
      * Apply a filter hook
+     *
+     * @param  mixed  $value
+     * @param  mixed  ...$args
+     * @return mixed
      */
     public function applyFilter(string $hook, $value, ...$args)
     {
@@ -134,6 +140,8 @@ class ThemeHooksService
 
     /**
      * Get all registered hooks
+     *
+     * @return array{actions: array<int, string>, filters: array<int, string>}
      */
     public function getRegisteredHooks(): array
     {

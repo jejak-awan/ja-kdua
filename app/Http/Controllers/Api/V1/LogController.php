@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\File;
 
 class LogController extends BaseApiController
 {
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $logPath = storage_path('logs');
         $files = [];
@@ -27,13 +27,15 @@ class LogController extends BaseApiController
 
         // Sort by modified date desc
         usort($files, function ($a, $b) {
+            /** @var array{name: string, size: int|false, modified: int|false} $a */
+            /** @var array{name: string, size: int|false, modified: int|false} $b */
             return $b['modified'] <=> $a['modified'];
         });
 
         return $this->success($files, 'Log files retrieved successfully');
     }
 
-    public function show($filename)
+    public function show(string $filename): \Illuminate\Http\JsonResponse
     {
         $logFile = storage_path('logs/'.basename($filename));
 
@@ -47,7 +49,7 @@ class LogController extends BaseApiController
         return $this->success(['content' => $content], 'Log content retrieved successfully');
     }
 
-    public function download($filename)
+    public function download(string $filename): \Symfony\Component\HttpFoundation\Response
     {
         $logFile = storage_path('logs/'.basename($filename));
 
@@ -55,12 +57,18 @@ class LogController extends BaseApiController
             return response()->download($logFile, basename($filename));
         }
 
-        return $this->notFound('Log file');
+        return $this->notFoundResponse('Log file');
     }
 
-    public function clear(Request $request)
+    protected function notFoundResponse(string $resource): \Illuminate\Http\JsonResponse
     {
-        $filename = $request->input('filename');
+        return $this->error("{$resource} not found", 404);
+    }
+
+    public function clear(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $filenameRaw = $request->input('filename');
+        $filename = is_string($filenameRaw) ? $filenameRaw : null;
         $logPath = storage_path('logs');
 
         if ($filename) {
@@ -99,7 +107,7 @@ class LogController extends BaseApiController
         return $this->error('Log directory not found', 404);
     }
 
-    protected function tailFile($filepath, $lines = 100)
+    protected function tailFile(string $filepath, int $lines = 100): string
     {
         // Simple file get for now, or sophisticated tail logic
         // Since admin might want to see whole file but pagination is hard with text files

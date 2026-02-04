@@ -52,6 +52,8 @@ class CacheWarmingService
 
     /**
      * Warm all important caches
+     *
+     * @return array<string, int>
      */
     public function warmAll(): array
     {
@@ -327,6 +329,8 @@ class CacheWarmingService
 
     /**
      * Get cache warming statistics
+     *
+     * @return array<string, int>
      */
     public function getStatistics(): array
     {
@@ -348,7 +352,9 @@ class CacheWarmingService
         try {
             if (config('cache.default') === 'redis') {
                 $redis = \Illuminate\Support\Facades\Redis::connection();
-                $pattern = config('cache.prefix').':'.$prefix.'*';
+                /** @var string $prefix */
+                $prefix = config('cache.prefix', '');
+                $pattern = $prefix.':'.$prefix.'*';
                 $keys = $redis->keys($pattern);
 
                 return count($keys);

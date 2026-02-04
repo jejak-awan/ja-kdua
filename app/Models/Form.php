@@ -16,8 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $description
  * @property string|null $success_message
  * @property string|null $redirect_url
- * @property array|null $settings
- * @property array|null $blocks
+ * @property array<string, mixed>|null $settings
+ * @property array<int, mixed>|null $blocks
  * @property bool $is_active
  * @property int $submission_count
  * @property int $view_count
@@ -26,12 +26,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\User|null $author
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FormField[] $fields
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FormSubmission[] $submissions
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FormAnalytics[] $analytics
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\FormField> $fields
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\FormSubmission> $submissions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\FormAnalytics> $analytics
  */
 class Form extends Model
 {
+    /** @use HasFactory<\Database\Factories\FormFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -58,11 +59,17 @@ class Form extends Model
         'start_count' => 'integer',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
     }
 
+    /**
+     * @return HasMany<FormField, $this>
+     */
     public function fields(): HasMany
     {
         return $this->hasMany(FormField::class)->orderBy('sort_order');
@@ -76,30 +83,36 @@ class Form extends Model
         return $this->hasMany(FormSubmission::class)->latest();
     }
 
+    /**
+     * @return HasMany<FormAnalytics, $this>
+     */
     public function analytics(): HasMany
     {
         return $this->hasMany(FormAnalytics::class);
     }
 
-    public function incrementViewCount()
+    public function incrementViewCount(): void
     {
         $this->increment('view_count');
         $this->updateDailyStats('views');
     }
 
-    public function incrementStartCount()
+    public function incrementStartCount(): void
     {
         $this->increment('start_count');
         $this->updateDailyStats('starts');
     }
 
-    public function incrementSubmissionCount()
+    public function incrementSubmissionCount(): void
     {
         $this->increment('submission_count');
         $this->updateDailyStats('submissions');
     }
 
-    protected function updateDailyStats($field)
+    /**
+     * @param  "views"|"starts"|"submissions"  $field
+     */
+    protected function updateDailyStats(string $field): void
     {
         $analytics = $this->analytics()->firstOrCreate(
             ['date' => now()->toDateString()],
@@ -109,7 +122,7 @@ class Form extends Model
         $analytics->increment($field);
     }
 
-    public function getUnreadSubmissionsCount()
+    public function getUnreadSubmissionsCount(): int
     {
         return $this->submissions()->where('status', 'new')->count();
     }

@@ -13,12 +13,19 @@ class VerifyEmail extends Notification
 {
     use Queueable;
 
-    public function via($notifiable)
+    /**
+     * @param  mixed  $notifiable
+     * @return array<int, string>
+     */
+    public function via($notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail($notifiable)
+    /**
+     * @param  mixed  $notifiable
+     */
+    public function toMail($notifiable): MailMessage
     {
         $verificationUrl = $this->verificationUrl($notifiable);
 
@@ -29,11 +36,18 @@ class VerifyEmail extends Notification
             ->line('If you did not create an account, no further action is required.');
     }
 
-    protected function verificationUrl($notifiable)
+    /**
+     * @param  mixed  $notifiable
+     */
+    protected function verificationUrl($notifiable): string
     {
+        /** @var int $expire */
+        $expire = Config::get('auth.verification.expire', 60);
+
+        /** @var \App\Models\User $notifiable */
         return URL::temporarySignedRoute(
             'verification.verify',
-            Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
+            Carbon::now()->addMinutes($expire),
             ['id' => $notifiable->getKey(), 'hash' => sha1($notifiable->getEmailForVerification())]
         );
     }

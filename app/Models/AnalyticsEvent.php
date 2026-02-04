@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $event_type
  * @property string $event_name
  * @property string|null $event_category
- * @property array|null $event_data
+ * @property array<string, mixed>|null $event_data
  * @property string|null $url
  * @property int|null $content_id
  * @property string|null $ip_address
@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class AnalyticsEvent extends Model
 {
+    /** @use HasFactory<\Database\Factories\AnalyticsEventFactory> */
     use HasFactory;
 
     protected $table = 'analytics_events';
@@ -47,18 +48,31 @@ class AnalyticsEvent extends Model
         'occurred_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<Content, $this>
+     */
     public function content(): BelongsTo
     {
         return $this->belongsTo(Content::class);
     }
 
-    public static function track($eventType, $eventName, $data = [], $contentId = null)
+    /**
+     * @param  array<string, mixed>  $data
+     * @param  int|string|null  $contentId
+     */
+    public static function track(string $eventType, string $eventName, array $data = [], $contentId = null): self
     {
+        /** @var string $ip */
+        $ip = \App\Helpers\IpHelper::getClientIp(request());
+
         return self::create([
             'session_id' => session()->getId(),
             'user_id' => auth()->id(),
@@ -68,7 +82,7 @@ class AnalyticsEvent extends Model
             'event_data' => $data,
             'url' => request()->fullUrl(),
             'content_id' => $contentId,
-            'ip_address' => request()->ip(),
+            'ip_address' => $ip,
             'occurred_at' => now(),
         ]);
     }

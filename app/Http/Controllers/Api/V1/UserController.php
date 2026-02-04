@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends BaseApiController
 {
+    /**
+     * List users with filters.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request)
     {
         $query = User::with(['roles', 'permissions']);
@@ -25,7 +30,8 @@ class UserController extends BaseApiController
         }
 
         if ($request->filled('search')) {
-            $search = $request->input('search');
+            $searchRaw = $request->input('search');
+            $search = is_string($searchRaw) ? $searchRaw : '';
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
@@ -58,11 +64,13 @@ class UserController extends BaseApiController
                 ->where('last_login_at', '>=', now()->subDays(30));
         }
 
-        $perPage = $request->input('per_page', 20);
+        $perPageRaw = $request->input('per_page', 20);
+        $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 20;
         $users = $query->latest()->paginate($perPage);
 
         // Ensure roles and permissions are always arrays (not null)
         $users->getCollection()->transform(function ($user) {
+            /** @var User $user */
             // Ensure roles is always a collection (will be serialized as array in JSON)
             if (! $user->relationLoaded('roles')) {
                 $user->setRelation('roles', collect([]));
@@ -79,6 +87,8 @@ class UserController extends BaseApiController
 
     /**
      * Get user statistics for dashboard cards.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function stats()
     {
@@ -111,8 +121,19 @@ class UserController extends BaseApiController
         ], 'User statistics retrieved successfully');
     }
 
+    /**
+     * Create a new user.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request)
     {
+        $authUser = $request->user();
+        /** @var User|null $authUser */
+        if (! $authUser) {
+            return $this->unauthorized();
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -133,7 +154,8 @@ class UserController extends BaseApiController
 
         if ($request->has('roles')) {
             $maxRequestedRank = 0;
-            $roles = \Spatie\Permission\Models\Role::whereIn('id', $request->input('roles', []))->get();
+            $rolesInput = $request->input('roles', []);
+            $roles = \Spatie\Permission\Models\Role::whereIn('id', is_array($rolesInput) ? $rolesInput : [])->get();
 
             $roleRanks = [
                 'super-admin' => 100,
@@ -144,17 +166,17 @@ class UserController extends BaseApiController
             ];
 
             foreach ($roles as $role) {
-                $rank = $roleRanks[$role->name] ?? 0;
+                $rank = $roleRanks[(string) $role->name] ?? 0;
                 if ($rank > $maxRequestedRank) {
                     $maxRequestedRank = $rank;
                 }
             }
 
-            if ($maxRequestedRank > auth()->user()->getRoleRank()) {
+            if ($maxRequestedRank > $authUser->getRoleRank()) {
                 return $this->forbidden('You cannot assign a role higher than your own rank');
             }
 
-            $user->syncRoles($request->input('roles', []));
+            $user->syncRoles(is_array($rolesInput) ? $rolesInput : []);
         }
 
         $user->load(['roles']);
@@ -163,6 +185,11 @@ class UserController extends BaseApiController
         return $this->success($user, 'User created successfully', 201);
     }
 
+    /**
+     * Display the specified user.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show(User $user)
     {
         $user->load(['roles']);
@@ -171,19 +198,40 @@ class UserController extends BaseApiController
         return $this->success($user, 'User retrieved successfully');
     }
 
+    /**
+     * Get the authenticated user's profile.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function profile(Request $request)
     {
-        $user = $request->user()->load(['roles']);
+        $user = $request->user();
+        /** @var User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
+        $user->load(['roles']);
         $user->setRelation('permissions', $user->getAllPermissions());
 
         return $this->success($user, 'Profile retrieved successfully');
     }
 
+    /**
+     * Get the user's login history.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function loginHistory(Request $request)
     {
         $user = $request->user();
+        /** @var User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
 
-        $perPage = min(max((int) $request->input('per_page', 10), 1), 100);
+        $perPageRaw = $request->input('per_page', 10);
+        $perPage = min(max(is_numeric($perPageRaw) ? (int) $perPageRaw : 10, 1), 100);
 
         $history = \App\Models\LoginHistory::where('user_id', $user->id)
             ->orderBy('login_at', 'desc')
@@ -192,9 +240,18 @@ class UserController extends BaseApiController
         return $this->paginated($history, 'Login history retrieved successfully');
     }
 
+    /**
+     * Update the authenticated user's profile.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateProfile(Request $request)
     {
         $user = $request->user();
+        /** @var User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
 
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
@@ -214,20 +271,38 @@ class UserController extends BaseApiController
         return $this->success($user, 'Profile updated successfully');
     }
 
+    /**
+     * Upload user avatar.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function uploadAvatar(Request $request)
     {
+        $user = $request->user();
+        /** @var User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         $request->validate([
             'avatar' => 'required|image|max:2048', // 2MB max
         ]);
-
-        $user = $request->user();
 
         // Delete old avatar if exists
         if ($user->avatar) {
             Storage::disk('public')->delete($user->avatar);
         }
 
-        $path = $request->file('avatar')->store('avatars', 'public');
+        $file = $request->file('avatar');
+        if (! ($file instanceof \Illuminate\Http\UploadedFile)) {
+            return $this->error('Invalid avatar file', 400);
+        }
+
+        $path = $file->store('avatars', 'public');
+        if ($path === false) {
+            return $this->error('Failed to store avatar', 500);
+        }
+
         $user->update(['avatar' => $path]);
 
         return $this->success([
@@ -236,21 +311,33 @@ class UserController extends BaseApiController
         ], 'Avatar uploaded successfully');
     }
 
+    /**
+     * Update user password.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updatePassword(Request $request)
     {
+        $user = $request->user();
+        /** @var User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         $request->validate([
             'current_password' => 'required',
             'password' => ['required', 'confirmed', 'min:8', new StrongPassword],
         ]);
 
-        $user = $request->user();
+        $currentPassword = $request->input('current_password');
+        $newPassword = $request->input('password');
 
-        if (! Hash::check($request->input('current_password'), $user->password)) {
+        if (! is_string($currentPassword) || ! is_string($user->password) || ! Hash::check($currentPassword, $user->password)) {
             return $this->validationError(['current_password' => ['Current password is incorrect']], 'Current password is incorrect');
         }
 
         $user->update([
-            'password' => Hash::make($request->input('password')),
+            'password' => Hash::make(is_string($newPassword) ? $newPassword : ''),
         ]);
 
         return $this->success(null, 'Password updated successfully');
@@ -258,10 +345,16 @@ class UserController extends BaseApiController
 
     /**
      * Get user preferences.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function getPreferences(Request $request)
     {
         $user = $request->user();
+        /** @var User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
 
         return $this->success([
             'dark_mode' => $user->getPreference('dark_mode', 'system'),
@@ -271,15 +364,21 @@ class UserController extends BaseApiController
 
     /**
      * Update user preferences.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function updatePreferences(Request $request)
     {
+        $user = $request->user();
+        /** @var User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         $validated = $request->validate([
             'dark_mode' => 'sometimes|string|in:light,dark,system',
             'locale' => 'sometimes|string|max:10',
         ]);
-
-        $user = $request->user();
 
         foreach ($validated as $key => $value) {
             $user->setPreference($key, $value);
@@ -293,8 +392,19 @@ class UserController extends BaseApiController
         ], 'Preferences updated successfully');
     }
 
+    /**
+     * Update the specified user.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, User $user)
     {
+        $authUser = $request->user();
+        /** @var User|null $authUser */
+        if (! $authUser) {
+            return $this->unauthorized();
+        }
+
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|email|unique:users,email,'.$user->id,
@@ -310,7 +420,8 @@ class UserController extends BaseApiController
         ]);
 
         if (isset($validated['password'])) {
-            $validated['password'] = Hash::make($validated['password']);
+            $password = $validated['password'];
+            $validated['password'] = Hash::make(is_string($password) ? $password : '');
         } else {
             unset($validated['password']);
         }
@@ -323,15 +434,15 @@ class UserController extends BaseApiController
         $user->update($validated);
 
         // Guard: Hierarchy check
-        // Guard: Hierarchy check
         // Allow if self OR if super-admin (rank >= 100) OR if strictly higher rank
-        if (auth()->id() !== $user->id && auth()->user()->getRoleRank() < 100 && ! auth()->user()->isHigherThan($user)) {
+        if ($authUser->id !== $user->id && $authUser->getRoleRank() < 100 && ! $authUser->isHigherThan($user)) {
             return $this->forbidden(trans('features.users.messages.hierarchy_restriction'));
         }
 
         if ($request->has('roles')) {
             $maxRequestedRank = 0;
-            $roles = \Spatie\Permission\Models\Role::whereIn('id', $request->input('roles', []))->get();
+            $rolesInput = $request->input('roles', []);
+            $roles = \Spatie\Permission\Models\Role::whereIn('id', is_array($rolesInput) ? $rolesInput : [])->get();
 
             $roleRanks = [
                 'super-admin' => 100,
@@ -342,14 +453,14 @@ class UserController extends BaseApiController
             ];
 
             foreach ($roles as $role) {
-                $rank = $roleRanks[$role->name] ?? 0;
+                $rank = $roleRanks[(string) $role->name] ?? 0;
                 if ($rank > $maxRequestedRank) {
                     $maxRequestedRank = $rank;
                 }
             }
 
             // Cannot assign role higher than own
-            if ($maxRequestedRank > auth()->user()->getRoleRank()) {
+            if ($maxRequestedRank > $authUser->getRoleRank()) {
                 return $this->forbidden('You cannot assign a role higher than your own rank');
             }
 
@@ -364,7 +475,7 @@ class UserController extends BaseApiController
                 }
             }
 
-            $user->syncRoles($request->input('roles', []));
+            $user->syncRoles(is_array($rolesInput) ? $rolesInput : []);
         }
 
         $user->load(['roles']);
@@ -373,15 +484,26 @@ class UserController extends BaseApiController
         return $this->success($user, 'User updated successfully');
     }
 
-    public function destroy(User $user)
+    /**
+     * Remove the specified user.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(Request $request, User $user)
     {
+        $authUser = $request->user();
+        /** @var User|null $authUser */
+        if (! $authUser) {
+            return $this->unauthorized();
+        }
+
         // Prevent deleting yourself
-        if ($user->id === auth()->id()) {
+        if ($user->id === $authUser->id) {
             return $this->validationError(['user' => ['You cannot delete your own account']], 'You cannot delete your own account');
         }
 
         // Prevent deleting users with higher or equal rank (unless super-admin)
-        if (auth()->user()->getRoleRank() < 100 && ! auth()->user()->isHigherThan($user)) {
+        if ($authUser->getRoleRank() < 100 && ! $authUser->isHigherThan($user)) {
             return $this->forbidden(trans('features.users.messages.hierarchy_restriction'));
         }
 
@@ -406,17 +528,24 @@ class UserController extends BaseApiController
     /**
      * Force logout a user from all devices by revoking all their tokens.
      * Admin-only action for security management.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function forceLogout(User $user)
+    public function forceLogout(Request $request, User $user)
     {
+        $authUser = $request->user();
+        /** @var User|null $authUser */
+        if (! $authUser) {
+            return $this->unauthorized();
+        }
+
         // Guard: Hierarchy check
-        // Guard: Hierarchy check
-        if (auth()->id() !== $user->id && auth()->user()->getRoleRank() < 100 && ! auth()->user()->isHigherThan($user)) {
+        if ($authUser->id !== $user->id && $authUser->getRoleRank() < 100 && ! $authUser->isHigherThan($user)) {
             return $this->forbidden(trans('features.users.messages.hierarchy_restriction'));
         }
 
         // Prevent force logging out yourself
-        if ($user->id === auth()->id()) {
+        if ($user->id === $authUser->id) {
             return $this->validationError(
                 ['user' => ['You cannot force logout your own account']],
                 'You cannot force logout your own account'
@@ -431,11 +560,11 @@ class UserController extends BaseApiController
         \App\Models\SecurityLog::log(
             'force_logout',
             $user,
-            request()->ip(),
+            (string) $request->ip(),
             "Admin force logged out user from {$tokenCount} device(s)",
             [
-                'admin_id' => auth()->id(),
-                'admin_name' => auth()->user()->name,
+                'admin_id' => $authUser->id,
+                'admin_name' => $authUser->name,
                 'revoked_sessions' => $tokenCount,
             ]
         );
@@ -447,12 +576,19 @@ class UserController extends BaseApiController
 
     /**
      * Verify a user's email manually.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function verify(User $user)
+    public function verify(Request $request, User $user)
     {
+        $authUser = $request->user();
+        /** @var User|null $authUser */
+        if (! $authUser) {
+            return $this->unauthorized();
+        }
+
         // Guard: Hierarchy check
-        // Guard: Hierarchy check
-        if (auth()->id() !== $user->id && auth()->user()->getRoleRank() < 100 && ! auth()->user()->isHigherThan($user)) {
+        if ($authUser->id !== $user->id && $authUser->getRoleRank() < 100 && ! $authUser->isHigherThan($user)) {
             return $this->forbidden(trans('features.users.messages.hierarchy_restriction'));
         }
 
@@ -470,6 +606,9 @@ class UserController extends BaseApiController
 
     /**
      * Restore a soft-deleted user.
+     *
+     * @param  int|string  $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function restore($id)
     {
@@ -486,18 +625,27 @@ class UserController extends BaseApiController
 
     /**
      * Permanently delete a user.
+     *
+     * @param  int|string  $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function forceDelete($id)
+    public function forceDelete(Request $request, $id)
     {
         $user = User::withTrashed()->findOrFail($id);
 
+        $authUser = $request->user();
+        /** @var User|null $authUser */
+        if (! $authUser) {
+            return $this->unauthorized();
+        }
+
         // Prevent deleting yourself
-        if ($user->id === auth()->id()) {
+        if ($user->id === $authUser->id) {
             return $this->validationError(['user' => ['You cannot delete your own account']], 'You cannot delete your own account');
         }
 
         // Prevent deleting users with higher or equal rank (unless super-admin)
-        if (auth()->user()->getRoleRank() < 100 && ! auth()->user()->isHigherThan($user)) {
+        if ($authUser->getRoleRank() < 100 && ! $authUser->isHigherThan($user)) {
             return $this->forbidden(trans('features.users.messages.hierarchy_restriction'));
         }
 
@@ -519,34 +667,48 @@ class UserController extends BaseApiController
         return $this->success(null, 'User permanently deleted');
     }
 
+    /**
+     * Handle bulk actions for users.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function bulkAction(Request $request)
     {
+        $authUser = $request->user();
+        /** @var User|null $authUser */
+        if (! $authUser) {
+            return $this->unauthorized();
+        }
+
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:users,id',
             'action' => 'required|in:delete,force_logout,verify,restore,force_delete',
         ]);
 
-        $ids = $request->input('ids');
-        $action = $request->input('action');
+        $idsRaw = $request->input('ids');
+        $ids = is_array($idsRaw) ? $idsRaw : [];
+        $actionRaw = $request->input('action');
+        $action = is_string($actionRaw) ? $actionRaw : '';
         $count = 0;
         $message = '';
 
         if ($action === 'delete') {
             // Filter out self-deletion and hierarchy protection
-            $ids = array_filter($ids, function ($id) {
+            $ids = array_filter($ids, function ($id) use ($authUser) {
                 // Self deletion check
-                if ($id == auth()->id()) {
+                if ($id == $authUser->id) {
                     return false;
                 }
 
-                $target = User::find($id);
-                if (! $target) {
+                /** @var User|null $target */
+                $target = User::find(is_scalar($id) ? $id : null);
+                if (! $target instanceof User) {
                     return false;
                 }
 
                 // Rank check
-                if (auth()->user()->getRoleRank() < 100 && ! auth()->user()->isHigherThan($target)) {
+                if ($authUser->getRoleRank() < 100 && ! $authUser->isHigherThan($target)) {
                     return false;
                 }
 
@@ -563,23 +725,25 @@ class UserController extends BaseApiController
             }
 
             // Standard soft delete does NOT delete avatar
-            $count = User::whereIn('id', $ids)->delete();
-            $message = "{$count} users moved to trash";
+            $deleteResult = User::whereIn('id', $ids)->delete();
+            $count = is_numeric($deleteResult) ? (int) $deleteResult : 0;
+            $message = $count.' users moved to trash';
         } elseif ($action === 'force_delete') {
             // Filter out self-deletion and hierarchy protection
-            $ids = array_filter($ids, function ($id) {
+            $ids = array_filter($ids, function ($id) use ($authUser) {
                 // Self deletion check
-                if ($id == auth()->id()) {
+                if ($id == $authUser->id) {
                     return false;
                 }
 
-                $target = User::withTrashed()->find($id);
-                if (! $target) {
+                /** @var User|null $target */
+                $target = User::withTrashed()->find(is_scalar($id) ? $id : null);
+                if (! $target instanceof User) {
                     return false;
                 }
 
                 // Rank check
-                if (auth()->user()->getRoleRank() < 100 && ! auth()->user()->isHigherThan($target)) {
+                if ($authUser->getRoleRank() < 100 && ! $authUser->isHigherThan($target)) {
                     return false;
                 }
 
@@ -603,23 +767,25 @@ class UserController extends BaseApiController
                 }
             }
 
-            $count = User::withTrashed()->whereIn('id', $ids)->forceDelete();
-            $message = "{$count} users permanently deleted";
+            $forceDeleteResult = User::withTrashed()->whereIn('id', $ids)->forceDelete();
+            $count = is_numeric($forceDeleteResult) ? (int) $forceDeleteResult : 0;
+            $message = $count.' users permanently deleted';
         } elseif ($action === 'restore') {
             $count = User::withTrashed()->whereIn('id', $ids)->restore();
             $message = "{$count} users restored successfully";
         } elseif ($action === 'force_logout') {
             // Filter out self-logout and hierarchy protection
-            $ids = array_filter($ids, function ($id) {
-                if ($id == auth()->id()) {
+            $ids = array_filter($ids, function ($id) use ($authUser) {
+                if ($id == $authUser->id) {
                     return false;
                 }
 
-                $target = User::find($id);
-                if (! $target) {
+                /** @var User|null $target */
+                $target = User::find(is_scalar($id) ? $id : null);
+                if (! $target instanceof User) {
                     return false;
                 }
-                if (auth()->user()->getRoleRank() < 100 && ! auth()->user()->isHigherThan($target)) {
+                if ($authUser->getRoleRank() < 100 && ! $authUser->isHigherThan($target)) {
                     return false;
                 }
 
@@ -634,12 +800,13 @@ class UserController extends BaseApiController
             $message = "{$count} users force logged out successfully";
         } elseif ($action === 'verify') {
             // Filter hierarchy protection
-            $ids = array_filter($ids, function ($id) {
-                $target = User::find($id);
-                if (! $target) {
+            $ids = array_filter($ids, function ($id) use ($authUser) {
+                /** @var User|null $target */
+                $target = User::find(is_scalar($id) ? $id : null);
+                if (! $target instanceof User) {
                     return false;
                 }
-                if (auth()->id() !== $id && auth()->user()->getRoleRank() < 100 && ! auth()->user()->isHigherThan($target)) {
+                if ($authUser->id !== $id && $authUser->getRoleRank() < 100 && ! $authUser->isHigherThan($target)) {
                     return false;
                 }
 

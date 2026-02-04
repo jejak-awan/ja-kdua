@@ -20,20 +20,24 @@ class MediaSettingsHelper
 
     /**
      * Get allowed image types (comma-separated)
+     *
+     * @return array<int, string>
      */
     public static function getAllowedImageTypes(): array
     {
-        $types = Setting::get('allowed_image_types', 'jpg,jpeg,png,gif,webp,svg');
+        $types = (string) Setting::get('allowed_image_types', 'jpg,jpeg,png,gif,webp,svg');
 
         return array_map('trim', explode(',', $types));
     }
 
     /**
      * Get allowed file types (comma-separated)
+     *
+     * @return array<int, string>
      */
     public static function getAllowedFileTypes(): array
     {
-        $types = Setting::get('allowed_file_types', 'pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar');
+        $types = (string) Setting::get('allowed_file_types', 'pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar');
 
         return array_map('trim', explode(',', $types));
     }

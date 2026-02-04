@@ -26,11 +26,11 @@ class WarmCache extends Command
     /**
      * Execute the console command.
      */
-    public function handle(CacheWarmingService $warmingService)
+    public function handle(CacheWarmingService $warmingService): int
     {
         $this->info('Starting cache warming...');
 
-        $type = $this->option('type');
+        $type = (string) $this->option('type');
         $limit = (int) $this->option('limit');
 
         $startTime = microtime(true);
@@ -53,5 +53,7 @@ class WarmCache extends Command
         $duration = round(microtime(true) - $startTime, 2);
         $this->newLine();
         $this->info("Cache warming completed in {$duration} seconds");
+
+        return Command::SUCCESS;
     }
 }

@@ -25,21 +25,24 @@ class Plugin extends Model
         'is_active' => 'boolean',
     ];
 
-    public function activate()
+    public function activate(): void
     {
         $this->update(['is_active' => true]);
         // Trigger plugin activation hook
         event(new \App\Events\PluginActivated($this));
     }
 
-    public function deactivate()
+    public function deactivate(): void
     {
         $this->update(['is_active' => false]);
         // Trigger plugin deactivation hook
         event(new \App\Events\PluginDeactivated($this));
     }
 
-    public static function getActivePlugins()
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, self>
+     */
+    public static function getActivePlugins(): \Illuminate\Database\Eloquent\Collection
     {
         return self::where('is_active', true)
             ->orderBy('priority')

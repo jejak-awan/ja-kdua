@@ -43,13 +43,17 @@ class AppServiceProvider extends ServiceProvider
                         $postTypes = ['post', 'page'];
                     }
                     $postTypeOptions = array_map(function ($type) {
-                        return ['label' => ucfirst($type), 'value' => $type];
+                        $label = is_string($type) ? ucfirst($type) : 'Unknown';
+
+                        return ['label' => $label, 'value' => $type];
                     }, $postTypes);
 
                     // 2. Roles
                     $roles = \Spatie\Permission\Models\Role::pluck('name')->all();
                     $roleOptions = array_map(function ($role) {
-                        return ['label' => ucfirst($role), 'value' => $role];
+                        $label = is_string($role) ? ucfirst($role) : 'Unknown';
+
+                        return ['label' => $label, 'value' => $role];
                     }, $roles);
 
                     // 3. Taxonomies
@@ -157,8 +161,8 @@ class AppServiceProvider extends ServiceProvider
 
                 // Load Session Lifetime
                 $sessionLifetime = \App\Models\Setting::where('key', 'session_lifetime')->value('value');
-                if ($sessionLifetime) {
-                    config(['session.lifetime' => (int) $sessionLifetime]);
+                if (is_numeric($sessionLifetime)) {
+                    config(['session.lifetime' => intval($sessionLifetime)]);
                 }
 
                 // Load Media Settings (Storage Driver + AWS)

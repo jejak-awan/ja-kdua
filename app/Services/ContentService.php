@@ -25,6 +25,8 @@ class ContentService
 
     /**
      * Get published contents with filtering and caching
+     *
+     * @return array{data: \Illuminate\Pagination\LengthAwarePaginator<Content>|\Illuminate\Database\Eloquent\Collection<int, Content>, paginated: bool}
      */
     public function getPublishedContents(Request $request): array
     {
@@ -61,40 +63,44 @@ class ContentService
 
     /**
      * Apply common filters to content query
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<Content>  $query
      */
     public function applyFilters($query, Request $request): void
     {
         if ($request->has('type')) {
-            $query->where('type', $request->type);
+            $query->where('type', $request->input('type'));
         }
 
         if ($request->has('is_featured')) {
-            $query->where('is_featured', filter_var($request->is_featured, FILTER_VALIDATE_BOOLEAN));
+            $query->where('is_featured', filter_var($request->input('is_featured'), FILTER_VALIDATE_BOOLEAN));
         }
 
         if ($request->has('category')) {
             $query->whereHas('category', function ($q) use ($request) {
-                $q->where('slug', $request->category);
+                $q->where('slug', $request->input('category'));
             });
         }
 
         if ($request->has('tag')) {
             $query->whereHas('tags', function ($q) use ($request) {
-                $q->where('slug', $request->tag);
+                $q->where('slug', $request->input('tag'));
             });
         }
 
         if ($request->has('status')) {
-            $query->where('status', $request->status);
+            $query->where('status', $request->input('status'));
         }
 
         if ($request->has('category_id')) {
-            $query->where('category_id', $request->category_id);
+            $query->where('category_id', $request->input('category_id'));
         }
     }
 
     /**
      * Apply sorting to query
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<Content>  $query
      */
     public function applySorting($query, Request $request): void
     {
@@ -108,6 +114,8 @@ class ContentService
 
     /**
      * Get related content by tags and category
+     *
+     * @return array<int, array<string, mixed>>
      */
     public function getRelatedContent(string $slug, int $limit = 5): array
     {
@@ -311,7 +319,8 @@ class ContentService
      */
     protected function trackMediaUsage(Content $content, string $fieldName): void
     {
-        $mediaId = $content->{$fieldName};
+        $idValue = $content->getAttribute($fieldName);
+        $mediaId = is_numeric($idValue) ? (int) $idValue : null;
         if ($mediaId) {
             MediaUsage::track($mediaId, $content, $fieldName);
         } else {

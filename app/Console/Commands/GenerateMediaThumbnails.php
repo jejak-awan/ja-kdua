@@ -31,7 +31,7 @@ class GenerateMediaThumbnails extends Command
         $this->info('Generating thumbnails for media images...');
 
         $mediaController = new MediaController;
-        $force = $this->option('force');
+        $force = (bool) $this->option('force');
 
         // Get all image media
         $mediaList = Media::where('mime_type', 'like', 'image/%')->get();

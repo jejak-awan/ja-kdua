@@ -31,6 +31,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class AnalyticsVisit extends Model
 {
+    /** @use HasFactory<\Database\Factories\AnalyticsVisitFactory> */
     use HasFactory;
 
     protected $table = 'analytics_visits';
@@ -54,6 +55,9 @@ class AnalyticsVisit extends Model
         'status_code' => 'integer',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -61,24 +65,32 @@ class AnalyticsVisit extends Model
 
     /**
      * Get the session for this visit
+     *
+     * @return BelongsTo<AnalyticsSession, $this>
      */
     public function session(): BelongsTo
     {
         return $this->belongsTo(AnalyticsSession::class, 'session_id', 'session_id');
     }
 
-    public function content()
+    public function content(): ?\App\Models\Content
     {
         // Try to find content by URL slug
-        $slug = basename(parse_url($this->url, PHP_URL_PATH));
+        $path = parse_url((string) $this->url, PHP_URL_PATH);
+        if (! is_string($path)) {
+            return null;
+        }
 
+        $slug = basename($path);
+
+        /** @var \App\Models\Content|null */
         return \App\Models\Content::where('slug', $slug)->first();
     }
 
     /**
      * Accessor to get device_type from session
      */
-    public function getDeviceTypeAttribute()
+    public function getDeviceTypeAttribute(): ?string
     {
         return $this->session?->device_type;
     }
@@ -86,7 +98,7 @@ class AnalyticsVisit extends Model
     /**
      * Accessor to get browser from session
      */
-    public function getBrowserAttribute()
+    public function getBrowserAttribute(): ?string
     {
         return $this->session?->browser;
     }
@@ -94,7 +106,7 @@ class AnalyticsVisit extends Model
     /**
      * Accessor to get os from session
      */
-    public function getOsAttribute()
+    public function getOsAttribute(): ?string
     {
         return $this->session?->os;
     }
@@ -102,7 +114,7 @@ class AnalyticsVisit extends Model
     /**
      * Accessor to get country from session
      */
-    public function getCountryAttribute()
+    public function getCountryAttribute(): ?string
     {
         return $this->session?->country;
     }
@@ -110,12 +122,16 @@ class AnalyticsVisit extends Model
     /**
      * Accessor to get city from session
      */
-    public function getCityAttribute()
+    public function getCityAttribute(): ?string
     {
         return $this->session?->city;
     }
 
-    public static function trackVisit($request, $sessionId = null)
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string|null  $sessionId
+     */
+    public static function trackVisit($request, $sessionId = null): self
     {
         $sessionId = $sessionId ?? session()->getId();
 

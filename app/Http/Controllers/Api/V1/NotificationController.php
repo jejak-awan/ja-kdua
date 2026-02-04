@@ -8,20 +8,20 @@ use Illuminate\Support\Facades\Log;
 
 class NotificationController extends BaseApiController
 {
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
-            Log::info('NotificationController@index hit', [
-                'user_id' => $request->user()?->id,
-                'user_cls' => get_class($request->user() ?: new \stdClass),
-                'headers' => $request->headers->all(),
-            ]);
-
             $user = $request->user();
-
+            /** @var \App\Models\User|null $user */
             if (! $user) {
                 return $this->unauthorized('Unauthenticated');
             }
+
+            Log::info('NotificationController@index hit', [
+                'user_id' => $user->id,
+                'user_cls' => get_class($user),
+                'headers' => $request->headers->all(),
+            ]);
 
             // Use Notification model directly with user_id filter
             $query = Notification::where('user_id', $user->id);
@@ -31,13 +31,16 @@ class NotificationController extends BaseApiController
             }
 
             if ($request->has('type')) {
-                $query->where('type', $request->type);
+                $typeRaw = $request->type;
+                $type = is_string($typeRaw) ? $typeRaw : '';
+                $query->where('type', $type);
             }
 
-            $limit = $request->input('limit', 20);
+            $limitRaw = $request->input('limit', 20);
+            $limit = is_numeric($limitRaw) ? (int) $limitRaw : 20;
 
             // Always use pagination for consistency, but limit results if limit is specified
-            if ($limit && $limit < 100) {
+            if ($limit > 0 && $limit < 100) {
                 $notifications = $query->latest()->limit($limit)->get();
                 // Return as paginated response for consistency
                 $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
@@ -51,7 +54,7 @@ class NotificationController extends BaseApiController
                 return $this->paginated($paginator, 'Notifications retrieved successfully');
             }
 
-            $notifications = $query->latest()->paginate($limit ?: 20);
+            $notifications = $query->latest()->paginate($limit > 0 ? $limit : 20);
 
             return $this->paginated($notifications, 'Notifications retrieved successfully');
         } catch (\Exception $e) {
@@ -64,10 +67,10 @@ class NotificationController extends BaseApiController
         }
     }
 
-    public function unreadCount(Request $request)
+    public function unreadCount(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
-
+        /** @var \App\Models\User|null $user */
         if (! $user) {
             return $this->success(['count' => 0], 'Unread count retrieved');
         }
@@ -79,10 +82,10 @@ class NotificationController extends BaseApiController
         return $this->success(['count' => $count], 'Unread count retrieved');
     }
 
-    public function markAsRead(Request $request, Notification $notification)
+    public function markAsRead(Request $request, Notification $notification): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
-
+        /** @var \App\Models\User|null $user */
         if (! $user) {
             return $this->unauthorized('Unauthenticated');
         }
@@ -96,10 +99,10 @@ class NotificationController extends BaseApiController
         return $this->success($notification, 'Notification marked as read');
     }
 
-    public function markAllAsRead(Request $request)
+    public function markAllAsRead(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
-
+        /** @var \App\Models\User|null $user */
         if (! $user) {
             return $this->unauthorized('Unauthenticated');
         }
@@ -114,17 +117,22 @@ class NotificationController extends BaseApiController
         return $this->success(null, 'All notifications marked as read');
     }
 
-    public function indexSystem(Request $request)
+    public function indexSystem(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized('Unauthenticated');
+        }
 
-        if (! $user || ! $user->hasRole('super-admin')) {
-            if (! $user->can('manage system') && ! $user->hasRole('super-admin')) {
+        if (! $user->hasRole('super-admin')) {
+            if (! $user->can('manage system')) {
                 return $this->forbidden('Unauthorized');
             }
         }
 
-        $limit = $request->input('limit', 20);
+        $limitRaw = $request->input('limit', 20);
+        $limit = is_numeric($limitRaw) ? (int) $limitRaw : 20;
 
         // Group by title, message, type, and approximate created_at to find unique "broadcasts"
         $notifications = Notification::selectRaw('MIN(id) as id, title, message, type, MIN(created_at) as created_at, COUNT(*) as recipient_count')
@@ -135,11 +143,15 @@ class NotificationController extends BaseApiController
         return $this->paginated($notifications, 'System notifications retrieved');
     }
 
-    public function revokeSystem(Request $request)
+    public function revokeSystem(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized('Unauthenticated');
+        }
 
-        if (! $user || (! $user->hasRole('super-admin') && ! $user->can('manage system'))) {
+        if (! $user->hasRole('super-admin') && ! $user->can('manage system')) {
             return $this->forbidden('Unauthorized');
         }
 
@@ -151,21 +163,32 @@ class NotificationController extends BaseApiController
 
         // Convert created_at to the same formatting used in groupBy for precise matching
         // The input from frontend will be the full created_at string
-        $createdAt = date('Y-m-d H:i', strtotime($request->created_at));
+        $createdAtRaw = $request->created_at;
+        $createdAtStr = is_string($createdAtRaw) ? $createdAtRaw : '';
+        $createdAtTime = strtotime($createdAtStr);
+        $createdAt = date('Y-m-d H:i', $createdAtTime !== false ? $createdAtTime : time());
 
-        $count = Notification::where('title', $request->title)
+        $countRaw = Notification::where('title', $request->title)
             ->where('message', $request->message)
             ->where(\DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:%i")'), $createdAt)
             ->delete();
 
-        return $this->success(['count' => $count], "Broadcast revoked. {$count} notifications removed.");
+        $count = is_numeric($countRaw) ? (int) $countRaw : 0;
+
+        $countStr = (string) $count;
+
+        return $this->success(['count' => $count], "Broadcast revoked. {$countStr} notifications removed.");
     }
 
-    public function bulkRevokeSystem(Request $request)
+    public function bulkRevokeSystem(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized('Unauthenticated');
+        }
 
-        if (! $user || (! $user->hasRole('super-admin') && ! $user->can('manage system'))) {
+        if (! $user->hasRole('super-admin') && ! $user->can('manage system')) {
             return $this->forbidden('Unauthorized');
         }
 
@@ -177,26 +200,46 @@ class NotificationController extends BaseApiController
         ]);
 
         $totalDeleted = 0;
+        $broadcasts = is_array($request->broadcasts) ? $request->broadcasts : [];
 
-        foreach ($request->broadcasts as $broadcast) {
-            $createdAt = date('Y-m-d H:i', strtotime($broadcast['created_at']));
+        foreach ($broadcasts as $broadcast) {
+            if (! is_array($broadcast)) {
+                continue;
+            }
+            $createdAtRaw = $broadcast['created_at'] ?? '';
+            $createdAtStr = is_string($createdAtRaw) ? $createdAtRaw : '';
+            $createdAtTime = strtotime($createdAtStr);
+            $createdAt = date('Y-m-d H:i', $createdAtTime !== false ? $createdAtTime : time());
 
-            $count = Notification::where('title', $broadcast['title'])
-                ->where('message', $broadcast['message'])
+            $titleRaw = $broadcast['title'] ?? '';
+            $title = is_string($titleRaw) ? $titleRaw : '';
+            $messageRaw = $broadcast['message'] ?? '';
+            $message = is_string($messageRaw) ? $messageRaw : '';
+
+            $countRaw = Notification::where('title', $title)
+                ->where('message', $message)
                 ->where(\DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:%i")'), $createdAt)
                 ->delete();
+
+            $count = is_numeric($countRaw) ? (int) $countRaw : 0;
 
             $totalDeleted += $count;
         }
 
-        return $this->success(['count' => $totalDeleted], "Bulk revocation complete. {$totalDeleted} notifications removed.");
+        $totalDeletedStr = (string) $totalDeleted;
+
+        return $this->success(['count' => $totalDeleted], "Bulk revocation complete. {$totalDeletedStr} notifications removed.");
     }
 
-    public function broadcast(Request $request)
+    public function broadcast(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized('Unauthenticated');
+        }
 
-        if (! $user || (! $user->hasRole('super-admin') && ! $user->can('manage system'))) {
+        if (! $user->hasRole('super-admin') && ! $user->can('manage system')) {
             return $this->forbidden('Unauthorized');
         }
 
@@ -233,10 +276,10 @@ class NotificationController extends BaseApiController
         }
     }
 
-    public function destroy(Request $request, Notification $notification)
+    public function destroy(Request $request, Notification $notification): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
-
+        /** @var \App\Models\User|null $user */
         if (! $user) {
             return $this->unauthorized('Unauthenticated');
         }

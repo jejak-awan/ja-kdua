@@ -15,11 +15,12 @@ class CreateBackupJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $tries = 1; // Backup should only run once
+    public int $tries = 1; // Backup should only run once
 
-    public $timeout = 1800; // 30 minutes
+    public int $timeout = 1800; // 30 minutes
 
-    public $backoff = [300]; // Retry after 5 minutes if failed
+    /** @var array<int, int> */
+    public array $backoff = [300]; // Retry after 5 minutes if failed
 
     /**
      * Create a new job instance.
@@ -37,6 +38,7 @@ class CreateBackupJob implements ShouldQueue
      */
     public function handle(): void
     {
+        $backup = null;
         try {
             $backupService = new BackupService;
 
@@ -54,7 +56,7 @@ class CreateBackupJob implements ShouldQueue
                     throw new \Exception("Unknown backup type: {$this->type}");
             }
 
-            if ($this->description && $backup) {
+            if ($this->description) {
                 $backup->update(['description' => $this->description]);
             }
 
@@ -72,7 +74,7 @@ class CreateBackupJob implements ShouldQueue
             ]);
 
             // Update backup status if backup record exists
-            if (isset($backup) && $backup) {
+            if ($backup !== null) {
                 $backup->update([
                     'status' => 'failed',
                     'error_message' => $e->getMessage(),

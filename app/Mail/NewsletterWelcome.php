@@ -14,7 +14,7 @@ class NewsletterWelcome extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public $subscriber;
+    public NewsletterSubscriber $subscriber;
 
     /**
      * Create a new message instance.

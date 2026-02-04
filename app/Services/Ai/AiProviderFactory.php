@@ -8,7 +8,7 @@ class AiProviderFactory
     {
         // If no provider specified, get default from settings
         if (! $provider) {
-            $provider = \App\Models\Setting::get('ai_default_provider', 'gemini');
+            $provider = (string) \App\Models\Setting::get('ai_default_provider', 'gemini');
         }
 
         return match ($provider) {
@@ -21,6 +21,8 @@ class AiProviderFactory
 
     /**
      * Get list of all registered providers
+     *
+     * @return array<int, array{id: string, name: string, logo: string}>
      */
     public static function getProviders(): array
     {

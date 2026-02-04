@@ -24,7 +24,7 @@ class Backup extends Model
         'password' => 'encrypted',
     ];
 
-    public function getSizeHumanAttribute()
+    public function getSizeHumanAttribute(): string
     {
         if (! $this->size) {
             return 'Unknown';
@@ -42,12 +42,12 @@ class Backup extends Model
         return round($size, 2).' '.$units[$unit];
     }
 
-    public function isCompleted()
+    public function isCompleted(): bool
     {
         return $this->status === 'completed';
     }
 
-    public function isFailed()
+    public function isFailed(): bool
     {
         return $this->status === 'failed';
     }

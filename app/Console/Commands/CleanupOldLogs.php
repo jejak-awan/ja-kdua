@@ -44,7 +44,7 @@ class CleanupOldLogs extends Command
         }
 
         $cutoffDate = now()->subDays($retentionDays);
-        $dryRun = $this->option('dry-run');
+        $dryRun = (bool) $this->option('dry-run');
 
         $this->info("Cleaning up logs older than {$retentionDays} days (before {$cutoffDate->format('Y-m-d')})");
 

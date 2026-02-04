@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class RedirectController extends BaseApiController
 {
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = Redirect::query();
 
@@ -16,7 +16,8 @@ class RedirectController extends BaseApiController
         }
 
         if ($request->filled('search')) {
-            $search = $request->input('search');
+            $searchRaw = $request->input('search');
+            $search = is_string($searchRaw) ? $searchRaw : '';
             $query->where(function ($q) use ($search) {
                 $q->where('from_url', 'like', "%{$search}%")
                     ->orWhere('to_url', 'like', "%{$search}%");
@@ -28,7 +29,7 @@ class RedirectController extends BaseApiController
         return $this->paginated($redirects, 'Redirects retrieved successfully');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'from_url' => 'required|string|unique:redirects,from_url',
@@ -38,7 +39,7 @@ class RedirectController extends BaseApiController
         ]);
 
         // Ensure from_url starts with /
-        if (! str_starts_with($validated['from_url'], '/')) {
+        if (is_string($validated['from_url']) && ! str_starts_with($validated['from_url'], '/')) {
             $validated['from_url'] = '/'.$validated['from_url'];
         }
 
@@ -47,12 +48,12 @@ class RedirectController extends BaseApiController
         return $this->success($redirect, 'Redirect created successfully', 201);
     }
 
-    public function show(Redirect $redirect)
+    public function show(Redirect $redirect): \Illuminate\Http\JsonResponse
     {
         return $this->success($redirect, 'Redirect retrieved successfully');
     }
 
-    public function update(Request $request, Redirect $redirect)
+    public function update(Request $request, Redirect $redirect): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'from_url' => 'sometimes|required|string|unique:redirects,from_url,'.$redirect->id,
@@ -62,7 +63,7 @@ class RedirectController extends BaseApiController
         ]);
 
         // Ensure from_url starts with /
-        if (isset($validated['from_url']) && ! str_starts_with($validated['from_url'], '/')) {
+        if (isset($validated['from_url']) && is_string($validated['from_url']) && ! str_starts_with($validated['from_url'], '/')) {
             $validated['from_url'] = '/'.$validated['from_url'];
         }
 
@@ -71,14 +72,14 @@ class RedirectController extends BaseApiController
         return $this->success($redirect, 'Redirect updated successfully');
     }
 
-    public function destroy(Redirect $redirect)
+    public function destroy(Redirect $redirect): \Illuminate\Http\JsonResponse
     {
         $redirect->delete();
 
         return $this->success(null, 'Redirect deleted successfully');
     }
 
-    public function statistics()
+    public function statistics(): \Illuminate\Http\JsonResponse
     {
         $stats = [
             'total' => Redirect::count(),

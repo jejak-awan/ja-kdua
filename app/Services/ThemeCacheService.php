@@ -45,18 +45,23 @@ class ThemeCacheService
 
     /**
      * Get active theme with cache
+     *
+     * @param  (callable(): (?Theme))|null  $callback
      */
-    public function getActiveTheme(string $type = 'frontend', ?callable $callback = null)
+    public function getActiveTheme(string $type = 'frontend', ?callable $callback = null): ?Theme
     {
         $cacheKey = self::PREFIX_ACTIVE.$type;
 
-        return Cache::remember($cacheKey, self::TTL_LONG, function () use ($callback) {
+        /** @var ?Theme $theme */
+        $theme = Cache::remember($cacheKey, self::TTL_LONG, function () use ($callback) {
             if ($callback) {
                 return $callback();
             }
 
             return null;
         });
+
+        return $theme;
     }
 
     /**
@@ -71,6 +76,9 @@ class ThemeCacheService
 
     /**
      * Cache theme settings
+     *
+     * @param  callable(): mixed  $callback
+     * @return mixed
      */
     public function rememberSettings(Theme $theme, callable $callback)
     {
@@ -89,56 +97,83 @@ class ThemeCacheService
 
     /**
      * Cache theme assets
+     *
+     * @param  callable(): array{css: array<int, string>, js: array<int, string>}  $callback
+     * @return array{css: array<int, string>, js: array<int, string>}
      */
-    public function rememberAssets(Theme $theme, callable $callback)
+    public function rememberAssets(Theme $theme, callable $callback): array
     {
         $cacheKey = self::PREFIX_ASSETS.$theme->id;
 
         if ($this->tagsSupported()) {
-            return Cache::tags(['theme', "theme.{$theme->id}"])->remember(
+            /** @var array{css: array<int, string>, js: array<int, string>} $assets */
+            $assets = Cache::tags(['theme', "theme.{$theme->id}"])->remember(
                 $cacheKey,
                 self::TTL_VERY_LONG,
                 $callback
             );
+
+            return $assets;
         }
 
-        return Cache::remember($cacheKey, self::TTL_VERY_LONG, $callback);
+        /** @var array{css: array<int, string>, js: array<int, string>} $assets */
+        $assets = Cache::remember($cacheKey, self::TTL_VERY_LONG, $callback);
+
+        return $assets;
     }
 
     /**
      * Cache theme manifest
+     *
+     * @param  callable(): array<string, mixed>  $callback
+     * @return array<string, mixed>
      */
-    public function rememberManifest(Theme $theme, callable $callback)
+    public function rememberManifest(Theme $theme, callable $callback): array
     {
         $cacheKey = self::PREFIX_MANIFEST.$theme->id;
 
         if ($this->tagsSupported()) {
-            return Cache::tags(['theme', "theme.{$theme->id}"])->remember(
+            /** @var array<string, mixed> $manifest */
+            $manifest = Cache::tags(['theme', "theme.{$theme->id}"])->remember(
                 $cacheKey,
                 self::TTL_VERY_LONG,
                 $callback
             );
+
+            return $manifest;
         }
 
-        return Cache::remember($cacheKey, self::TTL_VERY_LONG, $callback);
+        /** @var array<string, mixed> $manifest */
+        $manifest = Cache::remember($cacheKey, self::TTL_VERY_LONG, $callback);
+
+        return $manifest;
     }
 
     /**
      * Cache template list
+     *
+     * @param  callable(): array<int, string>  $callback
+     * @return array<int, string>
      */
-    public function rememberTemplates(Theme $theme, callable $callback)
+    public function rememberTemplates(Theme $theme, callable $callback): array
     {
         $cacheKey = self::PREFIX_TEMPLATES.$theme->id;
 
         if ($this->tagsSupported()) {
-            return Cache::tags(['theme', "theme.{$theme->id}"])->remember(
+            /** @var array<int, string> $templates */
+            $templates = Cache::tags(['theme', "theme.{$theme->id}"])->remember(
                 $cacheKey,
                 self::TTL_LONG,
                 $callback
             );
+
+            return $templates;
         }
 
-        return Cache::remember($cacheKey, self::TTL_LONG, $callback);
+        /** @var array<int, string> $templates */
+        $templates = Cache::remember($cacheKey, self::TTL_LONG, $callback);
+
+        return $templates;
     }
 
     /**
@@ -288,11 +323,13 @@ class ThemeCacheService
 
     /**
      * Get cache statistics
+     *
+     * @return array{driver: string, tags_supported: bool, ttl_short: int, ttl_medium: int, ttl_long: int, ttl_very_long: int}
      */
     public function getStats(): array
     {
         return [
-            'driver' => config('cache.default'),
+            'driver' => (string) config('cache.default'),
             'tags_supported' => config('cache.default') === 'redis',
             'ttl_short' => self::TTL_SHORT,
             'ttl_medium' => self::TTL_MEDIUM,

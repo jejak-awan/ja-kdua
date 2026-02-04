@@ -8,14 +8,14 @@ use Illuminate\Http\Request;
 
 class SearchController extends BaseApiController
 {
-    protected $searchService;
+    protected SearchService $searchService;
 
     public function __construct(SearchService $searchService)
     {
         $this->searchService = $searchService;
     }
 
-    public function search(Request $request)
+    public function search(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'q' => 'required|string|min:2|max:255',
@@ -24,6 +24,8 @@ class SearchController extends BaseApiController
             'date_to' => 'nullable|date',
             'limit' => 'nullable|integer|min:1|max:100',
         ]);
+
+        $query = is_string($request->input('q')) ? $request->input('q') : '';
 
         $filters = [];
         if ($request->has('type')) {
@@ -36,58 +38,67 @@ class SearchController extends BaseApiController
             $filters['date_to'] = $request->input('date_to');
         }
 
-        $limit = $request->input('limit', 20);
+        $limitRaw = $request->input('limit', 20);
+        $limit = is_numeric($limitRaw) ? (int) $limitRaw : 20;
 
-        $results = $this->searchService->search($request->input('q'), $filters, $limit);
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Content> $results */
+        $results = $this->searchService->search($query, $filters, $limit);
 
         return $this->success($results, 'Search results retrieved successfully');
     }
 
-    public function suggestions(Request $request)
+    public function suggestions(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'q' => 'required|string|min:2|max:255',
             'limit' => 'nullable|integer|min:1|max:10',
         ]);
 
-        $limit = $request->input('limit', 5);
-        $suggestions = $this->searchService->getSuggestions($request->input('q'), $limit);
+        $query = is_string($request->input('q')) ? $request->input('q') : '';
+        $limitRaw = $request->input('limit', 5);
+        $limit = is_numeric($limitRaw) ? (int) $limitRaw : 5;
+        $suggestions = $this->searchService->getSuggestions($query, $limit);
 
         return $this->success([
             'suggestions' => $suggestions,
         ], 'Search suggestions retrieved successfully');
     }
 
-    public function popularQueries(Request $request)
+    public function popularQueries(Request $request): \Illuminate\Http\JsonResponse
     {
-        $limit = $request->input('limit', 10);
-        $days = $request->input('days', 30);
+        $limitRaw = $request->input('limit', 10);
+        $limit = is_numeric($limitRaw) ? (int) $limitRaw : 10;
+        $daysRaw = $request->input('days', 30);
+        $days = is_numeric($daysRaw) ? (int) $daysRaw : 30;
 
         $queries = SearchQuery::getPopularQueries($limit, $days);
 
         return $this->success($queries, 'Popular queries retrieved successfully');
     }
 
-    public function noResultsQueries(Request $request)
+    public function noResultsQueries(Request $request): \Illuminate\Http\JsonResponse
     {
-        $limit = $request->input('limit', 10);
-        $days = $request->input('days', 30);
+        $limitRaw = $request->input('limit', 10);
+        $limit = is_numeric($limitRaw) ? (int) $limitRaw : 10;
+        $daysRaw = $request->input('days', 30);
+        $days = is_numeric($daysRaw) ? (int) $daysRaw : 30;
 
         $queries = SearchQuery::getNoResultsQueries($limit, $days);
 
         return $this->success($queries, 'No results queries retrieved successfully');
     }
 
-    public function searchStats(Request $request)
+    public function searchStats(Request $request): \Illuminate\Http\JsonResponse
     {
-        $days = $request->input('days', 30);
+        $daysRaw = $request->input('days', 30);
+        $days = is_numeric($daysRaw) ? (int) $daysRaw : 30;
 
         $stats = [
             'total_searches' => SearchQuery::where('searched_at', '>=', now()->subDays($days))->count(),
             'unique_queries' => SearchQuery::where('searched_at', '>=', now()->subDays($days))
                 ->distinct('query')
                 ->count('query'),
-            'avg_results' => SearchQuery::where('searched_at', '>=', now()->subDays($days))
+            'avg_results' => (float) SearchQuery::where('searched_at', '>=', now()->subDays($days))
                 ->avg('results_count'),
             'zero_result_searches' => SearchQuery::where('searched_at', '>=', now()->subDays($days))
                 ->where('results_count', 0)
@@ -98,10 +109,13 @@ class SearchController extends BaseApiController
         return $this->success($stats, 'Search statistics retrieved successfully');
     }
 
-    public function reindex(Request $request)
+    public function reindex(Request $request): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+
         // Only allow admins to reindex
-        if (! $request->user()->can('manage settings')) {
+        if (! $user || ! $user->can('manage settings')) {
             return $this->forbidden('Unauthorized');
         }
 

@@ -22,7 +22,7 @@ class Setting extends Model
     // For SQLite compatibility with 'key' as reserved keyword
     protected $table = 'settings';
 
-    public static function get($key, $default = null)
+    public static function get(string $key, mixed $default = null): mixed
     {
         $setting = static::where('key', $key)->first();
 
@@ -30,12 +30,13 @@ class Setting extends Model
             return $default;
         }
 
-        return static::castValue($setting->value, $setting->type);
+        return static::castValue($setting->value, (string) $setting->type);
     }
 
-    public static function set($key, $value, $type = 'string', $group = 'general')
+    public static function set(string $key, mixed $value, string $type = 'string', string $group = 'general'): self
     {
-        return static::updateOrCreate(
+        /** @var self $setting */
+        $setting = static::updateOrCreate(
             ['key' => $key],
             [
                 'value' => is_array($value) ? json_encode($value) : $value,
@@ -43,27 +44,32 @@ class Setting extends Model
                 'group' => $group,
             ]
         );
+
+        return $setting;
     }
 
-    public static function getGroup($group)
+    /**
+     * @return array<string, mixed>
+     */
+    public static function getGroup(string $group): array
     {
-        return static::where('group', $group)
-            ->get()
-            ->mapWithKeys(function ($setting) {
-                return [$setting->key => static::castValue($setting->value, $setting->type)];
-            })
-            ->toArray();
+        /** @var \Illuminate\Database\Eloquent\Collection<int, self> $settings */
+        $settings = static::where('group', $group)->get();
+
+        return $settings->mapWithKeys(function ($setting) {
+            return [(string) $setting->key => static::castValue($setting->value, (string) $setting->type)];
+        })->toArray();
     }
 
-    protected static function castValue($value, $type)
+    protected static function castValue(mixed $value, string $type): mixed
     {
         switch ($type) {
             case 'integer':
-                return (int) $value;
+                return is_numeric($value) ? (int) $value : 0;
             case 'boolean':
                 return filter_var($value, FILTER_VALIDATE_BOOLEAN);
             case 'json':
-                return json_decode($value, true);
+                return is_string($value) ? json_decode($value, true) : $value;
             case 'text':
             case 'string':
             default:

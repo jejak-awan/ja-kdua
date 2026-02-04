@@ -13,13 +13,11 @@ class RedisController extends BaseApiController
     /**
      * Get all Redis settings.
      */
-    public function index()
+    public function index(): \Illuminate\Http\JsonResponse
     {
         $settings = RedisSetting::orderBy('group')->orderBy('key')->get();
 
-        /** @phpstan-ignore argument.type */
         $grouped = $settings->groupBy('group')->map(function (\Illuminate\Database\Eloquent\Collection $items) {
-            /** @phpstan-ignore return.type */
             return $items->map(function ($item) {
                 return [
                     'id' => $item->id,
@@ -38,7 +36,7 @@ class RedisController extends BaseApiController
     /**
      * Update Redis settings.
      */
-    public function update(Request $request)
+    public function update(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'settings' => 'required|array',
@@ -50,8 +48,16 @@ class RedisController extends BaseApiController
             return $this->validationError($validator->errors()->toArray());
         }
 
-        foreach ($request->input('settings') as $settingData) {
-            RedisSetting::setValue($settingData['key'], $settingData['value']);
+        $settings = $request->input('settings');
+        if (is_array($settings)) {
+            foreach ($settings as $settingData) {
+                if (is_array($settingData) && isset($settingData['key'])) {
+                    $key = is_string($settingData['key']) ? $settingData['key'] : '';
+                    if ($key) {
+                        RedisSetting::setValue($key, $settingData['value'] ?? null);
+                    }
+                }
+            }
         }
 
         // Clear config cache to apply new settings
@@ -63,7 +69,7 @@ class RedisController extends BaseApiController
     /**
      * Test Redis connection.
      */
-    public function testConnection()
+    public function testConnection(): \Illuminate\Http\JsonResponse
     {
         try {
             $start = microtime(true);
@@ -103,7 +109,7 @@ class RedisController extends BaseApiController
     /**
      * Get Redis server info.
      */
-    public function info()
+    public function info(): \Illuminate\Http\JsonResponse
     {
         try {
             $redis = Redis::connection();
@@ -148,7 +154,7 @@ class RedisController extends BaseApiController
     /**
      * Flush Redis cache.
      */
-    public function flushCache(Request $request)
+    public function flushCache(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $type = $request->input('type', 'all'); // all, cache, config, route, view
@@ -185,7 +191,7 @@ class RedisController extends BaseApiController
     /**
      * Get cache statistics.
      */
-    public function cacheStats()
+    public function cacheStats(): \Illuminate\Http\JsonResponse
     {
         try {
             $redis = Redis::connection('cache');
@@ -202,7 +208,8 @@ class RedisController extends BaseApiController
 
             $keys = $redis->keys('*');
 
-            $prefix = config('database.redis.options.prefix');
+            $prefixRaw = config('database.redis.options.prefix');
+            $prefix = is_string($prefixRaw) ? $prefixRaw : null;
 
             $stats = [
                 'total_keys' => count($keys),
@@ -225,17 +232,24 @@ class RedisController extends BaseApiController
     /**
      * Helper: Get total keys count.
      */
-    private function getTotalKeys()
+    /**
+     * Helper: Get total keys count.
+     */
+    private function getTotalKeys(): int
     {
         $count = 0;
         // Try to count keys from both default and cache connections
         try {
-            $count += count(Redis::connection('default')->keys('*'));
+            /** @var array<string> $keys */
+            $keys = Redis::connection('default')->keys('*');
+            $count += count($keys);
         } catch (\Exception $e) {
         }
 
         try {
-            $count += count(Redis::connection('cache')->keys('*'));
+            /** @var array<string> $keysCache */
+            $keysCache = Redis::connection('cache')->keys('*');
+            $count += count($keysCache);
         } catch (\Exception $e) {
         }
 
@@ -244,11 +258,15 @@ class RedisController extends BaseApiController
 
     /**
      * Helper: Calculate hit rate.
+     *
+     * @param  array<string, mixed>  $info
      */
-    private function calculateHitRate($info)
+    private function calculateHitRate(array $info): string
     {
-        $hits = $info['keyspace_hits'] ?? 0;
-        $misses = $info['keyspace_misses'] ?? 0;
+        $hitsRaw = $info['keyspace_hits'] ?? 0;
+        $hits = is_numeric($hitsRaw) ? (int) $hitsRaw : 0;
+        $missesRaw = $info['keyspace_misses'] ?? 0;
+        $misses = is_numeric($missesRaw) ? (int) $missesRaw : 0;
         $total = $hits + $misses;
 
         if ($total === 0) {
@@ -260,8 +278,11 @@ class RedisController extends BaseApiController
 
     /**
      * Helper: Get cache size.
+     *
+     * @param  \Illuminate\Redis\Connections\Connection  $redis
+     * @param  array<string>  $keys
      */
-    private function getCacheSize($redis, $keys, $prefix = null)
+    private function getCacheSize($redis, array $keys, ?string $prefix = null): string
     {
         try {
             $size = 0;
@@ -271,7 +292,8 @@ class RedisController extends BaseApiController
                     ? substr($key, strlen($prefix))
                     : $key;
 
-                $size += strlen($redis->get($lookupKey) ?? '');
+                $value = $redis->get($lookupKey);
+                $size += strlen(is_string($value) ? $value : '');
             }
 
             return $this->formatBytes($size);
@@ -282,13 +304,15 @@ class RedisController extends BaseApiController
 
     /**
      * Helper: Format bytes to human readable.
+     *
+     * @param  int|float  $bytes
      */
-    private function formatBytes($bytes)
+    private function formatBytes($bytes): string
     {
         $units = ['B', 'KB', 'MB', 'GB'];
         $bytes = max($bytes, 0);
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
-        $pow = min($pow, count($units) - 1);
+        $pow = min((int) $pow, count($units) - 1);
         $bytes /= pow(1024, $pow);
 
         return round($bytes, 2).' '.$units[$pow];
@@ -296,13 +320,15 @@ class RedisController extends BaseApiController
 
     /**
      * Helper: Get expired keys count.
+     *
+     * @param  \Illuminate\Redis\Connections\Connection  $redis
      */
-    private function getExpiredKeysCount($redis)
+    private function getExpiredKeysCount($redis): int
     {
         try {
             $info = $redis->info();
 
-            return $info['expired_keys'] ?? 0;
+            return isset($info['expired_keys']) ? (int) $info['expired_keys'] : 0;
         } catch (\Exception $e) {
             return 0;
         }
@@ -310,8 +336,12 @@ class RedisController extends BaseApiController
 
     /**
      * Helper: Get top keys.
+     *
+     * @param  \Illuminate\Redis\Connections\Connection  $redis
+     * @param  array<string>  $keys
+     * @return array<int, array<string, mixed>>
      */
-    private function getTopKeys($redis, $keys, $limit = 10, $prefix = null)
+    private function getTopKeys($redis, array $keys, int $limit = 10, ?string $prefix = null): array
     {
         $topKeys = [];
 
@@ -323,12 +353,14 @@ class RedisController extends BaseApiController
                     : $key;
 
                 $ttl = $redis->ttl($lookupKey);
-                $size = strlen($redis->get($lookupKey) ?? '');
+                $value = $redis->get($lookupKey);
+                $size = strlen(is_string($value) ? $value : '');
 
                 $topKeys[] = [
                     'key' => $key, // Show full key for display
                     'size' => $this->formatBytes($size),
                     'ttl' => $ttl > 0 ? $ttl.'s' : ($ttl === -1 ? 'Never' : 'Expired'),
+                    'size_bytes' => $size,
                 ];
             } catch (\Exception $e) {
                 continue;
@@ -337,16 +369,21 @@ class RedisController extends BaseApiController
 
         // Sort by size (descending)
         usort($topKeys, function ($a, $b) {
-            return $b['size'] <=> $a['size']; // Note: comparing formatted strings isn't ideal but sufficient for simple display if units match
+            return $b['size_bytes'] <=> $a['size_bytes'];
         });
 
-        return array_slice($topKeys, 0, $limit);
+        // Remove size_bytes helper key
+        return array_map(function ($item) {
+            unset($item['size_bytes']);
+
+            return $item;
+        }, array_slice($topKeys, 0, $limit));
     }
 
     /**
      * Warm up cache (optimize).
      */
-    public function warmCache()
+    public function warmCache(): \Illuminate\Http\JsonResponse
     {
         try {
             // Run optimization commands

@@ -23,31 +23,32 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int|null $category_id
  * @property \Illuminate\Support\Carbon|null $published_at
  * @property int $views
- * @property array|null $meta
+ * @property array<string, mixed>|null $meta
  * @property string|null $meta_title
  * @property string|null $meta_description
  * @property string|null $meta_keywords
  * @property string|null $og_image
  * @property int|null $locked_by
  * @property \Illuminate\Support\Carbon|null $locked_at
- * @property array|null $blocks
- * @property array|null $global_variables
+ * @property array<int, mixed>|null $blocks
+ * @property array<string, mixed>|null $global_variables
  * @property bool $comment_status
  * @property string $editor_type
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property int|null $visits_count
- * @property array|null $lock_status
+ * @property array<string, mixed>|null $lock_status
  * @property-read \App\Models\User $author
  * @property-read \App\Models\Category|null $category
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Tag[] $tags
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Comment[] $comments
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ContentRevision[] $revisions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tag> $tags
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Comment> $comments
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ContentRevision> $revisions
  * @property-read \App\Models\User|null $lockedBy
  */
 class Content extends Model
 {
+    /** @use HasFactory<\Database\Factories\ContentFactory> */
     use HasFactory, SoftDeletes;
 
     protected static function booted()
@@ -105,52 +106,82 @@ class Content extends Model
         'global_variables' => 'array',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function lockedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'locked_by');
     }
 
+    /**
+     * @return BelongsTo<Category, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
+    /**
+     * @return BelongsToMany<Tag, $this>
+     */
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'content_tag');
     }
 
-    public function comments()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Comment, $this>
+     */
+    public function comments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Comment::class)->whereNull('parent_id');
     }
 
-    public function allComments()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Comment, $this>
+     */
+    public function allComments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Comment::class);
     }
 
-    public function revisions()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\ContentRevision, $this>
+     */
+    public function revisions(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ContentRevision::class)->orderBy('created_at', 'desc');
     }
 
-    public function latestRevision()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\ContentRevision, $this>
+     */
+    public function latestRevision(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(ContentRevision::class)->latestOfMany();
     }
 
-    public function customFields()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\ContentCustomField, $this>
+     */
+    public function customFields(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ContentCustomField::class);
     }
 
-    public function getCustomFieldValue($fieldSlug)
+    /**
+     * Get a custom field value.
+     */
+    public function getCustomFieldValue(string $fieldSlug): mixed
     {
         $field = \App\Models\CustomField::where('slug', $fieldSlug)->first();
         if (! $field) {
@@ -159,10 +190,13 @@ class Content extends Model
 
         $value = $this->customFields()->where('custom_field_id', $field->id)->first();
 
-        return $value ? $value->value : $field->default_value;
+        return $value ? $value->value : $field->getAttribute('default_value');
     }
 
-    public function setCustomFieldValue($fieldSlug, $value)
+    /**
+     * Set a custom field value.
+     */
+    public function setCustomFieldValue(string $fieldSlug, mixed $value): bool
     {
         $field = \App\Models\CustomField::where('slug', $fieldSlug)->first();
         if (! $field) {
@@ -177,12 +211,18 @@ class Content extends Model
         return true;
     }
 
-    public function analyticsVisits()
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder<\App\Models\AnalyticsVisit>
+     */
+    public function analyticsVisits(): \Illuminate\Database\Eloquent\Builder
     {
         // Match visits by URL slug - using where clause
         return AnalyticsVisit::where('url', 'like', '%'.$this->slug.'%');
     }
 
+    /**
+     * @return MorphMany<\App\Models\MenuItem, $this>
+     */
     public function menuItems(): MorphMany
     {
         return $this->morphMany(MenuItem::class, 'target');

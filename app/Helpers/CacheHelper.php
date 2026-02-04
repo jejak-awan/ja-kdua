@@ -66,7 +66,7 @@ class CacheHelper
     /**
      * Cache API response
      */
-    public static function rememberApiResponse(string $key, int $ttl, callable $callback)
+    public static function rememberApiResponse(string $key, int $ttl, \Closure $callback): mixed
     {
         $cacheKey = self::key(self::PREFIX_API, $key);
 
@@ -83,7 +83,7 @@ class CacheHelper
     /**
      * Cache content data
      */
-    public static function rememberContent(int $id, int $ttl, callable $callback)
+    public static function rememberContent(int $id, int $ttl, \Closure $callback): mixed
     {
         $cacheKey = self::key(self::PREFIX_CONTENT, (string) $id);
 
@@ -97,7 +97,7 @@ class CacheHelper
     /**
      * Cache media data
      */
-    public static function rememberMedia(int $id, int $ttl, callable $callback)
+    public static function rememberMedia(int $id, int $ttl, \Closure $callback): mixed
     {
         $cacheKey = self::key(self::PREFIX_MEDIA, (string) $id);
 
@@ -111,7 +111,7 @@ class CacheHelper
     /**
      * Cache category data
      */
-    public static function rememberCategory(int $id, int $ttl, callable $callback)
+    public static function rememberCategory(int $id, int $ttl, \Closure $callback): mixed
     {
         $cacheKey = self::key(self::PREFIX_CATEGORY, (string) $id);
 
@@ -125,7 +125,7 @@ class CacheHelper
     /**
      * Cache statistics
      */
-    public static function rememberStatistics(string $type, int $ttl, callable $callback)
+    public static function rememberStatistics(string $type, int $ttl, \Closure $callback): mixed
     {
         $cacheKey = self::key(self::PREFIX_STATISTICS, $type);
 
@@ -293,6 +293,9 @@ class CacheHelper
 
     /**
      * Get cache statistics (if supported)
+     */
+    /**
+     * @return array{driver: string|null, available: bool, supports_tagging: bool}
      */
     public static function getStats(): array
     {

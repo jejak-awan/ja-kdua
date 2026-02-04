@@ -28,37 +28,60 @@ class MediaUsage extends Model
         'field_name',
     ];
 
+    /**
+     * @return BelongsTo<Media, $this>
+     */
     public function media(): BelongsTo
     {
         return $this->belongsTo(Media::class);
     }
 
+    /**
+     * @return MorphTo<\Illuminate\Database\Eloquent\Model, $this>
+     */
     public function model(): MorphTo
     {
         return $this->morphTo();
     }
 
-    // Helper method to track media usage
-    public static function track($mediaId, $model, $fieldName = null)
+    /**
+     * Helper method to track media usage
+     *
+     * @param  int  $mediaId
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  string|null  $fieldName
+     */
+    public static function track($mediaId, $model, $fieldName = null): self
     {
         // Remove old usage for this field if exists
         if ($fieldName) {
+            $modelId = $model->getAttribute('id');
+            $id = is_int($modelId) ? $modelId : (is_string($modelId) ? (int) $modelId : 0);
             self::where('model_type', $model->getMorphClass())
-                ->where('model_id', $model->id)
+                ->where('model_id', $id)
                 ->where('field_name', $fieldName)
                 ->delete();
         }
 
+        $modelId = $model->getAttribute('id');
+        $id = is_int($modelId) ? $modelId : (is_string($modelId) ? (int) $modelId : 0);
+
         return self::create([
             'media_id' => $mediaId,
             'model_type' => $model->getMorphClass(),
-            'model_id' => $model->id,
+            'model_id' => $id,
             'field_name' => $fieldName,
         ]);
     }
 
-    // Helper method to remove media usage
-    public static function untrack($mediaId = null, $model = null, $fieldName = null)
+    /**
+     * Helper method to remove media usage
+     *
+     * @param  int|null  $mediaId
+     * @param  \Illuminate\Database\Eloquent\Model|null  $model
+     * @param  string|null  $fieldName
+     */
+    public static function untrack($mediaId = null, $model = null, $fieldName = null): int
     {
         $query = self::query();
 
@@ -67,14 +90,18 @@ class MediaUsage extends Model
         }
 
         if ($model) {
+            $modelId = $model->getAttribute('id');
+            $id = is_int($modelId) ? $modelId : (is_string($modelId) ? (int) $modelId : 0);
             $query->where('model_type', $model->getMorphClass())
-                ->where('model_id', $model->id);
+                ->where('model_id', $id);
         }
 
         if ($fieldName) {
             $query->where('field_name', $fieldName);
         }
 
-        return $query->delete();
+        $deleted = $query->delete();
+
+        return is_int($deleted) ? $deleted : (is_numeric($deleted) ? (int) $deleted : 0);
     }
 }

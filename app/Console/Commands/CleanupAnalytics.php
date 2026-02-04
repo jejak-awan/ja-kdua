@@ -90,17 +90,17 @@ class CleanupAnalytics extends Command
 
         // Delete visits
         $this->output->write('Deleting visits... ');
-        $deleted['visits'] = AnalyticsVisit::where('visited_at', '<', $cutoffDate)->delete();
+        $deleted['visits'] = (int) AnalyticsVisit::where('visited_at', '<', $cutoffDate)->delete();
         $this->info("Done ({$deleted['visits']} records)");
 
         // Delete events
         $this->output->write('Deleting events... ');
-        $deleted['events'] = AnalyticsEvent::where('occurred_at', '<', $cutoffDate)->delete();
+        $deleted['events'] = (int) AnalyticsEvent::where('occurred_at', '<', $cutoffDate)->delete();
         $this->info("Done ({$deleted['events']} records)");
 
         // Delete sessions
         $this->output->write('Deleting sessions... ');
-        $deleted['sessions'] = AnalyticsSession::where('started_at', '<', $cutoffDate)->delete();
+        $deleted['sessions'] = (int) AnalyticsSession::where('started_at', '<', $cutoffDate)->delete();
         $this->info("Done ({$deleted['sessions']} records)");
 
         $this->newLine();

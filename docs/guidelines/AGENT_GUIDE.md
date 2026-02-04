@@ -8,9 +8,12 @@ This document outlines the mandatory standards and architecture that must be fol
 - **Security-First**: Never trust user input. Always use validation and standard helpers for IP/Auth.
 
 ## 2. Coding Standards
-- **PHPStan**: All code MUST pass PHPStan Level 5 (minimal required). Aim for higher levels when refactoring. Always provide generic types for relations (e.g., `/** @return HasMany<TargetModel, $this> */`).
-- **Styling**: Run `./vendor/bin/pint` before every commit. Follow the project's enforced style.
-- **Strict Typing**: Use PHP 8.x/9.x strict typing. Declare return types and property types wherever possible.
+- **PHPStan (Level 9)**: All code MUST pass PHPStan Level 9. 
+    - No exceptions for `mixed` - always cast or type-hint using `@var`.
+    - Relations MUST specify generics: `/** @return HasMany<TargetModel, $this> */`.
+    - Mixed IDs from `getAttribute('id')` MUST be narrowed before usage: `is_numeric($id) ? (int) $id : 0`.
+- **Laravel Pint**: Run `./vendor/bin/pint` before every commit. This ensures code style consistency across the team.
+- **Strict Typing**: Use PHP 8.x/9.x strict typing. Declare return types and property types wherever possible. Always use `declare(strict_types=1);` in new files.
 
 ## 3. API Guidelines
 - **Inheritance**: All `Api/V1` controllers MUST extend `App\Http\Controllers\Api\V1\BaseApiController`.

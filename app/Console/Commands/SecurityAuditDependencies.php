@@ -12,7 +12,7 @@ class SecurityAuditDependencies extends Command
 
     protected $description = 'Scan composer and npm dependencies for known vulnerabilities';
 
-    public function handle()
+    public function handle(): int
     {
         $this->info('Running dependency security audit...');
 
@@ -48,8 +48,11 @@ class SecurityAuditDependencies extends Command
         try {
             $data = json_decode($json, true);
 
-            if (isset($data['advisories']) && count($data['advisories']) > 0) {
+            if (isset($data['advisories']) && is_array($data['advisories']) && count($data['advisories']) > 0) {
                 foreach ($data['advisories'] as $advisory) {
+                    if (! is_array($advisory)) {
+                        continue;
+                    }
                     DependencyVulnerability::updateOrCreate(
                         [
                             'package_name' => $advisory['packageName'] ?? 'unknown',
@@ -76,8 +79,11 @@ class SecurityAuditDependencies extends Command
         try {
             $data = json_decode($json, true);
 
-            if (isset($data['vulnerabilities']) && count($data['vulnerabilities']) > 0) {
+            if (isset($data['vulnerabilities']) && is_array($data['vulnerabilities']) && count($data['vulnerabilities']) > 0) {
                 foreach ($data['vulnerabilities'] as $name => $vuln) {
+                    if (! is_array($vuln)) {
+                        continue;
+                    }
                     DependencyVulnerability::updateOrCreate(
                         [
                             'package_name' => $name,

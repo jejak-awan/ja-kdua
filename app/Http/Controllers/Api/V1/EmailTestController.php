@@ -19,7 +19,7 @@ class EmailTestController extends BaseApiController
      *
      * Attempts to connect to the SMTP server using current configuration
      */
-    public function testConnection(Request $request)
+    public function testConnection(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $config = $this->getEmailConfig($request);
@@ -40,26 +40,32 @@ class EmailTestController extends BaseApiController
 
             // Test basic socket connection
             $timeout = 5;
+            $hostRaw = $config['host'];
+            $host = is_string($hostRaw) ? $hostRaw : '';
+            $portRaw = $config['port'];
+            $port = is_numeric($portRaw) ? (int) $portRaw : 25;
             $connection = @fsockopen(
-                $config['host'],
-                $config['port'],
+                $host,
+                $port,
                 $errno,
                 $errstr,
                 $timeout
             );
 
             if (! $connection) {
-                throw new \Exception("Cannot connect to {$config['host']}:{$config['port']} - {$errstr} ({$errno})");
+                throw new \Exception("Cannot connect to {$host}:{$port} - {$errstr} ({$errno})");
             }
 
             fclose($connection);
             $testResult = true;
 
+            $encryption = isset($config['encryption']) && is_string($config['encryption']) ? $config['encryption'] : 'none';
+
             return $this->success([
                 'connected' => $testResult,
-                'host' => $config['host'],
-                'port' => $config['port'],
-                'encryption' => $config['encryption'] ?? 'none',
+                'host' => $host,
+                'port' => $port,
+                'encryption' => $encryption,
             ], 'SMTP connection test completed');
         } catch (\Exception $e) {
             return $this->error(
@@ -77,7 +83,7 @@ class EmailTestController extends BaseApiController
      *
      * Sends a test email to the specified address
      */
-    public function sendTest(Request $request)
+    public function sendTest(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'to' => 'required|email',
@@ -91,15 +97,25 @@ class EmailTestController extends BaseApiController
             // Temporarily update mail config
             $this->updateMailConfig($config);
 
-            $to = $validated['to'];
-            $subject = $validated['subject'] ?? 'Test Email from '.config('app.name');
-            $message = $validated['message'] ?? 'This is a test email sent from the CMS email testing tool.';
+            $toRaw = $validated['to'];
+            $to = is_string($toRaw) ? $toRaw : '';
+            $appName = config('app.name');
+            $appNameStr = is_string($appName) ? $appName : 'App';
+            $subjectRaw = $validated['subject'] ?? 'Test Email from '.$appNameStr;
+            $subject = is_string($subjectRaw) ? $subjectRaw : 'Test Email';
+            $messageRaw = $validated['message'] ?? 'This is a test email sent from the CMS email testing tool.';
+            $message = is_string($messageRaw) ? $messageRaw : 'Test Message';
 
             // Send email
             Mail::raw($message, function (Message $mail) use ($to, $subject, $config) {
+                $fromAddressRaw = $config['from_address'] ?? null;
+                $fromAddress = is_string($fromAddressRaw) ? $fromAddressRaw : '';
+                $fromNameRaw = $config['from_name'] ?? null;
+                $fromName = is_string($fromNameRaw) ? $fromNameRaw : null;
+
                 $mail->to($to)
                     ->subject($subject)
-                    ->from($config['from_address'], $config['from_name']);
+                    ->from($fromAddress, $fromName);
             });
 
             // Log the test email
@@ -116,10 +132,12 @@ class EmailTestController extends BaseApiController
                 'sent_at' => now()->toIso8601String(),
             ], 'Test email sent successfully');
         } catch (\Exception $e) {
-            Log::error('Test email failed', [
+            $logContext = [
                 'to' => $validated['to'] ?? null,
                 'error' => $e->getMessage(),
-            ]);
+            ];
+            /** @var array<string, mixed> $logContext */
+            Log::error('Test email failed', $logContext);
 
             return $this->error(
                 'Failed to send test email: '.$e->getMessage(),
@@ -136,10 +154,11 @@ class EmailTestController extends BaseApiController
      *
      * Returns information about pending email jobs in the queue
      */
-    public function getQueueStatus()
+    public function getQueueStatus(): \Illuminate\Http\JsonResponse
     {
         try {
-            $queueConnection = config('queue.default');
+            $queueConnectionRaw = config('queue.default');
+            $queueConnection = is_string($queueConnectionRaw) ? $queueConnectionRaw : 'sync';
             $queueDriver = config("queue.connections.{$queueConnection}.driver");
 
             $status = [
@@ -178,26 +197,33 @@ class EmailTestController extends BaseApiController
      *
      * Returns recent email sending logs (from cache or log files)
      */
-    public function getRecentLogs(Request $request)
+    public function getRecentLogs(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
-            $limit = $request->get('limit', 10);
+            $limitRaw = $request->get('limit', 10);
+            $limit = is_numeric($limitRaw) ? (int) $limitRaw : 10;
             $limit = min(max(1, $limit), 50); // Between 1 and 50
 
             // Get from cache (stored when emails are sent)
-            $logs = Cache::get('email_logs', []);
+            $logsRaw = Cache::get('email_logs', []);
+            $logs = is_array($logsRaw) ? $logsRaw : [];
 
             // Sort by timestamp descending
             usort($logs, function ($a, $b) {
-                return strtotime($b['sent_at'] ?? 0) - strtotime($a['sent_at'] ?? 0);
+                /** @var array{sent_at: string} $a */
+                /** @var array{sent_at: string} $b */
+                return strtotime($b['sent_at']) - strtotime($a['sent_at']);
             });
 
             // Limit results
             $logs = array_slice($logs, 0, $limit);
 
+            $totalCountRaw = Cache::get('email_logs', []);
+            $totalCount = is_array($totalCountRaw) || $totalCountRaw instanceof \Countable ? count($totalCountRaw) : 0;
+
             return $this->success([
                 'logs' => $logs,
-                'total' => count(Cache::get('email_logs', [])),
+                'total' => $totalCount,
             ], 'Recent email logs retrieved successfully');
         } catch (\Exception $e) {
             return $this->handleException($e, 'Failed to get email logs', 'Email logs');
@@ -209,7 +235,7 @@ class EmailTestController extends BaseApiController
      *
      * Validates the current email configuration settings
      */
-    public function validateConfig(Request $request)
+    public function validateConfig(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $config = $this->getEmailConfig($request);
@@ -269,10 +295,18 @@ class EmailTestController extends BaseApiController
     /**
      * Get email configuration from request or settings
      */
+    /**
+     * @return array<string, mixed>
+     */
     private function getEmailConfig(Request $request): array
     {
         // If config is provided in request, use it (for testing different configs)
         if ($request->has('config')) {
+            $requestConfig = $request->get('config', []);
+            if (! is_array($requestConfig)) {
+                $requestConfig = [];
+            }
+
             return array_merge([
                 'host' => config('mail.mailers.smtp.host'),
                 'port' => config('mail.mailers.smtp.port'),
@@ -281,7 +315,7 @@ class EmailTestController extends BaseApiController
                 'encryption' => config('mail.mailers.smtp.encryption'),
                 'from_address' => config('mail.from.address'),
                 'from_name' => config('mail.from.name'),
-            ], $request->get('config', []));
+            ], $requestConfig);
         }
 
         // Otherwise, get from settings or config
@@ -301,6 +335,11 @@ class EmailTestController extends BaseApiController
     /**
      * Temporarily update mail configuration
      */
+    /**
+     * Temporarily update mail configuration
+     *
+     * @param  array<string, mixed>  $config
+     */
     private function updateMailConfig(array $config): void
     {
         Config::set('mail.mailers.smtp.host', $config['host']);
@@ -315,9 +354,15 @@ class EmailTestController extends BaseApiController
     /**
      * Log email sent event
      */
+    /**
+     * Log email sent event
+     *
+     * @param  array<string, mixed>  $data
+     */
     private function logEmailSent(array $data): void
     {
-        $logs = Cache::get('email_logs', []);
+        $logsRaw = Cache::get('email_logs', []);
+        $logs = is_array($logsRaw) ? $logsRaw : [];
         $logs[] = array_merge($data, [
             'sent_at' => now()->toIso8601String(),
         ]);

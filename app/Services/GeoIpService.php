@@ -27,6 +27,7 @@ class GeoIpService
 
         // Check cache first
         $cacheKey = "geoip:{$ipAddress}";
+        /** @var array{country: string|null, city: string|null, country_code: string|null}|null $cached */
         $cached = Cache::get($cacheKey);
 
         if ($cached !== null) {
@@ -54,13 +55,14 @@ class GeoIpService
             ]);
 
             if ($response->successful()) {
+                /** @var array<string, mixed> $data */
                 $data = $response->json();
 
                 if (($data['status'] ?? '') === 'success') {
                     return [
-                        'country' => $data['country'] ?? null,
-                        'country_code' => $data['countryCode'] ?? null,
-                        'city' => $data['city'] ?? null,
+                        'country' => isset($data['country']) ? (string) $data['country'] : null,
+                        'country_code' => isset($data['countryCode']) ? (string) $data['countryCode'] : null,
+                        'city' => isset($data['city']) ? (string) $data['city'] : null,
                     ];
                 }
             }

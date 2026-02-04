@@ -19,10 +19,10 @@ use Illuminate\Support\Facades\Cache;
  * @property string|null $author_url
  * @property string|null $license
  * @property string|null $preview_image
- * @property array|null $settings
+ * @property array<string, mixed>|null $settings
  * @property string|null $custom_css
- * @property array|null $dependencies
- * @property array|null $supports
+ * @property array<string, mixed>|null $dependencies
+ * @property array<string|int, mixed>|null $supports
  * @property bool $is_active
  * @property string $status
  * @property string|null $update_url
@@ -31,11 +31,12 @@ use Illuminate\Support\Facades\Cache;
  * @property \Illuminate\Support\Carbon|null $last_updated_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property array|null $manifest
- * @property array $assets
+ * @property array<string, mixed>|null $manifest
+ * @property array<string, mixed> $assets
  */
 class Theme extends Model
 {
+    /** @use HasFactory<\Database\Factories\ThemeFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -229,9 +230,9 @@ class Theme extends Model
     /**
      * Get theme setting
      */
-    public function getSetting(string $key, $default = null)
+    public function getSetting(string $key, mixed $default = null): mixed
     {
-        if (! $this->settings) {
+        if (! is_array($this->settings)) {
             return $default;
         }
 
@@ -241,8 +242,9 @@ class Theme extends Model
     /**
      * Set theme setting
      */
-    public function setSetting(string $key, $value): void
+    public function setSetting(string $key, mixed $value): void
     {
+        /** @var array<string, mixed> $settings */
         $settings = $this->settings ?? [];
         $settings[$key] = $value;
         $this->update(['settings' => $settings]);
@@ -250,9 +252,12 @@ class Theme extends Model
 
     /**
      * Validate theme structure
+     *
+     * @return array<int, string>
      */
     public function validate(): array
     {
+        /** @var array<int, string> $errors */
         $errors = [];
         $themePath = $this->getThemePath();
 
@@ -269,9 +274,14 @@ class Theme extends Model
             $errors[] = 'Theme manifest (theme.json) not found';
         } else {
             // Validate manifest
-            $manifest = json_decode(file_get_contents($manifestPath), true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $errors[] = 'Invalid theme.json format: '.json_last_error_msg();
+            $content = file_get_contents($manifestPath);
+            if ($content === false) {
+                $errors[] = 'Could not read theme.json';
+            } else {
+                $manifest = json_decode($content, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $errors[] = 'Invalid theme.json format: '.json_last_error_msg();
+                }
             }
         }
 
@@ -301,6 +311,8 @@ class Theme extends Model
 
     /**
      * Get theme manifest
+     *
+     * @return array<string, mixed>|null
      */
     public function getManifest(): ?array
     {
@@ -310,9 +322,15 @@ class Theme extends Model
             return null;
         }
 
-        $manifest = json_decode(file_get_contents($manifestPath), true);
+        $content = file_get_contents($manifestPath);
+        if ($content === false) {
+            return null;
+        }
 
-        return $manifest ?: null;
+        $manifest = json_decode($content, true);
+
+        /** @var array<string, mixed>|null $manifest */
+        return is_array($manifest) ? $manifest : null;
     }
 
     /**
@@ -330,6 +348,8 @@ class Theme extends Model
 
     /**
      * Get CSS assets
+     *
+     * @return array<int, string>
      */
     public function getCssAssets(): array
     {
@@ -339,8 +359,10 @@ class Theme extends Model
 
         if (is_dir($cssDir)) {
             $files = glob("{$cssDir}/*.css");
-            foreach ($files as $file) {
-                $assets[] = basename($file);
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    $assets[] = basename($file);
+                }
             }
         }
 
@@ -349,6 +371,8 @@ class Theme extends Model
 
     /**
      * Get JS assets
+     *
+     * @return array<int, string>
      */
     public function getJsAssets(): array
     {
@@ -358,8 +382,10 @@ class Theme extends Model
 
         if (is_dir($jsDir)) {
             $files = glob("{$jsDir}/*.js");
-            foreach ($files as $file) {
-                $assets[] = basename($file);
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    $assets[] = basename($file);
+                }
             }
         }
 
@@ -368,24 +394,33 @@ class Theme extends Model
 
     /**
      * Scope: Get themes by type
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<self>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<self>
      */
-    public function scopeOfType($query, string $type)
+    public function scopeOfType(\Illuminate\Database\Eloquent\Builder $query, string $type): \Illuminate\Database\Eloquent\Builder
     {
         return $query->where('type', $type);
     }
 
     /**
      * Scope: Get active themes
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<self>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<self>
      */
-    public function scopeActive($query)
+    public function scopeActive(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
         return $query->where('is_active', true);
     }
 
     /**
      * Scope: Get themes by status
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<self>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<self>
      */
-    public function scopeByStatus($query, string $status)
+    public function scopeByStatus(\Illuminate\Database\Eloquent\Builder $query, string $status): \Illuminate\Database\Eloquent\Builder
     {
         return $query->where('status', $status);
     }
@@ -402,7 +437,13 @@ class Theme extends Model
         $themePath = $this->getThemePath();
         $componentsDir = "{$themePath}/components";
 
-        return is_dir($componentsDir) && count(glob("{$componentsDir}/*")) > 0;
+        if (! is_dir($componentsDir)) {
+            return false;
+        }
+
+        $files = glob("{$componentsDir}/*");
+
+        return is_array($files) && count($files) > 0;
     }
 
     /**
@@ -418,12 +459,17 @@ class Theme extends Model
 
     /**
      * Get components manifest from theme.json
+     *
+     * @return array<string, mixed>
      */
     public function getComponentManifest(): array
     {
         $manifest = $this->getManifest();
 
-        return $manifest['components'] ?? [];
+        /** @var array<string, mixed> $components */
+        $components = $manifest['components'] ?? [];
+
+        return $components;
     }
 
     /**
@@ -439,16 +485,18 @@ class Theme extends Model
 
     /**
      * Get theme configuration
+     *
+     * @return array{settings_schema: array<mixed>, supports: array<mixed>, menus: array<mixed>, components: array<mixed>}
      */
     public function getThemeConfig(): array
     {
-        $manifest = $this->getManifest();
+        $manifest = $this->getManifest() ?? [];
 
         return [
-            'settings_schema' => $manifest['settings_schema'] ?? [],
-            'supports' => $manifest['supports'] ?? [],
-            'menus' => $manifest['menus'] ?? [],
-            'components' => $manifest['components'] ?? [],
+            'settings_schema' => is_array($manifest['settings_schema'] ?? null) ? $manifest['settings_schema'] : [],
+            'supports' => is_array($manifest['supports'] ?? null) ? $manifest['supports'] : [],
+            'menus' => is_array($manifest['menus'] ?? null) ? $manifest['menus'] : [],
+            'components' => is_array($manifest['components'] ?? null) ? $manifest['components'] : [],
         ];
     }
 

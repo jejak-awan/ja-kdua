@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ContentTemplate extends Model
 {
-    use HasFactory, SoftDeletes;
+    use SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -27,6 +26,9 @@ class ContentTemplate extends Model
         'author_id',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
@@ -39,17 +41,24 @@ class ContentTemplate extends Model
         'usage_count' => 'integer',
     ];
 
+    /**
+     * @return BelongsTo<Category, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function createContent($data = [])
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function createContent(array $data = []): \App\Models\Content
     {
         $title = $this->replaceTemplateVariables($this->title_template ?? '{{ title }}', $data);
-        $body = $this->replaceTemplateVariables($this->body_template, $data);
+        $body = $this->replaceTemplateVariables((string) $this->body_template, $data);
         $excerpt = $this->excerpt_template ? $this->replaceTemplateVariables($this->excerpt_template, $data) : null;
 
+        /** @var array<string, mixed> $contentData */
         $contentData = [
             'title' => $title,
             'body' => $body,
@@ -63,12 +72,15 @@ class ContentTemplate extends Model
         $contentData = array_merge($contentData, $data);
 
         // Create content
+        /** @var \App\Models\Content $content */
         $content = \App\Models\Content::create($contentData);
 
         // Apply default custom fields if any
-        if ($this->default_fields) {
+        if (is_array($this->default_fields)) {
             foreach ($this->default_fields as $fieldSlug => $value) {
-                $content->setCustomFieldValue($fieldSlug, $value);
+                if (is_string($fieldSlug)) {
+                    $content->setCustomFieldValue($fieldSlug, $value);
+                }
             }
         }
 
@@ -78,11 +90,16 @@ class ContentTemplate extends Model
         return $content;
     }
 
-    protected function replaceTemplateVariables($template, array $data)
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function replaceTemplateVariables(string $template, array $data): string
     {
         foreach ($data as $key => $value) {
-            $template = str_replace('{{'.$key.'}}', $value, $template);
-            $template = str_replace('{{ $'.$key.' }}', $value, $template);
+            if (is_scalar($value)) {
+                $template = str_replace('{{'.$key.'}}', (string) $value, $template);
+                $template = str_replace('{{ $'.$key.' }}', (string) $value, $template);
+            }
         }
 
         return $template;

@@ -32,10 +32,10 @@ class ThemeMake extends Command
      */
     public function handle(ThemeService $themeService): int
     {
-        $name = $this->argument('name');
-        $slug = $this->option('slug') ?: Str::slug($name);
-        $type = $this->option('type') ?? 'frontend';
-        $parent = $this->option('parent');
+        $name = (string) $this->argument('name');
+        $slug = (string) ($this->option('slug') ?: Str::slug($name));
+        $type = (string) ($this->option('type') ?? 'frontend');
+        $parent = (string) $this->option('parent');
 
         // Validate type
         if (! in_array($type, ['frontend', 'admin', 'email'])) {
@@ -67,11 +67,13 @@ class ThemeMake extends Command
         $manifestPath = "{$themePath}/theme.json";
         if (file_exists($manifestPath)) {
             $manifest = json_decode(file_get_contents($manifestPath), true);
-            $manifest['type'] = $type;
-            if ($parent) {
-                $manifest['parent_theme'] = $parent;
+            if (is_array($manifest)) {
+                $manifest['type'] = $type;
+                if ($parent) {
+                    $manifest['parent_theme'] = $parent;
+                }
+                file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             }
-            file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         }
 
         // Create theme in database

@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string|null $model_type
  * @property int|null $model_id
  * @property string|null $description
- * @property array|null $changes
+ * @property array<string, mixed>|null $changes
  * @property string|null $ip_address
  * @property string|null $user_agent
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -39,34 +39,48 @@ class ActivityLog extends Model
         'changes' => 'array',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function model(): MorphTo
     {
         return $this->morphTo();
     }
 
     // Helper method to log activity
-    public static function log(string $action, $model = null, array $changes = [], $user = null, $description = null): self
+    /**
+     * @param  Model|null  $model
+     * @param  array<string, mixed>  $changes
+     * @param  User|null  $user
+     */
+    public static function log(string $action, $model = null, array $changes = [], $user = null, ?string $description = null): self
     {
         $user = $user ?? auth()->user();
+
+        /** @var string $ip */
+        $ip = \App\Helpers\IpHelper::getClientIp(request());
 
         return self::create([
             'user_id' => $user?->id,
             'action' => $action,
             'model_type' => $model ? get_class($model) : null,
-            'model_id' => $model?->id,
+            'model_id' => $model?->getKey(),
             'description' => $description ?? self::generateDescription($action, $model),
             'changes' => $changes,
-            'ip_address' => request()->ip(),
+            'ip_address' => $ip,
             'user_agent' => request()->userAgent(),
         ]);
     }
 
-    protected static function generateDescription(string $action, $model = null): string
+    protected static function generateDescription(string $action, ?Model $model = null): string
     {
         $modelName = $model ? class_basename($model) : 'item';
 

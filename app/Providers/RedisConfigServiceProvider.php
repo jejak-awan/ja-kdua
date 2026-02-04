@@ -43,9 +43,12 @@ class RedisConfigServiceProvider extends ServiceProvider
      */
     protected function isMigrating(): bool
     {
-        return in_array('migrate', $_SERVER['argv'] ?? [])
-            || in_array('migrate:fresh', $_SERVER['argv'] ?? [])
-            || in_array('migrate:refresh', $_SERVER['argv'] ?? []);
+        /** @var array<int, string> $argv */
+        $argv = $_SERVER['argv'] ?? [];
+
+        return in_array('migrate', $argv, true)
+            || in_array('migrate:fresh', $argv, true)
+            || in_array('migrate:refresh', $argv, true);
     }
 
     /**

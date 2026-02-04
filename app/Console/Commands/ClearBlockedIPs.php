@@ -11,8 +11,9 @@ class ClearBlockedIPs extends Command
 
     protected $description = 'Clear blocked IP addresses and failed login attempts from cache';
 
-    public function handle()
+    public function handle(): int
     {
+        /** @var string|null $ip */
         $ip = $this->argument('ip');
 
         if ($ip) {

@@ -8,22 +8,29 @@ use Illuminate\Http\Request;
 
 class BackupController extends BaseApiController
 {
-    protected $backupService;
+    protected BackupService $backupService;
 
     public function __construct(BackupService $backupService)
     {
         $this->backupService = $backupService;
     }
 
-    public function index(Request $request)
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        $type = $request->input('type');
+        $typeRaw = $request->input('type');
+        $type = is_string($typeRaw) ? $typeRaw : null;
         $backups = $this->backupService->listBackups($type);
 
         return $this->success($backups, 'Backups retrieved successfully');
     }
 
-    public function store(Request $request)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'name' => 'nullable|string|max:255',
@@ -31,7 +38,8 @@ class BackupController extends BaseApiController
         ]);
 
         try {
-            $name = $request->input('name');
+            $nameRaw = $request->input('name');
+            $name = is_string($nameRaw) ? $nameRaw : null;
             $backup = $this->backupService->createDatabaseBackup($name);
 
             if ($backup->status === 'failed') {
@@ -61,12 +69,18 @@ class BackupController extends BaseApiController
         }
     }
 
-    public function show(Backup $backup)
+    /**
+     * Display the specified resource.
+     */
+    public function show(Backup $backup): \Illuminate\Http\JsonResponse
     {
         return $this->success($backup, 'Backup retrieved successfully');
     }
 
-    public function restore(Request $request, Backup $backup)
+    /**
+     * Restore the specified backup.
+     */
+    public function restore(Request $request, Backup $backup): \Illuminate\Http\JsonResponse
     {
         if (! $backup->isCompleted()) {
             return $this->validationError(['backup' => ['Cannot restore incomplete backup']], 'Cannot restore incomplete backup');
@@ -81,36 +95,50 @@ class BackupController extends BaseApiController
         }
     }
 
-    public function destroy(Backup $backup)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Backup $backup): \Illuminate\Http\JsonResponse
     {
         $this->backupService->deleteBackup($backup);
 
         return $this->success(null, 'Backup deleted successfully');
     }
 
+    /**
+     * Download the specified backup.
+     *
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
+     */
     public function download(Backup $backup)
     {
         if (! $backup->isCompleted()) {
             return $this->notFound('Backup');
         }
 
-        $path = \Storage::disk($backup->disk)->path($backup->path);
+        $path = \Storage::disk($backup->disk)->path((string) $backup->path);
 
         if (! file_exists($path)) {
             return $this->notFound('Backup file');
         }
 
-        return response()->download($path, $backup->name.'.sql');
+        return response()->download($path, (string) $backup->name.'.sql');
     }
 
-    public function stats()
+    /**
+     * Get backup statistics.
+     */
+    public function stats(): \Illuminate\Http\JsonResponse
     {
         $stats = $this->backupService->getBackupStats();
 
         return $this->success($stats, 'Backup statistics retrieved successfully');
     }
 
-    public function schedule(Request $request)
+    /**
+     * Get or update backup schedule.
+     */
+    public function schedule(Request $request): \Illuminate\Http\JsonResponse
     {
         if ($request->isMethod('GET')) {
             $schedule = $this->backupService->getScheduleSettings();
@@ -132,15 +160,21 @@ class BackupController extends BaseApiController
         return $this->success($schedule, 'Backup schedule updated successfully');
     }
 
-    public function cleanup(Request $request)
+    /**
+     * Cleanup old backups.
+     */
+    public function cleanup(Request $request): \Illuminate\Http\JsonResponse
     {
-        $retentionDays = $request->input('retention_days', 30);
-        $maxBackups = $request->input('max_backups', 10);
+        $retentionDaysRaw = $request->input('retention_days', 30);
+        $retentionDays = is_numeric($retentionDaysRaw) ? (int) $retentionDaysRaw : 30;
+        $maxBackupsRaw = $request->input('max_backups', 10);
+        $maxBackups = is_numeric($maxBackupsRaw) ? (int) $maxBackupsRaw : 10;
 
         $deleted = $this->backupService->cleanupOldBackups($retentionDays, $maxBackups);
+        $deletedStr = (string) $deleted;
 
         return $this->success([
             'deleted' => $deleted,
-        ], "{$deleted} old backups cleaned up");
+        ], "{$deletedStr} old backups cleaned up");
     }
 }

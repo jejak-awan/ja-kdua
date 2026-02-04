@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class NewsletterSubscriber extends Model
 {
-    use HasFactory, SoftDeletes;
+    use SoftDeletes;
 
     protected $fillable = [
         'email',
@@ -26,12 +25,19 @@ class NewsletterSubscriber extends Model
         'unsubscribed_at' => 'datetime',
     ];
 
-    // Status: subscribed, unsubscribed, pending
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
+     */
     public function scopeSubscribed($query)
     {
         return $query->where('status', 'subscribed');
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
+     */
     public function scopePending($query)
     {
         return $query->where('status', 'pending');

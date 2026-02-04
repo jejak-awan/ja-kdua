@@ -25,25 +25,35 @@ class SearchIndex extends Model
         'relevance_score' => 'integer',
     ];
 
-    public function searchable()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo<\Illuminate\Database\Eloquent\Model, $this>
+     */
+    public function searchable(): \Illuminate\Database\Eloquent\Relations\MorphTo
     {
         return $this->morphTo();
     }
 
-    public static function index($model, $data = [])
+    /**
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  array<string, mixed>  $data
+     */
+    public static function index($model, $data = []): self
     {
         $searchableType = get_class($model);
-        $searchableId = $model->id;
+        /** @var int $searchableId */
+        $searchableId = $model->getAttribute('id');
 
         // Build searchable content
-        $title = $data['title'] ?? $model->title ?? $model->name ?? '';
-        $content = $data['content'] ?? $model->body ?? $model->description ?? '';
-        $excerpt = $data['excerpt'] ?? $model->excerpt ?? null;
+        /** @var string $title */
+        $title = $data['title'] ?? $model->getAttribute('title') ?? $model->getAttribute('name') ?? '';
+        /** @var string|null $content */
+        $content = $data['content'] ?? $model->getAttribute('body') ?? $model->getAttribute('description') ?? '';
+        $excerpt = $data['excerpt'] ?? $model->getAttribute('excerpt') ?? null;
         $url = $data['url'] ?? null;
         $type = $data['type'] ?? null;
 
         // Calculate relevance score (can be enhanced)
-        $relevanceScore = self::calculateRelevance($title, $content);
+        $relevanceScore = self::calculateRelevance($title, (string) $content);
 
         return self::updateOrCreate(
             [
@@ -62,14 +72,19 @@ class SearchIndex extends Model
         );
     }
 
-    public static function remove($model)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     */
+    public static function remove($model): ?bool
     {
-        return self::where('searchable_type', get_class($model))
-            ->where('searchable_id', $model->id)
+        $deleted = self::where('searchable_type', get_class($model))
+            ->where('searchable_id', $model->getAttribute('id'))
             ->delete();
+
+        return $deleted > 0;
     }
 
-    protected static function calculateRelevance($title, $content)
+    protected static function calculateRelevance(string $title, string $content): int
     {
         // Simple relevance calculation
         // Title matches are more important than content matches

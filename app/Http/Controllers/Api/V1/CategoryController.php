@@ -44,22 +44,24 @@ class CategoryController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
         $query = Category::query();
 
         // Admin/Manager can see all, others see own + global
-        if ($request->user() && ! $request->user()->can('manage categories')) {
-            $query->where(function ($q) use ($request) {
-                $q->whereNull('author_id')->orWhere('author_id', $request->user()->id);
+        if ($user && ! $user->can('manage categories')) {
+            $query->where(function ($q) use ($user) {
+                $q->whereNull('author_id')->orWhere('author_id', $user->id);
             });
-        } elseif (! $request->user()) {
+        } elseif (! $user) {
             // Public/Guest sees only global categories
             $query->whereNull('author_id');
         }
 
         // Tree view
-        if ($request->has('tree') && $request->tree) {
+        if ($request->has('tree') && $request->boolean('tree')) {
             // Note: Tree view with partial permissions might break hierarchy if parent is missing.
             // For now, we assume global categories are parents.
             $categories = $query->whereNull('parent_id')
@@ -79,15 +81,16 @@ class CategoryController extends BaseApiController
             ->orderBy('sort_order');
 
         if ($request->has('per_page')) {
-            $perPage = (int) $request->get('per_page', 20);
+            $perPageRaw = $request->get('per_page', 20);
+            $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 20;
             $categories = $query->paginate($perPage);
 
             return $this->success($categories, 'Categories retrieved successfully');
         }
 
-        $categories = $query->get();
+        $categoriesFlat = $query->get();
 
-        return $this->success($categories, 'Categories retrieved successfully');
+        return $this->success($categoriesFlat, 'Categories retrieved successfully');
     }
 
     /**
@@ -126,8 +129,14 @@ class CategoryController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'required|string|unique:categories,slug',
@@ -141,19 +150,22 @@ class CategoryController extends BaseApiController
 
         // Prevent circular reference
         if (isset($validated['parent_id']) && $validated['parent_id']) {
-            $parent = Category::find($validated['parent_id']);
-            if ($parent && $parent->parent_id == $request->input('id')) {
+            $parentId = (int) $validated['parent_id'];
+            /** @var Category|null $parent */
+            $parent = Category::find($parentId);
+            $requestId = $request->input('id');
+            if ($parent && $requestId && $parent->parent_id == $requestId) {
                 return $this->validationError(['parent_id' => ['Cannot set parent to a child category']], 'Cannot set parent to a child category');
             }
         }
 
         // Assign author logic
-        if ($request->user()->can('manage categories')) {
+        if ($user->can('manage categories')) {
             // Admin can assign author or leave null (Global)
             // validated['author_id'] is already in array if sent
         } else {
             // Regular user forces ownership
-            $validated['author_id'] = $request->user()->id;
+            $validated['author_id'] = $user->id;
         }
 
         $category = Category::create($validated);
@@ -197,16 +209,14 @@ class CategoryController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
-    public function show(Category $category)
+    public function show(Category $category): \Illuminate\Http\JsonResponse
     {
+        $user = request()->user();
+        /** @var \App\Models\User|null $user */
+
         // Scope check for show?
-        // Usually view permissions handled by middleware, but "view own" needs check.
-        // If middleware is 'view categories' and user is Author, they might try to view Admin's Private category?
-        // Current logic: Admin categories are NULL (Global). So visible.
-        // Private categories have AuthorID.
-        // If Author A tries to view Author B's category:
-        if (request()->user() && ! request()->user()->can('manage categories')) {
-            if ($category->author_id && $category->author_id !== request()->user()->id) {
+        if ($user && ! $user->can('manage categories')) {
+            if ($category->author_id && $category->author_id !== $user->id) {
                 return $this->forbidden('You do not have permission to view this category');
             }
         }
@@ -249,11 +259,17 @@ class CategoryController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, Category $category): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         // Ownership check
-        if (! request()->user()->can('manage categories')) {
-            if ($category->author_id && $category->author_id !== request()->user()->id) {
+        if (! $user->can('manage categories')) {
+            if ($category->author_id && $category->author_id !== $user->id) {
                 return $this->forbidden('You do not have permission to update this category');
             }
             // Cannot change author_id
@@ -278,15 +294,19 @@ class CategoryController extends BaseApiController
 
         // Prevent circular reference
         if (isset($validated['parent_id']) && $validated['parent_id']) {
-            $parent = Category::find($validated['parent_id']);
+            $parentId = (int) $validated['parent_id'];
+            /** @var Category|null $parent */
+            $parent = Category::find($parentId);
             if ($parent) {
                 // Check if parent is a descendant of this category
                 $checkParent = $parent;
-                while ($checkParent->parent_id) {
+                while ($checkParent && $checkParent->parent_id) {
                     if ($checkParent->parent_id == $category->id) {
                         return $this->validationError(['parent_id' => ['Cannot set parent to a child category']], 'Cannot set parent to a child category');
                     }
-                    $checkParent = Category::find($checkParent->parent_id);
+                    /** @var Category|null $nextParent */
+                    $nextParent = Category::find($checkParent->parent_id);
+                    $checkParent = $nextParent;
                 }
             }
         }
@@ -321,11 +341,17 @@ class CategoryController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
-    public function destroy(Category $category)
+    public function destroy(Category $category): \Illuminate\Http\JsonResponse
     {
+        $user = request()->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         // Ownership check
-        if (! request()->user()->can('manage categories')) {
-            if ($category->author_id && $category->author_id !== request()->user()->id) {
+        if (! $user->can('manage categories')) {
+            if ($category->author_id && $category->author_id !== $user->id) {
                 return $this->forbidden('You do not have permission to delete this category');
             }
             // Global categories (null author) cannot be deleted by non-managers
@@ -338,7 +364,7 @@ class CategoryController extends BaseApiController
         if ($category->children()->count() > 0) {
             return $this->validationError([
                 'category' => ['Cannot delete category with child categories'],
-                'children_count' => $category->children()->count(),
+                'children_count' => [(string) $category->children()->count()],
             ], 'Cannot delete category with child categories');
         }
 
@@ -346,7 +372,7 @@ class CategoryController extends BaseApiController
         if ($category->contents()->count() > 0) {
             return $this->validationError([
                 'category' => ['Cannot delete category with associated contents'],
-                'contents_count' => $category->contents()->count(),
+                'contents_count' => [(string) $category->contents()->count()],
             ], 'Cannot delete category with associated contents');
         }
 
@@ -391,7 +417,7 @@ class CategoryController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
-    public function move(Request $request, Category $category)
+    public function move(Request $request, Category $category): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'parent_id' => 'nullable|exists:categories,id',
@@ -405,14 +431,18 @@ class CategoryController extends BaseApiController
 
         // Prevent circular reference
         if (isset($validated['parent_id']) && $validated['parent_id']) {
-            $parent = Category::find($validated['parent_id']);
+            $parentId = (int) $validated['parent_id'];
+            /** @var Category|null $parent */
+            $parent = Category::find($parentId);
             if ($parent) {
                 $checkParent = $parent;
-                while ($checkParent->parent_id) {
+                while ($checkParent && $checkParent->parent_id) {
                     if ($checkParent->parent_id == $category->id) {
                         return $this->validationError(['parent_id' => ['Cannot set parent to a child category']], 'Cannot set parent to a child category');
                     }
-                    $checkParent = Category::find($checkParent->parent_id);
+                    /** @var Category|null $nextParent */
+                    $nextParent = Category::find($checkParent->parent_id);
+                    $checkParent = $nextParent;
                 }
             }
         }
@@ -447,22 +477,29 @@ class CategoryController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
-    public function bulkDestroy(Request $request)
+    public function bulkDestroy(Request $request): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         $validated = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:categories,id',
         ]);
 
-        $ids = $validated['ids'];
+        $idsRaw = $validated['ids'];
+        $ids = is_array($idsRaw) ? $idsRaw : [];
         $categories = Category::whereIn('id', $ids)->get();
         $count = 0;
         $errors = [];
 
         foreach ($categories as $category) {
             // Check ownership/permissions
-            if (! $request->user()->can('manage categories')) {
-                if ($category->author_id && $category->author_id !== $request->user()->id) {
+            if (! $user->can('manage categories')) {
+                if ($category->author_id && $category->author_id !== $user->id) {
                     $errors[] = "Permission denied for category ID {$category->id}: Not owner.";
 
                     continue;

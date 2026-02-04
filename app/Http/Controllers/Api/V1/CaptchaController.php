@@ -28,8 +28,13 @@ class CaptchaController extends BaseApiController
             'answer' => 'required|string',
         ]);
 
+        $tokenRaw = $request->input('token');
+        $token = is_string($tokenRaw) ? $tokenRaw : '';
+        $answerRaw = $request->input('answer');
+        $answer = is_string($answerRaw) ? $answerRaw : '';
+
         $service = new CaptchaService;
-        $valid = $service->verify($request->token, $request->answer, false); // Don't consume on dry-run verify
+        $valid = $service->verify($token, $answer, false); // Don't consume on dry-run verify
 
         if (! $valid) {
             return $this->error('Invalid captcha', 422);

@@ -10,15 +10,16 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * @property string|null $thumbnail_path
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Tag[] $tags
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\MediaUsage[] $usages
- * @property-read array $tag_names
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tag> $tags
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\MediaUsage> $usages
+ * @property-read array<int, string> $tag_names
  * @property-read string|null $url
  * @property-read string|null $thumbnail_url
  * @property-read int $usage_count
  */
 class Media extends Model
 {
+    /** @use HasFactory<\Database\Factories\MediaFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -37,6 +38,9 @@ class Media extends Model
         'is_shared',
     ];
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this>
+     */
     public function author(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
@@ -49,32 +53,47 @@ class Media extends Model
 
     protected $appends = ['url', 'thumbnail_url', 'tag_names'];
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<MediaFolder, $this>
+     */
     public function folder(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(MediaFolder::class, 'folder_id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<MediaUsage, $this>
+     */
     public function usages(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(MediaUsage::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Tag, $this>
+     */
     public function tags(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'media_tag');
     }
 
-    public function getTagNamesAttribute()
+    /**
+     * @return array<int, string>
+     */
+    public function getTagNamesAttribute(): array
     {
-        return $this->tags->pluck('name')->toArray();
+        /** @var array<int, string> $names */
+        $names = $this->tags->pluck('name')->toArray();
+
+        return $names;
     }
 
-    public function getUsageCountAttribute()
+    public function getUsageCountAttribute(): int
     {
         return $this->usages()->count();
     }
 
-    public function getUrlAttribute()
+    public function getUrlAttribute(): ?string
     {
         if (! $this->path) {
             return null;
@@ -95,9 +114,9 @@ class Media extends Model
         return Storage::disk($this->disk)->url($this->path);
     }
 
-    public function getThumbnailUrlAttribute()
+    public function getThumbnailUrlAttribute(): ?string
     {
-        if (! $this->path || ! str_starts_with($this->mime_type, 'image/')) {
+        if (! $this->path || ! str_starts_with((string) $this->mime_type, 'image/')) {
             return null;
         }
 

@@ -23,11 +23,20 @@ class CspReport extends Model
         'line_number' => 'integer',
     ];
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
+     */
     public function scopeNew($query)
     {
         return $query->where('status', 'new');
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @param  string  $directive
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
+     */
     public function scopeByDirective($query, $directive)
     {
         return $query->where('violated_directive', $directive);

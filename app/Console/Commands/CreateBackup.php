@@ -11,9 +11,10 @@ class CreateBackup extends Command
 
     protected $description = 'Create a backup of the CMS';
 
-    public function handle(BackupService $backupService)
+    public function handle(BackupService $backupService): int
     {
-        $type = $this->option('type');
+        /** @var string $type */
+        $type = $this->option('type') ?? 'database';
 
         $this->info("Creating {$type} backup...");
 

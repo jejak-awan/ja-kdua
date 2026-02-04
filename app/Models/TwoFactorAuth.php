@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Crypt;
  * @property int $id
  * @property int $user_id
  * @property string|null $secret
- * @property array|null $backup_codes
+ * @property array<int, string>|null $backup_codes
  * @property bool $enabled
  * @property \Illuminate\Support\Carbon|null $enabled_at
  * @property \Illuminate\Support\Carbon|null $recovery_codes_generated_at
@@ -45,6 +45,8 @@ class TwoFactorAuth extends Model
 
     /**
      * Get the user that owns the 2FA.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -100,6 +102,8 @@ class TwoFactorAuth extends Model
 
     /**
      * Add backup codes (hashed).
+     *
+     * @param  array<int, string>  $codes
      */
     public function setBackupCodes(array $codes): void
     {

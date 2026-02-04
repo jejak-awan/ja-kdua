@@ -17,10 +17,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property bool|null $has_ui_translations
- * @property array|null $translation_keys
+ * @property int $translation_keys
  */
 class Language extends Model
 {
+    /** @use HasFactory<\Database\Factories\LanguageFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -39,12 +40,16 @@ class Language extends Model
         'sort_order' => 'integer',
     ];
 
-    public static function getDefault()
+    public static function getDefault(): ?self
     {
+        /** @var self|null */
         return static::where('is_default', true)->where('is_active', true)->first();
     }
 
-    public static function getActive()
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, self>
+     */
+    public static function getActive(): \Illuminate\Database\Eloquent\Collection
     {
         return static::where('is_active', true)->orderBy('sort_order')->get();
     }

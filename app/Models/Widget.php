@@ -21,7 +21,10 @@ class Widget extends Model
         'is_active' => 'boolean',
     ];
 
-    public static function getByLocation($location)
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, self>
+     */
+    public static function getByLocation(string $location): \Illuminate\Database\Eloquent\Collection
     {
         return self::where('location', $location)
             ->where('is_active', true)
@@ -29,7 +32,7 @@ class Widget extends Model
             ->get();
     }
 
-    public function getContent()
+    public function getContent(): mixed
     {
         switch ($this->type) {
             case 'recent_posts':
@@ -43,18 +46,27 @@ class Widget extends Model
         }
     }
 
-    protected function getRecentPosts()
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Content>
+     */
+    protected function getRecentPosts(): \Illuminate\Database\Eloquent\Collection
     {
-        $limit = $this->settings['limit'] ?? 5;
+        /** @var array<string, mixed> $settings */
+        $settings = $this->settings ?? [];
+        /** @var int $limit */
+        $limit = $settings['limit'] ?? 5;
 
         return \App\Models\Content::where('status', 'published')
             ->where('type', 'post')
             ->latest('published_at')
-            ->limit($limit)
+            ->limit((int) $limit)
             ->get();
     }
 
-    protected function getCategories()
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Category>
+     */
+    protected function getCategories(): \Illuminate\Database\Eloquent\Collection
     {
         return \App\Models\Category::where('is_active', true)
             ->orderBy('sort_order')

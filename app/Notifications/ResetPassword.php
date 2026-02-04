@@ -10,20 +10,28 @@ class ResetPassword extends Notification
 {
     use Queueable;
 
-    public $token;
+    public string $token;
 
-    public function __construct($token)
+    public function __construct(string $token)
     {
         $this->token = $token;
     }
 
-    public function via($notifiable)
+    /**
+     * @param  mixed  $notifiable
+     * @return array<int, string>
+     */
+    public function via($notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail($notifiable)
+    /**
+     * @param  mixed  $notifiable
+     */
+    public function toMail($notifiable): MailMessage
     {
+        /** @var object{email: string} $notifiable */
         $url = url('/reset-password?token='.$this->token.'&email='.urlencode($notifiable->email));
 
         return (new MailMessage)

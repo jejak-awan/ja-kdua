@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 
 class NewsletterController extends BaseApiController
 {
-    public function subscribe(Request $request)
+    public function subscribe(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|max:255',
@@ -21,8 +21,10 @@ class NewsletterController extends BaseApiController
         }
 
         try {
-            $email = $request->email;
-            $name = $request->name;
+            $emailRaw = $request->email;
+            $email = is_string($emailRaw) ? $emailRaw : '';
+            $nameRaw = $request->name;
+            $name = is_string($nameRaw) ? $nameRaw : null;
 
             // Check if already subscribed
             $existing = NewsletterSubscriber::where('email', $email)->first();
@@ -72,7 +74,7 @@ class NewsletterController extends BaseApiController
         }
     }
 
-    public function unsubscribe(Request $request)
+    public function unsubscribe(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
@@ -83,7 +85,9 @@ class NewsletterController extends BaseApiController
         }
 
         try {
-            $subscriber = NewsletterSubscriber::where('email', $request->email)->first();
+            $emailRaw = $request->email;
+            $email = is_string($emailRaw) ? $emailRaw : '';
+            $subscriber = NewsletterSubscriber::where('email', $email)->first();
 
             if (! $subscriber) {
                 return $this->error('Email tidak ditemukan', 404);
@@ -109,14 +113,15 @@ class NewsletterController extends BaseApiController
     /**
      * Admin: Get paginated subscribers
      */
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $query = NewsletterSubscriber::query();
 
             // Search by email or name
             if ($request->has('q')) {
-                $search = $request->q;
+                $searchRaw = $request->q;
+                $search = is_string($searchRaw) ? $searchRaw : '';
                 $query->where(function ($q) use ($search) {
                     $q->where('email', 'like', "%{$search}%")
                         ->orWhere('name', 'like', "%{$search}%");
@@ -124,13 +129,18 @@ class NewsletterController extends BaseApiController
             }
 
             // Filter by status
-            if ($request->has('status') && in_array($request->status, ['subscribed', 'unsubscribed'])) {
-                $query->where('status', $request->status);
+            if ($request->has('status')) {
+                $statusRaw = $request->status;
+                $status = is_string($statusRaw) ? $statusRaw : '';
+                if (in_array($status, ['subscribed', 'unsubscribed'])) {
+                    $query->where('status', $status);
+                }
             }
 
             // Soft deletes filter
             if ($request->has('trashed')) {
-                $trashed = $request->trashed;
+                $trashedRaw = $request->trashed;
+                $trashed = is_string($trashedRaw) ? $trashedRaw : '';
                 if ($trashed === 'only') {
                     $query->onlyTrashed();
                 } elseif ($trashed === 'with') {
@@ -138,7 +148,8 @@ class NewsletterController extends BaseApiController
                 }
             }
 
-            $perPage = $request->get('per_page', 10);
+            $perPageRaw = $request->get('per_page', 10);
+            $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 10;
             $subscribers = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
             return $this->success($subscribers);
@@ -152,9 +163,13 @@ class NewsletterController extends BaseApiController
     /**
      * Admin: Delete subscriber
      */
-    public function destroy($id)
+    /**
+     * @param  string|int  $id
+     */
+    public function destroy($id): \Illuminate\Http\JsonResponse
     {
         try {
+            /** @var NewsletterSubscriber $subscriber */
             $subscriber = NewsletterSubscriber::findOrFail($id);
             $subscriber->delete();
 
@@ -164,9 +179,13 @@ class NewsletterController extends BaseApiController
         }
     }
 
-    public function restore($id)
+    /**
+     * @param  string|int  $id
+     */
+    public function restore($id): \Illuminate\Http\JsonResponse
     {
         try {
+            /** @var NewsletterSubscriber $subscriber */
             $subscriber = NewsletterSubscriber::withTrashed()->findOrFail($id);
             $subscriber->restore();
 
@@ -176,9 +195,13 @@ class NewsletterController extends BaseApiController
         }
     }
 
-    public function forceDelete($id)
+    /**
+     * @param  string|int  $id
+     */
+    public function forceDelete($id): \Illuminate\Http\JsonResponse
     {
         try {
+            /** @var NewsletterSubscriber $subscriber */
             $subscriber = NewsletterSubscriber::withTrashed()->findOrFail($id);
             $subscriber->forceDelete();
 
@@ -191,13 +214,15 @@ class NewsletterController extends BaseApiController
     /**
      * Admin: Export subscribers (returns raw CSV data)
      */
-    public function export(Request $request)
+    public function export(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse|\Illuminate\Http\JsonResponse
     {
         try {
             $query = NewsletterSubscriber::query();
 
-            if ($request->has('status') && in_array($request->status, ['subscribed', 'unsubscribed'])) {
-                $query->where('status', $request->status);
+            $statusRaw = $request->status;
+            $status = is_string($statusRaw) ? $statusRaw : '';
+            if ($status && in_array($status, ['subscribed', 'unsubscribed'])) {
+                $query->where('status', $status);
             }
 
             $subscribers = $query->orderBy('created_at', 'desc')->get();
@@ -210,18 +235,21 @@ class NewsletterController extends BaseApiController
                 'Expires' => '0',
             ];
 
-            $callback = function () use ($subscribers) {
+            $callback = function () use ($subscribers): void {
                 $file = fopen('php://output', 'w');
+                if ($file === false) {
+                    return;
+                }
                 fputcsv($file, ['ID', 'Email', 'Name', 'Status', 'Joined At', 'Source']);
 
                 foreach ($subscribers as $subscriber) {
                     fputcsv($file, [
-                        $subscriber->id,
-                        $subscriber->email,
-                        $subscriber->name,
-                        $subscriber->status,
-                        $subscriber->created_at,
-                        $subscriber->source,
+                        (string) $subscriber->id,
+                        (string) $subscriber->email,
+                        (string) $subscriber->name,
+                        (string) $subscriber->status,
+                        (string) $subscriber->created_at,
+                        (string) $subscriber->source,
                     ]);
                 }
                 fclose($file);
@@ -235,7 +263,7 @@ class NewsletterController extends BaseApiController
         }
     }
 
-    public function bulkAction(Request $request)
+    public function bulkAction(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'ids' => 'required|array',
@@ -243,8 +271,10 @@ class NewsletterController extends BaseApiController
             'action' => 'required|in:delete,unsubscribe,subscribe,restore,force_delete',
         ]);
 
-        $ids = $request->ids;
-        $action = $request->action;
+        $idsRaw = $request->ids;
+        $ids = is_array($idsRaw) ? $idsRaw : [];
+        $actionRaw = $request->action;
+        $action = is_string($actionRaw) ? $actionRaw : '';
 
         try {
             if ($action === 'delete') {

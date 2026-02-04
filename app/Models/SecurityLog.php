@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $ip_address
  * @property string|null $user_agent
  * @property string|null $description
- * @property array|null $metadata
+ * @property array<string, mixed>|null $metadata
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read int|null $count
@@ -33,13 +33,21 @@ class SecurityLog extends Model
         'metadata' => 'array',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    // Helper method to log security events
-    public static function log(string $eventType, $user = null, ?string $ipAddress = null, ?string $description = null, array $metadata = [])
+    /**
+     * Helper method to log security events
+     *
+     * @param  User|null  $user
+     * @param  array<string, mixed>  $metadata
+     */
+    public static function log(string $eventType, $user = null, ?string $ipAddress = null, ?string $description = null, array $metadata = []): self
     {
         return self::create([
             'user_id' => $user?->id,

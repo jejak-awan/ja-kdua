@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -44,7 +43,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class MenuItem extends Model
 {
-    use HasFactory, SoftDeletes;
+    use SoftDeletes;
 
     protected $fillable = [
         'menu_id',
@@ -87,41 +86,62 @@ class MenuItem extends Model
         'hide_label' => 'boolean',
     ];
 
+    /**
+     * @return BelongsTo<Menu, $this>
+     */
     public function menu(): BelongsTo
     {
         return $this->belongsTo(Menu::class);
     }
 
+    /**
+     * @return BelongsTo<MenuItem, $this>
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(MenuItem::class, 'parent_id');
     }
 
+    /**
+     * @return HasMany<MenuItem, $this>
+     */
     public function children(): HasMany
     {
         return $this->hasMany(MenuItem::class, 'parent_id')->where('is_active', true)->orderBy('sort_order');
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function target(): MorphTo
     {
         return $this->morphTo('target', 'target_type', 'target_id');
     }
 
-    public function getUrlAttribute($value)
+    public function getUrlAttribute(?string $value): ?string
     {
         // If type is page, generate URL from target (frontend uses /:slug)
         if ($this->type === 'page' && $this->target) {
-            return '/'.$this->target->slug;
+            /** @var Category|Content $target */
+            $target = $this->target;
+
+            return '/'.$target->slug;
         }
 
         // If type is post, generate URL from target (frontend uses /blog/:slug)
         if ($this->type === 'post' && $this->target) {
-            return '/blog/'.$this->target->slug;
+            /** @var Category|Content $target */
+            $target = $this->target;
+
+            return '/blog/'.$target->slug;
         }
 
         // If type is category, generate URL from target
         if ($this->type === 'category' && $this->target) {
-            return '/category/'.$this->target->slug;
+            /** @var Category|Content $target */
+            $target = $this->target;
+
+            return '/category/'.$target->slug;
         }
 
         return $value;

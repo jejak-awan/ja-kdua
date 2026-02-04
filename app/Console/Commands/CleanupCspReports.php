@@ -11,11 +11,11 @@ class CleanupCspReports extends Command
 
     protected $description = 'Remove CSP reports older than specified days';
 
-    public function handle()
+    public function handle(): int
     {
         $days = (int) $this->option('days');
 
-        $deleted = CspReport::where('created_at', '<', now()->subDays($days))->delete();
+        $deleted = (int) CspReport::where('created_at', '<', now()->subDays($days))->delete();
 
         $this->info("Deleted {$deleted} CSP report(s) older than {$days} days.");
 

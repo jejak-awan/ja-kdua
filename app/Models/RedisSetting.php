@@ -5,6 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 
+/**
+ * @property int $id
+ * @property string $key
+ * @property string|null $value
+ * @property string $type
+ * @property string $group
+ * @property string|null $description
+ * @property bool $is_encrypted
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class RedisSetting extends Model
 {
     protected $fillable = [
@@ -23,9 +34,9 @@ class RedisSetting extends Model
     /**
      * Get the value attribute with decryption if needed.
      */
-    public function getValueAttribute($value)
+    public function getValueAttribute(mixed $value): mixed
     {
-        if ($this->is_encrypted && $value) {
+        if ($this->is_encrypted && is_string($value)) {
             try {
                 return Crypt::decryptString($value);
             } catch (\Exception $e) {
@@ -39,45 +50,51 @@ class RedisSetting extends Model
     /**
      * Set the value attribute with encryption if needed.
      */
-    public function setValueAttribute($value)
+    public function setValueAttribute(mixed $value): void
     {
-        if ($this->is_encrypted && $value) {
+        if ($this->is_encrypted && is_string($value)) {
             $this->attributes['value'] = Crypt::encryptString($value);
         } else {
-            $this->attributes['value'] = $value;
+            $this->attributes['value'] = is_scalar($value) ? (string) $value : $value;
         }
     }
 
     /**
      * Get typed value based on type field.
      */
-    public function getTypedValue()
+    public function getTypedValue(): mixed
     {
         $value = $this->value;
 
         return match ($this->type) {
             'boolean' => filter_var($value, FILTER_VALIDATE_BOOLEAN),
-            'integer' => (int) $value,
-            'json' => json_decode($value, true),
+            'integer' => is_numeric($value) ? (int) $value : 0,
+            'json' => is_string($value) ? json_decode($value, true) : $value,
             default => $value,
         };
     }
 
     /**
      * Get settings by group.
+     *
+     * @return \Illuminate\Support\Collection<string, mixed>
      */
-    public static function getByGroup($group)
+    public static function getByGroup(string $group): \Illuminate\Support\Collection
     {
-        return static::where('group', $group)->get()->mapWithKeys(function ($setting) {
-            return [$setting->key => $setting->getTypedValue()];
+        /** @var \Illuminate\Database\Eloquent\Collection<int, self> $settings */
+        $settings = static::where('group', $group)->get();
+
+        return $settings->mapWithKeys(function ($setting) {
+            return [(string) $setting->key => $setting->getTypedValue()];
         });
     }
 
     /**
      * Get single setting value.
      */
-    public static function getValue($key, $default = null)
+    public static function getValue(string $key, mixed $default = null): mixed
     {
+        /** @var self|null $setting */
         $setting = static::where('key', $key)->first();
 
         return $setting ? $setting->getTypedValue() : $default;
@@ -86,12 +103,13 @@ class RedisSetting extends Model
     /**
      * Set setting value.
      */
-    public static function setValue($key, $value)
+    public static function setValue(string $key, mixed $value): ?self
     {
+        /** @var self|null $setting */
         $setting = static::where('key', $key)->first();
 
         if ($setting) {
-            $setting->value = $value;
+            $setting->value = is_scalar($value) ? (string) $value : (string) json_encode($value);
             $setting->save();
         }
 

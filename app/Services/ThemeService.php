@@ -32,12 +32,17 @@ class ThemeService
 
     /**
      * Get validated menu locations from theme manifest
+     *
+     * @return array<string, string>
      */
     public function getMenuLocations(Theme $theme): array
     {
         $manifest = $theme->getManifest();
-        if ($manifest && isset($manifest['menus'])) {
-            return $manifest['menus'];
+        if ($manifest && isset($manifest['menus']) && is_array($manifest['menus'])) {
+            /** @var array<string, string> $menus */
+            $menus = $manifest['menus'];
+
+            return $menus;
         }
 
         // Check parent theme if exists
@@ -138,6 +143,8 @@ class ThemeService
 
     /**
      * Get theme setting with fallback
+     *
+     * @return mixed
      */
     public function getThemeSetting(Theme $theme, string $key, $default = null)
     {
@@ -150,7 +157,7 @@ class ThemeService
         // Check parent theme if exists
         if ($theme->hasParent()) {
             $parent = $theme->getParent();
-            if ($parent) {
+            if ($parent instanceof Theme) {
                 $value = $parent->getSetting($key);
                 if ($value !== null) {
                     return $this->hooks ? $this->hooks->applyFilter('theme.setting', $value, $theme, $key, $default) : $value;
@@ -171,6 +178,8 @@ class ThemeService
 
     /**
      * Load theme assets (CSS/JS) with cache
+     *
+     * @return array{css: array<int, string>, js: array<int, string>}
      */
     public function loadThemeAssets(Theme $theme): array
     {
@@ -178,7 +187,8 @@ class ThemeService
             return ['css' => [], 'js' => []];
         }
 
-        return $this->cache->rememberAssets($theme, function () use ($theme) {
+        /** @var array{css: array<int, string>, js: array<int, string>} $assets */
+        $assets = $this->cache->rememberAssets($theme, function () use ($theme) {
             $assets = [
                 'css' => [],
                 'js' => [],
@@ -186,11 +196,10 @@ class ThemeService
 
             try {
                 $themePath = $theme->getThemePath();
-                $publicPath = $theme->getPublicPath();
 
                 // Load CSS files from manifest or directory
                 $manifest = $theme->getManifest();
-                if ($manifest && isset($manifest['assets']['css'])) {
+                if ($manifest && isset($manifest['assets']['css']) && is_array($manifest['assets']['css'])) {
                     // Use CSS files from manifest
                     foreach ($manifest['assets']['css'] as $cssFile) {
                         $assets['css'][] = "themes/{$theme->path}/{$cssFile}";
@@ -199,16 +208,16 @@ class ThemeService
                     // Fallback: scan directory
                     $cssDir = "{$themePath}/assets/css";
                     if (is_dir($cssDir)) {
-                        $cssFiles = glob("{$cssDir}/*.css");
+                        $cssFiles = (array) glob("{$cssDir}/*.css");
                         foreach ($cssFiles as $file) {
-                            $filename = basename($file);
+                            $filename = basename((string) $file);
                             $assets['css'][] = "themes/{$theme->path}/assets/css/{$filename}";
                         }
                     }
                 }
 
                 // Load JS files from manifest or directory
-                if ($manifest && isset($manifest['assets']['js'])) {
+                if ($manifest && isset($manifest['assets']['js']) && is_array($manifest['assets']['js'])) {
                     // Use JS files from manifest
                     foreach ($manifest['assets']['js'] as $jsFile) {
                         $assets['js'][] = "themes/{$theme->path}/{$jsFile}";
@@ -217,9 +226,9 @@ class ThemeService
                     // Fallback: scan directory
                     $jsDir = "{$themePath}/assets/js";
                     if (is_dir($jsDir)) {
-                        $jsFiles = glob("{$jsDir}/*.js");
+                        $jsFiles = (array) glob("{$jsDir}/*.js");
                         foreach ($jsFiles as $file) {
-                            $filename = basename($file);
+                            $filename = basename((string) $file);
                             $assets['js'][] = "themes/{$theme->path}/assets/js/{$filename}";
                         }
                     }
@@ -228,7 +237,7 @@ class ThemeService
                 // Load parent theme assets if exists
                 if ($theme->hasParent()) {
                     $parent = $theme->getParent();
-                    if ($parent) {
+                    if ($parent instanceof Theme) {
                         $parentAssets = $this->loadThemeAssets($parent);
                         $assets['css'] = array_merge($parentAssets['css'], $assets['css']);
                         $assets['js'] = array_merge($parentAssets['js'], $assets['js']);
@@ -242,6 +251,8 @@ class ThemeService
 
             return $assets;
         });
+
+        return $assets;
     }
 
     /**
@@ -251,6 +262,8 @@ class ThemeService
 
     /**
      * Validate theme structure
+     *
+     * @return array<int, string>
      */
     public function validateTheme(Theme $theme): array
     {
@@ -295,13 +308,16 @@ class ThemeService
      */
     public function getThemeCustomCss(Theme $theme): string
     {
-        $css = $theme->custom_css ?? '';
+        $css = (string) ($theme->getAttribute('custom_css') ?? '');
 
         // Add parent theme custom CSS if exists
         if ($theme->hasParent()) {
             $parent = $theme->getParent();
-            if ($parent && $parent->custom_css) {
-                $css = $parent->custom_css."\n\n".$css;
+            if ($parent instanceof Theme) {
+                $parentCss = (string) $parent->getAttribute('custom_css');
+                if ($parentCss) {
+                    $css = $parentCss."\n\n".$css;
+                }
             }
         }
 
@@ -389,25 +405,33 @@ class ThemeService
 
             if (file_exists($manifestPath)) {
                 try {
-                    $manifest = json_decode(file_get_contents($manifestPath), true);
+                    /** @var array<string, mixed> $manifest */
+                    $manifest = json_decode((string) file_get_contents($manifestPath), true);
 
                     if ($manifest) {
+                        /** @var array<string, mixed>|null $dependencies */
+                        $dependencies = $manifest['dependencies'] ?? null;
+                        /** @var array<string, mixed>|null $supports */
+                        $supports = $manifest['supports'] ?? null;
+                        /** @var array{cms_version?: string}|null $requires */
+                        $requires = $manifest['requires'] ?? null;
+
                         // Use relative path (just slug) instead of full path
                         $theme = Theme::updateOrCreate(
                             ['slug' => $slug],
                             [
-                                'name' => $manifest['name'] ?? $slug,
-                                'type' => $manifest['type'] ?? 'frontend',
+                                'name' => (string) ($manifest['name'] ?? $slug),
+                                'type' => (string) ($manifest['type'] ?? 'frontend'),
                                 'path' => $slug, // Store relative path (slug)
-                                'version' => $manifest['version'] ?? '1.0.0',
-                                'description' => $manifest['description'] ?? null,
-                                'author' => $manifest['author'] ?? null,
-                                'author_url' => $manifest['author_url'] ?? null,
-                                'license' => $manifest['license'] ?? null,
-                                'parent_theme' => $manifest['parent_theme'] ?? null,
-                                'dependencies' => $manifest['dependencies'] ?? null,
-                                'supports' => $manifest['supports'] ?? null,
-                                'requires_cms_version' => $manifest['requires']['cms_version'] ?? null,
+                                'version' => (string) ($manifest['version'] ?? '1.0.0'),
+                                'description' => (string) ($manifest['description'] ?? null),
+                                'author' => (string) ($manifest['author'] ?? null),
+                                'author_url' => (string) ($manifest['author_url'] ?? null),
+                                'license' => (string) ($manifest['license'] ?? null),
+                                'parent_theme' => (string) ($manifest['parent_theme'] ?? null),
+                                'dependencies' => $dependencies,
+                                'supports' => $supports,
+                                'requires_cms_version' => $requires['cms_version'] ?? null,
                                 'status' => 'active', // Set as active by default
                             ]
                         );
@@ -427,6 +451,8 @@ class ThemeService
     /**
      * Get default settings schema for themes without manifest
      * Optimized for "Janari" theme with modern UI/UX
+     *
+     * @return array<string, array<string, mixed>>
      */
     public function getDefaultSettingsSchema(): array
     {

@@ -7,12 +7,14 @@ use Illuminate\Http\Request;
 
 class FieldGroupController extends BaseApiController
 {
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = FieldGroup::with('fields')->withCount('fields');
 
         if ($request->has('applies_to')) {
-            $query->where('applies_to', $request->applies_to);
+            $appliesToRaw = $request->applies_to;
+            $appliesTo = is_string($appliesToRaw) ? $appliesToRaw : '';
+            $query->where('applies_to', $appliesTo);
         }
 
         if ($request->has('is_active')) {
@@ -24,7 +26,7 @@ class FieldGroupController extends BaseApiController
         return $this->success($groups, 'Field groups retrieved successfully');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -40,12 +42,12 @@ class FieldGroupController extends BaseApiController
         return $this->success($group->load('fields'), 'Field group created successfully', 201);
     }
 
-    public function show(FieldGroup $fieldGroup)
+    public function show(FieldGroup $fieldGroup): \Illuminate\Http\JsonResponse
     {
         return $this->success($fieldGroup->load('fields'), 'Field group retrieved successfully');
     }
 
-    public function update(Request $request, FieldGroup $fieldGroup)
+    public function update(Request $request, FieldGroup $fieldGroup): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
@@ -62,7 +64,7 @@ class FieldGroupController extends BaseApiController
         return $this->success($fieldGroup->load('fields'), 'Field group updated successfully');
     }
 
-    public function destroy(FieldGroup $fieldGroup)
+    public function destroy(FieldGroup $fieldGroup): \Illuminate\Http\JsonResponse
     {
         $fieldGroup->delete();
 

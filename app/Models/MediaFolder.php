@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class MediaFolder extends Model
 {
+    /** @use HasFactory<\Database\Factories\MediaFolderFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -42,21 +43,33 @@ class MediaFolder extends Model
         'is_shared' => 'boolean',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
     }
 
+    /**
+     * @return BelongsTo<MediaFolder, $this>
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(MediaFolder::class, 'parent_id');
     }
 
+    /**
+     * @return HasMany<MediaFolder, $this>
+     */
     public function children(): HasMany
     {
         return $this->hasMany(MediaFolder::class, 'parent_id')->orderBy('sort_order');
     }
 
+    /**
+     * @return HasMany<Media, $this>
+     */
     public function media(): HasMany
     {
         return $this->hasMany(Media::class, 'folder_id');

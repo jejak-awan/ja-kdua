@@ -11,7 +11,7 @@ class StorageMigrationController extends BaseApiController
     /**
      * List all files from local public storage that need migration
      */
-    public function index()
+    public function index(): \Illuminate\Http\JsonResponse
     {
         try {
             // We specifically want to list files from the 'public' disk (local)
@@ -32,13 +32,14 @@ class StorageMigrationController extends BaseApiController
     /**
      * Migrate a batch of files from public disk to the currently configured default disk
      */
-    public function migrate(Request $request)
+    public function migrate(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'files' => 'required|array',
             'files.*' => 'string',
         ]);
 
+        /** @var array<string> $files */
         $files = $request->input('files');
         $results = [
             'success' => [],
@@ -71,6 +72,12 @@ class StorageMigrationController extends BaseApiController
 
                 // Perform copy using streams for memory efficiency
                 $stream = Storage::disk('public')->readStream($file);
+                if (! is_resource($stream)) {
+                    $results['failed'][$file] = 'Failed to read from source';
+
+                    continue;
+                }
+
                 $copied = Storage::disk($targetDisk)->writeStream($file, $stream);
 
                 if ($copied) {

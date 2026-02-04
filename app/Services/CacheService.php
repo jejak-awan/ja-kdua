@@ -11,7 +11,7 @@ class CacheService
     /**
      * Clear all CMS-related caches
      */
-    public function clearAll()
+    public function clearAll(): void
     {
         Cache::flush();
         $this->clearContentCaches();
@@ -20,8 +20,10 @@ class CacheService
 
     /**
      * Clear content-related caches
+     *
+     * @param  int|string|null  $contentId
      */
-    public function clearContentCaches($contentId = null)
+    public function clearContentCaches($contentId = null): void
     {
         // Clear content list cache
         Cache::forget('contents_list');
@@ -42,8 +44,10 @@ class CacheService
 
     /**
      * Clear category-related caches
+     *
+     * @param  int|string|null  $categoryId
      */
-    public function clearCategoryCaches($categoryId = null)
+    public function clearCategoryCaches($categoryId = null): void
     {
         Cache::forget('categories_list');
         Cache::forget('categories_tree');
@@ -57,7 +61,7 @@ class CacheService
     /**
      * Clear tag-related caches
      */
-    public function clearTagCaches()
+    public function clearTagCaches(): void
     {
         Cache::forget('tags_all');
         Cache::forget('tags_statistics');
@@ -66,15 +70,17 @@ class CacheService
     /**
      * Clear media caches
      */
-    public function clearMediaCaches()
+    public function clearMediaCaches(): void
     {
         Cache::forget('media_list');
     }
 
     /**
      * Clear user caches
+     *
+     * @param  int|string|null  $userId
      */
-    public function clearUserCaches($userId = null)
+    public function clearUserCaches($userId = null): void
     {
         if ($userId) {
             Cache::forget("user_{$userId}");
@@ -85,7 +91,7 @@ class CacheService
     /**
      * Clear SEO caches
      */
-    public function clearSeoCaches()
+    public function clearSeoCaches(): void
     {
         Cache::forget('sitemap_index');
         Cache::forget('sitemap_pages');
@@ -98,7 +104,7 @@ class CacheService
      *
      * @deprecated Use CacheWarmingService instead
      */
-    public function warmUp()
+    public function warmUp(): void
     {
         // Pre-cache frequently accessed data
         Category::all();
@@ -124,7 +130,9 @@ class CacheService
 
         try {
             $redis = \Illuminate\Support\Facades\Redis::connection();
-            $keys = $redis->keys(config('cache.prefix').':'.$pattern);
+            /** @var string $prefix */
+            $prefix = config('cache.prefix', '');
+            $keys = $redis->keys($prefix.':'.$pattern);
 
             if (empty($keys)) {
                 return 0;
@@ -173,6 +181,8 @@ class CacheService
 
     /**
      * Get current cache driver info
+     *
+     * @return array{configured_driver: string|null, redis_available: bool, effective_driver: string, recommendation: string}
      */
     public function getCacheDriverInfo(): array
     {
@@ -192,7 +202,7 @@ class CacheService
     /**
      * Smart cache remember - uses Redis if available, falls back to file
      */
-    public function smartRemember(string $key, int $ttlSeconds, callable $callback)
+    public function smartRemember(string $key, int $ttlSeconds, \Closure $callback): mixed
     {
         $store = $this->getPreferredStore();
 

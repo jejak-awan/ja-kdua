@@ -53,22 +53,26 @@ class TagController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = Tag::orderBy('name');
 
+        /** @var \App\Models\User|null $user */
+        $user = $request->user();
+
         // Admin/Manager can see all, others see own + global
-        if ($request->user() && ! $request->user()->can('manage tags')) {
-            $query->where(function ($q) use ($request) {
-                $q->whereNull('author_id')->orWhere('author_id', $request->user()->id);
+        if ($user && ! $user->can('manage tags')) {
+            $query->where(function ($q) use ($user) {
+                $q->whereNull('author_id')->orWhere('author_id', $user->id);
             });
-        } elseif (! $request->user()) {
+        } elseif (! $user) {
             // Public/Guest sees only global tags
             $query->whereNull('author_id');
         }
 
         if ($request->filled('search')) {
-            $search = $request->input('search');
+            $searchRaw = $request->input('search');
+            $search = is_string($searchRaw) ? $searchRaw : '';
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('slug', 'like', "%{$search}%")
@@ -76,10 +80,11 @@ class TagController extends BaseApiController
             });
         }
 
-        if ($request->has('usage') && in_array($request->input('usage'), ['used', 'unused', 'media'])) {
-            if ($request->input('usage') === 'used') {
+        $usageRaw = $request->input('usage');
+        if ($request->has('usage') && is_string($usageRaw) && in_array($usageRaw, ['used', 'unused', 'media'])) {
+            if ($usageRaw === 'used') {
                 $query->has('contents');
-            } elseif ($request->input('usage') === 'media') {
+            } elseif ($usageRaw === 'media') {
                 $query->has('media');
             } else {
                 $query->doesntHave('contents')->doesntHave('media');
@@ -87,7 +92,8 @@ class TagController extends BaseApiController
         }
 
         if ($request->has('per_page')) {
-            $perPage = (int) $request->get('per_page', 20);
+            $perPageRaw = $request->get('per_page', 20);
+            $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 20;
             $tags = $query->withCount('contents')->paginate($perPage);
 
             return $this->success($tags, 'Tags retrieved successfully');
@@ -126,7 +132,7 @@ class TagController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -135,12 +141,15 @@ class TagController extends BaseApiController
             'author_id' => 'nullable|exists:users,id',
         ]);
 
+        /** @var \App\Models\User|null $user */
+        $user = $request->user();
+
         // Assign author logic
-        if ($request->user()->can('manage tags')) {
+        if ($user && $user->can('manage tags')) {
             // Admin can assign author or leave null (Global)
-        } else {
+        } elseif ($user) {
             // Regular user forces ownership
-            $validated['author_id'] = $request->user()->id;
+            $validated['author_id'] = $user->id;
         }
 
         $tag = Tag::create($validated);
@@ -171,11 +180,13 @@ class TagController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
-    public function show(Tag $tag)
+    public function show(Tag $tag): \Illuminate\Http\JsonResponse
     {
         // Scope check
-        if (request()->user() && ! request()->user()->can('manage tags')) {
-            if ($tag->author_id && $tag->author_id !== request()->user()->id) {
+        /** @var \App\Models\User|null $user */
+        $user = request()->user();
+        if ($user && ! $user->can('manage tags')) {
+            if ($tag->author_id && $tag->author_id !== $user->id) {
                 return $this->forbidden('You do not have permission to view this tag');
             }
         }
@@ -215,11 +226,13 @@ class TagController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
-    public function update(Request $request, Tag $tag)
+    public function update(Request $request, Tag $tag): \Illuminate\Http\JsonResponse
     {
+        /** @var \App\Models\User|null $user */
+        $user = request()->user();
         // Ownership check
-        if (! request()->user()->can('manage tags')) {
-            if ($tag->author_id && $tag->author_id !== request()->user()->id) {
+        if ($user && ! $user->can('manage tags')) {
+            if ($tag->author_id && $tag->author_id !== $user->id) {
                 return $this->forbidden('You do not have permission to update this tag');
             }
             unset($request['author_id']);
@@ -260,11 +273,13 @@ class TagController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
-    public function destroy(Tag $tag)
+    public function destroy(Tag $tag): \Illuminate\Http\JsonResponse
     {
+        /** @var \App\Models\User|null $user */
+        $user = request()->user();
         // Ownership check
-        if (! request()->user()->can('manage tags')) {
-            if ($tag->author_id && $tag->author_id !== request()->user()->id) {
+        if ($user && ! $user->can('manage tags')) {
+            if ($tag->author_id && $tag->author_id !== $user->id) {
                 return $this->forbidden('You do not have permission to delete this tag');
             }
             if (is_null($tag->author_id)) {
@@ -300,18 +315,23 @@ class TagController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
-    public function bulkDelete(Request $request)
+    public function bulkDelete(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:tags,id',
         ]);
 
-        $query = Tag::whereIn('id', $validated['ids']);
+        /** @var array<int> $ids */
+        $ids = $validated['ids'];
+        $query = Tag::whereIn('id', $ids);
+
+        /** @var \App\Models\User|null $user */
+        $user = $request->user();
 
         // Scope deletion
-        if (! $request->user()->can('manage tags')) {
-            $query->where('author_id', $request->user()->id);
+        if ($user && ! $user->can('manage tags')) {
+            $query->where('author_id', $user->id);
             // This implicitly prevents deleting Global tags (author_id is null)
         }
 
@@ -335,28 +355,33 @@ class TagController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
-    public function statistics(Request $request)
+    public function statistics(Request $request): \Illuminate\Http\JsonResponse
     {
+        /** @var \App\Models\User|null $user */
+        $user = $request->user();
+
         $cacheKey = 'tags_statistics';
-        if ($request->user() && ! $request->user()->can('manage settings')) {
-            $cacheKey .= '_u'.$request->user()->id;
+        if ($user && ! $user->can('manage settings')) {
+            $cacheKey .= '_u'.$user->id;
         }
 
-        $stats = Cache::remember($cacheKey, now()->addHours(1), function () use ($request) {
+        $stats = Cache::remember($cacheKey, now()->addHours(1), function () use ($user) {
             $query = Tag::query();
 
             // Scope if not manager
-            if ($request->user() && ! $request->user()->can('manage settings')) {
-                $query->where('author_id', $request->user()->id);
+            if ($user && ! $user->can('manage settings')) {
+                $query->where('author_id', $user->id);
             }
 
-            $tags = (clone $query)->withCount(['contents' => function ($q) use ($request) {
+            $tags = (clone $query)->withCount(['contents' => function ($q) use ($user) {
                 // Also scope content count if author?
                 // Currently tags are shared but have author_id?
                 // Phase 10 says: "Add author_id to ... tags".
                 // If tags are personal, then we only show personal tags.
-                if ($request->user() && ! $request->user()->can('manage content')) {
-                    $q->where('author_id', $request->user()->id);
+
+                // Add explicit User type hint for $user in closure usage if analyzed again inside, but usually fine.
+                if ($user && ! $user->can('manage content')) {
+                    $q->where('author_id', $user->id);
                 }
             }])->get();
 

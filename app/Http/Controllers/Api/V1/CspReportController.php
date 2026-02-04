@@ -12,28 +12,32 @@ class CspReportController extends BaseApiController
      * Receive CSP violation reports from browsers
      * Public endpoint, no authentication required
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
-            $report = $request->input('csp-report');
+            $reportRaw = $request->input('csp-report');
+            $report = is_array($reportRaw) ? $reportRaw : null;
 
             // Fallback for direct JSON or slightly different formats
             if (! $report) {
-                $report = $request->json()->all();
-                if (isset($report['csp-report'])) {
-                    $report = $report['csp-report'];
+                $reportAll = $request->json()->all();
+                if (isset($reportAll['csp-report']) && is_array($reportAll['csp-report'])) {
+                    $report = $reportAll['csp-report'];
+                } else {
+                    $report = $reportAll;
                 }
             }
 
             if (empty($report)) {
                 return response()->json(['status' => 'ignored'], 200);
             }
+
             CspReport::create([
-                'document_uri' => $report['document-uri'] ?? '',
-                'violated_directive' => $report['violated-directive'] ?? '',
-                'blocked_uri' => $report['blocked-uri'] ?? '',
-                'source_file' => $report['source-file'] ?? null,
-                'line_number' => $report['line-number'] ?? null,
+                'document_uri' => is_string($report['document-uri'] ?? null) ? $report['document-uri'] : '',
+                'violated_directive' => is_string($report['violated-directive'] ?? null) ? $report['violated-directive'] : '',
+                'blocked_uri' => is_string($report['blocked-uri'] ?? null) ? $report['blocked-uri'] : '',
+                'source_file' => is_string($report['source-file'] ?? null) ? $report['source-file'] : null,
+                'line_number' => (is_numeric($report['line-number'] ?? null)) ? (int) $report['line-number'] : null,
                 'user_agent' => $request->userAgent(),
                 'ip_address' => $request->ip(),
                 'raw_report' => $report,
@@ -52,27 +56,37 @@ class CspReportController extends BaseApiController
     /**
      * Get CSP reports for admin dashboard
      */
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = CspReport::query();
 
         if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
+            $statusRaw = $request->input('status');
+            $status = is_string($statusRaw) ? $statusRaw : '';
+            $query->where('status', $status);
         }
 
         if ($request->filled('directive')) {
-            $query->where('violated_directive', 'like', "%{$request->input('directive')}%");
+            $directiveRaw = $request->input('directive');
+            $directive = is_string($directiveRaw) ? $directiveRaw : '';
+            $query->where('violated_directive', 'like', "%{$directive}%");
         }
 
         if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->input('date_from'));
+            $dateFromRaw = $request->input('date_from');
+            $dateFrom = is_string($dateFromRaw) ? $dateFromRaw : null;
+            $query->whereDate('created_at', '>=', $dateFrom);
         }
 
         if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->input('date_to'));
+            $dateToRaw = $request->input('date_to');
+            $dateTo = is_string($dateToRaw) ? $dateToRaw : null;
+            $query->whereDate('created_at', '<=', $dateTo);
         }
 
-        $reports = $query->latest()->paginate($request->input('per_page', 50));
+        $perPageRaw = $request->input('per_page', 50);
+        $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 50;
+        $reports = $query->latest()->paginate($perPage);
 
         return $this->paginated($reports, 'CSP reports retrieved successfully');
     }
@@ -80,14 +94,16 @@ class CspReportController extends BaseApiController
     /**
      * Bulk action on CSP reports
      */
-    public function bulkAction(Request $request)
+    public function bulkAction(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'ids' => 'required|array',
             'action' => 'required|in:mark_reviewed,mark_false_positive,delete',
         ]);
 
-        $query = CspReport::whereIn('id', $validated['ids']);
+        $idsRaw = $validated['ids'];
+        $ids = is_array($idsRaw) ? $idsRaw : [];
+        $query = CspReport::whereIn('id', $ids);
 
         switch ($validated['action']) {
             case 'mark_reviewed':
@@ -107,7 +123,7 @@ class CspReportController extends BaseApiController
     /**
      * Get CSP report statistics
      */
-    public function statistics()
+    public function statistics(): \Illuminate\Http\JsonResponse
     {
         $stats = [
             'total' => CspReport::count(),

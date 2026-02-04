@@ -7,12 +7,14 @@ use Illuminate\Http\Request;
 
 class SettingController extends BaseApiController
 {
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = Setting::query();
 
         if ($request->has('group')) {
-            $query->where('group', $request->group);
+            $groupRaw = $request->group;
+            $group = is_string($groupRaw) ? $groupRaw : '';
+            $query->where('group', $group);
         }
 
         if ($request->has('public_only')) {
@@ -24,11 +26,17 @@ class SettingController extends BaseApiController
         return $this->success($settings, 'Settings retrieved successfully');
     }
 
-    public function getGroup($group)
+    public function getGroup(string $group): \Illuminate\Http\JsonResponse
     {
+        $user = request()->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         // Permission check: if user doesn't have 'view settings',
         // they might still need specific group settings (e.g. media settings for authors)
-        if (! request()->user()->can('view settings')) {
+        if (! $user->can('view settings')) {
             $allowedGroups = [
                 'media' => ['view media', 'upload media'],
                 'general' => [],
@@ -43,7 +51,7 @@ class SettingController extends BaseApiController
             if (! empty($requiredPermissions)) {
                 $hasAny = false;
                 foreach ($requiredPermissions as $perm) {
-                    if (request()->user()->can($perm)) {
+                    if ($user->can($perm)) {
                         $hasAny = true;
                         break;
                     }
@@ -59,14 +67,14 @@ class SettingController extends BaseApiController
         return $this->success($settings, 'Settings retrieved successfully');
     }
 
-    public function show($key)
+    public function show(string $key): \Illuminate\Http\JsonResponse
     {
         $setting = Setting::where('key', $key)->firstOrFail();
 
         return $this->success($setting, 'Setting retrieved successfully');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'key' => 'required|string|unique:settings,key',
@@ -82,7 +90,7 @@ class SettingController extends BaseApiController
         return $this->success($setting, 'Setting created successfully', 201);
     }
 
-    public function update(Request $request, Setting $setting)
+    public function update(Request $request, Setting $setting): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'value' => 'nullable',
@@ -97,7 +105,7 @@ class SettingController extends BaseApiController
         return $this->success($setting, 'Setting updated successfully');
     }
 
-    public function bulkUpdate(Request $request)
+    public function bulkUpdate(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'settings' => 'required|array',
@@ -107,19 +115,25 @@ class SettingController extends BaseApiController
             'settings.*.group' => 'sometimes|string',
         ]);
 
-        foreach ($validated['settings'] as $settingData) {
-            Setting::set(
-                $settingData['key'],
-                $settingData['value'] ?? null,
-                $settingData['type'] ?? 'string',
-                $settingData['group'] ?? 'general'
-            );
+        $settings = is_array($validated['settings']) ? $validated['settings'] : [];
+        foreach ($settings as $settingData) {
+            if (is_array($settingData) && isset($settingData['key'])) {
+                $sKeyRaw = $settingData['key'];
+                $sKey = is_scalar($sKeyRaw) ? (string) $sKeyRaw : '';
+                $sValue = $settingData['value'] ?? null;
+                $sTypeRaw = $settingData['type'] ?? 'string';
+                $sType = is_scalar($sTypeRaw) ? (string) $sTypeRaw : 'string';
+                $sGroupRaw = $settingData['group'] ?? 'general';
+                $sGroup = is_scalar($sGroupRaw) ? (string) $sGroupRaw : 'general';
+
+                Setting::set($sKey, $sValue, $sType, $sGroup);
+            }
         }
 
         return $this->success(null, 'Settings updated successfully');
     }
 
-    public function destroy(Setting $setting)
+    public function destroy(Setting $setting): \Illuminate\Http\JsonResponse
     {
         $setting->delete();
 
@@ -129,12 +143,15 @@ class SettingController extends BaseApiController
     /**
      * Test storage connection dynamically
      */
-    public function testStorage(Request $request)
+    public function testStorage(Request $request): \Illuminate\Http\JsonResponse
     {
-        $driver = $request->input('driver');
-        $config = $request->input('config'); // Array of settings formData
+        $driverRaw = $request->input('driver');
+        $driver = is_string($driverRaw) ? $driverRaw : '';
+        $configRaw = $request->input('config'); // Array of settings formData
+        /** @var array<string, mixed> $config */
+        $config = is_array($configRaw) ? $configRaw : [];
 
-        if (! $driver || ! $config) {
+        if (! $driver || empty($config)) {
             return $this->error('Driver and configuration are required', 400);
         }
 
@@ -142,33 +159,51 @@ class SettingController extends BaseApiController
         $diskConfig = ['driver' => $driver];
 
         if ($driver === 's3') {
+            $awsKeyRaw = $config['aws_access_key_id'] ?? '';
+            $awsSecretRaw = $config['aws_secret_access_key'] ?? '';
+            $awsRegionRaw = $config['aws_default_region'] ?? 'us-east-1';
+            $awsBucketRaw = $config['aws_bucket'] ?? '';
+            $awsEndpointRaw = $config['aws_endpoint'] ?? '';
+
             $diskConfig = array_merge($diskConfig, [
-                'key' => $config['aws_access_key_id'] ?? '',
-                'secret' => $config['aws_secret_access_key'] ?? '',
-                'region' => $config['aws_default_region'] ?? 'us-east-1',
-                'bucket' => $config['aws_bucket'] ?? '',
-                'endpoint' => $config['aws_endpoint'] ?? '',
+                'key' => is_scalar($awsKeyRaw) ? (string) $awsKeyRaw : '',
+                'secret' => is_scalar($awsSecretRaw) ? (string) $awsSecretRaw : '',
+                'region' => is_scalar($awsRegionRaw) ? (string) $awsRegionRaw : 'us-east-1',
+                'bucket' => is_scalar($awsBucketRaw) ? (string) $awsBucketRaw : '',
+                'endpoint' => is_scalar($awsEndpointRaw) ? (string) $awsEndpointRaw : '',
                 'use_path_style_endpoint' => ! empty($config['aws_endpoint']),
             ]);
         } elseif ($driver === 'google') {
+            $gClientIdRaw = $config['google_client_id'] ?? '';
+            $gClientSecretRaw = $config['google_client_secret'] ?? '';
+            $gRefreshTokenRaw = $config['google_refresh_token'] ?? '';
+            $gFolderIdRaw = $config['google_folder_id'] ?? '/';
+
             $diskConfig = array_merge($diskConfig, [
-                'clientId' => $config['google_client_id'] ?? '',
-                'clientSecret' => $config['google_client_secret'] ?? '',
-                'refreshToken' => $config['google_refresh_token'] ?? '',
-                'folderId' => $config['google_folder_id'] ?? '/',
+                'clientId' => is_scalar($gClientIdRaw) ? (string) $gClientIdRaw : '',
+                'clientSecret' => is_scalar($gClientSecretRaw) ? (string) $gClientSecretRaw : '',
+                'refreshToken' => is_scalar($gRefreshTokenRaw) ? (string) $gRefreshTokenRaw : '',
+                'folderId' => is_scalar($gFolderIdRaw) ? (string) $gFolderIdRaw : '/',
             ]);
         } elseif ($driver === 'ftp') {
+            $ftpHostRaw = $config['ftp_host'] ?? '';
+            $ftpUsernameRaw = $config['ftp_username'] ?? '';
+            $ftpPasswordRaw = $config['ftp_password'] ?? '';
+            $ftpPortRaw = $config['ftp_port'] ?? 21;
+            $ftpRootRaw = $config['ftp_root'] ?? '';
+
             $diskConfig = array_merge($diskConfig, [
-                'host' => $config['ftp_host'] ?? '',
-                'username' => $config['ftp_username'] ?? '',
-                'password' => $config['ftp_password'] ?? '',
-                'port' => $config['ftp_port'] ?? 21,
-                'root' => $config['ftp_root'] ?? '',
-                'ssl' => $config['ftp_ssl'] ?? false,
+                'host' => is_scalar($ftpHostRaw) ? (string) $ftpHostRaw : '',
+                'username' => is_scalar($ftpUsernameRaw) ? (string) $ftpUsernameRaw : '',
+                'password' => is_scalar($ftpPasswordRaw) ? (string) $ftpPasswordRaw : '',
+                'port' => is_numeric($ftpPortRaw) ? (int) $ftpPortRaw : 21,
+                'root' => is_scalar($ftpRootRaw) ? (string) $ftpRootRaw : '',
+                'ssl' => (bool) ($config['ftp_ssl'] ?? false),
             ]);
         } elseif ($driver === 'dropbox') {
+            $dbTokenRaw = $config['dropbox_authorization_token'] ?? '';
             $diskConfig = array_merge($diskConfig, [
-                'authorizationToken' => $config['dropbox_authorization_token'] ?? '',
+                'authorizationToken' => is_scalar($dbTokenRaw) ? (string) $dbTokenRaw : '',
             ]);
         }
 

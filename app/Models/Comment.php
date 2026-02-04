@@ -21,21 +21,33 @@ class Comment extends Model
         'status',
     ];
 
+    /**
+     * @return BelongsTo<Content, $this>
+     */
     public function content(): BelongsTo
     {
         return $this->belongsTo(Content::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<Comment, $this>
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Comment::class, 'parent_id');
     }
 
+    /**
+     * @return HasMany<Comment, $this>
+     */
     public function replies(): HasMany
     {
         return $this->hasMany(Comment::class, 'parent_id');

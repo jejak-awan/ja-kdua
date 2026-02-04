@@ -8,17 +8,19 @@ class SessionManager
 {
     /**
      * Set session lifetime based on user role
+     *
+     * @param  \App\Models\User|null  $user
      */
     public static function setLifetimeForUser($user): void
     {
-        if (! $user) {
+        if (! $user instanceof \App\Models\User) {
             return;
         }
 
         // Determine lifetime based on role hierarchy
         $lifetime = $user->isAtLeastRole('admin')
-            ? config('session.admin_lifetime', 120)  // 2 hours for admins
-            : config('session.user_lifetime', 480);  // 8 hours for regular users
+            ? (int) config('session.admin_lifetime', 120)  // 2 hours for admins
+            : (int) config('session.user_lifetime', 480);  // 8 hours for regular users
 
         // Set session lifetime dynamically
         config(['session.lifetime' => $lifetime]);
@@ -32,6 +34,6 @@ class SessionManager
      */
     public static function getLifetime(): int
     {
-        return Session::get('session_lifetime', config('session.lifetime'));
+        return (int) Session::get('session_lifetime', (int) config('session.lifetime'));
     }
 }

@@ -19,7 +19,7 @@ class TrustProxies
     /**
      * The headers that should be used to detect proxies.
      *
-     * @var int
+     * @var int<0, 63>
      */
     protected $headers =
         Request::HEADER_X_FORWARDED_FOR |
@@ -35,9 +35,10 @@ class TrustProxies
     {
         // Emergency kill-switch to revert to "trust all" behavior
         if (config('app.trust_all_proxies', false)) {
+            $remoteAddr = $request->server->get('REMOTE_ADDR');
             $request::setTrustedProxies(
-                [$request->server->get('REMOTE_ADDR')],
-                $this->headers
+                [is_string($remoteAddr) ? $remoteAddr : ''],
+                (int) $this->headers
             );
             $this->setRealIpFromHeaders($request, true);
 
@@ -48,7 +49,7 @@ class TrustProxies
         $trustedIps = $this->getTrustedProxies();
 
         if (count($trustedIps) > 0) {
-            $request::setTrustedProxies($trustedIps, $this->headers);
+            $request::setTrustedProxies($trustedIps, (int) $this->headers);
         }
 
         // Additional headers check (guarded by trust check)
@@ -59,6 +60,8 @@ class TrustProxies
 
     /**
      * Get trusted proxies list.
+     *
+     * @return array<int, string>
      */
     protected function getTrustedProxies(): array
     {
@@ -92,10 +95,11 @@ class TrustProxies
     {
         // Security: Only parse headers if the remote address is trusted
         if (! $forceTrust) {
+            /** @var string|null $remoteAddr */
             $remoteAddr = $request->server->get('REMOTE_ADDR');
             $trustedProxies = $this->getTrustedProxies();
 
-            if (! IpUtils::checkIp($remoteAddr, $trustedProxies)) {
+            if (! $remoteAddr || ! IpUtils::checkIp($remoteAddr, $trustedProxies)) {
                 // Current proxy is NOT trusted. Do not spoof IP based on headers.
                 return;
             }
@@ -117,7 +121,7 @@ class TrustProxies
         }
         // Priority 4: Standard X-Forwarded-For (get first IP in chain)
         elseif ($request->hasHeader('X-Forwarded-For')) {
-            $forwardedFor = $request->header('X-Forwarded-For');
+            $forwardedFor = strval($request->header('X-Forwarded-For'));
             $ips = array_map('trim', explode(',', $forwardedFor));
             $realIp = $ips[0];
         }

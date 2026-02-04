@@ -2,14 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FormField extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'form_id',
         'name',
@@ -29,13 +26,20 @@ class FormField extends Model
         'is_required' => 'boolean',
     ];
 
+    /**
+     * @return BelongsTo<Form, $this>
+     */
     public function form(): BelongsTo
     {
         return $this->belongsTo(Form::class);
     }
 
-    public function getValidationRules()
+    /**
+     * @return array<int, string>
+     */
+    public function getValidationRules(): array
     {
+        /** @var array<int, string> $rules */
         $rules = $this->validation_rules ?? [];
 
         if ($this->is_required) {

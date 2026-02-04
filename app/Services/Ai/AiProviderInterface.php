@@ -11,6 +11,8 @@ interface AiProviderInterface
 
     /**
      * Get a list of available models from the provider.
+     *
+     * @return array<int, array{id: string, name: string}>
      */
     public function getModels(): array;
 

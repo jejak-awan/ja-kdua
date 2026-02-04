@@ -12,21 +12,32 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class FormSubmissionController extends BaseApiController
 {
-    public function index(Request $request, ?Form $form = null)
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request, ?Form $form = null): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         $query = FormSubmission::with(['form', 'user']);
 
         // Multi-tenancy scoping
-        if (! $request->user()->can('manage forms')) {
-            $query->whereHas('form', function ($q) use ($request) {
-                $q->where('author_id', $request->user()->id);
+        if (! $user->can('manage forms')) {
+            $query->whereHas('form', function ($q) use ($user) {
+                $q->where('author_id', $user->id);
             });
         }
 
         if ($form) {
             $query->where('form_id', $form->id);
         } elseif ($request->has('form_id')) {
-            $query->where('form_id', $request->input('form_id'));
+            $formIdRaw = $request->input('form_id');
+            $formId = is_numeric($formIdRaw) ? (int) $formIdRaw : 0;
+            $query->where('form_id', $formId);
         }
 
         // Soft deletes filter
@@ -40,11 +51,14 @@ class FormSubmissionController extends BaseApiController
         }
 
         if ($request->has('status')) {
-            $query->where('status', $request->input('status'));
+            $statusRaw = $request->input('status');
+            $status = is_string($statusRaw) ? $statusRaw : '';
+            $query->where('status', $status);
         }
 
         if ($request->filled('search')) {
-            $search = $request->input('search');
+            $searchRaw = $request->input('search');
+            $search = is_string($searchRaw) ? $searchRaw : '';
             $query->where(function ($q) use ($search) {
                 $q->where('data', 'like', "%{$search}%")
                     ->orWhere('ip_address', 'like', "%{$search}%");
@@ -52,16 +66,22 @@ class FormSubmissionController extends BaseApiController
         }
 
         if ($request->has('date_from')) {
-            $query->whereDate('created_at', '>=', $request->input('date_from'));
+            $dateFromRaw = $request->input('date_from');
+            $dateFrom = is_string($dateFromRaw) ? $dateFromRaw : null;
+            $query->whereDate('created_at', '>=', $dateFrom);
         }
 
         if ($request->has('date_to')) {
-            $query->whereDate('created_at', '<=', $request->input('date_to'));
+            $dateToRaw = $request->input('date_to');
+            $dateTo = is_string($dateToRaw) ? $dateToRaw : null;
+            $query->whereDate('created_at', '<=', $dateTo);
         }
 
         // Sorting logic
-        $sortBy = $request->input('sort_by', 'created_at');
-        $sortOrder = $request->input('sort_order', 'desc');
+        $sortByRaw = $request->input('sort_by', 'created_at');
+        $sortBy = is_string($sortByRaw) ? $sortByRaw : 'created_at';
+        $sortOrderRaw = $request->input('sort_order', 'desc');
+        $sortOrder = is_string($sortOrderRaw) ? $sortOrderRaw : 'desc';
 
         // Validate sort column to prevent SQL injection or errors
         $allowedSortColumns = ['status', 'created_at', 'ip_address'];
@@ -71,18 +91,25 @@ class FormSubmissionController extends BaseApiController
             $query->latest(); // Default to created_at desc
         }
 
-        $perPage = min($request->input('per_page', 15), 100);
+        $perPageRaw = $request->input('per_page', 15);
+        $perPage = is_numeric($perPageRaw) ? min((int) $perPageRaw, 100) : 15;
         $submissions = $query->paginate($perPage);
 
         return $this->paginated($submissions, 'Form submissions retrieved successfully');
     }
 
-    public function show(FormSubmission $formSubmission)
+    /**
+     * Display the specified resource.
+     */
+    public function show(FormSubmission $formSubmission): \Illuminate\Http\JsonResponse
     {
         return $this->success($formSubmission->load(['form.fields', 'user']), 'Form submission retrieved successfully');
     }
 
-    public function markAsRead(FormSubmission $formSubmission)
+    /**
+     * Mark the specified resource as read.
+     */
+    public function markAsRead(FormSubmission $formSubmission): \Illuminate\Http\JsonResponse
     {
         $formSubmission->markAsRead();
 
@@ -91,7 +118,10 @@ class FormSubmissionController extends BaseApiController
         ], 'Submission marked as read');
     }
 
-    public function archive(FormSubmission $formSubmission)
+    /**
+     * Archive the specified resource.
+     */
+    public function archive(FormSubmission $formSubmission): \Illuminate\Http\JsonResponse
     {
         $formSubmission->archive();
 
@@ -100,36 +130,57 @@ class FormSubmissionController extends BaseApiController
         ], 'Submission archived');
     }
 
-    public function destroy(FormSubmission $formSubmission)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(FormSubmission $formSubmission): \Illuminate\Http\JsonResponse
     {
         $formSubmission->delete();
 
         return $this->success(null, 'Submission deleted successfully');
     }
 
-    public function restore($id)
+    /**
+     * Restore the specified resource from storage.
+     *
+     * @param  string|int  $id
+     */
+    public function restore($id): \Illuminate\Http\JsonResponse
     {
+        /** @var FormSubmission $submission */
         $submission = FormSubmission::withTrashed()->findOrFail($id);
         $submission->restore();
 
         return $this->success(null, 'Submission restored successfully');
     }
 
-    public function forceDelete($id)
+    /**
+     * Permanently remove the specified resource from storage.
+     *
+     * @param  string|int  $id
+     */
+    public function forceDelete($id): \Illuminate\Http\JsonResponse
     {
+        /** @var FormSubmission $submission */
         $submission = FormSubmission::withTrashed()->findOrFail($id);
         $submission->forceDelete();
 
         return $this->success(null, 'Submission permanently deleted');
     }
 
+    /**
+     * Export the resource.
+     *
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+     */
     public function export(Request $request, Form $form)
     {
         $query = $form->submissions();
 
         // Search filter
         if ($request->filled('search')) {
-            $search = $request->input('search');
+            $searchRaw = $request->input('search');
+            $search = is_string($searchRaw) ? $searchRaw : '';
             $query->where(function ($q) use ($search) {
                 $q->where('data', 'like', "%{$search}%")
                     ->orWhere('ip_address', 'like', "%{$search}%");
@@ -138,10 +189,14 @@ class FormSubmissionController extends BaseApiController
 
         // Date range filter
         if ($request->has('date_from')) {
-            $query->whereDate('created_at', '>=', $request->input('date_from'));
+            $dateFromRaw = $request->input('date_from');
+            $dateFrom = is_string($dateFromRaw) ? $dateFromRaw : null;
+            $query->whereDate('created_at', '>=', $dateFrom);
         }
         if ($request->has('date_to')) {
-            $query->whereDate('created_at', '<=', $request->input('date_to'));
+            $dateToRaw = $request->input('date_to');
+            $dateTo = is_string($dateToRaw) ? $dateToRaw : null;
+            $query->whereDate('created_at', '<=', $dateTo);
         }
 
         // Status filter (match index logic)
@@ -150,8 +205,10 @@ class FormSubmissionController extends BaseApiController
         }
 
         // Sort logic
-        $sortBy = $request->input('sort_by', 'created_at');
-        $sortOrder = $request->input('sort_order', 'desc');
+        $sortByRaw = $request->input('sort_by', 'created_at');
+        $sortBy = is_string($sortByRaw) ? $sortByRaw : 'created_at';
+        $sortOrderRaw = $request->input('sort_order', 'desc');
+        $sortOrder = is_string($sortOrderRaw) ? $sortOrderRaw : 'desc';
         $allowedSortColumns = ['status', 'created_at', 'ip_address'];
         if (in_array($sortBy, $allowedSortColumns)) {
             $query->orderBy($sortBy, $sortOrder);
@@ -211,7 +268,10 @@ class FormSubmissionController extends BaseApiController
         return Excel::download(new FormSubmissionsExport($query, $fieldKeys), "{$filename}.xlsx");
     }
 
-    public function exportPdf(FormSubmission $formSubmission)
+    /**
+     * Export the resource as PDF.
+     */
+    public function exportPdf(FormSubmission $formSubmission): \Illuminate\Http\Response
     {
         @ini_set('memory_limit', '512M');
         $formSubmission->load(['form', 'user']);
@@ -235,14 +295,23 @@ class FormSubmissionController extends BaseApiController
             ->header('Content-Type', 'application/pdf');
     }
 
-    public function statistics(Request $request, ?Form $form = null)
+    /**
+     * Get statistics.
+     */
+    public function statistics(Request $request, ?Form $form = null): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         $baseQuery = FormSubmission::query();
 
         // Multi-tenancy scoping
-        if (! $request->user()->can('manage forms')) {
-            $baseQuery->whereHas('form', function ($q) use ($request) {
-                $q->where('author_id', $request->user()->id);
+        if (! $user->can('manage forms')) {
+            $baseQuery->whereHas('form', function ($q) use ($user) {
+                $q->where('author_id', $user->id);
             });
         }
 
@@ -253,15 +322,18 @@ class FormSubmissionController extends BaseApiController
         }
 
         // Date Range Logic
-        $dateFrom = $request->input('date_from');
-        $dateTo = $request->input('date_to');
+        $dateFromRaw = $request->input('date_from');
+        $dateToRaw = $request->input('date_to');
+        $dateFrom = is_string($dateFromRaw) ? $dateFromRaw : null;
+        $dateTo = is_string($dateToRaw) ? $dateToRaw : null;
 
         if ($dateFrom && $dateTo) {
             $start = \Illuminate\Support\Carbon::parse($dateFrom)->startOfDay();
             $end = \Illuminate\Support\Carbon::parse($dateTo)->endOfDay();
-            $daysCount = $start->diffInDays($end) + 1;
+            $daysCount = (int) $start->diffInDays($end) + 1;
         } else {
-            $daysCount = (int) $request->input('days', 30);
+            $daysCountRaw = $request->input('days', 30);
+            $daysCount = is_numeric($daysCountRaw) ? (int) $daysCountRaw : 30;
             $start = now()->subDays($daysCount - 1)->startOfDay();
             $end = now()->endOfDay();
         }
@@ -355,7 +427,8 @@ class FormSubmissionController extends BaseApiController
 
             $stats['chartable_fields'] = $chartableFields;
 
-            $selectedFieldName = $request->input('aggregate_field');
+            $selectedFieldNameRaw = $request->input('aggregate_field');
+            $selectedFieldName = is_string($selectedFieldNameRaw) ? $selectedFieldNameRaw : '';
             if ($selectedFieldName && $chartableFields->contains('name', $selectedFieldName)) {
                 $fieldData = (clone $periodQuery)
                     ->select('data->'.$selectedFieldName.' as label')
@@ -366,14 +439,15 @@ class FormSubmissionController extends BaseApiController
                     ->get();
 
                 $stats['field_distribution'] = $fieldData->map(function ($item) {
-                    $label = $item->label;
+                    $itemData = (object) $item;
+                    $label = property_exists($itemData, 'label') ? $itemData->label : null;
                     if (is_string($label)) {
                         $label = trim($label, '"');
                     }
 
                     return [
                         'label' => $label ?: 'Unknown',
-                        'count' => (int) $item->count,
+                        'count' => property_exists($itemData, 'count') ? (int) $itemData->count : 0,
                     ];
                 });
             }

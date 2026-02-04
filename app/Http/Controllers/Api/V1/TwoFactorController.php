@@ -10,7 +10,7 @@ use PragmaRX\Google2FA\Google2FA;
 
 class TwoFactorController extends BaseApiController
 {
-    protected $google2fa;
+    protected Google2FA $google2fa;
 
     public function __construct()
     {
@@ -20,8 +20,9 @@ class TwoFactorController extends BaseApiController
     /**
      * Generate QR code and secret for 2FA setup
      */
-    public function generate(Request $request)
+    public function generate(Request $request): \Illuminate\Http\JsonResponse
     {
+        /** @var \App\Models\User $user */
         $user = $request->user();
 
         // Check global 2FA setting
@@ -48,16 +49,20 @@ class TwoFactorController extends BaseApiController
         $secret = $this->google2fa->generateSecretKey();
 
         // Get or create 2FA record
+        /** @var \App\Models\TwoFactorAuth $twoFactorAuth */
         $twoFactorAuth = $user->twoFactorAuth ?? new TwoFactorAuth;
-        $twoFactorAuth->user_id = $user->id;
+        if (! $twoFactorAuth->exists) {
+            $twoFactorAuth->user_id = $user->id;
+        }
         $twoFactorAuth->setSecret($secret);
         $twoFactorAuth->enabled = false;
         $twoFactorAuth->save();
 
         // Generate QR code URL
+        $appName = config('app.name');
         $qrCodeUrl = $this->google2fa->getQRCodeUrl(
-            config('app.name'),
-            $user->email,
+            is_string($appName) ? $appName : 'App',
+            (string) $user->email,
             $secret
         );
 
@@ -75,7 +80,7 @@ class TwoFactorController extends BaseApiController
     /**
      * Verify TOTP code and enable 2FA
      */
-    public function verify(Request $request)
+    public function verify(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'code' => 'required|string|size:6',
@@ -90,7 +95,9 @@ class TwoFactorController extends BaseApiController
             );
         }
 
+        /** @var \App\Models\User $user */
         $user = $request->user();
+        /** @var \App\Models\TwoFactorAuth|null $twoFactorAuth */
         $twoFactorAuth = $user->twoFactorAuth;
 
         if (! $twoFactorAuth || $twoFactorAuth->enabled) {
@@ -112,8 +119,10 @@ class TwoFactorController extends BaseApiController
             );
         }
 
+        $code = is_string($request->input('code')) ? $request->input('code') : '';
+
         // Verify code
-        $valid = $this->google2fa->verifyKey($secret, $request->input('code'), 2); // 2 = 2 time windows tolerance
+        $valid = $this->google2fa->verifyKey($secret, $code, 2); // 2 = 2 time windows tolerance
 
         if (! $valid) {
             return $this->error(
@@ -139,16 +148,19 @@ class TwoFactorController extends BaseApiController
     /**
      * Disable 2FA
      */
-    public function disable(Request $request)
+    public function disable(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'password' => 'required|string',
         ]);
 
+        /** @var \App\Models\User $user */
         $user = $request->user();
 
+        $password = is_string($request->input('password')) ? $request->input('password') : '';
+
         // Verify password
-        if (! \Illuminate\Support\Facades\Hash::check($request->input('password'), $user->password)) {
+        if (! \Illuminate\Support\Facades\Hash::check($password, (string) $user->password)) {
             return $this->validationError([
                 'password' => ['Invalid password'],
             ]);
@@ -164,6 +176,7 @@ class TwoFactorController extends BaseApiController
             );
         }
 
+        /** @var \App\Models\TwoFactorAuth|null $twoFactorAuth */
         $twoFactorAuth = $user->twoFactorAuth;
         if ($twoFactorAuth) {
             $twoFactorAuth->enabled = false;
@@ -178,21 +191,25 @@ class TwoFactorController extends BaseApiController
     /**
      * Regenerate backup codes
      */
-    public function regenerateBackupCodes(Request $request)
+    public function regenerateBackupCodes(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'password' => 'required|string',
         ]);
 
+        /** @var \App\Models\User $user */
         $user = $request->user();
 
+        $password = is_string($request->input('password')) ? $request->input('password') : '';
+
         // Verify password
-        if (! \Illuminate\Support\Facades\Hash::check($request->input('password'), $user->password)) {
+        if (! \Illuminate\Support\Facades\Hash::check($password, (string) $user->password)) {
             return $this->validationError([
                 'password' => ['Invalid password'],
             ]);
         }
 
+        /** @var \App\Models\TwoFactorAuth|null $twoFactorAuth */
         $twoFactorAuth = $user->twoFactorAuth;
         if (! $twoFactorAuth || ! $twoFactorAuth->enabled) {
             return $this->error(
@@ -215,14 +232,16 @@ class TwoFactorController extends BaseApiController
     /**
      * Verify TOTP code (for login)
      */
-    public function verifyCode(Request $request)
+    public function verifyCode(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'code' => 'required|string|size:6',
         ]);
 
+        /** @var \App\Models\User $user */
         $user = User::findOrFail($request->input('user_id'));
+        /** @var \App\Models\TwoFactorAuth|null $twoFactorAuth */
         $twoFactorAuth = $user->twoFactorAuth;
 
         if (! $twoFactorAuth || ! $twoFactorAuth->enabled) {
@@ -244,12 +263,14 @@ class TwoFactorController extends BaseApiController
             );
         }
 
+        $code = is_string($request->input('code')) ? $request->input('code') : '';
+
         // Try TOTP code first
-        $valid = $this->google2fa->verifyKey($secret, $request->input('code'), 2);
+        $valid = $this->google2fa->verifyKey($secret, $code, 2);
 
         // If TOTP fails, try backup code
         if (! $valid) {
-            $valid = $twoFactorAuth->verifyBackupCode($request->input('code'));
+            $valid = $twoFactorAuth->verifyBackupCode($code);
         }
 
         if (! $valid) {
@@ -270,9 +291,11 @@ class TwoFactorController extends BaseApiController
     /**
      * Get 2FA status
      */
-    public function status(Request $request)
+    public function status(Request $request): \Illuminate\Http\JsonResponse
     {
+        /** @var \App\Models\User $user */
         $user = $request->user();
+        /** @var \App\Models\TwoFactorAuth|null $twoFactorAuth */
         $twoFactorAuth = $user->twoFactorAuth;
 
         return $this->success([
@@ -286,6 +309,8 @@ class TwoFactorController extends BaseApiController
 
     /**
      * Generate backup codes
+     *
+     * @return array<string>
      */
     private function generateBackupCodes(int $count = 10): array
     {

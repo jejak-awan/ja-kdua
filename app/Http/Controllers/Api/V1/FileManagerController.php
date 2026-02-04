@@ -18,6 +18,8 @@ class FileManagerController extends BaseApiController
 {
     /**
      * Allowed disks for file manager operations.
+     *
+     * @var array<int, string>
      */
     protected array $allowedDisks = ['public'];
 
@@ -73,15 +75,24 @@ class FileManagerController extends BaseApiController
         return trim($path, '/');
     }
 
+    /**
+     * List files and folders in a path.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request)
     {
-        if (! $request->user()->can('manage files')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to manage files');
         }
 
         try {
-            $disk = $this->validateDisk($request->input('disk'));
-            $path = $this->validatePath($request->input('path'));
+            $diskRaw = $request->input('disk');
+            $disk = $this->validateDisk(is_string($diskRaw) ? $diskRaw : null);
+            $pathRaw = $request->input('path');
+            $path = $this->validatePath(is_string($pathRaw) ? $pathRaw : null);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
         }
@@ -134,12 +145,13 @@ class FileManagerController extends BaseApiController
         }
 
         // Server-side Filtering
-        $search = $request->input('search');
+        $searchRaw = $request->input('search');
+        $search = is_string($searchRaw) ? $searchRaw : null;
         $type = $request->input('type');
 
         if ($search) {
-            $folders = array_values(array_filter($folders, fn ($f) => stripos($f['name'], $search) !== false));
-            $files = array_values(array_filter($files, fn ($f) => stripos($f['name'], $search) !== false));
+            $folders = array_values(array_filter($folders, fn ($f) => stripos((string) $f['name'], (string) $search) !== false));
+            $files = array_values(array_filter($files, fn ($f) => stripos((string) $f['name'], (string) $search) !== false));
         }
 
         if ($type && $type !== 'all') {
@@ -206,15 +218,24 @@ class FileManagerController extends BaseApiController
         ], 'Directory contents retrieved successfully');
     }
 
+    /**
+     * Download a file or folder.
+     *
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Symfony\Component\HttpFoundation\StreamedResponse|\Illuminate\Http\JsonResponse|mixed
+     */
     public function download(Request $request)
     {
-        if (! $request->user()->can('manage files')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to download files');
         }
 
         try {
-            $disk = $this->validateDisk($request->input('disk'));
-            $path = $this->validatePath($request->input('path'));
+            $diskRaw = $request->input('disk');
+            $disk = $this->validateDisk(is_string($diskRaw) ? $diskRaw : null);
+            $pathRaw = $request->input('path');
+            $path = $this->validatePath(is_string($pathRaw) ? $pathRaw : null);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
         }
@@ -234,6 +255,8 @@ class FileManagerController extends BaseApiController
 
     /**
      * Download a folder as ZIP
+     *
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
      */
     protected function downloadFolder(string $path, string $disk)
     {
@@ -242,7 +265,7 @@ class FileManagerController extends BaseApiController
         }
 
         $zipFileName = basename($path).'.zip';
-        $zipPath = storage_path('app/temp/'.$zipFileName);
+        $zipPath = (string) storage_path('app/temp/'.$zipFileName);
 
         // Ensure temp directory exists
         if (! File::exists(dirname($zipPath))) {
@@ -254,14 +277,10 @@ class FileManagerController extends BaseApiController
             $files = Storage::disk($disk)->allFiles($path);
 
             foreach ($files as $file) {
-                // Get relative path inside the zip
-                // If path is "foo/bar" and file is "foo/bar/baz.txt", relative is "baz.txt"
-                // But usually we want to keep structure inside the zip, maybe "bar/baz.txt" or just "baz.txt"
-                // Let's keep relative path from the folder root
-
-                // Add file to zip
                 $content = Storage::disk($disk)->get($file);
-                $zip->addFromString($file, $content);
+                if (is_string($content)) {
+                    $zip->addFromString($file, $content);
+                }
             }
 
             $zip->close();
@@ -298,9 +317,16 @@ class FileManagerController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
+    /**
+     * Upload file to specific path.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function upload(Request $request)
     {
-        if (! $request->user()->can('manage files')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to upload files');
         }
 
@@ -318,17 +344,26 @@ class FileManagerController extends BaseApiController
         ]);
 
         try {
-            $disk = $this->validateDisk($request->input('disk'));
-            $path = $this->validatePath($request->input('path'));
+            $diskRaw = $request->input('disk');
+            $disk = $this->validateDisk(is_string($diskRaw) ? $diskRaw : null);
+            $pathRaw = $request->input('path');
+            $path = $this->validatePath(is_string($pathRaw) ? $pathRaw : null);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
         }
         $uploadedFiles = [];
 
         // Handle single file or multiple files
-        $files = $request->hasFile('files')
-            ? $request->file('files')
-            : [$request->file('file')];
+        $requestFiles = $request->file('files');
+        $files = [];
+        if (is_array($requestFiles)) {
+            $files = $requestFiles;
+        } else {
+            $singleFile = $request->file('file');
+            if ($singleFile instanceof \Illuminate\Http\UploadedFile) {
+                $files[] = $singleFile;
+            }
+        }
 
         foreach ($files as $file) {
             // Double-check extension is allowed (in case mimes validation is bypassed)
@@ -340,9 +375,12 @@ class FileManagerController extends BaseApiController
             }
 
             $fileName = $file->getClientOriginalName();
-            $filePath = $path ? $path.'/'.$fileName : $fileName;
+            $filePath = $path !== '' ? $path.'/'.$fileName : $fileName;
 
-            $content = file_get_contents($file);
+            $content = file_get_contents($file->getRealPath());
+            if ($content === false) {
+                continue;
+            }
 
             // Sanitize SVG
             if ($extension === 'svg' || $file->getMimeType() === 'image/svg+xml') {
@@ -350,7 +388,10 @@ class FileManagerController extends BaseApiController
                     try {
                         $sanitizer = new \enshrined\svgSanitize\Sanitizer;
                         $sanitizer->removeRemoteReferences(true);
-                        $content = $sanitizer->sanitize($content);
+                        $sanitized = $sanitizer->sanitize($content);
+                        if (is_string($sanitized)) {
+                            $content = $sanitized;
+                        }
                     } catch (\Exception $e) {
                         \Illuminate\Support\Facades\Log::warning('SVG sanitization failed in FileManager: '.$e->getMessage());
                     }
@@ -376,18 +417,26 @@ class FileManagerController extends BaseApiController
     }
 
     /**
-     * Move file to trash (soft delete)
+     * Move file to trash (soft delete) or delete permanently.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function delete(Request $request)
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         \Illuminate\Support\Facades\Log::info('FileManagerController::delete called', [
             'method' => $request->method(),
             'input' => $request->all(),
             'query' => $request->query(),
-            'user' => $request->user()->id,
+            'user' => $user->id,
         ]);
 
-        if (! $request->user()->can('manage files')) {
+        if (! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to delete files or folders');
         }
 
@@ -397,9 +446,11 @@ class FileManagerController extends BaseApiController
             'permanent' => 'nullable|boolean', // If true, skip trash
         ]);
 
-        $path = trim($request->input('path'), '/');
-        $disk = $request->input('disk', 'public');
-        $permanent = $request->input('permanent', false);
+        $pathRaw = $request->input('path');
+        $path = trim(is_string($pathRaw) ? $pathRaw : '', '/');
+        $diskRaw = $request->input('disk', 'public');
+        $disk = is_string($diskRaw) ? $diskRaw : 'public';
+        $permanent = (bool) $request->input('permanent', false);
 
         if (! Storage::disk($disk)->exists($path)) {
             return $this->notFound('File');
@@ -483,18 +534,26 @@ class FileManagerController extends BaseApiController
     }
 
     /**
-     * Move folder to trash (soft delete)
+     * Move folder to trash (soft delete) or delete permanently.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function deleteFolder(Request $request)
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         \Illuminate\Support\Facades\Log::info('FileManagerController::deleteFolder called', [
             'method' => $request->method(),
             'input' => $request->all(),
             'query' => $request->query(),
-            'user' => $request->user()->id,
+            'user' => $user->id,
         ]);
 
-        if (! $request->user()->can('manage files')) {
+        if (! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to delete folders');
         }
 
@@ -504,9 +563,11 @@ class FileManagerController extends BaseApiController
             'permanent' => 'nullable|boolean',
         ]);
 
-        $path = trim($request->input('path'), '/');
-        $disk = $request->input('disk', 'public');
-        $permanent = $request->input('permanent', false);
+        $pathRaw = $request->input('path');
+        $path = trim(is_string($pathRaw) ? $pathRaw : '', '/');
+        $diskRaw = $request->input('disk', 'public');
+        $disk = is_string($diskRaw) ? $diskRaw : 'public';
+        $permanent = (bool) $request->input('permanent', false);
 
         // Check if directory exists using Storage for better compatibility
         if (! Storage::disk($disk)->exists($path)) {
@@ -597,9 +658,16 @@ class FileManagerController extends BaseApiController
      *     security={{"sanctum":{}}}
      * )
      */
+    /**
+     * Create new folder.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function createFolder(Request $request)
     {
-        if (! $request->user()->can('manage files')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to create folders');
         }
 
@@ -609,16 +677,19 @@ class FileManagerController extends BaseApiController
             'disk' => 'nullable|string',
         ]);
 
-        $name = $request->input('name');
+        $nameRaw = $request->input('name');
+        $name = is_string($nameRaw) ? $nameRaw : '';
 
         try {
-            $disk = $this->validateDisk($request->input('disk'));
-            $path = $this->validatePath($request->input('path'));
+            $diskRaw = $request->input('disk');
+            $disk = $this->validateDisk(is_string($diskRaw) ? $diskRaw : null);
+            $pathRaw = $request->input('path');
+            $path = $this->validatePath(is_string($pathRaw) ? $pathRaw : null);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
         }
 
-        $folderPath = $path ? $path.'/'.$name : $name;
+        $folderPath = $path !== '' ? $path.'/'.$name : $name;
 
         Storage::disk($disk)->makeDirectory($folderPath);
 
@@ -630,11 +701,15 @@ class FileManagerController extends BaseApiController
     }
 
     /**
-     * Move a file or folder to a new location
+     * Move a file or folder to a new location.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function move(Request $request)
     {
-        if (! $request->user()->can('manage files')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to move files or folders');
         }
 
@@ -645,12 +720,16 @@ class FileManagerController extends BaseApiController
             'disk' => 'nullable|string',
         ]);
 
-        $type = $request->input('type');
+        $typeRaw = $request->input('type');
+        $type = is_string($typeRaw) ? $typeRaw : 'file';
 
         try {
-            $disk = $this->validateDisk($request->input('disk'));
-            $source = $this->validatePath($request->input('source'));
-            $destination = $this->validatePath($request->input('destination'));
+            $diskRaw = $request->input('disk');
+            $disk = $this->validateDisk(is_string($diskRaw) ? $diskRaw : null);
+            $sourceRaw = $request->input('source');
+            $source = $this->validatePath(is_string($sourceRaw) ? $sourceRaw : null);
+            $destinationRaw = $request->input('destination');
+            $destination = $this->validatePath(is_string($destinationRaw) ? $destinationRaw : null);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
         }
@@ -691,11 +770,15 @@ class FileManagerController extends BaseApiController
     }
 
     /**
-     * Copy a file or folder
+     * Copy a file or folder.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function copy(Request $request)
     {
-        if (! $request->user()->can('manage files')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to copy files or folders');
         }
 
@@ -706,12 +789,16 @@ class FileManagerController extends BaseApiController
             'disk' => 'nullable|string',
         ]);
 
-        $type = $request->input('type');
+        $typeRaw = $request->input('type');
+        $type = is_string($typeRaw) ? $typeRaw : 'file';
 
         try {
-            $disk = $this->validateDisk($request->input('disk'));
-            $source = $this->validatePath($request->input('source'));
-            $destination = $this->validatePath($request->input('destination'));
+            $diskRaw = $request->input('disk');
+            $disk = $this->validateDisk(is_string($diskRaw) ? $diskRaw : null);
+            $sourceRaw = $request->input('source');
+            $source = $this->validatePath(is_string($sourceRaw) ? $sourceRaw : null);
+            $destinationRaw = $request->input('destination');
+            $destination = $this->validatePath(is_string($destinationRaw) ? $destinationRaw : null);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
         }
@@ -751,7 +838,7 @@ class FileManagerController extends BaseApiController
     /**
      * Helper: Get unique path if file/folder exists
      */
-    private function getUniquePath($disk, $path)
+    private function getUniquePath(string $disk, string $path): string
     {
         if (! Storage::disk($disk)->exists($path)) {
             return $path;
@@ -772,11 +859,15 @@ class FileManagerController extends BaseApiController
     }
 
     /**
-     * Rename a file or folder
+     * Rename a file or folder.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function rename(Request $request)
     {
-        if (! $request->user()->can('manage files')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to rename files or folders');
         }
 
@@ -787,12 +878,16 @@ class FileManagerController extends BaseApiController
             'disk' => 'nullable|string',
         ]);
 
-        $newName = $request->input('newName');
-        $type = $request->input('type');
+        $newNameRaw = $request->input('newName');
+        $newName = is_string($newNameRaw) ? $newNameRaw : '';
+        $typeRaw = $request->input('type');
+        $type = is_string($typeRaw) ? $typeRaw : 'file';
 
         try {
-            $disk = $this->validateDisk($request->input('disk'));
-            $path = $this->validatePath($request->input('path'));
+            $diskRaw = $request->input('disk');
+            $disk = $this->validateDisk(is_string($diskRaw) ? $diskRaw : null);
+            $pathRaw = $request->input('path');
+            $path = $this->validatePath(is_string($pathRaw) ? $pathRaw : null);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
         }
@@ -830,11 +925,15 @@ class FileManagerController extends BaseApiController
     }
 
     /**
-     * List all items in trash
+     * List all items in trash.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function trash(Request $request)
     {
-        if (! $request->user()->can('manage files')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to view trashed files');
         }
 
@@ -862,11 +961,15 @@ class FileManagerController extends BaseApiController
     }
 
     /**
-     * Restore item from trash
+     * Restore item from trash.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function restore(Request $request)
     {
-        if (! $request->user()->can('manage files')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to restore files');
         }
 
@@ -875,11 +978,16 @@ class FileManagerController extends BaseApiController
             'disk' => 'nullable|string', // Keep for validation, but actual disk comes from DeletedFile
         ]);
 
-        $deletedFile = DeletedFile::findOrFail($request->input('id'));
+        $deletedFileId = $request->input('id');
+        /** @var DeletedFile $deletedFile */
+        $deletedFile = DeletedFile::findOrFail(is_scalar($deletedFileId) ? $deletedFileId : 0);
 
-        $trashPath = $deletedFile->trash_path;
-        $originalPath = ltrim($deletedFile->original_path, '/');
-        $disk = $deletedFile->disk ?? 'public'; // Use disk from deleted_files table
+        $trashPath = (string) $deletedFile->trash_path;
+        $originalPath = ltrim((string) $deletedFile->original_path, '/');
+        $disk = (string) $deletedFile->disk;
+        if ($disk === '') {
+            $disk = 'public';
+        }
 
         if (! Storage::disk($disk)->exists($trashPath) && ! is_dir(Storage::disk($disk)->path($trashPath))) {
             $deletedFile->delete(); // Remove record if file/folder is already gone
@@ -970,11 +1078,15 @@ class FileManagerController extends BaseApiController
     }
 
     /**
-     * Empty entire trash
+     * Empty entire trash.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function emptyTrash(Request $request)
     {
-        if (! $request->user()->can('manage files')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to empty trash');
         }
 
@@ -1041,7 +1153,7 @@ class FileManagerController extends BaseApiController
         $count = $deletedRecords->count();
         \App\Models\DeletedFile::query()->delete();
 
-        ActivityLog::log('emptied_trash', null, ['deleted_count' => $count, 'disks' => $disksToClean], $request->user(), 'Emptied File Manager trash on disks: '.implode(', ', $disksToClean));
+        ActivityLog::log('emptied_trash', null, ['deleted_count' => $count, 'disks' => $disksToClean], $user, 'Emptied File Manager trash on disks: '.implode(', ', $disksToClean));
 
         return $this->success([
             'deleted_count' => $count,
@@ -1049,18 +1161,26 @@ class FileManagerController extends BaseApiController
     }
 
     /**
-     * Permanently delete single item from trash
+     * Permanently delete single item from trash.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function deletePermanently(Request $request)
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         \Illuminate\Support\Facades\Log::info('FileManagerController::deletePermanently called', [
             'method' => $request->method(),
             'input' => $request->all(),
             'query' => $request->query(),
-            'user' => $request->user()->id,
+            'user' => $user->id,
         ]);
 
-        if (! $request->user()->can('manage files')) {
+        if (! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to permanently delete files');
         }
 
@@ -1069,8 +1189,13 @@ class FileManagerController extends BaseApiController
             'disk' => 'nullable|string', // Keep for validation, but actual disk comes from DeletedFile
         ]);
 
-        $deletedFile = DeletedFile::findOrFail($request->input('id'));
-        $disk = $deletedFile->disk ?? 'public'; // Use disk from deleted_files table
+        $deletedFileId = $request->input('id');
+        /** @var DeletedFile $deletedFile */
+        $deletedFile = DeletedFile::findOrFail(is_scalar($deletedFileId) ? $deletedFileId : 0);
+        $disk = (string) $deletedFile->disk;
+        if ($disk === '') {
+            $disk = 'public';
+        }
 
         try {
             $disk = $this->validateDisk($disk);
@@ -1127,17 +1252,21 @@ class FileManagerController extends BaseApiController
         // Remove from database
         $deletedFile->delete();
 
-        ActivityLog::log('permanently_deleted_file', null, ['path' => $deletedFile->original_path, 'disk' => $disk], $request->user(), "Permanently deleted item from trash: {$deletedFile->original_path}");
+        ActivityLog::log('permanently_deleted_file', null, ['path' => $deletedFile->original_path, 'disk' => $disk], $user, "Permanently deleted item from trash: {$deletedFile->original_path}");
 
         return $this->success(null, 'Item permanently deleted');
     }
 
     /**
-     * Extract archive (zip, tar.gz, tar)
+     * Extract archive (zip, tar.gz, tar).
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function extract(Request $request)
     {
-        if (! $request->user()->can('manage files')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to extract archives');
         }
 
@@ -1147,8 +1276,10 @@ class FileManagerController extends BaseApiController
         ]);
 
         try {
-            $disk = $this->validateDisk($request->input('disk'));
-            $path = $this->validatePath($request->input('path'));
+            $diskRaw = $request->input('disk');
+            $disk = $this->validateDisk(is_string($diskRaw) ? $diskRaw : null);
+            $pathRaw = $request->input('path');
+            $path = $this->validatePath(is_string($pathRaw) ? $pathRaw : null);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
         }
@@ -1184,20 +1315,16 @@ class FileManagerController extends BaseApiController
 
                         // Prevent Zip Slip
                         // 1. Check for .. in path
-                        if (str_contains($filename, '..')) {
+                        if ($filename !== false && str_contains($filename, '..')) {
                             $zip->close();
                             throw new \Exception("Security Violation: Zip Slip detected in entry '$filename'");
                         }
 
                         // 2. Ensure destination is within extract dir
-                        $destination = $extractPath.'/'.$filename;
-
-                        // Canonicalize path (handle if it doesn't exist yet)
-                        // Note: We can't use realpath on non-existent files.
-                        // We rely on '..' check above strongly.
-
-                        // Extract specific file
-                        $zip->extractTo($extractPath, $filename);
+                        if ($filename !== false) {
+                            // Extract specific file
+                            $zip->extractTo($extractPath, $filename);
+                        }
                     }
                     $zip->close();
                 } else {
@@ -1233,11 +1360,15 @@ class FileManagerController extends BaseApiController
     }
 
     /**
-     * Compress files/folders to ZIP archive
+     * Compress files/folders to ZIP archive.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function compress(Request $request)
     {
-        if (! $request->user()->can('manage files')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage files')) {
             return $this->forbidden('You do not have permission to compress files');
         }
 
@@ -1248,47 +1379,53 @@ class FileManagerController extends BaseApiController
             'disk' => 'nullable|string',
         ]);
 
-        $paths = $request->input('paths');
+        $requestPaths = $request->input('paths');
+        if (! is_array($requestPaths)) {
+            return $this->error('Paths must be an array');
+        }
+        $paths = $requestPaths;
         try {
-            $disk = $this->validateDisk($request->input('disk'));
+            $diskRaw = $request->input('disk');
+            $disk = $this->validateDisk(is_string($diskRaw) ? $diskRaw : null);
             // Validate all paths in array
             $cleanPaths = [];
             foreach ($paths as $p) {
-                $cleanPaths[] = $this->validatePath($p);
+                $cleanPaths[] = $this->validatePath(is_string($p) ? $p : null);
             }
             $paths = $cleanPaths;
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
         }
-        $archiveName = $request->input('name');
+        $archiveNameRaw = $request->input('name');
+        $archiveName = is_string($archiveNameRaw) ? $archiveNameRaw : null;
 
         // Determine archive name
         if (! $archiveName) {
             if (count($paths) === 1) {
-                $archiveName = pathinfo(trim($paths[0], '/'), PATHINFO_FILENAME).'.zip';
+                $archiveName = pathinfo(trim((string) $paths[0], '/'), PATHINFO_FILENAME).'.zip';
             } else {
                 $archiveName = 'archive_'.date('Y-m-d_His').'.zip';
             }
         }
 
         // Ensure .zip extension
-        if (! str_ends_with(strtolower($archiveName), '.zip')) {
-            $archiveName .= '.zip';
+        if (! str_ends_with(strtolower((string) $archiveName), '.zip')) {
+            $archiveName = ((string) $archiveName).'.zip';
         }
 
         // Determine output directory (same as first item's parent)
-        $firstPath = trim($paths[0], '/');
+        $firstPath = trim((string) $paths[0], '/');
         $parentDir = dirname($firstPath);
         $parentDir = $parentDir === '.' ? '' : $parentDir;
-        $archivePath = $parentDir ? $parentDir.'/'.$archiveName : $archiveName;
-        $fullArchivePath = Storage::disk($disk)->path($archivePath);
+        $archivePath = $parentDir !== '' ? $parentDir.'/'.$archiveName : $archiveName;
+        $fullArchivePath = (string) Storage::disk($disk)->path($archivePath);
 
         // Handle if archive already exists
-        if (file_exists($fullArchivePath)) {
-            $baseName = pathinfo($archiveName, PATHINFO_FILENAME);
+        if ($fullArchivePath !== '' && file_exists($fullArchivePath)) {
+            $baseName = pathinfo((string) $archiveName, PATHINFO_FILENAME);
             $archiveName = $baseName.'_'.time().'.zip';
-            $archivePath = $parentDir ? $parentDir.'/'.$archiveName : $archiveName;
-            $fullArchivePath = Storage::disk($disk)->path($archivePath);
+            $archivePath = $parentDir !== '' ? $parentDir.'/'.$archiveName : $archiveName;
+            $fullArchivePath = (string) Storage::disk($disk)->path($archivePath);
         }
 
         try {
@@ -1329,7 +1466,7 @@ class FileManagerController extends BaseApiController
     /**
      * Helper: Add directory contents to ZIP recursively
      */
-    private function addDirectoryToZip(\ZipArchive $zip, string $path, string $relativePath)
+    private function addDirectoryToZip(\ZipArchive $zip, string $path, string $relativePath): void
     {
         $zip->addEmptyDir($relativePath);
         $files = scandir($path);

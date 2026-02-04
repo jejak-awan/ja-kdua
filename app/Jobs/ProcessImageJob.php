@@ -16,11 +16,12 @@ class ProcessImageJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $tries = 3;
+    public int $tries = 3;
 
-    public $timeout = 300; // 5 minutes
+    public int $timeout = 300; // 5 minutes
 
-    public $backoff = [60, 120, 300]; // Retry after 1min, 2min, 5min
+    /** @var array<int, int> */
+    public array $backoff = [60, 120, 300]; // Retry after 1min, 2min, 5min
 
     /**
      * Create a new job instance.
@@ -42,8 +43,9 @@ class ProcessImageJob implements ShouldQueue
     {
         try {
             $media = Media::findOrFail($this->mediaId);
+            $mimeType = is_string($media->mime_type) ? $media->mime_type : '';
 
-            if (! str_starts_with($media->mime_type, 'image/')) {
+            if (! str_starts_with($mimeType, 'image/')) {
                 Log::channel('media')->warning("ProcessImageJob: Media {$this->mediaId} is not an image");
 
                 return;
@@ -205,9 +207,11 @@ class ProcessImageJob implements ShouldQueue
                 $manager = new \Intervention\Image\ImageManager($driver);
                 $image = $manager->read($fullPath);
 
-                $autoConvert = Setting::get('media_auto_convert_webp', true);
-                $quality = $this->quality ?? (int) Setting::get('media_optimization_quality', 85);
-                $maxWidth = (int) Setting::get('media_max_width', 1920);
+                $autoConvert = filter_var(Setting::get('media_auto_convert_webp', true), FILTER_VALIDATE_BOOLEAN);
+                $qualityConfig = Setting::get('media_optimization_quality', 85);
+                $quality = $this->quality ?? (is_numeric($qualityConfig) ? intval($qualityConfig) : 85);
+                $maxWidthConfig = Setting::get('media_max_width', 1920);
+                $maxWidth = is_numeric($maxWidthConfig) ? intval($maxWidthConfig) : 1920;
 
                 // Resize if too large
                 if ($image->width() > $maxWidth) {
@@ -215,9 +219,10 @@ class ProcessImageJob implements ShouldQueue
                 }
 
                 if ($autoConvert && $media->mime_type !== 'image/webp') {
-                    $pathInfo = pathinfo($media->path);
+                    $pathInfo = pathinfo((string) $media->path);
                     $newFileName = $pathInfo['filename'].'.webp';
-                    $newPath = $pathInfo['dirname'].'/'.$newFileName;
+                    $dirname = strval($pathInfo['dirname'] ?? '.');
+                    $newPath = ($dirname !== '.' ? $dirname.'/' : '').$newFileName;
                     $newFullPath = Storage::disk($media->disk)->path($newPath);
 
                     $image->toWebp($quality)->save($newFullPath);

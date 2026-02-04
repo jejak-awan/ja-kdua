@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property int $form_id
  * @property int|null $user_id
- * @property array $data
+ * @property array<string, mixed> $data
  * @property string|null $ip_address
  * @property string|null $user_agent
  * @property string $status
@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class FormSubmission extends Model
 {
+    /** @use HasFactory<\Database\Factories\FormSubmissionFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -40,27 +41,33 @@ class FormSubmission extends Model
         'data' => 'array',
     ];
 
+    /**
+     * @return BelongsTo<Form, $this>
+     */
     public function form(): BelongsTo
     {
         return $this->belongsTo(Form::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function markAsRead()
+    public function markAsRead(): void
     {
         $this->update(['status' => 'read']);
     }
 
-    public function archive()
+    public function archive(): void
     {
         $this->update(['status' => 'archived']);
     }
 
-    public function getFieldValue($fieldName)
+    public function getFieldValue(string $fieldName): mixed
     {
         return $this->data[$fieldName] ?? null;
     }

@@ -12,7 +12,7 @@ class SystemHealthCheck extends Command
 
     protected $description = 'Check system health status';
 
-    public function handle()
+    public function handle(): int
     {
         $this->info('Running system health check...');
         $this->newLine();

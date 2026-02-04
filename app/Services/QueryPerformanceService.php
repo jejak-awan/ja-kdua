@@ -26,6 +26,9 @@ class QueryPerformanceService
 
     /**
      * Analyze query performance
+     *
+     * @param  array<int, array{query: string, bindings: array<mixed>, time: float}>|null  $queries
+     * @return array<string, mixed>
      */
     public function analyzeQueries(?array $queries = null): array
     {
@@ -124,6 +127,7 @@ class QueryPerformanceService
      */
     public function logSlowQueries(float $threshold = 100): void
     {
+        /** @var array<int, array{query: string, bindings: array<mixed>, time: float}> $queries */
         $queries = $this->getQueryLog();
         $slowQueries = [];
 
@@ -152,27 +156,28 @@ class QueryPerformanceService
      */
     public function getPerformanceStats(): array
     {
+        /** @var array<int, array{query: string, bindings: array<mixed>, time: float}> $queries */
         $queries = $this->getQueryLog();
 
         if (empty($queries)) {
             return [
                 'total_queries' => 0,
-                'total_time' => 0,
-                'average_time' => 0,
+                'total_time' => 0.0,
+                'average_time' => 0.0,
                 'slow_queries_count' => 0,
             ];
         }
 
-        $totalTime = array_sum(array_column($queries, 'time'));
-        $slowQueries = array_filter($queries, fn ($q) => ($q['time'] ?? 0) > 100);
+        $totalTime = (float) array_sum(array_column($queries, 'time'));
+        $slowQueries = array_filter($queries, fn (array $q) => ($q['time'] ?? 0) > 100);
 
         return [
             'total_queries' => count($queries),
             'total_time' => round($totalTime, 2),
             'average_time' => round($totalTime / count($queries), 2),
             'slow_queries_count' => count($slowQueries),
-            'max_time' => round(max(array_column($queries, 'time')), 2),
-            'min_time' => round(min(array_column($queries, 'time')), 2),
+            'max_time' => round((float) max(array_column($queries, 'time')), 2),
+            'min_time' => round((float) min(array_column($queries, 'time')), 2),
         ];
     }
 

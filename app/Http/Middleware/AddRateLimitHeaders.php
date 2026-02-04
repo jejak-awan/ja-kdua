@@ -26,9 +26,9 @@ class AddRateLimitHeaders
         $rateLimitInfo = $this->getRateLimitInfo($request);
 
         if ($rateLimitInfo) {
-            $response->headers->set('X-RateLimit-Limit', $rateLimitInfo['limit']);
-            $response->headers->set('X-RateLimit-Remaining', $rateLimitInfo['remaining']);
-            $response->headers->set('X-RateLimit-Reset', $rateLimitInfo['reset']);
+            $response->headers->set('X-RateLimit-Limit', (string) $rateLimitInfo['limit']);
+            $response->headers->set('X-RateLimit-Remaining', (string) $rateLimitInfo['remaining']);
+            $response->headers->set('X-RateLimit-Reset', (string) $rateLimitInfo['reset']);
         }
 
         return $response;
@@ -36,6 +36,8 @@ class AddRateLimitHeaders
 
     /**
      * Get rate limit information from request
+     *
+     * @return array{limit: int, remaining: int, reset: int}|null
      */
     protected function getRateLimitInfo(Request $request): ?array
     {

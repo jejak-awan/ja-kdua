@@ -19,12 +19,12 @@ class SystemController extends BaseApiController
         $this->systemService = new SystemService;
     }
 
-    public function info()
+    public function info(): \Illuminate\Http\JsonResponse
     {
         return $this->success($this->systemService->getSystemInfo(), 'System information retrieved successfully');
     }
 
-    public function health()
+    public function health(): \Illuminate\Http\JsonResponse
     {
         $health = $this->systemService->getSystemHealth();
 
@@ -41,12 +41,12 @@ class SystemController extends BaseApiController
         return $this->success($health, 'System health check completed');
     }
 
-    public function statistics()
+    public function statistics(): \Illuminate\Http\JsonResponse
     {
         return $this->success($this->systemService->getStatistics(), 'System statistics retrieved successfully');
     }
 
-    public function cache()
+    public function cache(): \Illuminate\Http\JsonResponse
     {
         return $this->success([
             'driver' => config('cache.default'),
@@ -54,14 +54,14 @@ class SystemController extends BaseApiController
         ], 'Cache information retrieved successfully');
     }
 
-    public function cacheStatus()
+    public function cacheStatus(): \Illuminate\Http\JsonResponse
     {
         $status = $this->systemService->getCacheStatus();
 
         return $this->success($status, 'Cache status retrieved successfully');
     }
 
-    public function clearCache()
+    public function clearCache(): \Illuminate\Http\JsonResponse
     {
         \Artisan::call('cache:clear');
         \Artisan::call('config:clear');
@@ -74,12 +74,14 @@ class SystemController extends BaseApiController
     /**
      * Warm up application cache
      */
-    public function warmCache(Request $request)
+    public function warmCache(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $warmingService = new CacheWarmingService;
-            $type = $request->input('type');
-            $limit = (int) $request->input('limit', 50);
+            $typeInput = $request->input('type');
+            $type = is_string($typeInput) ? $typeInput : null;
+            $limitInput = $request->input('limit', 50);
+            $limit = is_numeric($limitInput) ? (int) $limitInput : 50;
 
             if ($type) {
                 $count = $warmingService->warmByType($type, $limit);
@@ -107,7 +109,7 @@ class SystemController extends BaseApiController
     /**
      * Get cache warming statistics
      */
-    public function cacheWarmingStats()
+    public function cacheWarmingStats(): \Illuminate\Http\JsonResponse
     {
         try {
             $warmingService = new CacheWarmingService;
@@ -121,7 +123,7 @@ class SystemController extends BaseApiController
         }
     }
 
-    public function systemHealth()
+    public function systemHealth(): \Illuminate\Http\JsonResponse
     {
         $health = $this->systemService->getSystemHealth();
 
@@ -134,11 +136,13 @@ class SystemController extends BaseApiController
     /**
      * Clear rate limit for login attempts
      */
-    public function clearRateLimit(Request $request)
+    public function clearRateLimit(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
-            $ip = $request->input('ip', \App\Helpers\IpHelper::getClientIp($request));
-            $email = $request->input('email');
+            $ipInput = $request->input('ip', \App\Helpers\IpHelper::getClientIp($request));
+            $ip = is_string($ipInput) ? $ipInput : '';
+            $emailInput = $request->input('email');
+            $email = is_string($emailInput) ? $emailInput : null;
 
             $cleared = [];
 
@@ -170,16 +174,23 @@ class SystemController extends BaseApiController
             // If using database cache, also clear from cache table
             if (config('cache.default') === 'database') {
                 try {
-                    DB::table('cache')->where('key', 'like', "%throttle:5,1:{$ip}%")->delete();
-                    DB::table('cache')->where('key', 'like', "%throttle:10,1:{$ip}%")->delete();
-                    DB::table('cache')->where('key', 'like', "%throttle:60,1:{$ip}%")->delete();
-                    DB::table('cache')->where('key', 'like', "%throttle:120,1:{$ip}%")->delete();
-                    DB::table('cache')->where('key', 'like', "%failed_login_attempts_{$ip}%")->delete();
-                    DB::table('cache')->where('key', 'like', "%blocked_ip_{$ip}%")->delete();
+                    $keysToDelete = [];
+                    $keysToDelete[] = "throttle:5,1:{$ip}";
+                    $keysToDelete[] = "throttle:10,1:{$ip}";
+                    $keysToDelete[] = "throttle:60,1:{$ip}";
+                    $keysToDelete[] = "throttle:120,1:{$ip}";
+                    $keysToDelete[] = "failed_login_attempts_{$ip}";
+                    $keysToDelete[] = "blocked_ip_{$ip}";
+
                     if ($email) {
-                        DB::table('cache')->where('key', 'like', "%account_locked_{$email}%")->delete();
-                        DB::table('cache')->where('key', 'like', "%failed_login_attempts_email_{$email}%")->delete();
+                        $keysToDelete[] = "account_locked_{$email}";
+                        $keysToDelete[] = "failed_login_attempts_email_{$email}";
                     }
+
+                    foreach ($keysToDelete as $key) {
+                        DB::table('cache')->where('key', 'like', "%{$key}%")->delete();
+                    }
+
                     $cleared[] = 'Database cache entries cleared';
                 } catch (\Exception $e) {
                     Log::warning('Failed to clear database cache: '.$e->getMessage());

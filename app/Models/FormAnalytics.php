@@ -2,14 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FormAnalytics extends Model
 {
-    use HasFactory;
-
     protected $table = 'form_analytics';
 
     protected $fillable = [
@@ -27,6 +24,9 @@ class FormAnalytics extends Model
         'submissions' => 'integer',
     ];
 
+    /**
+     * @return BelongsTo<Form, $this>
+     */
     public function form(): BelongsTo
     {
         return $this->belongsTo(Form::class);

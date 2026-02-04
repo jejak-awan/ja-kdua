@@ -27,8 +27,12 @@ class CommentSecurityService
     /**
      * Check for banned words
      */
+    /**
+     * Check for banned words
+     */
     protected function containsBannedWords(string $content): bool
     {
+        /** @var mixed $bannedWords */
         $bannedWords = Setting::get('comments.security.banned_words', []);
 
         if (empty($bannedWords)) {
@@ -36,11 +40,17 @@ class CommentSecurityService
         }
 
         if (is_string($bannedWords)) {
-            $bannedWords = json_decode($bannedWords, true) ?? [];
+            /** @var array<int, string>|null $decoded */
+            $decoded = json_decode($bannedWords, true);
+            $bannedWords = $decoded ?? [];
+        }
+
+        if (! is_array($bannedWords)) {
+            return false;
         }
 
         foreach ($bannedWords as $word) {
-            if (stripos($content, $word) !== false) {
+            if (is_string($word) && stripos($content, $word) !== false) {
                 return true;
             }
         }
@@ -53,7 +63,7 @@ class CommentSecurityService
      */
     protected function exceedsLinkLimit(string $content): bool
     {
-        $maxLinks = Setting::get('comments.security.max_links', 2);
+        $maxLinks = (int) Setting::get('comments.security.max_links', 2);
 
         // Count http/https occurrences
         $linkCount = substr_count(strtolower($content), 'http://') +

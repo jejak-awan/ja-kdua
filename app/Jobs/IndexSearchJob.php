@@ -14,11 +14,12 @@ class IndexSearchJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $tries = 3;
+    public int $tries = 3;
 
-    public $timeout = 300; // 5 minutes
+    public int $timeout = 300; // 5 minutes
 
-    public $backoff = [60, 120, 300]; // Retry after 1min, 2min, 5min
+    /** @var array<int, int> */
+    public array $backoff = [60, 120, 300]; // Retry after 1min, 2min, 5min
 
     /**
      * Create a new job instance.

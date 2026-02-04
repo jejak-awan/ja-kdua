@@ -25,12 +25,20 @@ class SearchQuery extends Model
         'searched_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public static function log($query, $resultsCount, $filters = [])
+    /**
+     * @param  string  $query
+     * @param  int  $resultsCount
+     * @param  array<string, mixed>  $filters
+     */
+    public static function log($query, $resultsCount, $filters = []): self
     {
         return self::create([
             'query' => $query,
@@ -43,24 +51,34 @@ class SearchQuery extends Model
         ]);
     }
 
-    public static function getPopularQueries($limit = 10, $days = 30)
+    /**
+     * @param  int|null  $limit
+     * @param  int|null  $days
+     * @return \Illuminate\Database\Eloquent\Collection<int, self>
+     */
+    public static function getPopularQueries($limit = 10, $days = 30): \Illuminate\Database\Eloquent\Collection
     {
-        return self::where('searched_at', '>=', now()->subDays($days))
+        return self::where('searched_at', '>=', now()->subDays($days ?? 30))
             ->select('query', \DB::raw('count(*) as count'))
             ->groupBy('query')
             ->orderByDesc('count')
-            ->limit($limit)
+            ->limit($limit ?? 10)
             ->get();
     }
 
-    public static function getNoResultsQueries($limit = 10, $days = 30)
+    /**
+     * @param  int|null  $limit
+     * @param  int|null  $days
+     * @return \Illuminate\Database\Eloquent\Collection<int, self>
+     */
+    public static function getNoResultsQueries($limit = 10, $days = 30): \Illuminate\Database\Eloquent\Collection
     {
-        return self::where('searched_at', '>=', now()->subDays($days))
+        return self::where('searched_at', '>=', now()->subDays($days ?? 30))
             ->where('results_count', 0)
             ->select('query', \DB::raw('count(*) as count'))
             ->groupBy('query')
             ->orderByDesc('count')
-            ->limit($limit)
+            ->limit($limit ?? 10)
             ->get();
     }
 }

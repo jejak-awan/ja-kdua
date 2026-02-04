@@ -21,7 +21,7 @@ class Redirect extends Model
         'last_hit_at' => 'datetime',
     ];
 
-    public function recordHit()
+    public function recordHit(): void
     {
         $this->increment('hits');
         $this->update(['last_hit_at' => now()]);

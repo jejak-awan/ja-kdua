@@ -17,13 +17,12 @@ class BuilderController extends BaseApiController
 
     /**
      * Get available dynamic data sources for the builder
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function dynamicSources(Request $request)
+    public function dynamicSources(Request $request): \Illuminate\Http\JsonResponse
     {
         $contentId = $request->query('content_id');
-        $context = $request->query('context', 'all'); // all | page | loop | site
+        $contextRaw = $request->query('context', 'all'); // all | page | loop | site
+        $context = is_string($contextRaw) ? $contextRaw : 'all';
 
         \Log::info('BuilderController::dynamicSources', [
             'context' => $context,
@@ -110,10 +109,8 @@ class BuilderController extends BaseApiController
 
     /**
      * Resolve dynamic tags to actual values for preview
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function resolveDynamic(Request $request)
+    public function resolveDynamic(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'tags' => 'required|array',
@@ -121,20 +118,26 @@ class BuilderController extends BaseApiController
             'loop_item' => 'nullable|array',
         ]);
 
-        $tags = $request->input('tags');
+        $tagsRaw = $request->input('tags');
+        $tags = is_array($tagsRaw) ? $tagsRaw : [];
         $contentId = $request->input('content_id');
-        $loopItem = $request->input('loop_item');
+        $loopItemRaw = $request->input('loop_item');
+        /** @var array<string, mixed>|null $loopItem */
+        $loopItem = is_array($loopItemRaw) ? $loopItemRaw : null;
 
         // Load content if provided
         $content = null;
         if ($contentId) {
             $content = Content::with(['author', 'category', 'tags'])->find($contentId);
+            /** @var Content|null $content */
         }
 
         $resolved = [];
 
         foreach ($tags as $tag) {
-            $resolved[$tag] = $this->dynamicTagService->resolveTag($tag, $content, $loopItem);
+            if (is_string($tag)) {
+                $resolved[$tag] = $this->dynamicTagService->resolveTag($tag, $content, $loopItem);
+            }
         }
 
         return $this->success($resolved, 'Tags resolved successfully');

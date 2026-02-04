@@ -11,9 +11,12 @@ class BackupService
 {
     /**
      * Execute a shell command using Symfony Process with fallback to native exec
+     *
+     * @return array{output: array<int, string>, returnCode: int}
      */
     protected function executeCommand(string $command, ?int $timeout = 300): array
     {
+        /** @var array<int, string> $output */
         $output = [];
         $returnCode = 0;
 
@@ -24,8 +27,8 @@ class BackupService
                 $process->setTimeout($timeout);
                 $process->run();
 
-                $output = explode("\n", $process->getOutput().$process->getErrorOutput());
-                $returnCode = $process->getExitCode();
+                $output = explode("\n", (string) ($process->getOutput().$process->getErrorOutput()));
+                $returnCode = (int) $process->getExitCode();
 
                 return ['output' => $output, 'returnCode' => $returnCode];
             } catch (\Exception $e) {
@@ -37,13 +40,16 @@ class BackupService
         if (function_exists('exec')) {
             \exec($command, $output, $returnCode);
 
-            return ['output' => $output, 'returnCode' => $returnCode];
+            return ['output' => $output, 'returnCode' => (int) $returnCode];
         }
 
         throw new \Exception('No shell execution method available. Please enable exec() or install symfony/process.');
     }
 
-    public function createDatabaseBackup($name = null)
+    /**
+     * Create a database backup
+     */
+    public function createDatabaseBackup(?string $name = null): Backup
     {
         $name = $name ?? 'backup_'.now()->format('Y-m-d_His');
 
@@ -52,9 +58,9 @@ class BackupService
         $sqlFilename = $name.'.sql';
         $zipFilename = $name.'.zip';
         $targetPath = 'backups/'.date('Y/m').'/'.$zipFilename;
-        $relativePath = 'backups/'.date('Y/m').'/'.$sqlFilename; // Temp path for SQL
 
         // Create backup record
+        /** @var Backup $backup */
         $backup = Backup::create([
             'name' => $name,
             'type' => 'database',
@@ -64,10 +70,16 @@ class BackupService
         ]);
 
         try {
-            $database = config('database.connections.'.config('database.default').'.database');
-            $username = config('database.connections.'.config('database.default').'.username');
-            $password = config('database.connections.'.config('database.default').'.password');
-            $host = config('database.connections.'.config('database.default').'.host');
+            /** @var string $defaultConnection */
+            $defaultConnection = config('database.default');
+            /** @var string $database */
+            $database = config("database.connections.{$defaultConnection}.database", '');
+            /** @var string $username */
+            $username = config("database.connections.{$defaultConnection}.username", '');
+            /** @var string $password */
+            $password = config("database.connections.{$defaultConnection}.password", '');
+            /** @var string $host */
+            $host = config("database.connections.{$defaultConnection}.host", '');
 
             // Determine temporary path for the SQL file
             // We use the same directory structure but temporary filename
@@ -80,7 +92,7 @@ class BackupService
             $tempSqlFile = $backupDir.'/'.$sqlFilename;
 
             // 1. Generate SQL Dump
-            if (config('database.default') === 'sqlite') {
+            if ($defaultConnection === 'sqlite') {
                 // Check database path logic (existing)
                 if (str_starts_with($database, '/')) {
                     $dbPath = $database;
@@ -102,13 +114,14 @@ class BackupService
                 } else {
                     throw new \Exception('Database file not found: '.$dbPath);
                 }
-            } elseif (config('database.default') === 'mysql') {
+            } elseif ($defaultConnection === 'mysql') {
+                /** @var int|string $port */
                 $port = config('database.connections.mysql.port', 3306);
 
                 $command = sprintf(
                     'mysqldump --host=%s --port=%s --user=%s --password=%s --single-transaction --routines --triggers %s > %s 2>&1',
                     escapeshellarg($host),
-                    escapeshellarg($port),
+                    escapeshellarg((string) $port),
                     escapeshellarg($username),
                     escapeshellarg($password),
                     escapeshellarg($database),
@@ -119,14 +132,15 @@ class BackupService
                 if ($result['returnCode'] !== 0) {
                     throw new \Exception('mysqldump failed: '.implode("\n", $result['output']));
                 }
-            } elseif (config('database.default') === 'pgsql') {
+            } elseif ($defaultConnection === 'pgsql') {
+                /** @var int|string $port */
                 $port = config('database.connections.pgsql.port', 5432);
                 \putenv("PGPASSWORD={$password}");
 
                 $command = sprintf(
                     'pg_dump --host=%s --port=%s --username=%s --format=plain %s > %s 2>&1',
                     escapeshellarg($host),
-                    escapeshellarg($port),
+                    escapeshellarg((string) $port),
                     escapeshellarg($username),
                     escapeshellarg($database),
                     escapeshellarg($tempSqlFile)
@@ -139,7 +153,7 @@ class BackupService
                     throw new \Exception('pg_dump failed: '.implode("\n", $result['output']));
                 }
             } else {
-                throw new \Exception('Unsupported database driver: '.config('database.default'));
+                throw new \Exception('Unsupported database driver: '.$defaultConnection);
             }
 
             // Verify SQL file creation
@@ -151,18 +165,15 @@ class BackupService
             $zipPath = Storage::disk('local')->path($targetPath);
             $zip = new \ZipArchive;
 
+            /** @var string|null $encryptionPassword */
+            $encryptionPassword = config('backup.archive_password');
+            if (empty($encryptionPassword)) {
+                $encryptionPassword = \Illuminate\Support\Str::random(16);
+            }
+
             if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
                 // Add SQL file
                 $zip->addFile($tempSqlFile, $sqlFilename);
-
-                // Encrypt with generated password or Env
-                $encryptionPassword = config('backup.archive_password');
-
-                // If no env password, generate a unique one (per user request)
-                // We prefer unique passwords over APP_KEY fallback for security isolation
-                if (! $encryptionPassword) {
-                    $encryptionPassword = \Illuminate\Support\Str::random(16);
-                }
 
                 if ($encryptionPassword) {
                     if (! $zip->setEncryptionName($sqlFilename, \ZipArchive::EM_AES_256, $encryptionPassword)) {
@@ -219,14 +230,19 @@ class BackupService
         }
     }
 
-    public function restoreDatabaseBackup(Backup $backup)
+    /**
+     * Restore a database backup
+     */
+    public function restoreDatabaseBackup(Backup $backup): bool
     {
         if ($backup->type !== 'database' || ! $backup->isCompleted()) {
             throw new \Exception('Invalid backup or backup not completed');
         }
 
         try {
-            $fullPath = Storage::disk($backup->disk)->path($backup->path);
+            $disk = strval($backup->disk ?? 'local');
+            $path = strval($backup->path);
+            $fullPath = Storage::disk($disk)->path($path);
 
             if (! file_exists($fullPath)) {
                 throw new \Exception('Backup file not found');
@@ -249,7 +265,7 @@ class BackupService
                     }
 
                     // Get password from DB or Env or App Key
-                    $encryptionPassword = $backup->password ?? config('backup.archive_password') ?: config('app.key');
+                    $encryptionPassword = (string) ($backup->getAttribute('password') ?? config('backup.archive_password') ?: config('app.key'));
 
                     if ($encryptionPassword) {
                         $zip->setPassword($encryptionPassword);
@@ -272,15 +288,18 @@ class BackupService
                         }
                     }
 
-                    $sqlPath = $files[0];
+                    $sqlPath = (string) $files[0];
                 } else {
                     throw new \Exception('Failed to open zip archive');
                 }
             }
 
             try {
-                if (config('database.default') === 'sqlite') {
-                    $database = config('database.connections.'.config('database.default').'.database');
+                /** @var string $defaultConnection */
+                $defaultConnection = config('database.default', 'sqlite');
+                if ($defaultConnection === 'sqlite') {
+                    /** @var string $database */
+                    $database = config("database.connections.{$defaultConnection}.database", '');
 
                     // Logic to find target DB path
                     if (str_starts_with($database, '/')) {
@@ -297,17 +316,22 @@ class BackupService
                     if (file_exists($sqlPath)) {
                         copy($sqlPath, $dbPath);
                     }
-                } elseif (config('database.default') === 'mysql') {
-                    $database = config('database.connections.mysql.database');
-                    $username = config('database.connections.mysql.username');
-                    $password = config('database.connections.mysql.password');
-                    $host = config('database.connections.mysql.host');
+                } elseif ($defaultConnection === 'mysql') {
+                    /** @var string $database */
+                    $database = config('database.connections.mysql.database', '');
+                    /** @var string $username */
+                    $username = config('database.connections.mysql.username', '');
+                    /** @var string $password */
+                    $password = config('database.connections.mysql.password', '');
+                    /** @var string $host */
+                    $host = config('database.connections.mysql.host', '');
+                    /** @var int|string $port */
                     $port = config('database.connections.mysql.port', 3306);
 
                     $command = sprintf(
                         'mysql --host=%s --port=%s --user=%s --password=%s %s < %s 2>&1',
                         escapeshellarg($host),
-                        escapeshellarg($port),
+                        escapeshellarg((string) $port),
                         escapeshellarg($username),
                         escapeshellarg($password),
                         escapeshellarg($database),
@@ -318,19 +342,24 @@ class BackupService
                     if ($result['returnCode'] !== 0) {
                         throw new \Exception('MySQL restore failed: '.implode("\n", $result['output']));
                     }
-                } elseif (config('database.default') === 'pgsql') {
-                    $database = config('database.connections.pgsql.database');
-                    $username = config('database.connections.pgsql.username');
-                    $password = config('database.connections.pgsql.password');
-                    $host = config('database.connections.pgsql.host');
-                    $port = config('database.connections.pgsql.port', 5432);
+                } elseif ($defaultConnection === 'pgsql') {
+                    /** @var string $database */
+                    $database = config('database.connections.pgsql.database', '');
+                    /** @var string $username */
+                    $username = config('cache.connections.pgsql.username', '');
+                    /** @var string $password */
+                    $password = config('cache.connections.pgsql.password', '');
+                    /** @var string $host */
+                    $host = config('cache.connections.pgsql.host', '');
+                    /** @var int|string $port */
+                    $port = config('cache.connections.pgsql.port', 5432);
 
                     \putenv("PGPASSWORD={$password}");
 
                     $command = sprintf(
                         'psql --host=%s --port=%s --username=%s %s < %s 2>&1',
                         escapeshellarg($host),
-                        escapeshellarg($port),
+                        escapeshellarg((string) $port),
                         escapeshellarg($username),
                         escapeshellarg($database),
                         escapeshellarg($sqlPath)
@@ -348,7 +377,10 @@ class BackupService
             } finally {
                 // Cleanup temporary extracted files
                 if ($tempExtractDir && is_dir($tempExtractDir)) {
-                    array_map('unlink', glob("$tempExtractDir/*.*"));
+                    $toDelete = (array) glob("$tempExtractDir/*.*");
+                    foreach ($toDelete as $file) {
+                        unlink((string) $file);
+                    }
                     rmdir($tempExtractDir);
                 }
             }
@@ -359,14 +391,24 @@ class BackupService
         }
     }
 
-    public function deleteBackup(Backup $backup)
+    /**
+     * Delete a backup
+     */
+    public function deleteBackup(Backup $backup): void
     {
+        /** @var int|string $backupId */
         $backupId = $backup->id;
+        /** @var string $backupName */
         $backupName = $backup->name;
 
         // Delete file
-        if (Storage::disk($backup->disk)->exists($backup->path)) {
-            Storage::disk($backup->disk)->delete($backup->path);
+        /** @var string $disk */
+        $disk = $backup->disk ?? 'local';
+        /** @var string $path */
+        $path = $backup->path;
+
+        if (Storage::disk($disk)->exists($path)) {
+            Storage::disk($disk)->delete($path);
         }
 
         // Delete record
@@ -378,7 +420,12 @@ class BackupService
         ]);
     }
 
-    public function listBackups($type = null)
+    /**
+     * List backups
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, Backup>
+     */
+    public function listBackups(?string $type = null): \Illuminate\Database\Eloquent\Collection
     {
         $query = Backup::query();
 
@@ -386,16 +433,24 @@ class BackupService
             $query->where('type', $type);
         }
 
-        return $query->orderBy('created_at', 'desc')->get();
+        /** @var \Illuminate\Database\Eloquent\Collection<int, Backup> $backups */
+        $backups = $query->orderBy('created_at', 'desc')->get();
+
+        return $backups;
     }
 
-    public function getBackupStats()
+    /**
+     * Get backup statistics
+     *
+     * @return array{total: int, completed: int, failed: int, total_size: int, latest: ?Backup, schedule: array<string, mixed>}
+     */
+    public function getBackupStats(): array
     {
         return [
             'total' => Backup::count(),
             'completed' => Backup::where('status', 'completed')->count(),
             'failed' => Backup::where('status', 'failed')->count(),
-            'total_size' => Backup::where('status', 'completed')->sum('size'),
+            'total_size' => (int) Backup::where('status', 'completed')->sum('size'),
             'latest' => Backup::where('status', 'completed')->latest('completed_at')->first(),
             'schedule' => $this->getScheduleSettings(),
         ];
@@ -403,22 +458,40 @@ class BackupService
 
     /**
      * Get backup schedule settings from database
+     *
+     * @return array{enabled: bool, frequency: string, time: string, retention_days: int, max_backups: int, last_run: ?string, next_run: ?string}
      */
     public function getScheduleSettings(): array
     {
+        /** @var bool $enabled */
+        $enabled = \App\Models\Setting::get('backup_schedule_enabled', false);
+        /** @var string $frequency */
+        $frequency = \App\Models\Setting::get('backup_schedule_frequency', 'daily');
+        /** @var string $time */
+        $time = \App\Models\Setting::get('backup_schedule_time', '02:00');
+        /** @var int $retentionDays */
+        $retentionDays = \App\Models\Setting::get('backup_retention_days', 30);
+        /** @var int $maxBackups */
+        $maxBackups = \App\Models\Setting::get('backup_max_count', 10);
+        /** @var string|null $lastRun */
+        $lastRun = \App\Models\Setting::get('backup_last_run');
+
         return [
-            'enabled' => \App\Models\Setting::get('backup_schedule_enabled', false),
-            'frequency' => \App\Models\Setting::get('backup_schedule_frequency', 'daily'), // daily, weekly, monthly
-            'time' => \App\Models\Setting::get('backup_schedule_time', '02:00'),
-            'retention_days' => (int) \App\Models\Setting::get('backup_retention_days', 30),
-            'max_backups' => (int) \App\Models\Setting::get('backup_max_count', 10),
-            'last_run' => \App\Models\Setting::get('backup_last_run'),
+            'enabled' => $enabled,
+            'frequency' => $frequency, // daily, weekly, monthly
+            'time' => $time,
+            'retention_days' => $retentionDays,
+            'max_backups' => $maxBackups,
+            'last_run' => $lastRun,
             'next_run' => $this->calculateNextRun(),
         ];
     }
 
     /**
      * Update backup schedule settings
+     *
+     * @param  array<string, mixed>  $settings
+     * @return array{enabled: bool, frequency: string, time: string, retention_days: int, max_backups: int, last_run: ?string, next_run: ?string}
      */
     public function updateScheduleSettings(array $settings): array
     {
@@ -500,12 +573,50 @@ class BackupService
     /**
      * Calculate next scheduled run time
      */
-    public function createFilesBackup($name = null)
+    protected function calculateNextRun(): ?string
+    {
+        $settings = [
+            'enabled' => (bool) \App\Models\Setting::get('backup_schedule_enabled', false),
+            'frequency' => (string) \App\Models\Setting::get('backup_schedule_frequency', 'daily'),
+            'time' => (string) \App\Models\Setting::get('backup_schedule_time', '02:00'),
+        ];
+
+        if (! $settings['enabled']) {
+            return null;
+        }
+
+        $time = explode(':', $settings['time']);
+        $hour = (int) $time[0];
+        $minute = (int) ($time[1] ?? 0);
+
+        $next = now()->setTime($hour, $minute, 0);
+
+        if ($next->isPast()) {
+            switch ($settings['frequency']) {
+                case 'weekly':
+                    $next->addWeek();
+                    break;
+                case 'monthly':
+                    $next->addMonth();
+                    break;
+                default:
+                    $next->addDay();
+            }
+        }
+
+        return $next->toISOString();
+    }
+
+    /**
+     * Create a files backup
+     */
+    public function createFilesBackup(?string $name = null): Backup
     {
         $name = $name ?? 'backup_files_'.now()->format('Y-m-d_His');
         $zipFilename = $name.'.zip';
         $targetPath = 'backups/'.date('Y/m').'/'.$zipFilename;
 
+        /** @var Backup $backup */
         $backup = Backup::create([
             'name' => $name,
             'type' => 'files',
@@ -524,17 +635,18 @@ class BackupService
             $zip = new \ZipArchive;
             if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
                 // Add storage/app/public
-                $filesPath = storage_path('app/public');
+                $filesPath = (string) storage_path('app/public');
                 $this->addFolderToZip($zip, $filesPath, 'storage');
 
                 // Add public/uploads if exists
-                $uploadsPath = public_path('uploads');
+                $uploadsPath = (string) public_path('uploads');
                 if (file_exists($uploadsPath)) {
                     $this->addFolderToZip($zip, $uploadsPath, 'uploads');
                 }
 
+                /** @var string|null $encryptionPassword */
                 $encryptionPassword = config('backup.archive_password');
-                if (! $encryptionPassword) {
+                if (empty($encryptionPassword)) {
                     $encryptionPassword = \Illuminate\Support\Str::random(16);
                 }
 
@@ -568,7 +680,7 @@ class BackupService
         }
     }
 
-    public function createFullBackup($name = null)
+    public function createFullBackup(?string $name = null): Backup
     {
         $name = $name ?? 'backup_full_'.now()->format('Y-m-d_His');
         $zipFilename = $name.'.zip';
@@ -602,8 +714,8 @@ class BackupService
                 // We will skip strict code duplication for brevity and just dump a placeholder or call internal helper if I refactored.
                 // Since I didn't refactor, I'll add "files" part first.
 
-                $this->addFolderToZip($zip, storage_path('app/public'), 'storage');
-                $uploadsPath = public_path('uploads');
+                $this->addFolderToZip($zip, (string) storage_path('app/public'), 'storage');
+                $uploadsPath = (string) public_path('uploads');
                 if (file_exists($uploadsPath)) {
                     $this->addFolderToZip($zip, $uploadsPath, 'uploads');
                 }
@@ -629,19 +741,25 @@ class BackupService
         }
     }
 
-    private function addFolderToZip($zip, $path, $zipRoot)
+    /**
+     * Add a folder to a ZIP archive recursively
+     */
+    private function addFolderToZip(\ZipArchive $zip, string $path, string $zipRoot): void
     {
         if (! is_dir($path)) {
             return;
         }
 
-        $files = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::SELF_FIRST
-        );
+        $directory = new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS);
+        $files = new \RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::SELF_FIRST);
 
         foreach ($files as $file) {
-            $filePath = $file->getRealPath();
+            /** @var \SplFileInfo|string $file */
+            if (! $file instanceof \SplFileInfo) {
+                continue;
+            }
+
+            $filePath = (string) $file->getRealPath();
             $relativePath = $zipRoot.'/'.substr($filePath, strlen($path) + 1);
 
             if ($file->isDir()) {
@@ -650,39 +768,5 @@ class BackupService
                 $zip->addFile($filePath, $relativePath);
             }
         }
-    }
-
-    protected function calculateNextRun(): ?string
-    {
-        $settings = [
-            'enabled' => \App\Models\Setting::get('backup_schedule_enabled', false),
-            'frequency' => \App\Models\Setting::get('backup_schedule_frequency', 'daily'),
-            'time' => \App\Models\Setting::get('backup_schedule_time', '02:00'),
-        ];
-
-        if (! $settings['enabled']) {
-            return null;
-        }
-
-        $time = explode(':', $settings['time']);
-        $hour = (int) $time[0];
-        $minute = (int) ($time[1] ?? 0);
-
-        $next = now()->setTime($hour, $minute, 0);
-
-        if ($next->isPast()) {
-            switch ($settings['frequency']) {
-                case 'weekly':
-                    $next->addWeek();
-                    break;
-                case 'monthly':
-                    $next->addMonth();
-                    break;
-                default:
-                    $next->addDay();
-            }
-        }
-
-        return $next->toISOString();
     }
 }

@@ -9,17 +9,20 @@ use Illuminate\Support\Facades\DB;
 
 class MenuController extends BaseApiController
 {
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = Menu::with('items');
 
         if ($request->has('location')) {
-            $query->where('location', $request->location);
+            $locationRaw = $request->location;
+            $location = is_string($locationRaw) ? $locationRaw : '';
+            $query->where('location', $location);
         }
 
         // Soft deletes filter
         if ($request->has('trashed')) {
-            $trashed = $request->trashed;
+            $trashedRaw = $request->trashed;
+            $trashed = is_string($trashedRaw) ? $trashedRaw : '';
             if ($trashed === 'only') {
                 $query->onlyTrashed();
             } elseif ($trashed === 'with') {
@@ -40,7 +43,7 @@ class MenuController extends BaseApiController
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -53,9 +56,11 @@ class MenuController extends BaseApiController
             'description' => 'nullable|string',
         ]);
 
+        $name = is_string($validated['name']) ? $validated['name'] : '';
+
         // Auto-generate slug from name if not provided
         if (empty($validated['slug'])) {
-            $baseSlug = \Illuminate\Support\Str::slug($validated['name']);
+            $baseSlug = \Illuminate\Support\Str::slug($name);
             $slug = $baseSlug;
             $counter = 1;
             while (Menu::withTrashed()->where('slug', $slug)->exists()) {
@@ -69,14 +74,18 @@ class MenuController extends BaseApiController
         return $this->success($menu->load('items'), 'Menu created successfully', 201);
     }
 
-    public function show($id)
+    /**
+     * @param  int  $id
+     */
+    public function show($id): \Illuminate\Http\JsonResponse
     {
+        /** @var Menu $menu */
         $menu = Menu::withTrashed()->findOrFail($id);
 
         return $this->success($menu->load(['items.children']), 'Menu retrieved successfully');
     }
 
-    public function update(Request $request, Menu $menu)
+    public function update(Request $request, Menu $menu): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
@@ -96,23 +105,28 @@ class MenuController extends BaseApiController
         return $this->success($menu->load('items'), 'Menu updated successfully');
     }
 
-    public function destroy(Menu $menu)
+    public function destroy(Menu $menu): \Illuminate\Http\JsonResponse
     {
         $menu->delete();
 
         return $this->success(null, 'Menu deleted successfully');
     }
 
-    public function restore($id)
+    public function restore(int $id): \Illuminate\Http\JsonResponse
     {
+        /** @var Menu $menu */
         $menu = Menu::withTrashed()->findOrFail($id);
         $menu->restore();
 
         return $this->success(null, 'Menu restored successfully');
     }
 
-    public function forceDelete($id)
+    /**
+     * @param  int  $id
+     */
+    public function forceDelete($id): \Illuminate\Http\JsonResponse
     {
+        /** @var Menu $menu */
         $menu = Menu::withTrashed()->findOrFail($id);
 
         // Delete menu items
@@ -123,7 +137,7 @@ class MenuController extends BaseApiController
         return $this->success(null, 'Menu permanently deleted');
     }
 
-    public function bulkAction(Request $request)
+    public function bulkAction(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'ids' => 'required|array',
@@ -131,8 +145,10 @@ class MenuController extends BaseApiController
             'action' => 'required|in:delete,restore,force_delete',
         ]);
 
-        $ids = $request->ids;
-        $action = $request->action;
+        $idsRaw = $request->ids;
+        $ids = is_array($idsRaw) ? $idsRaw : [];
+        $actionRaw = $request->action;
+        $action = is_string($actionRaw) ? $actionRaw : '';
 
         try {
             if ($action === 'delete') {
@@ -146,6 +162,7 @@ class MenuController extends BaseApiController
             } elseif ($action === 'force_delete') {
                 $menus = Menu::withTrashed()->whereIn('id', $ids)->get();
                 foreach ($menus as $menu) {
+                    /** @var Menu $menu */
                     $menu->items()->delete(); // Soft delete items first just in case, orforce delete depending on requirement. Usually items are Cascade.
                     // But actually $menu->items() returns checking menu_id.
                     // Let's force delete items associated.
@@ -162,7 +179,7 @@ class MenuController extends BaseApiController
         return $this->error('Invalid action', 422);
     }
 
-    public function addItem(Request $request, Menu $menu)
+    public function addItem(Request $request, Menu $menu): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -189,16 +206,21 @@ class MenuController extends BaseApiController
             'is_active' => 'boolean',
         ]);
 
+        $targetTypeRaw = $validated['target_type'] ?? null;
+        $targetType = is_string($targetTypeRaw) ? $targetTypeRaw : null;
+        $typeRaw = $validated['type'] ?? null;
+        $type = is_string($typeRaw) ? $typeRaw : '';
+
         // Security: Validate target_type against whitelist
-        if (! empty($validated['target_type']) && ! in_array($validated['target_type'], MenuItem::ALLOWED_TARGET_TYPES)) {
+        if ($targetType && ! in_array($targetType, MenuItem::ALLOWED_TARGET_TYPES)) {
             return $this->error('Invalid target type', 422);
         }
 
         // Auto-assign target_type based on type if not provided
-        if (empty($validated['target_type']) && ! empty($validated['type'])) {
-            if (in_array($validated['type'], ['page', 'post'])) {
+        if (! $targetType && $type) {
+            if (in_array($type, ['page', 'post'])) {
                 $validated['target_type'] = 'App\Models\Content';
-            } elseif ($validated['type'] === 'category') {
+            } elseif ($type === 'category') {
                 $validated['target_type'] = 'App\Models\Category';
             }
         }
@@ -208,15 +230,25 @@ class MenuController extends BaseApiController
         return $this->success($item->load('children'), 'Menu item created successfully', 201);
     }
 
-    public function items($id)
+    /**
+     * @param  string|int  $id
+     */
+    /**
+     * @param  int  $id
+     */
+    public function items($id): \Illuminate\Http\JsonResponse
     {
+        /** @var Menu $menu */
         $menu = Menu::withTrashed()->findOrFail($id);
 
+        /** @var mixed $allItems */
+        $allItems = $menu->allItems;
+
         // Return all items flattened, frontend will build the tree
-        return $this->success($menu->allItems, 'Menu items retrieved successfully');
+        return $this->success($allItems, 'Menu items retrieved successfully');
     }
 
-    public function updateItem(Request $request, Menu $menu, MenuItem $menuItem)
+    public function updateItem(Request $request, Menu $menu, MenuItem $menuItem): \Illuminate\Http\JsonResponse
     {
         if ($menuItem->menu_id !== $menu->id) {
             return $this->validationError(['menu_item' => ['Menu item does not belong to this menu']], 'Menu item does not belong to this menu');
@@ -247,16 +279,21 @@ class MenuController extends BaseApiController
             'is_active' => 'boolean',
         ]);
 
+        $targetTypeRaw = $validated['target_type'] ?? $menuItem->target_type;
+        $targetType = is_string($targetTypeRaw) ? $targetTypeRaw : null;
+        $typeRaw = $validated['type'] ?? $menuItem->type;
+        $type = is_string($typeRaw) ? $typeRaw : '';
+
         // Security: Validate target_type against whitelist
-        if (! empty($validated['target_type']) && ! in_array($validated['target_type'], MenuItem::ALLOWED_TARGET_TYPES)) {
+        if ($targetType && ! in_array($targetType, MenuItem::ALLOWED_TARGET_TYPES)) {
             return $this->error('Invalid target type', 422);
         }
 
         // Auto-assign target_type based on type if not provided
-        if (empty($validated['target_type']) && ! empty($validated['type'])) {
-            if (in_array($validated['type'], ['page', 'post'])) {
+        if (! $targetType && $type) {
+            if (in_array($type, ['page', 'post'])) {
                 $validated['target_type'] = 'App\Models\Content';
-            } elseif ($validated['type'] === 'category') {
+            } elseif ($type === 'category') {
                 $validated['target_type'] = 'App\Models\Category';
             }
         }
@@ -266,7 +303,7 @@ class MenuController extends BaseApiController
         return $this->success($menuItem->load('children'), 'Menu item updated successfully');
     }
 
-    public function deleteItem(Menu $menu, MenuItem $menuItem)
+    public function deleteItem(Menu $menu, MenuItem $menuItem): \Illuminate\Http\JsonResponse
     {
         if ($menuItem->menu_id !== $menu->id) {
             return $this->validationError(['menu_item' => ['Menu item does not belong to this menu']], 'Menu item does not belong to this menu');
@@ -277,7 +314,7 @@ class MenuController extends BaseApiController
         return $this->success(null, 'Menu item deleted successfully');
     }
 
-    public function reorderItems(Request $request, Menu $menu)
+    public function reorderItems(Request $request, Menu $menu): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'items' => 'required|array',
@@ -286,11 +323,24 @@ class MenuController extends BaseApiController
             'items.*.parent_id' => 'nullable|exists:menu_items,id',
         ]);
 
-        DB::transaction(function () use ($request, $menu) {
-            foreach ($request->items as $itemData) {
+        $itemsRaw = $request->input('items', []);
+        $items = is_array($itemsRaw) ? $itemsRaw : [];
+
+        /** @var array<int, array<string, mixed>> $items */
+        DB::transaction(function () use ($items, $menu) {
+            foreach ($items as $itemData) {
+                // $itemData is array<string, mixed> according to PHPDoc of $items
+
+                $idRaw = $itemData['id'] ?? 0;
+                $id = is_numeric($idRaw) ? (int) $idRaw : 0;
+                $sortOrderRaw = $itemData['sort_order'] ?? 0;
+                $sortOrder = is_numeric($sortOrderRaw) ? (int) $sortOrderRaw : 0;
+                $parentIdRaw = $itemData['parent_id'] ?? null;
+                $parentId = is_numeric($parentIdRaw) ? (int) $parentIdRaw : null;
+
                 $updateData = [
-                    'sort_order' => $itemData['sort_order'],
-                    'parent_id' => $itemData['parent_id'] ?? null,
+                    'sort_order' => $sortOrder,
+                    'parent_id' => $parentId,
                 ];
 
                 // Include optional mega menu fields if present
@@ -306,7 +356,7 @@ class MenuController extends BaseApiController
                     }
                 }
 
-                MenuItem::where('id', $itemData['id'])
+                MenuItem::where('id', $id)
                     ->where('menu_id', $menu->id)
                     ->update($updateData);
             }
@@ -315,7 +365,7 @@ class MenuController extends BaseApiController
         return $this->success(null, 'Menu items reordered successfully');
     }
 
-    public function getByLocation(Request $request, $location)
+    public function getByLocation(Request $request, string $location): \Illuminate\Http\JsonResponse
     {
         $cacheKey = "menu_location_{$location}";
 

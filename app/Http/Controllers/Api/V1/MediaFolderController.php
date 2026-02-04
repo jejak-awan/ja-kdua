@@ -9,18 +9,20 @@ use Illuminate\Support\Str;
 
 class MediaFolderController extends BaseApiController
 {
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
+            $user = $request->user();
+            /** @var \App\Models\User|null $user */
             $query = MediaFolder::query();
 
             // Scope logic
-            if ($request->user() && ! $request->user()->can('manage media')) {
-                $query->where(function ($q) use ($request) {
-                    $q->where('author_id', $request->user()->id)
+            if ($user && ! $user->can('manage media')) {
+                $query->where(function ($q) use ($user) {
+                    $q->where('author_id', $user->id)
                         ->orWhere('is_shared', true);
                 });
-            } elseif (! $request->user()) {
+            } elseif (! $user) {
                 $query->where('is_shared', true);
             }
 
@@ -32,41 +34,32 @@ class MediaFolderController extends BaseApiController
             }
 
             if ($request->has('parent_id')) {
-                if ($request->parent_id === 'null' || $request->parent_id === null) {
+                $parentIdRaw = $request->parent_id;
+                if ($parentIdRaw === 'null' || $parentIdRaw === null) {
                     $query->whereNull('parent_id');
                 } else {
-                    $query->where('parent_id', $request->parent_id);
+                    $query->where('parent_id', $parentIdRaw);
                 }
             }
 
             // Get tree structure if requested
-            if ($request->has('tree') && $request->tree) {
+            if ($request->has('tree') && $request->boolean('tree')) {
                 // Apply same scope to tree root finding
                 // We need to apply the query constraint to the root query
                 // Note: The original code used MediaFolder::whereNull('parent_id') direct call.
                 // We must use the $query builder which has our scopes.
                 $foldersQuery = $query->clone()->whereNull('parent_id');
 
-                // Trashed handled in $query already? Yes, lines 18-21.
-                // But creating a new query instance from 'MediaFolder::' might lose scope.
-                // Let's rely on $query which already has scopes.
-                // However $query might have other filters from request.
-                // Let's reset parent_id filter if present in $query (it shouldn't be for tree root usually)
-
-                $folders = $foldersQuery->with(['children' => function ($q) use ($request) {
+                $folders = $foldersQuery->with(['children' => function ($q) use ($request, $user) {
                     if ($request->input('trashed') === 'only') {
                         $q->onlyTrashed();
                     } elseif ($request->input('trashed') === 'with') {
                         $q->withTrashed();
                     }
                     // We must also scope children?
-                    // If parent is visible, children should be visible?
-                    // If I own Parent, I own children.
-                    // If Parent is Global, I might own a child.
-                    // If Parent is Global, and Child is Other User's... I shouldn't see child.
-                    if ($request->user() && ! $request->user()->can('manage media')) {
-                        $q->where(function ($q) use ($request) {
-                            $q->where('author_id', $request->user()->id)
+                    if ($user && ! $user->can('manage media')) {
+                        $q->where(function ($sq) use ($user) {
+                            $sq->where('author_id', $user->id)
                                 ->orWhere('is_shared', true);
                         });
                     }
@@ -134,18 +127,17 @@ class MediaFolderController extends BaseApiController
         }
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
-        if (! $request->user()->can('manage media') && ! $request->user()->can('create media')) {
-            // Assuming 'create media' is enough to create folders?
-            // Or 'view media' + 'upload'?
-            // Seeder gave 'manage media' to Admin. 'view media' to Author.
-            // Author needs to upload. Controllers check 'manage media' for upload?
-            // MediaController checked 'manage media' for upload. I need to fix that too!
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
         }
+
         // Just checking 'create media' which implies upload rights?
         // Authors with 'upload media' should be able to create folders for organization
-        if (! $request->user()->can('upload media') && ! $request->user()->can('manage media')) {
+        if (! $user->can('upload media') && ! $user->can('manage media')) {
             return $this->forbidden('You do not have permission to create media folders');
         }
 
@@ -158,18 +150,19 @@ class MediaFolderController extends BaseApiController
                 'is_shared' => 'sometimes|boolean',
             ]);
 
-            $validated['slug'] = Str::slug($validated['name']);
+            $name = is_string($validated['name']) ? $validated['name'] : '';
+            $validated['slug'] = Str::slug($name);
 
             // Allow Admin to set author and shared status
-            if ($request->user()->can('manage media')) {
+            if ($user->can('manage media')) {
                 // can set author_id and is_shared
             } else {
-                $validated['author_id'] = $request->user()->id;
+                $validated['author_id'] = $user->id;
                 $validated['is_shared'] = false;
             }
 
             // Ensure slug is unique within the same parent
-            $originalSlug = $validated['slug'];
+            $originalSlug = is_string($validated['slug']) ? $validated['slug'] : '';
             $counter = 1;
             $parentQuery = MediaFolder::where('parent_id', $validated['parent_id'] ?? null);
             while ($parentQuery->clone()->where('slug', $validated['slug'])->exists()) {
@@ -186,13 +179,21 @@ class MediaFolderController extends BaseApiController
         }
     }
 
-    public function show($id)
+    /**
+     * Display the specified resource.
+     *
+     * @param  string|int  $id
+     */
+    public function show($id): \Illuminate\Http\JsonResponse
     {
+        /** @var MediaFolder $mediaFolder */
         $mediaFolder = MediaFolder::withTrashed()->findOrFail($id);
+        $user = request()->user();
+        /** @var \App\Models\User|null $user */
 
         // Scope check
-        if (request()->user() && ! request()->user()->can('manage media')) {
-            if ($mediaFolder->author_id && $mediaFolder->author_id !== request()->user()->id) {
+        if ($user && ! $user->can('manage media')) {
+            if ($mediaFolder->author_id && $mediaFolder->author_id !== $user->id) {
                 return $this->forbidden('You do not have permission to view this folder');
             }
         }
@@ -200,16 +201,22 @@ class MediaFolderController extends BaseApiController
         return $this->success($mediaFolder->load(['parent', 'children']), 'Folder retrieved successfully');
     }
 
-    public function update(Request $request, MediaFolder $mediaFolder)
+    public function update(Request $request, MediaFolder $mediaFolder): \Illuminate\Http\JsonResponse
     {
-        if (! $request->user()->can('manage media') && ! $request->user()->can('edit media')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
+        if (! $user->can('manage media') && ! $user->can('edit media')) {
             // Allow 'edit media' permission
             return $this->forbidden('You do not have permission to update media folders');
         }
 
         // Ownership check
-        if (! request()->user()->can('manage media')) {
-            if ($mediaFolder->author_id && $mediaFolder->author_id !== request()->user()->id) {
+        if (! $user->can('manage media')) {
+            if ($mediaFolder->author_id && $mediaFolder->author_id !== $user->id) {
                 return $this->forbidden('You do not have permission to update this folder');
             }
             if (is_null($mediaFolder->author_id)) {
@@ -228,12 +235,14 @@ class MediaFolderController extends BaseApiController
             ]);
 
             if (isset($validated['name'])) {
-                $validated['slug'] = Str::slug($validated['name']);
+                $name = is_string($validated['name']) ? $validated['name'] : '';
+                $validated['slug'] = Str::slug($name);
 
                 // Ensure slug is unique
                 $originalSlug = $validated['slug'];
                 $counter = 1;
-                $parentId = $validated['parent_id'] ?? $mediaFolder->parent_id;
+                $parentIdRaw = $validated['parent_id'] ?? $mediaFolder->parent_id;
+                $parentId = $parentIdRaw !== null ? (int) $parentIdRaw : null;
                 $parentQuery = MediaFolder::where('parent_id', $parentId);
                 while ($parentQuery->clone()->where('slug', $validated['slug'])->where('id', '!=', $mediaFolder->id)->exists()) {
                     $validated['slug'] = $originalSlug.'-'.$counter++;
@@ -250,15 +259,21 @@ class MediaFolderController extends BaseApiController
         }
     }
 
-    public function destroy(Request $request, MediaFolder $mediaFolder)
+    public function destroy(Request $request, MediaFolder $mediaFolder): \Illuminate\Http\JsonResponse
     {
-        if (! $request->user()->can('manage media') && ! $request->user()->can('delete media')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
+        if (! $user->can('manage media') && ! $user->can('delete media')) {
             return $this->forbidden('You do not have permission to delete media folders');
         }
 
         // Ownership check
-        if (! request()->user()->can('manage media')) {
-            if ($mediaFolder->author_id && $mediaFolder->author_id !== request()->user()->id) {
+        if (! $user->can('manage media')) {
+            if ($mediaFolder->author_id && $mediaFolder->author_id !== $user->id) {
                 return $this->forbidden('You do not have permission to delete this folder');
             }
             if (is_null($mediaFolder->author_id)) {
@@ -269,7 +284,7 @@ class MediaFolderController extends BaseApiController
         $permanent = $request->boolean('permanent', false);
 
         if ($permanent) {
-            return $this->forceDelete($request, $mediaFolder->id); // Pass ID to forceDelete
+            return $this->forceDelete($request, (string) $mediaFolder->id); // Pass ID as string
         }
 
         // Soft delete - recursive behavior is handled by MediaFolderObserver
@@ -278,12 +293,20 @@ class MediaFolderController extends BaseApiController
         return $this->success(null, 'Folder moved to trash');
     }
 
-    public function restore(Request $request, $id)
+    /**
+     * Restore the specified resource from storage.
+     *
+     * @param  string|int  $id
+     */
+    public function restore(Request $request, $id): \Illuminate\Http\JsonResponse
     {
-        if (! $request->user()->can('manage media')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage media')) {
             return $this->forbidden('You do not have permission to restore media folders');
         }
 
+        /** @var MediaFolder $folder */
         $folder = MediaFolder::onlyTrashed()->findOrFail($id);
         // Recursive restore is handled by MediaFolderObserver
         $folder->restore();
@@ -291,12 +314,20 @@ class MediaFolderController extends BaseApiController
         return $this->success($folder->fresh(), 'Folder restored successfully');
     }
 
-    public function forceDelete(Request $request, $id)
+    /**
+     * Permanently remove the specified resource from storage.
+     *
+     * @param  string|int  $id
+     */
+    public function forceDelete(Request $request, $id): \Illuminate\Http\JsonResponse
     {
-        if (! $request->user()->can('manage media')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage media')) {
             return $this->forbidden('You do not have permission to permanently delete media folders');
         }
 
+        /** @var MediaFolder $folder */
         $folder = MediaFolder::withTrashed()->findOrFail($id);
 
         $this->recursiveForceDelete($folder);
@@ -307,19 +338,19 @@ class MediaFolderController extends BaseApiController
     /**
      * Recursively delete all children folders and media
      */
-    protected function recursiveForceDelete(MediaFolder $folder)
+    protected function recursiveForceDelete(MediaFolder $folder): void
     {
         // 1. Permanently delete all media files in this folder
         $mediaItems = \App\Models\Media::where('folder_id', $folder->id)->withTrashed()->get();
         foreach ($mediaItems as $media) {
-            // Use MediaService to ensure file cleaning if necessary
-            // or just $media->forceDelete() if model handle observers
+            /** @var \App\Models\Media $media */
             $media->forceDelete();
         }
 
         // 2. Recurse into children folders
         $children = \App\Models\MediaFolder::where('parent_id', $folder->id)->withTrashed()->get();
         foreach ($children as $child) {
+            /** @var MediaFolder $child */
             $this->recursiveForceDelete($child);
         }
 
@@ -327,9 +358,11 @@ class MediaFolderController extends BaseApiController
         $folder->forceDelete();
     }
 
-    public function move(Request $request, MediaFolder $mediaFolder)
+    public function move(Request $request, MediaFolder $mediaFolder): \Illuminate\Http\JsonResponse
     {
-        if (! $request->user()->can('manage media')) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user || ! $user->can('manage media')) {
             return $this->forbidden('You do not have permission to move media folders');
         }
 
@@ -345,14 +378,18 @@ class MediaFolderController extends BaseApiController
 
         // Prevent circular reference
         if (isset($validated['parent_id']) && $validated['parent_id']) {
-            $parent = MediaFolder::find($validated['parent_id']);
+            $parentId = (int) $validated['parent_id'];
+            /** @var MediaFolder|null $parent */
+            $parent = MediaFolder::find($parentId);
             if ($parent) {
                 $checkParent = $parent;
-                while ($checkParent->parent_id) {
+                while ($checkParent && $checkParent->parent_id) {
                     if ($checkParent->parent_id == $mediaFolder->id) {
                         return $this->validationError(['parent_id' => ['Cannot set parent to a child folder']], 'Cannot set parent to a child folder');
                     }
-                    $checkParent = MediaFolder::find($checkParent->parent_id);
+                    /** @var MediaFolder|null $nextParent */
+                    $nextParent = MediaFolder::find($checkParent->parent_id);
+                    $checkParent = $nextParent;
                 }
             }
         }

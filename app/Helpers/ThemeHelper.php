@@ -42,7 +42,7 @@ class ThemeHelper
     /**
      * Get theme setting
      */
-    public static function setting(string $key, $default = null, string $type = 'frontend'): mixed
+    public static function setting(string $key, mixed $default = null, string $type = 'frontend'): mixed
     {
         try {
             $theme = self::getThemeService()->getActiveTheme($type);

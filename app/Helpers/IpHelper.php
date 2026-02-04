@@ -16,7 +16,7 @@ class IpHelper
 
         // Check if TrustProxies middleware already set the real IP
         if ($request->attributes->has('real_client_ip')) {
-            return $request->attributes->get('real_client_ip');
+            return (string) $request->attributes->get('real_client_ip');
         }
 
         // Try to get from various headers (fallback if middleware not loaded)
@@ -33,10 +33,10 @@ class IpHelper
 
                 // X-Forwarded-For can contain multiple IPs
                 if ($header === 'X-Forwarded-For') {
-                    $ips = array_map('trim', explode(',', $value));
+                    $ips = array_map('trim', explode(',', (string) $value));
                     $ip = $ips[0];
                 } else {
-                    $ip = $value;
+                    $ip = (string) $value;
                 }
 
                 if ($ip && filter_var($ip, FILTER_VALIDATE_IP)) {
@@ -46,7 +46,7 @@ class IpHelper
         }
 
         // Fallback to Laravel's default
-        return $request->ip();
+        return $request->ip() ?? '127.0.0.1';
     }
 
     /**

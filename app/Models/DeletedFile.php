@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -24,8 +23,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 class DeletedFile extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'original_path',
         'trash_path',
@@ -46,6 +43,8 @@ class DeletedFile extends Model
 
     /**
      * Get the user who deleted this file
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this>
      */
     public function deletedByUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
@@ -54,6 +53,9 @@ class DeletedFile extends Model
 
     /**
      * Scope for files only
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
      */
     public function scopeFiles($query)
     {
@@ -62,6 +64,9 @@ class DeletedFile extends Model
 
     /**
      * Scope for folders only
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
      */
     public function scopeFolders($query)
     {
@@ -71,14 +76,20 @@ class DeletedFile extends Model
     /**
      * Get formatted file size
      */
-    public function getFormattedSizeAttribute()
+    public function getFormattedSizeAttribute(): string
     {
-        if (! $this->size) {
+        if (! $this->size || $this->size <= 0) {
             return '0 B';
         }
 
         $units = ['B', 'KB', 'MB', 'GB'];
         $i = (int) floor(log($this->size, 1024));
+
+        // Safety check for units index
+        if (! isset($units[$i])) {
+            $i = count($units) - 1;
+        }
+
         $val = round($this->size / pow(1024, $i), 2);
 
         return $val.' '.$units[$i];

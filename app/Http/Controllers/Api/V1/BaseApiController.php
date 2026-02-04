@@ -47,9 +47,9 @@ class BaseApiController extends Controller
      *
      * @param  string  $message  Error message
      * @param  int  $status  HTTP status code (default: 400)
-     * @param  array  $errors  Validation errors (optional)
+     * @param  array<string, mixed>  $errors  Validation errors (optional)
      * @param  string  $code  Error code (optional, default: 'ERROR')
-     * @param  array  $context  Additional context for logging (optional)
+     * @param  array<string, mixed>  $context  Additional context for logging (optional)
      */
     protected function error(
         string $message = 'Error',
@@ -91,7 +91,7 @@ class BaseApiController extends Controller
      * Returns a standardized validation error response (422 status).
      * Should be used when ValidationException is caught.
      *
-     * @param  array  $errors  Validation errors from ValidationException
+     * @param  array<string, array<int, string>>  $errors  Validation errors from ValidationException
      * @param  string|null  $message  Custom error message (optional)
      */
     protected function validationError(array $errors, ?string $message = null): JsonResponse
@@ -160,10 +160,12 @@ class BaseApiController extends Controller
      *
      * Returns a standardized paginated response.
      *
-     * @param  \Illuminate\Contracts\Pagination\LengthAwarePaginator  $paginator
+     * @template TValue
+     *
+     * @param  \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, TValue>  $paginator
      * @param  string  $message  Success message
      */
-    protected function paginated($paginator, string $message = 'Data retrieved successfully'): JsonResponse
+    protected function paginated(\Illuminate\Contracts\Pagination\LengthAwarePaginator $paginator, string $message = 'Data retrieved successfully'): JsonResponse
     {
         return $this->success([
             'data' => $paginator->items(),

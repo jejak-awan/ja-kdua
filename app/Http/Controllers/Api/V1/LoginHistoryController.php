@@ -11,34 +11,44 @@ class LoginHistoryController extends BaseApiController
     /**
      * Get all login history for admin
      */
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $query = LoginHistory::with('user');
 
             // Filters
-            if ($request->has('user_id') && $request->user_id) {
-                $query->where('user_id', $request->user_id);
+            if ($request->has('user_id') && $request->input('user_id')) {
+                $query->where('user_id', $request->input('user_id'));
             }
 
-            if ($request->has('status') && $request->status) {
-                $query->where('status', $request->status);
+            if ($request->has('status') && $request->input('status')) {
+                $query->where('status', $request->input('status'));
             }
 
-            if ($request->has('ip_address') && $request->ip_address) {
-                $query->where('ip_address', $request->ip_address);
+            if ($request->has('ip_address') && $request->input('ip_address')) {
+                $query->where('ip_address', $request->input('ip_address'));
             }
 
-            if ($request->has('date_from') && $request->date_from) {
-                $query->whereDate('login_at', '>=', $request->date_from);
+            if ($request->has('date_from') && $request->input('date_from')) {
+                $dateFromRaw = $request->input('date_from');
+                $dateFrom = is_string($dateFromRaw) ? $dateFromRaw : null;
+                if ($dateFrom) {
+                    $query->whereDate('login_at', '>=', $dateFrom);
+                }
             }
 
-            if ($request->has('date_to') && $request->date_to) {
-                $query->whereDate('login_at', '<=', $request->date_to);
+            if ($request->has('date_to') && $request->input('date_to')) {
+                $dateToRaw = $request->input('date_to');
+                $dateTo = is_string($dateToRaw) ? $dateToRaw : null;
+                if ($dateTo) {
+                    $query->whereDate('login_at', '<=', $dateTo);
+                }
             }
 
             // Pagination
-            $perPage = min(max((int) $request->input('per_page', 50), 10), 500);
+            $perPageRaw = $request->input('per_page', 50);
+            $perPageInt = is_numeric($perPageRaw) ? (int) $perPageRaw : 50;
+            $perPage = min(max($perPageInt, 10), 500);
             $logs = $query->latest('login_at')->paginate($perPage);
 
             return $this->paginated($logs, 'Login history retrieved successfully');
@@ -52,7 +62,10 @@ class LoginHistoryController extends BaseApiController
     /**
      * Get login history statistics
      */
-    public function statistics(Request $request)
+    /**
+     * Get login history statistics
+     */
+    public function statistics(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $stats = [
@@ -83,26 +96,34 @@ class LoginHistoryController extends BaseApiController
     /**
      * Export login history to CSV
      */
-    public function export(Request $request)
+    public function export(Request $request): \Symfony\Component\HttpFoundation\Response
     {
         try {
             $query = LoginHistory::with('user');
 
             // Apply same filters as index
-            if ($request->has('user_id') && $request->user_id) {
-                $query->where('user_id', $request->user_id);
+            if ($request->has('user_id') && $request->input('user_id')) {
+                $query->where('user_id', $request->input('user_id'));
             }
 
-            if ($request->has('status') && $request->status) {
-                $query->where('status', $request->status);
+            if ($request->has('status') && $request->input('status')) {
+                $query->where('status', $request->input('status'));
             }
 
-            if ($request->has('date_from') && $request->date_from) {
-                $query->whereDate('login_at', '>=', $request->date_from);
+            if ($request->has('date_from') && $request->input('date_from')) {
+                $dateFromRaw = $request->input('date_from');
+                $dateFrom = is_string($dateFromRaw) ? $dateFromRaw : null;
+                if ($dateFrom) {
+                    $query->whereDate('login_at', '>=', $dateFrom);
+                }
             }
 
-            if ($request->has('date_to') && $request->date_to) {
-                $query->whereDate('login_at', '<=', $request->date_to);
+            if ($request->has('date_to') && $request->input('date_to')) {
+                $dateToRaw = $request->input('date_to');
+                $dateTo = is_string($dateToRaw) ? $dateToRaw : null;
+                if ($dateTo) {
+                    $query->whereDate('login_at', '<=', $dateTo);
+                }
             }
 
             $logs = $query->latest('login_at')->limit(10000)->get();
@@ -141,15 +162,17 @@ class LoginHistoryController extends BaseApiController
         }
     }
 
-    public function clear(Request $request)
+    public function clear(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
-            $retainDays = $request->input('retain_days');
+            $retainDaysRaw = $request->input('retain_days');
+            $retainDays = is_numeric($retainDaysRaw) ? (int) $retainDaysRaw : null;
 
             if ($retainDays) {
                 $count = LoginHistory::where('login_at', '<', now()->subDays($retainDays))->delete();
+                $countInt = is_numeric($count) ? (int) $count : 0;
 
-                return $this->success(null, "Cleared $count login history records older than $retainDays days");
+                return $this->success(null, "Cleared {$countInt} login history records older than {$retainDays} days");
             }
 
             LoginHistory::truncate();

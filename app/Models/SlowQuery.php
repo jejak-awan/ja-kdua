@@ -20,16 +20,29 @@ class SlowQuery extends Model
         'duration' => 'integer',
     ];
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this>
+     */
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @param  int|float|null  $threshold
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
+     */
     public function scopeSlow($query, $threshold = 1000)
     {
-        return $query->where('duration', '>=', $threshold);
+        return $query->where('duration', '>=', $threshold ?? 1000);
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @param  string  $route
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
+     */
     public function scopeByRoute($query, $route)
     {
         return $query->where('route', $route);

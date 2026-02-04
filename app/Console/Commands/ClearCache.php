@@ -11,10 +11,11 @@ class ClearCache extends Command
 
     protected $description = 'Clear CMS caches';
 
-    public function handle()
+    public function handle(): int
     {
         $cacheService = new CacheService;
-        $type = $this->option('type');
+        /** @var string $type */
+        $type = $this->option('type') ?? 'all';
 
         switch ($type) {
             case 'content':

@@ -27,10 +27,10 @@ class ClearRateLimit extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
-        $ip = $this->option('ip');
-        $all = $this->option('all');
+        $ip = (string) $this->option('ip');
+        $all = (bool) $this->option('all');
 
         if ($all) {
             // Clear all rate limit keys

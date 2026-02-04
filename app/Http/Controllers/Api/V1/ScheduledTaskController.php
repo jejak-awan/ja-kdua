@@ -12,14 +12,14 @@ class ScheduledTaskController extends BaseApiController
     /**
      * List all scheduled tasks
      */
-    public function index()
+    public function index(): \Illuminate\Http\JsonResponse
     {
         $tasks = ScheduledTask::orderBy('name')->get();
 
         return $this->success($tasks, 'Scheduled tasks retrieved successfully');
     }
 
-    public function allowedCommands()
+    public function allowedCommands(): \Illuminate\Http\JsonResponse
     {
         return $this->success([
             'commands' => ScheduledTask::getAllowedCommands(),
@@ -30,7 +30,7 @@ class ScheduledTaskController extends BaseApiController
     /**
      * Create a new scheduled task
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -58,6 +58,7 @@ class ScheduledTaskController extends BaseApiController
             ]);
         }
 
+        /** @var \App\Models\ScheduledTask $task */
         $task = ScheduledTask::create($validated);
 
         Log::info('Scheduled task created', [
@@ -72,8 +73,9 @@ class ScheduledTaskController extends BaseApiController
     /**
      * Update a scheduled task
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, string $id): \Illuminate\Http\JsonResponse
     {
+        /** @var \App\Models\ScheduledTask|null $task */
         $task = ScheduledTask::find($id);
 
         if (! $task) {
@@ -120,16 +122,20 @@ class ScheduledTaskController extends BaseApiController
     /**
      * Run a scheduled task manually
      */
-    public function run($id)
+    public function run(string $id): \Illuminate\Http\JsonResponse
     {
+        /** @var \App\Models\ScheduledTask|null $task */
         $task = ScheduledTask::find($id);
 
         if (! $task) {
             return $this->notFound('Task');
         }
 
+        /** @var \App\Models\User|null $user */
+        $user = auth()->user();
+
         // Check if user has permission
-        if (! auth()->user()->can('manage scheduled tasks')) {
+        if (! $user || ! $user->can('manage scheduled tasks')) {
             Log::warning('Unauthorized task execution attempt', [
                 'task_id' => $task->id,
                 'command' => $task->command,
@@ -189,7 +195,7 @@ class ScheduledTaskController extends BaseApiController
                 'exit_code' => $exitCode,
             ], 'Task executed successfully');
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $task->update([
                 'status' => 'failed',
                 'output' => $e->getMessage(),
@@ -213,8 +219,9 @@ class ScheduledTaskController extends BaseApiController
     /**
      * Delete a scheduled task
      */
-    public function destroy($id)
+    public function destroy(string $id): \Illuminate\Http\JsonResponse
     {
+        /** @var \App\Models\ScheduledTask|null $task */
         $task = ScheduledTask::find($id);
 
         if (! $task) {
@@ -235,8 +242,9 @@ class ScheduledTaskController extends BaseApiController
     /**
      * Get task execution history
      */
-    public function show($id)
+    public function show(string $id): \Illuminate\Http\JsonResponse
     {
+        /** @var \App\Models\ScheduledTask|null $task */
         $task = ScheduledTask::find($id);
 
         if (! $task) {
@@ -252,7 +260,7 @@ class ScheduledTaskController extends BaseApiController
     /**
      * Run an ad-hoc command without creating a permanent task record
      */
-    public function runAdhoc(Request $request)
+    public function runAdhoc(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'command' => 'required|string|max:500',
@@ -268,8 +276,11 @@ class ScheduledTaskController extends BaseApiController
             return $this->error('Command not allowed', 403, [], 'COMMAND_NOT_ALLOWED');
         }
 
+        /** @var \App\Models\User|null $user */
+        $user = auth()->user();
+
         // Permission check
-        if (! auth()->user()->can('manage scheduled tasks')) {
+        if (! $user || ! $user->can('manage scheduled tasks')) {
             return $this->forbidden('Insufficient permissions context.');
         }
 
@@ -286,8 +297,7 @@ class ScheduledTaskController extends BaseApiController
                 'output' => $output,
                 'exit_code' => $exitCode,
             ], 'Command executed successfully');
-
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Ad-hoc command execution failed', [
                 'command' => $fullCommand,
                 'error' => $e->getMessage(),

@@ -63,12 +63,12 @@ class MediaService
             'folder_id' => $folderId,
             'author_id' => $authorId,
             'is_shared' => $isShared,
-            'caption' => $metadata['caption'] ?? null,
-            'alt' => $metadata['alt'] ?? $file->getClientOriginalName(),
+            'caption' => isset($metadata['caption']) ? (string) $metadata['caption'] : null,
+            'alt' => isset($metadata['alt']) ? (string) $metadata['alt'] : $file->getClientOriginalName(),
         ]);
 
         // Sync tags if provided
-        if (! empty($metadata['tags'])) {
+        if (! empty($metadata['tags']) && is_array($metadata['tags'])) {
             $this->syncTags($media, $metadata['tags']);
         }
 
@@ -137,7 +137,9 @@ class MediaService
             $image = $manager->read($fullPath);
 
             $pathInfo = pathinfo($fullPath);
-            $newPath = $pathInfo['dirname'].'/'.$pathInfo['filename'].'.webp';
+            $filename = $pathInfo['filename'] ?? uniqid();
+            $dirname = $pathInfo['dirname'] ?? '.';
+            $newPath = $dirname.'/'.$filename.'.webp';
 
             // Convert and save
             $image->toWebp($quality)->save($newPath);
@@ -170,8 +172,9 @@ class MediaService
             mkdir($thumbnailDir, 0755, true);
         }
 
-        $fileName = pathinfo($media->path, PATHINFO_FILENAME);
-        $extension = pathinfo($media->path, PATHINFO_EXTENSION);
+        $pathInfo = pathinfo($media->path);
+        $fileName = $pathInfo['filename'] ?? uniqid();
+        $extension = $pathInfo['extension'] ?? '';
 
         // SVG files get converted to PNG for thumbnail
         $isSvg = $media->mime_type === 'image/svg+xml' || strtolower($extension) === 'svg';
@@ -559,6 +562,8 @@ class MediaService
 
     /**
      * Create ZIP download from multiple media
+     *
+     * @param  array<int, int>  $mediaIds
      */
     public function createZip(array $mediaIds): ?string
     {
@@ -595,6 +600,8 @@ class MediaService
 
     /**
      * Get usage information for media
+     *
+     * @return array<int, array<string, mixed>>
      */
     public function getUsageInfo(Media $media): array
     {
@@ -602,11 +609,14 @@ class MediaService
 
         return $usages->map(function ($usage) {
             /** @var \App\Models\MediaUsage $usage */
+            $modelClass = (string) $usage->getAttribute('model_type');
+            $modelId = (int) $usage->getAttribute('model_id');
+
             $model = null;
             try {
-                $modelClass = $usage->model_type;
                 if (class_exists($modelClass)) {
-                    $model = $modelClass::find($usage->model_id);
+                    /** @var \Illuminate\Database\Eloquent\Model|null $model */
+                    $model = $modelClass::find($modelId);
                 }
             } catch (\Exception $e) {
                 Log::channel('media')->warning('Failed to load model for usage: '.$e->getMessage());
@@ -614,18 +624,18 @@ class MediaService
 
             return [
                 'id' => $usage->id,
-                'model_type' => $usage->model_type,
-                'model_id' => $usage->model_id,
-                'field_name' => $usage->field_name,
+                'model_type' => $modelClass,
+                'model_id' => $modelId,
+                'field_name' => $usage->getAttribute('field_name'),
                 'model' => $model ? [
                     'id' => $model->getKey(),
-                    'title' => $model->getAttribute('title') ?? $model->getAttribute('name') ?? 'N/A',
-                    'slug' => $model->getAttribute('slug') ?? null,
-                    'type' => class_basename($usage->model_type),
+                    'title' => (string) ($model->getAttribute('title') ?? $model->getAttribute('name') ?? 'N/A'),
+                    'slug' => $model->getAttribute('slug'),
+                    'type' => class_basename($modelClass),
                 ] : [
-                    'id' => $usage->model_id,
+                    'id' => $modelId,
                     'title' => 'Deleted or not found',
-                    'type' => class_basename($usage->model_type),
+                    'type' => class_basename($modelClass),
                 ],
                 'created_at' => $usage->created_at,
             ];
@@ -634,6 +644,8 @@ class MediaService
 
     /**
      * Edit/replace image
+     *
+     * @param  array{name?: string, alt?: string, description?: string, caption?: string, tags?: array<int, string>}  $metadata
      */
     public function editImage(Media $media, UploadedFile $imageFile, bool $saveAsNew = false, array $metadata = []): ?Media
     {
@@ -651,9 +663,13 @@ class MediaService
 
             if ($saveAsNew) {
                 $pathInfo = pathinfo($media->path);
-                $extension = $autoConvert ? 'webp' : $pathInfo['extension'];
-                $newFileName = $pathInfo['filename'].'_edited_'.time().'.'.$extension;
-                $newPath = $pathInfo['dirname'].'/'.$newFileName;
+                $dirname = $pathInfo['dirname'] ?? 'media';
+                $filename = (string) ($pathInfo['filename'] ?? uniqid());
+                $extension = (string) ($pathInfo['extension'] ?? 'jpg');
+
+                $finalExtension = $autoConvert ? 'webp' : $extension;
+                $newFileName = $filename.'_edited_'.time().'.'.$finalExtension;
+                $newPath = $dirname.'/'.$newFileName;
 
                 $fullPath = Storage::disk($media->disk)->path($newPath);
                 $directory = dirname($fullPath);
@@ -699,8 +715,10 @@ class MediaService
             if ($autoConvert && $media->mime_type !== 'image/webp') {
                 // Convert to webp even on overwrite
                 $pathInfo = pathinfo($media->path);
-                $newFileName = $pathInfo['filename'].'.webp';
-                $newPath = $pathInfo['dirname'].'/'.$newFileName;
+                $filename = (string) ($pathInfo['filename'] ?? uniqid());
+                $dirname = (string) ($pathInfo['dirname'] ?? 'media');
+                $newFileName = $filename.'.webp';
+                $newPath = $dirname.'/'.$newFileName;
                 $newFullPath = Storage::disk($media->disk)->path($newPath);
 
                 $image->toWebp($quality)->save($newFullPath);
@@ -738,7 +756,7 @@ class MediaService
     /**
      * Get the appropriate image driver
      */
-    protected function getImageDriver(): ?object
+    protected function getImageDriver(): ?\Intervention\Image\Interfaces\DriverInterface
     {
         if (! class_exists(\Intervention\Image\ImageManager::class)) {
             return null;
@@ -765,6 +783,8 @@ class MediaService
 
     /**
      * Scan storage for files not in database
+     *
+     * @return array{scanned: int, added: int, errors: int}
      */
     public function scan(string $disk = 'public', string $path = 'media'): array
     {
@@ -804,8 +824,8 @@ class MediaService
                 // File is missing in DB, add it
                 try {
                     $stats['scanned']++;
-                    $fileSize = Storage::disk($disk)->size($filePath);
-                    $mimeType = Storage::disk($disk)->mimeType($filePath);
+                    $fileSize = (int) Storage::disk($disk)->size($filePath);
+                    $mimeType = (string) Storage::disk($disk)->mimeType($filePath);
                     $fileName = basename($filePath);
 
                     // Determine folder ID from path structure?
@@ -814,7 +834,7 @@ class MediaService
                     // Future: map subdirectories to MediaFolder models.
 
                     $media = Media::create([
-                        'name' => pathinfo($fileName, PATHINFO_FILENAME),
+                        'name' => (string) pathinfo($fileName, PATHINFO_FILENAME),
                         'file_name' => $fileName,
                         'mime_type' => $mimeType,
                         'disk' => $disk,
@@ -862,8 +882,16 @@ class MediaService
             $sanitizer = new \enshrined\svgSanitize\Sanitizer;
             $sanitizer->removeRemoteReferences(true);
 
+            /** @var string|false $content */
             $content = file_get_contents($filePath);
+            if ($content === false) {
+                return;
+            }
+
             $cleanContent = $sanitizer->sanitize($content);
+            if ($cleanContent === false) {
+                return;
+            }
 
             file_put_contents($filePath, $cleanContent);
         } catch (\Exception $e) {
@@ -875,6 +903,8 @@ class MediaService
 
     /**
      * Sync tags for media
+     *
+     * @param  array<int, string>  $tags
      */
     public function syncTags(Media $media, array $tags): void
     {

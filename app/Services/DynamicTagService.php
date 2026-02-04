@@ -10,10 +10,10 @@ class DynamicTagService
     /**
      * Resolve all dynamic tags in blocks array
      *
-     * @param  array  $blocks  The blocks array with potential dynamic tags
+     * @param  array<int, array<string, mixed>>  $blocks  The blocks array with potential dynamic tags
      * @param  Content|null  $content  The content context for post/page tags
-     * @param  array|null  $loopItem  Loop item context if in a loop
-     * @return array Blocks with resolved tags
+     * @param  array<string, mixed>|null  $loopItem  Loop item context if in a loop
+     * @return array<int, array<string, mixed>> Blocks with resolved tags
      */
     public function resolveBlocks(array $blocks, ?Content $content = null, ?array $loopItem = null): array
     {
@@ -22,6 +22,10 @@ class DynamicTagService
 
     /**
      * Recursively process blocks and resolve dynamic tags
+     *
+     * @param  array<int, array<string, mixed>>  $blocks
+     * @param  array<string, mixed>|null  $loopItem
+     * @return array<int, array<string, mixed>>
      */
     protected function processBlocks(array $blocks, ?Content $content, ?array $loopItem): array
     {
@@ -38,7 +42,9 @@ class DynamicTagService
 
             // Process children recursively
             if (isset($block['children']) && is_array($block['children'])) {
-                $block['children'] = $this->processBlocks($block['children'], $content, $loopItem);
+                /** @var array<int, array<string, mixed>> $children */
+                $children = $block['children'];
+                $block['children'] = $this->processBlocks($children, $content, $loopItem);
             }
         }
 
@@ -50,7 +56,7 @@ class DynamicTagService
      *
      * @param  string  $tag  The tag like "{{post_title}}"
      * @param  Content|null  $content  Content context
-     * @param  array|null  $loopItem  Loop item context
+     * @param  array<string, mixed>|null  $loopItem  Loop item context
      * @return string The resolved value
      */
     public function resolveTag(string $tag, ?Content $content = null, ?array $loopItem = null): string
@@ -60,17 +66,19 @@ class DynamicTagService
 
         // Post/Page tags
         if ($content && str_starts_with($key, 'post_')) {
+            $author = $content->author;
+
             return match ($key) {
-                'post_title' => $content->title ?? '',
-                'post_excerpt' => $content->excerpt ?? '',
-                'post_content' => $content->body ?? '',
-                'post_date' => ($content->published_at ?? $content->created_at)->format('M d, Y'),
-                'post_author' => $content->author->name ?? '',
-                'post_author_avatar' => $content->author->avatar ?? '',
-                'post_featured_image' => $content->featured_image ?? '',
+                'post_title' => (string) ($content->title ?? ''),
+                'post_excerpt' => (string) ($content->excerpt ?? ''),
+                'post_content' => (string) ($content->body ?? ''),
+                'post_date' => ($content->published_at ?? $content->created_at ?? now())->format('M d, Y'),
+                'post_author' => $author instanceof \App\Models\User ? $author->name : '',
+                'post_author_avatar' => $author instanceof \App\Models\User ? (string) ($author->getAttribute('avatar') ?? '') : '',
+                'post_featured_image' => (string) ($content->getAttribute('featured_image') ?? ''),
                 'post_url' => url('/'.$content->slug),
-                'post_category' => $content->category ? $content->category->name : '',
-                'post_tags' => $content->tags->pluck('name')->join(', ') ?? '',
+                'post_category' => $content->category ? (string) $content->category->name : '',
+                'post_tags' => (string) ($content->tags->pluck('name')->join(', ') ?? ''),
                 default => ''
             };
         }
@@ -78,14 +86,14 @@ class DynamicTagService
         // Loop item tags
         if ($loopItem && str_starts_with($key, 'loop_')) {
             return match ($key) {
-                'loop_title' => $loopItem['title'] ?? '',
-                'loop_excerpt' => $loopItem['excerpt'] ?? '',
-                'loop_date' => $loopItem['date'] ?? '',
-                'loop_author' => $loopItem['author'] ?? '',
-                'loop_thumbnail' => $loopItem['thumbnail'] ?? $loopItem['featured_image'] ?? '',
-                'loop_url' => $loopItem['url'] ?? '',
-                'loop_category' => $loopItem['category'] ?? '',
-                'loop_index' => (string) ($loopItem['index'] ?? 0),
+                'loop_title' => (string) ($loopItem['title'] ?? ''),
+                'loop_excerpt' => (string) ($loopItem['excerpt'] ?? ''),
+                'loop_date' => (string) ($loopItem['date'] ?? ''),
+                'loop_author' => (string) ($loopItem['author'] ?? ''),
+                'loop_thumbnail' => (string) ($loopItem['thumbnail'] ?? $loopItem['featured_image'] ?? ''),
+                'loop_url' => (string) ($loopItem['url'] ?? ''),
+                'loop_category' => (string) ($loopItem['category'] ?? ''),
+                'loop_index' => (string) ($loopItem['index'] ?? '0'),
                 default => ''
             };
         }
@@ -93,9 +101,9 @@ class DynamicTagService
         // Site tags
         if (str_starts_with($key, 'site_') || str_starts_with($key, 'current_')) {
             return match ($key) {
-                'site_title' => Setting::get('site_title', config('app.name')),
-                'site_tagline' => Setting::get('site_tagline', ''),
-                'site_logo' => Setting::get('site_logo', ''),
+                'site_title' => (string) Setting::get('site_title', (string) config('app.name')),
+                'site_tagline' => (string) Setting::get('site_tagline', ''),
+                'site_logo' => (string) Setting::get('site_logo', ''),
                 'current_date' => now()->format('M d, Y'),
                 'current_year' => (string) now()->year,
                 default => ''
@@ -115,14 +123,14 @@ class DynamicTagService
         // User tags (no user context on public frontend, return empty)
         if (str_starts_with($key, 'user_')) {
             $user = auth()->user();
-            if (! $user) {
+            if (! $user instanceof \App\Models\User) {
                 return '';
             }
 
             return match ($key) {
-                'user_name' => $user->name ?? '',
-                'user_email' => $user->email ?? '',
-                'user_avatar' => $user->avatar ?? '',
+                'user_name' => (string) ($user->name ?? ''),
+                'user_email' => (string) ($user->email ?? ''),
+                'user_avatar' => (string) $user->getAttribute('avatar') ?? '',
                 default => ''
             };
         }

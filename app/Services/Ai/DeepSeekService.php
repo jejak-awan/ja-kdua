@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\Log;
 
 class DeepSeekService implements AiProviderInterface
 {
-    protected $apiKey;
+    protected ?string $apiKey;
 
-    protected $baseUrl = 'https://api.deepseek.com'; // DeepSeek Base URL
+    protected string $baseUrl = 'https://api.deepseek.com'; // DeepSeek Base URL
 
     public function __construct(?string $apiKey = null)
     {
-        $this->apiKey = $apiKey ?? \App\Models\Setting::get('deepseek_api_key');
+        $this->apiKey = $apiKey ?? (string) \App\Models\Setting::get('deepseek_api_key', '');
     }
 
     public function getName(): string
@@ -27,7 +27,7 @@ class DeepSeekService implements AiProviderInterface
             throw new \Exception('DeepSeek API Key is not configured.');
         }
 
-        $model = $model ?: (\App\Models\Setting::get('deepseek_model') ?: 'deepseek-chat');
+        $model = $model ?: ((string) \App\Models\Setting::get('deepseek_model', '') ?: 'deepseek-chat');
 
         try {
             $messages = [
@@ -46,6 +46,7 @@ class DeepSeekService implements AiProviderInterface
                 $this->handleError($response);
             }
 
+            /** @var array{choices: array<int, array{message: array{content: string}}>} $data */
             $data = $response->json();
 
             return $data['choices'][0]['message']['content'] ?? '';
@@ -56,6 +57,11 @@ class DeepSeekService implements AiProviderInterface
         }
     }
 
+    /**
+     * Get available models
+     *
+     * @return array<int, array{id: string, name: string}>
+     */
     public function getModels(): array
     {
         if (empty($this->apiKey)) {
@@ -69,14 +75,20 @@ class DeepSeekService implements AiProviderInterface
                 return [];
             }
 
+            /** @var array{data: array<int, array{id: string}>} $data */
             $data = $response->json();
+            /** @var array<int, array{id: string, name: string}> $models */
             $models = [];
 
-            if (isset($data['data'])) {
+            if (is_array($data['data'])) {
                 foreach ($data['data'] as $m) {
+                    if (! is_array($m) || ! isset($m['id'])) {
+                        continue;
+                    }
+
                     $models[] = [
-                        'id' => $m['id'],
-                        'name' => $m['id'],
+                        'id' => strval($m['id']),
+                        'name' => strval($m['id']),
                     ];
                 }
             }
@@ -106,9 +118,18 @@ class DeepSeekService implements AiProviderInterface
         return true;
     }
 
-    protected function handleError($response)
+    /**
+     * Handle API errors
+     *
+     * @param  \Illuminate\Http\Client\Response  $response
+     *
+     * @throws \Exception
+     */
+    protected function handleError($response): never
     {
-        $errorMsg = $response->json('error.message', 'Unknown error');
+        /** @var mixed $errorData */
+        $errorData = $response->json('error.message', 'Unknown error');
+        $errorMsg = is_string($errorData) ? $errorData : 'Unknown error';
 
         if ($response->status() === 401) {
             throw new \Exception('Invalid DeepSeek API Key.');

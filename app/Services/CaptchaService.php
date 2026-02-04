@@ -14,7 +14,7 @@ class CaptchaService
 
     public function __construct()
     {
-        $this->method = Setting::get('captcha_method', 'slider');
+        $this->method = (string) Setting::get('captcha_method', 'slider');
     }
 
     /**
@@ -38,6 +38,7 @@ class CaptchaService
     public function verify(string $token, string $answer, bool $consume = true): bool
     {
         $cacheKey = "captcha:{$token}";
+        /** @var array{method: string, answer?: int, code?: string, target?: int}|null $stored */
         $stored = Cache::get($cacheKey);
 
         if (! $stored) {
@@ -103,10 +104,13 @@ class CaptchaService
         ];
     }
 
+    /**
+     * @param  array{method: string, target?: int}  $stored
+     */
     protected function verifySlider(array $stored, string $answer): bool
     {
         $userPosition = (int) $answer;
-        $target = $stored['target'];
+        $target = (int) ($stored['target'] ?? 0);
         $tolerance = 1; // ±1% tolerance (strict)
 
         return abs($userPosition - $target) <= $tolerance;
@@ -138,9 +142,12 @@ class CaptchaService
         ];
     }
 
+    /**
+     * @param  array{method: string, answer?: int}  $stored
+     */
     protected function verifyMath(array $stored, string $answer): bool
     {
-        return (int) $answer === $stored['answer'];
+        return (int) $answer === ($stored['answer'] ?? 0);
     }
 
     // ========================================
@@ -251,8 +258,11 @@ class CaptchaService
         return $imageData;
     }
 
+    /**
+     * @param  array{method: string, code?: string}  $stored
+     */
     protected function verifyImage(array $stored, string $answer): bool
     {
-        return strtoupper(trim($answer)) === $stored['code'];
+        return strtoupper(trim($answer)) === ($stored['code'] ?? '');
     }
 }

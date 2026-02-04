@@ -23,11 +23,17 @@ class ContentCustomField extends Model
         'value',
     ];
 
+    /**
+     * @return BelongsTo<Content, $this>
+     */
     public function content(): BelongsTo
     {
         return $this->belongsTo(Content::class);
     }
 
+    /**
+     * @return BelongsTo<CustomField, $this>
+     */
     public function customField(): BelongsTo
     {
         return $this->belongsTo(CustomField::class);

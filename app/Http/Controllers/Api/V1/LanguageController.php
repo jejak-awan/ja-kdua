@@ -18,14 +18,14 @@ class LanguageController extends BaseApiController
     /**
      * Get all active languages
      */
-    public function index()
+    public function index(): \Illuminate\Http\JsonResponse
     {
         $languages = Language::getActive();
 
         // Add UI translation stats to each language
         $languages = $languages->map(function ($lang) {
             $stats = $this->languagePackService->getLocaleStats($lang->code);
-            $lang->has_ui_translations = $stats['exists'] ?? false;
+            $lang->has_ui_translations = $stats['exists'];
             $lang->translation_keys = $stats['total_keys'] ?? 0;
 
             return $lang;
@@ -37,10 +37,10 @@ class LanguageController extends BaseApiController
     /**
      * Get a single language
      */
-    public function show(Language $language)
+    public function show(Language $language): \Illuminate\Http\JsonResponse
     {
         $stats = $this->languagePackService->getLocaleStats($language->code);
-        $language->has_ui_translations = $stats['exists'] ?? false;
+        $language->has_ui_translations = $stats['exists'];
         $language->translation_keys = $stats['total_keys'] ?? 0;
 
         return $this->success($language, 'Language retrieved successfully');
@@ -49,7 +49,7 @@ class LanguageController extends BaseApiController
     /**
      * Create a new language
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $validated = $request->validate([
@@ -74,11 +74,14 @@ class LanguageController extends BaseApiController
 
         // Create language folder from template if requested
         if ($validated['create_from_template'] ?? false) {
-            $templateLocale = $validated['template_locale'] ?? 'en';
-            $result = $this->languagePackService->createFromTemplate($validated['code'], $templateLocale);
+            $templateLocaleRaw = $validated['template_locale'] ?? 'en';
+            $templateLocale = is_string($templateLocaleRaw) ? $templateLocaleRaw : 'en';
+            $result = $this->languagePackService->createFromTemplate((string) $validated['code'], $templateLocale);
 
             if (! $result['success']) {
-                return $this->error($result['message'], 400);
+                $message = $result['message'];
+
+                return $this->error($message, 400);
             }
         }
 
@@ -98,7 +101,7 @@ class LanguageController extends BaseApiController
     /**
      * Update a language
      */
-    public function update(Request $request, Language $language)
+    public function update(Request $request, Language $language): \Illuminate\Http\JsonResponse
     {
         try {
             $validated = $request->validate([
@@ -127,7 +130,7 @@ class LanguageController extends BaseApiController
     /**
      * Delete a language
      */
-    public function destroy(Language $language)
+    public function destroy(Language $language): \Illuminate\Http\JsonResponse
     {
         if ($language->is_default) {
             return $this->validationError(['language' => ['Cannot delete default language']], 'Cannot delete default language');
@@ -141,7 +144,7 @@ class LanguageController extends BaseApiController
     /**
      * Set a language as default
      */
-    public function setDefault(Language $language)
+    public function setDefault(Language $language): \Illuminate\Http\JsonResponse
     {
         Language::where('is_default', true)->update(['is_default' => false]);
         $language->update(['is_default' => true]);
@@ -152,9 +155,10 @@ class LanguageController extends BaseApiController
     /**
      * Export a language pack as ZIP
      */
-    public function exportPack(Language $language)
+    public function exportPack(Language $language): \Symfony\Component\HttpFoundation\Response
     {
-        $zipPath = $this->languagePackService->exportLanguagePack($language->code);
+        $zipPathRaw = $this->languagePackService->exportLanguagePack($language->code);
+        $zipPath = is_string($zipPathRaw) ? $zipPathRaw : null;
 
         if (! $zipPath || ! file_exists($zipPath)) {
             return $this->error('Failed to create language pack export', 500);
@@ -168,7 +172,7 @@ class LanguageController extends BaseApiController
     /**
      * Import a language pack from ZIP
      */
-    public function importPack(Request $request)
+    public function importPack(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $request->validate([
@@ -180,10 +184,18 @@ class LanguageController extends BaseApiController
         }
 
         $file = $request->file('file');
-        $targetLocale = $request->input('target_locale');
+        if (! ($file instanceof \Illuminate\Http\UploadedFile)) {
+            return $this->error('Invalid file upload', 400);
+        }
+
+        $targetLocaleRaw = $request->input('target_locale');
+        $targetLocale = is_string($targetLocaleRaw) ? $targetLocaleRaw : null;
 
         // Store uploaded file temporarily
         $tempPath = $file->storeAs('temp', 'import-'.now()->timestamp.'.zip');
+        if (! is_string($tempPath)) {
+            return $this->error('Failed to store temporary file', 500);
+        }
         $fullPath = storage_path('app/'.$tempPath);
 
         $result = $this->languagePackService->importLanguagePack($fullPath, $targetLocale);
@@ -192,26 +204,32 @@ class LanguageController extends BaseApiController
         @unlink($fullPath);
 
         if (! $result['success']) {
-            return $this->error($result['message'], 400);
+            $message = $result['message'];
+
+            return $this->error($message, 400);
         }
 
         // Create or update language in DB if it doesn't exist
-        $locale = $result['locale'];
+        /** @var mixed $localeRaw */
+        $localeRaw = $result['locale'] ?? null;
+        $locale = is_string($localeRaw) ? $localeRaw : 'en';
         $language = Language::firstOrCreate(
             ['code' => $locale],
             ['name' => ucfirst($locale), 'is_active' => true]
         );
 
+        $message = $result['message'];
+
         return $this->success([
             'language' => $language,
             'files_imported' => $result['files'] ?? 0,
-        ], $result['message']);
+        ], $message);
     }
 
     /**
      * Get UI translation stats for all locales
      */
-    public function uiStats()
+    public function uiStats(): \Illuminate\Http\JsonResponse
     {
         $locales = $this->languagePackService->getAvailableLocales();
         $stats = [];

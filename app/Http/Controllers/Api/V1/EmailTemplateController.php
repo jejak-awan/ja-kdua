@@ -7,12 +7,14 @@ use Illuminate\Http\Request;
 
 class EmailTemplateController extends BaseApiController
 {
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = EmailTemplate::query();
 
         if ($request->has('category')) {
-            $query->where('category', $request->input('category'));
+            $categoryRaw = $request->input('category');
+            $category = is_string($categoryRaw) ? $categoryRaw : '';
+            $query->where('category', $category);
         }
 
         if ($request->has('is_active')) {
@@ -24,7 +26,7 @@ class EmailTemplateController extends BaseApiController
         return $this->success($templates, 'Email templates retrieved successfully');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -42,12 +44,12 @@ class EmailTemplateController extends BaseApiController
         return $this->success($template, 'Email template created successfully', 201);
     }
 
-    public function show(EmailTemplate $emailTemplate)
+    public function show(EmailTemplate $emailTemplate): \Illuminate\Http\JsonResponse
     {
         return $this->success($emailTemplate, 'Email template retrieved successfully');
     }
 
-    public function update(Request $request, EmailTemplate $emailTemplate)
+    public function update(Request $request, EmailTemplate $emailTemplate): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
@@ -65,34 +67,39 @@ class EmailTemplateController extends BaseApiController
         return $this->success($emailTemplate, 'Email template updated successfully');
     }
 
-    public function destroy(EmailTemplate $emailTemplate)
+    public function destroy(EmailTemplate $emailTemplate): \Illuminate\Http\JsonResponse
     {
         $emailTemplate->delete();
 
         return $this->success(null, 'Email template deleted successfully');
     }
 
-    public function preview(Request $request, EmailTemplate $emailTemplate)
+    public function preview(Request $request, EmailTemplate $emailTemplate): \Illuminate\Http\JsonResponse
     {
-        $data = $request->input('data', []);
+        $dataRaw = $request->input('data', []);
+        $data = is_array($dataRaw) ? $dataRaw : [];
         $rendered = $emailTemplate->render($data);
 
         return $this->success($rendered, 'Email template preview generated successfully');
     }
 
-    public function sendTest(Request $request, EmailTemplate $emailTemplate)
+    public function sendTest(Request $request, EmailTemplate $emailTemplate): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'email' => 'required|email',
             'data' => 'nullable|array',
         ]);
 
-        $data = $request->input('data', []);
+        $dataRaw = $request->input('data', []);
+        $data = is_array($dataRaw) ? $dataRaw : [];
         $rendered = $emailTemplate->render($data);
 
+        $toRaw = $request->input('email');
+        $to = is_string($toRaw) ? $toRaw : '';
+
         try {
-            \Mail::raw($rendered['text_body'] ?? strip_tags($rendered['body']), function ($message) use ($request, $rendered) {
-                $message->to($request->input('email'))
+            \Mail::raw($rendered['text_body'] ?? strip_tags($rendered['body']), function ($message) use ($to, $rendered) {
+                $message->to($to)
                     ->subject($rendered['subject']);
             });
 

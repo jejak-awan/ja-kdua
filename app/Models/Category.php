@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
+    /** @use HasFactory<\Database\Factories\CategoryFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -23,6 +24,9 @@ class Category extends Model
         'author_id',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
@@ -33,22 +37,34 @@ class Category extends Model
         'sort_order' => 'integer',
     ];
 
+    /**
+     * @return BelongsTo<Category, $this>
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'parent_id');
     }
 
+    /**
+     * @return HasMany<Category, $this>
+     */
     public function children(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id')->orderBy('sort_order');
     }
 
+    /**
+     * @return HasMany<Category, $this>
+     */
     public function allChildren(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id')->with('allChildren');
     }
 
-    public function contents()
+    /**
+     * @return HasMany<Content, $this>
+     */
+    public function contents(): HasMany
     {
         return $this->hasMany(Content::class);
     }

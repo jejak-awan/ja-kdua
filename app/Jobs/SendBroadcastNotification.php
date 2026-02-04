@@ -16,14 +16,24 @@ class SendBroadcastNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $payload;
+    /** @var array{type: string, title: string, message: string, target_type: string, target_id?: int|string|null, sender_id?: int|string|null} */
+    protected array $payload;
 
     /**
      * Create a new job instance.
+     *
+     * @param  array<string, mixed>  $payload
      */
     public function __construct(array $payload)
     {
-        $this->payload = $payload;
+        $this->payload = [
+            'type' => is_string($t = $payload['type'] ?? null) ? $t : 'info',
+            'title' => is_string($t = $payload['title'] ?? null) ? $t : 'Notification',
+            'message' => is_string($m = $payload['message'] ?? null) ? $m : '',
+            'target_type' => is_string($t = $payload['target_type'] ?? null) ? $t : 'user',
+            'target_id' => (is_int($id = $payload['target_id'] ?? null) || is_string($id)) ? $id : null,
+            'sender_id' => (is_int($id = $payload['sender_id'] ?? null) || is_string($id)) ? $id : null,
+        ];
     }
 
     /**
@@ -54,13 +64,15 @@ class SendBroadcastNotification implements ShouldQueue
                     }
                 });
             } elseif ($targetType === 'role') {
+                /** @var array<int, int|string> $userIds */
                 $userIds = DB::table('model_has_roles')
-                    ->where('role_id', $targetId)
-                    ->pluck('model_id');
+                    ->where('role_id', intval($targetId))
+                    ->pluck('model_id')
+                    ->all();
 
                 foreach ($userIds as $recipientId) {
                     Notification::createForUser(
-                        $recipientId,
+                        intval($recipientId),
                         $type,
                         $title,
                         $message,
@@ -71,7 +83,7 @@ class SendBroadcastNotification implements ShouldQueue
                 }
             } elseif ($targetType === 'user') {
                 Notification::createForUser(
-                    $targetId,
+                    intval($targetId ?? 0),
                     $type,
                     $title,
                     $message,

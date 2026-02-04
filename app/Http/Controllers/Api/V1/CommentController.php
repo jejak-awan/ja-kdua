@@ -8,14 +8,17 @@ use Illuminate\Http\Request;
 
 class CommentController extends BaseApiController
 {
-    protected $securityService;
+    protected \App\Services\CommentSecurityService $securityService;
 
     public function __construct(\App\Services\CommentSecurityService $securityService)
     {
         $this->securityService = $securityService;
     }
 
-    public function index(Content $content)
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Content $content): \Illuminate\Http\JsonResponse
     {
         $comments = Comment::with(['user', 'replies' => function ($q) {
             $q->where('status', 'approved')->with('user');
@@ -29,7 +32,10 @@ class CommentController extends BaseApiController
         return $this->success($comments, 'Comments retrieved successfully');
     }
 
-    public function store(Request $request, Content $content)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request, Content $content): \Illuminate\Http\JsonResponse
     {
         // Check if comments are enabled for this content
         if (! $content->comment_status) {
@@ -47,10 +53,14 @@ class CommentController extends BaseApiController
             return $this->validationError($e->errors());
         }
 
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        $authorEmail = '';
+
         // If user is authenticated, use user data
-        if ($request->user()) {
-            $validated['user_id'] = $request->user()->id;
-            $authorEmail = $request->user()->email;
+        if ($user) {
+            $validated['user_id'] = $user->id;
+            $authorEmail = (string) $user->email;
         } else {
             // Check if guests are allowed
             if (! \App\Models\Setting::get('comments.security.allow_guests', true)) {
@@ -66,16 +76,23 @@ class CommentController extends BaseApiController
             // Captcha Validation for Guests
             if (\App\Models\Setting::get('comments.security.guest_captcha', true)) {
                 $captchaService = app(\App\Services\CaptchaService::class);
-                if (! $captchaService->verify($request->input('captcha_token'), $request->input('captcha_input'))) {
+                $captchaTokenRaw = $request->input('captcha_token');
+                $captchaToken = is_string($captchaTokenRaw) ? $captchaTokenRaw : '';
+                $captchaInputRaw = $request->input('captcha_input');
+                $captchaInput = is_string($captchaInputRaw) ? $captchaInputRaw : '';
+
+                if (! $captchaService->verify($captchaToken, $captchaInput)) {
                     return $this->error('Invalid captcha', 422);
                 }
             }
 
-            $authorEmail = $validated['email'];
+            $authorEmailRaw = $validated['email'] ?? '';
+            $authorEmail = is_string($authorEmailRaw) ? $authorEmailRaw : '';
         }
 
         // Security Checks
-        $isSpam = $this->securityService->isSpam($validated['body'], $authorEmail, $request->ip());
+        $body = is_string($validated['body']) ? $validated['body'] : '';
+        $isSpam = $this->securityService->isSpam($body, $authorEmail, (string) $request->ip());
 
         $validated['content_id'] = $content->id;
         $validated['status'] = $this->securityService->getInitialStatus($isSpam);
@@ -89,14 +106,23 @@ class CommentController extends BaseApiController
         return $this->success($comment->load('user'), $message, 201);
     }
 
-    public function adminIndex(Request $request)
+    /**
+     * Display a listing of the resource for admin.
+     */
+    public function adminIndex(Request $request): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         $query = Comment::with(['content', 'user', 'parent']);
 
         // Multi-tenancy: Authors only see comments on their own content
-        if (! $request->user()->can('manage comments')) {
-            $query->whereHas('content', function ($q) use ($request) {
-                $q->where('author_id', $request->user()->id);
+        if (! $user->can('manage comments')) {
+            $query->whereHas('content', function ($q) use ($user) {
+                $q->where('author_id', $user->id);
             });
         }
 
@@ -109,7 +135,8 @@ class CommentController extends BaseApiController
         }
 
         if ($request->filled('search')) {
-            $search = $request->input('search');
+            $searchRaw = $request->input('search');
+            $search = is_string($searchRaw) ? $searchRaw : '';
             $query->where(function ($q) use ($search) {
                 $q->where('body', 'like', "%{$search}%")
                     ->orWhere('name', 'like', "%{$search}%")
@@ -117,20 +144,30 @@ class CommentController extends BaseApiController
             });
         }
 
-        $perPage = min($request->input('per_page', 10), 100); // Max 100 per page
+        $perPageRaw = $request->input('per_page', 10);
+        $perPage = is_numeric($perPageRaw) ? min((int) $perPageRaw, 100) : 10;
         $comments = $query->latest()->paginate($perPage);
 
         return $this->paginated($comments, 'Comments retrieved successfully');
     }
 
-    public function statistics(Request $request)
+    /**
+     * Get comment statistics.
+     */
+    public function statistics(Request $request): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         $query = Comment::query();
 
         // Multi-tenancy scoping
-        if (! $request->user()->can('manage comments')) {
-            $query->whereHas('content', function ($q) use ($request) {
-                $q->where('author_id', $request->user()->id);
+        if (! $user->can('manage comments')) {
+            $query->whereHas('content', function ($q) use ($user) {
+                $q->where('author_id', $user->id);
             });
         }
 
@@ -147,28 +184,40 @@ class CommentController extends BaseApiController
         return $this->success($stats, 'Comment statistics retrieved successfully');
     }
 
-    public function approve(Comment $comment)
+    /**
+     * Approve the specified comment.
+     */
+    public function approve(Comment $comment): \Illuminate\Http\JsonResponse
     {
         $comment->update(['status' => 'approved']);
 
         return $this->success($comment->load(['content', 'user']), 'Comment approved successfully');
     }
 
-    public function reject(Comment $comment)
+    /**
+     * Reject the specified comment.
+     */
+    public function reject(Comment $comment): \Illuminate\Http\JsonResponse
     {
         $comment->update(['status' => 'rejected']);
 
         return $this->success($comment->load(['content', 'user']), 'Comment rejected successfully');
     }
 
-    public function markAsSpam(Comment $comment)
+    /**
+     * Mark the specified comment as spam.
+     */
+    public function markAsSpam(Comment $comment): \Illuminate\Http\JsonResponse
     {
         $comment->update(['status' => 'spam']);
 
         return $this->success($comment->load(['content', 'user']), 'Comment marked as spam');
     }
 
-    public function bulkAction(Request $request)
+    /**
+     * Bulk action on multiple comments.
+     */
+    public function bulkAction(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'ids' => 'required|array',
@@ -176,26 +225,29 @@ class CommentController extends BaseApiController
             'action' => 'required|in:approve,reject,spam,delete',
         ]);
 
-        $count = count($validated['ids']);
+        $idsRaw = $validated['ids'];
+        $ids = is_array($idsRaw) ? $idsRaw : [];
+        $count = count($ids);
+        $action = $validated['action'];
 
-        switch ($validated['action']) {
+        switch ($action) {
             case 'approve':
-                Comment::whereIn('id', $validated['ids'])->update(['status' => 'approved']);
+                Comment::whereIn('id', $ids)->update(['status' => 'approved']);
                 $message = "{$count} comments approved";
                 break;
 
             case 'reject':
-                Comment::whereIn('id', $validated['ids'])->update(['status' => 'rejected']);
+                Comment::whereIn('id', $ids)->update(['status' => 'rejected']);
                 $message = "{$count} comments rejected";
                 break;
 
             case 'spam':
-                Comment::whereIn('id', $validated['ids'])->update(['status' => 'spam']);
+                Comment::whereIn('id', $ids)->update(['status' => 'spam']);
                 $message = "{$count} comments marked as spam";
                 break;
 
             case 'delete':
-                Comment::whereIn('id', $validated['ids'])->delete();
+                Comment::whereIn('id', $ids)->delete();
                 $message = "{$count} comments deleted";
                 break;
 
@@ -206,7 +258,10 @@ class CommentController extends BaseApiController
         return $this->success(['affected' => $count], $message);
     }
 
-    public function destroy(Comment $comment)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Comment $comment): \Illuminate\Http\JsonResponse
     {
         $comment->delete();
 

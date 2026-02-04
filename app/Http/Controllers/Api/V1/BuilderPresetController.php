@@ -14,7 +14,12 @@ class BuilderPresetController extends BaseApiController
      */
     public function index(Request $request): JsonResponse
     {
-        $type = $request->query('type');
+        $typeRaw = $request->query('type');
+        $type = is_string($typeRaw) ? $typeRaw : null;
+
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        $userId = $user ? (int) $user->id : 0;
 
         $query = BuilderPreset::query();
 
@@ -23,9 +28,9 @@ class BuilderPresetController extends BaseApiController
         }
 
         // Get system presets + user's presets
-        $presets = $query->where(function ($q) use ($request) {
+        $presets = $query->where(function ($q) use ($userId) {
             $q->where('is_system', true)
-                ->orWhere('user_id', $request->user()->id);
+                ->orWhere('user_id', $userId);
         })
             ->orderBy('is_system', 'desc') // System first
             ->orderBy('name')
@@ -39,6 +44,12 @@ class BuilderPresetController extends BaseApiController
      */
     public function store(Request $request): JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         $validated = $request->validate([
             'type' => 'required|string|max:50',
             'name' => 'required|string|max:255',
@@ -46,7 +57,7 @@ class BuilderPresetController extends BaseApiController
         ]);
 
         $preset = BuilderPreset::create([
-            'user_id' => $request->user()->id,
+            'user_id' => $user->id,
             'type' => $validated['type'],
             'name' => $validated['name'],
             'settings' => $validated['settings'],
@@ -61,12 +72,18 @@ class BuilderPresetController extends BaseApiController
      */
     public function update(Request $request, BuilderPreset $builderPreset): JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         // Only allow updating own presets (not system presets unless admin)
-        if ($builderPreset->is_system && ! $request->user()->hasRole('admin')) {
+        if ($builderPreset->is_system && ! $user->hasRole('admin')) {
             return $this->forbidden('Cannot modify system presets');
         }
 
-        if (! $builderPreset->is_system && $builderPreset->user_id !== $request->user()->id) {
+        if (! $builderPreset->is_system && $builderPreset->user_id !== $user->id) {
             return $this->unauthorized();
         }
 
@@ -85,12 +102,18 @@ class BuilderPresetController extends BaseApiController
      */
     public function destroy(Request $request, BuilderPreset $builderPreset): JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
         // Only allow deleting own presets
-        if ($builderPreset->is_system && ! $request->user()->hasRole('admin')) {
+        if ($builderPreset->is_system && ! $user->hasRole('admin')) {
             return $this->forbidden('Cannot delete system presets');
         }
 
-        if (! $builderPreset->is_system && $builderPreset->user_id !== $request->user()->id) {
+        if (! $builderPreset->is_system && $builderPreset->user_id !== $user->id) {
             return $this->unauthorized();
         }
 

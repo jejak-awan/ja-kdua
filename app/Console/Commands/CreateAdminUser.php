@@ -13,11 +13,11 @@ class CreateAdminUser extends Command
 
     protected $description = 'Create an admin user';
 
-    public function handle()
+    public function handle(): int
     {
-        $email = $this->option('email');
-        $password = $this->option('password');
-        $name = $this->option('name');
+        $email = (string) $this->option('email');
+        $password = (string) $this->option('password');
+        $name = (string) $this->option('name');
 
         // Check if user exists
         if (User::where('email', $email)->exists()) {

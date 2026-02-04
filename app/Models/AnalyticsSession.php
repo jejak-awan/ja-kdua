@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class AnalyticsSession extends Model
 {
+    /** @use HasFactory<\Database\Factories\AnalyticsSessionFactory> */
     use HasFactory;
 
     protected $table = 'analytics_sessions';
@@ -57,22 +58,35 @@ class AnalyticsSession extends Model
         'duration' => 'integer',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return HasMany<AnalyticsVisit, $this>
+     */
     public function visits(): HasMany
     {
         return $this->hasMany(AnalyticsVisit::class, 'session_id', 'session_id');
     }
 
+    /**
+     * @return HasMany<AnalyticsEvent, $this>
+     */
     public function events(): HasMany
     {
         return $this->hasMany(AnalyticsEvent::class, 'session_id', 'session_id');
     }
 
-    public static function start($request, $sessionId = null)
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string|null  $sessionId
+     */
+    public static function start($request, $sessionId = null): self
     {
         $sessionId = $sessionId ?? session()->getId();
 
@@ -96,25 +110,36 @@ class AnalyticsSession extends Model
         );
     }
 
-    public function end()
+    public function end(): void
     {
         $this->update([
             'ended_at' => now(),
-            'duration' => $this->started_at->diffInSeconds(now()),
+            'duration' => $this->started_at?->diffInSeconds(now()) ?? 0,
             'page_views' => $this->visits()->count(),
         ]);
     }
 
-    public function incrementPageViews()
+    public function incrementPageViews(): void
     {
         $this->increment('page_views');
     }
 
-    protected static function parseUserAgent($userAgent)
+    /**
+     * @return array{device_type: string, browser: string, os: string}
+     */
+    protected static function parseUserAgent(?string $userAgent): array
     {
         $deviceType = 'desktop';
         $browser = 'unknown';
         $os = 'unknown';
+
+        if (! $userAgent) {
+            return [
+                'device_type' => $deviceType,
+                'browser' => $browser,
+                'os' => $os,
+            ];
+        }
 
         if (preg_match('/mobile|android|iphone|ipad/i', $userAgent)) {
             $deviceType = 'mobile';
@@ -151,8 +176,15 @@ class AnalyticsSession extends Model
         ];
     }
 
-    public static function getLocation($ipAddress)
+    /**
+     * @return array{country: string|null, city: string|null}
+     */
+    public static function getLocation(?string $ipAddress): array
     {
+        if (! $ipAddress) {
+            return ['country' => null, 'city' => null];
+        }
+
         $geoService = app(\App\Services\GeoIpService::class);
 
         return $geoService->getLocation($ipAddress);

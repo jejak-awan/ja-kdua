@@ -143,6 +143,8 @@ README;
 
     /**
      * Get theme directory structure info
+     *
+     * @return array{exists: bool, directories: array<int, string>, files: array<int, string>}
      */
     public static function getStructureInfo(string $themePath): array
     {
@@ -173,6 +175,8 @@ README;
 
     /**
      * Validate theme directory structure
+     *
+     * @return array<int, string>
      */
     public static function validateStructure(string $themePath): array
     {

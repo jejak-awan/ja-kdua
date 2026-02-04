@@ -23,11 +23,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $location
  * @property \Illuminate\Support\Carbon|null $last_login_at
  * @property string|null $last_login_ip
- * @property array|null $preferences
- * @property string|null $remember_token
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property array<string, mixed>|null $preferences
  * @property-read \App\Models\TwoFactorAuth|null $twoFactorAuth
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Media[] $media
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activityLogs
@@ -97,35 +94,45 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function setPreference(string $key, mixed $value): self
     {
+        /** @var array<string, mixed> $preferences */
         $preferences = $this->preferences ?? [];
         data_set($preferences, $key, $value);
+        /** @var array<string, mixed> $preferences */
         $this->preferences = $preferences;
 
         return $this;
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Media, $this>
      */
-    public function media()
+    public function media(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Media::class, 'author_id');
     }
 
-    public function activityLogs()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\ActivityLog, $this>
+     */
+    public function activityLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ActivityLog::class);
     }
 
-    public function notifications()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Notification, $this>
+     */
+    public function notifications(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(\App\Models\Notification::class);
     }
 
     /**
      * Get the two factor authentication record.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\TwoFactorAuth, $this>
      */
-    public function twoFactorAuth()
+    public function twoFactorAuth(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(\App\Models\TwoFactorAuth::class);
     }
@@ -183,6 +190,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
         $maxRank = 0;
         foreach ($userRoles as $role) {
+            if (! is_string($role)) {
+                continue;
+            }
             if (isset($roleRanks[$role]) && $roleRanks[$role] > $maxRank) {
                 $maxRank = $roleRanks[$role];
             }

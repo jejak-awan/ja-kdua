@@ -3,13 +3,10 @@
 namespace App\Models;
 
 use Cron\CronExpression;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ScheduledTask extends Model
 {
-    use HasFactory;
-
     protected $table = 'scheduled_tasks';
 
     protected $fillable = [
@@ -131,6 +128,8 @@ class ScheduledTask extends Model
 
     /**
      * Get allowed commands list for UI dropdown
+     *
+     * @return array<int, array{value: string, label: string}>
      */
     public static function getAllowedCommands(): array
     {
@@ -168,7 +167,8 @@ class ScheduledTask extends Model
     }
 
     /**
-     * Scope for active tasks only
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
      */
     public function scopeActive($query)
     {
@@ -176,7 +176,8 @@ class ScheduledTask extends Model
     }
 
     /**
-     * Scope for tasks due to run
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
      */
     public function scopeDue($query)
     {

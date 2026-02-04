@@ -7,14 +7,14 @@ use Illuminate\Support\Facades\Log;
 
 class GeminiService implements AiProviderInterface
 {
-    protected $apiKey;
+    protected ?string $apiKey;
 
-    protected $baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
+    protected string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
 
     public function __construct(?string $apiKey = null)
     {
         // Allow passing key explicitly (for testing connection), otherwise use settings
-        $this->apiKey = $apiKey ?? \App\Models\Setting::get('gemini_api_key') ?? config('services.gemini.api_key');
+        $this->apiKey = $apiKey ?? (string) (\App\Models\Setting::get('gemini_api_key') ?? config('services.gemini.api_key', ''));
     }
 
     public function getName(): string
@@ -29,7 +29,7 @@ class GeminiService implements AiProviderInterface
         }
 
         // Use provided model or default to gemini-2.0-flash
-        $model = $model ?: (\App\Models\Setting::get('gemini_model') ?: 'gemini-2.0-flash');
+        $model = $model ?: ((string) \App\Models\Setting::get('gemini_model', '') ?: 'gemini-2.0-flash');
 
         // Ensure model name format is correct for API URL
         if (! str_starts_with($model, 'models/')) {
@@ -39,7 +39,7 @@ class GeminiService implements AiProviderInterface
         // Strip 'models/' for the base URL construction if it was already there because the endpoint structure differs slightly based on how we call it
         // Actually, for generateContent, the URL is: models/{model}:generateContent
         // So let's normalize.
-        $model = str_replace('models/', '', $model);
+        $model = str_replace('models/', '', (string) $model);
 
         try {
             $fullPrompt = $prompt.":\n\n".$context;
@@ -60,10 +60,14 @@ class GeminiService implements AiProviderInterface
                 $this->handleError($response);
             }
 
+            /** @var mixed $data */
             $data = $response->json();
 
-            if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
-                return $data['candidates'][0]['content']['parts'][0]['text'];
+            if (is_array($data) && isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+                /** @var string $text */
+                $text = $data['candidates'][0]['content']['parts'][0]['text'];
+
+                return $text;
             }
 
             throw new \Exception('Unexpected response format from Gemini.');
@@ -86,6 +90,7 @@ class GeminiService implements AiProviderInterface
                 return [];
             }
 
+            /** @var array{models?: array<int, array{name: string, displayName?: string, supportedGenerationMethods?: array<int, string>}>} $data */
             $data = $response->json();
             $models = [];
 
@@ -93,8 +98,8 @@ class GeminiService implements AiProviderInterface
                 foreach ($data['models'] as $m) {
                     if (in_array('generateContent', $m['supportedGenerationMethods'] ?? [])) {
                         $models[] = [
-                            'id' => str_replace('models/', '', $m['name']),
-                            'name' => $m['displayName'] ?? $m['name'],
+                            'id' => str_replace('models/', '', (string) $m['name']),
+                            'name' => (string) ($m['displayName'] ?? $m['name']),
                         ];
                     }
                 }
@@ -124,14 +129,14 @@ class GeminiService implements AiProviderInterface
         return true;
     }
 
-    protected function handleError($response)
+    protected function handleError($response): never
     {
         Log::error('Gemini API Error', [
             'status' => $response->status(),
             'body' => $response->body(),
         ]);
 
-        $errorMsg = $response->json('error.message', 'Unknown error');
+        $errorMsg = (string) $response->json('error.message', 'Unknown error');
 
         if ($response->status() === 429 || str_contains(strtolower($errorMsg), 'quota')) {
             throw new \Exception('Gemini Quota Exceeded. Please check billing.');

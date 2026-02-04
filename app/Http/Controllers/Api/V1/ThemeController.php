@@ -15,9 +15,10 @@ class ThemeController extends BaseApiController
         $this->themeService = $themeService;
     }
 
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        $type = $request->get('type', 'frontend');
+        $typeRaw = $request->get('type', 'frontend');
+        $type = is_string($typeRaw) ? $typeRaw : 'frontend';
         $themes = Theme::ofType($type)->latest()->get();
 
         // Attach manifest to each theme
@@ -30,7 +31,7 @@ class ThemeController extends BaseApiController
 
     // Store method removed (Themes are code-managed)
 
-    public function show(Theme $theme)
+    public function show(Theme $theme): \Illuminate\Http\JsonResponse
     {
         // Load theme assets
         $assets = $this->themeService->loadThemeAssets($theme);
@@ -54,7 +55,7 @@ class ThemeController extends BaseApiController
         return $this->success($theme, 'Theme retrieved successfully');
     }
 
-    public function update(Request $request, Theme $theme)
+    public function update(Request $request, Theme $theme): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
@@ -81,7 +82,7 @@ class ThemeController extends BaseApiController
         return $this->success($theme, 'Theme updated successfully');
     }
 
-    public function destroy(Theme $theme)
+    public function destroy(Theme $theme): \Illuminate\Http\JsonResponse
     {
         if ($theme->is_active) {
             return $this->validationError(
@@ -96,7 +97,7 @@ class ThemeController extends BaseApiController
         return $this->success(null, 'Theme deleted successfully');
     }
 
-    public function activate(Theme $theme)
+    public function activate(Theme $theme): \Illuminate\Http\JsonResponse
     {
         try {
             $this->themeService->activateTheme($theme);
@@ -116,7 +117,7 @@ class ThemeController extends BaseApiController
         }
     }
 
-    public function deactivate(Theme $theme)
+    public function deactivate(Theme $theme): \Illuminate\Http\JsonResponse
     {
         try {
             $this->themeService->deactivateTheme($theme);
@@ -129,10 +130,11 @@ class ThemeController extends BaseApiController
         }
     }
 
-    public function getActive(Request $request)
+    public function getActive(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
-            $type = $request->get('type', 'frontend');
+            $typeRaw = $request->get('type', 'frontend');
+            $type = is_string($typeRaw) ? $typeRaw : 'frontend';
             $theme = $this->themeService->getActiveTheme($type);
 
             if (! $theme) {
@@ -157,7 +159,7 @@ class ThemeController extends BaseApiController
         }
     }
 
-    public function updateSettings(Request $request, Theme $theme)
+    public function updateSettings(Request $request, Theme $theme): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'settings' => 'required|array',
@@ -165,8 +167,10 @@ class ThemeController extends BaseApiController
 
         try {
             // Merge with existing settings instead of replacing
-            $existingSettings = $theme->settings ?? [];
-            $newSettings = array_merge($existingSettings, $validated['settings']);
+            $existingSettings = is_array($theme->settings) ? $theme->settings : [];
+            $settingsInput = is_array($validated['settings']) ? $validated['settings'] : [];
+
+            $newSettings = array_merge($existingSettings, $settingsInput);
 
             $theme->update(['settings' => $newSettings]);
             $this->themeService->clearThemeCache($theme);
@@ -182,19 +186,20 @@ class ThemeController extends BaseApiController
         }
     }
 
-    public function updateCustomCss(Request $request, Theme $theme)
+    public function updateCustomCss(Request $request, Theme $theme): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'custom_css' => 'nullable|string',
         ]);
 
-        $theme->update(['custom_css' => $validated['custom_css'] ?? '']);
+        $customCss = isset($validated['custom_css']) && is_string($validated['custom_css']) ? $validated['custom_css'] : '';
+        $theme->update(['custom_css' => $customCss]);
         $this->themeService->clearThemeCache($theme);
 
         return $this->success($theme, 'Theme custom CSS updated successfully');
     }
 
-    public function validate(Theme $theme)
+    public function validate(Theme $theme): \Illuminate\Http\JsonResponse
     {
         $errors = $this->themeService->validateTheme($theme);
 
@@ -214,7 +219,7 @@ class ThemeController extends BaseApiController
 
     // Legacy Blade methods removed
 
-    public function scan()
+    public function scan(): \Illuminate\Http\JsonResponse
     {
         try {
             $themes = $this->themeService->scanThemes();
@@ -228,9 +233,10 @@ class ThemeController extends BaseApiController
         }
     }
 
-    public function getSetting(Theme $theme, Request $request)
+    public function getSetting(Theme $theme, Request $request): \Illuminate\Http\JsonResponse
     {
-        $key = $request->get('key');
+        $keyRaw = $request->get('key');
+        $key = is_string($keyRaw) ? $keyRaw : '';
         $default = $request->get('default');
 
         if (! $key) {
@@ -254,9 +260,10 @@ class ThemeController extends BaseApiController
     /**
      * Get active theme menu locations
      */
-    public function locations(Request $request)
+    public function locations(Request $request): \Illuminate\Http\JsonResponse
     {
-        $type = $request->get('type', 'frontend');
+        $typeRaw = $request->get('type', 'frontend');
+        $type = is_string($typeRaw) ? $typeRaw : 'frontend';
         $theme = $this->themeService->getActiveTheme($type);
 
         if (! $theme) {
@@ -271,7 +278,7 @@ class ThemeController extends BaseApiController
     /**
      * Get Vue components manifest
      */
-    public function getComponents(Theme $theme)
+    public function getComponents(Theme $theme): \Illuminate\Http\JsonResponse
     {
         try {
             $componentManifest = $theme->getComponentManifest();
@@ -289,7 +296,7 @@ class ThemeController extends BaseApiController
     /**
      * Get theme configuration
      */
-    public function getConfig(Theme $theme)
+    public function getConfig(Theme $theme): \Illuminate\Http\JsonResponse
     {
         try {
             $config = $theme->getThemeConfig();
@@ -303,7 +310,7 @@ class ThemeController extends BaseApiController
     /**
      * Get theme composables
      */
-    public function getComposables(Theme $theme)
+    public function getComposables(Theme $theme): \Illuminate\Http\JsonResponse
     {
         try {
             $composablesPath = $theme->getComposablesPath();
@@ -315,8 +322,9 @@ class ThemeController extends BaseApiController
                 ]);
             }
 
+            /** @var list<string>|false $composableFiles */
             $composableFiles = glob("{$composablesPath}/*.js");
-            $composables = array_map('basename', $composableFiles);
+            $composables = $composableFiles ? array_map('basename', $composableFiles) : [];
 
             return $this->success([
                 'has_composables' => true,

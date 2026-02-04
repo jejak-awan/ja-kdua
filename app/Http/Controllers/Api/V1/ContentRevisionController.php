@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class ContentRevisionController extends BaseApiController
 {
-    public function index(Content $content)
+    public function index(Content $content): \Illuminate\Http\JsonResponse
     {
         try {
             $revisions = $content->revisions()->with('user')->latest()->paginate(20);
@@ -22,14 +22,17 @@ class ContentRevisionController extends BaseApiController
             ]);
 
             // Return empty paginated response instead of error
+            /** @var \Illuminate\Pagination\LengthAwarePaginator<int, ContentRevision> $paginator */
+            $paginator = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20);
+
             return $this->paginated(
-                new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20),
+                $paginator,
                 'Content revisions retrieved successfully'
             );
         }
     }
 
-    public function show(Content $content, ContentRevision $revision)
+    public function show(Content $content, ContentRevision $revision): \Illuminate\Http\JsonResponse
     {
         if ($revision->content_id !== $content->id) {
             return $this->notFound('Revision');
@@ -38,17 +41,25 @@ class ContentRevisionController extends BaseApiController
         return $this->success($revision->load('user'), 'Content revision retrieved successfully');
     }
 
-    public function store(Request $request, Content $content)
+    public function store(Request $request, Content $content): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized('Unauthenticated');
+        }
+
         $validated = $request->validate([
             'reason' => 'nullable|string|max:500',
             'note' => 'nullable|string|max:500', // Legacy support
         ]);
 
-        $reason = $validated['reason'] ?? $validated['note'] ?? 'Auto-saved revision';
+        $reasonRaw = $validated['reason'] ?? $validated['note'] ?? 'Auto-saved revision';
+        $reason = is_string($reasonRaw) ? $reasonRaw : 'Auto-saved revision';
 
         // Prepare standard revision metadata
-        $meta = $content->meta ?? [];
+        $metaRaw = $content->meta;
+        $meta = is_array($metaRaw) ? $metaRaw : [];
         $meta['revision_data'] = [
             'excerpt' => $content->excerpt,
             'slug' => $content->slug,
@@ -58,7 +69,7 @@ class ContentRevisionController extends BaseApiController
         // Create revision from current content state
         $revision = ContentRevision::create([
             'content_id' => $content->id,
-            'author_id' => $request->user()->id,
+            'author_id' => $user->id,
             'title' => $content->title,
             'body' => $content->body,
             'blocks' => $content->blocks,
@@ -69,14 +80,21 @@ class ContentRevisionController extends BaseApiController
         return $this->success($revision->load('author'), 'Content revision created successfully', 201);
     }
 
-    public function restore(Request $request, Content $content, ContentRevision $revision)
+    public function restore(Request $request, Content $content, ContentRevision $revision): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized('Unauthenticated');
+        }
+
         if ($revision->content_id !== $content->id) {
             return $this->notFound('Revision');
         }
 
         // Backup current state
-        $currentMeta = $content->meta ?? [];
+        $currentMetaRaw = $content->meta;
+        $currentMeta = is_array($currentMetaRaw) ? $currentMetaRaw : [];
         $currentMeta['revision_data'] = [
             'excerpt' => $content->excerpt,
             'slug' => $content->slug,
@@ -85,7 +103,7 @@ class ContentRevisionController extends BaseApiController
 
         ContentRevision::create([
             'content_id' => $content->id,
-            'author_id' => $request->user()->id,
+            'author_id' => $user->id,
             'title' => $content->title,
             'body' => $content->body,
             'blocks' => $content->blocks,
@@ -94,7 +112,10 @@ class ContentRevisionController extends BaseApiController
         ]);
 
         // Restore content from revision
-        $revisionData = $revision->meta['revision_data'] ?? [];
+        $revisionMeta = $revision->meta;
+        $revisionData = (is_array($revisionMeta) && isset($revisionMeta['revision_data']) && is_array($revisionMeta['revision_data']))
+            ? $revisionMeta['revision_data']
+            : [];
 
         $content->update([
             'title' => $revision->title,
@@ -102,7 +123,7 @@ class ContentRevisionController extends BaseApiController
             'blocks' => $revision->blocks,
             'excerpt' => $revisionData['excerpt'] ?? $content->excerpt, // Fallback to current if missing
             'slug' => $revisionData['slug'] ?? $content->slug,
-            'meta' => $revision->meta, // This might overwrite revision_data into content meta, which is fine
+            'meta' => $revisionMeta, // This might overwrite revision_data into content meta, which is fine
             'status' => $revisionData['status'] ?? 'draft', // Safe default
         ]);
 
@@ -111,7 +132,7 @@ class ContentRevisionController extends BaseApiController
         ], 'Content restored successfully');
     }
 
-    public function destroy(Content $content, ContentRevision $revision)
+    public function destroy(Content $content, ContentRevision $revision): \Illuminate\Http\JsonResponse
     {
         if ($revision->content_id !== $content->id) {
             return $this->notFound('Revision');

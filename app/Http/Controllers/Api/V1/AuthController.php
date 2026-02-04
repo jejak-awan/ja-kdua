@@ -69,7 +69,10 @@ class AuthController extends BaseApiController
      *     )
      * )
      */
-    public function login(Request $request)
+    /**
+     * User login.
+     */
+    public function login(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $request->validate([
@@ -79,6 +82,11 @@ class AuthController extends BaseApiController
         } catch (ValidationException $e) {
             return $this->validationError($e->errors());
         }
+
+        $emailRaw = $request->input('email');
+        $email = is_string($emailRaw) ? $emailRaw : '';
+        $passwordRaw = $request->input('password');
+        $password = is_string($passwordRaw) ? $passwordRaw : '';
 
         // Verify Captcha - Skip if two_factor_code is present (step 2 of login)
         // This avoids 422 errors because the captcha token is consumed during the first attempt.
@@ -92,19 +100,25 @@ class AuthController extends BaseApiController
                 'captcha_answer' => 'required|string',
             ]);
 
-            if (! $captchaService->verify($request->input('captcha_token'), $request->input('captcha_answer'))) {
+            $captchaTokenRaw = $request->input('captcha_token');
+            $captchaAnswerRaw = $request->input('captcha_answer');
+            $captchaToken = is_string($captchaTokenRaw) ? $captchaTokenRaw : '';
+            $captchaAnswer = is_string($captchaAnswerRaw) ? $captchaAnswerRaw : '';
+
+            if (! $captchaService->verify($captchaToken, $captchaAnswer)) {
                 return $this->validationError(['captcha' => ['Invalid captcha verification. Please try again.']]);
             }
         }
 
         $securityService = new SecurityService;
+
         // Use IpHelper to get real client IP (handles proxies/CDN properly)
         $ipAddress = \App\Helpers\IpHelper::getClientIp($request);
 
         // Check if IP is blocked (auto-expires via cache TTL)
         if ($securityService->isIpBlocked($ipAddress)) {
             $remainingSeconds = $securityService->getRemainingBlockTime($ipAddress);
-            $remainingMinutes = max(1, ceil($remainingSeconds / 60));
+            $remainingMinutes = max(1, (int) ceil($remainingSeconds / 60));
 
             return response()->json([
                 'success' => false,
@@ -117,9 +131,9 @@ class AuthController extends BaseApiController
         }
 
         // Check if account is locked (auto-expires via cache TTL)
-        if ($securityService->isAccountLocked($request->input('email'))) {
-            $remainingSeconds = $securityService->getAccountLockoutRemaining($request->input('email'));
-            $remainingMinutes = max(1, ceil($remainingSeconds / 60));
+        if ($securityService->isAccountLocked($email)) {
+            $remainingSeconds = $securityService->getAccountLockoutRemaining($email);
+            $remainingMinutes = max(1, (int) ceil($remainingSeconds / 60));
 
             return response()->json([
                 'success' => false,
@@ -131,18 +145,18 @@ class AuthController extends BaseApiController
             ], 429);
         }
 
-        $user = User::where('email', $request->input('email'))->first();
+        $user = User::where('email', $email)->first();
 
-        if (! $user || ! Hash::check($request->input('password'), $user->password)) {
+        if (! $user || ! Hash::check($password, (string) $user->password)) {
             // Record failed login (may trigger progressive blocking)
-            $result = $securityService->recordFailedLogin($request->input('email'), $ipAddress);
+            $result = $securityService->recordFailedLogin($email, $ipAddress);
 
             // Record failed login history if user exists
-            if ($user && isset($user->id)) {
+            if ($user) {
                 \App\Models\LoginHistory::create([
                     'user_id' => $user->id,
                     'ip_address' => $ipAddress,
-                    'user_agent' => $request->userAgent(),
+                    'user_agent' => is_string($request->userAgent()) ? $request->userAgent() : '',
                     'login_at' => now(),
                     'status' => 'failed',
                     'failure_reason' => 'Invalid password',
@@ -150,11 +164,13 @@ class AuthController extends BaseApiController
             }
 
             // If IP was just blocked, return 429 with retry_after
-            if (isset($result['ip_blocked']) && $result['ip_blocked']) {
+            if ($result['ip_blocked']) {
+                $blockDuration = $result['block_duration'];
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Too many failed attempts. Your IP has been temporarily blocked.',
-                    'retry_after' => $result['block_duration'],
+                    'retry_after' => $blockDuration,
                     'errors' => [
                         'email' => ['Too many failed login attempts. Please try again later.'],
                     ],
@@ -184,7 +200,7 @@ class AuthController extends BaseApiController
         \App\Models\LoginHistory::create([
             'user_id' => $user->id,
             'ip_address' => $ipAddress,
-            'user_agent' => $request->userAgent(),
+            'user_agent' => is_string($request->userAgent()) ? $request->userAgent() : '',
             'login_at' => now(),
             'status' => 'success',
         ]);
@@ -201,24 +217,30 @@ class AuthController extends BaseApiController
 
             // Verify 2FA code
             $twoFactorAuth = $user->twoFactorAuth;
-            $secret = $twoFactorAuth->getDecryptedSecret();
+            $twoFactorCodeRaw = $request->input('two_factor_code');
+            $twoFactorCode = is_string($twoFactorCodeRaw) ? $twoFactorCodeRaw : '';
+
+            $secret = $twoFactorAuth ? $twoFactorAuth->getDecryptedSecret() : null;
 
             $google2fa = new \PragmaRX\Google2FA\Google2FA;
-            $valid = $google2fa->verifyKey($secret, $request->input('two_factor_code'), 2);
+            $valid = false;
+            if ($secret) {
+                $valid = $google2fa->verifyKey($secret, $twoFactorCode, 2);
+            }
 
             // If TOTP fails, try backup code
-            if (! $valid) {
-                $valid = $twoFactorAuth->verifyBackupCode($request->input('two_factor_code'));
+            if (! $valid && $twoFactorAuth) {
+                $valid = $twoFactorAuth->verifyBackupCode($twoFactorCode);
             }
 
             if (! $valid) {
                 // Record failed login
-                $securityService->recordFailedLogin($request->input('email'), $ipAddress);
+                $securityService->recordFailedLogin($email, $ipAddress);
 
                 \App\Models\LoginHistory::create([
                     'user_id' => $user->id,
                     'ip_address' => $ipAddress,
-                    'user_agent' => $request->userAgent(),
+                    'user_agent' => is_string($request->userAgent()) ? $request->userAgent() : '',
                     'login_at' => now(),
                     'status' => 'failed',
                     'failure_reason' => 'Invalid 2FA code',
@@ -241,7 +263,8 @@ class AuthController extends BaseApiController
 
         // Handle concurrent login control
         $singleSession = \App\Models\Setting::get('single_session_enabled', false);
-        $maxSessions = \App\Models\Setting::get('max_concurrent_sessions', 0);
+        $maxSessionsRaw = \App\Models\Setting::get('max_concurrent_sessions', 0);
+        $maxSessions = is_numeric($maxSessionsRaw) ? (int) $maxSessionsRaw : 0;
 
         if ($singleSession) {
             // Revoke all previous tokens (Sanctum)
@@ -263,17 +286,17 @@ class AuthController extends BaseApiController
 
             // Also invalidate previous sessions if using stateful session guards
             // Note: This requires the AuthenticateSession middleware to be active
-            // Also invalidate previous sessions if using stateful session guards
-            // Note: This requires the AuthenticateSession middleware to be active
             try {
                 // Create web session for Sanctum SPA (stateful)
                 \Illuminate\Support\Facades\Auth::login($user, $request->boolean('remember'));
-                $request->session()->regenerate();
+                if ($request->hasSession()) {
+                    $request->session()->regenerate();
+                }
 
                 // Set tiered session lifetime based on user role
                 \App\Services\SessionManager::setLifetimeForUser($user);
 
-                \Illuminate\Support\Facades\Auth::logoutOtherDevices($request->input('password'));
+                \Illuminate\Support\Facades\Auth::logoutOtherDevices($password);
                 \Illuminate\Support\Facades\Log::info("Single Session: logoutOtherDevices called for {$user->email}");
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error('Single Session Error: '.$e->getMessage());
@@ -350,7 +373,10 @@ class AuthController extends BaseApiController
      *     )
      * )
      */
-    public function register(Request $request)
+    /**
+     * User registration.
+     */
+    public function register(Request $request): \Illuminate\Http\JsonResponse
     {
         // Check if registration is enabled in settings
         $registrationEnabled = \App\Models\Setting::get('enable_registration', true);
@@ -368,7 +394,12 @@ class AuthController extends BaseApiController
                     'captcha_answer' => 'required|string',
                 ]);
 
-                if (! $captchaService->verify($request->input('captcha_token'), $request->input('captcha_answer'))) {
+                $captchaTokenRaw = $request->input('captcha_token');
+                $captchaAnswerRaw = $request->input('captcha_answer');
+                $captchaToken = is_string($captchaTokenRaw) ? $captchaTokenRaw : '';
+                $captchaAnswer = is_string($captchaAnswerRaw) ? $captchaAnswerRaw : '';
+
+                if (! $captchaService->verify($captchaToken, $captchaAnswer)) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
                         'captcha' => ['Invalid captcha verification. Please try again.'],
                     ]);
@@ -384,10 +415,13 @@ class AuthController extends BaseApiController
             return $this->validationError($e->errors());
         }
 
+        $passwordRaw = $validated['password'];
+        $password = is_string($passwordRaw) ? $passwordRaw : '';
+
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'password' => Hash::make($password),
         ]);
 
         // Assign default role (member)
@@ -405,12 +439,18 @@ class AuthController extends BaseApiController
         ], 'Registration successful. Please verify your email address.', 201);
     }
 
-    public function logout(Request $request)
+    /**
+     * User logout.
+     */
+    public function logout(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
+        /** @var \App\Models\User|null $user */
 
         // Log activity
-        \App\Models\ActivityLog::log('logout', null, [], $user, 'User logged out');
+        if ($user) {
+            \App\Models\ActivityLog::log('logout', null, [], $user, 'User logged out');
+        }
 
         // Pure session-based logout - invalidate session only
         if ($request->hasSession()) {
@@ -426,29 +466,53 @@ class AuthController extends BaseApiController
         return $this->success(null, 'Logged out successfully');
     }
 
-    public function user(Request $request)
+    /**
+     * Get authenticated user.
+     */
+    public function user(Request $request): \Illuminate\Http\JsonResponse
     {
-        $user = $request->user()->load('roles');
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
+        $user->load('roles');
         $user->setRelation('permissions', $user->getAllPermissions());
 
         return $this->success($user, 'User retrieved successfully');
     }
 
-    public function resendVerificationEmail(Request $request)
+    /**
+     * Resend verification email.
+     */
+    public function resendVerificationEmail(Request $request): \Illuminate\Http\JsonResponse
     {
-        if ($request->user()->hasVerifiedEmail()) {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
+        if ($user->hasVerifiedEmail()) {
             return $this->validationError(['email' => ['Email already verified']], 'Email already verified');
         }
 
-        $request->user()->sendEmailVerificationNotification();
+        $user->sendEmailVerificationNotification();
 
         return $this->success(null, 'Verification email sent');
     }
 
-    public function verifyEmail(Request $request, $id, $hash)
+    /**
+     * Verify email address.
+     *
+     * @param  int|string  $id
+     * @param  string  $hash
+     */
+    public function verifyEmail(Request $request, $id, $hash): \Illuminate\Http\JsonResponse
     {
         $user = User::findOrFail($id);
-
+        /** @var User $user */
         if (! hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
             return $this->validationError(['hash' => ['Invalid verification link']], 'Invalid verification link');
         }
@@ -464,7 +528,10 @@ class AuthController extends BaseApiController
         return $this->success(null, 'Email verified successfully');
     }
 
-    public function verifyEmailApi(Request $request)
+    /**
+     * Verify email address (API version).
+     */
+    public function verifyEmailApi(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $request->validate([
@@ -475,7 +542,10 @@ class AuthController extends BaseApiController
             return $this->validationError($e->errors());
         }
 
-        $user = User::where('email', $request->input('email'))->first();
+        $emailRaw = $request->input('email');
+        $email = is_string($emailRaw) ? $emailRaw : '';
+
+        $user = User::where('email', $email)->first();
 
         if (! $user) {
             return $this->error('User not found', 404);
@@ -486,8 +556,6 @@ class AuthController extends BaseApiController
         }
 
         // Verify token (simplified - in production, use proper token verification)
-        $verificationUrl = url("/api/v1/email/verify/{$user->id}/".sha1($user->getEmailForVerification()));
-
         // For API, we'll use a simpler approach - verify directly if token matches
         // In production, implement proper token verification
         if ($user->markEmailAsVerified()) {
@@ -499,7 +567,10 @@ class AuthController extends BaseApiController
         return $this->error('Verification failed', 400);
     }
 
-    public function resendVerificationEmailApi(Request $request)
+    /**
+     * Resend verification email (API version).
+     */
+    public function resendVerificationEmailApi(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $request->validate([
@@ -509,7 +580,10 @@ class AuthController extends BaseApiController
             return $this->validationError($e->errors());
         }
 
-        $user = User::where('email', $request->input('email'))->first();
+        $emailRaw = $request->input('email');
+        $email = is_string($emailRaw) ? $emailRaw : '';
+
+        $user = User::where('email', $email)->first();
 
         if (! $user) {
             // Don't reveal if user exists (security best practice)
@@ -525,7 +599,10 @@ class AuthController extends BaseApiController
         return $this->success(null, 'Verification email sent');
     }
 
-    public function forgotPassword(Request $request)
+    /**
+     * Handle forgot password request.
+     */
+    public function forgotPassword(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $request->validate(['email' => 'required|email']);
@@ -533,7 +610,10 @@ class AuthController extends BaseApiController
             return $this->validationError($e->errors());
         }
 
-        $user = User::where('email', $request->input('email'))->first();
+        $emailRaw = $request->input('email');
+        $email = is_string($emailRaw) ? $emailRaw : '';
+
+        $user = User::where('email', $email)->first();
 
         if (! $user) {
             // Don't reveal if user exists (security best practice)
@@ -550,12 +630,15 @@ class AuthController extends BaseApiController
             ]
         );
 
-        $user->notify(new ResetPassword($token));
+        $user->notify(new ResetPassword((string) $token));
 
         return $this->success(null, 'If the email exists, a password reset link has been sent');
     }
 
-    public function resetPassword(Request $request)
+    /**
+     * Handle password reset request.
+     */
+    public function resetPassword(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $request->validate([
@@ -567,25 +650,33 @@ class AuthController extends BaseApiController
             return $this->validationError($e->errors());
         }
 
+        $emailRaw = $request->input('email');
+        $email = is_string($emailRaw) ? $emailRaw : '';
+        $tokenRaw = $request->input('token');
+        $token = is_string($tokenRaw) ? $tokenRaw : '';
+        $passwordRaw = $request->input('password');
+        $password = is_string($passwordRaw) ? $passwordRaw : '';
+
         $passwordReset = DB::table('password_reset_tokens')
-            ->where('email', $request->input('email'))
+            ->where('email', $email)
             ->first();
 
-        if (! $passwordReset || ! Hash::check($request->input('token'), $passwordReset->token)) {
+        if (! $passwordReset || ! Hash::check($token, (string) $passwordReset->token)) {
             return $this->error('Invalid or expired reset token', 400, [], 'INVALID_TOKEN');
         }
 
         // Check if token is expired (60 minutes)
-        if (now()->diffInMinutes($passwordReset->created_at) > 60) {
-            DB::table('password_reset_tokens')->where('email', $request->input('email'))->delete();
+        if (now()->diffInMinutes(\Carbon\Carbon::parse((string) $passwordReset->created_at)) > 60) {
+            DB::table('password_reset_tokens')->where('email', $email)->delete();
 
             return $this->error('Reset token has expired', 400, [], 'TOKEN_EXPIRED');
         }
 
-        $user = User::where('email', $request->input('email'))->firstOrFail();
-        $user->update(['password' => Hash::make($request->input('password'))]);
+        $user = User::where('email', $email)->firstOrFail();
+        /** @var User $user */
+        $user->update(['password' => Hash::make($password)]);
 
-        DB::table('password_reset_tokens')->where('email', $request->input('email'))->delete();
+        DB::table('password_reset_tokens')->where('email', $email)->delete();
 
         // Log activity
         \App\Models\ActivityLog::log('password_reset', null, [], $user, 'Password reset via email');

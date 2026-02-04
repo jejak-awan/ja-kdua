@@ -11,11 +11,11 @@ class CleanupSlowQueryLogs extends Command
 
     protected $description = 'Remove slow query logs older than specified days';
 
-    public function handle()
+    public function handle(): int
     {
         $days = (int) $this->option('days');
 
-        $deleted = SlowQuery::where('created_at', '<', now()->subDays($days))->delete();
+        $deleted = (int) SlowQuery::where('created_at', '<', now()->subDays($days))->delete();
 
         $this->info("Deleted {$deleted} slow query log(s) older than {$days} days.");
 

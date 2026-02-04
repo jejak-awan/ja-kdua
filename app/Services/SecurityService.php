@@ -38,6 +38,8 @@ class SecurityService
     /**
      * Record a failed login attempt.
      * Uses progressive blocking - block duration increases with each offense.
+     *
+     * @return array{ip_attempts: int, email_attempts: int, ip_blocked: bool, account_locked: bool, block_duration: int}
      */
     public function recordFailedLogin(string $email, string $ipAddress): array
     {
@@ -112,7 +114,7 @@ class SecurityService
     {
         $key = $this->cachePrefix."failed_attempts:{$type}:{$identifier}";
 
-        return Cache::get($key, 0);
+        return (int) Cache::get($key, 0);
     }
 
     /**
@@ -133,7 +135,7 @@ class SecurityService
 
         // Get and increment offense count
         $offenseKey = $this->cachePrefix."offense_count:{$ipAddress}";
-        $offenseCount = Cache::get($offenseKey, 0) + 1;
+        $offenseCount = (int) Cache::get($offenseKey, 0) + 1;
         Cache::put($offenseKey, $offenseCount, now()->addHours($this->offenseResetHours));
 
         // Calculate progressive block duration (exponential backoff)
@@ -206,13 +208,15 @@ class SecurityService
 
     /**
      * Get block info for API response.
+     *
+     * @return array{is_blocked: bool, remaining_seconds: int, offense_count: int, failed_attempts: int}
      */
     public function getBlockInfo(string $ipAddress): array
     {
         return [
             'is_blocked' => $this->isIpBlocked($ipAddress),
             'remaining_seconds' => $this->getRemainingBlockTime($ipAddress),
-            'offense_count' => Cache::get($this->cachePrefix."offense_count:{$ipAddress}", 0),
+            'offense_count' => (int) Cache::get($this->cachePrefix."offense_count:{$ipAddress}", 0),
             'failed_attempts' => $this->getFailedAttempts($ipAddress),
         ];
     }
@@ -309,6 +313,8 @@ class SecurityService
 
     /**
      * Get all blocked IPs.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, IpList>
      */
     public function getBlocklist()
     {
@@ -317,6 +323,8 @@ class SecurityService
 
     /**
      * Get all whitelisted IPs.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, IpList>
      */
     public function getWhitelist()
     {
@@ -395,6 +403,8 @@ class SecurityService
 
     /**
      * Get security statistics.
+     *
+     * @return array<string, mixed>
      */
     public function getSecurityStats(int $days = 30): array
     {

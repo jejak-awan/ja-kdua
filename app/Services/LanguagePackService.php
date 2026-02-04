@@ -92,10 +92,13 @@ class LanguagePackService
 
     /**
      * Get list of available language folders
+     *
+     * @return array<int, string>
      */
     public function getAvailableLocales(): array
     {
         $locales = [];
+        /** @var array<int, string> $directories */
         $directories = File::directories($this->langPath);
 
         foreach ($directories as $dir) {
@@ -119,7 +122,12 @@ class LanguagePackService
         }
 
         $hasIndex = File::exists($path.'/index.js');
-        $hasJson = count(glob($path.'/*.json')) > 0 || count(glob($path.'/*/*.json')) > 0;
+        /** @var array<int, string>|false $jsonFiles */
+        $jsonFiles = glob($path.'/*.json');
+        /** @var array<int, string>|false $nestedJsonFiles */
+        $nestedJsonFiles = glob($path.'/*/*.json');
+
+        $hasJson = ($jsonFiles !== false && count($jsonFiles) > 0) || ($nestedJsonFiles !== false && count($nestedJsonFiles) > 0);
 
         return $hasIndex || $hasJson;
     }
@@ -198,6 +206,8 @@ class LanguagePackService
 
     /**
      * Import a language pack from uploaded ZIP with security validation
+     *
+     * @return array{success: bool, message: string, locale?: string, files?: int}
      */
     public function importLanguagePack(string $zipPath, ?string $targetLocale = null): array
     {
@@ -296,6 +306,8 @@ class LanguagePackService
 
     /**
      * Validate ZIP contents before extraction
+     *
+     * @return array{valid: bool, message?: string, locale?: string}
      */
     protected function validateZipContents(ZipArchive $zip): array
     {
@@ -305,6 +317,10 @@ class LanguagePackService
 
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $stat = $zip->statIndex($i);
+            if ($stat === false) {
+                continue;
+            }
+
             $name = $stat['name'];
 
             // Detect locale from first folder
@@ -356,7 +372,7 @@ class LanguagePackService
             if ($content !== false) {
                 $contentCheck = $this->validateFileContent($content, $name);
                 if (! $contentCheck['valid']) {
-                    return $contentCheck;
+                    return ['valid' => false, 'message' => $contentCheck['message'] ?? 'Unknown error'];
                 }
             }
         }
@@ -374,6 +390,8 @@ class LanguagePackService
 
     /**
      * Validate file content for malicious patterns
+     *
+     * @return array{valid: bool, message?: string}
      */
     protected function validateFileContent(string $content, string $filename): array
     {
@@ -390,6 +408,7 @@ class LanguagePackService
         // If JSON file, validate JSON structure
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         if ($extension === 'json') {
+            /** @var mixed $json */
             $json = json_decode($content, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return [
@@ -399,7 +418,7 @@ class LanguagePackService
             }
 
             // Validate JSON structure (should only contain strings)
-            if (! $this->validateTranslationStructure($json, $filename)) {
+            if (! is_array($json) || ! $this->validateTranslationStructure($json, $filename)) {
                 return [
                     'valid' => false,
                     'message' => "Invalid translation structure in {$filename}: Values must be strings only",
@@ -412,12 +431,14 @@ class LanguagePackService
 
     /**
      * Validate translation JSON structure (only strings allowed as leaf values)
+     *
+     * @param  array<string|int, mixed>  $data
      */
     protected function validateTranslationStructure(array $data, string $path = ''): bool
     {
         foreach ($data as $key => $value) {
             // Key should be alphanumeric with underscores
-            if (! preg_match('/^[a-zA-Z0-9_]+$/', $key)) {
+            if (! preg_match('/^[a-zA-Z0-9_]+$/', (string) $key)) {
                 Log::warning("Invalid translation key: {$path}.{$key}");
 
                 return false;
@@ -439,6 +460,8 @@ class LanguagePackService
 
     /**
      * Validate extracted content in temp directory
+     *
+     * @return array{valid: bool, message?: string}
      */
     protected function validateExtractedContent(string $extractPath, string $locale): array
     {
@@ -463,10 +486,11 @@ class LanguagePackService
                 ];
             }
 
+            /** @var string $content */
             $content = File::get($file->getRealPath());
             $check = $this->validateFileContent($content, $file->getFilename());
             if (! $check['valid']) {
-                return $check;
+                return ['valid' => false, 'message' => $check['message'] ?? 'Unknown error'];
             }
         }
 
@@ -506,6 +530,8 @@ class LanguagePackService
 
     /**
      * Create a new language from template (copy from default language)
+     *
+     * @return array{success: bool, message: string, locale?: string, files?: int}
      */
     public function createFromTemplate(string $newLocale, string $templateLocale = 'en'): array
     {
@@ -546,6 +572,8 @@ class LanguagePackService
 
     /**
      * Delete a language folder
+     *
+     * @return array{success: bool, message: string}
      */
     public function deleteLanguagePack(string $locale): array
     {
@@ -577,6 +605,8 @@ class LanguagePackService
 
     /**
      * Get translation statistics for a locale
+     *
+     * @return array{exists: bool, files?: int, total_keys?: int}
      */
     public function getLocaleStats(string $locale): array
     {
@@ -601,6 +631,7 @@ class LanguagePackService
         $totalKeys = 0;
 
         foreach ($jsonFiles as $file) {
+            /** @var mixed $content */
             $content = json_decode(File::get($file->getRealPath()), true);
             if (is_array($content)) {
                 $totalKeys += $this->countKeys($content);
@@ -616,6 +647,8 @@ class LanguagePackService
 
     /**
      * Recursively count keys in array
+     *
+     * @param  array<string|int, mixed>  $array
      */
     protected function countKeys(array $array): int
     {

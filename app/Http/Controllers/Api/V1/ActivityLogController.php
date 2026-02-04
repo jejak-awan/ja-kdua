@@ -8,7 +8,10 @@ use Illuminate\Support\Facades\Log;
 
 class ActivityLogController extends BaseApiController
 {
-    public function index(Request $request)
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $query = ActivityLog::with('user');
@@ -23,7 +26,9 @@ class ActivityLogController extends BaseApiController
             }
 
             if ($request->filled('model_type')) {
-                $query->where('model_type', 'like', '%'.$request->input('model_type').'%');
+                $modelTypeRaw = $request->input('model_type');
+                $modelType = is_string($modelTypeRaw) ? $modelTypeRaw : '';
+                $query->where('model_type', 'like', '%'.$modelType.'%');
             }
 
             if ($request->filled('ip_address')) {
@@ -31,15 +36,24 @@ class ActivityLogController extends BaseApiController
             }
 
             if ($request->filled('date_from')) {
-                $query->whereDate('created_at', '>=', $request->input('date_from'));
+                $dateFromRaw = $request->input('date_from');
+                $dateFrom = is_string($dateFromRaw) ? $dateFromRaw : null;
+                if ($dateFrom) {
+                    $query->whereDate('created_at', '>=', $dateFrom);
+                }
             }
 
             if ($request->filled('date_to')) {
-                $query->whereDate('created_at', '<=', $request->input('date_to'));
+                $dateToRaw = $request->input('date_to');
+                $dateTo = is_string($dateToRaw) ? $dateToRaw : null;
+                if ($dateTo) {
+                    $query->whereDate('created_at', '<=', $dateTo);
+                }
             }
 
             if ($request->filled('search')) {
-                $search = $request->input('search');
+                $searchRaw = $request->input('search');
+                $search = is_string($searchRaw) ? $searchRaw : '';
                 $query->where(function ($q) use ($search) {
                     $q->where('description', 'like', "%{$search}%")
                         ->orWhere('model_type', 'like', "%{$search}%")
@@ -50,8 +64,10 @@ class ActivityLogController extends BaseApiController
             }
 
             // Sorting
-            $sortBy = $request->input('sort_by', 'created_at');
-            $sortDir = $request->input('sort_dir', 'desc');
+            $sortByRaw = $request->input('sort_by', 'created_at');
+            $sortBy = is_string($sortByRaw) ? $sortByRaw : 'created_at';
+            $sortDirRaw = $request->input('sort_dir', 'desc');
+            $sortDir = is_string($sortDirRaw) ? $sortDirRaw : 'desc';
             $allowedSorts = ['created_at', 'action', 'model_type', 'user_id'];
             if (in_array($sortBy, $allowedSorts)) {
                 $query->orderBy($sortBy, $sortDir === 'asc' ? 'asc' : 'desc');
@@ -60,7 +76,8 @@ class ActivityLogController extends BaseApiController
             }
 
             // Pagination with customizable per_page
-            $perPage = min(max((int) $request->input('per_page', 50), 1), 500);
+            $perPageRaw = $request->input('per_page', 50);
+            $perPage = min(max(is_numeric($perPageRaw) ? (int) $perPageRaw : 50, 1), 500);
             $logs = $query->paginate($perPage);
 
             return $this->paginated($logs, 'Activity logs retrieved successfully');
@@ -75,13 +92,14 @@ class ActivityLogController extends BaseApiController
 
     /**
      * Export activity logs to CSV
+     *
+     * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
      */
     public function export(Request $request)
     {
         try {
             $query = ActivityLog::with('user');
 
-            // Apply same filters as index
             // Apply same filters as index
             if ($request->filled('user_id')) {
                 $query->where('user_id', $request->input('user_id'));
@@ -92,15 +110,25 @@ class ActivityLogController extends BaseApiController
             }
 
             if ($request->filled('model_type')) {
-                $query->where('model_type', 'like', '%'.$request->input('model_type').'%');
+                $modelTypeRaw = $request->input('model_type');
+                $modelType = is_string($modelTypeRaw) ? $modelTypeRaw : '';
+                $query->where('model_type', 'like', '%'.$modelType.'%');
             }
 
             if ($request->filled('date_from')) {
-                $query->whereDate('created_at', '>=', $request->input('date_from'));
+                $dateFromRaw = $request->input('date_from');
+                $dateFrom = is_string($dateFromRaw) ? $dateFromRaw : null;
+                if ($dateFrom) {
+                    $query->whereDate('created_at', '>=', $dateFrom);
+                }
             }
 
             if ($request->filled('date_to')) {
-                $query->whereDate('created_at', '<=', $request->input('date_to'));
+                $dateToRaw = $request->input('date_to');
+                $dateTo = is_string($dateToRaw) ? $dateToRaw : null;
+                if ($dateTo) {
+                    $query->whereDate('created_at', '<=', $dateTo);
+                }
             }
 
             $logs = $query->latest()->limit(10000)->get();
@@ -117,7 +145,7 @@ class ActivityLogController extends BaseApiController
                     $log->model_id ?? '',
                     str_replace('"', '""', $log->description ?? ''),
                     $log->ip_address ?? '',
-                    $log->created_at->format('Y-m-d H:i:s')
+                    $log->created_at ? $log->created_at->format('Y-m-d H:i:s') : ''
                 );
             }
 
@@ -132,12 +160,20 @@ class ActivityLogController extends BaseApiController
         }
     }
 
-    public function show(ActivityLog $activityLog)
+    /**
+     * Display the specified resource.
+     */
+    public function show(ActivityLog $activityLog): \Illuminate\Http\JsonResponse
     {
         return $this->success($activityLog->load('user'), 'Activity log retrieved successfully');
     }
 
-    public function userActivity(Request $request, $userId)
+    /**
+     * Display a listing of the resource for a specific user.
+     *
+     * @param  int|string  $userId
+     */
+    public function userActivity(Request $request, $userId): \Illuminate\Http\JsonResponse
     {
         $logs = ActivityLog::where('user_id', $userId)
             ->with('user')
@@ -147,9 +183,13 @@ class ActivityLogController extends BaseApiController
         return $this->paginated($logs, 'User activity logs retrieved successfully');
     }
 
-    public function recent(Request $request)
+    /**
+     * Display a listing of the most recent resources.
+     */
+    public function recent(Request $request): \Illuminate\Http\JsonResponse
     {
-        $limit = $request->input('limit', 20);
+        $limitRaw = $request->input('limit', 20);
+        $limit = is_numeric($limitRaw) ? (int) $limitRaw : 20;
 
         $logs = ActivityLog::with('user')
             ->latest()
@@ -159,16 +199,27 @@ class ActivityLogController extends BaseApiController
         return $this->success($logs, 'Recent activity logs retrieved successfully');
     }
 
-    public function statistics(Request $request)
+    /**
+     * Display statistics about activity logs.
+     */
+    public function statistics(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = ActivityLog::query();
 
         if ($request->has('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
+            $dateFromRaw = $request->input('date_from');
+            $dateFrom = is_string($dateFromRaw) ? $dateFromRaw : null;
+            if ($dateFrom) {
+                $query->whereDate('created_at', '>=', $dateFrom);
+            }
         }
 
         if ($request->has('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
+            $dateToRaw = $request->input('date_to');
+            $dateTo = is_string($dateToRaw) ? $dateToRaw : null;
+            if ($dateTo) {
+                $query->whereDate('created_at', '<=', $dateTo);
+            }
         }
 
         $baseQuery = clone $query;
@@ -202,16 +253,22 @@ class ActivityLogController extends BaseApiController
         return $this->success($stats, 'Activity log statistics retrieved successfully');
     }
 
-    public function clear(Request $request)
+    /**
+     * Clear activity logs.
+     */
+    public function clear(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             // Optional: retain last X days
-            $retainDays = $request->input('retain_days');
+            $retainDaysRaw = $request->input('retain_days');
+            $retainDays = is_numeric($retainDaysRaw) ? (int) $retainDaysRaw : null;
 
             if ($retainDays) {
                 $count = ActivityLog::where('created_at', '<', now()->subDays($retainDays))->delete();
+                $countStr = is_numeric($count) ? (string) $count : '0';
+                $retainDaysStr = (string) $retainDays;
 
-                return $this->success(null, "Cleared $count activity logs older than $retainDays days");
+                return $this->success(null, "Cleared $countStr activity logs older than $retainDaysStr days");
             }
 
             ActivityLog::truncate();

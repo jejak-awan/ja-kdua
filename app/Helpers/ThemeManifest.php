@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 class ThemeManifest
 {
+    /** @var array<string, mixed> */
     protected array $manifest;
 
     protected string $path;
@@ -26,9 +27,13 @@ class ThemeManifest
         }
 
         $content = file_get_contents($manifestPath);
+        if ($content === false) {
+            throw new \Exception("Failed to read theme manifest: {$manifestPath}");
+        }
+
         $manifest = json_decode($content, true);
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
+        if (json_last_error() !== JSON_ERROR_NONE || ! is_array($manifest)) {
             throw new \Exception('Invalid theme.json: '.json_last_error_msg());
         }
 
@@ -37,6 +42,8 @@ class ThemeManifest
 
     /**
      * Get manifest data
+     *
+     * @return array<string, mixed>
      */
     public function getManifest(): array
     {
@@ -117,26 +124,32 @@ class ThemeManifest
 
     /**
      * Get dependencies
+     *
+     * @return array<string, string>
      */
     public function getDependencies(): array
     {
-        return $this->manifest['dependencies'] ?? [];
+        return (array) ($this->manifest['dependencies'] ?? []);
     }
 
     /**
      * Get supports
+     *
+     * @return array<string, bool>
      */
     public function getSupports(): array
     {
-        return $this->manifest['supports'] ?? [];
+        return (array) ($this->manifest['supports'] ?? []);
     }
 
     /**
      * Get requirements
+     *
+     * @return array<string, string>
      */
     public function getRequirements(): array
     {
-        return $this->manifest['requires'] ?? [];
+        return (array) ($this->manifest['requires'] ?? []);
     }
 
     /**
@@ -157,38 +170,48 @@ class ThemeManifest
 
     /**
      * Get assets configuration
+     *
+     * @return array<string, array<int, string>>
      */
     public function getAssets(): array
     {
-        return $this->manifest['assets'] ?? [];
+        return (array) ($this->manifest['assets'] ?? []);
     }
 
     /**
      * Get CSS assets
+     *
+     * @return array<int, string>
      */
     public function getCssAssets(): array
     {
-        return $this->manifest['assets']['css'] ?? [];
+        return (array) ($this->manifest['assets']['css'] ?? []);
     }
 
     /**
      * Get JS assets
+     *
+     * @return array<int, string>
      */
     public function getJsAssets(): array
     {
-        return $this->manifest['assets']['js'] ?? [];
+        return (array) ($this->manifest['assets']['js'] ?? []);
     }
 
     /**
      * Get settings schema
+     *
+     * @return array<string, array<string, mixed>>
      */
     public function getSettingsSchema(): array
     {
-        return $this->manifest['settings_schema'] ?? [];
+        return (array) ($this->manifest['settings_schema'] ?? []);
     }
 
     /**
      * Validate manifest structure
+     *
+     * @return array<int, string>
      */
     public function validate(): array
     {
@@ -204,7 +227,8 @@ class ThemeManifest
 
         // Validate version format (semver)
         if (isset($this->manifest['version'])) {
-            if (! preg_match('/^\d+\.\d+\.\d+$/', $this->manifest['version'])) {
+            $version = (string) $this->manifest['version'];
+            if (! preg_match('/^\d+\.\d+\.\d+$/', $version)) {
                 $errors[] = 'Invalid version format. Expected semver (e.g., 1.0.0)';
             }
         }
@@ -212,16 +236,17 @@ class ThemeManifest
         // Validate type
         if (isset($this->manifest['type'])) {
             $validTypes = ['frontend', 'admin', 'email'];
-            if (! in_array($this->manifest['type'], $validTypes)) {
+            $type = (string) $this->manifest['type'];
+            if (! in_array($type, $validTypes)) {
                 $errors[] = 'Invalid type. Must be one of: '.implode(', ', $validTypes);
             }
         }
 
         // Validate assets paths exist
-        if (isset($this->manifest['assets'])) {
+        if (isset($this->manifest['assets']) && is_array($this->manifest['assets'])) {
             $assets = $this->manifest['assets'];
 
-            if (isset($assets['css'])) {
+            if (isset($assets['css']) && is_array($assets['css'])) {
                 foreach ($assets['css'] as $cssFile) {
                     $cssPath = "{$this->path}/{$cssFile}";
                     if (! file_exists($cssPath)) {
@@ -230,7 +255,7 @@ class ThemeManifest
                 }
             }
 
-            if (isset($assets['js'])) {
+            if (isset($assets['js']) && is_array($assets['js'])) {
                 foreach ($assets['js'] as $jsFile) {
                     $jsPath = "{$this->path}/{$jsFile}";
                     if (! file_exists($jsPath)) {
@@ -241,9 +266,12 @@ class ThemeManifest
         }
 
         // Validate settings schema
-        if (isset($this->manifest['settings_schema'])) {
+        if (isset($this->manifest['settings_schema']) && is_array($this->manifest['settings_schema'])) {
             $schema = $this->manifest['settings_schema'];
             foreach ($schema as $key => $setting) {
+                if (! is_array($setting)) {
+                    continue;
+                }
                 if (! isset($setting['type'])) {
                     $errors[] = "Setting '{$key}' missing type";
                 }
@@ -264,6 +292,8 @@ class ThemeManifest
 
     /**
      * Check if theme meets requirements
+     *
+     * @return array<int, string>
      */
     public function checkRequirements(): array
     {
@@ -272,7 +302,7 @@ class ThemeManifest
         // Check CMS version
         $requiredCmsVersion = $this->getRequiredCmsVersion();
         if ($requiredCmsVersion) {
-            $currentVersion = config('app.version', '1.0.0');
+            $currentVersion = (string) config('app.version', '1.0.0');
             if (version_compare($currentVersion, $requiredCmsVersion, '<')) {
                 $errors[] = "CMS version {$currentVersion} does not meet requirement: {$requiredCmsVersion}";
             }
@@ -303,6 +333,8 @@ class ThemeManifest
 
     /**
      * Create manifest from array
+     *
+     * @param  array<string, mixed>  $data
      */
     public static function create(string $themePath, array $data): bool
     {

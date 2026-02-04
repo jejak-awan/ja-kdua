@@ -25,12 +25,15 @@ class Notification extends Model
         'data' => 'array',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function markAsRead()
+    public function markAsRead(): void
     {
         $this->update([
             'is_read' => true,
@@ -38,7 +41,11 @@ class Notification extends Model
         ]);
     }
 
-    public static function createForUser($userId, $type, $title, $message, $actionUrl = null, $actionText = null, $data = [])
+    /**
+     * @param  int|string  $userId
+     * @param  array<string, mixed>  $data
+     */
+    public static function createForUser($userId, string $type, string $title, string $message, ?string $actionUrl = null, ?string $actionText = null, array $data = []): self
     {
         return static::create([
             'user_id' => $userId,
@@ -51,7 +58,11 @@ class Notification extends Model
         ]);
     }
 
-    public static function createForAll($type, $title, $message, $actionUrl = null, $actionText = null, $data = [])
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<int, self>
+     */
+    public static function createForAll(string $type, string $title, string $message, ?string $actionUrl = null, ?string $actionText = null, array $data = []): array
     {
         $users = \App\Models\User::all();
         $notifications = [];

@@ -15,11 +15,12 @@ class SendEmailJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $tries = 3;
+    public int $tries = 3;
 
-    public $timeout = 60;
+    public int $timeout = 60;
 
-    public $backoff = [30, 60, 120]; // Retry after 30s, 1min, 2min
+    /** @var array<int, int> */
+    public array $backoff = [30, 60, 120]; // Retry after 30s, 1min, 2min
 
     /**
      * Create a new job instance.
@@ -29,6 +30,7 @@ class SendEmailJob implements ShouldQueue
         public string $subject,
         public string $body,
         public ?string $templateSlug = null,
+        /** @var array<string, mixed> */
         public array $data = [],
         public ?string $from = null,
         public ?string $fromName = null

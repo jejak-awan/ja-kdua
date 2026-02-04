@@ -2,14 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BuilderPreset extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
         'type',
@@ -25,6 +22,8 @@ class BuilderPreset extends Model
 
     /**
      * Get the user that owns the preset.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -33,6 +32,9 @@ class BuilderPreset extends Model
 
     /**
      * Scope for system presets.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
      */
     public function scopeSystem($query)
     {
@@ -41,6 +43,10 @@ class BuilderPreset extends Model
 
     /**
      * Scope for user presets.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @param  int|string  $userId
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
      */
     public function scopeForUser($query, $userId)
     {
@@ -49,6 +55,10 @@ class BuilderPreset extends Model
 
     /**
      * Scope by module type.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @param  string  $type
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
      */
     public function scopeOfType($query, $type)
     {

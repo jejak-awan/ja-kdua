@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class WebhookController extends BaseApiController
 {
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = Webhook::query();
 
@@ -24,7 +24,7 @@ class WebhookController extends BaseApiController
         return $this->success($webhooks, 'Webhooks retrieved successfully');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $validated = $request->validate([
@@ -46,12 +46,12 @@ class WebhookController extends BaseApiController
         return $this->success($webhook, 'Webhook created successfully', 201);
     }
 
-    public function show(Webhook $webhook)
+    public function show(Webhook $webhook): \Illuminate\Http\JsonResponse
     {
         return $this->success($webhook, 'Webhook retrieved successfully');
     }
 
-    public function update(Request $request, Webhook $webhook)
+    public function update(Request $request, Webhook $webhook): \Illuminate\Http\JsonResponse
     {
         try {
             $validated = $request->validate([
@@ -74,14 +74,14 @@ class WebhookController extends BaseApiController
         return $this->success($webhook, 'Webhook updated successfully');
     }
 
-    public function destroy(Webhook $webhook)
+    public function destroy(Webhook $webhook): \Illuminate\Http\JsonResponse
     {
         $webhook->delete();
 
         return $this->success(null, 'Webhook deleted successfully');
     }
 
-    public function test(Webhook $webhook)
+    public function test(Webhook $webhook): \Illuminate\Http\JsonResponse
     {
         $testData = [
             'test' => true,
@@ -95,13 +95,13 @@ class WebhookController extends BaseApiController
         ], $result ? 'Webhook triggered successfully' : 'Webhook failed');
     }
 
-    public function statistics()
+    public function statistics(): \Illuminate\Http\JsonResponse
     {
         $stats = [
             'total' => Webhook::count(),
             'active' => Webhook::where('is_active', true)->count(),
-            'total_success' => Webhook::sum('success_count'),
-            'total_failures' => Webhook::sum('failure_count'),
+            'total_success' => (int) Webhook::sum('success_count'),
+            'total_failures' => (int) Webhook::sum('failure_count'),
             'recent_webhooks' => Webhook::whereNotNull('last_triggered_at')
                 ->latest('last_triggered_at')
                 ->limit(10)

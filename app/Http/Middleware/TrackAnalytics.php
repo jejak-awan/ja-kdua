@@ -33,16 +33,14 @@ class TrackAnalytics
             try {
                 $sessionId = session()->getId();
 
-                // Start or get session
+                // Start or get session (this always returns a session)
                 $session = \App\Models\AnalyticsSession::start($request, $sessionId);
 
                 // Track visit
                 \App\Models\AnalyticsVisit::trackVisit($request, $sessionId);
 
                 // Update session
-                if ($session) {
-                    $session->incrementPageViews();
-                }
+                $session->incrementPageViews();
             } catch (\Exception $e) {
                 // Log error but don't break anything
                 \Log::error('Analytics tracking failed: '.$e->getMessage());

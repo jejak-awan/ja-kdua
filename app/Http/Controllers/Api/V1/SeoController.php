@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\File;
 
 class SeoController extends BaseApiController
 {
-    public function generateSitemap()
+    public function generateSitemap(): \Illuminate\Http\JsonResponse
     {
         // Sitemap is generated on-the-fly by SitemapController
         return $this->success([
@@ -16,7 +16,7 @@ class SeoController extends BaseApiController
         ], 'Sitemap is available at /sitemap.xml');
     }
 
-    public function getRobotsTxt()
+    public function getRobotsTxt(): \Illuminate\Http\JsonResponse
     {
         $path = public_path('robots.txt');
 
@@ -31,21 +31,22 @@ class SeoController extends BaseApiController
         ], 'Robots.txt retrieved successfully');
     }
 
-    public function updateRobotsTxt(Request $request)
+    public function updateRobotsTxt(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'content' => 'required|string',
         ]);
 
+        $content = is_string($validated['content']) ? $validated['content'] : '';
         $path = public_path('robots.txt');
-        File::put($path, $validated['content']);
+        File::put($path, $content);
 
         return $this->success([
-            'content' => $validated['content'],
+            'content' => $content,
         ], 'Robots.txt updated successfully');
     }
 
-    public function analyzeContent(Content $content)
+    public function analyzeContent(Content $content): \Illuminate\Http\JsonResponse
     {
         $score = 0;
         $maxScore = 100;
@@ -54,7 +55,7 @@ class SeoController extends BaseApiController
 
         // Check title
         if ($content->title) {
-            $titleLength = strlen($content->title);
+            $titleLength = strlen((string) $content->title);
             if ($titleLength >= 30 && $titleLength <= 60) {
                 $score += 20;
             } else {
@@ -67,7 +68,7 @@ class SeoController extends BaseApiController
 
         // Check meta title
         if ($content->meta_title) {
-            $metaTitleLength = strlen($content->meta_title);
+            $metaTitleLength = strlen((string) $content->meta_title);
             if ($metaTitleLength >= 30 && $metaTitleLength <= 60) {
                 $score += 15;
             } else {
@@ -79,7 +80,7 @@ class SeoController extends BaseApiController
 
         // Check meta description
         if ($content->meta_description) {
-            $metaDescLength = strlen($content->meta_description);
+            $metaDescLength = strlen((string) $content->meta_description);
             if ($metaDescLength >= 120 && $metaDescLength <= 160) {
                 $score += 15;
             } else {
@@ -112,7 +113,7 @@ class SeoController extends BaseApiController
 
         // Check body length
         if ($content->body) {
-            $bodyLength = strlen(strip_tags($content->body));
+            $bodyLength = strlen(strip_tags((string) $content->body));
             if ($bodyLength >= 300) {
                 $score += 15;
             } else {
@@ -122,7 +123,7 @@ class SeoController extends BaseApiController
 
         // Check slug
         if ($content->slug) {
-            $slugLength = strlen($content->slug);
+            $slugLength = strlen((string) $content->slug);
             if ($slugLength <= 100) {
                 $score += 5;
             } else {
@@ -132,7 +133,7 @@ class SeoController extends BaseApiController
 
         // Check keywords
         if ($content->meta_keywords) {
-            $keywords = explode(',', $content->meta_keywords);
+            $keywords = explode(',', (string) $content->meta_keywords);
             if (count($keywords) >= 3 && count($keywords) <= 10) {
                 $score += 10;
             } else {
@@ -141,6 +142,9 @@ class SeoController extends BaseApiController
         } else {
             $suggestions[] = 'Add meta keywords for better SEO';
         }
+
+        // Clamp score to maxScore
+        $score = min($score, $maxScore);
 
         return $this->success([
             'score' => $score,
@@ -152,7 +156,7 @@ class SeoController extends BaseApiController
         ], 'Content SEO analysis completed');
     }
 
-    protected function getGrade($score, $maxScore)
+    protected function getGrade(int $score, int $maxScore): string
     {
         $percentage = ($score / $maxScore) * 100;
 
@@ -175,15 +179,21 @@ class SeoController extends BaseApiController
         return 'F';
     }
 
-    public function generateSchema(Content $content)
+    public function generateSchema(Content $content): \Illuminate\Http\JsonResponse
     {
+        $publishedAtRaw = $content->published_at ?? $content->created_at;
+        $publishedAt = $publishedAtRaw instanceof \Illuminate\Support\Carbon ? $publishedAtRaw->toIso8601String() : now()->toIso8601String();
+
+        $updatedAtRaw = $content->updated_at;
+        $updatedAt = $updatedAtRaw instanceof \Illuminate\Support\Carbon ? $updatedAtRaw->toIso8601String() : now()->toIso8601String();
+
         $schema = [
             '@context' => 'https://schema.org',
             '@type' => $content->type === 'post' ? 'BlogPosting' : 'Article',
             'headline' => $content->title,
             'description' => $content->meta_description ?? $content->excerpt,
-            'datePublished' => $content->published_at?->toIso8601String() ?? $content->created_at->toIso8601String(),
-            'dateModified' => $content->updated_at->toIso8601String(),
+            'datePublished' => $publishedAt,
+            'dateModified' => $updatedAt,
             'author' => [
                 '@type' => 'Person',
                 'name' => $content->author->name ?? 'Unknown',
@@ -193,7 +203,7 @@ class SeoController extends BaseApiController
         if ($content->featured_image) {
             $schema['image'] = [
                 '@type' => 'ImageObject',
-                'url' => url($content->featured_image),
+                'url' => url((string) $content->featured_image),
             ];
         }
 

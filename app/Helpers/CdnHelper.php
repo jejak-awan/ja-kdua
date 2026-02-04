@@ -28,8 +28,8 @@ class CdnHelper
             return '/'.ltrim($path, '/');
         }
 
-        $cdnUrl = $domain ? config("cdn.domains.{$domain}", config('cdn.url')) : config('cdn.url');
-        $pathPrefix = config('cdn.path_prefix', '/storage');
+        $cdnUrl = (string) ($domain ? config("cdn.domains.{$domain}", config('cdn.url')) : config('cdn.url'));
+        $pathPrefix = (string) config('cdn.path_prefix', '/storage');
 
         // Remove leading slash from path if present
         $path = ltrim($path, '/');
@@ -59,13 +59,16 @@ class CdnHelper
     /**
      * Get image optimization parameters for CDN
      */
+    /**
+     * @return array{width: int, height: int, quality: int, format: string}
+     */
     public static function getImageParams(?int $width = null, ?int $height = null, ?int $quality = null): array
     {
         return [
-            'width' => $width ?? config('cdn.image.max_width', 1920),
-            'height' => $height ?? config('cdn.image.max_height', 1080),
-            'quality' => $quality ?? config('cdn.image.quality', 85),
-            'format' => config('cdn.image.format', 'auto'),
+            'width' => (int) ($width ?? config('cdn.image.max_width', 1920)),
+            'height' => (int) ($height ?? config('cdn.image.max_height', 1080)),
+            'quality' => (int) ($quality ?? config('cdn.image.quality', 85)),
+            'format' => (string) config('cdn.image.format', 'auto'),
         ];
     }
 
@@ -105,6 +108,7 @@ class CdnHelper
      */
     public static function getCacheControl(string $mimeType): string
     {
+        /** @var array<string, string> $config */
         $config = config('cdn.cache_control', []);
 
         if (str_starts_with($mimeType, 'image/')) {

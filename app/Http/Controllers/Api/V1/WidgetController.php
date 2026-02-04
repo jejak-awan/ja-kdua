@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class WidgetController extends BaseApiController
 {
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = Widget::query();
 
@@ -20,7 +20,7 @@ class WidgetController extends BaseApiController
         return $this->success($widgets, 'Widgets retrieved successfully');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -36,12 +36,12 @@ class WidgetController extends BaseApiController
         return $this->success($widget, 'Widget created successfully', 201);
     }
 
-    public function show(Widget $widget)
+    public function show(Widget $widget): \Illuminate\Http\JsonResponse
     {
         return $this->success($widget, 'Widget retrieved successfully');
     }
 
-    public function update(Request $request, Widget $widget)
+    public function update(Request $request, Widget $widget): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
@@ -58,21 +58,21 @@ class WidgetController extends BaseApiController
         return $this->success($widget, 'Widget updated successfully');
     }
 
-    public function destroy(Widget $widget)
+    public function destroy(Widget $widget): \Illuminate\Http\JsonResponse
     {
         $widget->delete();
 
         return $this->success(null, 'Widget deleted successfully');
     }
 
-    public function getByLocation(Request $request, $location)
+    public function getByLocation(Request $request, string $location): \Illuminate\Http\JsonResponse
     {
         $widgets = Widget::getByLocation($location);
 
         return $this->success($widgets, 'Widgets retrieved successfully');
     }
 
-    public function reorder(Request $request)
+    public function reorder(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'widgets' => 'required|array',
@@ -80,14 +80,20 @@ class WidgetController extends BaseApiController
             'widgets.*.sort_order' => 'required|integer',
         ]);
 
-        foreach ($request->input('widgets') as $widgetData) {
-            Widget::where('id', $widgetData['id'])
-                ->update(['sort_order' => $widgetData['sort_order']]);
+        $widgets = $request->input('widgets');
+        if (is_array($widgets)) {
+            foreach ($widgets as $widgetData) {
+                if (is_array($widgetData) && isset($widgetData['id']) && isset($widgetData['sort_order'])) {
+                    Widget::where('id', $widgetData['id'])
+                        ->update(['sort_order' => (int) $widgetData['sort_order']]);
+                }
+            }
         }
 
+        return $this->success(null, 'Widgets reordered successfully');
     }
 
-    public function locations()
+    public function locations(): \Illuminate\Http\JsonResponse
     {
         $defaultLocations = [
             ['id' => 'sidebar-1', 'name' => 'Main Sidebar'],
@@ -96,8 +102,12 @@ class WidgetController extends BaseApiController
             ['id' => 'footer-3', 'name' => 'Footer Area 3'],
         ];
 
+        /** @var \Illuminate\Support\Collection<int, array{id: string, name: string}> $dbLocations */
         $dbLocations = Widget::select('location')->distinct()->pluck('location')->filter()->map(function ($loc) {
-            return ['id' => $loc, 'name' => ucwords(str_replace('-', ' ', $loc))];
+            /** @var string $locStr */
+            $locStr = $loc;
+
+            return ['id' => $locStr, 'name' => ucwords(str_replace('-', ' ', $locStr))];
         });
 
         // Merge and unique by id

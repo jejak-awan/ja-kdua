@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 
 class Webhook extends Model
 {
+    /** @use HasFactory<\Database\Factories\WebhookFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -33,7 +34,10 @@ class Webhook extends Model
         'last_triggered_at' => 'datetime',
     ];
 
-    public function trigger($data)
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function trigger(array $data): bool
     {
         if (! $this->is_active) {
             return false;
@@ -42,9 +46,12 @@ class Webhook extends Model
         try {
             $payload = $this->buildPayload($data);
 
-            $response = Http::timeout($this->timeout)
+            /** @var "get"|"post"|"put"|"patch"|"delete" $method */
+            $method = strtolower((string) $this->method);
+
+            $response = Http::timeout((int) ($this->timeout ?? 30))
                 ->withHeaders($this->headers ?? [])
-                ->{strtolower($this->method)}($this->url, $payload);
+                ->{$method}((string) $this->url, $payload);
 
             if ($response->successful()) {
                 $this->increment('success_count');
@@ -55,7 +62,7 @@ class Webhook extends Model
                 $this->increment('failure_count');
 
                 // Retry if not exceeded max retries
-                if ($this->retry_count < $this->max_retries) {
+                if ((int) $this->retry_count < (int) $this->max_retries) {
                     $this->increment('retry_count');
                     // Could implement retry queue here
                 }
@@ -71,7 +78,7 @@ class Webhook extends Model
             $this->increment('failure_count');
 
             // Retry if not exceeded max retries
-            if ($this->retry_count < $this->max_retries) {
+            if ((int) $this->retry_count < (int) $this->max_retries) {
                 $this->increment('retry_count');
                 // Could implement retry queue here
             }
@@ -85,9 +92,13 @@ class Webhook extends Model
         }
     }
 
-    protected function buildPayload($data)
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function buildPayload(array $data): array
     {
-        if ($this->payload_template) {
+        if (is_array($this->payload_template) && ! empty($this->payload_template)) {
             // Use template to build payload
             $payload = [];
             foreach ($this->payload_template as $key => $template) {
@@ -105,18 +116,26 @@ class Webhook extends Model
         ];
     }
 
-    protected function resolveTemplate($template, $data)
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function resolveTemplate(mixed $template, array $data): mixed
     {
         // Simple template resolution
         // Could be enhanced with more complex logic
         if (is_string($template)) {
-            return str_replace('{data}', json_encode($data), $template);
+            $json = json_encode($data);
+
+            return str_replace('{data}', is_string($json) ? $json : '{}', $template);
         }
 
         return $template;
     }
 
-    public static function triggerForEvent($event, $data)
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public static function triggerForEvent(string $event, array $data): void
     {
         $webhooks = self::where('event', $event)
             ->where('is_active', true)

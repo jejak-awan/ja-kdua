@@ -4,12 +4,13 @@ namespace App\Services;
 
 class HookService
 {
+    /** @var array<string, array<int, array{callback: callable, priority: int}>> */
     protected static $hooks = [];
 
     /**
      * Register a hook
      */
-    public static function addHook(string $hookName, callable $callback, int $priority = 10)
+    public static function addHook(string $hookName, callable $callback, int $priority = 10): void
     {
         if (! isset(self::$hooks[$hookName])) {
             self::$hooks[$hookName] = [];
@@ -29,7 +30,7 @@ class HookService
     /**
      * Execute a hook
      */
-    public static function doHook(string $hookName, ...$args)
+    public static function doHook(string $hookName, ...$args): mixed
     {
         if (! isset(self::$hooks[$hookName])) {
             return $args[0] ?? null;
@@ -47,15 +48,17 @@ class HookService
     /**
      * Apply a filter
      */
-    public static function applyFilter(string $filterName, $value, ...$args)
+    public static function applyFilter(string $filterName, mixed $value, mixed ...$args): mixed
     {
         return self::doHook($filterName, $value, ...$args);
     }
 
     /**
      * Get all registered hooks
+     *
+     * @return array<string, array<int, array{callback: callable, priority: int}>>
      */
-    public static function getHooks()
+    public static function getHooks(): array
     {
         return self::$hooks;
     }
@@ -63,7 +66,7 @@ class HookService
     /**
      * Remove a hook
      */
-    public static function removeHook(string $hookName, ?callable $callback = null)
+    public static function removeHook(string $hookName, ?callable $callback = null): void
     {
         if (! isset(self::$hooks[$hookName])) {
             return;

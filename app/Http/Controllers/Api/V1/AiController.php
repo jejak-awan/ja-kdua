@@ -9,7 +9,7 @@ class AiController extends BaseApiController
     /**
      * Get list of available AI providers
      */
-    public function getProviders()
+    public function getProviders(): \Illuminate\Http\JsonResponse
     {
         return $this->success(\App\Services\Ai\AiProviderFactory::getProviders());
     }
@@ -17,11 +17,12 @@ class AiController extends BaseApiController
     /**
      * Get available models for a provider
      */
-    public function getModels(Request $request, string $provider)
+    public function getModels(Request $request, string $provider): \Illuminate\Http\JsonResponse
     {
         try {
             // Instantiate service manually with the provided key (for setup) or null to use saved key
-            $apiKey = $request->input('api_key');
+            $apiKeyRaw = $request->input('api_key');
+            $apiKey = is_string($apiKeyRaw) ? $apiKeyRaw : null;
 
             // Factory doesn't accept key in 'make', so we instantiate manually based on provider
             $service = match ($provider) {
@@ -42,7 +43,7 @@ class AiController extends BaseApiController
     /**
      * Test connection to a provider
      */
-    public function testConnection(Request $request)
+    public function testConnection(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'provider' => 'required|string',
@@ -50,8 +51,10 @@ class AiController extends BaseApiController
         ]);
 
         try {
-            $provider = $request->input('provider');
-            $apiKey = $request->input('api_key');
+            $providerRaw = $request->input('provider');
+            $provider = is_string($providerRaw) ? $providerRaw : '';
+            $apiKeyRaw = $request->input('api_key');
+            $apiKey = is_string($apiKeyRaw) ? $apiKeyRaw : null;
 
             $service = match ($provider) {
                 'openai' => new \App\Services\Ai\OpenAiService($apiKey),
@@ -71,7 +74,7 @@ class AiController extends BaseApiController
     /**
      * Generate content using AI
      */
-    public function generate(Request $request)
+    public function generate(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'prompt' => 'required|string|max:1000',
@@ -81,16 +84,22 @@ class AiController extends BaseApiController
         ]);
 
         try {
-            $providerName = $request->input('provider');
-            $model = $request->input('model');
+            $providerNameRaw = $request->input('provider');
+            $providerName = is_string($providerNameRaw) ? $providerNameRaw : null;
+            $modelRaw = $request->input('model', '');
+            $model = is_string($modelRaw) ? $modelRaw : '';
+            $promptRaw = $request->input('prompt', '');
+            $prompt = is_string($promptRaw) ? $promptRaw : '';
+            $contextRaw = $request->input('context', '');
+            $context = is_string($contextRaw) ? $contextRaw : '';
 
             // Use Factory to get the active service
             $service = \App\Services\Ai\AiProviderFactory::make($providerName);
 
             $result = $service->generateText(
-                $request->input('prompt'),
-                (string) $request->input('context', ''),
-                (string) $model
+                $prompt,
+                $context,
+                $model
             );
 
             return $this->success([

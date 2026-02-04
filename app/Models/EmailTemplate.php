@@ -22,10 +22,14 @@ class EmailTemplate extends Model
         'is_active' => 'boolean',
     ];
 
-    public function render(array $data = [])
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{subject: string, body: string, text_body: string|null}
+     */
+    public function render(array $data = []): array
     {
-        $subject = $this->replaceVariables($this->subject, $data);
-        $body = $this->replaceVariables($this->body, $data);
+        $subject = $this->replaceVariables((string) $this->subject, $data);
+        $body = $this->replaceVariables((string) $this->body, $data);
         $textBody = $this->text_body ? $this->replaceVariables($this->text_body, $data) : null;
 
         return [
@@ -35,23 +39,30 @@ class EmailTemplate extends Model
         ];
     }
 
-    protected function replaceVariables($template, array $data)
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function replaceVariables(string $template, array $data): string
     {
         foreach ($data as $key => $value) {
-            $template = str_replace('{{'.$key.'}}', $value, $template);
-            $template = str_replace('{{ $'.$key.' }}', $value, $template);
+            if (is_scalar($value)) {
+                $template = str_replace('{{'.$key.'}}', (string) $value, $template);
+                $template = str_replace('{{ $'.$key.' }}', (string) $value, $template);
+            }
         }
 
         // Replace common variables
-        $template = str_replace('{{ site_name }}', \App\Models\Setting::get('site_name', 'CMS'), $template);
+        $siteName = \App\Models\Setting::get('site_name', 'CMS');
+        $template = str_replace('{{ site_name }}', is_string($siteName) ? $siteName : 'CMS', $template);
         $template = str_replace('{{ site_url }}', url('/'), $template);
         $template = str_replace('{{ current_year }}', date('Y'), $template);
 
         return $template;
     }
 
-    public static function getBySlug($slug)
+    public static function getBySlug(string $slug): ?self
     {
+        /** @var self|null */
         return static::where('slug', $slug)->where('is_active', true)->first();
     }
 }

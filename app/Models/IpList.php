@@ -15,7 +15,8 @@ class IpList extends Model
     ];
 
     /**
-     * Scope for blocklist entries
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
      */
     public function scopeBlocklist($query)
     {
@@ -23,7 +24,8 @@ class IpList extends Model
     }
 
     /**
-     * Scope for whitelist entries
+     * @param  \Illuminate\Database\Eloquent\Builder<$this>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<$this>
      */
     public function scopeWhitelist($query)
     {
@@ -32,6 +34,9 @@ class IpList extends Model
 
     /**
      * Get the user who created this entry
+     */
+    /**
+     * @return BelongsTo<User, $this>
      */
     public function creator(): BelongsTo
     {

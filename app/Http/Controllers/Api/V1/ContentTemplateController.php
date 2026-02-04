@@ -7,20 +7,22 @@ use Illuminate\Http\Request;
 
 class ContentTemplateController extends BaseApiController
 {
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
         $query = ContentTemplate::with('category');
 
         // Scope logic
-        if ($request->user() && ! $request->user()->can('manage templates')) {
-            $query->where(function ($q) use ($request) {
-                $q->whereNull('author_id')->orWhere('author_id', $request->user()->id);
+        if ($user && ! $user->can('manage templates')) {
+            $query->where(function ($q) use ($user) {
+                $q->whereNull('author_id')->orWhere('author_id', $user->id);
             });
-        } elseif (! $request->user()) {
+        } elseif (! $user) {
             $query->whereNull('author_id');
         }
 
-        if ($request->has('type') && $request->type !== 'all') {
+        if ($request->has('type') && is_string($request->type) && $request->type !== 'all') {
             $types = explode(',', $request->type);
             if (count($types) > 1) {
                 $query->whereIn('type', $types);
@@ -30,7 +32,8 @@ class ContentTemplateController extends BaseApiController
         }
 
         if ($request->has('search')) {
-            $search = $request->search;
+            $searchRaw = $request->search;
+            $search = is_string($searchRaw) ? $searchRaw : '';
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
@@ -43,7 +46,8 @@ class ContentTemplateController extends BaseApiController
 
         // Soft deletes filter
         if ($request->has('trashed')) {
-            $trashed = $request->trashed;
+            $trashedRaw = $request->trashed;
+            $trashed = is_string($trashedRaw) ? $trashedRaw : '';
             if ($trashed === 'only') {
                 $query->onlyTrashed();
             } elseif ($trashed === 'with') {
@@ -51,45 +55,64 @@ class ContentTemplateController extends BaseApiController
             }
         }
 
-        $perPage = $request->input('per_page', 10);
+        $perPageRaw = $request->input('per_page', 10);
+        $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 10;
         $templates = $query->latest()->paginate($perPage);
 
         return $this->success($templates, 'Content templates retrieved successfully');
     }
 
-    public function bulkAction(Request $request)
+    public function bulkAction(Request $request): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized('Unauthenticated');
+        }
+
         $request->validate([
             'action' => 'required|in:delete,restore,force_delete',
             'ids' => 'required|array',
             'ids.*' => 'exists:content_templates,id',
         ]);
 
-        $action = $request->input('action');
-        $ids = $request->input('ids');
+        $actionRaw = $request->input('action');
+        $action = is_string($actionRaw) ? $actionRaw : '';
+        $idsRaw = $request->input('ids');
+        $ids = is_array($idsRaw) ? $idsRaw : [];
 
         $query = ContentTemplate::whereIn('id', $ids);
 
         // Scope
-        if (! $request->user()->can('manage templates')) {
-            $query->where('author_id', $request->user()->id);
+        if (! $user->can('manage templates')) {
+            $query->where('author_id', $user->id);
         }
 
         $count = 0;
 
         if ($action === 'delete') {
-            $count = $query->delete();
+            $countRaw = $query->delete();
+            $count = is_numeric($countRaw) ? (int) $countRaw : 0;
         } elseif ($action === 'restore') {
-            $count = ContentTemplate::withTrashed()->whereIn('id', $ids)->restore();
+            $count = (int) ContentTemplate::withTrashed()->whereIn('id', $ids)->restore();
         } elseif ($action === 'force_delete') {
-            $count = ContentTemplate::withTrashed()->whereIn('id', $ids)->forceDelete();
+            $countRaw = ContentTemplate::withTrashed()->whereIn('id', $ids)->forceDelete();
+            $count = is_numeric($countRaw) ? (int) $countRaw : 0;
         }
 
-        return $this->success(null, "Bulk action {$action} completed for {$count} templates");
+        $countStr = (string) $count;
+
+        return $this->success(null, "Bulk action {$action} completed for {$countStr} templates");
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized('Unauthenticated');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'required|string|unique:content_templates,slug',
@@ -106,10 +129,10 @@ class ContentTemplateController extends BaseApiController
         ]);
 
         // Author Assignment
-        if ($request->user()->can('manage templates')) {
+        if ($user->can('manage templates')) {
             // Admin can assign
         } else {
-            $validated['author_id'] = $request->user()->id;
+            $validated['author_id'] = $user->id;
         }
 
         $template = ContentTemplate::create($validated);
@@ -117,13 +140,16 @@ class ContentTemplateController extends BaseApiController
         return $this->success($template->load('category'), 'Content template created successfully', 201);
     }
 
-    public function show(ContentTemplate $contentTemplate)
+    public function show(ContentTemplate $contentTemplate): \Illuminate\Http\JsonResponse
     {
+        $user = request()->user();
+        /** @var \App\Models\User|null $user */
+
         // Permission/Ownership check?
         // Usually viewing templates is fine if they are visible in index?
         // But let's enforce consistency.
-        if (request()->user() && ! request()->user()->can('manage templates')) {
-            if ($contentTemplate->author_id && $contentTemplate->author_id !== request()->user()->id) {
+        if ($user && ! $user->can('manage templates')) {
+            if ($contentTemplate->author_id && $contentTemplate->author_id !== $user->id) {
                 return $this->forbidden('You do not have permission to view this template');
             }
         }
@@ -131,11 +157,17 @@ class ContentTemplateController extends BaseApiController
         return $this->success($contentTemplate->load('category'), 'Content template retrieved successfully');
     }
 
-    public function update(Request $request, ContentTemplate $contentTemplate)
+    public function update(Request $request, ContentTemplate $contentTemplate): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized('Unauthenticated');
+        }
+
         // Ownership check
-        if (! $request->user()->can('manage templates')) {
-            if ($contentTemplate->author_id && $contentTemplate->author_id !== $request->user()->id) {
+        if (! $user->can('manage templates')) {
+            if ($contentTemplate->author_id && $contentTemplate->author_id !== $user->id) {
                 return $this->forbidden('You do not have permission to update this template');
             }
             if (is_null($contentTemplate->author_id)) {
@@ -164,11 +196,17 @@ class ContentTemplateController extends BaseApiController
         return $this->success($contentTemplate->load('category'), 'Content template updated successfully');
     }
 
-    public function destroy(ContentTemplate $contentTemplate)
+    public function destroy(ContentTemplate $contentTemplate): \Illuminate\Http\JsonResponse
     {
+        $user = request()->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized('Unauthenticated');
+        }
+
         // Ownership check
-        if (! request()->user()->can('manage templates')) {
-            if ($contentTemplate->author_id && $contentTemplate->author_id !== request()->user()->id) {
+        if (! $user->can('manage templates')) {
+            if ($contentTemplate->author_id && $contentTemplate->author_id !== $user->id) {
                 return $this->forbidden('You do not have permission to delete this template');
             }
             if (is_null($contentTemplate->author_id)) {
@@ -181,39 +219,45 @@ class ContentTemplateController extends BaseApiController
         return $this->success(null, 'Content template deleted successfully');
     }
 
-    public function restore($id)
+    public function restore(int $id): \Illuminate\Http\JsonResponse
     {
         $template = ContentTemplate::withTrashed()->findOrFail($id);
+        /** @var ContentTemplate $template */
         $template->restore();
 
         return $this->success(null, 'Content template restored successfully');
     }
 
-    public function forceDelete($id)
+    public function forceDelete(int $id): \Illuminate\Http\JsonResponse
     {
         $template = ContentTemplate::withTrashed()->findOrFail($id);
+        /** @var ContentTemplate $template */
         $template->forceDelete();
 
         return $this->success(null, 'Content template permanently deleted');
     }
 
-    public function createContent(Request $request, ContentTemplate $contentTemplate)
+    public function createContent(Request $request, ContentTemplate $contentTemplate): \Illuminate\Http\JsonResponse
     {
+        $user = $request->user();
+        /** @var \App\Models\User|null $user */
+        if (! $user) {
+            return $this->unauthorized('Unauthenticated');
+        }
+
         // Scope?
-        if (request()->user() && ! request()->user()->can('manage templates')) {
-            if ($contentTemplate->author_id && $contentTemplate->author_id !== request()->user()->id) {
+        if (! $user->can('manage templates')) {
+            if ($contentTemplate->author_id && $contentTemplate->author_id !== $user->id) {
                 // But wait, can I use a template if it is Global? YES.
                 // So only forbidden if it's someone ELSE'S private template.
                 // Global (null) is OK.
                 return $this->forbidden('You do not have permission to use this template');
             }
-            // Actually, index logic allows seeing Global or Own.
-            // So if I can see it, I can use it?
-            // Yes.
         }
 
-        $data = $request->input('data', []);
-        $data['author_id'] = $request->user()->id;
+        $dataRaw = $request->input('data', []);
+        $data = is_array($dataRaw) ? $dataRaw : [];
+        $data['author_id'] = $user->id;
 
         $content = $contentTemplate->createContent($data);
 

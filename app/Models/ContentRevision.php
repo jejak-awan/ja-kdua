@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ContentRevision extends Model
 {
+    /** @use HasFactory<\Database\Factories\ContentRevisionFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -25,17 +26,27 @@ class ContentRevision extends Model
         'meta' => 'array',
     ];
 
+    /**
+     * @return BelongsTo<Content, $this>
+     */
     public function content(): BelongsTo
     {
         return $this->belongsTo(Content::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
     }
 
-    // Alias for backward compatibility if needed, or just remove
+    /**
+     * Alias for backward compatibility if needed, or just remove
+     *
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');

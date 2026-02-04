@@ -8,28 +8,39 @@ use Spatie\Permission\Models\Role;
 
 class RoleController extends BaseApiController
 {
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        $limit = $request->input('limit', 10);
-        $search = $request->input('search');
+        $limitRaw = $request->input('limit', 10);
+        $limit = is_numeric($limitRaw) ? (int) $limitRaw : 10;
+        $searchRaw = $request->input('search');
+        $search = is_string($searchRaw) ? $searchRaw : '';
 
         $query = Role::with('permissions')->orderBy('name');
 
-        if ($search) {
+        if ($search !== '') {
             $query->where('name', 'like', "%{$search}%");
         }
 
+        /** @var \Illuminate\Pagination\LengthAwarePaginator<int, Role> $roles */
         $roles = $query->paginate($limit);
 
         // Optimized: Batch fetch users count in one query to avoid N+1 issues
         $roleIds = $roles->getCollection()->pluck('id')->toArray();
-        $userCounts = \DB::table(config('permission.table_names.model_has_roles'))
-            ->whereIn(config('permission.column_names.role_pivot_key') ?? 'role_id', $roleIds)
-            ->selectRaw((config('permission.column_names.role_pivot_key') ?? 'role_id').' as role_id, count(*) as total')
+
+        $tableNameRaw = config('permission.table_names.model_has_roles');
+        $tableName = is_string($tableNameRaw) ? $tableNameRaw : 'model_has_roles';
+
+        $columnNameRaw = config('permission.column_names.role_pivot_key');
+        $columnName = is_string($columnNameRaw) ? $columnNameRaw : 'role_id';
+
+        $userCounts = \DB::table($tableName)
+            ->whereIn($columnName, $roleIds)
+            ->selectRaw($columnName.' as role_id, count(*) as total')
             ->groupBy('role_id')
             ->pluck('total', 'role_id');
 
-        $roles->getCollection()->transform(function ($role) use ($userCounts) {
+        $roles->getCollection()->transform(function (mixed $role) use ($userCounts) {
+            /** @var Role $role */
             $role->setAttribute('users_count', $userCounts[$role->id] ?? 0);
 
             return $role;
@@ -38,7 +49,7 @@ class RoleController extends BaseApiController
         return $this->success($roles, 'Roles retrieved successfully');
     }
 
-    public function bulkAction(Request $request)
+    public function bulkAction(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'action' => 'required|string|in:delete',
@@ -47,11 +58,17 @@ class RoleController extends BaseApiController
         ]);
 
         $action = $validated['action'];
-        $ids = $validated['ids'];
+        $idsRaw = $validated['ids'];
+        $ids = is_array($idsRaw) ? $idsRaw : [];
         $count = 0;
 
         foreach ($ids as $id) {
+            /** @var Role|null $role */
             $role = Role::find($id);
+
+            if (! $role) {
+                continue;
+            }
 
             // Prevent deleting protected roles
             if ($role->name === 'super-admin') {
@@ -59,7 +76,9 @@ class RoleController extends BaseApiController
             }
 
             // Prevent deleting roles with users
-            if ($role->users()->count() > 0) {
+            /** @var \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\User, \Spatie\Permission\Models\Role> $usersRelation */
+            $usersRelation = $role->users();
+            if ($usersRelation->count() > 0) {
                 continue;
             }
 
@@ -69,20 +88,29 @@ class RoleController extends BaseApiController
             }
         }
 
-        return $this->success(null, ucfirst($action)." completed for {$count} roles");
+        $countStr = (string) $count;
+
+        return $this->success(null, ucfirst((string) $action)." completed for {$countStr} roles");
     }
 
-    public function show(Role $role)
+    public function show(Role $role): \Illuminate\Http\JsonResponse
     {
         $role->load('permissions');
-        $role->setAttribute('users_count', \DB::table(config('permission.table_names.model_has_roles'))
-            ->where(config('permission.column_names.role_pivot_key') ?? 'role_id', $role->id)
+
+        $tableNameRaw = config('permission.table_names.model_has_roles');
+        $tableName = is_string($tableNameRaw) ? $tableNameRaw : 'model_has_roles';
+
+        $columnNameRaw = config('permission.column_names.role_pivot_key');
+        $columnName = is_string($columnNameRaw) ? $columnNameRaw : 'role_id';
+
+        $role->setAttribute('users_count', \DB::table($tableName)
+            ->where($columnName, $role->id)
             ->count());
 
         return $this->success($role, 'Role retrieved successfully');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:roles,name',
@@ -90,16 +118,18 @@ class RoleController extends BaseApiController
             'permissions.*' => 'exists:permissions,name',
         ]);
 
-        $role = Role::create(['name' => $validated['name'], 'guard_name' => 'web']);
+        $name = is_string($validated['name']) ? $validated['name'] : '';
 
-        if (! empty($validated['permissions'])) {
+        $role = Role::create(['name' => $name, 'guard_name' => 'web']);
+
+        if (! empty($validated['permissions']) && is_array($validated['permissions'])) {
             $role->syncPermissions($validated['permissions']);
         }
 
         return $this->success($role->load('permissions'), 'Role created successfully', 201);
     }
 
-    public function update(Request $request, Role $role)
+    public function update(Request $request, Role $role): \Illuminate\Http\JsonResponse
     {
         // Prevent editing protected roles
         if ($role->name === 'super-admin') {
@@ -116,14 +146,14 @@ class RoleController extends BaseApiController
             $role->update(['name' => $validated['name']]);
         }
 
-        if (isset($validated['permissions'])) {
+        if (isset($validated['permissions']) && is_array($validated['permissions'])) {
             $role->syncPermissions($validated['permissions']);
         }
 
         return $this->success($role->load('permissions'), 'Role updated successfully');
     }
 
-    public function destroy(Role $role)
+    public function destroy(Role $role): \Illuminate\Http\JsonResponse
     {
         // Prevent deleting protected roles
         if ($role->name === 'super-admin') {
@@ -131,7 +161,9 @@ class RoleController extends BaseApiController
         }
 
         // Check if role has users
-        if ($role->users()->count() > 0) {
+        /** @var \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\User, \Spatie\Permission\Models\Role> $usersRelation */
+        $usersRelation = $role->users();
+        if ($usersRelation->count() > 0) {
             return $this->error('Cannot delete role with assigned users', 400);
         }
 
@@ -140,11 +172,12 @@ class RoleController extends BaseApiController
         return $this->success(null, 'Role deleted successfully');
     }
 
-    public function permissions()
+    public function permissions(): \Illuminate\Http\JsonResponse
     {
-        $permissions = Permission::orderBy('name')->get()->groupBy(function ($permission) {
+        $permissions = Permission::orderBy('name')->get()->groupBy(function (Permission $permission) {
             // Group by category (resource name - everything after the first word)
-            $parts = explode(' ', $permission->name, 2);
+            $nameStr = $permission->name;
+            $parts = explode(' ', $nameStr, 2);
 
             return isset($parts[1]) ? ucfirst($parts[1]) : 'General';
         });
@@ -152,7 +185,7 @@ class RoleController extends BaseApiController
         return $this->success($permissions, 'Permissions retrieved successfully');
     }
 
-    public function syncPermissions(Request $request, Role $role)
+    public function syncPermissions(Request $request, Role $role): \Illuminate\Http\JsonResponse
     {
         // Prevent modifying super-admin permissions
         if ($role->name === 'super-admin') {
@@ -164,15 +197,17 @@ class RoleController extends BaseApiController
             'permissions.*' => 'exists:permissions,name',
         ]);
 
-        $role->syncPermissions($validated['permissions']);
+        $permissions = is_array($validated['permissions']) ? $validated['permissions'] : [];
+
+        $role->syncPermissions($permissions);
 
         return $this->success($role->load('permissions'), 'Permissions synced successfully');
     }
 
-    public function duplicate(Role $role)
+    public function duplicate(Role $role): \Illuminate\Http\JsonResponse
     {
         $newRole = Role::create([
-            'name' => $role->name.' (copy)',
+            'name' => ((string) $role->name).' (copy)',
             'guard_name' => 'web',
         ]);
 

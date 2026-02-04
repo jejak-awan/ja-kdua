@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 
 class SecurityController extends BaseApiController
 {
-    protected $securityService;
+    protected SecurityService $securityService;
 
-    protected $alertService;
+    protected SecurityAlertService $alertService;
 
     public function __construct(SecurityService $securityService, SecurityAlertService $alertService)
     {
@@ -19,44 +19,56 @@ class SecurityController extends BaseApiController
         $this->alertService = $alertService;
     }
 
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = SecurityLog::with('user');
 
         if ($request->has('event_type')) {
-            $query->where('event_type', $request->input('event_type'));
+            $eventTypeRaw = $request->input('event_type');
+            $eventType = is_string($eventTypeRaw) ? $eventTypeRaw : '';
+            $query->where('event_type', $eventType);
         }
 
         if ($request->has('ip_address')) {
-            $query->where('ip_address', $request->input('ip_address'));
+            $ipAddressRaw = $request->input('ip_address');
+            $ipAddress = is_string($ipAddressRaw) ? $ipAddressRaw : '';
+            $query->where('ip_address', $ipAddress);
         }
 
         if ($request->has('user_id')) {
-            $query->where('user_id', $request->input('user_id'));
+            $userIdRaw = $request->input('user_id');
+            $userId = is_numeric($userIdRaw) ? (int) $userIdRaw : 0;
+            $query->where('user_id', $userId);
         }
 
         if ($request->has('date_from')) {
-            $query->whereDate('created_at', '>=', $request->input('date_from'));
+            $dateFromRaw = $request->input('date_from');
+            $dateFrom = is_string($dateFromRaw) ? $dateFromRaw : null;
+            $query->whereDate('created_at', '>=', $dateFrom);
         }
 
         if ($request->has('date_to')) {
-            $query->whereDate('created_at', '<=', $request->input('date_to'));
+            $dateToRaw = $request->input('date_to');
+            $dateTo = is_string($dateToRaw) ? $dateToRaw : null;
+            $query->whereDate('created_at', '<=', $dateTo);
         }
 
-        $perPage = $request->input('per_page', 50);
+        $perPageRaw = $request->input('per_page', 50);
+        $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 50;
         $logs = $query->latest()->paginate($perPage);
 
         return $this->paginated($logs, 'Security logs retrieved successfully');
     }
 
-    public function show(SecurityLog $securityLog)
+    public function show(SecurityLog $securityLog): \Illuminate\Http\JsonResponse
     {
         return $this->success($securityLog->load('user'), 'Security log retrieved successfully');
     }
 
-    public function stats(Request $request)
+    public function stats(Request $request): \Illuminate\Http\JsonResponse
     {
-        $days = $request->input('days', 30);
+        $daysRaw = $request->input('days', 30);
+        $days = is_numeric($daysRaw) ? (int) $daysRaw : 30;
         $stats = $this->securityService->getSecurityStats($days);
 
         return $this->success($stats, 'Security statistics retrieved successfully');
@@ -65,7 +77,7 @@ class SecurityController extends BaseApiController
     /**
      * Get security alerts for suspicious activity
      */
-    public function alerts()
+    public function alerts(): \Illuminate\Http\JsonResponse
     {
         $alerts = $this->alertService->getAlerts();
         $count = $this->alertService->getAlertCount();
@@ -80,14 +92,14 @@ class SecurityController extends BaseApiController
     // Blocklist Management
     // =====================
 
-    public function getBlocklist()
+    public function getBlocklist(): \Illuminate\Http\JsonResponse
     {
         $blocklist = $this->securityService->getBlocklist();
 
         return $this->success($blocklist, 'Blocklist retrieved successfully');
     }
 
-    public function blockIp(Request $request)
+    public function blockIp(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'ip_address' => 'required|ip',
@@ -95,12 +107,18 @@ class SecurityController extends BaseApiController
             'permanent' => 'sometimes|boolean',
         ]);
 
+        $ipAddressRaw = $request->input('ip_address');
+        $ipAddress = is_string($ipAddressRaw) ? $ipAddressRaw : '';
+        $reasonRaw = $request->input('reason');
+        $reason = is_string($reasonRaw) ? $reasonRaw : null;
+        $permanent = $request->boolean('permanent', true);
+
         // Default to permanent blocking so IP appears in blocklist tab
         // Use permanent=false to only block temporarily (cache only)
-        if ($request->input('permanent', true)) {
-            $result = $this->securityService->blockIpPermanently($request->input('ip_address'), $request->input('reason'));
+        if ($permanent) {
+            $result = $this->securityService->blockIpPermanently($ipAddress, $reason);
         } else {
-            $seconds = $this->securityService->blockIpTemporarily($request->input('ip_address'), $request->input('reason'));
+            $seconds = $this->securityService->blockIpTemporarily($ipAddress, $reason);
             $result = $seconds > 0;
         }
 
@@ -111,18 +129,21 @@ class SecurityController extends BaseApiController
         return $this->success(null, 'IP address blocked successfully');
     }
 
-    public function unblockIp(Request $request)
+    public function unblockIp(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'ip_address' => 'required|ip',
         ]);
 
-        $this->securityService->unblockIp($request->input('ip_address'));
+        $ipAddressRaw = $request->input('ip_address');
+        $ipAddress = is_string($ipAddressRaw) ? $ipAddressRaw : '';
+
+        $this->securityService->unblockIp($ipAddress);
 
         return $this->success(null, 'IP address unblocked successfully');
     }
 
-    public function bulkBlock(Request $request)
+    public function bulkBlock(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'ip_addresses' => 'required|array',
@@ -133,69 +154,93 @@ class SecurityController extends BaseApiController
         $blocked = 0;
         $skipped = 0;
 
-        foreach ($request->input('ip_addresses') as $ip) {
-            if ($this->securityService->blockIp($ip, $request->input('reason'))) {
+        $ipAddressesRaw = $request->input('ip_addresses');
+        $ipAddresses = is_array($ipAddressesRaw) ? $ipAddressesRaw : [];
+        $reasonRaw = $request->input('reason');
+        $reason = is_string($reasonRaw) ? $reasonRaw : null;
+
+        foreach ($ipAddresses as $ip) {
+            if (is_string($ip) && $this->securityService->blockIpPermanently($ip, $reason)) {
                 $blocked++;
             } else {
                 $skipped++;
             }
         }
 
+        $blockedStr = (string) $blocked;
+        $skippedStr = (string) $skipped;
+
         return $this->success([
             'blocked' => $blocked,
             'skipped' => $skipped,
-        ], "{$blocked} IP addresses blocked, {$skipped} skipped (whitelisted)");
+        ], "{$blockedStr} IP addresses blocked, {$skippedStr} skipped (whitelisted)");
     }
 
-    public function bulkUnblock(Request $request)
+    public function bulkUnblock(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'ip_addresses' => 'required|array',
             'ip_addresses.*' => 'required|ip',
         ]);
 
-        foreach ($request->input('ip_addresses') as $ip) {
-            $this->securityService->unblockIp($ip);
+        $ipAddressesRaw = $request->input('ip_addresses');
+        $ipAddresses = is_array($ipAddressesRaw) ? $ipAddressesRaw : [];
+
+        foreach ($ipAddresses as $ip) {
+            if (is_string($ip)) {
+                $this->securityService->unblockIp($ip);
+            }
         }
 
-        return $this->success(null, count($request->input('ip_addresses')).' IP addresses unblocked');
+        $count = count($ipAddresses);
+        $countStr = (string) $count;
+
+        return $this->success(null, "{$countStr} IP addresses unblocked");
     }
 
     // =====================
     // Whitelist Management
     // =====================
 
-    public function getWhitelist()
+    public function getWhitelist(): \Illuminate\Http\JsonResponse
     {
         $whitelist = $this->securityService->getWhitelist();
 
         return $this->success($whitelist, 'Whitelist retrieved successfully');
     }
 
-    public function addToWhitelist(Request $request)
+    public function addToWhitelist(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'ip_address' => 'required|ip',
             'reason' => 'nullable|string',
         ]);
 
-        $this->securityService->addToWhitelist($request->input('ip_address'), $request->input('reason'));
+        $ipAddressRaw = $request->input('ip_address');
+        $ipAddress = is_string($ipAddressRaw) ? $ipAddressRaw : '';
+        $reasonRaw = $request->input('reason');
+        $reason = is_string($reasonRaw) ? $reasonRaw : null;
+
+        $this->securityService->addToWhitelist($ipAddress, $reason);
 
         return $this->success(null, 'IP address added to whitelist');
     }
 
-    public function removeFromWhitelist(Request $request)
+    public function removeFromWhitelist(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'ip_address' => 'required|ip',
         ]);
 
-        $this->securityService->removeFromWhitelist($request->input('ip_address'));
+        $ipAddressRaw = $request->input('ip_address');
+        $ipAddress = is_string($ipAddressRaw) ? $ipAddressRaw : '';
+
+        $this->securityService->removeFromWhitelist($ipAddress);
 
         return $this->success(null, 'IP address removed from whitelist');
     }
 
-    public function bulkWhitelist(Request $request)
+    public function bulkWhitelist(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'ip_addresses' => 'required|array',
@@ -203,34 +248,53 @@ class SecurityController extends BaseApiController
             'reason' => 'nullable|string',
         ]);
 
-        foreach ($request->input('ip_addresses') as $ip) {
-            $this->securityService->addToWhitelist($ip, $request->input('reason'));
+        $ipAddressesRaw = $request->input('ip_addresses');
+        $ipAddresses = is_array($ipAddressesRaw) ? $ipAddressesRaw : [];
+        $reasonRaw = $request->input('reason');
+        $reason = is_string($reasonRaw) ? $reasonRaw : null;
+
+        foreach ($ipAddresses as $ip) {
+            if (is_string($ip)) {
+                $this->securityService->addToWhitelist($ip, $reason);
+            }
         }
 
-        return $this->success(null, count($request->input('ip_addresses')).' IP addresses added to whitelist');
+        $count = count($ipAddresses);
+        $countStr = (string) $count;
+
+        return $this->success(null, "{$countStr} IP addresses added to whitelist");
     }
 
-    public function bulkRemoveWhitelist(Request $request)
+    public function bulkRemoveWhitelist(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'ip_addresses' => 'required|array',
             'ip_addresses.*' => 'required|ip',
         ]);
 
-        foreach ($request->input('ip_addresses') as $ip) {
-            $this->securityService->removeFromWhitelist($ip);
+        $ipAddressesRaw = $request->input('ip_addresses');
+        $ipAddresses = is_array($ipAddressesRaw) ? $ipAddressesRaw : [];
+
+        foreach ($ipAddresses as $ip) {
+            if (is_string($ip)) {
+                $this->securityService->removeFromWhitelist($ip);
+            }
         }
 
-        return $this->success(null, count($request->input('ip_addresses')).' IP addresses removed from whitelist');
+        $count = count($ipAddresses);
+        $countStr = (string) $count;
+
+        return $this->success(null, "{$countStr} IP addresses removed from whitelist");
     }
 
     // =====================
     // IP Check & Clear
     // =====================
 
-    public function checkIp(Request $request)
+    public function checkIp(Request $request): \Illuminate\Http\JsonResponse
     {
-        $ipAddress = $request->input('ip_address', \App\Helpers\IpHelper::getClientIp($request));
+        $ipAddressRaw = $request->input('ip_address', \App\Helpers\IpHelper::getClientIp($request));
+        $ipAddress = is_string($ipAddressRaw) ? $ipAddressRaw : '';
         $blockInfo = $this->securityService->getBlockInfo($ipAddress);
 
         return $this->success([
@@ -242,9 +306,10 @@ class SecurityController extends BaseApiController
         ], 'IP status retrieved successfully');
     }
 
-    public function clearFailedAttempts(Request $request)
+    public function clearFailedAttempts(Request $request): \Illuminate\Http\JsonResponse
     {
-        $ipAddress = $request->input('ip_address', \App\Helpers\IpHelper::getClientIp($request));
+        $ipAddressRaw = $request->input('ip_address', \App\Helpers\IpHelper::getClientIp($request));
+        $ipAddress = is_string($ipAddressRaw) ? $ipAddressRaw : '';
 
         // Clear all security cache for IP
         $this->securityService->clearSecurityCache($ipAddress);
@@ -252,27 +317,29 @@ class SecurityController extends BaseApiController
 
         // Also clear email-based locks if provided
         if ($request->has('email')) {
-            $this->securityService->clearSecurityCache($request->input('email'), 'email');
-            $this->securityService->unlockAccount($request->input('email'));
+            $emailRaw = $request->input('email');
+            $email = is_string($emailRaw) ? $emailRaw : '';
+            $this->securityService->clearSecurityCache($email, 'email');
+            $this->securityService->unlockAccount($email);
         }
 
         return $this->success(null, 'Security cache cleared for IP: '.$ipAddress);
     }
 
-    public function clear(Request $request)
+    public function clear(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
-            // Use SecurityLog model directly since we don't have it imported above, or import it.
-            // Assuming App\Models\SecurityLog is available or use full path.
-            // Wait, SecurityLog is imported? Let's check imports in file view (Step 1089).
-            // It uses App\Models\SecurityLog in `show` method type hint, so likely imported.
+            $retainDaysRaw = $request->input('retain_days');
 
-            $retainDays = $request->input('retain_days');
+            if ($retainDaysRaw) {
+                $retainDays = is_numeric($retainDaysRaw) ? (int) $retainDaysRaw : 0;
+                $countRaw = \App\Models\SecurityLog::where('created_at', '<', now()->subDays($retainDays))->delete();
+                $count = is_numeric($countRaw) ? (int) $countRaw : 0;
 
-            if ($retainDays) {
-                $count = \App\Models\SecurityLog::where('created_at', '<', now()->subDays($retainDays))->delete();
+                $countStr = (string) $count;
+                $retainDaysStr = (string) $retainDays;
 
-                return $this->success(null, "Cleared $count security logs older than $retainDays days");
+                return $this->success(null, "Cleared {$countStr} security logs older than {$retainDaysStr} days");
             }
 
             \App\Models\SecurityLog::truncate();

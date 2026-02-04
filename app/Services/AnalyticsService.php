@@ -13,7 +13,7 @@ class AnalyticsService
      *
      * @param  string  $eventType  Type of event (e.g., 'click', 'form_submit', 'download')
      * @param  string  $eventName  Name of the event (e.g., 'Button Click: Subscribe')
-     * @param  array  $data  Additional event data
+     * @param  array<string, mixed>  $data  Additional event data
      * @param  int|null  $contentId  Related content ID (optional)
      */
     public static function trackEvent(string $eventType, string $eventName, array $data = [], ?int $contentId = null): AnalyticsEvent
@@ -41,7 +41,8 @@ class AnalyticsService
     /**
      * Track multiple events in batch
      *
-     * @param  array  $events  Array of events [['type' => 'click', 'name' => 'Button', 'data' => []]]
+     * @param  array<int, array{type?: string, name?: string, data?: array<string, mixed>, content_id?: int|null}>  $events  Array of events [['type' => 'click', 'name' => 'Button', 'data' => []]]
+     * @return array<int, AnalyticsEvent>
      */
     public static function trackBatch(array $events): array
     {
@@ -63,7 +64,7 @@ class AnalyticsService
      *
      * @param  int  $contentId  Content ID
      * @param  string  $action  Action type (view, like, share, comment)
-     * @param  array  $data  Additional data
+     * @param  array<string, mixed>  $data  Additional data
      */
     public static function trackContentInteraction(int $contentId, string $action, array $data = []): AnalyticsEvent
     {
@@ -79,7 +80,7 @@ class AnalyticsService
      * Track form submission
      *
      * @param  string  $formName  Form name/identifier
-     * @param  array  $data  Form data (sanitized)
+     * @param  array<string, mixed>  $data  Form data (sanitized)
      */
     public static function trackFormSubmission(string $formName, array $data = []): AnalyticsEvent
     {

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class RedirectController extends Controller
 {
-    public function handle(Request $request, $path = null)
+    public function handle(Request $request, ?string $path = null): \Illuminate\Http\RedirectResponse
     {
         $fullPath = $path ? '/'.$path : $request->path();
 
