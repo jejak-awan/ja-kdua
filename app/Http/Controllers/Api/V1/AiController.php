@@ -2,20 +2,16 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class AiController extends Controller
+class AiController extends BaseApiController
 {
     /**
      * Get list of available AI providers
      */
     public function getProviders()
     {
-        return response()->json([
-            'success' => true,
-            'data' => \App\Services\Ai\AiProviderFactory::getProviders(),
-        ]);
+        return $this->success(\App\Services\Ai\AiProviderFactory::getProviders());
     }
 
     /**
@@ -37,15 +33,9 @@ class AiController extends Controller
 
             $models = $service->getModels();
 
-            return response()->json([
-                'success' => true,
-                'data' => $models,
-            ]);
+            return $this->success($models);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch models: '.$e->getMessage(),
-            ], 500);
+            return $this->error('Failed to fetch models: '.$e->getMessage(), 500);
         }
     }
 
@@ -72,16 +62,9 @@ class AiController extends Controller
 
             $service->testConnection();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Connection successful!',
-            ]);
-
+            return $this->success(null, 'Connection successful!');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 400);
+            return $this->error($e->getMessage(), 400);
         }
     }
 
@@ -110,12 +93,9 @@ class AiController extends Controller
                 (string) $model
             );
 
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'content' => $result,
-                    'provider' => $service->getName(),
-                ],
+            return $this->success([
+                'content' => $result,
+                'provider' => $service->getName(),
             ]);
 
         } catch (\Exception $e) {
@@ -131,11 +111,7 @@ class AiController extends Controller
                 $status = 401;
             }
 
-            return response()->json([
-                'success' => false,
-                'message' => $message,
-                'original_error' => $e->getMessage(),
-            ], $status);
+            return $this->error($message, $status, [], 'AI_ERROR', ['original_error' => $e->getMessage()]);
         }
     }
 }

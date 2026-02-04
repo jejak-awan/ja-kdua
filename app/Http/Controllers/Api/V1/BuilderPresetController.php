@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
 use App\Models\BuilderPreset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class BuilderPresetController extends Controller
+class BuilderPresetController extends BaseApiController
 {
     /**
      * Get presets for a module type.
@@ -32,10 +31,7 @@ class BuilderPresetController extends Controller
             ->orderBy('name')
             ->get();
 
-        return response()->json([
-            'data' => $presets,
-            'success' => true,
-        ]);
+        return $this->success($presets);
     }
 
     /**
@@ -57,11 +53,7 @@ class BuilderPresetController extends Controller
             'is_system' => false,
         ]);
 
-        return response()->json([
-            'data' => $preset,
-            'success' => true,
-            'message' => 'Preset saved successfully',
-        ], 201);
+        return $this->success($preset, 'Preset saved successfully', 201);
     }
 
     /**
@@ -71,17 +63,11 @@ class BuilderPresetController extends Controller
     {
         // Only allow updating own presets (not system presets unless admin)
         if ($builderPreset->is_system && ! $request->user()->hasRole('admin')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot modify system presets',
-            ], 403);
+            return $this->forbidden('Cannot modify system presets');
         }
 
         if (! $builderPreset->is_system && $builderPreset->user_id !== $request->user()->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized',
-            ], 403);
+            return $this->unauthorized();
         }
 
         $validated = $request->validate([
@@ -91,11 +77,7 @@ class BuilderPresetController extends Controller
 
         $builderPreset->update($validated);
 
-        return response()->json([
-            'data' => $builderPreset,
-            'success' => true,
-            'message' => 'Preset updated successfully',
-        ]);
+        return $this->success($builderPreset, 'Preset updated successfully');
     }
 
     /**
@@ -105,24 +87,15 @@ class BuilderPresetController extends Controller
     {
         // Only allow deleting own presets
         if ($builderPreset->is_system && ! $request->user()->hasRole('admin')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot delete system presets',
-            ], 403);
+            return $this->forbidden('Cannot delete system presets');
         }
 
         if (! $builderPreset->is_system && $builderPreset->user_id !== $request->user()->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized',
-            ], 403);
+            return $this->unauthorized();
         }
 
         $builderPreset->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Preset deleted successfully',
-        ]);
+        return $this->success(null, 'Preset deleted successfully');
     }
 }

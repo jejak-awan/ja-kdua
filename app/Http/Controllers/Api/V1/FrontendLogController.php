@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class FrontendLogController extends Controller
+class FrontendLogController extends BaseApiController
 {
     /**
      * Handle incoming frontend log entries.
@@ -40,6 +39,6 @@ class FrontendLogController extends Controller
         // Log to specific frontend channel
         Log::channel('frontend')->log($level, "Frontend Error: {$message}", $context);
 
-        return response()->json(['status' => 'logged']);
+        return $this->success(null, 'logged');
     }
 }

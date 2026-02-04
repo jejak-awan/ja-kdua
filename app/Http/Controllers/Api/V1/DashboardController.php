@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
 use App\Models\AnalyticsVisit;
 use App\Models\Content;
 use App\Models\Media;
@@ -11,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-class DashboardController extends Controller
+class DashboardController extends BaseApiController
 {
     /**
      * Get admin dashboard data (full access)
@@ -19,7 +18,7 @@ class DashboardController extends Controller
     public function admin(Request $request)
     {
         return Cache::remember('dashboard_admin_data', 300, function () {
-            return response()->json([
+            return $this->success([
                 'stats' => [
                     'contents' => $this->getContentStats(),
                     'media' => $this->getMediaStats(),
@@ -45,7 +44,7 @@ class DashboardController extends Controller
         $cacheKey = "dashboard_creator_data_{$userId}_{$days}";
 
         return Cache::remember($cacheKey, 300, function () use ($userId, $days) {
-            return response()->json([
+            return $this->success([
                 'stats' => [
                     'myContents' => $this->getMyContentStats($userId),
                     'myMedia' => $this->getMyMediaStats($userId),
@@ -65,13 +64,11 @@ class DashboardController extends Controller
     public function viewer(Request $request)
     {
         return Cache::remember('dashboard_viewer_data', 600, function () {
-            return response()->json([
-                'recentContent' => Content::where('status', 'published')
-                    ->latest()
-                    ->take(5)
-                    ->select('id', 'title', 'created_at')
-                    ->get(),
-            ]);
+            return $this->success(Content::where('status', 'published')
+                ->latest()
+                ->take(5)
+                ->select('id', 'title', 'created_at')
+                ->get());
         });
     }
 
