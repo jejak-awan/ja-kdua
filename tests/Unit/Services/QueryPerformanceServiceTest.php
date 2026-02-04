@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class QueryPerformanceServiceTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     /**
      * Test enableQueryLog enables query logging.

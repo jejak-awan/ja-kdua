@@ -64,7 +64,7 @@ if (! function_exists('theme_custom_css')) {
      *
      * @param  string  $type  Theme type
      */
-    function theme_custom_css(string $type = 'frontend'): ?string
+    function theme_custom_css(string $type = 'frontend'): string
     {
         return \App\Helpers\ThemeHelper::customCss($type);
     }
@@ -75,7 +75,6 @@ if (! function_exists('theme_menu')) {
      * Get theme menu data (for API/Vue consumption)
      *
      * @param  string  $slug  Menu slug
-     * @return \App\Models\Menu|null
      */
     function theme_menu(string $slug): ?\App\Models\Menu
     {

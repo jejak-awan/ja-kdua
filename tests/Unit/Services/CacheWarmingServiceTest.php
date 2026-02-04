@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class CacheWarmingServiceTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     protected function setUp(): void
     {

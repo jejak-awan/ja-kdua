@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class PermissionTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     /**
      * Test admin can access all protected endpoints.

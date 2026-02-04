@@ -32,7 +32,7 @@ class CommentController extends BaseApiController
     public function store(Request $request, Content $content)
     {
         // Check if comments are enabled for this content
-        if (!$content->comment_status) {
+        if (! $content->comment_status) {
             return $this->error('Comments are disabled for this content', 403);
         }
 
@@ -53,7 +53,7 @@ class CommentController extends BaseApiController
             $authorEmail = $request->user()->email;
         } else {
             // Check if guests are allowed
-            if (!\App\Models\Setting::get('comments.security.allow_guests', true)) {
+            if (! \App\Models\Setting::get('comments.security.allow_guests', true)) {
                 return $this->error('Guest comments are disabled', 403);
             }
 
@@ -66,7 +66,7 @@ class CommentController extends BaseApiController
             // Captcha Validation for Guests
             if (\App\Models\Setting::get('comments.security.guest_captcha', true)) {
                 $captchaService = app(\App\Services\CaptchaService::class);
-                if (!$captchaService->verify($request->input('captcha_token'), $request->input('captcha_input'))) {
+                if (! $captchaService->verify($request->input('captcha_token'), $request->input('captcha_input'))) {
                     return $this->error('Invalid captcha', 422);
                 }
             }
@@ -76,14 +76,14 @@ class CommentController extends BaseApiController
 
         // Security Checks
         $isSpam = $this->securityService->isSpam($validated['body'], $authorEmail, $request->ip());
-        
+
         $validated['content_id'] = $content->id;
         $validated['status'] = $this->securityService->getInitialStatus($isSpam);
 
         $comment = Comment::create($validated);
-        
-        $message = $comment->status === 'approved' 
-            ? 'Comment posted successfully' 
+
+        $message = $comment->status === 'approved'
+            ? 'Comment posted successfully'
             : ($comment->status === 'spam' ? 'Comment marked as spam' : 'Comment pending approval');
 
         return $this->success($comment->load('user'), $message, 201);
@@ -101,15 +101,15 @@ class CommentController extends BaseApiController
         }
 
         if ($request->has('status')) {
-            $query->where('status', $request->status);
+            $query->where('status', $request->input('status'));
         }
 
         if ($request->has('content_id')) {
-            $query->where('content_id', $request->content_id);
+            $query->where('content_id', $request->input('content_id'));
         }
 
-        if ($request->has('search')) {
-            $search = $request->search;
+        if ($request->filled('search')) {
+            $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('body', 'like', "%{$search}%")
                     ->orWhere('name', 'like', "%{$search}%")

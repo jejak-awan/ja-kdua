@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Content;
 use App\Models\Language;
 use App\Models\Translation;
 use App\Models\User;
@@ -12,7 +11,7 @@ use Tests\TestCase;
 
 class LanguageTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     protected User $admin;
 

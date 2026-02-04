@@ -5,12 +5,11 @@ namespace Tests\Unit\Services;
 use App\Models\AnalyticsEvent;
 use App\Services\AnalyticsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class AnalyticsServiceTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     /**
      * Test trackEvent creates an analytics event.

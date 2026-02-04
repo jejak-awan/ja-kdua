@@ -18,7 +18,7 @@ class RedirectController extends Controller
         if ($redirect) {
             $redirect->recordHit();
 
-            return redirect($redirect->to_url, $redirect->type);
+            return redirect($redirect->to_url, (int) $redirect->type);
         }
 
         abort(404);

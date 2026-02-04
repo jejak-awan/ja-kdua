@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 
 class UpdateCloudflareIps extends Command
 {
@@ -51,7 +51,7 @@ class UpdateCloudflareIps extends Command
 
             // Filter valid IPs/CIDRs only
             $ips = array_filter($ips, function ($ip) {
-                return !empty($ip) && (
+                return ! empty($ip) && (
                     filter_var($ip, FILTER_VALIDATE_IP) ||
                     $this->isValidCidr($ip)
                 );
@@ -59,24 +59,26 @@ class UpdateCloudflareIps extends Command
 
             if (empty($ips)) {
                 $this->error('No IPs received from Cloudflare.');
+
                 return 1;
             }
 
-            $content = "<?php\n\nreturn " . var_export(array_values($ips), true) . ";\n";
-            
+            $content = "<?php\n\nreturn ".var_export(array_values($ips), true).";\n";
+
             // Ensure directory exists
-            if (!File::isDirectory(dirname($this->cachePath))) {
+            if (! File::isDirectory(dirname($this->cachePath))) {
                 File::makeDirectory(dirname($this->cachePath), 0755, true);
             }
 
             File::put($this->cachePath, $content);
 
-            $this->info('Successfully updated Cloudflare IPs: ' . count($ips) . ' ranges.');
-            
+            $this->info('Successfully updated Cloudflare IPs: '.count($ips).' ranges.');
+
             return 0;
 
         } catch (\Exception $e) {
-            $this->error('Failed to update Cloudflare IPs: ' . $e->getMessage());
+            $this->error('Failed to update Cloudflare IPs: '.$e->getMessage());
+
             return 1;
         }
     }
@@ -84,14 +86,20 @@ class UpdateCloudflareIps extends Command
     private function isValidCidr($cidr)
     {
         $parts = explode('/', $cidr);
-        if (count($parts) != 2) return false;
+        if (count($parts) != 2) {
+            return false;
+        }
 
         $ip = $parts[0];
         $netmask = $parts[1];
 
-        if (!filter_var($ip, FILTER_VALIDATE_IP)) return false;
-        if (!is_numeric($netmask)) return false;
-        
+        if (! filter_var($ip, FILTER_VALIDATE_IP)) {
+            return false;
+        }
+        if (! is_numeric($netmask)) {
+            return false;
+        }
+
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             return $netmask >= 0 && $netmask <= 32;
         } else {

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 class OpenAiService implements AiProviderInterface
 {
     protected $apiKey;
+
     protected $baseUrl = 'https://api.openai.com/v1';
 
     public function __construct(?string $apiKey = null)
@@ -31,7 +32,7 @@ class OpenAiService implements AiProviderInterface
         try {
             $messages = [
                 ['role' => 'system', 'content' => 'You are a helpful content editor assistant.'],
-                ['role' => 'user', 'content' => $context ? "Context:\n$context\n\nInstruction: $prompt" : $prompt]
+                ['role' => 'user', 'content' => $context ? "Context:\n$context\n\nInstruction: $prompt" : $prompt],
             ];
 
             $response = Http::withToken($this->apiKey)
@@ -77,19 +78,20 @@ class OpenAiService implements AiProviderInterface
                     if (str_contains($m['id'], 'gpt')) {
                         $models[] = [
                             'id' => $m['id'],
-                            'name' => $m['id']
+                            'name' => $m['id'],
                         ];
                     }
                 }
             }
-            
+
             // Sort models alphabetically
-            usort($models, fn($a, $b) => strcmp($a['id'], $b['id']));
+            usort($models, fn ($a, $b) => strcmp($a['id'], $b['id']));
 
             return $models;
 
         } catch (\Exception $e) {
             Log::error('OpenAI GetModels Exception', ['message' => $e->getMessage()]);
+
             return [];
         }
     }
@@ -112,15 +114,15 @@ class OpenAiService implements AiProviderInterface
     protected function handleError($response)
     {
         $errorMsg = $response->json('error.message', 'Unknown error');
-        
+
         if ($response->status() === 401) {
             throw new \Exception('Invalid OpenAI API Key.');
         }
-        
+
         if ($response->status() === 429) {
-             throw new \Exception('OpenAI Rate Limit / Quota Exceeded.');
+            throw new \Exception('OpenAI Rate Limit / Quota Exceeded.');
         }
 
-        throw new \Exception('OpenAI API Error: ' . $errorMsg);
+        throw new \Exception('OpenAI API Error: '.$errorMsg);
     }
 }

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exports\FormSubmissionsExport;
 use App\Models\Form;
 use App\Models\FormField;
 use App\Models\FormSubmission;
 use Illuminate\Http\Request;
-use App\Exports\FormSubmissionsExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FormSubmissionController extends BaseApiController
 {
@@ -26,12 +26,12 @@ class FormSubmissionController extends BaseApiController
         if ($form) {
             $query->where('form_id', $form->id);
         } elseif ($request->has('form_id')) {
-            $query->where('form_id', $request->form_id);
+            $query->where('form_id', $request->input('form_id'));
         }
 
         // Soft deletes filter
         if ($request->has('trashed')) {
-            $trashed = $request->trashed;
+            $trashed = $request->input('trashed');
             if ($trashed === 'only') {
                 $query->onlyTrashed();
             } elseif ($trashed === 'with') {
@@ -40,29 +40,29 @@ class FormSubmissionController extends BaseApiController
         }
 
         if ($request->has('status')) {
-            $query->where('status', $request->status);
+            $query->where('status', $request->input('status'));
         }
 
-        if ($request->has('search')) {
-            $search = $request->search;
+        if ($request->filled('search')) {
+            $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('data', 'like', "%{$search}%")
-                  ->orWhere('ip_address', 'like', "%{$search}%");
+                    ->orWhere('ip_address', 'like', "%{$search}%");
             });
         }
 
         if ($request->has('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
+            $query->whereDate('created_at', '>=', $request->input('date_from'));
         }
 
         if ($request->has('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
+            $query->whereDate('created_at', '<=', $request->input('date_to'));
         }
 
         // Sorting logic
         $sortBy = $request->input('sort_by', 'created_at');
         $sortOrder = $request->input('sort_order', 'desc');
-        
+
         // Validate sort column to prevent SQL injection or errors
         $allowedSortColumns = ['status', 'created_at', 'ip_address'];
         if (in_array($sortBy, $allowedSortColumns)) {
@@ -128,25 +128,25 @@ class FormSubmissionController extends BaseApiController
         $query = $form->submissions();
 
         // Search filter
-        if ($request->has('search')) {
-            $search = $request->search;
+        if ($request->filled('search')) {
+            $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('data', 'like', "%{$search}%")
-                  ->orWhere('ip_address', 'like', "%{$search}%");
+                    ->orWhere('ip_address', 'like', "%{$search}%");
             });
         }
 
         // Date range filter
         if ($request->has('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
+            $query->whereDate('created_at', '>=', $request->input('date_from'));
         }
         if ($request->has('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
+            $query->whereDate('created_at', '<=', $request->input('date_to'));
         }
 
         // Status filter (match index logic)
-        if ($request->has('status') && $request->status !== 'all') {
-            $query->where('status', $request->status);
+        if ($request->has('status') && $request->input('status') !== 'all') {
+            $query->where('status', $request->input('status'));
         }
 
         // Sort logic
@@ -163,14 +163,15 @@ class FormSubmissionController extends BaseApiController
         $submissions = (clone $query)->get();
         $fieldKeys = [];
         foreach ($submissions as $submission) {
-            if (is_array($submission->data)) {
+            /** @var FormSubmission $submission */
+            if ($submission->data) {
                 $fieldKeys = array_merge($fieldKeys, array_keys($submission->data));
             }
         }
         $fieldKeys = array_values(array_unique($fieldKeys));
 
         $timestamp = now()->format('Y-m-d_H-i-s');
-        $filename = str_replace(' ', '_', $form->name) . "_submissions_{$timestamp}";
+        $filename = str_replace(' ', '_', $form->name)."_submissions_{$timestamp}";
         $format = $request->input('format', 'xlsx');
 
         @ini_set('memory_limit', '512M');
@@ -191,7 +192,7 @@ class FormSubmissionController extends BaseApiController
             $html = view('pdf.submissions-list', [
                 'form' => $form,
                 'submissions' => $submissions,
-                'headers' => $fieldKeys
+                'headers' => $fieldKeys,
             ])->render();
 
             $mpdf = new \Mpdf\Mpdf([
@@ -202,6 +203,7 @@ class FormSubmissionController extends BaseApiController
                 'margin_bottom' => 10,
             ]);
             $mpdf->WriteHTML($html);
+
             return response($mpdf->Output("{$filename}.pdf", 'D'))
                 ->header('Content-Type', 'application/pdf');
         }
@@ -213,11 +215,11 @@ class FormSubmissionController extends BaseApiController
     {
         @ini_set('memory_limit', '512M');
         $formSubmission->load(['form', 'user']);
-        
+
         $html = view('pdf.submission', [
             'submission' => $formSubmission,
             'form' => $formSubmission->form,
-            'data' => $formSubmission->data
+            'data' => $formSubmission->data,
         ])->render();
 
         $mpdf = new \Mpdf\Mpdf([
@@ -228,6 +230,7 @@ class FormSubmissionController extends BaseApiController
             'margin_bottom' => 15,
         ]);
         $mpdf->WriteHTML($html);
+
         return response($mpdf->Output("submission-{$formSubmission->id}.pdf", 'D'))
             ->header('Content-Type', 'application/pdf');
     }
@@ -246,13 +249,13 @@ class FormSubmissionController extends BaseApiController
         if ($form) {
             $baseQuery->where('form_id', $form->id);
         } elseif ($request->has('form_id')) {
-            $baseQuery->where('form_id', $request->form_id);
+            $baseQuery->where('form_id', $request->input('form_id'));
         }
 
         // Date Range Logic
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
-        
+
         if ($dateFrom && $dateTo) {
             $start = \Illuminate\Support\Carbon::parse($dateFrom)->startOfDay();
             $end = \Illuminate\Support\Carbon::parse($dateTo)->endOfDay();
@@ -276,14 +279,14 @@ class FormSubmissionController extends BaseApiController
             'new' => (clone $periodQuery)->where('status', 'new')->count(),
             'read' => (clone $periodQuery)->where('status', 'read')->count(),
             'archived' => (clone $periodQuery)->where('status', 'archived')->count(),
-            
+
             // Fixed stats for general context
             'all_time_total' => (clone $baseQuery)->count(),
             'today' => (clone $baseQuery)->whereDate('created_at', today())->count(),
         ];
 
         // Growth calculation
-        $stats['growth'] = $stats['previous_total'] > 0 
+        $stats['growth'] = $stats['previous_total'] > 0
             ? round((($stats['total'] - $stats['previous_total']) / $stats['previous_total']) * 100, 1)
             : ($stats['total'] > 0 ? 100 : 0);
 
@@ -301,7 +304,7 @@ class FormSubmissionController extends BaseApiController
             $found = $dailyData->firstWhere('date', $dateStr);
             $dailyStats[] = [
                 'period' => $dateStr, // Matches LineChart expected field
-                'visits' => $found ? (int)$found->count : 0
+                'visits' => $found ? (int) $found->count : 0,
             ];
             $current->addDay();
         }
@@ -313,13 +316,13 @@ class FormSubmissionController extends BaseApiController
             ->groupBy('hour')
             ->orderBy('hour', 'ASC')
             ->get();
-        
+
         $hourlyStats = [];
-        for ($i=0; $i<24; $i++) {
+        for ($i = 0; $i < 24; $i++) {
             $found = $hourlyData->firstWhere('hour', $i);
             $hourlyStats[] = [
                 'hour' => $i,
-                'count' => $found ? (int)$found->count : 0
+                'count' => $found ? (int) $found->count : 0,
             ];
         }
         $stats['hourly_stats'] = $hourlyStats;
@@ -330,26 +333,26 @@ class FormSubmissionController extends BaseApiController
             ->groupBy('day')
             ->orderBy('day', 'ASC')
             ->get();
-        
+
         $daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         $weeklyStats = [];
-        for ($i=1; $i<=7; $i++) {
+        for ($i = 1; $i <= 7; $i++) {
             $found = $weeklyData->firstWhere('day', $i);
             $weeklyStats[] = [
-                'day' => $daysOfWeek[$i-1],
+                'day' => $daysOfWeek[$i - 1],
                 'day_index' => $i, // Sunday = 1 to Saturday = 7
-                'count' => $found ? (int)$found->count : 0
+                'count' => $found ? (int) $found->count : 0,
             ];
         }
         $stats['weekly_stats'] = $weeklyStats;
 
         // Dynamic Field Analytics
-        $formId = $form ? $form->id : $request->form_id;
+        $formId = $form ? $form->id : $request->input('form_id');
         if ($formId) {
             $chartableFields = FormField::where('form_id', $formId)
                 ->whereIn('type', ['select', 'radio', 'checkbox', 'checkbox_group', 'dropdown'])
                 ->get(['id', 'name', 'label', 'type']);
-            
+
             $stats['chartable_fields'] = $chartableFields;
 
             $selectedFieldName = $request->input('aggregate_field');
@@ -361,15 +364,16 @@ class FormSubmissionController extends BaseApiController
                     ->groupBy('label')
                     ->orderBy('count', 'DESC')
                     ->get();
-                
-                $stats['field_distribution'] = $fieldData->map(function($item) {
+
+                $stats['field_distribution'] = $fieldData->map(function ($item) {
                     $label = $item->label;
                     if (is_string($label)) {
                         $label = trim($label, '"');
                     }
+
                     return [
                         'label' => $label ?: 'Unknown',
-                        'count' => (int)$item->count
+                        'count' => (int) $item->count,
                     ];
                 });
             }

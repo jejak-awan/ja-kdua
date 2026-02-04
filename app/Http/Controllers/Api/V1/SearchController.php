@@ -27,18 +27,18 @@ class SearchController extends BaseApiController
 
         $filters = [];
         if ($request->has('type')) {
-            $filters['type'] = $request->type;
+            $filters['type'] = $request->input('type');
         }
         if ($request->has('date_from')) {
-            $filters['date_from'] = $request->date_from;
+            $filters['date_from'] = $request->input('date_from');
         }
         if ($request->has('date_to')) {
-            $filters['date_to'] = $request->date_to;
+            $filters['date_to'] = $request->input('date_to');
         }
 
         $limit = $request->input('limit', 20);
 
-        $results = $this->searchService->search($request->q, $filters, $limit);
+        $results = $this->searchService->search($request->input('q'), $filters, $limit);
 
         return $this->success($results, 'Search results retrieved successfully');
     }
@@ -51,7 +51,7 @@ class SearchController extends BaseApiController
         ]);
 
         $limit = $request->input('limit', 5);
-        $suggestions = $this->searchService->getSuggestions($request->q, $limit);
+        $suggestions = $this->searchService->getSuggestions($request->input('q'), $limit);
 
         return $this->success([
             'suggestions' => $suggestions,

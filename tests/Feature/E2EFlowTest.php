@@ -16,7 +16,7 @@ use Tests\TestCase;
 
 class E2EFlowTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     protected User $admin;
 
@@ -24,10 +24,10 @@ class E2EFlowTest extends TestCase
     {
         parent::setUp();
         Storage::fake('public');
-        
+
         // Start a session for login tests that need it
         $this->withSession([]);
-        
+
         $this->admin = $this->createAdminUser();
     }
 

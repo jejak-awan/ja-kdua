@@ -4,19 +4,16 @@ namespace Tests\Unit\Services;
 
 use App\Models\Setting;
 use App\Services\CommentSecurityService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class CommentSecurityServiceTest extends TestCase
 {
-
-
     protected CommentSecurityService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new CommentSecurityService();
+        $this->service = new CommentSecurityService;
     }
 
     public function test_detects_banned_words()

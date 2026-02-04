@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Services\Ai\GeminiService;
 use Illuminate\Http\Request;
 
 class AiController extends Controller
@@ -15,7 +14,7 @@ class AiController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data' => \App\Services\Ai\AiProviderFactory::getProviders()
+            'data' => \App\Services\Ai\AiProviderFactory::getProviders(),
         ]);
     }
 
@@ -26,8 +25,8 @@ class AiController extends Controller
     {
         try {
             // Instantiate service manually with the provided key (for setup) or null to use saved key
-            $apiKey = $request->input('api_key'); 
-            
+            $apiKey = $request->input('api_key');
+
             // Factory doesn't accept key in 'make', so we instantiate manually based on provider
             $service = match ($provider) {
                 'openai' => new \App\Services\Ai\OpenAiService($apiKey),
@@ -40,12 +39,12 @@ class AiController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $models
+                'data' => $models,
             ]);
         } catch (\Exception $e) {
-             return response()->json([
+            return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch models: ' . $e->getMessage()
+                'message' => 'Failed to fetch models: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -53,11 +52,11 @@ class AiController extends Controller
     /**
      * Test connection to a provider
      */
-    public function testConnection(Request $request) 
+    public function testConnection(Request $request)
     {
         $request->validate([
             'provider' => 'required|string',
-            'api_key' => 'required|string'
+            'api_key' => 'required|string',
         ]);
 
         try {
@@ -75,13 +74,13 @@ class AiController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Connection successful!'
+                'message' => 'Connection successful!',
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 400);
         }
     }
@@ -95,7 +94,7 @@ class AiController extends Controller
             'prompt' => 'required|string|max:1000',
             'context' => 'nullable|string|max:5000',
             'provider' => 'nullable|string',
-            'model' => 'nullable|string'
+            'model' => 'nullable|string',
         ]);
 
         try {
@@ -115,8 +114,8 @@ class AiController extends Controller
                 'success' => true,
                 'data' => [
                     'content' => $result,
-                    'provider' => $service->getName()
-                ]
+                    'provider' => $service->getName(),
+                ],
             ]);
 
         } catch (\Exception $e) {
@@ -135,7 +134,7 @@ class AiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $message,
-                'original_error' => $e->getMessage()
+                'original_error' => $e->getMessage(),
             ], $status);
         }
     }

@@ -8,6 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @property string|null $thumbnail_path
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Tag[] $tags
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\MediaUsage[] $usages
+ * @property-read array $tag_names
+ * @property-read string|null $url
+ * @property-read string|null $thumbnail_url
+ * @property-read int $usage_count
+ */
 class Media extends Model
 {
     use HasFactory, SoftDeletes;
@@ -18,6 +27,7 @@ class Media extends Model
         'mime_type',
         'disk',
         'path',
+        'thumbnail_path',
         'size',
         'alt',
         'description',
@@ -27,7 +37,7 @@ class Media extends Model
         'is_shared',
     ];
 
-    public function author()
+    public function author(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
     }
@@ -39,17 +49,17 @@ class Media extends Model
 
     protected $appends = ['url', 'thumbnail_url', 'tag_names'];
 
-    public function folder()
+    public function folder(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(MediaFolder::class, 'folder_id');
     }
 
-    public function usages()
+    public function usages(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(MediaUsage::class);
     }
 
-    public function tags()
+    public function tags(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'media_tag');
     }

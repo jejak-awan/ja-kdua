@@ -12,7 +12,7 @@ class WidgetController extends BaseApiController
         $query = Widget::query();
 
         if ($request->has('location')) {
-            $query->where('location', $request->location);
+            $query->where('location', $request->input('location'));
         }
 
         $widgets = $query->orderBy('sort_order')->get();
@@ -80,7 +80,7 @@ class WidgetController extends BaseApiController
             'widgets.*.sort_order' => 'required|integer',
         ]);
 
-        foreach ($request->widgets as $widgetData) {
+        foreach ($request->input('widgets') as $widgetData) {
             Widget::where('id', $widgetData['id'])
                 ->update(['sort_order' => $widgetData['sort_order']]);
         }

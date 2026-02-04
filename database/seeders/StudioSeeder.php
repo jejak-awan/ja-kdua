@@ -19,7 +19,9 @@ class StudioSeeder extends Seeder
     public function run(): void
     {
         $admin = User::where('email', 'admin@jejakawan.com')->first();
-        if (!$admin) return;
+        if (! $admin) {
+            return;
+        }
 
         // 1. Categories
         $categories = [
@@ -38,7 +40,7 @@ class StudioSeeder extends Seeder
         foreach ($tags as $tag) {
             Tag::updateOrCreate(['slug' => Str::slug($tag)], [
                 'name' => $tag,
-                'author_id' => $admin->id
+                'author_id' => $admin->id,
             ]);
         }
 
@@ -46,7 +48,7 @@ class StudioSeeder extends Seeder
         $mainMenu = Menu::updateOrCreate(['slug' => 'main-menu'], [
             'name' => 'Main Navigation',
             'location' => 'header',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         $menuItems = [
@@ -60,7 +62,7 @@ class StudioSeeder extends Seeder
         foreach ($menuItems as $item) {
             MenuItem::updateOrCreate([
                 'menu_id' => $mainMenu->id,
-                'title' => $item['title']
+                'title' => $item['title'],
             ], $item);
         }
 
@@ -73,8 +75,8 @@ class StudioSeeder extends Seeder
             'author_id' => $admin->id,
             'settings' => [
                 'email_notifications' => true,
-                'notification_email' => 'admin@jejakawan.com'
-            ]
+                'notification_email' => 'admin@jejakawan.com',
+            ],
         ]);
 
         $this->command->info('Studio structure seeded successfully!');

@@ -6,6 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property int $id
+ * @property int $media_id
+ * @property string $model_type
+ * @property int $model_id
+ * @property string|null $field_name
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Media $media
+ * @property-read \Illuminate\Database\Eloquent\Model $model
+ */
 class MediaUsage extends Model
 {
     protected $table = 'media_usage';

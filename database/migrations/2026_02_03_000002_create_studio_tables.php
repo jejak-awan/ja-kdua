@@ -47,7 +47,7 @@ return new class extends Migration
             $table->text('excerpt')->nullable();
             $table->json('blocks')->nullable();
             $table->json('meta')->nullable();
-            
+
             // Stats
             $table->integer('views')->default(0);
             $table->integer('share_count')->default(0);
@@ -113,7 +113,7 @@ return new class extends Migration
             $table->boolean('is_shared')->default(false)->index();
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index('parent_id');
             $table->index('slug');
         });

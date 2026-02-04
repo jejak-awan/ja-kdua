@@ -7,6 +7,27 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $session_id
+ * @property int|null $user_id
+ * @property string|null $ip_address
+ * @property string|null $user_agent
+ * @property string|null $device_type
+ * @property string|null $browser
+ * @property string|null $os
+ * @property string|null $country
+ * @property string|null $city
+ * @property int $page_views
+ * @property int $duration
+ * @property \Illuminate\Support\Carbon|null $started_at
+ * @property \Illuminate\Support\Carbon|null $ended_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User|null $user
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\AnalyticsVisit[] $visits
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\AnalyticsEvent[] $events
+ */
 class AnalyticsSession extends Model
 {
     use HasFactory;

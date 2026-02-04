@@ -20,17 +20,18 @@ class RoleController extends BaseApiController
         }
 
         $roles = $query->paginate($limit);
- 
+
         // Optimized: Batch fetch users count in one query to avoid N+1 issues
         $roleIds = $roles->getCollection()->pluck('id')->toArray();
         $userCounts = \DB::table(config('permission.table_names.model_has_roles'))
             ->whereIn(config('permission.column_names.role_pivot_key') ?? 'role_id', $roleIds)
-            ->selectRaw((config('permission.column_names.role_pivot_key') ?? 'role_id') . ' as role_id, count(*) as total')
+            ->selectRaw((config('permission.column_names.role_pivot_key') ?? 'role_id').' as role_id, count(*) as total')
             ->groupBy('role_id')
             ->pluck('total', 'role_id');
 
         $roles->getCollection()->transform(function ($role) use ($userCounts) {
-            $role->users_count = $userCounts[$role->id] ?? 0;
+            $role->setAttribute('users_count', $userCounts[$role->id] ?? 0);
+
             return $role;
         });
 
@@ -74,9 +75,9 @@ class RoleController extends BaseApiController
     public function show(Role $role)
     {
         $role->load('permissions');
-        $role->users_count = \DB::table(config('permission.table_names.model_has_roles'))
+        $role->setAttribute('users_count', \DB::table(config('permission.table_names.model_has_roles'))
             ->where(config('permission.column_names.role_pivot_key') ?? 'role_id', $role->id)
-            ->count();
+            ->count());
 
         return $this->success($role, 'Role retrieved successfully');
     }

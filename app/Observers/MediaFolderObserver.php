@@ -34,13 +34,13 @@ class MediaFolderObserver
     public function restoring(MediaFolder $mediaFolder): void
     {
         // Restore all children recursively
-        foreach ($mediaFolder->children()->onlyTrashed()->get() as $child) {
+        foreach (\App\Models\MediaFolder::onlyTrashed()->where('parent_id', $mediaFolder->id)->get() as $child) {
             $child->restore();
         }
 
-        // Restore all media files that belong to this folder 
+        // Restore all media files that belong to this folder
         // We only restore media that were trashed (deleted_at is NOT null)
-        foreach ($mediaFolder->media()->onlyTrashed()->get() as $media) {
+        foreach (\App\Models\Media::onlyTrashed()->where('folder_id', $mediaFolder->id)->get() as $media) {
             $media->restore();
         }
     }

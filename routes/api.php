@@ -7,7 +7,6 @@ Route::prefix('v1')->group(function () {
     // Public Settings
     Route::get('/public/settings', [App\Http\Controllers\Api\V1\PublicSettingsController::class, 'index']);
     Route::get('/public-settings', [App\Http\Controllers\Api\V1\PublicSettingsController::class, 'index']); // Legacy alias
-    
 
     // Captcha endpoints (no auth required)
     Route::get('/captcha/generate', [App\Http\Controllers\Api\V1\CaptchaController::class, 'generate']);
@@ -537,7 +536,6 @@ Route::prefix('v1')->group(function () {
         Route::post('system-journal/clear', [App\Http\Controllers\Api\V1\LogController::class, 'clear'])->middleware('permission:manage settings');
         Route::get('system-journal/{filename}', [App\Http\Controllers\Api\V1\LogController::class, 'show'])->middleware('permission:manage settings');
         Route::get('system-journal/{filename}/download', [App\Http\Controllers\Api\V1\LogController::class, 'download'])->middleware('permission:manage settings');
-        
 
         // System Information
         Route::get('system/info', [App\Http\Controllers\Api\V1\SystemController::class, 'info'])->middleware('permission:manage system');

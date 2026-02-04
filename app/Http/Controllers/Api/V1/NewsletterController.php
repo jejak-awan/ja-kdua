@@ -17,7 +17,7 @@ class NewsletterController extends BaseApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->validationError($validator->errors());
+            return $this->validationError($validator->errors()->toArray());
         }
 
         try {
@@ -79,7 +79,7 @@ class NewsletterController extends BaseApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->validationError($validator->errors());
+            return $this->validationError($validator->errors()->toArray());
         }
 
         try {

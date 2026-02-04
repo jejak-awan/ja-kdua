@@ -5,6 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string $original_path
+ * @property string $trash_path
+ * @property string $disk
+ * @property string $name
+ * @property string $type
+ * @property int $size
+ * @property string $extension
+ * @property string $mime_type
+ * @property int|null $deleted_by
+ * @property \Illuminate\Support\Carbon $deleted_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User|null $deletedByUser
+ * @property-read string $formatted_size
+ */
 class DeletedFile extends Model
 {
     use HasFactory;
@@ -30,7 +47,7 @@ class DeletedFile extends Model
     /**
      * Get the user who deleted this file
      */
-    public function deletedByUser()
+    public function deletedByUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
     }
@@ -61,8 +78,9 @@ class DeletedFile extends Model
         }
 
         $units = ['B', 'KB', 'MB', 'GB'];
-        $i = floor(log($this->size, 1024));
+        $i = (int) floor(log($this->size, 1024));
+        $val = round($this->size / pow(1024, $i), 2);
 
-        return round($this->size / pow(1024, $i), 2).' '.$units[$i];
+        return $val.' '.$units[$i];
     }
 }

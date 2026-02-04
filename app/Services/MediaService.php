@@ -4,13 +4,9 @@ namespace App\Services;
 
 use App\Models\Media;
 use App\Models\MediaFolder;
-use App\Models\MediaUsage;
-use App\Models\Tag;
-use App\Models\DeletedFile;
 use App\Models\Setting;
-use App\Services\CacheService;
+use App\Models\Tag;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -50,9 +46,9 @@ class MediaService
                 $webpPath = $this->convertToWebP($fullPath, $quality);
                 if ($webpPath) {
                     $fullPath = $webpPath;
-                    $path = 'media/' . basename($fullPath);
+                    $path = 'media/'.basename($fullPath);
                     $mimeType = 'image/webp';
-                    $fileName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
+                    $fileName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME).'.webp';
                 }
             }
         }
@@ -149,6 +145,7 @@ class MediaService
             // If new path is different, delete original
             if ($fullPath !== $newPath && file_exists($newPath)) {
                 unlink($fullPath);
+
                 return $newPath;
             }
 
@@ -488,7 +485,7 @@ class MediaService
         $affectedFolders = 0;
 
         // Process Media
-        if (!empty($mediaIds)) {
+        if (! empty($mediaIds)) {
             $query = Media::withTrashed();
             if ($action === 'restore') {
                 $query->onlyTrashed();
@@ -523,7 +520,7 @@ class MediaService
         }
 
         // Process Folders
-        if (!empty($folderIds)) {
+        if (! empty($folderIds)) {
             $folderQuery = \App\Models\MediaFolder::withTrashed();
             if ($action === 'restore') {
                 $folderQuery->onlyTrashed();
@@ -556,7 +553,7 @@ class MediaService
 
         return [
             'media_count' => $affectedMedia,
-            'folder_count' => $affectedFolders
+            'folder_count' => $affectedFolders,
         ];
     }
 
@@ -604,6 +601,7 @@ class MediaService
         $usages = $media->usages()->get();
 
         return $usages->map(function ($usage) {
+            /** @var \App\Models\MediaUsage $usage */
             $model = null;
             try {
                 $modelClass = $usage->model_type;
@@ -620,9 +618,9 @@ class MediaService
                 'model_id' => $usage->model_id,
                 'field_name' => $usage->field_name,
                 'model' => $model ? [
-                    'id' => $model->id,
-                    'title' => $model->title ?? $model->name ?? 'N/A',
-                    'slug' => $model->slug ?? null,
+                    'id' => $model->getKey(),
+                    'title' => $model->getAttribute('title') ?? $model->getAttribute('name') ?? 'N/A',
+                    'slug' => $model->getAttribute('slug') ?? null,
                     'type' => class_basename($usage->model_type),
                 ] : [
                     'id' => $usage->model_id,
@@ -697,21 +695,21 @@ class MediaService
 
             // Overwrite existing
             $fullPath = Storage::disk($media->disk)->path($media->path);
-            
+
             if ($autoConvert && $media->mime_type !== 'image/webp') {
                 // Convert to webp even on overwrite
                 $pathInfo = pathinfo($media->path);
                 $newFileName = $pathInfo['filename'].'.webp';
                 $newPath = $pathInfo['dirname'].'/'.$newFileName;
                 $newFullPath = Storage::disk($media->disk)->path($newPath);
-                
+
                 $image->toWebp($quality)->save($newFullPath);
-                
+
                 // Delete old if different
                 if ($fullPath !== $newFullPath) {
                     unlink($fullPath);
                 }
-                
+
                 $media->update([
                     'file_name' => $newFileName,
                     'path' => $newPath,
@@ -767,10 +765,6 @@ class MediaService
 
     /**
      * Scan storage for files not in database
-     *
-     * @param  string  $disk
-     * @param  string  $path
-     * @return array
      */
     public function scan(string $disk = 'public', string $path = 'media'): array
     {
@@ -794,7 +788,7 @@ class MediaService
                 if (str_contains($filePath, '/thumbnails/') || str_contains($filePath, '/variants/')) {
                     continue;
                 }
-                
+
                 // Skip if already exists in DB
                 // Use relative path matching (exact match)
                 $exists = Media::where('path', $filePath)
@@ -803,6 +797,7 @@ class MediaService
 
                 if ($exists) {
                     $stats['scanned']++;
+
                     continue;
                 }
 
@@ -842,11 +837,11 @@ class MediaService
                     }
                 } catch (\Exception $e) {
                     $stats['errors']++;
-                    Log::channel('media')->error("Failed to import file during scan: {$filePath} - " . $e->getMessage());
-                    }
+                    Log::channel('media')->error("Failed to import file during scan: {$filePath} - ".$e->getMessage());
+                }
             }
         } catch (\Exception $e) {
-            Log::channel('media')->error("Media scan failed: " . $e->getMessage());
+            Log::channel('media')->error('Media scan failed: '.$e->getMessage());
         }
 
         return $stats;
@@ -859,16 +854,17 @@ class MediaService
     {
         if (! class_exists(\enshrined\svgSanitize\Sanitizer::class)) {
             Log::channel('media')->warning('SVG Sanitizer class not found. Skipping sanitization.');
+
             return;
         }
 
         try {
-            $sanitizer = new \enshrined\svgSanitize\Sanitizer();
+            $sanitizer = new \enshrined\svgSanitize\Sanitizer;
             $sanitizer->removeRemoteReferences(true);
-            
+
             $content = file_get_contents($filePath);
             $cleanContent = $sanitizer->sanitize($content);
-            
+
             file_put_contents($filePath, $cleanContent);
         } catch (\Exception $e) {
             Log::channel('media')->error('SVG sanitization failed: '.$e->getMessage());
@@ -885,7 +881,9 @@ class MediaService
         $tagIds = [];
         foreach ($tags as $tagName) {
             $tagName = trim($tagName);
-            if (empty($tagName)) continue;
+            if (empty($tagName)) {
+                continue;
+            }
 
             $tag = Tag::firstOrCreate([
                 'name' => $tagName,

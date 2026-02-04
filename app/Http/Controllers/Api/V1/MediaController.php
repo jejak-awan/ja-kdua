@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\ActivityLog;
 use App\Models\Media;
-use App\Models\User;
 use App\Models\Tag;
+use App\Models\User;
 use App\Services\CacheService;
 use App\Services\MediaService;
 use Illuminate\Http\Request;
@@ -111,6 +111,7 @@ class MediaController extends BaseApiController
      *     path="/api/v1/media/statistics",
      *     summary="Get media statistics",
      *     tags={"Media"},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Statistics retrieved successfully"
@@ -156,12 +157,16 @@ class MediaController extends BaseApiController
      *     path="/api/v1/media/upload",
      *     summary="Upload a single media file",
      *     tags={"Media"},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
+     *
      *             @OA\Schema(
      *                 required={"file"},
+     *
      *                 @OA\Property(property="file", type="string", format="binary"),
      *                 @OA\Property(property="folder_id", type="integer"),
      *                 @OA\Property(property="alt", type="string"),
@@ -169,9 +174,11 @@ class MediaController extends BaseApiController
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Media uploaded successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/SuccessResponse")
      *     ),
      *     security={{"sanctum":{}}}
@@ -314,12 +321,15 @@ class MediaController extends BaseApiController
      *     path="/api/v1/media/{media}",
      *     summary="Get media details",
      *     tags={"Media"},
+     *
      *     @OA\Parameter(
      *         name="media",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Media details retrieved"
@@ -358,19 +368,25 @@ class MediaController extends BaseApiController
      *     path="/api/v1/media/{media}",
      *     summary="Update media metadata",
      *     tags={"Media"},
+     *
      *     @OA\Parameter(
      *         name="media",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="name", type="string"),
      *             @OA\Property(property="alt", type="string"),
      *             @OA\Property(property="caption", type="string")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Media updated successfully"
@@ -439,19 +455,24 @@ class MediaController extends BaseApiController
      *     path="/api/v1/media/{media}",
      *     summary="Delete media",
      *     tags={"Media"},
+     *
      *     @OA\Parameter(
      *         name="media",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="permanent",
      *         in="query",
      *         description="Skip trash if true",
      *         required=false,
+     *
      *         @OA\Schema(type="boolean")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Media deleted successfully"
@@ -465,9 +486,9 @@ class MediaController extends BaseApiController
             'id' => $media->id,
             'path' => $media->path,
             'user' => $request->user()->id,
-            'permanent' => $request->boolean('permanent')
+            'permanent' => $request->boolean('permanent'),
         ]);
-        
+
         $user = $request->user();
         $isOwner = $media->author_id && $media->author_id === $user->id;
         $isManager = $user->can('manage media');
@@ -521,14 +542,14 @@ class MediaController extends BaseApiController
 
         $stats = $this->mediaService->scan();
 
-        return $this->success($stats, 'Media scan completed successfully. Added ' . $stats['added'] . ' new files.');
+        return $this->success($stats, 'Media scan completed successfully. Added '.$stats['added'].' new files.');
     }
 
     public function restore(Request $request, $id)
     {
         \Illuminate\Support\Facades\Log::info('MediaController::restore called', [
             'id' => $id,
-            'user' => $request->user()->id
+            'user' => $request->user()->id,
         ]);
 
         $user = $request->user();
@@ -564,9 +585,9 @@ class MediaController extends BaseApiController
         \Illuminate\Support\Facades\Log::info('MediaController::forceDelete called', [
             'id' => $id,
             'user' => $request->user()->id,
-            'force' => $request->boolean('force')
+            'force' => $request->boolean('force'),
         ]);
-        
+
         $user = $request->user();
         $media = Media::withTrashed()->findOrFail($id);
 
@@ -654,7 +675,7 @@ class MediaController extends BaseApiController
         \Illuminate\Support\Facades\Log::info('MediaController::bulkAction called', [
             'action' => $request->input('action'),
             'ids' => $request->input('ids'),
-            'user' => $request->user()->id
+            'user' => $request->user()->id,
         ]);
         if (! $request->user()->can('manage media') && ! $request->user()->can('edit media') && ! $request->user()->can('delete media')) {
             return $this->forbidden('You do not have permission to perform bulk actions on media');
@@ -676,7 +697,7 @@ class MediaController extends BaseApiController
 
         // Filter Media IDs
         $existingMediaIds = [];
-        if (!empty($ids)) {
+        if (! empty($ids)) {
             $query = Media::withTrashed()->whereIn('id', $ids);
             if (! $request->user()->can('manage media')) {
                 $query->where('author_id', $request->user()->id);
@@ -686,7 +707,7 @@ class MediaController extends BaseApiController
 
         // Filter Folder IDs
         $existingFolderIds = [];
-        if (!empty($folderIds)) {
+        if (! empty($folderIds)) {
             $folderQuery = \App\Models\MediaFolder::withTrashed()->whereIn('id', $folderIds);
             if (! $request->user()->can('manage media')) {
                 $folderQuery->where('author_id', $request->user()->id);
@@ -1033,7 +1054,7 @@ class MediaController extends BaseApiController
     public function filters()
     {
         $tags = Tag::whereHas('media')->get(['id', 'name', 'slug']);
-        
+
         $authors = User::whereHas('media')
             ->get(['id', 'name', 'avatar']);
 

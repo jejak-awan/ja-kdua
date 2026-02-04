@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\IpUtils;
+use Symfony\Component\HttpFoundation\Response;
 
 class TrustProxies
 {
@@ -34,18 +34,19 @@ class TrustProxies
     public function handle(Request $request, Closure $next): Response
     {
         // Emergency kill-switch to revert to "trust all" behavior
-        if (env('TRUST_ALL_PROXIES', false)) {
+        if (config('app.trust_all_proxies', false)) {
             $request::setTrustedProxies(
                 [$request->server->get('REMOTE_ADDR')],
                 $this->headers
             );
             $this->setRealIpFromHeaders($request, true);
+
             return $next($request);
         }
 
         // Load trusted IPs from cache (Cloudflare) + Private Networks
         $trustedIps = $this->getTrustedProxies();
-        
+
         if (count($trustedIps) > 0) {
             $request::setTrustedProxies($trustedIps, $this->headers);
         }
@@ -70,7 +71,7 @@ class TrustProxies
         }
 
         // 2. Add Private Networks (RFC 1918)
-        // This is safe because if an attacker is in our private network, 
+        // This is safe because if an attacker is in our private network,
         // we have bigger problems. Valid upstream LB/Nginx usually sit here.
         $proxies = array_merge($proxies, [
             '127.0.0.1',
@@ -90,13 +91,13 @@ class TrustProxies
     protected function setRealIpFromHeaders(Request $request, bool $forceTrust): void
     {
         // Security: Only parse headers if the remote address is trusted
-        if (!$forceTrust) {
+        if (! $forceTrust) {
             $remoteAddr = $request->server->get('REMOTE_ADDR');
             $trustedProxies = $this->getTrustedProxies();
-            
-            if (!IpUtils::checkIp($remoteAddr, $trustedProxies)) {
-                 // Current proxy is NOT trusted. Do not spoof IP based on headers.
-                 return;
+
+            if (! IpUtils::checkIp($remoteAddr, $trustedProxies)) {
+                // Current proxy is NOT trusted. Do not spoof IP based on headers.
+                return;
             }
         }
 
@@ -118,7 +119,7 @@ class TrustProxies
         elseif ($request->hasHeader('X-Forwarded-For')) {
             $forwardedFor = $request->header('X-Forwarded-For');
             $ips = array_map('trim', explode(',', $forwardedFor));
-            $realIp = $ips[0] ?? null;
+            $realIp = $ips[0];
         }
 
         // Validate and store the real IP

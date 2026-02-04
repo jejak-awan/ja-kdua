@@ -87,9 +87,7 @@ class ThemeHelper
         try {
             $theme = self::getThemeService()->getActiveTheme($type);
             if ($theme && $theme->supports) {
-                $supports = is_string($theme->supports)
-                    ? json_decode($theme->supports, true)
-                    : $theme->supports;
+                $supports = $theme->supports;
 
                 return isset($supports[$feature]) && $supports[$feature] === true;
             }
@@ -108,7 +106,7 @@ class ThemeHelper
         try {
             $theme = self::getThemeService()->getActiveTheme($type);
             if ($theme) {
-                return self::getThemeService()->getThemeCustomCss($theme) ?? '';
+                return self::getThemeService()->getThemeCustomCss($theme);
             }
         } catch (\Exception $e) {
             // Return empty string on error

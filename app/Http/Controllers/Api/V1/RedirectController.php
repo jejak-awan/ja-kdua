@@ -15,8 +15,8 @@ class RedirectController extends BaseApiController
             $query->where('is_active', $request->boolean('is_active'));
         }
 
-        if ($request->has('search')) {
-            $search = $request->search;
+        if ($request->filled('search')) {
+            $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('from_url', 'like', "%{$search}%")
                     ->orWhere('to_url', 'like', "%{$search}%");

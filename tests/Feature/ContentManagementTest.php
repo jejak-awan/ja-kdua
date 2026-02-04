@@ -32,7 +32,7 @@ class ContentManagementTest extends TestCase
         // If total contents exceed per_page (usually 10 or 15), this might fail if we assert count + 5
         // Ideally we check total in meta, or just assert we got some data
         // $response->assertJsonCount(min($initialCount + 5, 10), 'data.data'); // Assuming 10 per page
-        
+
         // Safer check: assert at least 5
         $data = $response->json('data.data');
         $this->assertGreaterThanOrEqual(5, count($data));

@@ -16,7 +16,7 @@ class UserController extends BaseApiController
 
         // Soft deletes filter
         if ($request->has('trashed')) {
-            $trashed = $request->trashed;
+            $trashed = $request->input('trashed');
             if ($trashed === 'only') {
                 $query->onlyTrashed();
             } elseif ($trashed === 'with') {
@@ -24,8 +24,8 @@ class UserController extends BaseApiController
             }
         }
 
-        if ($request->has('search')) {
-            $search = $request->search;
+        if ($request->filled('search')) {
+            $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
@@ -34,13 +34,13 @@ class UserController extends BaseApiController
 
         if ($request->has('role')) {
             $query->whereHas('roles', function ($q) use ($request) {
-                $q->where('name', $request->role);
+                $q->where('name', $request->input('role'));
             });
         }
 
         // Verification filter
         if ($request->has('verified')) {
-            if ($request->verified == 1) {
+            if ($request->input('verified') == 1) {
                 $query->whereNotNull('email_verified_at');
             } else {
                 $query->whereNull('email_verified_at');
@@ -48,12 +48,12 @@ class UserController extends BaseApiController
         }
 
         // Recent filter (registered in last 7 days)
-        if ($request->has('recent') && $request->recent == 1) {
+        if ($request->has('recent') && $request->input('recent') == 1) {
             $query->where('created_at', '>=', now()->subDays(7));
         }
 
         // Active filter (logged in within last 30 days)
-        if ($request->has('active') && $request->active == 1) {
+        if ($request->has('active') && $request->input('active') == 1) {
             $query->whereNotNull('last_login_at')
                 ->where('last_login_at', '>=', now()->subDays(30));
         }
@@ -64,7 +64,7 @@ class UserController extends BaseApiController
         // Ensure roles and permissions are always arrays (not null)
         $users->getCollection()->transform(function ($user) {
             // Ensure roles is always a collection (will be serialized as array in JSON)
-            if (! $user->relationLoaded('roles') || $user->roles === null) {
+            if (! $user->relationLoaded('roles')) {
                 $user->setRelation('roles', collect([]));
             }
             // Ensure permissions includes inherited ones
@@ -133,7 +133,7 @@ class UserController extends BaseApiController
 
         if ($request->has('roles')) {
             $maxRequestedRank = 0;
-            $roles = \Spatie\Permission\Models\Role::whereIn('id', $request->roles)->get();
+            $roles = \Spatie\Permission\Models\Role::whereIn('id', $request->input('roles', []))->get();
 
             $roleRanks = [
                 'super-admin' => 100,
@@ -154,7 +154,7 @@ class UserController extends BaseApiController
                 return $this->forbidden('You cannot assign a role higher than your own rank');
             }
 
-            $user->syncRoles($request->roles);
+            $user->syncRoles($request->input('roles', []));
         }
 
         $user->load(['roles']);
@@ -245,12 +245,12 @@ class UserController extends BaseApiController
 
         $user = $request->user();
 
-        if (! Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->input('current_password'), $user->password)) {
             return $this->validationError(['current_password' => ['Current password is incorrect']], 'Current password is incorrect');
         }
 
         $user->update([
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($request->input('password')),
         ]);
 
         return $this->success(null, 'Password updated successfully');
@@ -331,7 +331,7 @@ class UserController extends BaseApiController
 
         if ($request->has('roles')) {
             $maxRequestedRank = 0;
-            $roles = \Spatie\Permission\Models\Role::whereIn('id', $request->roles)->get();
+            $roles = \Spatie\Permission\Models\Role::whereIn('id', $request->input('roles', []))->get();
 
             $roleRanks = [
                 'super-admin' => 100,
@@ -364,7 +364,7 @@ class UserController extends BaseApiController
                 }
             }
 
-            $user->syncRoles($request->roles);
+            $user->syncRoles($request->input('roles', []));
         }
 
         $user->load(['roles']);
@@ -527,9 +527,10 @@ class UserController extends BaseApiController
             'action' => 'required|in:delete,force_logout,verify,restore,force_delete',
         ]);
 
-        $ids = $request->ids;
-        $action = $request->action;
+        $ids = $request->input('ids');
+        $action = $request->input('action');
         $count = 0;
+        $message = '';
 
         if ($action === 'delete') {
             // Filter out self-deletion and hierarchy protection

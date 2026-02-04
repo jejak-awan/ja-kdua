@@ -121,6 +121,7 @@ class AnalyticsController extends BaseApiController
                     ->get()
                     ->map(function ($content) use ($slugToVisits) {
                         $content->visits_count = $slugToVisits[$content->slug] ?? 0;
+
                         return $content;
                     })
                     ->sortByDesc('visits_count')
@@ -484,7 +485,7 @@ class AnalyticsController extends BaseApiController
                 $visit->os ?? '',
                 $visit->country ?? '',
                 $visit->city ?? '',
-                $visit->visited_at?->format('Y-m-d H:i:s') ?? ''
+                $visit->visited_at->format('Y-m-d H:i:s')
             );
         }
 
@@ -506,13 +507,13 @@ class AnalyticsController extends BaseApiController
                 "%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%s,\"%s\",\"%s\"\n",
                 $event->id,
                 $event->session_id ?? '',
-                $event->user?->name ?? 'Guest',
+                $event->user ? $event->user->name : 'Guest',
                 $event->event_type ?? '',
                 str_replace('"', '""', $event->event_name ?? ''),
                 str_replace('"', '""', $event->url ?? ''),
                 $event->content_id ?? '',
                 $event->ip_address ?? '',
-                $event->occurred_at?->format('Y-m-d H:i:s') ?? ''
+                $event->occurred_at->format('Y-m-d H:i:s')
             );
         }
 
@@ -534,7 +535,7 @@ class AnalyticsController extends BaseApiController
                 "%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%d,%d,\"%s\",\"%s\"\n",
                 $session->id,
                 $session->session_id ?? '',
-                $session->user?->name ?? 'Guest',
+                $session->user ? $session->user->name : 'Guest',
                 $session->ip_address ?? '',
                 $session->device_type ?? '',
                 $session->browser ?? '',
@@ -543,8 +544,8 @@ class AnalyticsController extends BaseApiController
                 $session->city ?? '',
                 $session->page_views ?? 0,
                 $session->duration ?? 0,
-                $session->started_at?->format('Y-m-d H:i:s') ?? '',
-                $session->ended_at?->format('Y-m-d H:i:s') ?? ''
+                $session->started_at->format('Y-m-d H:i:s'),
+                $session->ended_at->format('Y-m-d H:i:s')
             );
         }
 

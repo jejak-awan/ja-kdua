@@ -12,7 +12,7 @@ class EmailTemplateController extends BaseApiController
         $query = EmailTemplate::query();
 
         if ($request->has('category')) {
-            $query->where('category', $request->category);
+            $query->where('category', $request->input('category'));
         }
 
         if ($request->has('is_active')) {
@@ -92,7 +92,7 @@ class EmailTemplateController extends BaseApiController
 
         try {
             \Mail::raw($rendered['text_body'] ?? strip_tags($rendered['body']), function ($message) use ($request, $rendered) {
-                $message->to($request->email)
+                $message->to($request->input('email'))
                     ->subject($rendered['subject']);
             });
 

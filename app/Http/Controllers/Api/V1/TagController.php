@@ -16,30 +16,38 @@ class TagController extends BaseApiController
      *     path="/api/v1/tags",
      *     summary="List all tags",
      *     tags={"Tags"},
+     *
      *     @OA\Parameter(
      *         name="search",
      *         in="query",
      *         description="Search by name or slug",
      *         required=false,
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="usage",
      *         in="query",
      *         description="Filter by usage (used, unused, media)",
      *         required=false,
+     *
      *         @OA\Schema(type="string", enum={"used", "unused", "media"})
      *     ),
+     *
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
      *         description="Results per page",
      *         required=false,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Tags retrieved successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/SuccessResponse")
      *     ),
      *     security={{"sanctum":{}}}
@@ -59,8 +67,8 @@ class TagController extends BaseApiController
             $query->whereNull('author_id');
         }
 
-        if ($request->has('search') && ! empty($request->search)) {
-            $search = $request->search;
+        if ($request->filled('search')) {
+            $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('slug', 'like', "%{$search}%")
@@ -68,10 +76,10 @@ class TagController extends BaseApiController
             });
         }
 
-        if ($request->has('usage') && in_array($request->usage, ['used', 'unused', 'media'])) {
-            if ($request->usage === 'used') {
+        if ($request->has('usage') && in_array($request->input('usage'), ['used', 'unused', 'media'])) {
+            if ($request->input('usage') === 'used') {
                 $query->has('contents');
-            } elseif ($request->usage === 'media') {
+            } elseif ($request->input('usage') === 'media') {
                 $query->has('media');
             } else {
                 $query->doesntHave('contents')->doesntHave('media');
@@ -96,18 +104,23 @@ class TagController extends BaseApiController
      *     path="/api/v1/tags",
      *     summary="Create a new tag",
      *     tags={"Tags"},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"name", "slug"},
+     *
      *             @OA\Property(property="name", type="string", example="Laravel"),
      *             @OA\Property(property="slug", type="string", example="laravel"),
      *             @OA\Property(property="description", type="string", example="Posts about Laravel framework")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Tag created successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/SuccessResponse")
      *     ),
      *     security={{"sanctum":{}}}
@@ -142,12 +155,15 @@ class TagController extends BaseApiController
      *     path="/api/v1/tags/{tag}",
      *     summary="Get tag details",
      *     tags={"Tags"},
+     *
      *     @OA\Parameter(
      *         name="tag",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Tag retrieved successfully"
@@ -172,20 +188,26 @@ class TagController extends BaseApiController
      *     path="/api/v1/tags/{tag}",
      *     summary="Update a tag",
      *     tags={"Tags"},
+     *
      *     @OA\Parameter(
      *         name="tag",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="name", type="string"),
      *             @OA\Property(property="slug", type="string"),
      *             @OA\Property(property="description", type="string")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Tag updated successfully"
@@ -222,12 +244,15 @@ class TagController extends BaseApiController
      *     path="/api/v1/tags/{tag}",
      *     summary="Delete a tag",
      *     tags={"Tags"},
+     *
      *     @OA\Parameter(
      *         name="tag",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Tag deleted successfully"
@@ -259,11 +284,15 @@ class TagController extends BaseApiController
      *     path="/api/v1/tags/bulk-delete",
      *     summary="Bulk delete tags",
      *     tags={"Tags"},
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="ids", type="array", @OA\Items(type="integer"))
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Bulk deletion processed"
@@ -298,6 +327,7 @@ class TagController extends BaseApiController
      *     path="/api/v1/tags/statistics",
      *     summary="Get tag statistics",
      *     tags={"Tags"},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Statistics retrieved successfully"

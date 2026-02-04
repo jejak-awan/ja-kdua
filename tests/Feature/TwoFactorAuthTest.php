@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class TwoFactorAuthTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     protected function setUp(): void
     {

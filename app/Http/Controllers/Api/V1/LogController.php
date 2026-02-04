@@ -64,15 +64,17 @@ class LogController extends BaseApiController
         $logPath = storage_path('logs');
 
         if ($filename) {
-            $logFile = $logPath . '/' . basename($filename);
+            $logFile = $logPath.'/'.basename($filename);
             if (File::exists($logFile)) {
                 try {
                     File::put($logFile, '');
+
                     return $this->success(null, 'Log file cleared successfully');
                 } catch (\Exception $e) {
-                    return $this->error('Failed to clear log file: ' . $e->getMessage(), 500);
+                    return $this->error('Failed to clear log file: '.$e->getMessage(), 500);
                 }
             }
+
             return $this->notFound('Log file');
         }
 
@@ -90,6 +92,7 @@ class LogController extends BaseApiController
                     }
                 }
             }
+
             return $this->success(null, 'All log files cleared successfully');
         }
 

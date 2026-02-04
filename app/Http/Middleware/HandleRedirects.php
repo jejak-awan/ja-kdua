@@ -28,7 +28,7 @@ class HandleRedirects
         if ($redirect) {
             $redirect->recordHit();
 
-            return redirect($redirect->to_url, $redirect->type);
+            return redirect($redirect->to_url, (int) $redirect->type);
         }
 
         return $next($request);

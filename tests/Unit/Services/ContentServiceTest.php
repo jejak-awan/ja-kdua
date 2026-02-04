@@ -8,20 +8,20 @@ use App\Models\ContentRevision;
 use App\Models\Tag;
 use App\Models\User;
 use App\Services\ContentService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class ContentServiceTest extends TestCase
 {
     protected ContentService $service;
+
     protected User $user;
 
     protected function setUp(): void
     {
         parent::setUp();
         Cache::flush();
-        $this->service = new ContentService();
+        $this->service = new ContentService;
         $this->user = User::factory()->create();
     }
 
@@ -31,10 +31,10 @@ class ContentServiceTest extends TestCase
     public function test_create_content(): void
     {
         $category = Category::factory()->create();
-        
+
         $data = [
-            'title' => 'Test Content ' . uniqid(),
-            'slug' => 'test-content-' . uniqid(),
+            'title' => 'Test Content '.uniqid(),
+            'slug' => 'test-content-'.uniqid(),
             'body' => 'This is test content body.',
             'status' => 'draft',
             'type' => 'post',
@@ -55,8 +55,8 @@ class ContentServiceTest extends TestCase
     public function test_create_content_with_revision(): void
     {
         $data = [
-            'title' => 'Revision Test ' . uniqid(),
-            'slug' => 'revision-test-' . uniqid(),
+            'title' => 'Revision Test '.uniqid(),
+            'slug' => 'revision-test-'.uniqid(),
             'body' => 'Content with revision.',
             'status' => 'published',
             'type' => 'post',
@@ -65,7 +65,7 @@ class ContentServiceTest extends TestCase
         $content = $this->service->create($data, $this->user->id, true);
 
         $this->assertInstanceOf(Content::class, $content);
-        
+
         // Check revision was created
         $revision = ContentRevision::where('content_id', $content->id)->first();
         $this->assertNotNull($revision);
@@ -79,7 +79,7 @@ class ContentServiceTest extends TestCase
         $content = Content::factory()->create();
 
         $updateData = [
-            'title' => 'Updated Title ' . uniqid(),
+            'title' => 'Updated Title '.uniqid(),
             'body' => 'Updated body content',
         ];
 
@@ -98,7 +98,7 @@ class ContentServiceTest extends TestCase
         $tags = Tag::factory()->count(3)->create();
 
         $updateData = [
-            'title' => 'Tagged Content ' . uniqid(),
+            'title' => 'Tagged Content '.uniqid(),
             'tags' => $tags->pluck('id')->toArray(),
         ];
 
@@ -113,9 +113,9 @@ class ContentServiceTest extends TestCase
     public function test_update_creates_revision(): void
     {
         $content = Content::factory()->create();
-        
+
         $updateData = [
-            'title' => 'Revised Content ' . uniqid(),
+            'title' => 'Revised Content '.uniqid(),
             'body' => 'New body',
         ];
 
@@ -302,7 +302,7 @@ class ContentServiceTest extends TestCase
         $result = $this->service->restore($content->id); // Returns bool
 
         $this->assertTrue($result);
-        
+
         $content->refresh();
         $this->assertNull($content->deleted_at);
     }

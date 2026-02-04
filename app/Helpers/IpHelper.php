@@ -34,7 +34,7 @@ class IpHelper
                 // X-Forwarded-For can contain multiple IPs
                 if ($header === 'X-Forwarded-For') {
                     $ips = array_map('trim', explode(',', $value));
-                    $ip = $ips[0] ?? null;
+                    $ip = $ips[0];
                 } else {
                     $ip = $value;
                 }

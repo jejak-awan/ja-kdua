@@ -310,14 +310,16 @@ class MediaFolderController extends BaseApiController
     protected function recursiveForceDelete(MediaFolder $folder)
     {
         // 1. Permanently delete all media files in this folder
-        foreach ($folder->media()->withTrashed()->get() as $media) {
+        $mediaItems = \App\Models\Media::where('folder_id', $folder->id)->withTrashed()->get();
+        foreach ($mediaItems as $media) {
             // Use MediaService to ensure file cleaning if necessary
             // or just $media->forceDelete() if model handle observers
             $media->forceDelete();
         }
 
         // 2. Recurse into children folders
-        foreach ($folder->children()->withTrashed()->get() as $child) {
+        $children = \App\Models\MediaFolder::where('parent_id', $folder->id)->withTrashed()->get();
+        foreach ($children as $child) {
             $this->recursiveForceDelete($child);
         }
 

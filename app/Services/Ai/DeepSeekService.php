@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 class DeepSeekService implements AiProviderInterface
 {
     protected $apiKey;
+
     protected $baseUrl = 'https://api.deepseek.com'; // DeepSeek Base URL
 
     public function __construct(?string $apiKey = null)
@@ -31,7 +32,7 @@ class DeepSeekService implements AiProviderInterface
         try {
             $messages = [
                 ['role' => 'system', 'content' => 'You are a helpful content editor assistant.'],
-                ['role' => 'user', 'content' => $context ? "Context:\n$context\n\nInstruction: $prompt" : $prompt]
+                ['role' => 'user', 'content' => $context ? "Context:\n$context\n\nInstruction: $prompt" : $prompt],
             ];
 
             $response = Http::withToken($this->apiKey)
@@ -75,15 +76,16 @@ class DeepSeekService implements AiProviderInterface
                 foreach ($data['data'] as $m) {
                     $models[] = [
                         'id' => $m['id'],
-                        'name' => $m['id']
+                        'name' => $m['id'],
                     ];
                 }
             }
-            
+
             return $models;
 
         } catch (\Exception $e) {
             Log::error('DeepSeek GetModels Exception', ['message' => $e->getMessage()]);
+
             return [];
         }
     }
@@ -107,15 +109,15 @@ class DeepSeekService implements AiProviderInterface
     protected function handleError($response)
     {
         $errorMsg = $response->json('error.message', 'Unknown error');
-        
+
         if ($response->status() === 401) {
             throw new \Exception('Invalid DeepSeek API Key.');
         }
-        
+
         if ($response->status() === 402) {
-             throw new \Exception('DeepSeek Validation Failed (Insufficient Balance).');
+            throw new \Exception('DeepSeek Validation Failed (Insufficient Balance).');
         }
 
-        throw new \Exception('DeepSeek API Error: ' . $errorMsg);
+        throw new \Exception('DeepSeek API Error: '.$errorMsg);
     }
 }

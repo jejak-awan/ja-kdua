@@ -157,7 +157,7 @@ class EmailTestController extends BaseApiController
                 // Try to get queue length from Redis
                 try {
                     $redis = app('redis');
-                    $status['pending_jobs'] = $redis->llen('queues:default') ?? 0;
+                    $status['pending_jobs'] = $redis->llen('queues:default');
                 } catch (\Exception $e) {
                     // Redis not available or queue name different
                     $status['pending_jobs'] = 'unknown';

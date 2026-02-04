@@ -2,14 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\Content;
 use App\Models\Category;
+use App\Models\Comment;
+use App\Models\Content;
+use App\Models\NewsletterSubscriber;
 use App\Models\Tag;
 use App\Models\User;
-use App\Models\Comment;
-use App\Models\NewsletterSubscriber;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class SampleDataSeeder extends Seeder
 {
@@ -19,7 +18,9 @@ class SampleDataSeeder extends Seeder
     public function run(): void
     {
         $admin = User::where('email', 'admin@jejakawan.com')->first();
-        if (!$admin) return;
+        if (! $admin) {
+            return;
+        }
 
         $categories = Category::all();
         $tags = Tag::all();
@@ -56,7 +57,7 @@ class SampleDataSeeder extends Seeder
                     'author_id' => $admin->id,
                     'category_id' => $categories->random()->id,
                     'status' => 'published',
-                    'published_at' => now()->subDays(rand(1, 30))
+                    'published_at' => now()->subDays(rand(1, 30)),
                 ])
             );
 
@@ -67,10 +68,10 @@ class SampleDataSeeder extends Seeder
             for ($i = 0; $i < rand(1, 4); $i++) {
                 Comment::create([
                     'content_id' => $content->id,
-                    'name' => 'Sample Commenter ' . ($i+1),
-                    'email' => 'commenter' . ($i+1) . '@example.com',
-                    'body' => 'This is a great article on ' . $postData['title'] . '! Very helpful.',
-                    'status' => 'approved'
+                    'name' => 'Sample Commenter '.($i + 1),
+                    'email' => 'commenter'.($i + 1).'@example.com',
+                    'body' => 'This is a great article on '.$postData['title'].'! Very helpful.',
+                    'status' => 'approved',
                 ]);
             }
         }
@@ -82,7 +83,7 @@ class SampleDataSeeder extends Seeder
                 [
                     'name' => "Sample User {$i}",
                     'status' => 'subscribed',
-                    'subscribed_at' => now()->subDays(rand(1, 100))
+                    'subscribed_at' => now()->subDays(rand(1, 100)),
                 ]
             );
         }

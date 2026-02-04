@@ -30,50 +30,46 @@ class FileManagerController extends BaseApiController
 
     /**
      * Validate the requested disk.
-     * 
-     * @param string|null $disk
-     * @return string
+     *
      * @throws \Illuminate\Validation\ValidationException
      */
     protected function validateDisk(?string $disk): string
     {
         $disk = $disk ?: 'public';
-        
+
         // Superadmin bypass (optional, verify if user ID 1 policy applies here as per audit)
         if (Auth::id() === 1) {
             return $disk;
         }
 
-        if (!in_array($disk, $this->allowedDisks)) {
+        if (! in_array($disk, $this->allowedDisks)) {
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'disk' => ["Disk '$disk' is not allowed access."],
             ]);
         }
-        
+
         return $disk;
     }
 
     /**
      * Validate and normalize the path to prevent traversal.
-     * 
-     * @param string|null $path
-     * @return string
+     *
      * @throws \Illuminate\Validation\ValidationException
      */
     protected function validatePath(?string $path): string
     {
         $path = $path ?: '';
-        
+
         // Remove null bytes
         $path = str_replace("\0", '', $path);
-        
+
         // Prevent directory traversal
         if (str_contains($path, '..')) {
-             throw \Illuminate\Validation\ValidationException::withMessages([
-                'path' => ["Invalid path detected (traversal)."],
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'path' => ['Invalid path detected (traversal).'],
             ]);
         }
-        
+
         return trim($path, '/');
     }
 
@@ -95,109 +91,119 @@ class FileManagerController extends BaseApiController
 
         try {
             if (Storage::disk($disk)->exists($path)) {
-            // Use Storage methods for better compatibility with non-local disks
-            $allDirectories = Storage::disk($disk)->directories($path);
-            $allFiles = Storage::disk($disk)->files($path);
+                // Use Storage methods for better compatibility with non-local disks
+                $allDirectories = Storage::disk($disk)->directories($path);
+                $allFiles = Storage::disk($disk)->files($path);
 
-            foreach ($allDirectories as $dirPath) {
-                $dirName = basename($dirPath);
-                
-                // Exclude .trash folder
-                if ($dirName === '.trash') {
-                    continue;
+                foreach ($allDirectories as $dirPath) {
+                    $dirName = basename($dirPath);
+
+                    // Exclude .trash folder
+                    if ($dirName === '.trash') {
+                        continue;
+                    }
+
+                    $folders[] = [
+                        'name' => $dirName,
+                        'path' => '/'.$dirPath,
+                        'type' => 'folder',
+                    ];
                 }
 
-                $folders[] = [
-                    'name' => $dirName,
-                    'path' => '/'.$dirPath,
-                    'type' => 'folder',
-                ];
-            }
+                foreach ($allFiles as $filePath) {
+                    $fileName = basename($filePath);
 
-            foreach ($allFiles as $filePath) {
-                $fileName = basename($filePath);
-                
-                // Exclude hidden files
-                if (str_starts_with($fileName, '.')) {
-                    continue;
+                    // Exclude hidden files
+                    if (str_starts_with($fileName, '.')) {
+                        continue;
+                    }
+
+                    $files[] = [
+                        'name' => $fileName,
+                        'path' => '/'.$filePath,
+                        'type' => 'file',
+                        'size' => Storage::disk($disk)->size($filePath),
+                        'modified' => date('Y-m-d H:i:s', Storage::disk($disk)->lastModified($filePath)),
+                        'extension' => pathinfo($fileName, PATHINFO_EXTENSION),
+                        'url' => Storage::disk($disk)->url($filePath),
+                    ];
                 }
-
-                $files[] = [
-                    'name' => $fileName,
-                    'path' => '/'.$filePath,
-                    'type' => 'file',
-                    'size' => Storage::disk($disk)->size($filePath),
-                    'modified' => date('Y-m-d H:i:s', Storage::disk($disk)->lastModified($filePath)),
-                    'extension' => pathinfo($fileName, PATHINFO_EXTENSION),
-                    'url' => Storage::disk($disk)->url($filePath),
-                ];
             }
-        }
         } catch (\Exception $e) {
             return $this->error('Error reading directory: '.$e->getMessage(), 500, [], 'DIRECTORY_READ_ERROR');
         }
 
+        // Server-side Filtering
+        $search = $request->input('search');
+        $type = $request->input('type');
 
-            // Server-side Filtering
-            $search = $request->input('search');
-            $type = $request->input('type');
+        if ($search) {
+            $folders = array_values(array_filter($folders, fn ($f) => stripos($f['name'], $search) !== false));
+            $files = array_values(array_filter($files, fn ($f) => stripos($f['name'], $search) !== false));
+        }
 
-            if ($search) {
-                $folders = array_values(array_filter($folders, fn($f) => stripos($f['name'], $search) !== false));
-                $files = array_values(array_filter($files, fn($f) => stripos($f['name'], $search) !== false));
+        if ($type && $type !== 'all') {
+            $extensions = [];
+            switch ($type) {
+                case 'images': $extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'];
+                    break;
+                case 'documents': $extensions = ['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt', 'xls', 'xlsx', 'ppt', 'pptx'];
+                    break;
+                case 'videos': $extensions = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm'];
+                    break;
+                case 'audio': $extensions = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'];
+                    break;
+                case 'archives': $extensions = ['zip', 'rar', '7z', 'tar', 'gz', 'bz2'];
+                    break;
             }
 
-            if ($type && $type !== 'all') {
-                $extensions = [];
-                switch ($type) {
-                    case 'images': $extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico']; break;
-                    case 'documents': $extensions = ['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt', 'xls', 'xlsx', 'ppt', 'pptx']; break;
-                    case 'videos': $extensions = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm']; break;
-                    case 'audio': $extensions = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a']; break;
-                    case 'archives': $extensions = ['zip', 'rar', '7z', 'tar', 'gz', 'bz2']; break;
+            if (! empty($extensions)) {
+                $files = array_values(array_filter($files, fn ($f) => in_array(strtolower($f['extension']), $extensions)));
+            }
+        }
+
+        // Server-side Sorting
+        $sort = $request->input('sort', 'name');
+        $direction = $request->input('direction', 'asc');
+
+        $sortFn = function ($a, $b) use ($sort, $direction) {
+            $valA = $a[$sort] ?? '';
+            $valB = $b[$sort] ?? '';
+
+            if ($sort === 'date') {
+                $valA = strtotime($a['modified'] ?? 0);
+                $valB = strtotime($b['modified'] ?? 0);
+                if ($valA == $valB) {
+                    return 0;
                 }
-                
-                if (!empty($extensions)) {
-                    $files = array_values(array_filter($files, fn($f) => in_array(strtolower($f['extension']), $extensions)));
-                }
+
+                return ($direction === 'asc') ? ($valA - $valB) : ($valB - $valA);
             }
 
-            // Server-side Sorting
-            $sort = $request->input('sort', 'name');
-            $direction = $request->input('direction', 'asc');
-            
-            $sortFn = function($a, $b) use ($sort, $direction) {
-                $valA = $a[$sort] ?? '';
-                $valB = $b[$sort] ?? '';
-                
-                if ($sort === 'date') {
-                    $valA = strtotime($a['modified'] ?? 0);
-                    $valB = strtotime($b['modified'] ?? 0);
-                    if ($valA == $valB) return 0;
-                    return ($direction === 'asc') ? ($valA - $valB) : ($valB - $valA);
-                }
-                
-                if ($sort === 'size') {
-                    $valA = $a['size'] ?? 0;
-                    $valB = $b['size'] ?? 0;
-                    if ($valA == $valB) return 0;
-                    return ($direction === 'asc') ? ($valA - $valB) : ($valB - $valA);
+            if ($sort === 'size') {
+                $valA = $a['size'] ?? 0;
+                $valB = $b['size'] ?? 0;
+                if ($valA == $valB) {
+                    return 0;
                 }
 
-                // Default string comparison (name)
-                return ($direction === 'asc') 
-                    ? strcasecmp((string)$valA, (string)$valB) 
-                    : strcasecmp((string)$valB, (string)$valA);
-            };
+                return ($direction === 'asc') ? ($valA - $valB) : ($valB - $valA);
+            }
 
-            usort($folders, $sortFn);
-            usort($files, $sortFn);
+            // Default string comparison (name)
+            return ($direction === 'asc')
+                ? strcasecmp((string) $valA, (string) $valB)
+                : strcasecmp((string) $valB, (string) $valA);
+        };
 
-            return $this->success([
-                'path' => $path ? '/'.$path : '/',
-                'folders' => $folders,
-                'files' => $files,
-            ], 'Directory contents retrieved successfully');
+        usort($folders, $sortFn);
+        usort($files, $sortFn);
+
+        return $this->success([
+            'path' => $path ? '/'.$path : '/',
+            'folders' => $folders,
+            'files' => $files,
+        ], 'Directory contents retrieved successfully');
     }
 
     public function download(Request $request)
@@ -227,22 +233,67 @@ class FileManagerController extends BaseApiController
     }
 
     /**
+     * Download a folder as ZIP
+     */
+    protected function downloadFolder(string $path, string $disk)
+    {
+        if (! class_exists('ZipArchive')) {
+            return $this->error('Zip extension not installed', 500);
+        }
+
+        $zipFileName = basename($path).'.zip';
+        $zipPath = storage_path('app/temp/'.$zipFileName);
+
+        // Ensure temp directory exists
+        if (! File::exists(dirname($zipPath))) {
+            File::makeDirectory(dirname($zipPath), 0755, true);
+        }
+
+        $zip = new \ZipArchive;
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
+            $files = Storage::disk($disk)->allFiles($path);
+
+            foreach ($files as $file) {
+                // Get relative path inside the zip
+                // If path is "foo/bar" and file is "foo/bar/baz.txt", relative is "baz.txt"
+                // But usually we want to keep structure inside the zip, maybe "bar/baz.txt" or just "baz.txt"
+                // Let's keep relative path from the folder root
+
+                // Add file to zip
+                $content = Storage::disk($disk)->get($file);
+                $zip->addFromString($file, $content);
+            }
+
+            $zip->close();
+        } else {
+            return $this->error('Failed to create zip file', 500);
+        }
+
+        return response()->download($zipPath)->deleteFileAfterSend(true);
+    }
+
+    /**
      * @OA\Post(
      *     path="/api/v1/file-manager/upload",
      *     summary="Upload file to specific path",
      *     tags={"File Manager"},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
+     *
      *             @OA\Schema(
      *                 required={"file"},
+     *
      *                 @OA\Property(property="file", type="string", format="binary"),
      *                 @OA\Property(property="disk", type="string"),
      *                 @OA\Property(property="path", type="string")
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response=201, description="Uploaded"),
      *     security={{"sanctum":{}}}
      * )
@@ -295,15 +346,15 @@ class FileManagerController extends BaseApiController
 
             // Sanitize SVG
             if ($extension === 'svg' || $file->getMimeType() === 'image/svg+xml') {
-                 if (class_exists(\enshrined\svgSanitize\Sanitizer::class)) {
-                     try {
-                        $sanitizer = new \enshrined\svgSanitize\Sanitizer();
+                if (class_exists(\enshrined\svgSanitize\Sanitizer::class)) {
+                    try {
+                        $sanitizer = new \enshrined\svgSanitize\Sanitizer;
                         $sanitizer->removeRemoteReferences(true);
                         $content = $sanitizer->sanitize($content);
-                     } catch (\Exception $e) {
-                         \Illuminate\Support\Facades\Log::warning('SVG sanitization failed in FileManager: '.$e->getMessage());
-                     }
-                 }
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::warning('SVG sanitization failed in FileManager: '.$e->getMessage());
+                    }
+                }
             }
 
             Storage::disk($disk)->put($filePath, $content);
@@ -333,7 +384,7 @@ class FileManagerController extends BaseApiController
             'method' => $request->method(),
             'input' => $request->all(),
             'query' => $request->query(),
-            'user' => $request->user()->id
+            'user' => $request->user()->id,
         ]);
 
         if (! $request->user()->can('manage files')) {
@@ -356,9 +407,9 @@ class FileManagerController extends BaseApiController
 
         if ($permanent) {
             // Find media if any
-            $media = \App\Models\Media::where(function($q) use ($path) {
+            $media = \App\Models\Media::where(function ($q) use ($path) {
                 $q->where('path', $path)
-                  ->orWhere('path', '/'.$path);
+                    ->orWhere('path', '/'.$path);
             })->first();
 
             if ($media) {
@@ -395,10 +446,10 @@ class FileManagerController extends BaseApiController
         // Sync with Media Library (Delete)
         try {
             // Find valid media
-            $media = \App\Models\Media::where(function($q) use ($path) {
+            $media = \App\Models\Media::where(function ($q) use ($path) {
                 $q->where('path', $path)
-                  ->orWhere('path', '/'.$path)
-                  ->orWhere('path', trim($path, '/'));
+                    ->orWhere('path', '/'.$path)
+                    ->orWhere('path', trim($path, '/'));
             })->first();
 
             if ($media) {
@@ -410,8 +461,8 @@ class FileManagerController extends BaseApiController
                 $media->delete(); // Soft delete
             }
         } catch (\Exception $e) {
-             // Log but don't fail the file operation
-             \Illuminate\Support\Facades\Log::warning('Failed to sync media delete: '.$e->getMessage());
+            // Log but don't fail the file operation
+            \Illuminate\Support\Facades\Log::warning('Failed to sync media delete: '.$e->getMessage());
         }
 
         // Record in database
@@ -440,7 +491,7 @@ class FileManagerController extends BaseApiController
             'method' => $request->method(),
             'input' => $request->all(),
             'query' => $request->query(),
-            'user' => $request->user()->id
+            'user' => $request->user()->id,
         ]);
 
         if (! $request->user()->can('manage files')) {
@@ -484,15 +535,15 @@ class FileManagerController extends BaseApiController
         // Sync with Media Library (Update paths for all files inside the folder)
         try {
             // Find all media items starting with this path
-            $searchPath = $path . '/';
-            $mediaItems = \App\Models\Media::where('path', 'like', $searchPath . '%')
-                ->orWhere('path', 'like', '/' . $searchPath . '%')
+            $searchPath = $path.'/';
+            $mediaItems = \App\Models\Media::where('path', 'like', $searchPath.'%')
+                ->orWhere('path', 'like', '/'.$searchPath.'%')
                 ->get();
 
             foreach ($mediaItems as $media) {
-                $relativePart = str_replace([$path, '/' . $path], '', $media->path);
-                $newMediaPath = $trashPath . $relativePart;
-                
+                $relativePart = str_replace([$path, '/'.$path], '', $media->path);
+                $newMediaPath = $trashPath.$relativePart;
+
                 // Move thumbnails and variants for this media item too
                 // We need to pass the new path to moveVariantsToTrash logic
                 // But moveVariantsToTrash moves FROM $media->path TO $trashPath
@@ -529,15 +580,19 @@ class FileManagerController extends BaseApiController
      *     path="/api/v1/file-manager/folder",
      *     summary="Create new folder",
      *     tags={"File Manager"},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"name"},
+     *
      *             @OA\Property(property="name", type="string"),
      *             @OA\Property(property="disk", type="string"),
      *             @OA\Property(property="path", type="string")
      *         )
      *     ),
+     *
      *     @OA\Response(response=201, description="Created"),
      *     security={{"sanctum":{}}}
      * )
@@ -555,7 +610,7 @@ class FileManagerController extends BaseApiController
         ]);
 
         $name = $request->input('name');
-        
+
         try {
             $disk = $this->validateDisk($request->input('disk'));
             $path = $this->validatePath($request->input('path'));
@@ -734,7 +789,7 @@ class FileManagerController extends BaseApiController
 
         $newName = $request->input('newName');
         $type = $request->input('type');
-        
+
         try {
             $disk = $this->validateDisk($request->input('disk'));
             $path = $this->validatePath($request->input('path'));
@@ -795,8 +850,8 @@ class FileManagerController extends BaseApiController
                     'size' => $item->size,
                     'formatted_size' => $item->formatted_size,
                     'extension' => $item->extension,
-                    'deleted_at' => $item->deleted_at?->toIso8601String(),
-                    'deleted_by' => $item->deletedByUser?->name ?? 'Unknown',
+                    'deleted_at' => $item->deleted_at->toIso8601String(),
+                    'deleted_by' => $item->deletedByUser ? $item->deletedByUser->name : 'Unknown',
                 ];
             });
 
@@ -826,8 +881,9 @@ class FileManagerController extends BaseApiController
         $originalPath = ltrim($deletedFile->original_path, '/');
         $disk = $deletedFile->disk ?? 'public'; // Use disk from deleted_files table
 
-        if (! Storage::disk($disk)->exists($trashPath) && !is_dir(Storage::disk($disk)->path($trashPath))) {
+        if (! Storage::disk($disk)->exists($trashPath) && ! is_dir(Storage::disk($disk)->path($trashPath))) {
             $deletedFile->delete(); // Remove record if file/folder is already gone
+
             return $this->error('Trash item no longer exists in storage', 404, [], 'TRASH_ITEM_NOT_FOUND');
         }
 
@@ -858,11 +914,11 @@ class FileManagerController extends BaseApiController
 
         // Sync with Media Library (Restore)
         if ($deletedFile->type === 'file') {
-             try {
+            try {
                 $media = \App\Models\Media::withTrashed()
-                    ->where(function($q) use ($trashPath) {
+                    ->where(function ($q) use ($trashPath) {
                         $q->where('path', $trashPath)
-                          ->orWhere('path', '/'.$trashPath);
+                            ->orWhere('path', '/'.$trashPath);
                     })
                     ->first();
 
@@ -883,13 +939,13 @@ class FileManagerController extends BaseApiController
             try {
                 // Find all media items starting with the trash path
                 $mediaItems = \App\Models\Media::withTrashed()
-                    ->where('path', 'like', $trashPath . '%')
-                    ->orWhere('path', 'like', '/' . $trashPath . '%')
+                    ->where('path', 'like', $trashPath.'%')
+                    ->orWhere('path', 'like', '/'.$trashPath.'%')
                     ->get();
 
                 foreach ($mediaItems as $media) {
-                    $relativePart = str_replace([$trashPath, '/' . $trashPath], '', $media->path);
-                    $newPath = $finalOriginalPath . $relativePart;
+                    $relativePart = str_replace([$trashPath, '/'.$trashPath], '', $media->path);
+                    $newPath = $finalOriginalPath.$relativePart;
 
                     // Move variants back from trash
                     $this->mediaService->moveVariantsFromTrash($media, $media->path, $newPath);
@@ -903,10 +959,9 @@ class FileManagerController extends BaseApiController
             }
         }
 
-
         // Remove from database
         $deletedFile->delete();
-        
+
         ActivityLog::log('restored_file', null, ['path' => $finalOriginalPath, 'disk' => $disk], $request->user(), "Restored item from trash: {$finalOriginalPath}");
 
         return $this->success([
@@ -933,11 +988,11 @@ class FileManagerController extends BaseApiController
 
             // Sync with Media Library (Force Delete)
             if ($record->type === 'file') {
-                 try {
+                try {
                     $media = \App\Models\Media::withTrashed()
-                        ->where(function($q) use ($trashPath) {
+                        ->where(function ($q) use ($trashPath) {
                             $q->where('path', $trashPath)
-                              ->orWhere('path', '/'.$trashPath);
+                                ->orWhere('path', '/'.$trashPath);
                         })
                         ->first();
 
@@ -952,8 +1007,8 @@ class FileManagerController extends BaseApiController
                 try {
                     $searchPath = $record->trash_path;
                     $mediaItems = \App\Models\Media::withTrashed()
-                        ->where('path', 'like', $searchPath . '%')
-                        ->orWhere('path', 'like', '/' . $searchPath . '%')
+                        ->where('path', 'like', $searchPath.'%')
+                        ->orWhere('path', 'like', '/'.$searchPath.'%')
                         ->get();
 
                     foreach ($mediaItems as $media) {
@@ -965,7 +1020,7 @@ class FileManagerController extends BaseApiController
             }
 
             // Track unique disks to clean directories later
-            if (!in_array($disk, $disksToClean)) {
+            if (! in_array($disk, $disksToClean)) {
                 $disksToClean[] = $disk;
             }
         }
@@ -978,7 +1033,7 @@ class FileManagerController extends BaseApiController
                     Storage::disk($diskName)->makeDirectory('.trash');
                 }
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("Failed to clean trash on disk {$diskName}: " . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error("Failed to clean trash on disk {$diskName}: ".$e->getMessage());
             }
         }
 
@@ -986,7 +1041,7 @@ class FileManagerController extends BaseApiController
         $count = $deletedRecords->count();
         \App\Models\DeletedFile::query()->delete();
 
-        ActivityLog::log('emptied_trash', null, ['deleted_count' => $count, 'disks' => $disksToClean], $request->user(), "Emptied File Manager trash on disks: " . implode(', ', $disksToClean));
+        ActivityLog::log('emptied_trash', null, ['deleted_count' => $count, 'disks' => $disksToClean], $request->user(), 'Emptied File Manager trash on disks: '.implode(', ', $disksToClean));
 
         return $this->success([
             'deleted_count' => $count,
@@ -1002,7 +1057,7 @@ class FileManagerController extends BaseApiController
             'method' => $request->method(),
             'input' => $request->all(),
             'query' => $request->query(),
-            'user' => $request->user()->id
+            'user' => $request->user()->id,
         ]);
 
         if (! $request->user()->can('manage files')) {
@@ -1018,20 +1073,20 @@ class FileManagerController extends BaseApiController
         $disk = $deletedFile->disk ?? 'public'; // Use disk from deleted_files table
 
         try {
-             $disk = $this->validateDisk($disk);
+            $disk = $this->validateDisk($disk);
         } catch (\Illuminate\Validation\ValidationException $e) {
-             return $this->validationError($e->errors());
+            return $this->validationError($e->errors());
         }
-        
+
         $trashPath = $deletedFile->trash_path;
 
         // Sync with Media Library (Force Delete)
         if ($deletedFile->type === 'file') {
-             try {
+            try {
                 $media = \App\Models\Media::withTrashed()
-                    ->where(function($q) use ($trashPath) {
+                    ->where(function ($q) use ($trashPath) {
                         $q->where('path', $trashPath)
-                          ->orWhere('path', '/'.$trashPath);
+                            ->orWhere('path', '/'.$trashPath);
                     })
                     ->first();
 
@@ -1046,8 +1101,8 @@ class FileManagerController extends BaseApiController
             try {
                 $searchPath = $deletedFile->trash_path;
                 $mediaItems = \App\Models\Media::withTrashed()
-                    ->where('path', 'like', $searchPath . '%')
-                    ->orWhere('path', 'like', '/' . $searchPath . '%')
+                    ->where('path', 'like', $searchPath.'%')
+                    ->orWhere('path', 'like', '/'.$searchPath.'%')
                     ->get();
 
                 foreach ($mediaItems as $media) {
@@ -1126,21 +1181,21 @@ class FileManagerController extends BaseApiController
                 if ($zip->open($fullPath) === true) {
                     for ($i = 0; $i < $zip->numFiles; $i++) {
                         $filename = $zip->getNameIndex($i);
-                        
+
                         // Prevent Zip Slip
                         // 1. Check for .. in path
                         if (str_contains($filename, '..')) {
                             $zip->close();
-                             throw new \Exception("Security Violation: Zip Slip detected in entry '$filename'");
+                            throw new \Exception("Security Violation: Zip Slip detected in entry '$filename'");
                         }
-                        
+
                         // 2. Ensure destination is within extract dir
-                        $destination = $extractPath . '/' . $filename;
-                        
+                        $destination = $extractPath.'/'.$filename;
+
                         // Canonicalize path (handle if it doesn't exist yet)
                         // Note: We can't use realpath on non-existent files.
                         // We rely on '..' check above strongly.
-                        
+
                         // Extract specific file
                         $zip->extractTo($extractPath, $filename);
                     }

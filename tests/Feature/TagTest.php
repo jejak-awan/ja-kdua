@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Content;
 use App\Models\Tag;
 use App\Models\User;
 use Tests\Helpers\TestHelpers;
@@ -50,8 +49,8 @@ class TagTest extends TestCase
         $this->actingAs($admin, 'sanctum');
 
         $tagData = [
-            'name' => 'Test Tag ' . uniqid(),
-            'slug' => 'test-tag-' . uniqid(),
+            'name' => 'Test Tag '.uniqid(),
+            'slug' => 'test-tag-'.uniqid(),
             'description' => 'Test tag description',
         ];
 
@@ -128,7 +127,7 @@ class TagTest extends TestCase
 
         $response = $this->putJson("/api/v1/admin/ja/tags/{$tag->id}", [
             'name' => 'Updated Tag Name',
-            'slug' => 'updated-tag-name-' . uniqid(),
+            'slug' => 'updated-tag-name-'.uniqid(),
         ]);
 
         TestHelpers::assertApiSuccess($response);

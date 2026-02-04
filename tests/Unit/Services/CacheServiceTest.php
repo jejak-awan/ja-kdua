@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class CacheServiceTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     protected function setUp(): void
     {

@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class CommentSystemTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     /**
      * Test user can post a comment on published content.
@@ -204,7 +204,7 @@ class CommentSystemTest extends TestCase
             $response = $this->postJson("/api/v1/cms/contents/{$content->id}/comments", [
                 'body' => "Comment {$i}",
                 'name' => 'Test User',
-                'email' => "test{$i}@example.com", // Unique email to ensure guest ID doesn't conflict? 
+                'email' => "test{$i}@example.com", // Unique email to ensure guest ID doesn't conflict?
                 // Throttle usually defaults to IP.
             ]);
         }

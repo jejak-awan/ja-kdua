@@ -8,6 +8,23 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ * @property int|null $parent_id
+ * @property int $sort_order
+ * @property int|null $author_id
+ * @property bool $is_shared
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\User $author
+ * @property-read \App\Models\MediaFolder|null $parent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\MediaFolder[] $children
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Media[] $media
+ * @property-read string $full_path
+ */
 class MediaFolder extends Model
 {
     use HasFactory, SoftDeletes;

@@ -13,7 +13,7 @@ class CleanupSlowQueryLogs extends Command
 
     public function handle()
     {
-        $days = $this->option('days');
+        $days = (int) $this->option('days');
 
         $deleted = SlowQuery::where('created_at', '<', now()->subDays($days))->delete();
 

@@ -17,7 +17,9 @@ class RedisController extends BaseApiController
     {
         $settings = RedisSetting::orderBy('group')->orderBy('key')->get();
 
-        $grouped = $settings->groupBy('group')->map(function ($items) {
+        /** @phpstan-ignore argument.type */
+        $grouped = $settings->groupBy('group')->map(function (\Illuminate\Database\Eloquent\Collection $items) {
+            /** @phpstan-ignore return.type */
             return $items->map(function ($item) {
                 return [
                     'id' => $item->id,
@@ -45,10 +47,10 @@ class RedisController extends BaseApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->validationError($validator->errors());
+            return $this->validationError($validator->errors()->toArray());
         }
 
-        foreach ($request->settings as $settingData) {
+        foreach ($request->input('settings') as $settingData) {
             RedisSetting::setValue($settingData['key'], $settingData['value']);
         }
 
@@ -225,23 +227,19 @@ class RedisController extends BaseApiController
      */
     private function getTotalKeys()
     {
+        $count = 0;
+        // Try to count keys from both default and cache connections
         try {
-            $count = 0;
-            // Try to count keys from both default and cache connections
-            try {
-                $count += count(Redis::connection('default')->keys('*'));
-            } catch (\Exception $e) {
-            }
-
-            try {
-                $count += count(Redis::connection('cache')->keys('*'));
-            } catch (\Exception $e) {
-            }
-
-            return $count;
+            $count += count(Redis::connection('default')->keys('*'));
         } catch (\Exception $e) {
-            return 0;
         }
+
+        try {
+            $count += count(Redis::connection('cache')->keys('*'));
+        } catch (\Exception $e) {
+        }
+
+        return $count;
     }
 
     /**

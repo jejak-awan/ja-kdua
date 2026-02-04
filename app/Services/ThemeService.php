@@ -174,7 +174,7 @@ class ThemeService
      */
     public function loadThemeAssets(Theme $theme): array
     {
-        if (! $theme || ! $theme->path) {
+        if (! $theme->path) {
             return ['css' => [], 'js' => []];
         }
 
@@ -262,7 +262,8 @@ class ThemeService
      */
     public function checkDependencies(Theme $theme): bool
     {
-        if (! $theme->dependencies || empty($theme->dependencies)) {
+        // Check dependencies
+        if (empty($theme->dependencies)) {
             return true;
         }
 

@@ -190,7 +190,7 @@ class MenuController extends BaseApiController
         ]);
 
         // Security: Validate target_type against whitelist
-        if (!empty($validated['target_type']) && !in_array($validated['target_type'], MenuItem::ALLOWED_TARGET_TYPES)) {
+        if (! empty($validated['target_type']) && ! in_array($validated['target_type'], MenuItem::ALLOWED_TARGET_TYPES)) {
             return $this->error('Invalid target type', 422);
         }
 
@@ -248,7 +248,7 @@ class MenuController extends BaseApiController
         ]);
 
         // Security: Validate target_type against whitelist
-        if (!empty($validated['target_type']) && !in_array($validated['target_type'], MenuItem::ALLOWED_TARGET_TYPES)) {
+        if (! empty($validated['target_type']) && ! in_array($validated['target_type'], MenuItem::ALLOWED_TARGET_TYPES)) {
             return $this->error('Invalid target type', 422);
         }
 
@@ -318,10 +318,10 @@ class MenuController extends BaseApiController
     public function getByLocation(Request $request, $location)
     {
         $cacheKey = "menu_location_{$location}";
-        
+
         $menu = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($location) {
             $menu = Menu::getByLocation($location);
-            
+
             if ($menu) {
                 // Eager load items and their recursive children with their targets to fix N+1
                 $menu->load([
@@ -331,10 +331,10 @@ class MenuController extends BaseApiController
                                 $sq->with(['target']);
                             }]);
                         }]);
-                    }
+                    },
                 ]);
             }
-            
+
             return $menu;
         });
 

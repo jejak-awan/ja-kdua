@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
@@ -19,10 +18,10 @@ class FileManagerSecurityTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Reserve ID 1 for superadmin test
         User::factory()->create(['id' => 1]);
-        
+
         // Create normal admin with permission (Force ID 2)
         $this->admin = User::factory()->create(['id' => 2]);
         $permission = Permission::firstOrCreate(['name' => 'manage files']);
@@ -45,7 +44,7 @@ class FileManagerSecurityTest extends TestCase
             ->getJson('/api/v1/admin/ja/file-manager?path=../private');
 
         $response->assertStatus(422)
-             ->assertJsonValidationErrors(['path']);
+            ->assertJsonValidationErrors(['path']);
     }
 
     public function test_cannot_upload_to_traversal_path()
@@ -58,7 +57,7 @@ class FileManagerSecurityTest extends TestCase
             ->postJson('/api/v1/admin/ja/file-manager/upload', [
                 'file' => $file,
                 'path' => '../',
-                'disk' => 'public'
+                'disk' => 'public',
             ]);
 
         $response->assertStatus(422)
@@ -75,13 +74,13 @@ class FileManagerSecurityTest extends TestCase
                 'source' => 'test.txt',
                 'destination' => 'new.txt',
                 'type' => 'file',
-                'disk' => 'local' // Restricted
+                'disk' => 'local', // Restricted
             ]);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['disk']);
     }
-    
+
     public function test_super_admin_can_access_any_disk()
     {
         // User ID 1 is super admin
@@ -95,7 +94,7 @@ class FileManagerSecurityTest extends TestCase
         $response = $this->actingAs($superAdmin, 'sanctum')
             ->getJson('/api/v1/admin/ja/file-manager?disk=local');
 
-        // Should NOT be 422. 
+        // Should NOT be 422.
         $response->assertSuccessful();
     }
 }

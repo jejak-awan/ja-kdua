@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class SearchFunctionalityTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     /**
      * Test user can search for content.

@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -141,7 +141,7 @@ return new class extends Migration
                     'type' => 'section',
                     'settings' => [
                         'padding' => '80px 0',
-                         'background_color' => '#f8f9fa'
+                        'background_color' => '#f8f9fa',
                     ],
                     'children' => [
                         [
@@ -156,29 +156,29 @@ return new class extends Migration
                                             'settings' => [
                                                 'text' => 'Welcome to our website',
                                                 'tag' => 'h1',
-                                                'alignment' => 'center'
-                                            ]
+                                                'alignment' => 'center',
+                                            ],
                                         ],
                                         [
                                             'type' => 'text',
                                             'settings' => [
                                                 'content' => '<p style="text-align: center;">This is a simple hero section to get you started.</p>',
-                                                'alignment' => 'center'
-                                            ]
+                                                'alignment' => 'center',
+                                            ],
                                         ],
                                         [
                                             'type' => 'button',
                                             'settings' => [
                                                 'text' => 'Get Started',
                                                 'alignment' => 'center',
-                                                'url' => '#'
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
+                                                'url' => '#',
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                 ]),
             ],
             [
@@ -199,28 +199,28 @@ return new class extends Migration
                                     'settings' => ['width' => '4'],
                                     'children' => [
                                         ['type' => 'heading', 'settings' => ['text' => 'Feature 1', 'tag' => 'h3']],
-                                        ['type' => 'text', 'settings' => ['content' => 'Description for feature 1.']]
-                                    ]
+                                        ['type' => 'text', 'settings' => ['content' => 'Description for feature 1.']],
+                                    ],
                                 ],
                                 [
                                     'type' => 'column',
                                     'settings' => ['width' => '4'],
                                     'children' => [
                                         ['type' => 'heading', 'settings' => ['text' => 'Feature 2', 'tag' => 'h3']],
-                                        ['type' => 'text', 'settings' => ['content' => 'Description for feature 2.']]
-                                    ]
+                                        ['type' => 'text', 'settings' => ['content' => 'Description for feature 2.']],
+                                    ],
                                 ],
                                 [
                                     'type' => 'column',
                                     'settings' => ['width' => '4'],
                                     'children' => [
                                         ['type' => 'heading', 'settings' => ['text' => 'Feature 3', 'tag' => 'h3']],
-                                        ['type' => 'text', 'settings' => ['content' => 'Description for feature 3.']]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
+                                        ['type' => 'text', 'settings' => ['content' => 'Description for feature 3.']],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                 ]),
             ],
             [
@@ -233,7 +233,7 @@ return new class extends Migration
                     'type' => 'section',
                     'settings' => [
                         'background_color' => '#4f46e5',
-                        'padding' => '60px 0'
+                        'padding' => '60px 0',
                     ],
                     'children' => [
                         [
@@ -244,20 +244,20 @@ return new class extends Migration
                                     'settings' => ['width' => '8'],
                                     'children' => [
                                         ['type' => 'heading', 'settings' => ['text' => 'Ready to dive in?', 'tag' => 'h2', 'color' => '#ffffff']],
-                                    ]
+                                    ],
                                 ],
                                 [
                                     'type' => 'column',
                                     'settings' => ['width' => '4', 'vertical_align' => 'center'],
                                     'children' => [
-                                        ['type' => 'button', 'settings' => ['text' => 'Sign Up Now', 'variant' => 'outline', 'color' => '#ffffff']]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
+                                        ['type' => 'button', 'settings' => ['text' => 'Sign Up Now', 'variant' => 'outline', 'color' => '#ffffff']],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                 ]),
-            ]
+            ],
         ]);
     }
 

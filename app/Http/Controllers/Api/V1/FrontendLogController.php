@@ -11,7 +11,6 @@ class FrontendLogController extends Controller
     /**
      * Handle incoming frontend log entries.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)

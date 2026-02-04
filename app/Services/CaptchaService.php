@@ -228,7 +228,7 @@ class CaptchaService
             $y = ($height / 2) + ($fontSize / 2) + rand(-2, 2); // Baseline position
 
             if ($useTtf) {
-                imagettftext($image, $fontSize, $angle, $x, $y, $color, $fontPath, $char);
+                imagettftext($image, $fontSize, $angle, (int) $x, (int) $y, $color, $fontPath, $char);
             } else {
                 // Legacy fallback (should ideally not happen given our search)
                 // Use built-in font scaled up? No, just center it
@@ -238,7 +238,7 @@ class CaptchaService
                 // Center roughly
                 $lx = $x + ($charPadding / 2) - ($fw / 2);
                 $ly = ($height - $fh) / 2;
-                imagestring($image, $baseFont, $lx, $ly, $char, $color);
+                imagestring($image, $baseFont, (int) $lx, (int) $ly, $char, $color);
             }
         }
 

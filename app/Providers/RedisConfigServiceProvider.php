@@ -88,7 +88,7 @@ class RedisConfigServiceProvider extends ServiceProvider
             }
 
             // Apply config if mapping exists
-            if (isset($configMap[$key]) && $configMap[$key] !== null) {
+            if (isset($configMap[$key])) {
                 config([$configMap[$key] => $value]);
 
                 // Also update cache connection for consistency

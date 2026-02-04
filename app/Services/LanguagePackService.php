@@ -310,7 +310,7 @@ class LanguagePackService
             // Detect locale from first folder
             if ($detectedLocale === null) {
                 $parts = explode('/', $name);
-                if (count($parts) > 0 && $this->isValidLocaleCode($parts[0])) {
+                if ($this->isValidLocaleCode($parts[0])) {
                     $detectedLocale = $parts[0];
                 }
             }

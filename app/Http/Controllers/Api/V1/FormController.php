@@ -13,7 +13,7 @@ class FormController extends BaseApiController
 
         // Multi-tenancy scoping
         if (! $request->user()->can('manage forms')) {
-            $query->where('author_id', $request->user()->id);
+            $query->where('author_id', auth()->id());
         }
 
         if ($request->has('is_active')) {
@@ -48,8 +48,9 @@ class FormController extends BaseApiController
             'is_active' => 'boolean',
         ]);
 
-        $validated['author_id'] = $request->user()->id;
+        $validated['author_id'] = auth()->id();
 
+        /** @var Form $form */
         $form = Form::create($validated);
 
         return $this->success($form, 'Form created successfully', 201);
@@ -132,7 +133,6 @@ class FormController extends BaseApiController
         return $this->success(null, 'Form permanently deleted');
     }
 
-
     public function track(Request $request, Form $form)
     {
         $request->validate([
@@ -158,7 +158,7 @@ class FormController extends BaseApiController
 
         // Build validation rules from blocks
         $rules = [];
-        if ($form->blocks && count($form->blocks) > 0) {
+        if (! empty($form->blocks)) {
             $rules = $this->extractRulesFromBlocks($form->blocks);
         }
 
@@ -169,8 +169,8 @@ class FormController extends BaseApiController
                 'captcha_answer' => 'required|string',
             ]);
 
-            $captchaService = new \App\Services\CaptchaService();
-            if (!$captchaService->verify($request->captcha_token, $request->captcha_answer)) {
+            $captchaService = new \App\Services\CaptchaService;
+            if (! $captchaService->verify($request->captcha_token, $request->captcha_answer)) {
                 return $this->error('Invalid captcha', 422);
             }
         }
@@ -184,6 +184,8 @@ class FormController extends BaseApiController
             'ip_address' => \App\Helpers\IpHelper::getClientIp($request),
             'user_agent' => $request->userAgent(),
         ]);
+
+        /** @var \App\Models\FormSubmission $submission */
 
         // Increment submission count
         $form->incrementSubmissionCount();
@@ -217,7 +219,6 @@ class FormController extends BaseApiController
         ]);
     }
 
-
     protected function extractRulesFromBlocks($blocks)
     {
         $rules = [];
@@ -231,7 +232,7 @@ class FormController extends BaseApiController
                 $fieldId = $settings['field_id'] ?? null;
                 if ($fieldId) {
                     $fieldRules = [];
-                    
+
                     // Basic required check
                     if (isset($settings['is_required']) && $settings['is_required']) {
                         $fieldRules[] = 'required';
@@ -242,8 +243,12 @@ class FormController extends BaseApiController
                     // Type specific rules
                     if ($type === 'form_input') {
                         $inputType = $settings['type'] ?? 'text';
-                        if ($inputType === 'email') $fieldRules[] = 'email';
-                        if ($inputType === 'number') $fieldRules[] = 'numeric';
+                        if ($inputType === 'email') {
+                            $fieldRules[] = 'email';
+                        }
+                        if ($inputType === 'number') {
+                            $fieldRules[] = 'numeric';
+                        }
                         $fieldRules[] = 'string';
                         $fieldRules[] = 'max:255';
                     } elseif ($type === 'form_textarea') {
@@ -274,36 +279,59 @@ class FormController extends BaseApiController
         $newForm = $form->replicate(['slug', 'name', 'submission_count', 'view_count', 'start_count']);
         $newForm->name = $form->name.' (Copy)';
         $newForm->slug = $form->slug.'-copy-'.time();
-        $newForm->is_active = false;
-        $newForm->author_id = $request->user()->id;
-        
-        // Reset stats if not duplicating submissions
-        $newForm->submission_count = $withSubmissions ? $form->submission_count : 0;
-        $newForm->view_count = 0;
-        $newForm->start_count = 0;
-        
-        $newForm->save();
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:forms,slug',
+            'copy_submissions' => 'boolean',
+        ]);
 
-        // Duplicate submissions if requested
-        if ($withSubmissions) {
-            foreach ($form->submissions as $submission) {
-                $newSubmission = $submission->replicate();
-                $newSubmission->form_id = $newForm->id;
-                $newSubmission->save();
+        $title = $request->input('title');
+        $slug = $request->input('slug');
+        $copySubmissions = $request->boolean('copy_submissions');
+
+        $except = ['slug', 'name', 'submission_count', 'view_count', 'start_count'];
+        /** @var Form $replicated */
+        $replicated = $form->replicate($except);
+        $replicated->name = $title; // Use 'name' for the form's display name
+        $replicated->slug = $slug;
+        $replicated->is_active = false;
+        $replicated->author_id = $request->user()->id;
+        $replicated->submission_count = 0;
+        $replicated->view_count = 0;
+        $replicated->start_count = 0;
+        $replicated->save();
+
+        if ($copySubmissions) {
+            // Bulk insert for performance
+            $submissionsData = $form->submissions()->get()->map(function (\App\Models\FormSubmission $submission) use ($replicated) {
+                /** @var Form $replicated */
+                return [
+                    'form_id' => $replicated->id,
+                    'user_id' => $submission->user_id,
+                    'data' => $submission->data,
+                    'ip_address' => $submission->ip_address,
+                    'user_agent' => $submission->user_agent,
+                    'created_at' => now()->toDateTimeString(),
+                    'updated_at' => now()->toDateTimeString(),
+                ];
+            })->toArray();
+
+            if (! empty($submissionsData)) {
+                \App\Models\FormSubmission::insert($submissionsData);
+                $replicated->submission_count = count($submissionsData);
+                $replicated->save();
             }
         }
 
-        return $this->success($newForm, 'Form duplicated successfully', 201);
+        return $this->success($replicated, 'Form duplicated successfully', 201);
     }
-
 
     public function bulkAction(Request $request)
     {
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:forms,id',
-            'ids' => 'required|array',
-            'ids.*' => 'exists:forms,id',
+
             'action' => 'required|in:delete,restore,force_delete',
         ]);
 

@@ -13,7 +13,7 @@ class CleanupCspReports extends Command
 
     public function handle()
     {
-        $days = $this->option('days');
+        $days = (int) $this->option('days');
 
         $deleted = CspReport::where('created_at', '<', now()->subDays($days))->delete();
 

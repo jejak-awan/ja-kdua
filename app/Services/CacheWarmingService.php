@@ -347,7 +347,7 @@ class CacheWarmingService
     {
         try {
             if (config('cache.default') === 'redis') {
-                $redis = Cache::getRedis();
+                $redis = \Illuminate\Support\Facades\Redis::connection();
                 $pattern = config('cache.prefix').':'.$prefix.'*';
                 $keys = $redis->keys($pattern);
 

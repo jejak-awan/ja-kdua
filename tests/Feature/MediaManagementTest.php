@@ -4,17 +4,17 @@ namespace Tests\Feature;
 
 use App\Models\Media;
 use App\Models\MediaFolder;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Tag;
 use Tests\Helpers\TestHelpers;
 use Tests\TestCase;
 
 class MediaManagementTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -432,7 +432,7 @@ class MediaManagementTest extends TestCase
         ]);
 
         TestHelpers::assertApiSuccess($response);
-        
+
         foreach ($tags as $tagName) {
             $this->assertDatabaseHas('tags', ['name' => $tagName]);
         }

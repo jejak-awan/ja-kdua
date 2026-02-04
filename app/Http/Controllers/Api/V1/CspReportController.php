@@ -25,7 +25,7 @@ class CspReportController extends BaseApiController
                 }
             }
 
-            if (! $report || empty($report)) {
+            if (empty($report)) {
                 return response()->json(['status' => 'ignored'], 200);
             }
             CspReport::create([
@@ -57,19 +57,19 @@ class CspReportController extends BaseApiController
         $query = CspReport::query();
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $query->where('status', $request->input('status'));
         }
 
         if ($request->filled('directive')) {
-            $query->where('violated_directive', 'like', "%{$request->directive}%");
+            $query->where('violated_directive', 'like', "%{$request->input('directive')}%");
         }
 
         if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
+            $query->whereDate('created_at', '>=', $request->input('date_from'));
         }
 
         if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
+            $query->whereDate('created_at', '<=', $request->input('date_to'));
         }
 
         $reports = $query->latest()->paginate($request->input('per_page', 50));

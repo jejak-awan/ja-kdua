@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class UserPreferencesTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     protected User $user;
 

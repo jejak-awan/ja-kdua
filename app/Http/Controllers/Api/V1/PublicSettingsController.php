@@ -26,7 +26,7 @@ class PublicSettingsController extends BaseApiController
             'site_version' => config('app.version'),
             'site_logo' => Setting::get('site_logo', ''),
             'site_favicon' => Setting::get('site_favicon', '/favicon.svg'),
-            
+
             // Contact Info
             'contact_email' => Setting::get('contact_email', 'hello@janari.com'),
             'contact_phone' => Setting::get('contact_phone', ''),

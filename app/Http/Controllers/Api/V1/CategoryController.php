@@ -16,23 +16,29 @@ class CategoryController extends BaseApiController
      *     path="/api/v1/categories",
      *     summary="List all categories",
      *     tags={"Categories"},
+     *
      *     @OA\Parameter(
      *         name="tree",
      *         in="query",
      *         description="Return as tree structure",
      *         required=false,
+     *
      *         @OA\Schema(type="boolean")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
      *         description="Results per page",
      *         required=false,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Categories retrieved successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/SuccessResponse")
      *     ),
      *     security={{"sanctum":{}}}
@@ -75,6 +81,7 @@ class CategoryController extends BaseApiController
         if ($request->has('per_page')) {
             $perPage = (int) $request->get('per_page', 20);
             $categories = $query->paginate($perPage);
+
             return $this->success($categories, 'Categories retrieved successfully');
         }
 
@@ -88,10 +95,13 @@ class CategoryController extends BaseApiController
      *     path="/api/v1/categories",
      *     summary="Create a new category",
      *     tags={"Categories"},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"name", "slug"},
+     *
      *             @OA\Property(property="name", type="string", example="Technology"),
      *             @OA\Property(property="slug", type="string", example="technology"),
      *             @OA\Property(property="description", type="string", example="Tech related posts"),
@@ -99,14 +109,18 @@ class CategoryController extends BaseApiController
      *             @OA\Property(property="is_active", type="boolean", example=true)
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Category created successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/SuccessResponse")
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validation error",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
      *     ),
      *     security={{"sanctum":{}}}
@@ -157,21 +171,27 @@ class CategoryController extends BaseApiController
      *     path="/api/v1/categories/{category}",
      *     summary="Get category details",
      *     tags={"Categories"},
+     *
      *     @OA\Parameter(
      *         name="category",
      *         in="path",
      *         description="Category ID or Slug",
      *         required=true,
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Category retrieved successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/SuccessResponse")
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Category not found",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
      *     ),
      *     security={{"sanctum":{}}}
@@ -199,24 +219,31 @@ class CategoryController extends BaseApiController
      *     path="/api/v1/categories/{category}",
      *     summary="Update a category",
      *     tags={"Categories"},
+     *
      *     @OA\Parameter(
      *         name="category",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="name", type="string"),
      *             @OA\Property(property="slug", type="string"),
      *             @OA\Property(property="description", type="string"),
      *             @OA\Property(property="is_active", type="boolean")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Category updated successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/SuccessResponse")
      *     ),
      *     security={{"sanctum":{}}}
@@ -278,12 +305,15 @@ class CategoryController extends BaseApiController
      *     path="/api/v1/categories/{category}",
      *     summary="Delete a category",
      *     tags={"Categories"},
+     *
      *     @OA\Parameter(
      *         name="category",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Category deleted successfully"
@@ -336,18 +366,24 @@ class CategoryController extends BaseApiController
      *     path="/api/v1/categories/{category}/move",
      *     summary="Move category (hierarchical)",
      *     tags={"Categories"},
+     *
      *     @OA\Parameter(
      *         name="category",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="parent_id", type="integer"),
      *             @OA\Property(property="sort_order", type="integer")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Category moved successfully"
@@ -389,16 +425,21 @@ class CategoryController extends BaseApiController
 
         return $this->success($category->load(['parent', 'children']), 'Category moved successfully');
     }
+
     /**
      * @OA\Post(
      *     path="/api/v1/categories/bulk-delete",
      *     summary="Bulk delete categories",
      *     tags={"Categories"},
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="ids", type="array", @OA\Items(type="integer"))
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Bulk deletion processed"
@@ -423,10 +464,12 @@ class CategoryController extends BaseApiController
             if (! $request->user()->can('manage categories')) {
                 if ($category->author_id && $category->author_id !== $request->user()->id) {
                     $errors[] = "Permission denied for category ID {$category->id}: Not owner.";
+
                     continue;
                 }
                 if (is_null($category->author_id)) {
                     $errors[] = "Permission denied for category ID {$category->id}: Cannot delete global category.";
+
                     continue;
                 }
             }
@@ -434,12 +477,14 @@ class CategoryController extends BaseApiController
             // Check children
             if ($category->children()->count() > 0) {
                 $errors[] = "Category '{$category->name}' has sub-categories and cannot be deleted.";
+
                 continue;
             }
 
             // Check contents
             if ($category->contents()->count() > 0) {
                 $errors[] = "Category '{$category->name}' has associated contents and cannot be deleted.";
+
                 continue;
             }
 
@@ -456,7 +501,7 @@ class CategoryController extends BaseApiController
             // If partial success, we still return 200 but with messages
             return $this->success([
                 'deleted_count' => $count,
-                'errors' => $errors
+                'errors' => $errors,
             ], count($errors) === count($ids) ? 'Failed to delete categories' : 'Categories processed with some errors');
         }
 

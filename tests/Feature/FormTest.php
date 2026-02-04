@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Form;
-use App\Models\FormField;
 use App\Models\FormSubmission;
 use App\Models\User;
 use Tests\Helpers\TestHelpers;
@@ -35,8 +34,8 @@ class FormTest extends TestCase
         $this->actingAs($admin, 'sanctum');
 
         $formData = [
-            'name' => 'Contact Form ' . uniqid(),
-            'slug' => 'contact-form-' . uniqid(),
+            'name' => 'Contact Form '.uniqid(),
+            'slug' => 'contact-form-'.uniqid(),
             'description' => 'A contact form',
             'is_active' => true,
         ];
@@ -128,8 +127,6 @@ class FormTest extends TestCase
      * Test admin can add field to form.
      */
 
-
-
     /**
      * Test admin can duplicate form.
      */
@@ -190,7 +187,7 @@ class FormTest extends TestCase
                         'field_id' => 'name',
                         'type' => 'text',
                         'is_required' => true,
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'form_input',
@@ -198,9 +195,9 @@ class FormTest extends TestCase
                         'field_id' => 'email',
                         'type' => 'email',
                         'is_required' => true,
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ]);
 
         $response = $this->postJson("/api/v1/cms/forms/{$form->slug}/submit", [
@@ -225,9 +222,9 @@ class FormTest extends TestCase
                         'field_id' => 'email',
                         'type' => 'email',
                         'is_required' => true,
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ]);
 
         $response = $this->postJson("/api/v1/cms/forms/{$form->slug}/submit", []);

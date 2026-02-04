@@ -6,6 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Crypt;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string|null $secret
+ * @property array|null $backup_codes
+ * @property bool $enabled
+ * @property \Illuminate\Support\Carbon|null $enabled_at
+ * @property \Illuminate\Support\Carbon|null $recovery_codes_generated_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User $user
+ */
 class TwoFactorAuth extends Model
 {
     protected $table = 'two_factor_auth';
@@ -68,7 +80,7 @@ class TwoFactorAuth extends Model
      */
     public function verifyBackupCode(string $code): bool
     {
-        if (! $this->backup_codes || ! is_array($this->backup_codes)) {
+        if (empty($this->backup_codes)) {
             return false;
         }
 
@@ -104,7 +116,7 @@ class TwoFactorAuth extends Model
      */
     public function getRemainingBackupCodesCount(): int
     {
-        if (! $this->backup_codes || ! is_array($this->backup_codes)) {
+        if (empty($this->backup_codes)) {
             return 0;
         }
 

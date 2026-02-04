@@ -51,8 +51,8 @@ class CategoryTest extends TestCase
         $this->actingAs($admin, 'sanctum');
 
         $categoryData = [
-            'name' => 'Test Category ' . uniqid(),
-            'slug' => 'test-category-' . uniqid(),
+            'name' => 'Test Category '.uniqid(),
+            'slug' => 'test-category-'.uniqid(),
             'description' => 'Test description',
             'is_active' => true,
             'sort_order' => 1,
@@ -226,7 +226,7 @@ class CategoryTest extends TestCase
         ]);
 
         TestHelpers::assertApiSuccess($response);
-        
+
         $category->refresh();
         $this->assertEquals($parent->id, $category->parent_id);
         $this->assertEquals(5, $category->sort_order);
@@ -273,7 +273,7 @@ class CategoryTest extends TestCase
 
         $response = $this->postJson('/api/v1/admin/ja/categories', [
             'name' => 'Test',
-            'slug' => 'test-' . uniqid(),
+            'slug' => 'test-'.uniqid(),
         ]);
 
         $response->assertStatus(403);

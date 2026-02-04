@@ -4,7 +4,6 @@ namespace Tests\Unit\Services;
 
 use App\Models\IpList;
 use App\Models\SecurityLog;
-use App\Models\Setting;
 use App\Models\User;
 use App\Services\SecurityService;
 use Illuminate\Support\Facades\Cache;
@@ -18,7 +17,7 @@ class SecurityServiceTest extends TestCase
     {
         parent::setUp();
         Cache::flush();
-        $this->service = new SecurityService();
+        $this->service = new SecurityService;
     }
 
     /**
@@ -66,7 +65,7 @@ class SecurityServiceTest extends TestCase
 
         // Simulate max failed attempts
         $maxAttempts = $this->service->getMaxFailedAttempts();
-        
+
         for ($i = 1; $i <= $maxAttempts; $i++) {
             $result = $this->service->recordFailedLogin($email, $ip);
         }

@@ -55,7 +55,7 @@ class LogSlowQueries
                             return [
                                 'query' => $query['query'],
                                 'time' => $query['time'] ?? 0,
-                                'bindings' => $query['bindings'] ?? [],
+                                'bindings' => $query['bindings'],
                             ];
                         }, $slowQueries),
                     ]);
@@ -65,7 +65,7 @@ class LogSlowQueries
                         foreach ($slowQueries as $query) {
                             \App\Models\SlowQuery::create([
                                 'query' => $query['query'],
-                                'bindings' => $query['bindings'] ?? [],
+                                'bindings' => $query['bindings'],
                                 'duration' => (int) ($query['time'] ?? 0),
                                 'route' => $request->path(),
                                 'user_id' => auth()->id(),

@@ -12,11 +12,11 @@ class CustomFieldController extends BaseApiController
         $query = CustomField::with('fieldGroup');
 
         if ($request->has('field_group_id')) {
-            $query->where('field_group_id', $request->field_group_id);
+            $query->where('field_group_id', $request->input('field_group_id'));
         }
 
         if ($request->has('type')) {
-            $query->where('type', $request->type);
+            $query->where('type', $request->input('type'));
         }
 
         $fields = $query->orderBy('sort_order')->get();

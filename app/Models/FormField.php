@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class FormField extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'form_id',
         'name',

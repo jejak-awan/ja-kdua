@@ -34,7 +34,7 @@ class ContentRevision extends Model
     {
         return $this->belongsTo(User::class, 'author_id');
     }
-    
+
     // Alias for backward compatibility if needed, or just remove
     public function user(): BelongsTo
     {

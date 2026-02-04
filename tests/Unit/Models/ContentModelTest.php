@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class ContentModelTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     /**
      * Test content belongs to author.

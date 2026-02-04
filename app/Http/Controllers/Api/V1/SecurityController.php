@@ -24,23 +24,23 @@ class SecurityController extends BaseApiController
         $query = SecurityLog::with('user');
 
         if ($request->has('event_type')) {
-            $query->where('event_type', $request->event_type);
+            $query->where('event_type', $request->input('event_type'));
         }
 
         if ($request->has('ip_address')) {
-            $query->where('ip_address', $request->ip_address);
+            $query->where('ip_address', $request->input('ip_address'));
         }
 
         if ($request->has('user_id')) {
-            $query->where('user_id', $request->user_id);
+            $query->where('user_id', $request->input('user_id'));
         }
 
         if ($request->has('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
+            $query->whereDate('created_at', '>=', $request->input('date_from'));
         }
 
         if ($request->has('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
+            $query->whereDate('created_at', '<=', $request->input('date_to'));
         }
 
         $perPage = $request->input('per_page', 50);
@@ -98,9 +98,9 @@ class SecurityController extends BaseApiController
         // Default to permanent blocking so IP appears in blocklist tab
         // Use permanent=false to only block temporarily (cache only)
         if ($request->input('permanent', true)) {
-            $result = $this->securityService->blockIpPermanently($request->ip_address, $request->reason);
+            $result = $this->securityService->blockIpPermanently($request->input('ip_address'), $request->input('reason'));
         } else {
-            $seconds = $this->securityService->blockIpTemporarily($request->ip_address, $request->reason);
+            $seconds = $this->securityService->blockIpTemporarily($request->input('ip_address'), $request->input('reason'));
             $result = $seconds > 0;
         }
 
@@ -117,7 +117,7 @@ class SecurityController extends BaseApiController
             'ip_address' => 'required|ip',
         ]);
 
-        $this->securityService->unblockIp($request->ip_address);
+        $this->securityService->unblockIp($request->input('ip_address'));
 
         return $this->success(null, 'IP address unblocked successfully');
     }
@@ -133,8 +133,8 @@ class SecurityController extends BaseApiController
         $blocked = 0;
         $skipped = 0;
 
-        foreach ($request->ip_addresses as $ip) {
-            if ($this->securityService->blockIp($ip, $request->reason)) {
+        foreach ($request->input('ip_addresses') as $ip) {
+            if ($this->securityService->blockIp($ip, $request->input('reason'))) {
                 $blocked++;
             } else {
                 $skipped++;
@@ -154,11 +154,11 @@ class SecurityController extends BaseApiController
             'ip_addresses.*' => 'required|ip',
         ]);
 
-        foreach ($request->ip_addresses as $ip) {
+        foreach ($request->input('ip_addresses') as $ip) {
             $this->securityService->unblockIp($ip);
         }
 
-        return $this->success(null, count($request->ip_addresses).' IP addresses unblocked');
+        return $this->success(null, count($request->input('ip_addresses')).' IP addresses unblocked');
     }
 
     // =====================
@@ -179,7 +179,7 @@ class SecurityController extends BaseApiController
             'reason' => 'nullable|string',
         ]);
 
-        $this->securityService->addToWhitelist($request->ip_address, $request->reason);
+        $this->securityService->addToWhitelist($request->input('ip_address'), $request->input('reason'));
 
         return $this->success(null, 'IP address added to whitelist');
     }
@@ -190,7 +190,7 @@ class SecurityController extends BaseApiController
             'ip_address' => 'required|ip',
         ]);
 
-        $this->securityService->removeFromWhitelist($request->ip_address);
+        $this->securityService->removeFromWhitelist($request->input('ip_address'));
 
         return $this->success(null, 'IP address removed from whitelist');
     }
@@ -203,11 +203,11 @@ class SecurityController extends BaseApiController
             'reason' => 'nullable|string',
         ]);
 
-        foreach ($request->ip_addresses as $ip) {
-            $this->securityService->addToWhitelist($ip, $request->reason);
+        foreach ($request->input('ip_addresses') as $ip) {
+            $this->securityService->addToWhitelist($ip, $request->input('reason'));
         }
 
-        return $this->success(null, count($request->ip_addresses).' IP addresses added to whitelist');
+        return $this->success(null, count($request->input('ip_addresses')).' IP addresses added to whitelist');
     }
 
     public function bulkRemoveWhitelist(Request $request)
@@ -217,11 +217,11 @@ class SecurityController extends BaseApiController
             'ip_addresses.*' => 'required|ip',
         ]);
 
-        foreach ($request->ip_addresses as $ip) {
+        foreach ($request->input('ip_addresses') as $ip) {
             $this->securityService->removeFromWhitelist($ip);
         }
 
-        return $this->success(null, count($request->ip_addresses).' IP addresses removed from whitelist');
+        return $this->success(null, count($request->input('ip_addresses')).' IP addresses removed from whitelist');
     }
 
     // =====================
@@ -252,8 +252,8 @@ class SecurityController extends BaseApiController
 
         // Also clear email-based locks if provided
         if ($request->has('email')) {
-            $this->securityService->clearSecurityCache($request->email, 'email');
-            $this->securityService->unlockAccount($request->email);
+            $this->securityService->clearSecurityCache($request->input('email'), 'email');
+            $this->securityService->unlockAccount($request->input('email'));
         }
 
         return $this->success(null, 'Security cache cleared for IP: '.$ipAddress);

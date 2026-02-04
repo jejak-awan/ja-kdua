@@ -85,7 +85,7 @@ class CacheHelper
      */
     public static function rememberContent(int $id, int $ttl, callable $callback)
     {
-        $cacheKey = self::key(self::PREFIX_CONTENT, $id);
+        $cacheKey = self::key(self::PREFIX_CONTENT, (string) $id);
 
         if (self::supportsTagging()) {
             return Cache::tags(['content'])->remember($cacheKey, $ttl, $callback);
@@ -99,7 +99,7 @@ class CacheHelper
      */
     public static function rememberMedia(int $id, int $ttl, callable $callback)
     {
-        $cacheKey = self::key(self::PREFIX_MEDIA, $id);
+        $cacheKey = self::key(self::PREFIX_MEDIA, (string) $id);
 
         if (self::supportsTagging()) {
             return Cache::tags(['media'])->remember($cacheKey, $ttl, $callback);
@@ -113,7 +113,7 @@ class CacheHelper
      */
     public static function rememberCategory(int $id, int $ttl, callable $callback)
     {
-        $cacheKey = self::key(self::PREFIX_CATEGORY, $id);
+        $cacheKey = self::key(self::PREFIX_CATEGORY, (string) $id);
 
         if (self::supportsTagging()) {
             return Cache::tags(['categories'])->remember($cacheKey, $ttl, $callback);
@@ -137,7 +137,7 @@ class CacheHelper
      */
     public static function invalidateContent(int $id): void
     {
-        $cacheKey = self::key(self::PREFIX_CONTENT, $id);
+        $cacheKey = self::key(self::PREFIX_CONTENT, (string) $id);
         Cache::forget($cacheKey);
 
         if (self::supportsTagging()) {
@@ -154,7 +154,7 @@ class CacheHelper
      */
     public static function invalidateMedia(int $id): void
     {
-        $cacheKey = self::key(self::PREFIX_MEDIA, $id);
+        $cacheKey = self::key(self::PREFIX_MEDIA, (string) $id);
         Cache::forget($cacheKey);
 
         if (self::supportsTagging()) {
@@ -171,7 +171,7 @@ class CacheHelper
      */
     public static function invalidateCategory(int $id): void
     {
-        $cacheKey = self::key(self::PREFIX_CATEGORY, $id);
+        $cacheKey = self::key(self::PREFIX_CATEGORY, (string) $id);
         Cache::forget($cacheKey);
 
         if (self::supportsTagging()) {

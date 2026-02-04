@@ -119,8 +119,8 @@ class LoginHistoryController extends BaseApiController
                 $csv .= sprintf(
                     "%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n",
                     $log->id,
-                    $log->user?->name ?? 'Unknown',
-                    $log->user?->email ?? '',
+                    $log->user->name ?? 'Unknown',
+                    $log->user->email ?? '',
                     $log->status,
                     $log->ip_address ?? '',
                     $log->login_at?->format('Y-m-d H:i:s') ?? '',

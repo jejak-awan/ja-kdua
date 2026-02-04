@@ -87,7 +87,7 @@ class SystemService
      */
     public function getStatistics(): array
     {
-        return Cache::remember('system_statistics', 300, function () {
+        return Cache::remember('system_statistics', 300, function (): array {
             try {
                 // Get page views/visits count (if analytics exists)
                 $totalVisits = 0;
@@ -120,7 +120,7 @@ class SystemService
                     ],
                     'media' => [
                         'total' => \App\Models\Media::count(),
-                        'total_size' => \App\Models\Media::sum('size') ?? 0,
+                        'total_size' => \App\Models\Media::sum('size'),
                     ],
                     'categories' => \App\Models\Category::count(),
                     'tags' => \App\Models\Tag::count(),
@@ -234,7 +234,7 @@ class SystemService
                 // Try nproc
                 if ($nproc = @shell_exec('nproc')) {
                     $cores = (int) trim($nproc);
-                } 
+                }
                 // Fallback to reading cpuinfo lines
                 elseif (file_exists('/proc/cpuinfo')) {
                     $cpuinfo = file_get_contents('/proc/cpuinfo');
@@ -244,8 +244,10 @@ class SystemService
                 $cpuinfo = file_get_contents('/proc/cpuinfo');
                 $cores = substr_count($cpuinfo, 'processor');
             }
-            
-            if ($cores < 1) $cores = 1;
+
+            if ($cores < 1) {
+                $cores = 1;
+            }
 
             // 2. Get Real-Time CPU Usage from /proc/stat
             // We sample for 200ms to get an accurate instantaneous reading
@@ -265,7 +267,7 @@ class SystemService
                     // Prevent division by zero
                     if ($diffTotal > 0) {
                         $cpuPercent = (($diffTotal - $diffIdle) / $diffTotal) * 100;
-                        
+
                         // Get load average just for display
                         $load = sys_getloadavg();
 
@@ -282,7 +284,7 @@ class SystemService
             // Fallback to Load Average if /proc/stat fails
             if (file_exists('/proc/loadavg')) {
                 $load = sys_getloadavg();
-                // Load is number of runnable processes. 
+                // Load is number of runnable processes.
                 // Load 1.0 on 1 core = 100%. Load 8.0 on 8 cores = 100%.
                 $cpuPercent = min(100, ($load[0] * 100) / $cores);
 

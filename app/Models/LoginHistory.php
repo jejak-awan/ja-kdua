@@ -6,6 +6,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int|null $user_id
+ * @property string|null $ip_address
+ * @property string|null $user_agent
+ * @property \Illuminate\Support\Carbon|null $login_at
+ * @property \Illuminate\Support\Carbon|null $logout_at
+ * @property int|null $session_duration
+ * @property string $status
+ * @property string|null $failure_reason
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read int|null $ip_count
+ * @property-read \App\Models\User|null $user
+ */
 class LoginHistory extends Model
 {
     use HasFactory;

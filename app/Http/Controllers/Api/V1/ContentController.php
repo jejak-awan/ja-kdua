@@ -8,7 +8,6 @@ use App\Services\ContentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(name="Content")
@@ -38,12 +37,15 @@ class ContentController extends BaseApiController
      *     path="/api/v1/content/{slug}",
      *     summary="Get published content by slug",
      *     tags={"Content"},
+     *
      *     @OA\Parameter(
      *         name="slug",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Content details"
@@ -63,7 +65,7 @@ class ContentController extends BaseApiController
         if (! $content) {
             $fallbackSlugs = ['home', 'about', 'blog', 'contact', 'page', 'search'];
             if (in_array($slug, $fallbackSlugs)) {
-                return $this->success(null, ucfirst($slug) . ' content not found, using fallback');
+                return $this->success(null, ucfirst($slug).' content not found, using fallback');
             }
             abort(404);
         }
@@ -74,6 +76,7 @@ class ContentController extends BaseApiController
 
         // If not published, verify permissions
         if (! $isPublished) {
+            /** @var \App\Models\User|null $user */
             $user = auth('sanctum')->user();
 
             if (! $user) {
@@ -89,8 +92,8 @@ class ContentController extends BaseApiController
         $content->increment('views');
 
         // Resolve dynamic tags in blocks for frontend rendering
-        if ($content->blocks && is_array($content->blocks)) {
-            $dynamicTagService = new \App\Services\DynamicTagService();
+        if (! empty($content->blocks)) {
+            $dynamicTagService = new \App\Services\DynamicTagService;
             $content->blocks = $dynamicTagService->resolveBlocks($content->blocks, $content);
         }
 
@@ -114,7 +117,7 @@ class ContentController extends BaseApiController
         }
 
         $urlPrefix = $content->type === 'post' ? 'blog/' : '';
-        
+
         return $this->success([
             'content' => $content->load(['author', 'category', 'tags', 'customFields.customField']),
             'preview_url' => rtrim(config('app.frontend_url'), '/').'/'.$urlPrefix.ltrim($content->slug, '/'),
@@ -130,24 +133,24 @@ class ContentController extends BaseApiController
             $query->where('author_id', $request->user()->id);
         }
 
-        if ($request->has('status') && $request->status !== 'all') {
-            if ($request->status === 'trashed') {
+        if ($request->has('status') && $request->input('status') !== 'all') {
+            if ($request->input('status') === 'trashed') {
                 $query->onlyTrashed();
             } else {
-                $query->where('status', $request->status);
+                $query->where('status', $request->input('status'));
             }
         }
 
         if ($request->has('category_id')) {
-            $query->where('category_id', $request->category_id);
+            $query->where('category_id', $request->input('category_id'));
         }
 
         if ($request->has('type')) {
-            $query->where('type', $request->type);
+            $query->where('type', $request->input('type'));
         }
 
-        if ($request->has('search')) {
-            $search = $request->search;
+        if ($request->filled('search')) {
+            $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('body', 'like', "%{$search}%")
@@ -188,6 +191,7 @@ class ContentController extends BaseApiController
      *     path="/api/v1/contents/stats",
      *     summary="Get content statistics",
      *     tags={"Content"},
+     *
      *     @OA\Response(response=200, description="Stats"),
      *     security={{"sanctum":{}}}
      * )
@@ -200,7 +204,7 @@ class ContentController extends BaseApiController
 
         $userId = $request->user()->id;
         $canManage = $request->user()->can('manage content');
-        $cacheKey = "content_stats_{$userId}_" . ($canManage ? 'all' : 'scoped');
+        $cacheKey = "content_stats_{$userId}_".($canManage ? 'all' : 'scoped');
 
         return Cache::remember($cacheKey, 300, function () use ($request, $canManage) {
             $query = Content::query();
@@ -228,16 +232,20 @@ class ContentController extends BaseApiController
      *     path="/api/v1/contents",
      *     summary="Create new content",
      *     tags={"Content"},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"title", "status", "type"},
+     *
      *             @OA\Property(property="title", type="string"),
      *             @OA\Property(property="status", type="string", enum={"draft", "pending", "published"}),
      *             @OA\Property(property="type", type="string", enum={"post", "page"}),
      *             @OA\Property(property="body", type="string")
      *         )
      *     ),
+     *
      *     @OA\Response(response=201, description="Created"),
      *     security={{"sanctum":{}}}
      * )
@@ -303,9 +311,9 @@ class ContentController extends BaseApiController
                         'title' => $existing->title,
                         'is_trashed' => $existing->trashed(),
                         'slug' => $existing->slug,
-                        'suggested_slug' => $this->contentService->generateUniqueSlug($validated['slug'])
-                    ]
-                ]
+                        'suggested_slug' => $this->contentService->generateUniqueSlug($validated['slug']),
+                    ],
+                ],
             ], 409);
         }
 
@@ -321,8 +329,11 @@ class ContentController extends BaseApiController
      *     path="/api/v1/contents/{content}",
      *     summary="Update content",
      *     tags={"Content"},
+     *
      *     @OA\Parameter(name="content", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *     @OA\RequestBody(required=true, @OA\JsonContent(type="object")),
+     *
      *     @OA\Response(response=200, description="Updated"),
      *     security={{"sanctum":{}}}
      * )
@@ -333,6 +344,7 @@ class ContentController extends BaseApiController
         if ($this->contentService->isLockedByOther($content, $request->user()->id)) {
             // Allow Admins and Super Admins to bypass the lock
             if (! $request->user()->hasRole('super-admin') && ! $request->user()->hasRole('admin')) {
+                /** @var \App\Models\User $lockedBy */
                 $lockedBy = $content->lockedBy;
 
                 return $this->error(
@@ -387,7 +399,7 @@ class ContentController extends BaseApiController
 
             // If publishing, require body OR blocks (unless it's a builder page)
             $isBuilder = $request->input('editor_type') === 'builder' || ($request->input('editor_type') === null && $content->editor_type === 'builder');
-            if (!$isBuilder && ($request->input('status') === 'published' || ($request->input('status') === null && $content->status === 'published'))) {
+            if (! $isBuilder && ($request->input('status') === 'published' || ($request->input('status') === null && $content->status === 'published'))) {
                 $rules['body'] = 'nullable|required_without:blocks|string';
             }
 
@@ -551,9 +563,9 @@ class ContentController extends BaseApiController
                             'title' => $existing->title,
                             'is_trashed' => $existing->trashed(),
                             'slug' => $existing->slug,
-                            'suggested_slug' => $this->contentService->generateUniqueSlug($validated['slug'])
-                        ]
-                    ]
+                            'suggested_slug' => $this->contentService->generateUniqueSlug($validated['slug']),
+                        ],
+                    ],
                 ], 409);
             }
 
@@ -572,7 +584,9 @@ class ContentController extends BaseApiController
      *     path="/api/v1/contents/{content}",
      *     summary="Delete content",
      *     tags={"Content"},
+     *
      *     @OA\Parameter(name="content", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=200, description="Deleted"),
      *     security={{"sanctum":{}}}
      * )
@@ -673,6 +687,7 @@ class ContentController extends BaseApiController
         if ($this->contentService->isLockedByOther($content, $request->user()->id)) {
             // Allow Admins/Super Admins to steal the lock
             if (! $request->user()->hasRole('super-admin') && ! $request->user()->hasRole('admin')) {
+                /** @var \App\Models\User $lockedBy */
                 $lockedBy = $content->lockedBy;
 
                 return $this->error(

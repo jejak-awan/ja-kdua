@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Services\CacheWarmingService;
-use App\Services\SecurityService;
 use App\Services\SystemService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -27,8 +26,7 @@ class SystemController extends BaseApiController
 
     public function health()
     {
-        $securityService = new SecurityService;
-        $health = $securityService->checkSystemHealth();
+        $health = $this->systemService->getSystemHealth();
 
         $health['php'] = ['status' => 'ok', 'message' => 'PHP '.PHP_VERSION];
         $health['laravel'] = ['status' => 'ok', 'message' => 'Laravel '.app()->version()];

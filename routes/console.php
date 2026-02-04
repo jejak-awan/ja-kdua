@@ -1,6 +1,5 @@
 <?php
 
-use App\Jobs\WarmCacheJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -15,10 +14,10 @@ Artisan::command('inspire', function () {
 try {
     if (\Illuminate\Support\Facades\Schema::hasTable('scheduled_tasks')) {
         $tasks = \App\Models\ScheduledTask::where('is_active', true)->get();
-        
+
         foreach ($tasks as $task) {
             $taskId = $task->id;
-            
+
             $event = Schedule::command($task->command)
                 ->cron($task->schedule)
                 ->description($task->description ?? $task->name)
@@ -48,4 +47,3 @@ try {
     // Fail silently if DB is not ready or migration running
     \Illuminate\Support\Facades\Log::warning('Scheduler: Failed to load tasks from DB', ['error' => $e->getMessage()]);
 }
-

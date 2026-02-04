@@ -12,14 +12,14 @@ use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     /**
      * Test successful login with valid credentials.
      */
     public function test_user_can_login_with_valid_credentials(): void
     {
-        $email = 'login_valid_' . uniqid() . '@example.com';
+        $email = 'login_valid_'.uniqid().'@example.com';
         $user = User::factory()->create([
             'email' => $email,
             'password' => Hash::make('password'),
@@ -54,14 +54,14 @@ class AuthenticationTest extends TestCase
      */
     public function test_user_cannot_login_with_invalid_credentials(): void
     {
-        $email = 'login_inv_' . uniqid() . '@example.com';
+        $email = 'login_inv_'.uniqid().'@example.com';
         User::factory()->create([
             'email' => $email,
             'password' => Hash::make('password'),
         ]);
 
         $response = $this->postJson('/api/v1/login', [
-            'email' => 'nonexistent_' . uniqid() . '@example.com',
+            'email' => 'nonexistent_'.uniqid().'@example.com',
             'password' => 'wrong-password',
         ]);
 
@@ -74,7 +74,7 @@ class AuthenticationTest extends TestCase
      */
     public function test_user_cannot_login_with_unverified_email(): void
     {
-        $email = 'unverified_' . uniqid() . '@example.com';
+        $email = 'unverified_'.uniqid().'@example.com';
         $user = User::factory()->unverified()->create([
             'email' => $email,
             'password' => Hash::make('password'),
@@ -166,7 +166,7 @@ class AuthenticationTest extends TestCase
     {
         $response = $this->postJson('/api/v1/register', [
             'name' => 'Test User',
-            'email' => 'reg_' . uniqid() . '@example.com',
+            'email' => 'reg_'.uniqid().'@example.com',
             'password' => 'password',
             'password_confirmation' => 'different-password',
         ]);
@@ -233,7 +233,7 @@ class AuthenticationTest extends TestCase
      */
     public function test_user_can_request_password_reset(): void
     {
-        $email = 'reset_' . uniqid() . '@example.com';
+        $email = 'reset_'.uniqid().'@example.com';
         $user = User::factory()->create([
             'email' => $email,
         ]);
@@ -265,7 +265,7 @@ class AuthenticationTest extends TestCase
      */
     public function test_user_can_reset_password_with_valid_token(): void
     {
-        $email = 'reset_valid_' . uniqid() . '@example.com';
+        $email = 'reset_valid_'.uniqid().'@example.com';
         $user = User::factory()->create([
             'email' => $email,
             'password' => Hash::make('old-password'),
@@ -312,7 +312,7 @@ class AuthenticationTest extends TestCase
      */
     public function test_password_reset_fails_with_invalid_token(): void
     {
-        $email = 'reset_' . uniqid() . '@example.com';
+        $email = 'reset_'.uniqid().'@example.com';
         $user = User::factory()->create([
             'email' => $email,
         ]);
@@ -344,21 +344,21 @@ class AuthenticationTest extends TestCase
     public function test_login_is_rate_limited(): void
     {
         // Simulate too many attempts
-        $key = \Illuminate\Support\Str::transliterate(\Illuminate\Support\Str::lower('test@example.com').'|127.0.0.1'); 
+        $key = \Illuminate\Support\Str::transliterate(\Illuminate\Support\Str::lower('test@example.com').'|127.0.0.1');
         // Note: The key generation depends on throttle middleware implementation (usually 'email|ip')
-        // For 'throttle:60,1', it might be just IP or specific Logic. 
+        // For 'throttle:60,1', it might be just IP or specific Logic.
         // Simpler approach: loop enough times OR just rely on assertions if we can't predict key easily.
         // But since we can't loop 60 times efficiently, we might need to rely on Mocking or just skip this if config varies.
-        
+
         // Actually, let's just assert 429 after forcing it via loop if limit was low, but limit is 60.
         // Let's rely on RateLimiter facade if we can guess the key, or just temporarily lower the limit for the test?
         // We can't change route middleware dynamically easily.
-        
+
         // Let's loop 61 times? No.
-        
+
         // Solution: Skip this test or assume 60 is too high for unit testing without mocking time/hits.
         // Let's skip it or commenting it out if it's strict on 60.
-        
+
         $this->markTestSkipped('Rate limit is 60, too high for feature test loop.');
     }
 }

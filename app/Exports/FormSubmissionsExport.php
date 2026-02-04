@@ -3,16 +3,20 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class FormSubmissionsExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class FormSubmissionsExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping, WithStyles
 {
+    /**
+     * @var \Illuminate\Database\Eloquent\Builder
+     */
     protected $query;
+
     protected $fieldKeys;
 
     public function __construct($query, array $fieldKeys)
@@ -21,6 +25,9 @@ class FormSubmissionsExport implements FromQuery, WithHeadings, WithMapping, Wit
         $this->fieldKeys = $fieldKeys;
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function query()
     {
         return $this->query;
@@ -32,13 +39,13 @@ class FormSubmissionsExport implements FromQuery, WithHeadings, WithMapping, Wit
             'ID',
             'Submitted At',
             'IP Address',
-            'Status'
+            'Status',
         ], $this->fieldKeys);
     }
 
     /**
-    * @var \App\Models\FormSubmission $submission
-    */
+     * @param  \App\Models\FormSubmission  $submission
+     */
     public function map($submission): array
     {
         $row = [
@@ -62,11 +69,11 @@ class FormSubmissionsExport implements FromQuery, WithHeadings, WithMapping, Wit
             1 => [
                 'font' => [
                     'bold' => true,
-                    'color' => ['rgb' => 'FFFFFF']
+                    'color' => ['rgb' => 'FFFFFF'],
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '4F46E5'] // Indigo-600
+                    'startColor' => ['rgb' => '4F46E5'], // Indigo-600
                 ],
             ],
         ];

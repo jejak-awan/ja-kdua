@@ -6,6 +6,29 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property string $session_id
+ * @property int|null $user_id
+ * @property string|null $ip_address
+ * @property string|null $user_agent
+ * @property string|null $referer
+ * @property string|null $url
+ * @property string|null $method
+ * @property int $status_code
+ * @property int $duration
+ * @property int|null $visits_count
+ * @property \Illuminate\Support\Carbon|null $visited_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read string|null $device_type
+ * @property-read string|null $browser
+ * @property-read string|null $os
+ * @property-read string|null $country
+ * @property-read string|null $city
+ * @property-read \App\Models\User|null $user
+ * @property-read \App\Models\AnalyticsSession|null $session
+ */
 class AnalyticsVisit extends Model
 {
     use HasFactory;

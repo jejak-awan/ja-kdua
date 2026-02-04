@@ -56,12 +56,12 @@ class SvgUploadSecurityTest extends TestCase
             ]);
 
         $response->assertStatus(201);
-        
+
         // Find the file in the fake storage
         // FileManager stores as: uploads/evil.svg
         $exists = Storage::disk('public')->exists('uploads/evil.svg');
         $this->assertTrue($exists, 'File should exist in storage');
-        
+
         $content = Storage::disk('public')->get('uploads/evil.svg');
         $this->assertStringNotContainsString('<script>', $content);
         $this->assertStringContainsString('<rect', $content);

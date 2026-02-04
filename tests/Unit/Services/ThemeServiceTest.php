@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class ThemeServiceTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     /**
      * Test getActiveTheme returns active theme.

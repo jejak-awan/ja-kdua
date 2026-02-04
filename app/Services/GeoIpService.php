@@ -99,7 +99,7 @@ class GeoIpService
         foreach ($privateRanges as $range) {
             [$subnet, $mask] = explode('/', $range);
             $subnetLong = ip2long($subnet);
-            $maskLong = ~((1 << (32 - $mask)) - 1);
+            $maskLong = ~((1 << (32 - (int) $mask)) - 1);
 
             if (($ip & $maskLong) === ($subnetLong & $maskLong)) {
                 return true;

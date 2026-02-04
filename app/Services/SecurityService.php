@@ -19,8 +19,11 @@ class SecurityService
 
     // Progressive blocking settings
     protected $maxFailedAttempts;
+
     protected $baseBlockMinutes;
+
     protected $maxBlockMinutes = 60; // Maximum block duration in minutes
+
     protected $offenseResetHours = 24; // Reset offense count after this many hours
 
     public function __construct()
@@ -387,7 +390,7 @@ class SecurityService
      */
     public function recordSuspiciousActivity(string $description, ?User $user = null, array $metadata = []): void
     {
-        SecurityLog::log('suspicious_activity', $user, request()?->ip(), $description, $metadata);
+        SecurityLog::log('suspicious_activity', $user, request()->ip(), $description, $metadata);
     }
 
     /**

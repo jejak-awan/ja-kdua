@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class WebhookTest extends TestCase
 {
-// use RefreshDatabase;
+    // use RefreshDatabase;
 
     protected User $admin;
 

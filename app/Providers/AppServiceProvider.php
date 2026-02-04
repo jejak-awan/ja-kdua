@@ -2,15 +2,15 @@
 
 namespace App\Providers;
 
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Auth\Events\Login;
-use Illuminate\Auth\Events\Failed;
-use Illuminate\Auth\Events\Logout;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -42,13 +42,13 @@ class AppServiceProvider extends ServiceProvider
                     if (empty($postTypes)) {
                         $postTypes = ['post', 'page'];
                     }
-                    $postTypeOptions = array_map(function($type) {
+                    $postTypeOptions = array_map(function ($type) {
                         return ['label' => ucfirst($type), 'value' => $type];
                     }, $postTypes);
 
                     // 2. Roles
                     $roles = \Spatie\Permission\Models\Role::pluck('name')->all();
-                    $roleOptions = array_map(function($role) {
+                    $roleOptions = array_map(function ($role) {
                         return ['label' => ucfirst($role), 'value' => $role];
                     }, $roles);
 
@@ -57,11 +57,11 @@ class AppServiceProvider extends ServiceProvider
                         ['label' => 'Categories', 'value' => 'category'],
                         ['label' => 'Tags', 'value' => 'post_tag'],
                         ['label' => 'Project Categories', 'value' => 'project_category'],
-                        ['label' => 'Project Tags', 'value' => 'project_tag']
+                        ['label' => 'Project Tags', 'value' => 'project_tag'],
                     ];
 
                     // 4. Users
-                    $userOptions = \App\Models\User::select('id', 'name')->get()->map(function($user) {
+                    $userOptions = \App\Models\User::select('id', 'name')->get()->map(function ($user) {
                         return ['label' => $user->name, 'value' => $user->id];
                     })->all();
 
@@ -70,19 +70,19 @@ class AppServiceProvider extends ServiceProvider
                         ->select('id', 'title', 'type')
                         ->latest()
                         ->get()
-                        ->map(function($post) {
+                        ->map(function ($post) {
                             return [
-                                'label' => $post->title, 
-                                'value' => $post->id, 
-                                'type' => $post->type
+                                'label' => $post->title,
+                                'value' => $post->id,
+                                'type' => $post->type,
                             ];
                         })->all();
 
                     // 6. Terms
-                    $categories = \App\Models\Category::select('id', 'name')->get()->map(function($c) {
+                    $categories = \App\Models\Category::select('id', 'name')->get()->map(function ($c) {
                         return ['label' => $c->name, 'value' => $c->id, 'taxonomy' => 'category'];
                     });
-                    $tags = \App\Models\Tag::select('id', 'name')->get()->map(function($t) {
+                    $tags = \App\Models\Tag::select('id', 'name')->get()->map(function ($t) {
                         return ['label' => $t->name, 'value' => $t->id, 'taxonomy' => 'post_tag'];
                     });
                     $termOptions = $categories->merge($tags)->values()->all();
@@ -92,10 +92,10 @@ class AppServiceProvider extends ServiceProvider
                         ->select('id', 'name', 'slug')
                         ->latest()
                         ->get()
-                        ->map(function($form) {
+                        ->map(function ($form) {
                             return [
                                 'label' => $form->name,
-                                'value' => $form->slug
+                                'value' => $form->slug,
                             ];
                         })->all();
 
@@ -106,7 +106,7 @@ class AppServiceProvider extends ServiceProvider
                         'users' => $userOptions,
                         'posts' => $postOptions,
                         'terms' => $termOptions,
-                        'forms' => $formOptions
+                        'forms' => $formOptions,
                     ];
                 });
 
@@ -114,13 +114,13 @@ class AppServiceProvider extends ServiceProvider
 
             } catch (\Exception $e) {
                 // Fallback if DB fails
-                 $view->with('jaCmsData', [
+                $view->with('jaCmsData', [
                     'postTypes' => [['label' => 'Posts', 'value' => 'post'], ['label' => 'Pages', 'value' => 'page']],
                     'roles' => [],
                     'taxonomies' => [],
                     'users' => [],
                     'posts' => [],
-                    'terms' => []
+                    'terms' => [],
                 ]);
             }
         });
@@ -198,11 +198,11 @@ class AppServiceProvider extends ServiceProvider
 
                         if ($allSettings['storage_driver'] === 's3') {
                             config([
-                                'filesystems.disks.s3.key' => $allSettings['aws_access_key_id'] ?? env('AWS_ACCESS_KEY_ID'),
-                                'filesystems.disks.s3.secret' => $allSettings['aws_secret_access_key'] ?? env('AWS_SECRET_ACCESS_KEY'),
-                                'filesystems.disks.s3.region' => $allSettings['aws_default_region'] ?? env('AWS_DEFAULT_REGION', 'us-east-1'),
-                                'filesystems.disks.s3.bucket' => $allSettings['aws_bucket'] ?? env('AWS_BUCKET'),
-                                'filesystems.disks.s3.endpoint' => $allSettings['aws_endpoint'] ?? env('AWS_ENDPOINT'),
+                                'filesystems.disks.s3.key' => $allSettings['aws_access_key_id'] ?? config('filesystems.disks.s3.key'),
+                                'filesystems.disks.s3.secret' => $allSettings['aws_secret_access_key'] ?? config('filesystems.disks.s3.secret'),
+                                'filesystems.disks.s3.region' => $allSettings['aws_default_region'] ?? config('filesystems.disks.s3.region'),
+                                'filesystems.disks.s3.bucket' => $allSettings['aws_bucket'] ?? config('filesystems.disks.s3.bucket'),
+                                'filesystems.disks.s3.endpoint' => $allSettings['aws_endpoint'] ?? config('filesystems.disks.s3.endpoint'),
                                 'filesystems.disks.s3.use_path_style_endpoint' => ! empty($allSettings['aws_endpoint']),
                             ]);
                         } elseif ($allSettings['storage_driver'] === 'google') {

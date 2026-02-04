@@ -103,8 +103,6 @@ abstract class TestCase extends BaseTestCase
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
-
-
         // Create admin role if it doesn't exist
         $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $adminRole->givePermissionTo(Permission::all());

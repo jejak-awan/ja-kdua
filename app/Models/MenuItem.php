@@ -9,6 +9,39 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property int $menu_id
+ * @property int|null $parent_id
+ * @property string $title
+ * @property string|null $url
+ * @property string $type
+ * @property int|null $target_id
+ * @property string|null $target_type
+ * @property string|null $icon
+ * @property string|null $css_class
+ * @property string|null $description
+ * @property string|null $badge
+ * @property string|null $badge_color
+ * @property string|null $image
+ * @property string|null $image_size
+ * @property string|null $mega_menu_layout
+ * @property int|null $mega_menu_column
+ * @property bool $mega_menu_show_dividers
+ * @property int $sort_order
+ * @property bool $open_in_new_tab
+ * @property bool $is_active
+ * @property bool $hide_label
+ * @property string|null $heading
+ * @property bool $show_heading_line
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\Menu $menu
+ * @property-read \App\Models\MenuItem|null $parent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\MenuItem[] $children
+ * @property-read \App\Models\Content|\App\Models\Category|null $target
+ */
 class MenuItem extends Model
 {
     use HasFactory, SoftDeletes;

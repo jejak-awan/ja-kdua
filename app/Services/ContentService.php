@@ -327,7 +327,7 @@ class ContentService
         $contentId = $content->id;
 
         SearchIndex::remove($content);
-        
+
         // Untrack media usage
         MediaUsage::untrack(null, $content);
 
@@ -515,8 +515,8 @@ class ContentService
         $baseSlug = $slug;
         $counter = 1;
 
-        while (Content::withTrashed()->where('slug', $slug)->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))->exists()) {
-            $slug = $baseSlug . '-' . $counter++;
+        while (Content::withTrashed()->where('slug', $slug)->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))->exists()) {
+            $slug = $baseSlug.'-'.$counter++;
         }
 
         return $slug;
@@ -556,6 +556,7 @@ class ContentService
 
         return true;
     }
+
     /**
      * Empty trash
      */
@@ -563,9 +564,9 @@ class ContentService
     {
         $count = Content::onlyTrashed()->count();
         Content::onlyTrashed()->forceDelete();
-        
+
         $this->cacheService->clearContentCaches();
-        
+
         return $count;
     }
 }

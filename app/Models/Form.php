@@ -8,6 +8,28 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property int|null $author_id
+ * @property string $name
+ * @property string $slug
+ * @property string|null $description
+ * @property string|null $success_message
+ * @property string|null $redirect_url
+ * @property array|null $settings
+ * @property array|null $blocks
+ * @property bool $is_active
+ * @property int $submission_count
+ * @property int $view_count
+ * @property int $start_count
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\User|null $author
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FormField[] $fields
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FormSubmission[] $submissions
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FormAnalytics[] $analytics
+ */
 class Form extends Model
 {
     use HasFactory, SoftDeletes;
@@ -46,6 +68,9 @@ class Form extends Model
         return $this->hasMany(FormField::class)->orderBy('sort_order');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FormSubmission, $this>
+     */
     public function submissions(): HasMany
     {
         return $this->hasMany(FormSubmission::class)->latest();

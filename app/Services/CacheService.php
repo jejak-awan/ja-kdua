@@ -123,7 +123,7 @@ class CacheService
         }
 
         try {
-            $redis = Cache::getRedis();
+            $redis = \Illuminate\Support\Facades\Redis::connection();
             $keys = $redis->keys(config('cache.prefix').':'.$pattern);
 
             if (empty($keys)) {

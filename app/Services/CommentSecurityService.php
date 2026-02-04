@@ -30,7 +30,7 @@ class CommentSecurityService
     protected function containsBannedWords(string $content): bool
     {
         $bannedWords = Setting::get('comments.security.banned_words', []);
-        
+
         if (empty($bannedWords)) {
             return false;
         }
@@ -54,9 +54,9 @@ class CommentSecurityService
     protected function exceedsLinkLimit(string $content): bool
     {
         $maxLinks = Setting::get('comments.security.max_links', 2);
-        
+
         // Count http/https occurrences
-        $linkCount = substr_count(strtolower($content), 'http://') + 
+        $linkCount = substr_count(strtolower($content), 'http://') +
                      substr_count(strtolower($content), 'https://');
 
         return $linkCount > $maxLinks;

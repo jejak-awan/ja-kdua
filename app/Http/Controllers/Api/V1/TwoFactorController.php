@@ -113,7 +113,7 @@ class TwoFactorController extends BaseApiController
         }
 
         // Verify code
-        $valid = $this->google2fa->verifyKey($secret, $request->code, 2); // 2 = 2 time windows tolerance
+        $valid = $this->google2fa->verifyKey($secret, $request->input('code'), 2); // 2 = 2 time windows tolerance
 
         if (! $valid) {
             return $this->error(
@@ -148,7 +148,7 @@ class TwoFactorController extends BaseApiController
         $user = $request->user();
 
         // Verify password
-        if (! \Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+        if (! \Illuminate\Support\Facades\Hash::check($request->input('password'), $user->password)) {
             return $this->validationError([
                 'password' => ['Invalid password'],
             ]);
@@ -187,7 +187,7 @@ class TwoFactorController extends BaseApiController
         $user = $request->user();
 
         // Verify password
-        if (! \Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+        if (! \Illuminate\Support\Facades\Hash::check($request->input('password'), $user->password)) {
             return $this->validationError([
                 'password' => ['Invalid password'],
             ]);
@@ -222,7 +222,7 @@ class TwoFactorController extends BaseApiController
             'code' => 'required|string|size:6',
         ]);
 
-        $user = User::findOrFail($request->user_id);
+        $user = User::findOrFail($request->input('user_id'));
         $twoFactorAuth = $user->twoFactorAuth;
 
         if (! $twoFactorAuth || ! $twoFactorAuth->enabled) {
@@ -245,11 +245,11 @@ class TwoFactorController extends BaseApiController
         }
 
         // Try TOTP code first
-        $valid = $this->google2fa->verifyKey($secret, $request->code, 2);
+        $valid = $this->google2fa->verifyKey($secret, $request->input('code'), 2);
 
         // If TOTP fails, try backup code
         if (! $valid) {
-            $valid = $twoFactorAuth->verifyBackupCode($request->code);
+            $valid = $twoFactorAuth->verifyBackupCode($request->input('code'));
         }
 
         if (! $valid) {

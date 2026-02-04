@@ -9,10 +9,47 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property string $title
+ * @property string $slug
+ * @property string|null $excerpt
+ * @property string|null $body
+ * @property string|null $featured_image
+ * @property bool $is_featured
+ * @property string $status
+ * @property string $type
+ * @property int $author_id
+ * @property int|null $category_id
+ * @property \Illuminate\Support\Carbon|null $published_at
+ * @property int $views
+ * @property array|null $meta
+ * @property string|null $meta_title
+ * @property string|null $meta_description
+ * @property string|null $meta_keywords
+ * @property string|null $og_image
+ * @property int|null $locked_by
+ * @property \Illuminate\Support\Carbon|null $locked_at
+ * @property array|null $blocks
+ * @property array|null $global_variables
+ * @property bool $comment_status
+ * @property string $editor_type
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $visits_count
+ * @property array|null $lock_status
+ * @property-read \App\Models\User $author
+ * @property-read \App\Models\Category|null $category
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Tag[] $tags
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Comment[] $comments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ContentRevision[] $revisions
+ * @property-read \App\Models\User|null $lockedBy
+ */
 class Content extends Model
 {
     use HasFactory, SoftDeletes;
-    
+
     protected static function booted()
     {
         static::deleting(function ($content) {
@@ -20,15 +57,15 @@ class Content extends Model
             if ($content->isForceDeleting()) {
                 return;
             }
-            
+
             $timestamp = now()->timestamp;
-            $newSlug = $content->slug . '__trashed__' . $timestamp;
-            
+            $newSlug = $content->slug.'__trashed__'.$timestamp;
+
             // Ensure even the trashed slug is unique (rare but possible collision)
             while (\App\Models\Content::withTrashed()->where('slug', $newSlug)->exists()) {
-                $newSlug = $content->slug . '__trashed__' . $timestamp . '_' . rand(100, 999);
+                $newSlug = $content->slug.'__trashed__'.$timestamp.'_'.rand(100, 999);
             }
-            
+
             $content->slug = $newSlug;
             $content->save();
         });

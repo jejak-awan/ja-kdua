@@ -259,7 +259,7 @@ class ScheduledTaskController extends BaseApiController
             'parameters' => 'nullable|string|max:500',
         ]);
 
-        $fullCommand = $validated['parameters'] 
+        $fullCommand = $validated['parameters']
             ? "{$validated['command']} {$validated['parameters']}"
             : $validated['command'];
 

@@ -41,7 +41,7 @@ class DashboardController extends Controller
     {
         $userId = $request->user()->id;
         $days = (int) $request->input('days', 30);
-        
+
         $cacheKey = "dashboard_creator_data_{$userId}_{$days}";
 
         return Cache::remember($cacheKey, 300, function () use ($userId, $days) {
@@ -174,7 +174,8 @@ class DashboardController extends Controller
         // Optimize: Use whereIn if URLs are simple slugs, or optimized LIKE if they are paths.
         // For CMS, URLs usually contain the slug at the end or as a segment.
         // We'll use a more efficient approach by limiting the strings we search for.
-        $exactUrls = array_map(fn($s) => "/{$s}", $slugs);
+        $exactUrls = array_map(fn ($s) => "/{$s}", $slugs);
+
         return AnalyticsVisit::where(function ($query) use ($exactUrls, $slugs) {
             $query->whereIn('url', $exactUrls);
             foreach ($slugs as $slug) {

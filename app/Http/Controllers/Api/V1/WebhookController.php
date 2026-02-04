@@ -12,7 +12,7 @@ class WebhookController extends BaseApiController
         $query = Webhook::query();
 
         if ($request->has('event')) {
-            $query->where('event', $request->event);
+            $query->where('event', $request->input('event'));
         }
 
         if ($request->has('is_active')) {

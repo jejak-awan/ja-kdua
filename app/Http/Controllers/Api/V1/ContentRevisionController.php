@@ -23,7 +23,7 @@ class ContentRevisionController extends BaseApiController
 
             // Return empty paginated response instead of error
             return $this->paginated(
-                \Illuminate\Pagination\LengthAwarePaginator::make([], 0, 20),
+                new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20),
                 'Content revisions retrieved successfully'
             );
         }
@@ -95,7 +95,7 @@ class ContentRevisionController extends BaseApiController
 
         // Restore content from revision
         $revisionData = $revision->meta['revision_data'] ?? [];
-        
+
         $content->update([
             'title' => $revision->title,
             'body' => $revision->body,

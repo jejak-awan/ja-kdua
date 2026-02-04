@@ -4,9 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
-use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class SecurityHeaders
@@ -20,7 +18,7 @@ class SecurityHeaders
         // We do NOT use Nonce because dynamic plugins, themes, and Vue/Vite splitting
         // frequently break with strict nonce enforcement.
         // We rely on 'unsafe-inline' + sanitization for security.
-        
+
         $response = $next($request);
 
         // Content Security Policy
@@ -32,12 +30,16 @@ class SecurityHeaders
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
 
         // Remove server signature
         $response->headers->remove('X-Powered-By');
-        
-        // Attempt to remove upstream/conflicting Report-Only headers that might be too strict
+
+        // Force remove upstream/conflicting Report-Only headers
+        // These are often added by Cloudflare or Nginx proxies and can be too strict ('none')
         $response->headers->remove('Content-Security-Policy-Report-Only');
+        $response->headers->remove('X-Content-Security-Policy');
+        $response->headers->remove('X-WebKit-CSP');
 
         return $response;
     }
@@ -60,7 +62,7 @@ class SecurityHeaders
             "'self'",
             "'unsafe-inline'",
             "'unsafe-eval'",
-            "https:",
+            'https:',
         ];
 
         // Allow localhost for Vite dev server (including development on production machine)

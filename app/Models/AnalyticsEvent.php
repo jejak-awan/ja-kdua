@@ -6,6 +6,23 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property string $session_id
+ * @property int|null $user_id
+ * @property string $event_type
+ * @property string $event_name
+ * @property string|null $event_category
+ * @property array|null $event_data
+ * @property string|null $url
+ * @property int|null $content_id
+ * @property string|null $ip_address
+ * @property \Illuminate\Support\Carbon|null $occurred_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User|null $user
+ * @property-read \App\Models\Content|null $content
+ */
 class AnalyticsEvent extends Model
 {
     use HasFactory;

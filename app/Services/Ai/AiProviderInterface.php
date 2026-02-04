@@ -19,7 +19,7 @@ interface AiProviderInterface
      * Returns true on success, throws exception on failure.
      */
     public function testConnection(): bool;
-    
+
     /**
      * Get the descriptive name of the provider.
      */

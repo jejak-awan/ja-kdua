@@ -6,6 +6,34 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ * @property string $type
+ * @property string $path
+ * @property string|null $parent_theme
+ * @property string $version
+ * @property string|null $description
+ * @property string|null $author
+ * @property string|null $author_url
+ * @property string|null $license
+ * @property string|null $preview_image
+ * @property array|null $settings
+ * @property string|null $custom_css
+ * @property array|null $dependencies
+ * @property array|null $supports
+ * @property bool $is_active
+ * @property string $status
+ * @property string|null $update_url
+ * @property bool $auto_update
+ * @property string|null $requires_cms_version
+ * @property \Illuminate\Support\Carbon|null $last_updated_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property array|null $manifest
+ * @property array $assets
+ */
 class Theme extends Model
 {
     use HasFactory;
