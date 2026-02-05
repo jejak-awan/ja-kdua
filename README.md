@@ -1,4 +1,4 @@
-# Jejak Awan CMS (JA-CMS)
+# JA-KDUA
 
 JA-CMS is a powerful, modern, and flexible Headless CMS built with **Laravel 12** and **Vue 3**. It is designed to provide a robust backend API service paired with a dynamic Single Page Application (SPA) admin interface.
 
