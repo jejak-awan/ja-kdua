@@ -77,6 +77,10 @@
         "moderation": {
             "title": "Moderasi",
             "description": "Keamanan konten dan perlindungan spam"
+        },
+        "maintenance": {
+            "title": "Mode Maintenance",
+            "description": "Konfigurasi halaman Coming Soon / Under Maintenance."
         }
     },
     "enabled": "Aktif",

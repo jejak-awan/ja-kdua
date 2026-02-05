@@ -151,6 +151,18 @@
             "slider": "Slider Verification",
             "math": "Math Challenge",
             "image": "Image Code"
+        },
+        "maintenanceTitlePresets": {
+            "coming_soon": "Coming Soon",
+            "under_maintenance": "Under Maintenance",
+            "launch_day": "Launch Day!",
+            "system_update": "System Update"
+        },
+        "maintenanceMessagePresets": {
+            "awesome": "We are currently working on something awesome. Please check back later.",
+            "inconvenience": "Sorry for the inconvenience. We're performing some maintenance and will be back shortly.",
+            "exciting": "Something exciting is coming! Stay tuned for our launch.",
+            "better_exp": "We are updating our system to provide you a better experience. We'll be back online soon."
         }
     }
 }

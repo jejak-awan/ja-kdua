@@ -260,7 +260,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, reactive, computed, onMounted, watch } from 'vue';
+import { ref, reactive, computed, onMounted, watch, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
@@ -360,6 +360,7 @@ const selectedItems = ref<SelectedItem[]>([]);
 const bulkRevoking = ref(false);
 const queueHealth = ref<QueueHealth | null>(null);
 const sidebarCollapsed = ref(false);
+let healthCheckInterval: ReturnType<typeof setInterval> | null = null;
 
 const form = reactive<NotificationForm>({
     target_type: 'all',
@@ -402,17 +403,28 @@ const formatDate = (date: string) => {
     return new Date(date).toLocaleString();
 };
 
+const fetchQueueHealth = async (): Promise<void> => {
+    try {
+        const res = await api.get('/admin/ja/system/info');
+        const data = parseSingleResponse<{ queue_health?: QueueHealth }>(res);
+        queueHealth.value = data?.queue_health || null;
+    } catch (error: unknown) {
+        // Silent fail for polling
+        logger.debug('Failed to fetch queue health:', error);
+    }
+};
+
 const fetchData = async (): Promise<void> => {
     try {
-        const [rolesRes, usersRes, healthRes] = await Promise.all([
+        const [rolesRes, usersRes] = await Promise.all([
             api.get('/admin/ja/roles'),
-            api.get('/admin/ja/users'),
-            api.get('/admin/ja/system/info')
+            api.get('/admin/ja/users')
         ]);
         roles.value = parseResponse<Role>(rolesRes).data;
         users.value = parseResponse<User>(usersRes).data;
-        const data = parseSingleResponse<{ queue_health?: QueueHealth }>(healthRes);
-        queueHealth.value = data?.queue_health || null;
+        
+        // Initial health check
+        await fetchQueueHealth();
     } catch (error: unknown) {
         logger.error('Failed to fetch data:', error);
     }
@@ -567,8 +579,12 @@ const handleSend = async () => {
         form.title = '';
         form.message = '';
         
-        // Refresh history
+        // Refresh history immediately
         fetchHistory();
+
+        // Trigger global event for Navbar to update
+        window.dispatchEvent(new CustomEvent('notification:sent'));
+
     } catch (error: unknown) {
         logger.error('Failed to send:', error);
         toast.error.validation(t('features.system.notifications.messages.failed'));
@@ -580,5 +596,18 @@ const handleSend = async () => {
 onMounted(() => {
     fetchData();
     fetchHistory();
+
+    // Poll queue health every 15 seconds
+    healthCheckInterval = setInterval(() => {
+        fetchQueueHealth();
+        // Also poll history to catch up with async jobs
+        fetchHistory(pagination.value?.current_page || 1);
+    }, 10000);
+});
+
+onUnmounted(() => {
+    if (healthCheckInterval) {
+        clearInterval(healthCheckInterval);
+    }
 });
 </script>

@@ -414,10 +414,13 @@ watch(() => props.isAuthenticated, (isAuth) => {
 onMounted(() => {
     if (props.isAuthenticated) {
         fetchNotifications();
-        notificationInterval.value = setInterval(fetchNotifications, 120000);
+        // Poll faster (every 30s) instead of 2 minutes
+        notificationInterval.value = setInterval(fetchNotifications, 30000);
     }
     initializeLanguage();
     document.addEventListener('click', handleClickOutside);
+    // Listen for manual triggers from other components
+    window.addEventListener('notification:sent', fetchNotifications);
 });
 
 onUnmounted(() => {
@@ -425,6 +428,7 @@ onUnmounted(() => {
         clearInterval(notificationInterval.value);
     }
     document.removeEventListener('click', handleClickOutside);
+    window.removeEventListener('notification:sent', fetchNotifications);
 });
 </script>
 

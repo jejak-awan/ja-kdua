@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Schema;
@@ -65,46 +67,53 @@ class RedisConfigServiceProvider extends ServiceProvider
 
         // Build settings array using model accessor (handles decryption)
         $settings = $redisSettings->mapWithKeys(function ($setting) {
-            return [$setting->key => $setting->value]; // This uses getValueAttribute accessor
+            // @phpstan-ignore-next-line
+            return [(string) $setting->key => $setting->value]; // This uses getValueAttribute accessor
         });
 
         // Map RedisSetting keys to config values
         $configMap = [
-            'redis_enabled' => null, // Special handling
             'redis_host' => 'database.redis.default.host',
             'redis_port' => 'database.redis.default.port',
             'redis_password' => 'database.redis.default.password',
             'redis_database' => 'database.redis.default.database',
             'redis_prefix' => 'database.redis.options.prefix',
-            'cache_driver' => 'cache.default',
         ];
 
         foreach ($settings as $key => $value) {
+            $stringKey = (string) $key;
             // Skip empty values - use .env defaults
             if ($value === null || $value === '') {
                 continue;
             }
 
-            // Handle redis_enabled specially - DEPRECATED: Controlled by global cache_driver
-            if ($key === 'redis_enabled') {
-                continue;
-            }
-
             // Apply config if mapping exists
-            if (isset($configMap[$key])) {
-                config([$configMap[$key] => $value]);
+            if (isset($configMap[$stringKey])) {
+                config([$configMap[$stringKey] => $value]);
 
                 // Also update cache connection for consistency
-                if ($key === 'redis_host') {
+                if ($stringKey === 'redis_host') {
                     config(['database.redis.cache.host' => $value]);
                 }
-                if ($key === 'redis_port') {
+                if ($stringKey === 'redis_port') {
                     config(['database.redis.cache.port' => $value]);
                 }
-                if ($key === 'redis_password') {
+                if ($stringKey === 'redis_password') {
                     config(['database.redis.cache.password' => $value]);
                 }
             }
+        }
+
+        // Handle Queue Configuration
+        if (isset($settings['queue_enabled'])) {
+            $isEnabled = filter_var($settings['queue_enabled'], FILTER_VALIDATE_BOOLEAN);
+            config(['queue.default' => $isEnabled ? 'redis' : 'sync']);
+        }
+
+        // Handle Session Configuration
+        if (isset($settings['session_enabled'])) {
+            $isEnabled = filter_var($settings['session_enabled'], FILTER_VALIDATE_BOOLEAN);
+            config(['session.driver' => $isEnabled ? 'redis' : 'file']);
         }
     }
 }

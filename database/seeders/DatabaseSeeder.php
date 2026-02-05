@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
 
         // 2. Create Default Admin User
         $admin = User::firstOrCreate(
-            ['email' => 'admin@jejakawan.com'],
+            ['email' => 'admin@kdua.net'],
             [
                 'name' => 'Admin',
                 'password' => Hash::make('admin123'),

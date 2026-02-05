@@ -267,7 +267,7 @@
 
                         <Select
                           v-else-if="setting.type === 'boolean'"
-                          :model-value="String(settingsForm[setting.key])"
+                          :model-value="['true', '1', true, 1].includes(settingsForm[setting.key] as any) ? 'true' : 'false'"
                           @update:model-value="(val) => settingsForm[setting.key] = val === 'true'"
                         >
                           <SelectTrigger class="w-full">

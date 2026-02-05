@@ -15,7 +15,7 @@ import dashboard from './features/dashboard.json';
 import users from './features/users.json';
 import security from './features/security.json';
 import redis from './features/redis.json';
-import settings from './features/settings/index.js';
+import settings from './features/settings';
 import developer from './features/developer.json';
 import file_manager from './features/file_manager.json';
 import newsletter from './features/newsletter.json';
@@ -51,7 +51,7 @@ import scheduled_tasks from './features/scheduled_tasks.json';
 import command_runner from './features/command_runner.json';
 import email_templates from './features/email_templates.json';
 import editor from './features/editor.json';
-import builder from './features/builder/index.js';
+import builder from './features/builder';
 
 export default {
     // Builder translations at root level for backward compatibility with builder.* namespace

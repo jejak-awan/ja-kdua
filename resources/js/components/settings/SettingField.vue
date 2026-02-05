@@ -1,8 +1,39 @@
 <template>
     <div>
-        <label class="block text-sm font-medium text-foreground mb-1">
-            {{ label }}
-        </label>
+        <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium text-foreground">
+                {{ label }}
+            </label>
+
+            <!-- Presets Picker -->
+            <Popover v-if="hasPresets">
+                <PopoverTrigger as-child>
+                    <button 
+                        type="button" 
+                        class="h-6 w-6 p-0 flex items-center justify-center rounded-md hover:bg-muted transition-colors focus:outline-none"
+                        :title="$t('common.actions.select')"
+                    >
+                        <LucideIcon name="Wand2" class="h-3.5 w-3.5 text-muted-foreground" />
+                    </button>
+                </PopoverTrigger>
+                <PopoverContent class="w-72 p-1" align="end">
+                    <div class="p-2 pb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        {{ $t('common.actions.select') }}
+                    </div>
+                    <div class="grid gap-1">
+                        <button
+                            v-for="preset in presets"
+                            :key="String(preset.value)"
+                            @click="applyPreset(preset.value)"
+                            class="w-full text-left px-2 py-1.5 text-sm rounded-md hover:bg-muted transition-colors line-clamp-2"
+                            :title="preset.labelKey ? $t(preset.labelKey) : (preset.label || String(preset.value))"
+                        >
+                            {{ preset.labelKey ? $t(preset.labelKey) : (preset.label || String(preset.value)) }}
+                        </button>
+                    </div>
+                </PopoverContent>
+            </Popover>
+        </div>
         <p v-if="description" class="text-xs text-muted-foreground mb-2">
             {{ description }}
         </p>
@@ -50,11 +81,11 @@
         </Select>
 
         <Input
-            v-else-if="(type === 'string' || type === 'password') && !isTextarea"
+            v-else-if="(type === 'string' || type === 'password' || type === 'datetime') && !isTextarea"
             :model-value="(localValue as string)"
             :disabled="disabled"
             @input="localValue = ($event.target as HTMLInputElement).value; updateValue()"
-            :type="(isPassword || type === 'password') ? 'password' : 'text'"
+            :type="type === 'datetime' ? 'datetime-local' : ((isPassword || type === 'password') ? 'password' : 'text')"
             :class="error ? 'border-destructive focus-visible:ring-destructive' : ''"
         />
 
@@ -100,7 +131,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { getFieldOptions, getMailPortOptions } from '@/config/settingsFieldOptions'
+import { getFieldOptions, getMailPortOptions, getFieldPresets } from '@/config/settingsFieldOptions'
 import type { SettingValue } from '@/types/settings'
 import {
     Input,
@@ -110,7 +141,12 @@ import {
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue
+    SelectValue,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+    Button,
+    LucideIcon
 } from '@/components/ui'
 
 interface SettingOption {
@@ -199,6 +235,19 @@ const isPassword = computed(() => {
 const isTextarea = computed(() => {
     return props.type === 'text' || props.type === 'json'
 })
+
+const hasPresets = computed(() => {
+    return getFieldPresets(props.fieldKey) !== null
+})
+
+const presets = computed<SettingOption[]>(() => {
+    return getFieldPresets(props.fieldKey) || []
+})
+
+const applyPreset = (value: string | number) => {
+    localValue.value = value
+    updateValue()
+}
 
 // Update parent
 const updateValue = () => {

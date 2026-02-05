@@ -20,8 +20,8 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'https://jejakawan.com',
-        'https://www.jejakawan.com',
+        'https://kdua.net',
+        'https://www.kdua.net',
         'http://localhost:3000',
     ],
 

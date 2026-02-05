@@ -337,6 +337,13 @@ const fetchSettings = async () => {
         ensureSetting('ai_enabled', true, 'boolean', 'ai');
         ensureSetting('gemini_api_key', '', 'password', 'ai');
 
+        // Inject Maintenance Settings
+        ensureSetting('maintenance_mode', false, 'boolean', 'general');
+        ensureSetting('maintenance_title', 'Coming Soon', 'string', 'general');
+        ensureSetting('maintenance_message', 'We are currently working on something awesome. Please check back later.', 'text', 'general');
+        ensureSetting('maintenance_countdown_enabled', false, 'boolean', 'general');
+        ensureSetting('maintenance_end_time', '', 'datetime', 'general');
+
         initializeFormData();
     } catch (error: unknown) {
         logger.error('Failed to fetch settings:', error);

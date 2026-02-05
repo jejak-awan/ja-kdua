@@ -83,6 +83,11 @@
         "ftp_root": "Root directory for file storage (e.g. /public_html)",
         "ftp_port": "FTP connection port (default 21)",
         "ftp_ssl": "Enable secure connection (FTPS)",
-        "dropbox_authorization_token": "Generated Access Token from Dropbox App Console"
+        "dropbox_authorization_token": "Generated Access Token from Dropbox App Console",
+        "maintenance_mode": "Aktifkan atau nonaktifkan mode Coming Soon / Under Maintenance.",
+        "maintenance_title": "Judul utama di halaman maintenance.",
+        "maintenance_message": "Pesan yang ditampilkan di halaman maintenance.",
+        "maintenance_countdown_enabled": "Tampilkan penghitung waktu mundur langsung hingga situs online kembali.",
+        "maintenance_end_time": "Kapan perbaikan dijadwalkan selesai. Situs akan otomatis online kembali setelah waktu ini."
     }
 }

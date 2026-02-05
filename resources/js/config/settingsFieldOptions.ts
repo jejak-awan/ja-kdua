@@ -192,6 +192,21 @@ export const captchaMethodOptions: SettingsOption[] = [
     { value: 'image', labelKey: 'features.settings.options.captchaMethod.image' },
 ]
 
+// Maintenance presets options
+export const maintenanceTitlePresets: SettingsOption[] = [
+    { value: 'Coming Soon', labelKey: 'features.settings.options.maintenanceTitlePresets.coming_soon' },
+    { value: 'Under Maintenance', labelKey: 'features.settings.options.maintenanceTitlePresets.under_maintenance' },
+    { value: 'Launch Day!', labelKey: 'features.settings.options.maintenanceTitlePresets.launch_day' },
+    { value: 'System Update', labelKey: 'features.settings.options.maintenanceTitlePresets.system_update' },
+]
+
+export const maintenanceMessagePresets: SettingsOption[] = [
+    { value: 'We are currently working on something awesome. Please check back later.', labelKey: 'features.settings.options.maintenanceMessagePresets.awesome' },
+    { value: "Sorry for the inconvenience. We're performing some maintenance and will be back shortly.", labelKey: 'features.settings.options.maintenanceMessagePresets.inconvenience' },
+    { value: 'Something exciting is coming! Stay tuned for our launch.', labelKey: 'features.settings.options.maintenanceMessagePresets.exciting' },
+    { value: "We are updating our system to provide you a better experience. We'll be back online soon.", labelKey: 'features.settings.options.maintenanceMessagePresets.better_exp' },
+]
+
 // Helper function to get options for a specific field
 export function getFieldOptions(fieldKey: string): SettingsOption[] | null {
     const optionsMap: Record<string, SettingsOption[]> = {
@@ -205,11 +220,10 @@ export function getFieldOptions(fieldKey: string): SettingsOption[] | null {
         thumbnail_width: thumbnailSizeOptions,
         thumbnail_height: thumbnailSizeOptions,
         // Security options
-        // Security options
         password_min_length: passwordMinLengthOptions,
         two_factor_method: twoFactorMethodOptions,
         two_factor_enforced_roles: twoFactorEnforcedOptions,
-        captcha_method: captchaMethodOptions, // Added options for captcha method
+        captcha_method: captchaMethodOptions,
         login_attempts_limit: loginAttemptsOptions,
         block_duration_minutes: blockDurationOptions,
         session_lifetime: sessionLifetimeOptions,
@@ -223,6 +237,16 @@ export function getFieldOptions(fieldKey: string): SettingsOption[] | null {
     }
 
     return optionsMap[fieldKey] || null
+}
+
+// Helper to get presets for a specific field
+export function getFieldPresets(fieldKey: string): SettingsOption[] | null {
+    const presetsMap: Record<string, SettingsOption[]> = {
+        maintenance_title: maintenanceTitlePresets,
+        maintenance_message: maintenanceMessagePresets,
+    }
+
+    return presetsMap[fieldKey] || null
 }
 
 // Helper to check if a field should use dropdown

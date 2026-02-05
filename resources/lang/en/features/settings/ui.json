@@ -77,6 +77,10 @@
         "moderation": {
             "title": "Moderation",
             "description": "Content safety and spam protection"
+        },
+        "maintenance": {
+            "title": "Maintenance Mode",
+            "description": "Configure Coming Soon / Under Maintenance page."
         }
     },
     "enabled": "Enabled",

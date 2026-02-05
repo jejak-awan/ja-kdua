@@ -10,7 +10,7 @@ test.describe('Media Management Flow', () => {
     test.beforeEach(async ({ page }) => {
         // Login before each test
         await page.goto('/login');
-        await page.fill('#email', 'admin@jejakawan.com');
+        await page.fill('#email', 'admin@kdua.net');
         await page.fill('#password', 'admin123');
         await page.click('button[type="submit"]');
         await expect(page).toHaveURL(/.*admin/);

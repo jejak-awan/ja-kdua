@@ -18,7 +18,7 @@ class StudioSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = User::where('email', 'admin@jejakawan.com')->first();
+        $admin = User::where('email', 'admin@kdua.net')->first();
         if (! $admin) {
             return;
         }
@@ -75,7 +75,7 @@ class StudioSeeder extends Seeder
             'author_id' => $admin->id,
             'settings' => [
                 'email_notifications' => true,
-                'notification_email' => 'admin@jejakawan.com',
+                'notification_email' => 'admin@kdua.net',
             ],
         ]);
 

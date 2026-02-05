@@ -151,6 +151,18 @@
             "no": "Optional for all users",
             "admin": "Mandatory for Admins",
             "all": "Mandatory for All Users"
+        },
+        "maintenanceTitlePresets": {
+            "coming_soon": "Segera Hadir",
+            "under_maintenance": "Dalam Perbaikan",
+            "launch_day": "Hari Peluncuran!",
+            "system_update": "Pembaruan Sistem"
+        },
+        "maintenanceMessagePresets": {
+            "awesome": "Kami sedang mengerjakan sesuatu yang luar biasa. Silakan cek kembali nanti.",
+            "inconvenience": "Mohon maaf atas ketidaknyamanannya. Kami sedang melakukan pemeliharaan dan akan segera kembali.",
+            "exciting": "Sesuatu yang menarik akan segera hadir! Nantikan peluncuran kami.",
+            "better_exp": "Kami sedang memperbarui sistem untuk memberikan pengalaman yang lebih baik. Kami akan segera online kembali."
         }
     }
 }

@@ -6,7 +6,7 @@ test.describe('Authentication Flow', () => {
         await page.goto('/login');
 
         // Fill login form
-        await page.fill('#email', 'admin@jejakawan.com');
+        await page.fill('#email', 'admin@kdua.net');
         await page.fill('#password', 'admin123');
 
         // Click submit (ensure it's enabled after captcha check/validation)

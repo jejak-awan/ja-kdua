@@ -1,8 +1,8 @@
 import { createI18n } from 'vue-i18n';
 import config, { type LocaleConfig } from '../lang/config';
 import type { Ref } from 'vue';
-import en from '../lang/en/index.js';
-import id from '../lang/id/index.js';
+import en from '../lang/en';
+import id from '../lang/id';
 
 /**
  * Detect the best locale to use

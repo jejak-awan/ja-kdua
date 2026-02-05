@@ -74,6 +74,11 @@
         "ftp_port": "FTP connection port (default 21)",
         "ftp_ssl": "Enable secure connection (FTPS)",
         "dropbox_authorization_token": "Generated Access Token from Dropbox App Console",
+        "maintenance_mode": "Enable or disable Coming Soon / Under Maintenance mode.",
+        "maintenance_title": "The main heading on the maintenance page.",
+        "maintenance_message": "The message displayed on the maintenance page.",
+        "maintenance_countdown_enabled": "Show a live countdown timer until the site becomes live again.",
+        "maintenance_end_time": "When the maintenance is scheduled to end. The site will automatically become live after this time.",
         "comments": {
             "security": {
                 "enable_reply": "Allow users to reply to other comments",

@@ -79,7 +79,7 @@ class SettingController extends BaseApiController
         $validated = $request->validate([
             'key' => 'required|string|unique:settings,key',
             'value' => 'nullable',
-            'type' => 'required|in:string,integer,boolean,json,text,password,number',
+            'type' => 'required|in:string,integer,boolean,json,text,password,number,datetime',
             'group' => 'required|string',
             'description' => 'nullable|string',
             'is_public' => 'boolean',
@@ -94,7 +94,7 @@ class SettingController extends BaseApiController
     {
         $validated = $request->validate([
             'value' => 'nullable',
-            'type' => 'sometimes|in:string,integer,boolean,json,text,password,number',
+            'type' => 'sometimes|in:string,integer,boolean,json,text,password,number,datetime',
             'group' => 'sometimes|string',
             'description' => 'nullable|string',
             'is_public' => 'boolean',
@@ -111,7 +111,7 @@ class SettingController extends BaseApiController
             'settings' => 'required|array',
             'settings.*.key' => 'required|string',
             'settings.*.value' => 'nullable',
-            'settings.*.type' => 'sometimes|in:string,integer,boolean,json,text,password,number',
+            'settings.*.type' => 'sometimes|in:string,integer,boolean,json,text,password,number,datetime',
             'settings.*.group' => 'sometimes|string',
         ]);
 

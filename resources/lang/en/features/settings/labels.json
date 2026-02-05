@@ -74,6 +74,11 @@
         "ftp_port": "FTP Port",
         "ftp_ssl": "Use SSL/TLS",
         "dropbox_authorization_token": "Dropbox Auth Token",
+        "maintenance_mode": "Maintenance Mode",
+        "maintenance_title": "Maintenance Page Title",
+        "maintenance_message": "Maintenance Message",
+        "maintenance_countdown_enabled": "Enable Countdown Timer",
+        "maintenance_end_time": "Maintenance End Time",
         "comments": {
             "security": {
                 "enable_reply": "Enable Replies",
