@@ -52,6 +52,10 @@
             <div v-if="submitted" class="success-message mt-6 p-4 rounded-lg bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
               {{ blockSettings.successMessage || 'Thank you! Your message has been sent.' }}
             </div>
+
+            <div v-if="error" class="error-message mt-6 p-4 rounded-lg bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800">
+              {{ error }}
+            </div>
           </div>
         </form>
       </div>
@@ -60,12 +64,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, provide, reactive } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import ContactFieldBlock from './ContactFieldBlock.vue'
 import { Button } from '../ui'
 import Send from 'lucide-vue-next/dist/esm/icons/send.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
+import api from '@/services/api'
 import { 
   getTypographyStyles,
   getLayoutStyles,
@@ -88,14 +93,40 @@ const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const isSubmitting = ref(false)
 const submitted = ref(false)
+const error = ref<string | null>(null)
 
-const handleSubmit = () => {
+// Form Data Collection
+const formData = reactive<Record<string, any>>({})
+const updateField = (id: string, value: any) => {
+    formData[id] = value
+}
+
+provide('contactForm', { updateField })
+
+const handleSubmit = async () => {
     if (props.mode === 'edit') return
+    
     isSubmitting.value = true
-    setTimeout(() => {
+    submitted.value = false
+    error.value = null
+
+    try {
+        const formSlug = (settings.value.formSlug as string) || 'contact'
+        const response = await api.post(`/cms/forms/${formSlug}/submit`, formData)
+        
+        if (response.data?.success) {
+            submitted.value = true
+            // Clear form
+            Object.keys(formData).forEach(key => formData[key] = '')
+        } else {
+            error.value = response.data?.message || 'Failed to submit form.'
+        }
+    } catch (e: any) {
+        console.error('Form submission error:', e)
+        error.value = e.response?.data?.message || 'An error occurred during submission.'
+    } finally {
         isSubmitting.value = false
-        submitted.value = true
-    }, 1500)
+    }
 }
 
 const cardStyles = computed(() => {
@@ -125,6 +156,22 @@ const buttonStyles = computed(() => {
     }
 })
 </script>
+
+<style scoped>
+.contact-form-block { width: 100%; }
+.contact-form-block {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+.contact-form-block:hover {
+    transform: scale(var(--hover-scale, 1));
+    filter: brightness(var(--hover-brightness, 100%));
+}
+.success-message, .error-message { animation: fadeIn 0.3s ease-out; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
 
 <style scoped>
 .contact-form-block { width: 100%; }

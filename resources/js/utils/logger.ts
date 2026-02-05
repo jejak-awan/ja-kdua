@@ -15,10 +15,10 @@ class Logger {
     private apiUrl = '/journal/frontend';
     private queue: ErrorLog[] = []; // Kept for checking but technically unused now
 
-    // Rate Limiting Logic
+    // Rate Limiting & Deduplication Logic
     private logCount = 0;
     private lastResetTime = Date.now();
-    private lastLogSignature = '';
+    private signatureMap = new Map<string, number>();
 
     constructor() {
         this.setupGlobalHandlers();
@@ -96,14 +96,43 @@ class Logger {
         this.log('error', message, data);
     }
 
+
+
+    private deepTruncate(obj: unknown, limit = 200, depth = 0): unknown {
+        // Prevent infinite recursion
+        if (depth > 3) return '[Max Depth Exceeded]';
+
+        if (typeof obj === 'string') {
+            return obj.length > limit ? obj.substring(0, limit) + '... (truncated)' : obj;
+        }
+        if (Array.isArray(obj)) {
+            return obj.map(item => this.deepTruncate(item, limit, depth + 1));
+        }
+        if (obj !== null && typeof obj === 'object') {
+            const result: Record<string, unknown> = {};
+            for (const key in obj as Record<string, unknown>) {
+                // Defensively skip nested stacks or huge payloads
+                if (key === 'stack' || key === 'long_stack') continue;
+                result[key] = this.deepTruncate((obj as Record<string, unknown>)[key], limit, depth + 1);
+            }
+            return result;
+        }
+        return obj;
+    }
+
     private async send(log: ErrorLog) {
         // Don't send debug, info, or warning logs to backend to prevent flood
         if (['debug', 'info', 'warning'].includes(log.level)) return;
 
         // Rate Limiting: Reset count every 60 seconds
-        if (Date.now() - this.lastResetTime > 60000) {
+        const now = Date.now();
+        if (now - this.lastResetTime > 60000) {
             this.logCount = 0;
-            this.lastResetTime = Date.now();
+            this.lastResetTime = now;
+            // Also clean up signature map older than 60s
+            for (const [sig, time] of this.signatureMap.entries()) {
+                if (now - time > 60000) this.signatureMap.delete(sig);
+            }
         }
 
         // Limit to 20 logs per minute
@@ -115,22 +144,29 @@ class Logger {
             return;
         }
 
-        // Deduplication: Prevent sending the exact same error twice in a row
-        // (Use message + partial stack as signature)
-        const signature = `${log.message}|${log.stack?.substring(0, 100) || ''}`;
-        if (signature === this.lastLogSignature) {
+        // Aggressive Truncation: Limit stack trace to 1KB
+        if (log.stack && log.stack.length > 1000) {
+            log.stack = log.stack.substring(0, 1000) + '\n... (truncated for safety)';
+        }
+
+        // Deep Truncation of data object
+        if (log.data) {
+            log.data = this.deepTruncate(log.data);
+        }
+
+        // Deduplication: Use signature cache with 30s TTL
+        const signature = `${log.message}|${log.stack?.substring(0, 150) || ''}`;
+        const lastSeen = this.signatureMap.get(signature);
+        if (lastSeen && now - lastSeen < 30000) {
             return;
         }
-        this.lastLogSignature = signature;
+        this.signatureMap.set(signature, now);
 
         this.logCount++;
 
         try {
             await api.post(this.apiUrl, log);
         } catch (e) {
-            // Check if we are being rate limited by backend (429)
-            // If so, stop sending for a while? 
-            // The frontend rate limit should handle it, but fail safe:
             console.error('Failed to send log to backend', e);
         }
     }

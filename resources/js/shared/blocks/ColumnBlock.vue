@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<{
 const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const columnSize = computed(() => {
-    const size = getVal<string>(settings.value, 'width', props.device) || '1/2'
+    const size = getVal<string>(settings.value, 'width', props.device) || '1/1'
     const sizes: Record<string, string> = {
         '1/1': 'w-full',
         '1/2': 'w-1/2',
@@ -34,7 +34,7 @@ const columnSize = computed(() => {
         '1/4': 'w-1/4',
         '3/4': 'w-3/4'
     }
-    return sizes[size] || 'w-1/2'
+    return sizes[size] || 'w-full'
 })
 
 const alignmentClass = computed(() => {

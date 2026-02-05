@@ -128,6 +128,7 @@
                 </div>
             </div>
         </div>
+
     </footer>
 </template>
 
@@ -146,6 +147,7 @@ import Twitter from 'lucide-vue-next/dist/esm/icons/twitter.js';
 import Github from 'lucide-vue-next/dist/esm/icons/github.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js';
+import { onUnmounted } from 'vue'
 
 const { t } = useI18n()
 const { getSetting } = useTheme()
@@ -166,6 +168,16 @@ const gridClass = computed(() => {
 
 const loading = ref(false)
 const email = ref('')
+
+const brandingDisplay = computed(() => getSetting('branding_display', 'logo_only'));
+
+// Dynamic Branding Fallbacks
+const cmsStore = useCmsStore();
+const siteSettings = computed(() => cmsStore.siteSettings);
+
+const siteName = computed(() => (getSetting('site_title') as string) || siteSettings.value?.site_name || 'Janari');
+const siteLogo = computed(() => (getSetting('brand_logo') as string) || siteSettings.value?.site_logo || '');
+const siteVersion = computed(() => siteSettings.value?.site_version || 'v1.0 Janari');
 
 // Fetch footer menu columns
 onMounted(() => {
@@ -188,16 +200,6 @@ const defaultCol2Items: Partial<MenuItem>[] = [
 const footerCol1Items = computed(() => (menus.value['footer_col_1']?.items?.length || 0) > 0 ? menus.value['footer_col_1'].items : defaultCol1Items);
 const footerCol2Items = computed(() => (menus.value['footer_col_2']?.items?.length || 0) > 0 ? menus.value['footer_col_2'].items : defaultCol2Items);
 const footerItems = computed(() => menus.value['footer']?.items || []);
-
-const brandingDisplay = computed(() => getSetting('branding_display', 'logo_only'));
-
-// Dynamic Branding Fallbacks
-const cmsStore = useCmsStore();
-const siteSettings = computed(() => cmsStore.siteSettings);
-
-const siteName = computed(() => (getSetting('site_title') as string) || siteSettings.value?.site_name || 'Janari');
-const siteLogo = computed(() => (getSetting('brand_logo') as string) || siteSettings.value?.site_logo || '');
-const siteVersion = computed(() => siteSettings.value?.site_version || 'v1.0 Janari');
 
 const submitNewsletter = async () => {
     if (!validateWithZod({ email: email.value })) return

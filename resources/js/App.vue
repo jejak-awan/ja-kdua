@@ -140,6 +140,24 @@ onMounted(async () => {
         logger.warning('Theme loading failed, continuing without theme:', err);
     });
 
+    // --- NEW: Live Preview Listener for Customizer ---
+    window.addEventListener('message', (event) => {
+        // Only accept messages from same origin if needed, or check structure
+        if (event.data && event.data.type === 'THEME_UPDATE') {
+            const { settings, custom_css } = event.data;
+            if (settings) {
+                themeSettings.value = { ...themeSettings.value, ...settings };
+            }
+            if (custom_css !== undefined) {
+                const { customCss, applyThemeStyles } = useTheme();
+                customCss.value = custom_css;
+                applyThemeStyles();
+            }
+            logger.info('Live theme update applied via Customizer');
+        }
+    });
+    // --------------------------------------------------
+
     // Fetch public site settings for dynamic branding
     cmsStore.fetchPublicSettings().catch(err => {
         logger.warning('Public settings fetch failed:', err);

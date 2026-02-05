@@ -10,10 +10,18 @@
                 <component :is="fieldIcon" class="w-5 h-5 opacity-40 group-hover/input:opacity-100 group-hover/input:text-white" />
             </div>
             <div class="flex-1">
+                <textarea 
+                    v-if="settings.fieldType === 'message'"
+                    :placeholder="(settings.placeholder as string) || 'Your focus here...'"
+                    class="w-full bg-transparent border-none outline-none font-black text-sm tracking-tight placeholder:opacity-20 min-h-[100px] resize-none"
+                    v-model="fieldValue"
+                ></textarea>
                 <input 
+                    v-else
                     :type="inputType"
                     :placeholder="(settings.placeholder as string) || 'Your focus here...'"
                     class="w-full bg-transparent border-none outline-none font-black text-sm tracking-tight placeholder:opacity-20"
+                    v-model="fieldValue"
                 />
             </div>
         </div>
@@ -23,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, inject, watch } from 'vue'
 import User from 'lucide-vue-next/dist/esm/icons/user.js';
 import Mail from 'lucide-vue-next/dist/esm/icons/mail.js';
 import Phone from 'lucide-vue-next/dist/esm/icons/phone.js';
@@ -40,6 +48,16 @@ const props = withDefaults(defineProps<{
 })
 
 const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
+
+// Form Integration
+const formContext = inject<{ updateField: (id: string, value: any) => void } | null>('contactForm', null)
+const fieldValue = ref('')
+
+watch(fieldValue, (newVal) => {
+    if (formContext && settings.value.fieldId) {
+        formContext.updateField(settings.value.fieldId as string, newVal)
+    }
+})
 
 const inputType = computed(() => {
     const type = settings.value.fieldType || 'text'

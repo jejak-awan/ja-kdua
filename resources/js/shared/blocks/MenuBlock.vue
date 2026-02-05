@@ -26,16 +26,25 @@
         :class="menuStyle === 'vertical' ? 'flex-col gap-6' : 'flex-row gap-10'"
         :style="(menuStyles as any)"
       >
-        <li v-for="item in menuItems" :key="item" class="menu-item group/item">
+        <li v-for="item in menuItems" :key="item.id" class="menu-item group/item">
           <a 
-            href="#" 
+            :href="mode === 'view' ? (item.url || '#') : '#'" 
             class="menu-link block transition-colors duration-300 font-bold tracking-tight relative pb-1" 
             :style="(linkStyles as any)"
-            @click.prevent
+            @click="mode === 'edit' ? $event.preventDefault() : null"
           >
-            {{ item }}
+            {{ item.title }}
             <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-colors duration-300 group-hover/item:w-full"></span>
           </a>
+          
+          <!-- Basic Dropdown Support (One Level) -->
+          <ul v-if="item.children && item.children.length > 0" class="absolute hidden group-hover/item:block bg-white dark:bg-slate-900 shadow-xl rounded-xl p-4 min-w-[200px] z-50">
+             <li v-for="child in item.children" :key="child.id">
+                <a :href="mode === 'view' ? (child.url || '#') : '#'" class="block p-2 hover:text-primary transition-colors font-medium">
+                   {{ child.title }}
+                </a>
+             </li>
+          </ul>
         </li>
       </ul>
       
@@ -54,13 +63,13 @@
             <X class="w-10 h-10 text-slate-800 dark:text-white" />
         </button>
         <ul class="flex flex-col gap-8 mt-20 text-center text-3xl font-black tracking-tighter">
-            <li v-for="(item, index) in menuItems" :key="item" :style="{ animationDelay: `${index * 100}ms` }" class="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
+            <li v-for="(item, index) in menuItems" :key="item.id" :style="{ animationDelay: `${(index as number) * 100}ms` }" class="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
                 <a 
-                    href="#" 
+                    :href="mode === 'view' ? (item.url || '#') : '#'" 
                     class="text-slate-900 dark:text-white hover:text-primary transition-colors"
                     @click="mobileOpen = false"
                 >
-                    {{ item }}
+                    {{ item.title }}
                 </a>
             </li>
         </ul>
@@ -70,10 +79,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, inject } from 'vue'
+import { computed, ref, inject, onMounted, watch } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import MenuIcon from 'lucide-vue-next/dist/esm/icons/menu.js';
 import X from 'lucide-vue-next/dist/esm/icons/x.js';
+import api from '@/services/api'
 import { 
   getVal,
   getLayoutStyles,
@@ -91,12 +101,45 @@ const device = computed(() => builder?.device?.value || 'desktop')
 const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const mobileOpen = ref(false)
-const menuItems = ['Home', 'Products', 'Services', 'Insights', 'Company']
+const menuData = ref<any>(null)
+const menuItems = computed(() => menuData.value?.items || [])
 
 const showLogo = computed(() => getVal<boolean>(settings.value, 'showLogo', device.value))
 const logoPosition = computed(() => getVal<string>(settings.value, 'logoPosition', device.value) || 'left')
 const menuStyle = computed(() => getVal<string>(settings.value, 'style', device.value) || 'horizontal')
 const alignment = computed(() => getVal<string>(settings.value, 'alignment', device.value) || 'left')
+
+const fetchMenu = async () => {
+    const menuId = settings.value.menuId as string
+    try {
+        let response
+        if (menuId) {
+            // Check if it's likely an ID or a Slug
+            const isNumeric = /^\d+$/.test(menuId)
+            if (isNumeric) {
+                response = await api.get(`/cms/menus/${menuId}`)
+            } else {
+                // Try fetching by location first, as it's common for builder
+                response = await api.get(`/cms/menus/location/${menuId}`).catch(() => {
+                    // Fallback to direct show if location fails
+                    return api.get(`/cms/menus/${menuId}`)
+                })
+            }
+        } else {
+            // Default to 'main' location
+            response = await api.get('/cms/menus/location/main')
+        }
+        
+        if (response?.data?.success) {
+            menuData.value = response.data.data
+        }
+    } catch (error) {
+        console.error('Failed to fetch menu:', error)
+    }
+}
+
+onMounted(fetchMenu)
+watch(() => settings.value.menuId, fetchMenu)
 
 const containerStyles = computed(() => {
     return getLayoutStyles(settings.value, device.value)

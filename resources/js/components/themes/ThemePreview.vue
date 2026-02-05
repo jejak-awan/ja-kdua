@@ -174,8 +174,18 @@ defineExpose({ refreshPreview });
 
 // Watch for theme changes and re-inject styles
 watch(() => props.theme, () => {
-    if (previewFrame.value && previewFrame.value.contentDocument) {
-        injectThemeStyles();
+    if (previewFrame.value && previewFrame.value.contentWindow) {
+        // Send postMessage for reactive updates (JS-based)
+        previewFrame.value.contentWindow.postMessage({
+            type: 'THEME_UPDATE',
+            settings: props.theme.settings,
+            custom_css: props.theme.custom_css
+        }, '*');
+
+        // Still inject styles for color/CSS variables
+        if (previewFrame.value.contentDocument) {
+            injectThemeStyles();
+        }
     }
 }, { deep: true });
 </script>

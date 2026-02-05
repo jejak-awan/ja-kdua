@@ -22,6 +22,18 @@
             "type": "media",
             "category": "General"
         },
+        "site_tagline": {
+            "label": "Site Tagline",
+            "type": "text",
+            "default": "Modern & Elegant CMS",
+            "category": "General"
+        },
+        "site_description": {
+            "label": "Site Description",
+            "type": "textarea",
+            "default": "Modern Content Management System built with Laravel and Vue.js",
+            "category": "General"
+        },
         "branding_display": {
             "label": "Branding Display",
             "type": "select",

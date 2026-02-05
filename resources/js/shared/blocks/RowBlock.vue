@@ -117,17 +117,22 @@ const rowStyles = computed(() => {
         styles.justifyContent = justify
     }
     
-    // Legacy column widths support (for flex mode)
+    // Column structure logic (flex-based)
     const columns = getVal<string>(settings.value, 'columns', props.device) || '1-1'
-    const colWidths = columns.split('-').map((fraction: string) => {
+    const colConfigs = columns.split('-').map((fraction: string) => {
         const parts = fraction.split('/').map(Number)
-        if (parts.length === 2) return `${(parts[0] / parts[1]) * 100}%`
-        return `${100 / columns.split('-').length}%`
+        // If it's a fraction like 1/3, we use numerator as grow weight
+        if (parts.length === 2) return { grow: parts[0], basis: '0%' }
+        // Simple numeric/legacy format
+        const growCount = Number(fraction) || 1
+        return { grow: growCount, basis: '0%' }
     })
 
-    colWidths.forEach((width: string, i: number) => {
-        // If auto-stacking, override width to 100%
-        styles[`--col-width-${i}`] = (!hasResponsiveColumns && (isMobile || isTablet)) ? '100%' : width
+    colConfigs.forEach((config, i: number) => {
+        // If auto-stacking on mobile/tablet, force basis to 100% and grow to 0
+        const isStacked = (!hasResponsiveColumns && (isMobile || isTablet))
+        styles[`--col-grow-${i}`] = isStacked ? '0' : config.grow
+        styles[`--col-basis-${i}`] = isStacked ? '100%' : config.basis
     })
 
     return styles
@@ -135,7 +140,7 @@ const rowStyles = computed(() => {
 
 const getColumnStyles = (index: number) => {
     return {
-        width: `var(--col-width-${index}, 100%)`,
+        flex: `var(--col-grow-${index}, 1) 1 var(--col-basis-${index}, 0%)`,
         height: '100%'
     }
 }
@@ -169,10 +174,10 @@ const getColumnStyles = (index: number) => {
 }
 
 /* Apply specific widths to children in builder mode - allow flex stretching */
-.row-inner:deep(.children-container > :nth-child(1)) { width: var(--col-width-0, 100%); height: 100%; }
-.row-inner:deep(.children-container > :nth-child(2)) { width: var(--col-width-1, 100%); height: 100%; }
-.row-inner:deep(.children-container > :nth-child(3)) { width: var(--col-width-2, 100%); height: 100%; }
-.row-inner:deep(.children-container > :nth-child(4)) { width: var(--col-width-3, 100%); height: 100%; }
-.row-inner:deep(.children-container > :nth-child(5)) { width: var(--col-width-4, 100%); height: 100%; }
-.row-inner:deep(.children-container > :nth-child(6)) { width: var(--col-width-5, 100%); height: 100%; }
+.row-inner:deep(.children-container > :nth-child(1)) { flex: var(--col-grow-0, 1) 1 var(--col-basis-0, 0%); height: 100%; }
+.row-inner:deep(.children-container > :nth-child(2)) { flex: var(--col-grow-1, 1) 1 var(--col-basis-1, 0%); height: 100%; }
+.row-inner:deep(.children-container > :nth-child(3)) { flex: var(--col-grow-2, 1) 1 var(--col-basis-2, 0%); height: 100%; }
+.row-inner:deep(.children-container > :nth-child(4)) { flex: var(--col-grow-3, 1) 1 var(--col-basis-3, 0%); height: 100%; }
+.row-inner:deep(.children-container > :nth-child(5)) { flex: var(--col-grow-4, 1) 1 var(--col-basis-4, 0%); height: 100%; }
+.row-inner:deep(.children-container > :nth-child(6)) { flex: var(--col-grow-5, 1) 1 var(--col-basis-5, 0%); height: 100%; }
 </style>

@@ -67,7 +67,7 @@
         
         <div class="p-3 bg-muted/10 border-t border-border/40">
             <Button variant="ghost" size="sm" class="w-full text-primary hover:bg-primary/5 group" as-child>
-                <router-link :to="{ name: 'activity-logs' }" class="flex items-center justify-center">
+                <router-link to="/admin/activity-journal" class="flex items-center justify-center">
                     {{ $t('features.dashboard.widgets.recentActivity.viewAll') }}
                     <ArrowRight class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                 </router-link>

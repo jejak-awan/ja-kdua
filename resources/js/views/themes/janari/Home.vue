@@ -32,16 +32,16 @@
 
                 <div class="container mx-auto px-4 text-center relative z-10">
                     <span class="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold bg-primary/10 text-primary mb-8 ring-1 ring-inset ring-primary/20 backdrop-blur-sm">
-                        🚀 v1.0 Janari Edition
+                        🚀 {{ siteVersion }}
                     </span>
                     <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-foreground mb-6 text-balance">
-                        JA-CMS
+                        {{ heroTitle }}
                     </h1>
                     <p class="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-4 font-medium">
-                        Modern Content Management System
+                        {{ heroSubtitle }}
                     </p>
                     <p class="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
-                        Built with Laravel & Vue.js for speed, flexibility, and a premium developer experience.
+                        {{ siteTagline }}
                     </p>
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <router-link 
@@ -226,7 +226,7 @@ Content::published()
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import api from '@/services/api'
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue'
 import Zap from 'lucide-vue-next/dist/esm/icons/zap.js';
@@ -263,7 +263,16 @@ interface PageData extends Content {
     blocks?: BlockInstance[]; 
 }
 
-// useTheme imported but getSetting not used
+// useTheme and useCmsStore for dynamic fallback branding
+import { useTheme } from '@/composables/useTheme';
+import { useCmsStore } from '@/stores/cms';
+const { getSetting } = useTheme();
+const cmsStore = useCmsStore();
+
+const siteTagline = computed(() => (getSetting('site_tagline') as string) || (cmsStore.siteSettings as any)?.site_tagline || cmsStore.siteSettings?.site_description || 'Modern & Elegant CMS');
+const heroTitle = computed(() => (getSetting('hero_title') as string) || (getSetting('site_title') as string) || cmsStore.siteSettings?.site_name || 'JA-CMS');
+const heroSubtitle = computed(() => (getSetting('hero_subtitle') as string) || 'Modern Content Management System');
+const siteVersion = computed(() => cmsStore.siteSettings?.site_version || 'v1.0 Janari Edition');
 
 const pageData = ref<PageData | null>(null)
 const loading = ref(true)

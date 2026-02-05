@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, onUnmounted } from 'vue'
+import { computed, onMounted, ref, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useTheme } from '@/composables/useTheme'
 import ThemePageResolver from '@/components/shared/ThemePageResolver.vue'
@@ -150,6 +150,12 @@ const handleScroll = () => {
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
+
+// React immediately to back_to_top setting changes
+watch(enableBackToTop, (enabled) => {
+    if (!enabled) showBackToTop.value = false;
+    else handleScroll();
+});
 
 onMounted(async () => {
   if (!activeTheme.value) {

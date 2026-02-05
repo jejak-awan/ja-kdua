@@ -54,6 +54,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/services/api';
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.vue';
 import Archive from 'lucide-vue-next/dist/esm/icons/archive.js';
 
 import type { Content } from '@/types/cms'

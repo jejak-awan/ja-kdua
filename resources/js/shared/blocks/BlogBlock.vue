@@ -20,7 +20,7 @@
 
       <div class="blog-grid transition-[width] duration-500" :style="(gridStyles as any)">
         <Card 
-          v-for="post in mockPosts" 
+          v-for="post in posts" 
           :key="post.id"
           class="blog-post group flex flex-col border-none shadow-2xl overflow-hidden rounded-[3rem] transition-colors duration-700 bg-white dark:bg-slate-900 border border-slate-50 dark:border-slate-800 hover:-translate-y-4"
           :style="(postStyles as any)"
@@ -32,16 +32,21 @@
             :style="(imageWrapperStyles as any)"
           >
             <div class="absolute inset-0 bg-slate-50 dark:bg-slate-950 flex items-center justify-center overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10" />
-                <LucideIcon name="Image" class="w-16 h-16 text-slate-100 dark:text-slate-800 transition-transform duration-1000 group-hover:scale-110" />
+                <template v-if="post.featured_image">
+                    <img :src="post.featured_image" :alt="post.title" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                </template>
+                <template v-else>
+                    <div class="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10" />
+                    <LucideIcon name="Image" class="w-16 h-16 text-slate-100 dark:text-slate-800 transition-transform duration-1000 group-hover:scale-110" />
+                </template>
             </div>
             
             <!-- Category Badge -->
             <Badge 
-              v-if="settings.showCategory !== false" 
+              v-if="settings.showCategory !== false && post.category" 
               class="absolute top-6 left-6 z-20 rounded-2xl font-black px-5 py-2 text-[10px] uppercase tracking-widest bg-white/90 dark:bg-slate-900/90 text-primary border-none shadow-xl hover:bg-primary hover:text-white transition-colors transform -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
             >
-              {{ post.category }}
+              {{ post.category.name }}
             </Badge>
           </div>
           
@@ -51,7 +56,9 @@
               class="post-title text-2xl font-black mb-4 line-clamp-2 leading-tight tracking-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors border-none" 
               :style="(itemTitleStyles as any)"
             >
-              {{ post.title }}
+              <a :href="mode === 'view' ? `/blog/${post.slug}` : '#'" @click="mode === 'edit' ? $event.preventDefault() : null">
+                {{ post.title }}
+              </a>
             </CardTitle>
             
             <CardDescription 
@@ -64,31 +71,42 @@
             
             <!-- Meta Footer -->
             <div class="mt-auto pt-8 border-t border-slate-50 dark:border-slate-800/50 flex items-center justify-between">
-               <div v-if="settings.showAuthor !== false" class="flex items-center gap-3">
+               <div v-if="settings.showAuthor !== false && post.author" class="flex items-center gap-3">
                   <Avatar class="w-10 h-10 shadow-lg border-2 border-slate-50 dark:border-slate-800 rounded-2xl overflow-hidden">
                      <AvatarFallback class="bg-primary/5 text-primary text-xs font-black">
-                         {{ post.author.split(' ').map(n => n[0]).join('') }}
+                         {{ post.author.name ? post.author.name.split(' ').map((n: string) => n[0]).join('') : 'U' }}
                      </AvatarFallback>
                   </Avatar>
-                  <span class="text-xs font-black text-slate-700 dark:text-slate-300">{{ post.author }}</span>
+                  <span class="text-xs font-black text-slate-700 dark:text-slate-300">{{ post.author.name || 'User' }}</span>
                </div>
                
                <div v-if="settings.showDate !== false" class="flex flex-col items-end">
-                  <span class="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">{{ post.date }}</span>
+                  <span class="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">{{ formatDate(post.published_at || post.created_at) }}</span>
                </div>
             </div>
           </CardContent>
         </Card>
+      </div>
+      
+      <!-- Empty State -->
+      <div v-if="posts.length === 0 && !loading" class="text-center py-20 opacity-50 font-bold">
+        No posts found.
+      </div>
+      
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-20">
+        <div class="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     </div>
   </BaseBlock>
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, inject, ref, onMounted, watch } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Card, CardTitle, CardDescription, CardContent, Badge, Avatar, AvatarFallback } from '../ui'
 import { LucideIcon } from '@/components/ui';
+import api from '@/services/api'
 import { 
   getVal, 
   getLayoutStyles, 
@@ -108,18 +126,57 @@ const props = withDefaults(defineProps<{
 const builder = inject<BuilderInstance | null>('builder', null)
 const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-// Mock posts for preview
-const mockPosts = computed(() => {
-  const count = getVal<number>(settings.value, 'itemsPerPage', props.device) || 6
-  return Array.from({ length: Math.min(count, 12) }, (_, i) => ({
-    id: i + 1,
-    title: `Crafting Digital Excellence: The Art of Dynamic CMS Design`,
-    excerpt: 'Deep dive into specialized layout controls, responsive typography, and unmatched interactive aesthetics for the next generation of web applications.',
-    category: 'Innovation',
-    author: 'Antigravity Pro',
-    date: 'JAN 25, 2026'
-  }))
-})
+const postData = ref<any[]>([])
+const loading = ref(false)
+
+const posts = computed(() => postData.value)
+
+const fetchPosts = async () => {
+    loading.value = true
+    try {
+        const count = getVal<number>(settings.value, 'itemsPerPage', props.device) || 6
+        const category = getVal<string>(settings.value, 'category', props.device)
+        const orderBy = getVal<string>(settings.value, 'orderBy', props.device) || 'date'
+        const order = getVal<string>(settings.value, 'order', props.device) || 'desc'
+        
+        let sortField = 'published_at'
+        if (orderBy === 'title') sortField = 'title'
+        if (orderBy === 'views') sortField = 'views'
+        
+        const sort = order === 'desc' ? `-${sortField}` : sortField
+        
+        const response = await api.get('/cms/contents', {
+            params: {
+                type: 'post',
+                category: category || undefined,
+                limit: count,
+                sort: sort
+            }
+        })
+        
+        if (response.data?.success) {
+            postData.value = response.data.data
+        }
+    } catch (error) {
+        console.error('Failed to fetch posts:', error)
+    } finally {
+        loading.value = false
+    }
+}
+
+onMounted(fetchPosts)
+watch(() => [
+    settings.value.itemsPerPage,
+    settings.value.category,
+    settings.value.orderBy,
+    settings.value.order
+], fetchPosts)
+
+const formatDate = (dateStr: string) => {
+    if (!dateStr) return ''
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase()
+}
 
 const cardStyles = computed(() => {
     const styles: Record<string, string | number> = {}

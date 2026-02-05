@@ -2,7 +2,7 @@
     <div class="fixed inset-0 z-50 flex overflow-hidden bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
         <Sidebar 
             :sections="settingsSections"
-            :form-values="formValues"
+            v-model:form-values="formValues"
             v-model:custom-css="customCss"
             :loading="loading"
             :saving="saving"

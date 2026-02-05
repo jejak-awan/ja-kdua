@@ -86,6 +86,7 @@ import { useRoute } from 'vue-router';
 // import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.vue';
 import { useIconHydration } from '@/composables/useIconHydration';
 import Calendar from 'lucide-vue-next/dist/esm/icons/calendar.js';
 import User from 'lucide-vue-next/dist/esm/icons/user.js';

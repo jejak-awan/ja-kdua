@@ -24,11 +24,16 @@ class FrontendLogController extends BaseApiController
             'level' => 'nullable|string|in:info,warning,error,critical',
         ]);
 
+        $stack = $validated['stack'] ?? null;
+        if ($stack && strlen($stack) > 3000) {
+            $stack = substr($stack, 0, 3000) . "\n... (truncated by backend)";
+        }
+
         $context = [
             'url' => $validated['url'] ?? null,
             'user_id' => $validated['user_id'] ?? null,
             'user_agent' => $validated['user_agent'] ?? $request->userAgent(),
-            'stack' => $validated['stack'] ?? null,
+            'stack' => $stack,
             'data' => $validated['data'] ?? [],
             'ip' => $request->ip(),
         ];
