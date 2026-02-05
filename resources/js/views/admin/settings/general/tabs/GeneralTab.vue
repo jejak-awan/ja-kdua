@@ -11,7 +11,7 @@
         >
             <SettingField
                 v-for="setting in group.settings"
-                v-show="setting.key !== 'maintenance_end_time' || formData.maintenance_countdown_enabled"
+                v-show="isMaintenanceSettingVisible(setting.key)"
                 :key="setting.id"
                 :model-value="(formData[setting.key] as any)"
                 @update:model-value="(value) => updateField(setting.key, value)"
@@ -68,6 +68,10 @@ const ClockIcon = {
     template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
 }
 
+const ToolIcon = {
+    template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75a4.5 4.5 0 01-4.884 4.484c-1.076-.091-2.264.071-2.999.922l-7.126 7.126a.908.908 0 01-1.287 0l-1.287-1.287a.908.908 0 010-1.287l7.126-7.126c.851-.735 1.013-1.923.922-2.999a4.5 4.5 0 014.484-4.884 4.5 4.5 0 014.884 4.884zM11.64 12.36L9.64 10.36" /><path stroke-linecap="round" stroke-linejoin="round" d="M7 17l-5 5" /><path stroke-linecap="round" stroke-linejoin="round" d="M12.5 12.5l5.5-5.5" /></svg>`
+}
+
 interface SettingGroupData {
     id: string;
     title: string;
@@ -77,6 +81,22 @@ interface SettingGroupData {
     keys: string[];
     settings: Setting[];
     defaultExpanded: boolean;
+}
+
+const isMaintenanceSettingVisible = (key: string) => {
+    // Basic switches for master maintenance mode
+    const maintenanceSubSettings = ['maintenance_title', 'maintenance_message', 'maintenance_countdown_enabled', 'maintenance_end_time'];
+    
+    if (maintenanceSubSettings.includes(key)) {
+        if (!props.formData.maintenance_mode) return false;
+        
+        // Additional check for countdown end time
+        if (key === 'maintenance_end_time' && !props.formData.maintenance_countdown_enabled) {
+            return false;
+        }
+    }
+    
+    return true;
 }
 
 // General settings grouped by category
@@ -118,12 +138,14 @@ const generalSettingsGrouped = computed(() => {
 
     groups.forEach(group => {
         group.settings = generalSettings.filter(s => group.keys.includes(s.key))
+        
+        // Ensure maintenance settings are in logical order
+        if (group.id === 'maintenance') {
+            const order = ['maintenance_mode', 'maintenance_title', 'maintenance_message', 'maintenance_countdown_enabled', 'maintenance_end_time'];
+            group.settings.sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+        }
     })
 
     return groups.filter(group => group.settings.length > 0)
 })
-
-const ToolIcon = {
-    template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75a4.5 4.5 0 01-4.884 4.484c-1.076-.091-2.264.071-2.999.922l-7.126 7.126a.908.908 0 01-1.287 0l-1.287-1.287a.908.908 0 010-1.287l7.126-7.126c.851-.735 1.013-1.923.922-2.999a4.5 4.5 0 014.484-4.884 4.5 4.5 0 014.884 4.884zM11.64 12.36L9.64 10.36" /><path stroke-linecap="round" stroke-linejoin="round" d="M7 17l-5 5" /><path stroke-linecap="round" stroke-linejoin="round" d="M12.5 12.5l5.5-5.5" /></svg>`
-}
 </script>
