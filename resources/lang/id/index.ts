@@ -45,6 +45,15 @@ import profile from './features/profile.json';
 import content_studio from './features/content_studio.json';
 import autosave from './features/autosave.json';
 import securityAlerts from './features/security_alerts.json';
+import ispSupport from './features/isp/support.json';
+import ispNetwork from './features/isp/network.json';
+import ispOutages from './features/isp/outages.json';
+import ispCore from './features/isp/core.json';
+import ispServiceRequests from './features/isp/service_requests.json';
+import ispBilling from './features/isp/billing.json';
+import ispInfra from './features/isp/infra.json';
+import ispMember from './features/isp/member.json';
+import ispMonitor from './features/isp/monitor.json';
 
 
 import scheduled_tasks from './features/scheduled_tasks.json';
@@ -56,6 +65,18 @@ import builder from './features/builder';
 export default {
     // Builder translations at root level for backward compatibility with builder.* namespace
     builder,
+    ispServiceRequests,
+    isp: {
+        ...ispCore,
+        support: ispSupport,
+        network: ispNetwork,
+        outages: ispOutages,
+        member: ispMember,
+        billing: ispBilling,
+        infra: ispInfra,
+        monitor: ispMonitor,
+        service_requests: ispServiceRequests,
+    },
     common: {
         actions,
         labels,

@@ -1,0 +1,37 @@
+{
+    "title": "Service Requests",
+    "subtitle": "Handle customer upgrades, downgrades, and service changes.",
+    "fields": {
+        "customer": "Customer",
+        "type": "Type",
+        "status": "Status",
+        "details": "Details",
+        "date": "Requested At",
+        "actions": "Actions"
+    },
+    "types": {
+        "Upgrade": "Upgrade",
+        "Downgrade": "Downgrade",
+        "Cancellation": "Cancellation",
+        "Relocation": "Relocation"
+    },
+    "status": {
+        "Pending": "Pending",
+        "Approved": "Approved",
+        "Rejected": "Rejected",
+        "Completed": "Completed"
+    },
+    "actions": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "execute": "Execute Provisioning",
+        "viewDetails": "View Details"
+    },
+    "messages": {
+        "confirmApprove": "Are you sure you want to approve this request?",
+        "confirmReject": "Are you sure you want to reject this request?",
+        "confirmExecute": "This will trigger automated provisioning. Proceed?",
+        "successUpdate": "Request status updated successfully",
+        "successExecute": "Provisioning executed successfully"
+    }
+}

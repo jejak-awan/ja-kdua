@@ -1,0 +1,37 @@
+{
+    "title": "Permintaan Layanan",
+    "subtitle": "Tangani peningkatan, penurunan, dan perubahan layanan pelanggan.",
+    "fields": {
+        "customer": "Pelanggan",
+        "type": "Tipe",
+        "status": "Status",
+        "details": "Detail",
+        "date": "Diminta Pada",
+        "actions": "Aksi"
+    },
+    "types": {
+        "Upgrade": "Peningkatan",
+        "Downgrade": "Penurunan",
+        "Cancellation": "Pembatalan",
+        "Relocation": "Relokasi"
+    },
+    "status": {
+        "Pending": "Tertunda",
+        "Approved": "Disetujui",
+        "Rejected": "Ditolak",
+        "Completed": "Selesai"
+    },
+    "actions": {
+        "approve": "Setujui",
+        "reject": "Tolak",
+        "execute": "Jalankan Provisi",
+        "viewDetails": "Lihat Detail"
+    },
+    "messages": {
+        "confirmApprove": "Apakah Anda yakin ingin menyetujui permintaan ini?",
+        "confirmReject": "Apakah Anda yakin ingin menolak permintaan ini?",
+        "confirmExecute": "Ini akan memicu provisi otomatis. Lanjutkan?",
+        "successUpdate": "Status permintaan berhasil diperbarui",
+        "successExecute": "Provisi berhasil dijalankan"
+    }
+}

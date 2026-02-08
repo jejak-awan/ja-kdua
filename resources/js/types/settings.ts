@@ -12,6 +12,7 @@ export interface SiteSettings {
     contact_email?: string;
     contact_phone?: string;
     contact_address?: string;
+    site_tagline?: string;
 }
 
 export interface CacheStatus {

@@ -1,6 +1,7 @@
 {
     "descriptions": {
         "site_name": "The name of your application displayed throughout the site",
+        "site_logo": "The URL of your site's logo used for branding",
         "site_description": "A brief description of your site for SEO and meta tags",
         "site_url": "The base URL of your website",
         "admin_email": "The primary administrator email address for system notifications",

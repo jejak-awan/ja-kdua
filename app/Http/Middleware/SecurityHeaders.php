@@ -73,6 +73,7 @@ class SecurityHeaders
         $scriptSrc = array_merge($scriptSrc, [
             'https://cdn.jsdelivr.net',
             'https://code.jquery.com',
+            'https://unpkg.com',
             'https://static.cloudflareinsights.com',
             'https://cloudflareinsights.com',
             // Note: We removed specific hashes ("'sha256-...'") to allow 'unsafe-inline' to work.
@@ -100,6 +101,7 @@ class SecurityHeaders
             'https://cdn.jsdelivr.net',
             'https://fonts.googleapis.com',
             'https://fonts.bunny.net',
+            'https://unpkg.com',
         ]);
 
         $directives[] = 'style-src '.implode(' ', $styleSrc);

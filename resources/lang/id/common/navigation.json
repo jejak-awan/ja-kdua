@@ -40,6 +40,17 @@
         "system": "Info Sistem",
         "systemNotifications": "Notifikasi",
         "emailTemplates": "Template Email",
+        "ispInfra": "Infrastruktur",
+        "ispMonitor": "Dasbor NOC",
+        "ispBilling": "Penagihan",
+        "ispNetworkIpam": "Manajer IPAM",
+        "ispNetworkProfiles": "Profil Layanan",
+        "ispRouter": "Manajer Router",
+        "ispOutages": "Pelacak Gangguan",
+        "ispMember": "Manajemen Anggota",
+        "ispSupport": "Manajer Tiket",
+        "ispMemberPortal": "Dasbor Saya",
+        "ispMemberSupport": "Hubungi Dukungan",
         "logout": "Keluar"
     },
     "sections": {
@@ -50,7 +61,8 @@
         "logs": "Pulse",
         "monitoring": "Pemantauan",
         "system": "Pengaturan",
-        "developer": "Dev"
+        "developer": "Dev",
+        "isp": "K2NET"
     },
     "breadcrumbs": {
         "home": "Beranda",

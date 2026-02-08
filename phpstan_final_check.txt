@@ -1,0 +1,87 @@
+Note: Using configuration file /var/www/ja-kdua/phpstan.neon.
+ ------ -------------------------------- 
+  Line   Http/Controllers/Api/Isp/Custo  
+         merController.php               
+ ------ -------------------------------- 
+  :56    Cannot cast mixed to string.    
+         🪪  cast.string                 
+  :68    Cannot cast mixed to string.    
+         🪪  cast.string                 
+ ------ -------------------------------- 
+
+ ------ -------------------------------- 
+  Line   Http/Controllers/Api/Isp/Monit  
+         orController.php                
+ ------ -------------------------------- 
+  :73    Cannot cast mixed to string.    
+         🪪  cast.string                 
+  :74    Cannot cast mixed to string.    
+         🪪  cast.string                 
+ ------ -------------------------------- 
+
+ ------ -------------------------------- 
+  Line   Http/Controllers/Api/Isp/Route  
+         rController.php                 
+ ------ -------------------------------- 
+  :26    Cannot cast mixed to string.    
+         🪪  cast.string                 
+  :35    PHPDoc tag @var for variable    
+         $paginator contains generic     
+         class                           
+         Illuminate\Pagination\LengthAw  
+         arePaginator but does not       
+         specify its types: TKey,        
+         TValue                          
+         🪪  missingType.generics        
+  :37    Parameter #1 $callback of       
+         method                          
+         Illuminate\Support\Collection<  
+         (int|string),mixed>::transform  
+         () expects callable(mixed,      
+         int|string): non-empty-array,   
+         Closure(App\Models\Isp\Service  
+         Node): non-empty-array given.   
+         🪪  argument.type               
+         💡  Type                        
+         App\Models\Isp\ServiceNode of   
+         parameter #1 $router of passed  
+         callable needs to be same or    
+         wider than parameter type       
+         mixed of accepting callable.    
+ ------ -------------------------------- 
+
+ ------ -------------------------------- 
+  Line   Http/Controllers/Api/Isp/Subsc  
+         riptionProfileController.php    
+ ------ -------------------------------- 
+  :22    Cannot cast mixed to string.    
+         🪪  cast.string                 
+ ------ -------------------------------- 
+
+ ------ -------------------------------- 
+  Line   Models/Isp/Customer.php         
+ ------ -------------------------------- 
+  :15    Class App\Models\Isp\Customer   
+         uses generic trait              
+         Illuminate\Database\Eloquent\F  
+         actories\HasFactory but does    
+         not specify its types:          
+         TFactory                        
+         🪪  missingType.generics        
+ ------ -------------------------------- 
+
+ ------ -------------------------------- 
+  Line   Models/Isp/DataServer.php       
+ ------ -------------------------------- 
+  :13    Class                           
+         App\Models\Isp\DataServer uses  
+         generic trait                   
+         Illuminate\Database\Eloquent\F  
+         actories\HasFactory but does    
+         not specify its types:          
+         TFactory                        
+         🪪  missingType.generics        
+ ------ -------------------------------- 
+
+ [ERROR] Found 10 errors                 
+

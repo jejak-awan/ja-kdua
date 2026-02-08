@@ -26,7 +26,7 @@ class FrontendLogController extends BaseApiController
 
         $stack = $validated['stack'] ?? null;
         if ($stack && strlen($stack) > 3000) {
-            $stack = substr($stack, 0, 3000) . "\n... (truncated by backend)";
+            $stack = substr($stack, 0, 3000)."\n... (truncated by backend)";
         }
 
         $context = [

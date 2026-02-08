@@ -1,0 +1,121 @@
+
+> lint
+> eslint resources/js --ext .js,.vue --ext .js,.ts,.vue resources/js/views/Isp resources/js/types/isp.ts
+
+
+/var/www/ja-kdua/resources/js/components/ui/DataTable.vue
+  21:7  warning  'props' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/var/www/ja-kdua/resources/js/types/isp.ts
+  1:1  warning  All imports in the declaration are only used as types. Use `import type`  @typescript-eslint/consistent-type-imports
+
+/var/www/ja-kdua/resources/js/views/Isp/Admin/ServiceRequests.vue
+  86:10  warning  'ColumnDef' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  87:5   warning  'FlexRender' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/var/www/ja-kdua/resources/js/views/Isp/Billing/BillingSettingsModal.vue
+  125:22  warning  'onMounted' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  206:14  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+/var/www/ja-kdua/resources/js/views/Isp/Billing/Index.vue
+  233:102  warning  Expected a space before '/>', but not found                                   vue/html-closing-bracket-spacing
+  267:10   warning  'ColumnDef' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  268:5    warning  'FlexRender' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/var/www/ja-kdua/resources/js/views/Isp/Billing/InvoiceIndex.vue
+   99:10  warning  'ColumnDef' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  105:8   warning  'XCircle' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+
+/var/www/ja-kdua/resources/js/views/Isp/Infra/Index.vue
+  263:10  warning  'ColumnDef' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  264:5   warning  'FlexRender' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  275:8   warning  'Loader2' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+
+/var/www/ja-kdua/resources/js/views/Isp/Member/Diagnostics.vue
+   22:30   warning  Expected a linebreak before this attribute                                                                                            vue/first-attribute-linebreak
+   23:197  warning  Expected 1 line break before closing bracket, but no line breaks found                                                                vue/html-closing-bracket-newline
+   82:1    error    'lucide-vue-next' import is restricted from being used. Import dari lucide-vue-next/dist/esm/icons/[icon-name].js untuk tree-shaking  no-restricted-imports
+  123:14   warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                                                          @typescript-eslint/no-unused-vars
+
+/var/www/ja-kdua/resources/js/views/Isp/Monitor/ActiveSessions.vue
+  159:21  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  161:22  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  169:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  181:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  188:36  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  200:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+/var/www/ja-kdua/resources/js/views/Isp/Network/DataServerModal.vue
+   2:18  warning  'computed' is defined but never used. Allowed unused vars must match /^_/u                                                            @typescript-eslint/no-unused-vars
+   9:1   error    'lucide-vue-next' import is restricted from being used. Import dari lucide-vue-next/dist/esm/icons/[icon-name].js untuk tree-shaking  no-restricted-imports
+   9:10  warning  'Plus' is defined but never used. Allowed unused vars must match /^_/u                                                                @typescript-eslint/no-unused-vars
+   9:16  warning  'Trash2' is defined but never used. Allowed unused vars must match /^_/u                                                              @typescript-eslint/no-unused-vars
+   9:24  warning  'Edit' is defined but never used. Allowed unused vars must match /^_/u                                                                @typescript-eslint/no-unused-vars
+   9:30  warning  'Save' is defined but never used. Allowed unused vars must match /^_/u                                                                @typescript-eslint/no-unused-vars
+   9:36  warning  'X' is defined but never used. Allowed unused vars must match /^_/u                                                                   @typescript-eslint/no-unused-vars
+  16:5   warning  'DialogFooter' is defined but never used. Allowed unused vars must match /^_/u                                                        @typescript-eslint/no-unused-vars
+  23:7   warning  'props' is assigned a value but never used. Allowed unused vars must match /^_/u                                                      @typescript-eslint/no-unused-vars
+  32:24  warning  Unexpected any. Specify a different type                                                                                              @typescript-eslint/no-explicit-any
+  44:19  warning  Unexpected any. Specify a different type                                                                                              @typescript-eslint/no-explicit-any
+  60:19  warning  Unexpected any. Specify a different type                                                                                              @typescript-eslint/no-explicit-any
+  75:19  warning  Unexpected any. Specify a different type                                                                                              @typescript-eslint/no-explicit-any
+  90:19  warning  Unexpected any. Specify a different type                                                                                              @typescript-eslint/no-explicit-any
+  97:41  warning  Unexpected any. Specify a different type                                                                                              @typescript-eslint/no-explicit-any
+
+/var/www/ja-kdua/resources/js/views/Isp/Network/MikrotikScriptModal.vue
+  18:1  warning  All imports in the declaration are only used as types. Use `import type`                                                              @typescript-eslint/consistent-type-imports
+  19:1  error    'lucide-vue-next' import is restricted from being used. Import dari lucide-vue-next/dist/esm/icons/[icon-name].js untuk tree-shaking  no-restricted-imports
+
+/var/www/ja-kdua/resources/js/views/Isp/Network/Profiles.vue
+  150:26  warning  'computed' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/var/www/ja-kdua/resources/js/views/Isp/Network/RouterFormModal.vue
+   4:1   error    'lucide-vue-next' import is restricted from being used. Import dari lucide-vue-next/dist/esm/icons/[icon-name].js untuk tree-shaking  no-restricted-imports
+   6:1   warning  All imports in the declaration are only used as types. Use `import type`                                                              @typescript-eslint/consistent-type-imports
+  12:5   warning  'DialogFooter' is defined but never used. Allowed unused vars must match /^_/u                                                        @typescript-eslint/no-unused-vars
+  97:19  warning  Unexpected any. Specify a different type                                                                                              @typescript-eslint/no-explicit-any
+
+/var/www/ja-kdua/resources/js/views/Isp/Network/Routers.vue
+   2:15  warning  'computed' is defined but never used. Allowed unused vars must match /^_/u                                                            @typescript-eslint/no-unused-vars
+   9:1   error    'lucide-vue-next' import is restricted from being used. Import dari lucide-vue-next/dist/esm/icons/[icon-name].js untuk tree-shaking  no-restricted-imports
+  17:5   warning  'Loader2' is defined but never used. Allowed unused vars must match /^_/u                                                             @typescript-eslint/no-unused-vars
+  20:1   warning  All imports in the declaration are only used as types. Use `import type`                                                              @typescript-eslint/consistent-type-imports
+  64:19  warning  Unexpected any. Specify a different type                                                                                              @typescript-eslint/no-explicit-any
+  81:19  warning  Unexpected any. Specify a different type                                                                                              @typescript-eslint/no-explicit-any
+
+/var/www/ja-kdua/resources/js/views/Isp/Network/StaticRoutingModal.vue
+   4:1   error    'lucide-vue-next' import is restricted from being used. Import dari lucide-vue-next/dist/esm/icons/[icon-name].js untuk tree-shaking  no-restricted-imports
+   4:10  warning  'X' is defined but never used. Allowed unused vars must match /^_/u                                                                   @typescript-eslint/no-unused-vars
+   4:26  warning  'Loader2' is defined but never used. Allowed unused vars must match /^_/u                                                             @typescript-eslint/no-unused-vars
+  15:7   warning  'props' is assigned a value but never used. Allowed unused vars must match /^_/u                                                      @typescript-eslint/no-unused-vars
+  42:14  warning  'err' is defined but never used. Allowed unused caught errors must match /^_/u                                                        @typescript-eslint/no-unused-vars
+
+/var/www/ja-kdua/resources/js/views/Isp/Subscription/CustomerModal.vue
+  312:32  warning  'onMounted' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  321:8   warning  'MapPin' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  340:23  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  341:21  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  342:21  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  474:69  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+
+/var/www/ja-kdua/resources/js/views/Isp/Subscription/Customers.vue
+  118:16  warning  'Badge' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  124:5   warning  'ColumnDef' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  257:14  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  279:14  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  302:33  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+  307:33  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+  319:14  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  337:14  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+/var/www/ja-kdua/resources/js/views/Isp/Subscription/Profiles.vue
+   64:10  warning  'ColumnDef' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  154:14  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  171:37  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+
+/var/www/ja-kdua/resources/js/views/Isp/Support/Index.vue
+  205:8  warning  'Loader2' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+✖ 75 problems (6 errors, 69 warnings)
+  0 errors and 7 warnings potentially fixable with the `--fix` option.
+

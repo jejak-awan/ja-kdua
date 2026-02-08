@@ -26,7 +26,7 @@
         :class="menuStyle === 'vertical' ? 'flex-col gap-6' : 'flex-row gap-10'"
         :style="(menuStyles as any)"
       >
-        <li v-for="item in menuItems" :key="item.id" class="menu-item group/item">
+        <li v-for="item in menuItems" :key="String(item.id)" class="menu-item group/item">
           <a 
             :href="mode === 'view' ? (item.url || '#') : '#'" 
             class="menu-link block transition-colors duration-300 font-bold tracking-tight relative pb-1" 
@@ -39,7 +39,7 @@
           
           <!-- Basic Dropdown Support (One Level) -->
           <ul v-if="item.children && item.children.length > 0" class="absolute hidden group-hover/item:block bg-white dark:bg-slate-900 shadow-xl rounded-xl p-4 min-w-[200px] z-50">
-             <li v-for="child in item.children" :key="child.id">
+             <li v-for="child in item.children" :key="String(child.id)">
                 <a :href="mode === 'view' ? (child.url || '#') : '#'" class="block p-2 hover:text-primary transition-colors font-medium">
                    {{ child.title }}
                 </a>
@@ -63,7 +63,7 @@
             <X class="w-10 h-10 text-slate-800 dark:text-white" />
         </button>
         <ul class="flex flex-col gap-8 mt-20 text-center text-3xl font-black tracking-tighter">
-            <li v-for="(item, index) in menuItems" :key="item.id" :style="{ animationDelay: `${(index as number) * 100}ms` }" class="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
+            <li v-for="(item, index) in menuItems" :key="String(item.id)" :style="{ animationDelay: `${(index as number) * 100}ms` }" class="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
                 <a 
                     :href="mode === 'view' ? (item.url || '#') : '#'" 
                     class="text-slate-900 dark:text-white hover:text-primary transition-colors"
@@ -90,6 +90,7 @@ import {
   getTypographyStyles
 } from '../utils/styleUtils'
 import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
+import type { Menu } from '@/types/cms'
 
 const props = defineProps<{
   module: BlockInstance
@@ -101,7 +102,7 @@ const device = computed(() => builder?.device?.value || 'desktop')
 const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 const mobileOpen = ref(false)
-const menuData = ref<any>(null)
+const menuData = ref<Menu | null>(null)
 const menuItems = computed(() => menuData.value?.items || [])
 
 const showLogo = computed(() => getVal<boolean>(settings.value, 'showLogo', device.value))

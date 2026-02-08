@@ -333,6 +333,11 @@ const fetchSettings = async () => {
         // Inject Dropbox Settings
         ensureSetting('dropbox_authorization_token', '', 'password', 'media');
 
+        // Inject WhatsApp Settings
+        ensureSetting('whatsapp_driver', 'log', 'string', 'whatsapp');
+        ensureSetting('whatsapp_api_url', '', 'string', 'whatsapp');
+        ensureSetting('whatsapp_api_key', '', 'password', 'whatsapp');
+
         // Inject AI Settings
         ensureSetting('ai_enabled', true, 'boolean', 'ai');
         ensureSetting('gemini_api_key', '', 'password', 'ai');
@@ -343,6 +348,7 @@ const fetchSettings = async () => {
         ensureSetting('maintenance_message', 'We are currently working on something awesome. Please check back later.', 'text', 'general');
         ensureSetting('maintenance_countdown_enabled', false, 'boolean', 'general');
         ensureSetting('maintenance_end_time', '', 'datetime', 'general');
+        ensureSetting('site_logo', '', 'image', 'general', 'Site Logo');
 
         initializeFormData();
     } catch (error: unknown) {

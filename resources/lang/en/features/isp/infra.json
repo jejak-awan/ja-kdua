@@ -1,0 +1,56 @@
+{
+    "map_title": "Infrastructure Map",
+    "map_subtitle": "Geographical view of your network topology.",
+    "list_view": "List View",
+    "type": "Type",
+    "status": "Status",
+    "view_details": "VIEW FULL DETAILS",
+    "nodes": {
+        "title": "Infrastructure Management",
+        "subtitle": "Manage your network nodes, OLTs, and core routers.",
+        "add_node": "Add Node",
+        "stats": {
+            "total": "Total Nodes",
+            "active": "Active",
+            "maintenance": "Maintenance",
+            "offline": "Offline"
+        },
+        "fields": {
+            "name": "Node Name",
+            "type": "Type",
+            "ip": "IP Address",
+            "status": "Status",
+            "location": "Location",
+            "actions": "Actions",
+            "search_placeholder": "Search nodes or IP...",
+            "lat": "Latitude",
+            "lng": "Longitude"
+        },
+        "types": {
+            "all": "All Types",
+            "OLT": "OLT",
+            "POP": "POP",
+            "Router": "Router"
+        },
+        "status": {
+            "all": "All Status",
+            "active": "Active",
+            "maintenance": "Maintenance",
+            "inactive": "Offline"
+        }
+    },
+    "modals": {
+        "create_title": "Add New Infrastructure Node",
+        "edit_title": "Edit Infrastructure Node",
+        "save": "Save Node",
+        "delete_confirm": "Are you sure you want to delete {name}?"
+    },
+    "messages": {
+        "no_nodes": "No infrastructure nodes found.",
+        "success_create": "Node created successfully",
+        "success_update": "Node updated successfully",
+        "success_delete": "Node deleted successfully",
+        "error_load": "Failed to load infrastructure data",
+        "coming_soon": "Edit functionality coming soon"
+    }
+}

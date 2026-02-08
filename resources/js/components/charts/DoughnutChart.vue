@@ -54,13 +54,15 @@ const chartData = computed<ChartData<'doughnut'>>(() => {
     };
 });
 
-const chartOptions: ChartOptions<'doughnut'> = {
+const chartOptions = computed<ChartOptions<'doughnut'>>(() => ({
     responsive: true,
     maintainAspectRatio: false,
+    // Explicitly define events
+    events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
     plugins: {
         legend: {
             position: 'bottom',
-             labels: {
+            labels: {
                 usePointStyle: true,
                 padding: 10,
                 boxWidth: 8,
@@ -69,7 +71,15 @@ const chartOptions: ChartOptions<'doughnut'> = {
                 }
             }
         },
+        tooltip: {
+            enabled: true,
+            intersect: true, // Default for doughnut
+        }
+    },
+    interaction: {
+        mode: 'point',
+        intersect: true,
     },
     cutout: '60%',
-};
+}));
 </script>

@@ -1,4 +1,5 @@
 {
+    "no_data": "Tidak ada data yang ditemukan",
     "success": {
         "default": "Proses berhasil",
         "action": "Tindakan Berhasil",
@@ -62,6 +63,7 @@
         "processing": "Memproses...",
         "searching": "Mencari..."
     },
+    "select_node": "Pilih node...",
     "empty": {
         "default": "Tidak ada data",
         "search": "Tidak ada hasil untuk \"{query}\"",

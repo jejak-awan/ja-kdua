@@ -1,0 +1,69 @@
+{
+    "title": "Support Tickets",
+    "subtitle": "Need help? Open a ticket and our team will get back to you.",
+    "open_ticket": "Open a Ticket",
+    "new_ticket": "Create Support Ticket",
+    "new_ticket_desc": "Please describe your issue in detail. We usually respond within 24 hours.",
+    "submit": "Submit Ticket",
+    "history": "Ticket History",
+    "no_tickets": "You haven't opened any support tickets yet.",
+    "fields": {
+        "subject": "Subject",
+        "category": "Category",
+        "priority": "Priority",
+        "message": "Message"
+    },
+    "headers": {
+        "id": "ID",
+        "subject": "Subject",
+        "status": "Status",
+        "created": "Created",
+        "user": "User"
+    },
+    "categories": {
+        "Technical": "Technical",
+        "Billing": "Billing",
+        "Sales": "Sales"
+    },
+    "priorities": {
+        "Low": "Low",
+        "Medium": "Medium",
+        "High": "High"
+    },
+    "statuses": {
+        "Open": "Open",
+        "In Progress": "In Progress",
+        "Resolved": "Resolved",
+        "Closed": "Closed"
+    },
+    "messages": {
+        "success_submit": "Support ticket submitted successfully",
+        "error_fetch": "Failed to load support tickets",
+        "error_submit": "Failed to submit ticket"
+    },
+    "admin": {
+        "title": "Support Ticket Manager",
+        "subtitle": "Manage and respond to customer support requests.",
+        "search_placeholder": "Search by subject or user..."
+    },
+    "wizard": {
+        "title": "Troubleshooting Wizard",
+        "subtitle": "Guided diagnostic tool for common customer issues.",
+        "select_customer": "Select Customer to Diagnose",
+        "search_placeholder": "Enter customer name, ID, or IP...",
+        "steps": {
+            "billing": {
+                "title": "Billing Status"
+            },
+            "router": {
+                "title": "Router Status"
+            },
+            "signal": {
+                "title": "Signal Strength"
+            },
+            "ping": {
+                "title": "Ping Test"
+            }
+        }
+    }
+}

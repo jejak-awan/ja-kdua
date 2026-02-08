@@ -30,6 +30,57 @@ export const navigationGroups: Record<string, NavItem[]> = {
         { name: 'redirects', to: '/admin/redirects', label: 'Redirects', permission: 'view redirects' },
     ],
 
+    // K2NET ISP Management
+    isp: [
+        // Monitoring & Analytics
+        { type: 'divider', label: 'Monitoring & Analitik' },
+        { name: 'isp-monitor', to: '/admin/isp/monitor', label: 'Dasbor NOC', permission: 'manage settings' },
+        { name: 'isp.monitor.traffic', to: '/admin/isp/monitor/traffic', label: 'Trafik Real-time', permission: 'manage settings' },
+        { name: 'isp-active-sessions', to: '/admin/isp/monitoring/sessions', label: 'Sesi Online', permission: 'manage settings' },
+        { name: 'isp.admin.analytics.usage', to: '/admin/isp/admin/analytics/usage', label: 'Penggunaan Jaringan', permission: 'manage settings' },
+        { name: 'isp.admin.analytics.revenue', to: '/admin/isp/admin/analytics/revenue', label: 'Laporan Pendapatan', permission: 'manage settings' },
+
+        // Configuration
+        { type: 'divider', label: 'Konfigurasi' },
+        { name: 'isp-settings', to: '/admin/isp/settings', label: 'Pengaturan ISP', permission: 'manage settings' },
+
+        // Customers
+        { type: 'divider', label: 'Pelanggan' },
+        { name: 'isp-subscription-customers', to: '/admin/isp/subscription/customers', label: 'Manajemen Pelanggan', permission: 'manage settings' },
+        { name: 'isp.customers.map', to: '/admin/isp/customers/map', label: 'Peta Pelanggan', permission: 'manage settings' },
+        { name: 'isp-subscription-profiles', to: '/admin/isp/subscription/profiles', label: 'Profil Langganan', permission: 'manage settings' },
+        { name: 'isp.admin.service-requests', to: '/admin/isp/admin/service-requests', label: 'Pengajuan Layanan', permission: 'manage settings' },
+
+        // Network & Infrastructure
+        { type: 'divider', label: 'Jaringan' },
+        { name: 'isp-infra', to: '/admin/isp/infra', label: 'Infrastruktur', permission: 'manage settings' },
+        { name: 'isp.network.topology', to: '/admin/isp/network/topology', label: 'Topologi Jaringan', permission: 'manage settings' },
+        { name: 'isp-router', to: '/admin/isp/network/routers', label: 'Manajer Router', permission: 'manage settings' },
+        { name: 'isp-network-ipam', to: '/admin/isp/network/ipam', label: 'Manajer IPAM', permission: 'manage settings' },
+        { name: 'isp-network-profiles', to: '/admin/isp/network/profiles', label: 'Profil Jaringan', permission: 'manage settings' },
+        { name: 'isp-odp', to: '/admin/isp/odp', label: 'Manajer ODP', permission: 'manage settings' },
+
+        // Billing
+        { type: 'divider', label: 'Penagihan' },
+        { name: 'isp-billing', to: '/admin/isp/billing', label: 'Penagihan', permission: 'manage settings' },
+
+        // Inventory & Operations
+        { type: 'divider', label: 'Inventaris & Operasional' },
+        { name: 'isp-inventory', to: '/admin/isp/inventory', label: 'Stok Barang', permission: 'manage settings' },
+        { name: 'isp-vouchers', to: '/admin/isp/vouchers', label: 'Voucher Hotspot', permission: 'manage settings' },
+        { name: 'isp-outages', to: '/admin/isp/outages', label: 'Pelacak Gangguan', permission: 'manage settings' },
+
+        // Support
+        { type: 'divider', label: 'Dukungan' },
+        { name: 'isp-support', to: '/admin/isp/support', label: 'Manajer Tiket', permission: 'manage settings' },
+        { name: 'isp.support.wizard', to: '/admin/isp/support/wizard', label: 'Wizard Diagnosa', permission: 'manage settings' },
+
+        // Member Portal Section
+        { type: 'divider', label: 'Member Portal' },
+        { name: 'isp-member', to: '/admin/isp/member', label: 'Dasbor Saya', permission: 'view profile' },
+        { name: 'isp-member-support', to: '/admin/isp/member/support', label: 'Hubungi Dukungan', permission: 'view profile' },
+    ],
+
     // Users & Access (2 items)
     users: [
         { name: 'users', to: '/admin/users', label: 'Users', permission: 'view users' },

@@ -50,7 +50,7 @@ const props = withDefaults(defineProps<{
 const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
 // Form Integration
-const formContext = inject<{ updateField: (id: string, value: any) => void } | null>('contactForm', null)
+const formContext = inject<{ updateField: (id: string, value: string | number | boolean) => void } | null>('contactForm', null)
 const fieldValue = ref('')
 
 watch(fieldValue, (newVal) => {

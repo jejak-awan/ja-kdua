@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\ScheduledTask;
 use App\Models\Setting;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +40,7 @@ class FoundationSeeder extends Seeder
 
         $permissions = [
             // Content
-            'view content', 'create content', 'edit content', 'delete content', 'publish content', 'approve content', 'view pending content',
+            'view profile', 'view content', 'create content', 'edit content', 'delete content', 'publish content', 'approve content', 'view pending content',
             'view content templates', 'create content templates', 'edit content templates', 'delete content templates',
             'view categories', 'create categories', 'edit categories', 'delete categories',
             'view tags', 'create tags', 'edit tags', 'delete tags',
@@ -95,6 +94,12 @@ class FoundationSeeder extends Seeder
         $editor->syncPermissions([
             'view content', 'create content', 'edit content', 'delete content', 'publish content', 'approve content', 'view pending content',
             'view categories', 'view tags', 'view media', 'upload media', 'view comments', 'approve comments', 'view analytics',
+        ]);
+
+        $ispMember = Role::firstOrCreate(['name' => 'ISP Member', 'guard_name' => 'web']);
+        $ispMember->syncPermissions([
+            'view profile',
+            'view content',
         ]);
     }
 

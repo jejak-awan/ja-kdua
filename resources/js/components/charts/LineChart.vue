@@ -154,9 +154,11 @@ const chartOptions = computed<ChartOptions<'line'>>(() => {
         responsive: true,
         maintainAspectRatio: false,
         animation: {
-            duration: 400, // Faster animations
+            duration: 400,
         },
-        resizeDelay: 100, // Debounce resize events by 100ms
+        // Explicitly define events to avoid "includes of undefined" in minified chart.js
+        events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
+        resizeDelay: 100,
         interaction: {
             mode: 'index',
             intersect: false,
@@ -166,13 +168,16 @@ const chartOptions = computed<ChartOptions<'line'>>(() => {
                 display: false,
             },
             tooltip: {
+                enabled: true,
+                mode: 'index',
+                intersect: false,
                 backgroundColor: colors.value.tooltipBg,
                 titleColor: colors.value.tooltipText,
                 bodyColor: colors.value.tooltipText,
                 borderColor: colors.value.gridColor,
                 borderWidth: 1,
                 padding: 10,
-                displayColors: true, // Show color box for comparison
+                displayColors: true,
                 boxPadding: 4,
             },
         },

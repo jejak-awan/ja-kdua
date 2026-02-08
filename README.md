@@ -1,6 +1,6 @@
-# JA-KDUA
+# K2NET
 
-JA-CMS is a powerful, modern, and flexible Headless CMS built with **Laravel 12** and **Vue 3**. It is designed to provide a robust backend API service paired with a dynamic Single Page Application (SPA) admin interface.
+K2NET is a powerful, modern, and flexible Headless CMS built with **Laravel 12** and **Vue 3**. It is designed to provide a robust backend API service paired with a dynamic Single Page Application (SPA) admin interface.
 
 ## 🚀 Key Features
 
@@ -112,7 +112,7 @@ This will compile the Vue application into `public/build` for Laravel to serve.
 ## 📂 Project Structure
 
 ```
-/var/www/ja-cms
+/var/www/k2net
 ├── app/                  # Laravel Core Code (Models, Controllers, Services)
 ├── config/               # Application Configuration
 ├── database/             # Migrations, Factories, Seeders

@@ -219,6 +219,7 @@ const cmsStore = useCmsStore();
 const sidebarSections: SidebarSection[] = [
     { key: 'content', labelKey: 'common.navigation.sections.content', icon: getIcon('layers') },
     { key: 'marketing', labelKey: 'common.navigation.sections.marketing', icon: getIcon('megaphone') },
+    { key: 'isp', labelKey: 'common.navigation.sections.isp', icon: getIcon('network') },
     { key: 'users', labelKey: 'common.navigation.sections.usersAccess', icon: getIcon('users') },
     { key: 'appearance', labelKey: 'common.navigation.sections.appearance', icon: getIcon('palette') },
     { key: 'logs', labelKey: 'common.navigation.sections.logs', icon: getIcon('activity') },

@@ -1,0 +1,185 @@
+{
+    "title": "Penagihan & Invoice",
+    "subtitle": "Kelola langganan, paket, dan pembayaran pelanggan.",
+    "invoices": "Invoice",
+    "plans": "Paket",
+    "stats": {
+        "revenue": "Total Pendapatan",
+        "pending": "Jumlah Tertunda",
+        "paid": "Invoice Terbayar",
+        "unpaid": "Invoice Belum Bayar"
+    },
+    "tabs": {
+        "invoices": "Invoice",
+        "plans": "Paket",
+        "requests": "Permintaan Layanan"
+    },
+    "fields": {
+        "customer": "Pelanggan",
+        "period": "Periode",
+        "amount": "Jumlah",
+        "due_date": "Jatuh Tempo",
+        "status": "Status",
+        "actions": "Aksi",
+        "search_placeholder": "Cari pelanggan atau email..."
+    },
+    "actions": {
+        "generate": "Buat Invoice",
+        "pay": "Tandai Lunas",
+        "refresh": "Segarkan",
+        "edit_plan": "Edit Paket",
+        "suspend_check": "Jalankan Cek Isolir",
+        "suspending": "Mengisolir...",
+        "set_paid": "Tandai Lunas",
+        "set_unpaid": "Tandai Belum Bayar",
+        "cancel_invoices": "Batalkan Invoice"
+    },
+    "messages": {
+        "error_load": "Gagal memuat data penagihan",
+        "error_invoices": "Gagal memuat invoice",
+        "error_generate": "Gagal membuat invoice",
+        "success_generate": "Invoice bulanan berhasil dibuat",
+        "success_pay": "Pembayaran berhasil diverifikasi",
+        "no_data": "Tidak ada invoice ditemukan.",
+        "confirm_generate": "Mulai pembuatan tagihan otomatis?",
+        "confirm_suspend": "Jalankan pemeriksaan isolir? Pelanggan dengan invoice jatuh tempo yang belum dibayar akan diisolasi.",
+        "generating": "Membuat tagihan...",
+        "success_plan": "Layanan berhasil disimpan",
+        "error_plan": "Gagal menyimpan layanan",
+        "error_suspend": "Gagal menjalankan pemeriksaan isolir"
+    },
+    "plans_manager": {
+        "title": "Profile Langganan",
+        "subtitle": "Kelola paket internet dan profile tagihan.",
+        "new": "Tambah Profile",
+        "edit": "Edit Profile",
+        "delete": "Hapus Profile",
+        "delete_confirm": "Apakah anda yakin ingin menghapus profile ini?",
+        "fields": {
+            "name": "Nama Profile",
+            "mikrotik_group": "Mikrotik Group",
+            "mikrotik_group_help": "Harus sama dengan nama profile di Mikrotik",
+            "mikrotik_rate_limit": "Mikrotik Rate Limit",
+            "mikrotik_rate_limit_placeholder": "contoh: 1500k/2M 0/0 0/0 0/0 8 0/0",
+            "mikrotik_rate_limit_help": "Kosongkan jika menggunakan limit dari profile Mikrotik",
+            "shared": "Shared Users",
+            "active_period": "Masa Aktif (Hari)",
+            "cost_price": "HPP",
+            "commission": "Komisi",
+            "price": "Harga",
+            "price_help": "Harga diluar PPN",
+            "type": "Jenis Tagihan",
+            "status": "Status"
+        },
+        "options": {
+            "prepaid": "Prabayar (Prepaid)",
+            "postpaid": "Pascabayar (Postpaid)",
+            "active": "Aktif",
+            "inactive": "Tidak Aktif"
+        }
+    },
+    "settings": {
+        "title": "Pengaturan Penagihan",
+        "subtitle": "Konfigurasi siklus tagihan, pajak, dan isolir.",
+        "tabs": {
+            "general": "Umum",
+            "tax": "Pajak",
+            "isolation": "Isolir & Terminasi"
+        },
+        "fields": {
+            "payment_type": "Tipe Pembayaran",
+            "cycle_type": "Siklus Tagihan",
+            "invoice_date": "Tanggal Generate Invoice",
+            "invoice_date_help": "Tanggal dibuatnya tagihan setiap bulan.",
+            "isolation_date": "Tanggal Isolir Otomatis",
+            "isolation_date_help": "Tanggal layanan diputus jika belum bayar.",
+            "isolation_time": "Waktu Isolir",
+            "prorata": "Aktifkan Prorata",
+            "prorata_desc": "Hitung tagihan bulan pertama secara proporsional.",
+            "tax_enabled": "Aktifkan Pajak (PPN)",
+            "tax_rate": "Tarif Pajak",
+            "tax_rate_help": "Persentase pajak yang ditambahkan ke total tagihan.",
+            "suspend_behavior": "Perilaku Suspend"
+        }
+    },
+    "customers_manager": {
+        "title": "Data Berlangganan",
+        "subtitle": "Kelola data pelanggan, informasi teknis, dan keuangan.",
+        "new": "Pelanggan Baru",
+        "edit": "Edit Pelanggan",
+        "delete": "Hapus Pelanggan",
+        "delete_confirm": "Hapus pelanggan dan semua data terkait?",
+        "tabs": {
+            "identity": "Identitas",
+            "address": "Alamat Pemasangan",
+            "internet": "Internet",
+            "billing": "Paket & Keuangan",
+            "invoice": "Invoice"
+        },
+        "fields": {
+            "name": "Nama Lengkap",
+            "email": "Email",
+            "phone": "No. Telepon",
+            "password": "Password",
+            "identity_number": "No. Identitas (KTP/SIM)",
+            "identity_type": "Jenis Identitas",
+            "address_street": "Jalan / Blok / No",
+            "address_village": "Desa / Kelurahan",
+            "address_district": "Kecamatan",
+            "address_city": "Kabupaten / Kota",
+            "address_province": "Provinsi",
+            "address_postal_code": "Kode Pos",
+            "address_region": "Wilayah (Desa/Kec/Kab/Prov)",
+            "coordinates": "Koordinat (Lat, Lng)",
+            "coordinates_none": "Belum ada koordinat",
+            "plan": "Paket Langganan",
+            "cycle_start": "Tanggal Tagihan (Tgl 1-28)",
+            "installation_date": "Tanggal Pasang",
+            "status": "Status Langganan",
+            "mikrotik_login": "PPPoE/Hotspot User",
+            "mikrotik_password": "PPPoE/Hotspot Password",
+            "reseller": "Mitra Reseller",
+            "router": "Router",
+            "server": "Server",
+            "address_list": "Mikrotik Address List",
+            "service_category": "Kategori Layanan",
+            "billing_due_date": "Tanggal Jatuh Tempo",
+            "unique_code": "Kode Unik",
+            "is_taxed": "Kena PPN 11%",
+            "billing_notes": "Catatan Billing"
+        },
+        "placeholders": {
+            "select_reseller": "Pilih Mitra",
+            "select_router": "Pilih Router",
+            "select_server": "Pilih Server",
+            "address_list": "Auto-added to list",
+            "select_category": "-Pilih-",
+            "billing_due_date": "Tgl (1-28)"
+        },
+        "options": {
+            "fiber": "Fiber Optic",
+            "wireless": "Wireless"
+        },
+        "headers": {
+            "mikrotik_auth": "Mikrotik Authentication"
+        },
+        "messages": {
+            "invoice_feature_soon": "Fitur Item Invoice Awal (Biaya Pasang/Alat) akan tersedia segera."
+        },
+        "invoice_items": {
+            "title": "Item Invoice Awal",
+            "subtitle": "Tambahkan biaya instalasi, perangkat, atau biaya tambahan lainnya untuk invoice pertama.",
+            "add_item": "Tambah Item",
+            "fields": {
+                "name": "Nama Item",
+                "price": "Harga Satuan",
+                "qty": "Jumlah",
+                "total": "Total",
+                "actions": "Aksi"
+            },
+            "placeholders": {
+                "item_name": "seperti: Biaya Pasang, Router ONU, dll"
+            }
+        }
+    }
+}

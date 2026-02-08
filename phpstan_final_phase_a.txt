@@ -1,0 +1,45 @@
+Note: Using configuration file /var/www/ja-kdua/phpstan.neon.
+ ------ -------------------------------- 
+  Line   Http/Controllers/Api/Isp/Custo  
+         merController.php               
+ ------ -------------------------------- 
+  :79    PHPDoc tag @var for variable    
+         $customers contains generic     
+         class                           
+         Illuminate\Pagination\LengthAw  
+         arePaginator but does not       
+         specify its types: TKey,        
+         TValue                          
+         🪪  missingType.generics        
+ ------ -------------------------------- 
+
+ ------ -------------------------------- 
+  Line   Http/Controllers/Api/Isp/Route  
+         rController.php                 
+ ------ -------------------------------- 
+  :36    PHPDoc tag @var for variable    
+         $paginator contains generic     
+         class                           
+         Illuminate\Pagination\LengthAw  
+         arePaginator but does not       
+         specify its types: TKey,        
+         TValue                          
+         🪪  missingType.generics        
+ ------ -------------------------------- 
+
+ ------ -------------------------------- 
+  Line   Http/Controllers/Api/Isp/Subsc  
+         riptionProfileController.php    
+ ------ -------------------------------- 
+  :32    PHPDoc tag @var for variable    
+         $profiles contains generic      
+         class                           
+         Illuminate\Pagination\LengthAw  
+         arePaginator but does not       
+         specify its types: TKey,        
+         TValue                          
+         🪪  missingType.generics        
+ ------ -------------------------------- 
+
+ [ERROR] Found 3 errors                  
+

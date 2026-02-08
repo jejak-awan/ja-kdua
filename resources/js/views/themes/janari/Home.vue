@@ -269,7 +269,7 @@ import { useCmsStore } from '@/stores/cms';
 const { getSetting } = useTheme();
 const cmsStore = useCmsStore();
 
-const siteTagline = computed(() => (getSetting('site_tagline') as string) || (cmsStore.siteSettings as any)?.site_tagline || cmsStore.siteSettings?.site_description || 'Modern & Elegant CMS');
+const siteTagline = computed(() => (getSetting('site_tagline') as string) || cmsStore.siteSettings?.site_tagline || cmsStore.siteSettings?.site_description || 'Modern & Elegant CMS');
 const heroTitle = computed(() => (getSetting('hero_title') as string) || (getSetting('site_title') as string) || cmsStore.siteSettings?.site_name || 'JA-CMS');
 const heroSubtitle = computed(() => (getSetting('hero_subtitle') as string) || 'Modern Content Management System');
 const siteVersion = computed(() => cmsStore.siteSettings?.site_version || 'v1.0 Janari Edition');

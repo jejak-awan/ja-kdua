@@ -173,6 +173,12 @@ class ThemeController extends BaseApiController
             $newSettings = array_merge($existingSettings, $settingsInput);
 
             $theme->update(['settings' => $newSettings]);
+
+            // Sync brand_logo to global site_logo
+            if (isset($settingsInput['brand_logo'])) {
+                \App\Models\Setting::set('site_logo', $settingsInput['brand_logo'], 'image', 'general');
+            }
+
             $this->themeService->clearThemeCache($theme);
 
             return $this->success($theme->fresh(), 'Theme settings updated successfully');

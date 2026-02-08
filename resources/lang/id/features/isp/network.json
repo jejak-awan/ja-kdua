@@ -1,0 +1,174 @@
+{
+    "title": "Manajemen Jaringan",
+    "subtitle": "Kelola kolam alamat IP, subnet, dan profil bandwidth.",
+    "subnets": {
+        "title": "Subnet IP",
+        "new": "Tentukan Subnet Baru",
+        "pool": "Kolam IP Dikelola",
+        "fields": {
+            "prefix": "Prefiks Subnet (CIDR)",
+            "vlan": "VLAN ID",
+            "gateway": "Gateway Default"
+        }
+    },
+    "profiles": {
+        "title": "Profil Layanan",
+        "subtitle": "Tentukan batas bandwidth dan paket QoS.",
+        "new": "Buat Profil",
+        "fields": {
+            "download": "Batas Download (Mbps)",
+            "upload": "Batas Upload (Mbps)",
+            "burst": "Batas Burst"
+        }
+    },
+    "profiles_manager": {
+        "edit": "Edit Profil",
+        "new": "Profil Layanan Baru",
+        "desc": "Tentukan batas bandwidth untuk paket layanan ini.",
+        "download_label": "Download",
+        "upload_label": "Upload",
+        "burst_label": "Burst"
+    },
+    "ipam": {
+        "title": "Manajer IPAM",
+        "search": "Cari IP atau Serial...",
+        "assigned": "Terpasang ke Perangkat",
+        "available": "Tersedia"
+    },
+    "ip_manager": {
+        "edit": "Edit Data IP",
+        "fields": {
+            "address": "Alamat IP",
+            "status": "Status",
+            "notes": "Catatan / Deskripsi",
+            "notes_placeholder": "contoh: Nama Pelanggan, ID Perangkat...",
+            "assignment": "Penempatan"
+        }
+    },
+    "subnets_manager": {
+        "new_pool": "Buat Kolam IP",
+        "new": "Tambah Subnet Baru",
+        "desc": "Tentukan rentang IP baru untuk node layanan. Ini akan secara otomatis membuat catatan IP individual.",
+        "pool": "Kolam Terdaftar",
+        "generated": "Data IP Berhasil Dibuat",
+        "select_subnet": "Pilih subnet untuk mengelola kolam IP-nya",
+        "pool_title": "Kolam",
+        "fields": {
+            "node": "Node Layanan",
+            "type": "Tipe"
+        }
+    },
+    "messages": {
+        "success_subnet": "Subnet dan kolam IP berhasil dibuat",
+        "error_subnet": "Gagal membuat subnet",
+        "success_ip": "Data IP berhasil diperbarui",
+        "error_ips": "Gagal memuat alamat IP",
+        "success_profile": "Profil layanan berhasil disimpan",
+        "error_profile": "Gagal menyimpan profil layanan"
+    },
+    "router": {
+        "title": "Router Dan Server",
+        "subtitle": "Kelola router Mikrotik dan server otentikasi.",
+        "add": "Tambah",
+        "server": "Server",
+        "routing": "S.Routing",
+        "fields": {
+            "name": "Nama Router",
+            "ip": "Alamat IP",
+            "secret": "Rahasia / Kata Sandi",
+            "connection_type": "Tipe Koneksi",
+            "online": "Online",
+            "script": "Script",
+            "port": "Port",
+            "management_port": "Port Manajemen",
+            "api_port": "Port API",
+            "snmp_port": "Port SNMP"
+        },
+        "search_placeholder": "Cari Router...",
+        "new": "Tambah Router",
+        "edit": "Edit Router",
+        "messages": {
+            "success_create": "Router berhasil ditambahkan",
+            "success_update": "Router berhasil diperbarui",
+            "success_delete": "Router berhasil dihapus"
+        }
+    },
+    "data_server": {
+        "title": "Data Server",
+        "add": "Tambah Data",
+        "fields": {
+            "name": "Server Name"
+        },
+        "messages": {
+            "success_create": "Data server berhasil ditambahkan",
+            "success_update": "Data server berhasil diperbarui",
+            "success_delete": "Data server berhasil dihapus"
+        },
+        "instructions": {
+            "edit_hint": "Klik pada kolom server name untuk mengubah data",
+            "matching_hint": "Server name harus sama dengan yang ada di mikrotik",
+            "hotspot_path": "untuk hotspot lihat di menu IP->Hotspot->Servers->Name",
+            "ppp_path": "Untuk PPP lihat di menu PPP->PPPoE Servers->Service name",
+            "purpose": "Fungsi data server ini adalah untuk mengunci klien agar hanya bisa melakukan otentikasi dari satu server"
+        },
+        "connectivity": {
+            "title": "Konektivitas",
+            "method": "Metode Koneksi",
+            "status": "Status Koneksi",
+            "username": "Username API",
+            "password": "Password API",
+            "snmp_community": "SNMP Community",
+            "connected": "CONNECTED",
+            "disconnected": "DISCONNECTED",
+            "active_clients": "Klien Aktif"
+        },
+        "script": {
+            "title": "Script MikroTik",
+            "os_version": "RouterOS",
+            "tunnel_type": "Jenis Tunnel",
+            "service": "Service",
+            "download": "Download Script",
+            "fields": {
+                "router_name": "Nama Router",
+                "ip_address": "IP Address"
+            },
+            "options": {
+                "select": "-Pilih-",
+                "os_v6": "RouterOS v6",
+                "os_v7": "RouterOS v7",
+                "vpn_script": "SCRIPT VPN",
+                "pppoe_only": "PPPoE ONLY",
+                "hotspot_only": "HOTSPOT ONLY",
+                "pppoe_hotspot": "PPPoE + HOTSPOT"
+            }
+        }
+    },
+    "routing": {
+        "title": "STATIC ROUTING VPN",
+        "instructions": {
+            "item1": "Static routing digunakan jika anda menggunakan Loadbalance di mikrotik",
+            "item2": "Fungsi static routing ini untuk menentukan jalur VPN agar tetap berada di jalur paling stabil dan tidak terputus putus",
+            "item3": "Pasangkan script tersebut pada router Loadbalance",
+            "item4": "Isilah gateway dibawah dengan salah satu IP gateway yang paling stabil"
+        },
+        "fields": {
+            "gateway": "IP Address Gateway atau Interface Name",
+            "gateway_hint": "(Lihat di menu IP - Routes pada mikrotik anda)"
+        },
+        "actions": {
+            "get_script": "Ambil Script"
+        },
+        "messages": {
+            "copied": "Script berhasil disalin!"
+        }
+    },
+    "topology": {
+        "title": "Topologi Jaringan",
+        "subtitle": "Visualisasikan koneksi jaringan dari OLT hingga pelanggan.",
+        "legend": "Legenda",
+        "olt": "OLT / Core",
+        "odp": "ODP / POP",
+        "router": "Router Pelanggan",
+        "offline": "Offline"
+    }
+}

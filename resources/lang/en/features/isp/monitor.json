@@ -1,0 +1,46 @@
+{
+    "title": "NOC Dashboard",
+    "subtitle": "Real-time network performance and node monitoring.",
+    "health": "Network: {status}",
+    "last_updated": "Last updated",
+    "throughput_title": "Network Throughput",
+    "throughput_subtitle": "Real-time aggregated bandwidth usage (Mbps)",
+    "incoming": "Incoming",
+    "outgoing": "Outgoing",
+    "node_cpu": "CPU Load",
+    "connecting": "Connecting...",
+    "active_sessions": {
+        "title": "Online Sessions",
+        "description": "Monitor and manage active customer connections.",
+        "select_router": "Select router...",
+        "table": {
+            "customer": "Customer / Username",
+            "ip_address": "IP Address",
+            "uptime": "Uptime",
+            "type": "Connect Type",
+            "caller_id": "Caller ID / MAC",
+            "actions": "Actions"
+        },
+        "actions": {
+            "disconnect": "Disconnect",
+            "refresh": "Refresh"
+        },
+        "messages": {
+            "disconnect_confirm": "Force disconnect this user?",
+            "disconnecting": "Disconnecting...",
+            "success_disconnect": "Session closed successfully",
+            "error_disconnect": "Failed to close session",
+            "no_sessions": "No active sessions found on this router.",
+            "select_router_first": "Please select a router to see active sessions."
+        }
+    },
+    "traffic": {
+        "title": "Real-time Traffic Monitor",
+        "subtitle": "Monitor interface traffic in real-time.",
+        "select_interface": "Select Interface",
+        "download_rate": "Download Rate",
+        "upload_rate": "Upload Rate",
+        "download": "Download (Rx)",
+        "upload": "Upload (Tx)"
+    }
+}

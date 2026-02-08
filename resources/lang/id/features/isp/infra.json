@@ -1,0 +1,56 @@
+{
+    "map_title": "Peta Infrastruktur",
+    "map_subtitle": "Tampilan geografis topologi jaringan Anda.",
+    "list_view": "Tampilan Daftar",
+    "type": "Tipe",
+    "status": "Status",
+    "view_details": "LIHAT DETAIL LENGKAP",
+    "nodes": {
+        "title": "Manajemen Infrastruktur",
+        "subtitle": "Kelola node jaringan, OLT, dan router utama Anda.",
+        "add_node": "Tambah Node",
+        "stats": {
+            "total": "Total Node",
+            "active": "Aktif",
+            "maintenance": "Pemeliharaan",
+            "offline": "Offline"
+        },
+        "fields": {
+            "name": "Nama Node",
+            "type": "Tipe",
+            "ip": "Alamat IP",
+            "status": "Status",
+            "location": "Lokasi",
+            "actions": "Aksi",
+            "search_placeholder": "Cari node atau IP...",
+            "lat": "Latitudo",
+            "lng": "Longitudo"
+        },
+        "types": {
+            "all": "Semua Tipe",
+            "OLT": "OLT",
+            "POP": "POP",
+            "Router": "Router"
+        },
+        "status": {
+            "all": "Semua Status",
+            "active": "Aktif",
+            "maintenance": "Pemeliharaan",
+            "inactive": "Offline"
+        }
+    },
+    "modals": {
+        "create_title": "Tambah Node Infrastruktur Baru",
+        "edit_title": "Edit Node Infrastruktur",
+        "save": "Simpan Node",
+        "delete_confirm": "Apakah Anda yakin ingin menghapus {name}?"
+    },
+    "messages": {
+        "no_nodes": "Tidak ada node infrastruktur ditemukan.",
+        "success_create": "Node berhasil dibuat",
+        "success_update": "Node berhasil diperbarui",
+        "success_delete": "Node berhasil dihapus",
+        "error_load": "Gagal memuat data infrastruktur",
+        "coming_soon": "Fitur edit akan segera hadir"
+    }
+}

@@ -128,7 +128,6 @@
                 </div>
             </div>
         </div>
-
     </footer>
 </template>
 
@@ -147,7 +146,6 @@ import Twitter from 'lucide-vue-next/dist/esm/icons/twitter.js';
 import Github from 'lucide-vue-next/dist/esm/icons/github.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import ArrowRight from 'lucide-vue-next/dist/esm/icons/arrow-right.js';
-import { onUnmounted } from 'vue'
 
 const { t } = useI18n()
 const { getSetting } = useTheme()

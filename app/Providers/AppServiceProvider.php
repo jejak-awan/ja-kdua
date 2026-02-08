@@ -25,6 +25,12 @@ class AppServiceProvider extends ServiceProvider
         // Register ThemeCacheService as singleton
         $this->app->singleton(\App\Services\ThemeCacheService::class);
 
+        // Bind WhatsApp Service
+        $this->app->bind(
+            \App\Services\WhatsApp\WhatsAppServiceInterface::class,
+            \App\Services\WhatsApp\WhatsAppService::class
+        );
+
     }
 
     /**
@@ -179,11 +185,24 @@ class AppServiceProvider extends ServiceProvider
                         return [$setting->key => $setting->value];
                     });
 
+                // Load WhatsApp Settings
+                $whatsappSettings = \App\Models\Setting::where('group', 'whatsapp')
+                    ->whereIn('key', ['whatsapp_driver', 'whatsapp_api_url', 'whatsapp_api_key'])
+                    ->get()
+                    ->flatMap(function ($setting) {
+                        return [$setting->key => $setting->value];
+                    });
+
                 // Merge all settings for easier access
-                $allSettings = $performanceSettings->merge($mediaSettings);
+                $allSettings = $performanceSettings->merge($mediaSettings)->merge($whatsappSettings);
 
                 if ($allSettings->isNotEmpty()) {
                     config([
+                        // WhatsApp
+                        'services.whatsapp.driver' => $allSettings['whatsapp_driver'] ?? config('services.whatsapp.driver'),
+                        'services.whatsapp.url' => $allSettings['whatsapp_api_url'] ?? config('services.whatsapp.url'),
+                        'services.whatsapp.key' => $allSettings['whatsapp_api_key'] ?? config('services.whatsapp.key'),
+
                         // CDN
                         'cdn.enabled' => filter_var($allSettings['enable_cdn'] ?? false, FILTER_VALIDATE_BOOLEAN),
                         'cdn.url' => $allSettings['cdn_url'] ?? null,

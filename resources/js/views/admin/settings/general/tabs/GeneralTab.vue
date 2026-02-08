@@ -110,7 +110,7 @@ const generalSettingsGrouped = computed(() => {
             description: t('features.settings.groups.siteInfo.description'),
             icon: GlobeIcon,
             color: 'blue',
-            keys: ['site_name', 'site_description', 'site_url', 'admin_email'],
+            keys: ['site_name', 'site_logo', 'site_description', 'site_url', 'admin_email'],
             settings: [],
             defaultExpanded: true,
         },
@@ -139,8 +139,11 @@ const generalSettingsGrouped = computed(() => {
     groups.forEach(group => {
         group.settings = generalSettings.filter(s => group.keys.includes(s.key))
         
-        // Ensure maintenance settings are in logical order
-        if (group.id === 'maintenance') {
+        // Ensure settings are in logical order
+        if (group.id === 'site') {
+            const order = ['site_name', 'site_logo', 'site_description', 'site_url', 'admin_email'];
+            group.settings.sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+        } else if (group.id === 'maintenance') {
             const order = ['maintenance_mode', 'maintenance_title', 'maintenance_message', 'maintenance_countdown_enabled', 'maintenance_end_time'];
             group.settings.sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
         }

@@ -1,0 +1,53 @@
+{
+    "title": "Outage Tracker",
+    "subtitle": "Report and manage network incidents and maintenance.",
+    "new": "Report Incident",
+    "modals": {
+        "edit_title": "Update Incident",
+        "create_title": "Report New Incident",
+        "desc": "Reporting an incident will update the public status page and notify affected customers.",
+        "delete_confirm": "Are you sure you want to delete this incident record?"
+    },
+    "public": {
+        "title": "Network Status",
+        "subtitle": "Real-time health status of K2NET infrastructure.",
+        "operational": "All Systems Operational",
+        "issues": "Issues Detected",
+        "active": "Active Incidents",
+        "recent": "Recent History",
+        "description_healthy": "All core infrastructure systems are performing normally.",
+        "description_issues": "We are currently experiencing service disruptions in some areas.",
+        "last_checked": "Last checked",
+        "no_incidents": "No significant incidents reported in the last 7 days.",
+        "back": "Back to K2NET Portal"
+    },
+    "fields": {
+        "title": "Incident Title",
+        "type": "Incident Type",
+        "status": "Status",
+        "severity": "Severity",
+        "affected": "Affected Area",
+        "description": "Description",
+        "investigating": "Investigating",
+        "identified": "Identified",
+        "monitoring": "Monitoring",
+        "resolved": "Resolved"
+    },
+    "actions": {
+        "update": "Update Record",
+        "announce": "Announce Incident"
+    },
+    "columns": {
+        "incident": "Incident",
+        "status": "Status",
+        "affected": "Affected Area",
+        "duration": "Duration",
+        "actions": "Actions"
+    },
+    "messages": {
+        "success_report": "Incident reported",
+        "success_update": "Record updated",
+        "success_delete": "Incident deleted",
+        "error_save": "Failed to save record"
+    }
+}

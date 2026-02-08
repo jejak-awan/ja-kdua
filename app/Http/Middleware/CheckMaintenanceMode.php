@@ -32,6 +32,7 @@ class CheckMaintenanceMode
                 $endDateTime = \Illuminate\Support\Carbon::parse($endTime);
                 if ($endDateTime->isPast()) {
                     Setting::set('maintenance_mode', false, 'boolean', 'general');
+
                     return $next($request);
                 }
             } catch (\Exception $e) {
@@ -56,6 +57,8 @@ class CheckMaintenanceMode
             'message' => Setting::get('maintenance_message', 'We are currently working on something awesome. Please check back later.'),
             'countdownEnabled' => Setting::get('maintenance_countdown_enabled', false),
             'endTime' => $endTime,
+            'siteName' => Setting::get('site_name', 'JA-CMS'),
+            'siteLogo' => Setting::get('site_logo', ''),
         ], 503);
     }
 

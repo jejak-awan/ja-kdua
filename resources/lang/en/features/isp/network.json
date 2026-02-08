@@ -1,0 +1,174 @@
+{
+    "title": "Network Control",
+    "subtitle": "Manage IP address pools, subnets, and bandwidth profiles.",
+    "subnets": {
+        "title": "IP Subnets",
+        "new": "Define New Subnet",
+        "pool": "IP Pool Managed",
+        "fields": {
+            "prefix": "Subnet Prefix (CIDR)",
+            "vlan": "VLAN ID",
+            "gateway": "Default Gateway"
+        }
+    },
+    "profiles": {
+        "title": "Service Profiles",
+        "subtitle": "Define bandwidth limits and QoS packages.",
+        "new": "Create Profile",
+        "fields": {
+            "download": "Download Limit (Mbps)",
+            "upload": "Upload Limit (Mbps)",
+            "burst": "Burst Limit"
+        }
+    },
+    "profiles_manager": {
+        "edit": "Edit Profile",
+        "new": "New Service Profile",
+        "desc": "Define bandwidth limits for this service package.",
+        "download_label": "Download",
+        "upload_label": "Upload",
+        "burst_label": "Burst"
+    },
+    "ipam": {
+        "title": "IPAM Manager",
+        "search": "Search IP or Serial...",
+        "assigned": "Assigned to Device",
+        "available": "Available for Use"
+    },
+    "ip_manager": {
+        "edit": "Edit IP Record",
+        "fields": {
+            "address": "IP Address",
+            "status": "Status",
+            "notes": "Notes / Description",
+            "notes_placeholder": "e.g. Customer Name, Device ID...",
+            "assignment": "Assignment"
+        }
+    },
+    "subnets_manager": {
+        "new_pool": "Create Pool",
+        "new": "Add New Subnet",
+        "desc": "Define a new IP range for a service node. This will automatically generate individual IP records.",
+        "pool": "Registered Pools",
+        "generated": "IP Records Generated",
+        "select_subnet": "Select a subnet to manage its IP pool",
+        "pool_title": "Pool",
+        "fields": {
+            "node": "Service Node",
+            "type": "Type"
+        }
+    },
+    "messages": {
+        "success_subnet": "Subnet and IP pool generated successfully",
+        "error_subnet": "Failed to create subnet",
+        "success_ip": "IP record updated successfully",
+        "error_ips": "Failed to load IP addresses",
+        "success_profile": "Service profile saved successfully",
+        "error_profile": "Failed to save service profile"
+    },
+    "router": {
+        "title": "Router & Server",
+        "subtitle": "Manage Mikrotik routers and authentication servers.",
+        "add": "Add Router",
+        "server": "Data Server",
+        "routing": "S.Routing",
+        "fields": {
+            "name": "Router Name",
+            "ip": "IP Address",
+            "secret": "Secret / Password",
+            "connection_type": "Connection Type",
+            "online": "Online",
+            "script": "Script",
+            "port": "Port",
+            "management_port": "Management Port",
+            "api_port": "API Port",
+            "snmp_port": "SNMP Port"
+        },
+        "search_placeholder": "Search Router...",
+        "new": "New Router",
+        "edit": "Edit Router",
+        "messages": {
+            "success_create": "Router added successfully",
+            "success_update": "Router updated successfully",
+            "success_delete": "Router deleted successfully"
+        }
+    },
+    "data_server": {
+        "title": "Data Server",
+        "add": "Add Data Server",
+        "fields": {
+            "name": "Server Name"
+        },
+        "messages": {
+            "success_create": "Data server added successfully",
+            "success_update": "Data server updated successfully",
+            "success_delete": "Data server deleted successfully"
+        },
+        "instructions": {
+            "edit_hint": "Click on the server name column to change data",
+            "matching_hint": "Server name must be the same as in Mikrotik",
+            "hotspot_path": "for hotspot see menu IP->Hotspot->Servers->Name",
+            "ppp_path": "For PPP see menu PPP->PPPoE Servers->Service name",
+            "purpose": "The function of this data server is to lock clients so they can only authenticate from one server"
+        },
+        "connectivity": {
+            "title": "Connectivity",
+            "method": "Connect Method",
+            "status": "Connect Status",
+            "username": "API Username",
+            "password": "API Password",
+            "snmp_community": "SNMP Community",
+            "connected": "Connected",
+            "disconnected": "Disconnected",
+            "active_clients": "Active Clients"
+        },
+        "script": {
+            "title": "MikroTik Script",
+            "os_version": "RouterOS Version",
+            "tunnel_type": "Tunnel Type",
+            "service": "Service",
+            "download": "Download Script",
+            "fields": {
+                "router_name": "Router Name",
+                "ip_address": "IP Address"
+            },
+            "options": {
+                "select": "-Select-",
+                "os_v6": "RouterOS v6",
+                "os_v7": "RouterOS v7",
+                "vpn_script": "SCRIPT VPN",
+                "pppoe_only": "PPPoE ONLY",
+                "hotspot_only": "HOTSPOT ONLY",
+                "pppoe_hotspot": "PPPoE + HOTSPOT"
+            }
+        }
+    },
+    "routing": {
+        "title": "Static Routing VPN",
+        "instructions": {
+            "item1": "Static routing is used if you use Loadbalance on Mikrotik",
+            "item2": "The function of this static routing is to determine the VPN path so that it remains on the most stable path and is not interrupted",
+            "item3": "Install the script on the Loadbalance router",
+            "item4": "Fill in the gateway below with one of the most stable IP gateways"
+        },
+        "fields": {
+            "gateway": "IP Address Gateway or Interface Name",
+            "gateway_hint": "(See menu IP - Routes on your Mikrotik)"
+        },
+        "actions": {
+            "get_script": "Get Script"
+        },
+        "messages": {
+            "copied": "Script copied to clipboard!"
+        }
+    },
+    "topology": {
+        "title": "Network Topology",
+        "subtitle": "Visualize your network connections from OLT to Customer premises.",
+        "legend": "Legend",
+        "olt": "OLT / Core",
+        "odp": "ODP / POP",
+        "router": "Customer Router",
+        "offline": "Offline"
+    }
+}

@@ -1,0 +1,161 @@
+{
+    "title": "Billing & Invoices",
+    "subtitle": "Manage subscriptions, plans, and customer payments.",
+    "invoices": "Invoices",
+    "plans": "Plans",
+    "stats": {
+        "revenue": "Total Revenue",
+        "pending": "Pending Amount",
+        "paid": "Paid Invoices",
+        "unpaid": "Unpaid Invoices"
+    },
+    "tabs": {
+        "invoices": "Invoices",
+        "plans": "Plans",
+        "requests": "Service Requests"
+    },
+    "fields": {
+        "customer": "Customer",
+        "period": "Period",
+        "amount": "Amount",
+        "due_date": "Due Date",
+        "status": "Status",
+        "actions": "Actions",
+        "search_placeholder": "Search customer or email..."
+    },
+    "actions": {
+        "generate": "Generate Invoices",
+        "pay": "Mark Paid",
+        "refresh": "Refresh",
+        "edit_plan": "Edit Plan",
+        "suspend_check": "Run Suspend Check",
+        "suspending": "Suspending...",
+        "set_paid": "Set as Paid",
+        "set_unpaid": "Set as Unpaid",
+        "cancel_invoices": "Cancel Invoices"
+    },
+    "messages": {
+        "error_load": "Failed to load billing data",
+        "error_invoices": "Failed to load invoices",
+        "error_generate": "Failed to generate invoices",
+        "success_generate": "Monthly invoices generated successfully",
+        "success_pay": "Payment verified successfully",
+        "no_data": "No invoices found.",
+        "confirm_generate": "Trigger automated invoice generation?",
+        "confirm_suspend": "Run overdue suspension check? Customers with unpaid overdue invoices will be suspended.",
+        "generating": "Generating invoices...",
+        "success_plan": "Plan saved successfully",
+        "error_plan": "Failed to save plan",
+        "error_suspend": "Failed to run suspension check"
+    },
+    "plans_manager": {
+        "title": "Subscription Profiles",
+        "subtitle": "Manage internet packages and billing profiles.",
+        "new": "New Profile",
+        "edit": "Edit Profile",
+        "delete": "Delete Profile",
+        "delete_confirm": "Are you sure you want to delete this profile?",
+        "fields": {
+            "name": "Profile Name",
+            "mikrotik_group": "Mikrotik Group",
+            "mikrotik_group_help": "Must equal the profile name in Mikrotik",
+            "mikrotik_rate_limit": "Mikrotik Rate Limit",
+            "mikrotik_rate_limit_placeholder": "e.g., 1500k/2M 0/0 0/0 0/0 8 0/0",
+            "mikrotik_rate_limit_help": "Leave empty to use Mikrotik profile limit",
+            "shared": "Shared Users",
+            "active_period": "Active Period (Days)",
+            "cost_price": "HPP (Base Cost)",
+            "commission": "Commission",
+            "price": "Price",
+            "price_help": "Price excluding VAT",
+            "type": "Billing Type",
+            "status": "Status"
+        },
+        "options": {
+            "prepaid": "Prepaid",
+            "postpaid": "Postpaid",
+            "active": "Active",
+            "inactive": "Inactive"
+        }
+    },
+    "customers_manager": {
+        "title": "Data Berlangganan",
+        "subtitle": "Kelola data pelanggan, informasi teknis, and financial.",
+        "new": "New Customer",
+        "edit": "Edit Customer",
+        "delete": "Delete Customer",
+        "delete_confirm": "Delete customer and all related data?",
+        "tabs": {
+            "identity": "Identity",
+            "address": "Installation Address",
+            "internet": "Internet",
+            "billing": "Plan & Billing",
+            "invoice": "Invoice"
+        },
+        "fields": {
+            "name": "Full Name",
+            "email": "Email",
+            "phone": "Phone Number",
+            "password": "Password",
+            "identity_number": "Identity Number (KTP/Passport)",
+            "identity_type": "Identity Type",
+            "address_street": "Street / Block / No",
+            "address_village": "Village",
+            "address_district": "District",
+            "address_city": "City",
+            "address_province": "Province",
+            "address_postal_code": "Postal Code",
+            "address_region": "Region (Village/District/City/Prov)",
+            "coordinates": "Coordinates (Lat, Lng)",
+            "coordinates_none": "No coordinates selected",
+            "plan": "Subscription Plan",
+            "cycle_start": "Billing Cycle (Day 1-28)",
+            "installation_date": "Installation Date",
+            "status": "Subscription Status",
+            "mikrotik_login": "PPPoE/Hotspot User",
+            "mikrotik_password": "PPPoE/Hotspot Password",
+            "reseller": "Partner/Reseller",
+            "router": "Router",
+            "server": "Server",
+            "address_list": "Mikrotik Address List",
+            "service_category": "Service Category",
+            "billing_due_date": "Due Date",
+            "unique_code": "Unique Code",
+            "is_taxed": "Tax (PPN 11%)",
+            "billing_notes": "Billing Notes"
+        },
+        "placeholders": {
+            "select_reseller": "Select Partner",
+            "select_router": "Select Router",
+            "select_server": "Select Server",
+            "address_list": "Auto-added to list",
+            "select_category": "-Select-",
+            "billing_due_date": "Day (1-28)"
+        },
+        "options": {
+            "fiber": "Fiber Optic",
+            "wireless": "Wireless"
+        },
+        "headers": {
+            "mikrotik_auth": "Mikrotik Authentication"
+        },
+        "messages": {
+            "invoice_feature_soon": "Initial Invoice Items (Setup/Hardware) will be available soon."
+        },
+        "invoice_items": {
+            "title": "Initial Invoice Items",
+            "subtitle": "Add installation fees, devices, or other additional costs for the first invoice.",
+            "add_item": "Add Item",
+            "fields": {
+                "name": "Item Name",
+                "price": "Unit Price",
+                "qty": "Qty",
+                "total": "Total",
+                "actions": "Actions"
+            },
+            "placeholders": {
+                "item_name": "e.g., Installation Fee, Router ONU, etc."
+            }
+        }
+    }
+}

@@ -1,0 +1,53 @@
+{
+    "title": "Laporan Gangguan",
+    "subtitle": "Laporkan dan kelola insiden jaringan dan pemeliharaan.",
+    "new": "Lapor Gangguan",
+    "modals": {
+        "edit_title": "Update Insiden",
+        "create_title": "Laporkan Insiden Baru",
+        "desc": "Melaporkan insiden akan memperbarui halaman status publik dan memberitahu pelanggan yang terdampak.",
+        "delete_confirm": "Apakah Anda yakin ingin menghapus catatan insiden ini?"
+    },
+    "public": {
+        "title": "Status Jaringan",
+        "subtitle": "Status kesehatan real-time infrastruktur K2NET.",
+        "operational": "Semua Sistem Operasional",
+        "issues": "Masalah Terdeteksi",
+        "active": "Insiden Aktif",
+        "recent": "Riwayat Terkini",
+        "description_healthy": "Semua sistem infrastruktur inti berjalan normal.",
+        "description_issues": "Kami sedang mengalami gangguan layanan di beberapa area.",
+        "last_checked": "Terakhir diperiksa",
+        "no_incidents": "Tidak ada insiden signifikan yang dilaporkan dalam 7 hari terakhir.",
+        "back": "Kembali ke Portal K2NET"
+    },
+    "fields": {
+        "title": "Judul Insiden",
+        "type": "Tipe Insiden",
+        "status": "Status",
+        "severity": "Tingkat Keparahan",
+        "affected": "Area Terdampak",
+        "description": "Deskripsi",
+        "investigating": "Menyelidiki",
+        "identified": "Teridentifikasi",
+        "monitoring": "Memantau",
+        "resolved": "Teratasi"
+    },
+    "actions": {
+        "update": "Perbarui Catatan",
+        "announce": "Umumkan Insiden"
+    },
+    "columns": {
+        "incident": "Insiden",
+        "status": "Status",
+        "affected": "Area Terdampak",
+        "duration": "Durasi",
+        "actions": "Aksi"
+    },
+    "messages": {
+        "success_report": "Insiden dilaporkan",
+        "success_update": "Catatan diperbarui",
+        "success_delete": "Insiden dihapus",
+        "error_save": "Gagal menyimpan catatan"
+    }
+}

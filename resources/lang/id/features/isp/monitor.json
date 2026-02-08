@@ -1,0 +1,46 @@
+{
+    "title": "Dashboard NOC",
+    "subtitle": "Pemantauan performa jaringan dan node secara real-time.",
+    "health": "Jaringan: {status}",
+    "last_updated": "Terakhir diperbarui",
+    "throughput_title": "Throughput Jaringan",
+    "throughput_subtitle": "Penggunaan bandwidth agregat real-time (Mbps)",
+    "incoming": "Masuk",
+    "outgoing": "Keluar",
+    "node_cpu": "Beban CPU",
+    "connecting": "Menghubungkan...",
+    "active_sessions": {
+        "title": "Sesi Online",
+        "description": "Pantau dan kelola koneksi pelanggan yang aktif.",
+        "select_router": "Pilih router...",
+        "table": {
+            "customer": "Pelanggan / Username",
+            "ip_address": "Alamat IP",
+            "uptime": "Uptime",
+            "type": "Tipe Koneksi",
+            "caller_id": "Caller ID / MAC",
+            "actions": "Aksi"
+        },
+        "actions": {
+            "disconnect": "Putuskan",
+            "refresh": "Segarkan"
+        },
+        "messages": {
+            "disconnect_confirm": "Putuskan koneksi user ini secara paksa?",
+            "disconnecting": "Memutuskan...",
+            "success_disconnect": "Sesi berhasil diputuskan",
+            "error_disconnect": "Gagal memutuskan sesi",
+            "no_sessions": "Tidak ada sesi aktif ditemukan di router ini.",
+            "select_router_first": "Silakan pilih router untuk melihat sesi aktif."
+        }
+    },
+    "traffic": {
+        "title": "Monitor Trafik Real-time",
+        "subtitle": "Pantau trafik antarmuka secara real-time.",
+        "select_interface": "Pilih Antarmuka",
+        "download_rate": "Kecepatan Unduh",
+        "upload_rate": "Kecepatan Unggah",
+        "download": "Unduh (Rx)",
+        "upload": "Unggah (Tx)"
+    }
+}

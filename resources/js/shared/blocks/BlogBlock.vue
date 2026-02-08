@@ -113,6 +113,7 @@ import {
   getTypographyStyles 
 } from '../utils/styleUtils'
 import type { BlockInstance, BuilderInstance, ModuleSettings } from '@/types/builder'
+import type { Content } from '@/types/cms'
 
 const props = withDefaults(defineProps<{
   module: BlockInstance;
@@ -126,7 +127,7 @@ const props = withDefaults(defineProps<{
 const builder = inject<BuilderInstance | null>('builder', null)
 const settings = computed(() => (props.module.settings || {}) as ModuleSettings)
 
-const postData = ref<any[]>([])
+const postData = ref<Content[]>([])
 const loading = ref(false)
 
 const posts = computed(() => postData.value)

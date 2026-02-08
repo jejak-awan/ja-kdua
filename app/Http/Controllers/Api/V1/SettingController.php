@@ -79,7 +79,7 @@ class SettingController extends BaseApiController
         $validated = $request->validate([
             'key' => 'required|string|unique:settings,key',
             'value' => 'nullable',
-            'type' => 'required|in:string,integer,boolean,json,text,password,number,datetime',
+            'type' => 'required|in:string,integer,boolean,json,text,password,number,datetime,image,media',
             'group' => 'required|string',
             'description' => 'nullable|string',
             'is_public' => 'boolean',
@@ -94,7 +94,7 @@ class SettingController extends BaseApiController
     {
         $validated = $request->validate([
             'value' => 'nullable',
-            'type' => 'sometimes|in:string,integer,boolean,json,text,password,number,datetime',
+            'type' => 'sometimes|in:string,integer,boolean,json,text,password,number,datetime,image,media',
             'group' => 'sometimes|string',
             'description' => 'nullable|string',
             'is_public' => 'boolean',
@@ -111,7 +111,7 @@ class SettingController extends BaseApiController
             'settings' => 'required|array',
             'settings.*.key' => 'required|string',
             'settings.*.value' => 'nullable',
-            'settings.*.type' => 'sometimes|in:string,integer,boolean,json,text,password,number,datetime',
+            'settings.*.type' => 'sometimes|in:string,integer,boolean,json,text,password,number,datetime,image,media',
             'settings.*.group' => 'sometimes|string',
         ]);
 
@@ -127,6 +127,19 @@ class SettingController extends BaseApiController
                 $sGroup = is_scalar($sGroupRaw) ? (string) $sGroupRaw : 'general';
 
                 Setting::set($sKey, $sValue, $sType, $sGroup);
+
+                // Sync site_logo to active theme's brand_logo
+                if ($sKey === 'site_logo') {
+                    $theme = \App\Models\Theme::where('is_active', true)->where('type', 'frontend')->first();
+                    if ($theme) {
+                        $themeSettings = is_array($theme->settings) ? $theme->settings : [];
+                        $themeSettings['brand_logo'] = $sValue;
+                        $theme->update(['settings' => $themeSettings]);
+
+                        // Clear theme cache using the service
+                        app(\App\Services\ThemeService::class)->clearThemeCache($theme);
+                    }
+                }
             }
         }
 

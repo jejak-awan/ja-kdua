@@ -56,4 +56,4 @@ Before pushing or marking a task as complete:
 3. **Logs**: Check `storage/logs/` for any new errors or worker crashes.
 
 ---
-*Follow these rules to ensure high-quality, maintainable, and secure contributions to JA-CMS.*
+*Follow these rules and the [K2NET Style Guide](file:///var/www/ja-kdua/docs/guidelines/K2NET_STYLE_GUIDE.md) to ensure high-quality, maintainable, and secure contributions to K2NET.*

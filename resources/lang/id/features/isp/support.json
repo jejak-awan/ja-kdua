@@ -1,0 +1,69 @@
+{
+    "title": "Tiket Dukungan",
+    "subtitle": "Butuh bantuan? Buka tiket dan tim kami akan segera membalas.",
+    "open_ticket": "Buka Tiket",
+    "new_ticket": "Buat Tiket Dukungan",
+    "new_ticket_desc": "Harap deskripsikan masalah Anda secara mendetail. Kami biasanya membalas dalam 24 jam.",
+    "submit": "Kirim Tiket",
+    "history": "Riwayat Tiket",
+    "no_tickets": "Anda belum memiliki tiket dukungan.",
+    "fields": {
+        "subject": "Subjek",
+        "category": "Kategori",
+        "priority": "Prioritas",
+        "message": "Pesan"
+    },
+    "headers": {
+        "id": "ID",
+        "subject": "Subjek",
+        "status": "Status",
+        "created": "Dibuat",
+        "user": "Pengguna"
+    },
+    "categories": {
+        "Technical": "Teknis",
+        "Billing": "Tagihan",
+        "Sales": "Penjualan"
+    },
+    "priorities": {
+        "Low": "Rendah",
+        "Medium": "Sedang",
+        "High": "Tinggi"
+    },
+    "statuses": {
+        "Open": "Terbuka",
+        "In Progress": "Diproses",
+        "Resolved": "Selesai",
+        "Closed": "Ditutup"
+    },
+    "messages": {
+        "success_submit": "Tiket dukungan berhasil dikirim",
+        "error_fetch": "Gagal memuat tiket dukungan",
+        "error_submit": "Gagal mengirim tiket"
+    },
+    "admin": {
+        "title": "Manajer Tiket Dukungan",
+        "subtitle": "Kelola dan tanggapi permintaan dukungan pelanggan.",
+        "search_placeholder": "Cari berdasarkan subjek atau pengguna..."
+    },
+    "wizard": {
+        "title": "Wizard Diagnosa",
+        "subtitle": "Alat diagnosa terpandu untuk masalah umum pelanggan.",
+        "select_customer": "Pilih Pelanggan untuk Diagnosa",
+        "search_placeholder": "Masukkan nama, ID, atau IP pelanggan...",
+        "steps": {
+            "billing": {
+                "title": "Status Tagihan"
+            },
+            "router": {
+                "title": "Status Router"
+            },
+            "signal": {
+                "title": "Kekuatan Sinyal"
+            },
+            "ping": {
+                "title": "Tes Ping"
+            }
+        }
+    }
+}

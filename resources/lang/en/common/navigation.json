@@ -40,6 +40,17 @@
         "system": "System Info",
         "systemNotifications": "Notifications",
         "emailTemplates": "Email Templates",
+        "ispInfra": "Infrastructure",
+        "ispMonitor": "NOC Dashboard",
+        "ispBilling": "Billing",
+        "ispNetworkIpam": "IPAM Manager",
+        "ispNetworkProfiles": "Service Profiles",
+        "ispOutages": "Outage Tracker",
+        "ispMember": "Member Management",
+        "ispSupport": "Ticket Manager",
+        "ispRouter": "Router Manager",
+        "ispMemberPortal": "My Dashboard",
+        "ispMemberSupport": "Contact Support",
         "logout": "Logout"
     },
     "sections": {
@@ -50,6 +61,7 @@
         "logs": "Pulse",
         "monitoring": "Monitoring",
         "system": "Settings",
+        "isp": "K2NET",
         "developer": "Dev"
     },
     "breadcrumbs": {

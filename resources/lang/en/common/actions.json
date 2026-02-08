@@ -30,6 +30,7 @@
     "run": "Run",
     "clear": "Clear",
     "select": "Select",
+    "change": "Change",
     "selectAll": "Select All",
     "deselectAll": "Deselect All",
     "view": "View",

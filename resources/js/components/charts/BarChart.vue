@@ -52,10 +52,21 @@ const chartOptions = computed<ChartOptions<'bar'>>(() => ({
     indexAxis: isHorizontal.value ? 'y' : 'x',
     responsive: true,
     maintainAspectRatio: false,
+    // Explicitly define events
+    events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
     plugins: {
         legend: {
             display: false,
         },
+        tooltip: {
+            enabled: true,
+            mode: isHorizontal.value ? 'y' : 'x',
+            intersect: false,
+        }
+    },
+    interaction: {
+        mode: isHorizontal.value ? 'y' : 'x',
+        intersect: false,
     },
     scales: {
         x: {

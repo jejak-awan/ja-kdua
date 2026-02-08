@@ -96,8 +96,8 @@ const submitted = ref(false)
 const error = ref<string | null>(null)
 
 // Form Data Collection
-const formData = reactive<Record<string, any>>({})
-const updateField = (id: string, value: any) => {
+const formData = reactive<Record<string, string | number | boolean>>({})
+const updateField = (id: string, value: string | number | boolean) => {
     formData[id] = value
 }
 
@@ -121,9 +121,10 @@ const handleSubmit = async () => {
         } else {
             error.value = response.data?.message || 'Failed to submit form.'
         }
-    } catch (e: any) {
-        console.error('Form submission error:', e)
-        error.value = e.response?.data?.message || 'An error occurred during submission.'
+    } catch (e: unknown) {
+        console.error('Form submission error:', e);
+        const err = e as { response?: { data?: { message?: string } } };
+        error.value = err.response?.data?.message || 'An error occurred during submission.';
     } finally {
         isSubmitting.value = false
     }

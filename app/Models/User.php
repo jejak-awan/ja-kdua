@@ -138,6 +138,16 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get the ISP customer profile.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\Isp\Customer, $this>
+     */
+    public function customer(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\Isp\Customer::class, 'user_id');
+    }
+
+    /**
      * Check if 2FA is enabled for this user.
      */
     public function hasTwoFactorEnabled(): bool

@@ -84,6 +84,16 @@
             border-top: 1px solid #f1f5f9;
         }
 
+        .site-logo {
+            max-width: 150px;
+            max-height: 60px;
+            object-contain: contain;
+            margin-bottom: 1.5rem;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .btn {
             display: inline-flex;
             align-items: center;
@@ -152,7 +162,12 @@
 </head>
 <body>
     <div class="container">
-        <span class="logo">{{ config('app.name') }}</span>
+        @if($siteLogo)
+            <img src="{{ $siteLogo }}" alt="{{ $siteName }}" class="site-logo">
+        @else
+            <span class="logo">{{ $siteName }}</span>
+        @endif
+
         <div class="icon-box">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
         </div>
@@ -209,7 +224,7 @@
         @endif
         
         <div class="footer">
-            <a href="/login" class="btn">Admin Login</a>
+            <p style="font-size: 0.875rem; margin-bottom: 0;">&copy; {{ date('Y') }} {{ $siteName }}. All rights reserved.</p>
         </div>
     </div>
 </body>

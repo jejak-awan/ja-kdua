@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div :class="colSpanClass">
         <div class="flex items-center justify-between mb-1">
             <label class="block text-sm font-medium text-foreground">
                 {{ label }}
@@ -120,6 +120,54 @@
                 {{ localValue ? enabledText : disabledText }}
             </span>
         </div>
+
+        <!-- Image/Media Picker -->
+        <div v-else-if="type === 'image' || type === 'media'" class="flex items-center gap-3">
+            <!-- Preview/Placeholder Box -->
+            <div 
+                class="h-10 w-24 border rounded-md overflow-hidden bg-muted/30 flex items-center justify-center flex-shrink-0 shadow-sm transition-all"
+                :class="{ 'border-2 border-dashed border-muted-foreground/30': !localValue }"
+            >
+                <img v-if="localValue" :src="(localValue as string)" class="w-full h-full object-contain p-1" alt="Preview">
+                <LucideIcon v-else name="Image" class="w-4 h-4 text-muted-foreground/50" />
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-1.5">
+                <Button 
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    @click="showMediaPicker = true"
+                    class="h-8 px-2.5 text-xs font-medium"
+                >
+                    <LucideIcon name="Pencil" class="w-3.5 h-3.5 mr-1.5 opacity-70" />
+                    {{ localValue ? $t('common.actions.change') : $t('common.actions.select') }}
+                </Button>
+                
+                <Button 
+                    v-if="localValue"
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    @click="localValue = ''; updateValue()"
+                    class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    title="Remove"
+                >
+                    <LucideIcon name="Trash2" class="w-3.5 h-3.5" />
+                </Button>
+            </div>
+
+            <!-- Use an empty template for the trigger slot to hide the default button -->
+            <MediaPicker
+                v-model:open="showMediaPicker"
+                @selected="handleMediaSelect"
+            >
+                <template #trigger>
+                    <span></span>
+                </template>
+            </MediaPicker>
+        </div>
         
         <!-- Error Message -->
         <p v-if="error" class="text-sm text-destructive mt-1">
@@ -148,6 +196,7 @@ import {
     Button,
     LucideIcon
 } from '@/components/ui'
+import MediaPicker from '@/components/media/MediaPicker.vue'
 
 interface SettingOption {
     value: string | number;
@@ -169,6 +218,7 @@ const props = withDefaults(defineProps<{
     disabledText?: string;
     error?: string | string[] | null;
     disabled?: boolean;
+    colSpan?: number | 'full';
 }>(), {
     description: '',
     type: 'string',
@@ -177,6 +227,7 @@ const props = withDefaults(defineProps<{
     disabledText: 'Disabled',
     error: null,
     disabled: false,
+    colSpan: 1,
 });
 
 const emit = defineEmits<{
@@ -184,6 +235,13 @@ const emit = defineEmits<{
 }>()
 
 const localValue = ref<SettingValue>(props.modelValue)
+const showMediaPicker = ref(false)
+
+const handleMediaSelect = (media: { url: string }) => {
+    localValue.value = media.url
+    updateValue()
+    showMediaPicker.value = false
+}
 
 // Watch for external changes
 watch(() => props.modelValue, (newValue) => {
@@ -248,6 +306,13 @@ const applyPreset = (value: string | number) => {
     localValue.value = value
     updateValue()
 }
+
+const colSpanClass = computed(() => {
+    if (props.colSpan === 'full' || props.colSpan === 2) {
+        return 'col-span-1 md:col-span-2'
+    }
+    return 'col-span-1'
+})
 
 // Update parent
 const updateValue = () => {
