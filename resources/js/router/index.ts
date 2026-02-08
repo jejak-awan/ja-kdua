@@ -199,7 +199,7 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: 'isp/admin/analytics/revenue',
                 name: 'isp.admin.analytics.revenue',
-                component: () => import('../views/Isp/Monitoring/RevenueReports.vue'),
+                component: () => import('../views/Isp/Billing/Reports/Revenue.vue'),
             },
             {
                 path: 'isp/odp',
@@ -265,27 +265,27 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: 'isp/member',
                 name: 'isp-member',
-                component: () => import('../views/Isp/Member/Dashboard.vue'),
+                component: () => import('../views/Isp/Portal/Dashboard.vue'),
             },
             {
                 path: 'isp/member/invoices',
                 name: 'isp.member.invoices',
-                component: () => import('../views/Isp/Member/Invoices.vue'),
+                component: () => import('../views/Isp/Portal/Invoices.vue'),
             },
             {
                 path: 'isp/member/usage',
                 name: 'isp.member.usage',
-                component: () => import('../views/Isp/Member/UsageAnalytics.vue'),
+                component: () => import('../views/Isp/Portal/UsageAnalytics.vue'),
             },
             {
                 path: 'isp/member/support',
                 name: 'isp-member-support',
-                component: () => import('../views/Isp/Member/Support.vue'),
+                component: () => import('../views/Isp/Portal/Support.vue'),
             },
             {
                 path: 'isp/member/diagnostics',
                 name: 'isp.member.diagnostics',
-                component: () => import('../views/Isp/Member/Diagnostics.vue'),
+                component: () => import('../views/Isp/Portal/Diagnostics.vue'),
             },
             {
                 path: 'isp/support',
@@ -315,7 +315,7 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: 'isp/outages',
                 name: 'isp-outages',
-                component: () => import('../views/Isp/Inventory/Outages.vue'),
+                component: () => import('../views/Isp/Network/Outages/Index.vue'),
             },
             {
                 path: 'profile',

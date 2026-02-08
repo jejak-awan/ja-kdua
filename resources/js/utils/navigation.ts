@@ -38,7 +38,6 @@ export const navigationGroups: Record<string, NavItem[]> = {
         { name: 'isp.monitor.traffic', to: '/admin/isp/monitor/traffic', label: 'Trafik Real-time', permission: 'manage settings' },
         { name: 'isp-active-sessions', to: '/admin/isp/monitoring/sessions', label: 'Sesi Online', permission: 'manage settings' },
         { name: 'isp.admin.analytics.usage', to: '/admin/isp/admin/analytics/usage', label: 'Penggunaan Jaringan', permission: 'manage settings' },
-        { name: 'isp.admin.analytics.revenue', to: '/admin/isp/admin/analytics/revenue', label: 'Laporan Pendapatan', permission: 'manage settings' },
 
         // Configuration
         { type: 'divider', label: 'Konfigurasi' },
@@ -59,24 +58,25 @@ export const navigationGroups: Record<string, NavItem[]> = {
         { name: 'isp-network-ipam', to: '/admin/isp/network/ipam', label: 'Manajer IPAM', permission: 'manage settings' },
         { name: 'isp-network-profiles', to: '/admin/isp/network/profiles', label: 'Profil Jaringan', permission: 'manage settings' },
         { name: 'isp-odp', to: '/admin/isp/odp', label: 'Manajer ODP', permission: 'manage settings' },
+        { name: 'isp-outages', to: '/admin/isp/outages', label: 'Pelacak Gangguan', permission: 'manage settings' },
 
         // Billing
         { type: 'divider', label: 'Penagihan' },
         { name: 'isp-billing', to: '/admin/isp/billing', label: 'Penagihan', permission: 'manage settings' },
+        { name: 'isp.admin.analytics.revenue', to: '/admin/isp/admin/analytics/revenue', label: 'Laporan Pendapatan', permission: 'manage settings' },
 
-        // Inventory & Operations
-        { type: 'divider', label: 'Inventaris & Operasional' },
+        // Inventory
+        { type: 'divider', label: 'Inventaris' },
         { name: 'isp-inventory', to: '/admin/isp/inventory', label: 'Stok Barang', permission: 'manage settings' },
         { name: 'isp-vouchers', to: '/admin/isp/vouchers', label: 'Voucher Hotspot', permission: 'manage settings' },
-        { name: 'isp-outages', to: '/admin/isp/outages', label: 'Pelacak Gangguan', permission: 'manage settings' },
 
         // Support
         { type: 'divider', label: 'Dukungan' },
         { name: 'isp-support', to: '/admin/isp/support', label: 'Manajer Tiket', permission: 'manage settings' },
         { name: 'isp.support.wizard', to: '/admin/isp/support/wizard', label: 'Wizard Diagnosa', permission: 'manage settings' },
 
-        // Member Portal Section
-        { type: 'divider', label: 'Member Portal' },
+        // Portal Pelanggan (Customer Self-Service)
+        { type: 'divider', label: 'Portal Pelanggan' },
         { name: 'isp-member', to: '/admin/isp/member', label: 'Dasbor Saya', permission: 'view profile' },
         { name: 'isp-member-support', to: '/admin/isp/member/support', label: 'Hubungi Dukungan', permission: 'view profile' },
     ],
