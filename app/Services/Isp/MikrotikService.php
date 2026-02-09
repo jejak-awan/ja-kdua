@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Isp;
 
+use App\Models\Isp\ServiceNode;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use RouterOS\Client;
