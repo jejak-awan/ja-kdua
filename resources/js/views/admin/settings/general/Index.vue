@@ -12,7 +12,7 @@
         <div v-else class="w-full">
             <!-- Shadcn Tabs -->
             <Tabs v-model="activeTab" class="w-full">
-                <div class="mb-8">
+                <div class="mb-10 flex items-center justify-between">
                     <TabsList class="bg-transparent p-0 h-auto gap-0 flex-wrap">
                         <TabsTrigger 
                             v-for="tab in tabs" 
@@ -27,103 +27,103 @@
                 </div>
 
                 <!-- Tab Content -->
-                <div>
-                    <form @submit.prevent="handleSubmit" class="space-y-6">
+                <form @submit.prevent="handleSubmit" class="space-y-6">
                     <div v-if="currentSettings.length === 0" class="text-center py-8">
                         <p class="text-muted-foreground">{{ $t('features.settings.noSettings') }}</p>
                     </div>
 
-                    <!-- General Tab (New Component) -->
-                    <GeneralTab
-                        v-else-if="activeTab === 'general'"
-                        :settings="settings"
-                        v-model:form-data="formData"
-                        :errors="errors"
-                    />
+                    <template v-else>
+                        <TabsContent value="general">
+                            <GeneralTab
+                                :settings="settings"
+                                v-model:form-data="formData"
+                                :errors="errors"
+                            />
+                        </TabsContent>
 
-                    <SecurityTab
-                        v-else-if="activeTab === 'security'"
-                        :settings="settings"
-                        v-model:form-data="formData"
-                        :errors="errors"
-                    />
+                        <TabsContent value="security">
+                            <SecurityTab
+                                :settings="settings"
+                                v-model:form-data="formData"
+                                :errors="errors"
+                            />
+                        </TabsContent>
 
-                    <!-- Discussion Tab (New Component) -->
-                    <DiscussionTab
-                        v-else-if="activeTab === 'comments'"
-                        :settings="settings"
-                        v-model:form-data="formData"
-                        :errors="errors"
-                    />
+                        <TabsContent value="comments">
+                            <DiscussionTab
+                                :settings="settings"
+                                v-model:form-data="formData"
+                                :errors="errors"
+                            />
+                        </TabsContent>
 
-                    <!-- Performance Tab (New Component) -->
-                    <PerformanceTab
-                        v-else-if="activeTab === 'performance'"
-                        :settings="settings"
-                        v-model:form-data="formData"
-                        :errors="errors"
-                        :cache-status="cacheStatus"
-                        :clearing-cache="clearingCache"
-                        :warming-cache="warmingCache"
-                        @clear-cache="clearSystemCache"
-                        @warm-cache="warmSystemCache"
-                    />
+                        <TabsContent value="performance">
+                            <PerformanceTab
+                                :settings="settings"
+                                v-model:form-data="formData"
+                                :errors="errors"
+                                :cache-status="cacheStatus"
+                                :clearing-cache="clearingCache"
+                                :warming-cache="warmingCache"
+                                @clear-cache="clearSystemCache"
+                                @warm-cache="warmSystemCache"
+                            />
+                        </TabsContent>
 
-                    <!-- Email Tab (New Component) -->
-                    <EmailTab
-                        v-else-if="activeTab === 'email'"
-                        :settings="settings"
-                        v-model:form-data="formData"
-                        :errors="errors"
-                        :validating-config="validatingConfig"
-                        :config-validation="configValidation"
-                        :testing-connection="testingConnection"
-                        :connection-result="connectionResult"
-                        @validate-config="validateEmailConfig"
-                        @test-connection="testSmtpConnection"
-                    />
+                        <TabsContent value="email">
+                            <div class="space-y-6">
+                                <EmailTab
+                                    :settings="settings"
+                                    v-model:form-data="formData"
+                                    :errors="errors"
+                                    :validating-config="validatingConfig"
+                                    :config-validation="configValidation"
+                                    :testing-connection="testingConnection"
+                                    :connection-result="connectionResult"
+                                    @validate-config="validateEmailConfig"
+                                    @test-connection="testSmtpConnection"
+                                />
 
-                    <!-- SEO Tab (New Component) -->
-                    <SeoTab
-                        v-else-if="activeTab === 'seo'"
-                        :settings="settings"
-                        v-model:form-data="formData"
-                        :errors="errors"
-                    />
+                                <EmailTestSection
+                                    :sending-test-email="sendingTestEmail"
+                                    :test-email-result="testEmailResult"
+                                    :test-email="testEmail"
+                                    :queue-status="queueStatus"
+                                    :loading-queue-status="loadingQueueStatus"
+                                    :email-logs="emailLogs"
+                                    :loading-logs="loadingLogs"
+                                    @send-test-email="sendTestEmail"
+                                    @refresh-queue="getQueueStatus"
+                                    @refresh-logs="getRecentLogs"
+                                    @update:test-email="testEmail = $event"
+                                />
+                            </div>
+                        </TabsContent>
 
-                    <!-- Media Tab (New Component) -->
-                    <MediaTab
-                        v-else-if="activeTab === 'media'"
-                        :settings="settings"
-                        v-model:form-data="formData"
-                        :errors="errors"
-                    />
+                        <TabsContent value="seo">
+                            <SeoTab
+                                :settings="settings"
+                                v-model:form-data="formData"
+                                :errors="errors"
+                            />
+                        </TabsContent>
 
-                    <!-- AI Tab -->
-                    <AiTab
-                        v-else-if="activeTab === 'ai'"
-                        :settings="settings"
-                        v-model:form-data="formData"
-                        :errors="errors"
-                    />
+                        <TabsContent value="media">
+                            <MediaTab
+                                :settings="settings"
+                                v-model:form-data="formData"
+                                :errors="errors"
+                            />
+                        </TabsContent>
 
-
-
-                    <!-- Email Test Section (only for email tab) -->
-                    <EmailTestSection
-                        v-if="activeTab === 'email'"
-                        :sending-test-email="sendingTestEmail"
-                        :test-email-result="testEmailResult"
-                        :test-email="testEmail"
-                        :queue-status="queueStatus"
-                        :loading-queue-status="loadingQueueStatus"
-                        :email-logs="emailLogs"
-                        :loading-logs="loadingLogs"
-                        @send-test-email="sendTestEmail"
-                        @refresh-queue="getQueueStatus"
-                        @refresh-logs="getRecentLogs"
-                        @update:test-email="testEmail = $event"
-                    />
+                        <TabsContent value="ai">
+                            <AiTab
+                                :settings="settings"
+                                v-model:form-data="formData"
+                                :errors="errors"
+                            />
+                        </TabsContent>
+                    </template>
 
                     <!-- Actions -->
                     <div class="flex justify-end space-x-4 pt-6 border-t">
@@ -142,7 +142,6 @@
                         </Button>
                     </div>
                 </form>
-                </div>
             </Tabs>
         </div>
     </div>
@@ -159,6 +158,7 @@ import {
     Tabs,
     TabsList,
     TabsTrigger,
+    TabsContent,
     Button
 } from '@/components/ui';
 import { useToast } from '@/composables/useToast';

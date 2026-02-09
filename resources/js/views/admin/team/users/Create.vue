@@ -1,11 +1,14 @@
 <template>
     <div class="max-w-4xl mx-auto">
         <!-- Header -->
-        <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-foreground">{{ $t('common.actions.create') }} {{ $t('features.users.table.user') }}</h1>
+        <div class="mb-10 flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('common.actions.create') }} {{ $t('features.users.table.user') }}</h1>
+                <p class="text-muted-foreground">{{ $t('features.users.subtitleCreate') }}</p>
+            </div>
             <router-link :to="{ name: 'users.index' }">
-                <Button variant="ghost" class="pl-0 hover:bg-transparent hover:text-foreground">
-                    <ArrowLeft class="w-4 h-4 mr-2" />
+                <Button variant="ghost" class="gap-2 rounded-xl">
+                    <ArrowLeft class="w-4 h-4" />
                     {{ $t('common.actions.back') }}
                 </Button>
             </router-link>
@@ -13,7 +16,7 @@
 
         <form @submit.prevent="handleSubmit" class="space-y-6">
             <!-- Main Content -->
-            <div class="bg-card border border-border rounded-lg p-6 space-y-6">
+            <div class="bg-card border border-border/50 rounded-xl p-6 space-y-6 shadow-sm">
                 <!-- Avatar -->
                 <div>
                     <label class="block text-sm font-medium text-foreground mb-2">
@@ -209,6 +212,7 @@
                 <Button
                     variant="outline"
                     as-child
+                    class="rounded-xl"
                 >
                     <router-link :to="{ name: 'users.index' }">
                         {{ $t('common.actions.cancel') }}
@@ -217,6 +221,7 @@
                 <Button
                     type="submit"
                     :disabled="saving || !isValid"
+                    class="rounded-xl px-8"
                 >
                     <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                     {{ saving ? $t('common.messages.loading.creating') : $t('common.actions.create') }}

@@ -188,6 +188,7 @@
         },
         "filters": {
             "route": "Route",
+            "routePlaceholder": "Cari berdasarkan path route...",
             "minDuration": "Durasi Min (ms)",
             "dateFrom": "Dari Tanggal",
             "dateTo": "Sampai Tanggal"
@@ -244,6 +245,32 @@
             "acknowledged": "Diketahui",
             "patched": "Diperbaiki",
             "ignored": "Diabaikan"
+        }
+    },
+    "packages": {
+        "title": "Semua Paket",
+        "description": "Daftar lengkap semua dependensi Composer dan NPM",
+        "showAll": "Tampilkan Semua Paket",
+        "empty": "Tidak ada paket ditemukan di file lock",
+        "stats": {
+            "total": "Total Paket",
+            "composer": "Composer",
+            "npm": "NPM",
+            "secure": "Aman",
+            "vulnerable": "Rentan"
+        },
+        "filters": {
+            "status": "Status Keamanan"
+        },
+        "table": {
+            "package": "Paket",
+            "version": "Versi",
+            "source": "Sumber",
+            "status": "Status"
+        },
+        "status": {
+            "secure": "Aman",
+            "vulnerable": "Rentan"
         }
     }
 }

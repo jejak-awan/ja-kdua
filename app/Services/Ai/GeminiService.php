@@ -14,7 +14,11 @@ class GeminiService implements AiProviderInterface
     public function __construct(?string $apiKey = null)
     {
         // Allow passing key explicitly (for testing connection), otherwise use settings
-        $this->apiKey = $apiKey ?? (string) (\App\Models\Setting::get('gemini_api_key') ?? config('services.gemini.api_key', ''));
+        /** @var mixed $settingKey */
+        $settingKey = \App\Models\Setting::get('gemini_api_key');
+        /** @var string $defaultKey */
+        $defaultKey = is_string(config('services.gemini.api_key', '')) ? (string) config('services.gemini.api_key', '') : '';
+        $this->apiKey = $apiKey ?? (is_string($settingKey) ? $settingKey : $defaultKey);
     }
 
     public function getName(): string
@@ -29,24 +33,19 @@ class GeminiService implements AiProviderInterface
         }
 
         // Use provided model or default to gemini-2.0-flash
-        $model = $model ?: ((string) \App\Models\Setting::get('gemini_model', '') ?: 'gemini-2.0-flash');
+        /** @var mixed $settingModel */
+        $settingModel = \App\Models\Setting::get('gemini_model', '');
+        $model = $model ?: (is_string($settingModel) && $settingModel !== '' ? $settingModel : 'gemini-2.0-flash');
 
-        // Ensure model name format is correct for API URL
-        if (! str_starts_with($model, 'models/')) {
-            $model = 'models/'.$model; // e.g. models/gemini-2.0-flash
-        }
-
-        // Strip 'models/' for the base URL construction if it was already there because the endpoint structure differs slightly based on how we call it
-        // Actually, for generateContent, the URL is: models/{model}:generateContent
-        // So let's normalize.
-        $model = str_replace('models/', '', (string) $model);
+        // Normalize model string
+        $modelStr = str_replace('models/', '', $model);
 
         try {
             $fullPrompt = $prompt.":\n\n".$context;
 
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-            ])->post("{$this->baseUrl}/models/{$model}:generateContent?key={$this->apiKey}", [
+            ])->post("{$this->baseUrl}/models/{$modelStr}:generateContent?key={$this->apiKey}", [
                 'contents' => [
                     [
                         'parts' => [
@@ -63,11 +62,23 @@ class GeminiService implements AiProviderInterface
             /** @var mixed $data */
             $data = $response->json();
 
-            if (is_array($data) && isset($data['candidates'][0]['content']['parts'][0]['text'])) {
-                /** @var string $text */
-                $text = $data['candidates'][0]['content']['parts'][0]['text'];
+            if (is_array($data) &&
+                isset($data['candidates']) && is_array($data['candidates']) && isset($data['candidates'][0])
+            ) {
+                /** @var array<string, mixed> $candidate */
+                $candidate = $data['candidates'][0];
+                if (isset($candidate['content']) && is_array($candidate['content']) &&
+                    isset($candidate['content']['parts']) && is_array($candidate['content']['parts']) &&
+                    isset($candidate['content']['parts'][0]) && is_array($candidate['content']['parts'][0]) &&
+                    isset($candidate['content']['parts'][0]['text'])
+                ) {
+                    /** @var mixed $textRaw */
+                    $textRaw = $candidate['content']['parts'][0]['text'];
+                    /** @var string $text */
+                    $text = is_string($textRaw) ? $textRaw : (is_scalar($textRaw) ? (string) $textRaw : '');
 
-                return $text;
+                    return $text;
+                }
             }
 
             throw new \Exception('Unexpected response format from Gemini.');
@@ -129,6 +140,11 @@ class GeminiService implements AiProviderInterface
         return true;
     }
 
+    /**
+     * @param \Illuminate\Http\Client\Response $response
+     * @return never
+     * @throws \Exception
+     */
     protected function handleError($response): never
     {
         Log::error('Gemini API Error', [
@@ -136,7 +152,9 @@ class GeminiService implements AiProviderInterface
             'body' => $response->body(),
         ]);
 
-        $errorMsg = (string) $response->json('error.message', 'Unknown error');
+        /** @var mixed $errorMsgRaw */
+        $errorMsgRaw = $response->json('error.message', 'Unknown error');
+        $errorMsg = is_string($errorMsgRaw) ? $errorMsgRaw : 'Unknown error';
 
         if ($response->status() === 429 || str_contains(strtolower($errorMsg), 'quota')) {
             throw new \Exception('Gemini Quota Exceeded. Please check billing.');

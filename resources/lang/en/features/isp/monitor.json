@@ -42,5 +42,43 @@
         "upload_rate": "Upload Rate",
         "download": "Download (Rx)",
         "upload": "Upload (Tx)"
+    },
+    "radius_logs": {
+        "title": "Authentication Logs (RADIUS)",
+        "subtitle": "History of user login attempts to the RADIUS server.",
+        "empty": "No authentication history found.",
+        "table": {
+            "time": "Time",
+            "user_pass": "User / Password",
+            "status": "Status",
+            "nas_ip": "NAS IP",
+            "reply_message": "Reply Message / Error"
+        },
+        "messages": {
+            "error_load": "Failed to fetch RADIUS logs history"
+        }
+    },
+    "radius_sessions": {
+        "title": "Online Sessions (RADIUS)",
+        "subtitle": "List of users currently connected through FreeRADIUS.",
+        "status": "FreeRADIUS: {status}",
+        "empty": "No active sessions in FreeRADIUS.",
+        "table": {
+            "user": "User",
+            "ip_address": "IP Address",
+            "nas_ip": "VLAN / NAS IP",
+            "start_time": "Session Start",
+            "duration": "Duration",
+            "traffic": "Traffic (Up/Down)",
+            "actions": "Actions"
+        },
+        "actions": {
+            "disconnect_title": "Disconnect User",
+            "disconnect_confirm": "Disconnect user {username}?",
+            "disconnect_request_sent": "CoA Request Sent",
+            "disconnect_payload": "Sending disconnect request via CoA...",
+            "error_fetch": "Failed to fetch RADIUS data",
+            "error_disconnect": "Failed to disconnect session"
+        }
     }
 }

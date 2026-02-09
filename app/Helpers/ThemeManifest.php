@@ -33,10 +33,15 @@ class ThemeManifest
 
         $manifest = json_decode($content, true);
 
-        if (json_last_error() !== JSON_ERROR_NONE || ! is_array($manifest)) {
+        if (json_last_error() !== JSON_ERROR_NONE) {
             throw new \Exception('Invalid theme.json: '.json_last_error_msg());
         }
 
+        if (! is_array($manifest)) {
+            throw new \Exception('Invalid theme.json: expected array');
+        }
+
+        /** @var array<string, mixed> $manifest */
         $this->manifest = $manifest;
     }
 
@@ -55,7 +60,10 @@ class ThemeManifest
      */
     public function getName(): string
     {
-        return $this->manifest['name'] ?? 'Unknown Theme';
+        /** @var string $name */
+        $name = $this->manifest['name'] ?? 'Unknown Theme';
+
+        return $name;
     }
 
     /**
@@ -63,7 +71,10 @@ class ThemeManifest
      */
     public function getSlug(): string
     {
-        return $this->manifest['slug'] ?? basename($this->path);
+        /** @var string $slug */
+        $slug = $this->manifest['slug'] ?? basename($this->path);
+
+        return $slug;
     }
 
     /**
@@ -71,7 +82,10 @@ class ThemeManifest
      */
     public function getVersion(): string
     {
-        return $this->manifest['version'] ?? '1.0.0';
+        /** @var string $version */
+        $version = $this->manifest['version'] ?? '1.0.0';
+
+        return $version;
     }
 
     /**
@@ -79,7 +93,10 @@ class ThemeManifest
      */
     public function getType(): string
     {
-        return $this->manifest['type'] ?? 'frontend';
+        /** @var string $type */
+        $type = $this->manifest['type'] ?? 'frontend';
+
+        return $type;
     }
 
     /**
@@ -87,7 +104,10 @@ class ThemeManifest
      */
     public function getDescription(): ?string
     {
-        return $this->manifest['description'] ?? null;
+        /** @var string|null $description */
+        $description = $this->manifest['description'] ?? null;
+
+        return $description;
     }
 
     /**
@@ -95,7 +115,10 @@ class ThemeManifest
      */
     public function getAuthor(): ?string
     {
-        return $this->manifest['author'] ?? null;
+        /** @var string|null $author */
+        $author = $this->manifest['author'] ?? null;
+
+        return $author;
     }
 
     /**
@@ -103,7 +126,10 @@ class ThemeManifest
      */
     public function getAuthorUrl(): ?string
     {
-        return $this->manifest['author_url'] ?? null;
+        /** @var string|null $authorUrl */
+        $authorUrl = $this->manifest['author_url'] ?? null;
+
+        return $authorUrl;
     }
 
     /**
@@ -111,7 +137,10 @@ class ThemeManifest
      */
     public function getLicense(): ?string
     {
-        return $this->manifest['license'] ?? null;
+        /** @var string|null $license */
+        $license = $this->manifest['license'] ?? null;
+
+        return $license;
     }
 
     /**
@@ -119,7 +148,10 @@ class ThemeManifest
      */
     public function getParentTheme(): ?string
     {
-        return $this->manifest['parent_theme'] ?? null;
+        /** @var string|null $parentTheme */
+        $parentTheme = $this->manifest['parent_theme'] ?? null;
+
+        return $parentTheme;
     }
 
     /**
@@ -129,7 +161,10 @@ class ThemeManifest
      */
     public function getDependencies(): array
     {
-        return (array) ($this->manifest['dependencies'] ?? []);
+        /** @var array<string, string> $dependencies */
+        $dependencies = $this->manifest['dependencies'] ?? [];
+
+        return $dependencies;
     }
 
     /**
@@ -139,7 +174,10 @@ class ThemeManifest
      */
     public function getSupports(): array
     {
-        return (array) ($this->manifest['supports'] ?? []);
+        /** @var array<string, bool> $supports */
+        $supports = $this->manifest['supports'] ?? [];
+
+        return $supports;
     }
 
     /**
@@ -149,7 +187,10 @@ class ThemeManifest
      */
     public function getRequirements(): array
     {
-        return (array) ($this->manifest['requires'] ?? []);
+        /** @var array<string, string> $requires */
+        $requires = $this->manifest['requires'] ?? [];
+
+        return $requires;
     }
 
     /**
@@ -157,7 +198,9 @@ class ThemeManifest
      */
     public function getRequiredCmsVersion(): ?string
     {
-        return $this->manifest['requires']['cms_version'] ?? null;
+        $requires = $this->getRequirements();
+
+        return $requires['cms_version'] ?? null;
     }
 
     /**
@@ -165,7 +208,9 @@ class ThemeManifest
      */
     public function getRequiredPhpVersion(): ?string
     {
-        return $this->manifest['requires']['php'] ?? null;
+        $requires = $this->getRequirements();
+
+        return $requires['php'] ?? null;
     }
 
     /**
@@ -175,7 +220,10 @@ class ThemeManifest
      */
     public function getAssets(): array
     {
-        return (array) ($this->manifest['assets'] ?? []);
+        /** @var array<string, array<int, string>> $assets */
+        $assets = $this->manifest['assets'] ?? [];
+
+        return $assets;
     }
 
     /**
@@ -185,7 +233,12 @@ class ThemeManifest
      */
     public function getCssAssets(): array
     {
-        return (array) ($this->manifest['assets']['css'] ?? []);
+        $assets = $this->getAssets();
+
+        /** @var array<int, string> $css */
+        $css = $assets['css'] ?? [];
+
+        return $css;
     }
 
     /**
@@ -195,7 +248,12 @@ class ThemeManifest
      */
     public function getJsAssets(): array
     {
-        return (array) ($this->manifest['assets']['js'] ?? []);
+        $assets = $this->getAssets();
+
+        /** @var array<int, string> $js */
+        $js = $assets['js'] ?? [];
+
+        return $js;
     }
 
     /**
@@ -205,7 +263,10 @@ class ThemeManifest
      */
     public function getSettingsSchema(): array
     {
-        return (array) ($this->manifest['settings_schema'] ?? []);
+        /** @var array<string, array<string, mixed>> $schema */
+        $schema = $this->manifest['settings_schema'] ?? [];
+
+        return $schema;
     }
 
     /**
@@ -227,7 +288,8 @@ class ThemeManifest
 
         // Validate version format (semver)
         if (isset($this->manifest['version'])) {
-            $version = (string) $this->manifest['version'];
+            /** @var string $version */
+            $version = $this->manifest['version'];
             if (! preg_match('/^\d+\.\d+\.\d+$/', $version)) {
                 $errors[] = 'Invalid version format. Expected semver (e.g., 1.0.0)';
             }
@@ -236,7 +298,8 @@ class ThemeManifest
         // Validate type
         if (isset($this->manifest['type'])) {
             $validTypes = ['frontend', 'admin', 'email'];
-            $type = (string) $this->manifest['type'];
+            /** @var string $type */
+            $type = $this->manifest['type'];
             if (! in_array($type, $validTypes)) {
                 $errors[] = 'Invalid type. Must be one of: '.implode(', ', $validTypes);
             }
@@ -244,22 +307,22 @@ class ThemeManifest
 
         // Validate assets paths exist
         if (isset($this->manifest['assets']) && is_array($this->manifest['assets'])) {
-            $assets = $this->manifest['assets'];
+            $assets = $this->getAssets();
 
-            if (isset($assets['css']) && is_array($assets['css'])) {
+            if (isset($assets['css'])) {
                 foreach ($assets['css'] as $cssFile) {
-                    $cssPath = "{$this->path}/{$cssFile}";
+                    $cssPath = "{$this->path}/" . (string) $cssFile;
                     if (! file_exists($cssPath)) {
-                        $errors[] = "CSS file not found: {$cssFile}";
+                        $errors[] = "CSS file not found: " . (string) $cssFile;
                     }
                 }
             }
 
-            if (isset($assets['js']) && is_array($assets['js'])) {
+            if (isset($assets['js'])) {
                 foreach ($assets['js'] as $jsFile) {
-                    $jsPath = "{$this->path}/{$jsFile}";
+                    $jsPath = "{$this->path}/" . (string) $jsFile;
                     if (! file_exists($jsPath)) {
-                        $errors[] = "JS file not found: {$jsFile}";
+                        $errors[] = "JS file not found: " . (string) $jsFile;
                     }
                 }
             }
@@ -267,22 +330,23 @@ class ThemeManifest
 
         // Validate settings schema
         if (isset($this->manifest['settings_schema']) && is_array($this->manifest['settings_schema'])) {
-            $schema = $this->manifest['settings_schema'];
+            $schema = $this->getSettingsSchema();
             foreach ($schema as $key => $setting) {
-                if (! is_array($setting)) {
-                    continue;
-                }
                 if (! isset($setting['type'])) {
                     $errors[] = "Setting '{$key}' missing type";
                 }
 
                 $validTypes = ['text', 'textarea', 'number', 'email', 'url', 'color', 'select', 'checkbox', 'radio'];
-                if (isset($setting['type']) && ! in_array($setting['type'], $validTypes)) {
-                    $errors[] = "Setting '{$key}' has invalid type: {$setting['type']}";
+                /** @var string|null $settingType */
+                $settingType = $setting['type'] ?? null;
+                if ($settingType !== null && ! in_array($settingType, $validTypes)) {
+                    $errors[] = "Setting '{$key}' has invalid type: " . (string) $settingType;
                 }
 
-                if (isset($setting['type']) && $setting['type'] === 'select' && ! isset($setting['options'])) {
-                    $errors[] = "Setting '{$key}' (select) missing options";
+                if ($settingType === 'select') {
+                    if (! isset($setting['options'])) {
+                        $errors[] = "Setting '{$key}' (select) missing options";
+                    }
                 }
             }
         }
@@ -302,7 +366,8 @@ class ThemeManifest
         // Check CMS version
         $requiredCmsVersion = $this->getRequiredCmsVersion();
         if ($requiredCmsVersion) {
-            $currentVersion = (string) config('app.version', '1.0.0');
+            /** @var string $currentVersion */
+            $currentVersion = config('app.version', '1.0.0');
             if (version_compare($currentVersion, $requiredCmsVersion, '<')) {
                 $errors[] = "CMS version {$currentVersion} does not meet requirement: {$requiredCmsVersion}";
             }
@@ -325,8 +390,9 @@ class ThemeManifest
      */
     public function getScreenshotPath(): ?string
     {
+        /** @var string $screenshot */
         $screenshot = $this->manifest['screenshot'] ?? 'screenshot.png';
-        $screenshotPath = "{$this->path}/{$screenshot}";
+        $screenshotPath = "{$this->path}/" . (string) $screenshot;
 
         return file_exists($screenshotPath) ? $screenshotPath : null;
     }

@@ -18,7 +18,10 @@
         "fields": {
             "download": "Batas Download (Mbps)",
             "upload": "Batas Upload (Mbps)",
-            "burst": "Batas Burst"
+            "burst": "Batas Burst",
+            "fup_limit": "FUP Limit (GB)",
+            "fup_speed": "Kecepatan FUP (e.g. 2M/2M)",
+            "fup_enabled": "Aktifkan FUP"
         }
     },
     "profiles_manager": {
@@ -170,5 +173,91 @@
         "odp": "ODP / POP",
         "router": "Router Pelanggan",
         "offline": "Offline"
+    },
+    "ip_pool": {
+        "title": "IP Pool Management",
+        "subtitle": "Kelola alokasi IP address untuk pelanggan",
+        "list_title": "Daftar IP Pool",
+        "list_desc": "Pool IP yang tersedia untuk dialokasikan ke pelanggan",
+        "add": "Tambah Pool",
+        "edit": "Edit IP Pool",
+        "create": "Tambah IP Pool",
+        "create_desc": "Buat pool IP baru untuk alokasi pelanggan",
+        "refresh": "Refresh",
+        "regenerate": "Regenerate",
+        "fields": {
+            "name": "Nama Pool",
+            "network": "Network (CIDR)",
+            "network_hint": "Format: IP/prefix (tidak bisa diubah setelah dibuat)",
+            "network_placeholder": "contoh: 10.10.10.0/24",
+            "gateway": "Gateway",
+            "vlan_id": "VLAN ID",
+            "dns_primary": "DNS Primer",
+            "dns_secondary": "DNS Sekunder",
+            "router": "Router",
+            "status": "Status",
+            "description": "Deskripsi",
+            "description_placeholder": "Catatan tentang pool ini...",
+            "generate_auto": "Generate alamat IP otomatis dari CIDR"
+        },
+        "table": {
+            "name": "Nama Pool",
+            "network": "Network",
+            "gateway": "Gateway",
+            "router": "Router",
+            "status": "Status",
+            "usage": "Penggunaan",
+            "actions": "Aksi"
+        },
+        "address": {
+            "title": "Daftar Alamat IP",
+            "all": "Semua alamat",
+            "filter": "Filter",
+            "reset": "reset",
+            "ip": "IP Address",
+            "status": "Status",
+            "customer": "Pelanggan",
+            "assigned_at": "Assigned At",
+            "notes": "Notes"
+        },
+        "status": {
+            "active": "Aktif",
+            "inactive": "Nonaktif",
+            "available": "Tersedia",
+            "assigned": "Digunakan",
+            "reserved": "Reserved"
+        },
+        "stats": {
+            "total": "Total",
+            "available": "Tersedia",
+            "assigned": "Digunakan",
+            "reserved": "Reserved"
+        },
+        "info": "Informasi Pool",
+        "empty": "Belum ada IP Pool. Klik \"Tambah Pool\" untuk membuat.",
+        "empty_filter": "Tidak ada alamat yang sesuai filter",
+        "select_router": "Pilih router (opsional)",
+        "no_router": "Tidak ada",
+        "messages": {
+            "fetch_error": "Gagal mengambil data IP Pool",
+            "delete_success": "Pool berhasil dihapus",
+            "delete_error": "Gagal menghapus pool",
+            "create_success": "Pool berhasil dibuat",
+            "update_success": "Pool berhasil diperbarui",
+            "save_error": "Gagal menyimpan pool",
+            "regenerate_success": "{count} alamat di-generate ulang",
+            "regenerate_error": "Gagal regenerate alamat",
+            "pool_error": "Gagal mengambil data pool"
+        },
+        "confirm_delete": "Yakin hapus pool \"{name}\"?",
+        "confirm_regenerate": "Ini akan menghapus alamat yang tersedia dan generate ulang. Lanjutkan?"
+    },
+    "settings": {
+        "radius_title": "Konfigurasi RADIUS",
+        "radius_subtitle": "Pengaturan teknis untuk integrasi FreeRADIUS dan CoA.",
+        "fields": {
+            "coa_port": "Port CoA (Mikrotik)",
+            "default_speed": "Kecepatan Fallback (FUP)"
+        }
     }
 }

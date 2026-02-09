@@ -1,5 +1,8 @@
 {
     "title": "Users",
+    "subtitle": "Manage users, roles, and access permissions within the system.",
+    "subtitleCreate": "Fill in the information below to create a new user.",
+    "subtitleEdit": "Update user information to adjust profile and access.",
     "createNew": "Create New User",
     "search": "Search user by name, email or phone...",
     "allRoles": "All Roles",

@@ -95,63 +95,21 @@
         <!-- Payments Table -->
         <Card>
             <CardContent class="p-0">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>{{ t('isp.billing.payments.columns.id') }}</TableHead>
-                            <TableHead>{{ t('isp.billing.payments.columns.customer') }}</TableHead>
-                            <TableHead>{{ t('isp.billing.payments.columns.invoice') }}</TableHead>
-                            <TableHead>{{ t('isp.billing.payments.columns.amount') }}</TableHead>
-                            <TableHead>{{ t('isp.billing.payments.columns.gateway') }}</TableHead>
-                            <TableHead>{{ t('isp.billing.payments.columns.status') }}</TableHead>
-                            <TableHead>{{ t('isp.billing.payments.columns.date') }}</TableHead>
-                            <TableHead class="text-right">{{ t('common.actions.title') }}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow v-for="payment in payments" :key="payment.id">
-                            <TableCell class="font-mono text-sm">{{ payment.transaction_id }}</TableCell>
-                            <TableCell>
-                                <div class="font-medium">{{ payment.customer_name }}</div>
-                                <div class="text-xs text-muted-foreground">{{ payment.customer_id }}</div>
-                            </TableCell>
-                            <TableCell>
-                                <a href="#" class="text-primary hover:underline">{{ payment.invoice_number }}</a>
-                            </TableCell>
-                            <TableCell class="font-medium">{{ formatCurrency(payment.amount) }}</TableCell>
-                            <TableCell>
-                                <Badge variant="outline">{{ payment.gateway }}</Badge>
-                            </TableCell>
-                            <TableCell>
-                                <Badge :variant="getStatusVariant(payment.status)">
-                                    {{ t(`isp.billing.payments.status.${payment.status}`) }}
-                                </Badge>
-                            </TableCell>
-                            <TableCell class="text-muted-foreground">{{ formatDate(payment.created_at) }}</TableCell>
-                            <TableCell class="text-right">
-                                <Button variant="ghost" size="sm" @click="viewPayment(payment)">
-                                    <Eye class="w-4 h-4" />
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                        <TableRow v-if="payments.length === 0">
-                            <TableCell colspan="8" class="text-center py-8 text-muted-foreground">
-                                {{ t('isp.billing.payments.no_data') }}
-                            </TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
+                <DataTable
+                    :table="table"
+                    :loading="loading"
+                    :empty-message="t('isp.billing.payments.no_data')"
+                />
             </CardContent>
         </Card>
 
         <!-- Pagination -->
-        <div class="flex justify-center">
+        <div class="px-6 py-4 border-t border-border/40 bg-card rounded-b-lg">
             <Pagination
                 v-if="pagination.total > 0"
-                :current-page="pagination.currentPage"
-                :total-pages="pagination.totalPages"
-                :items-per-page="pagination.perPage"
                 :total-items="pagination.total"
+                :per-page="pagination.perPage"
+                :current-page="pagination.currentPage"
                 @page-change="handlePageChange"
             />
         </div>
@@ -159,17 +117,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, h } from 'vue';
 import { useI18n } from 'vue-i18n';
-import Download from 'lucide-vue-next/dist/esm/icons/download.js';
-import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
 import {
     Card, CardContent, CardHeader, CardDescription,
-    Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
     Button, Input, Badge, Pagination,
-    Select, SelectTrigger, SelectValue, SelectContent, SelectItem
+    Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+    DataTable
 } from '@/components/ui';
+
+import { 
+    useVueTable, 
+    getCoreRowModel, 
+    createColumnHelper,
+    getSortedRowModel,
+    type SortingState
+} from '@tanstack/vue-table';
+
 import api from '@/services/api';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import Download from 'lucide-vue-next/dist/esm/icons/download.js';
 
 const { t } = useI18n();
 
@@ -187,6 +154,75 @@ interface Payment {
 
 const payments = ref<Payment[]>([]);
 const loading = ref(false);
+
+const columnHelper = createColumnHelper<Payment>();
+
+const columns = [
+    columnHelper.accessor('transaction_id', {
+        header: t('isp.billing.payments.columns.id'),
+        cell: ({ row }) => h('span', { class: 'font-mono text-sm' }, row.original.transaction_id)
+    }),
+    columnHelper.accessor('customer_name', {
+        header: t('isp.billing.payments.columns.customer'),
+        cell: ({ row }) => h('div', [
+            h('div', { class: 'font-medium' }, row.original.customer_name),
+            h('div', { class: 'text-xs text-muted-foreground' }, row.original.customer_id)
+        ])
+    }),
+    columnHelper.accessor('invoice_number', {
+        header: t('isp.billing.payments.columns.invoice'),
+        cell: ({ row }) => h('a', { 
+            href: '#', 
+            class: 'text-primary hover:underline',
+            onClick: (e) => { e.preventDefault(); /* Handle invoice click */ }
+        }, row.original.invoice_number)
+    }),
+    columnHelper.accessor('amount', {
+        header: t('isp.billing.payments.columns.amount'),
+        cell: ({ row }) => h('span', { class: 'font-medium' }, formatCurrency(row.original.amount))
+    }),
+    columnHelper.accessor('gateway', {
+        header: t('isp.billing.payments.columns.gateway'),
+        cell: ({ row }) => h(Badge, { variant: 'outline' }, row.original.gateway)
+    }),
+    columnHelper.accessor('status', {
+        header: t('isp.billing.payments.columns.status'),
+        cell: ({ row }) => h(Badge, { variant: getStatusVariant(row.original.status) }, t(`isp.billing.payments.status.${row.original.status}`))
+    }),
+    columnHelper.accessor('created_at', {
+        header: t('isp.billing.payments.columns.date'),
+        cell: ({ row }) => h('span', { class: 'text-muted-foreground' }, formatDate(row.original.created_at))
+    }),
+    columnHelper.display({
+        id: 'actions',
+        header: () => h('div', { class: 'text-right' }, t('common.actions.title')),
+        cell: ({ row }) => h('div', { class: 'text-right' }, [
+            h(Button, {
+                variant: 'ghost',
+                size: 'sm',
+                onClick: () => viewPayment(row.original)
+            }, [
+                h(Eye, { class: 'w-4 h-4' })
+            ])
+        ])
+    })
+];
+
+const sorting = ref<SortingState>([]);
+
+const table = useVueTable({
+    get data() { return payments.value },
+    columns,
+    state: {
+        get sorting() { return sorting.value },
+    },
+    onSortingChange: updaterOrValue => {
+        sorting.value = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue;
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: row => String(row.id),
+});
 
 const stats = reactive({
     today: 0,

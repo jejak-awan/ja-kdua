@@ -5,7 +5,7 @@
   >
     <!-- Logo Container -->
     <div 
-      class="relative flex items-center justify-center overflow-hidden transition-all duration-300"
+      class="relative flex items-center justify-center overflow-hidden transition-[width,height,max-width] duration-300"
       :class="[
         minimized ? 'w-9 h-9' : 'w-auto h-9 max-w-[120px]'
       ]"

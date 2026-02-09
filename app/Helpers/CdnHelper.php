@@ -28,8 +28,10 @@ class CdnHelper
             return '/'.ltrim($path, '/');
         }
 
-        $cdnUrl = (string) ($domain ? config("cdn.domains.{$domain}", config('cdn.url')) : config('cdn.url'));
-        $pathPrefix = (string) config('cdn.path_prefix', '/storage');
+        /** @var string $cdnUrl */
+        $cdnUrl = $domain ? config("cdn.domains.{$domain}", config('cdn.url')) : config('cdn.url');
+        /** @var string $pathPrefix */
+        $pathPrefix = config('cdn.path_prefix', '/storage');
 
         // Remove leading slash from path if present
         $path = ltrim($path, '/');
@@ -64,11 +66,20 @@ class CdnHelper
      */
     public static function getImageParams(?int $width = null, ?int $height = null, ?int $quality = null): array
     {
+        /** @var int $maxWidth */
+        $maxWidth = config('cdn.image.max_width', 1920);
+        /** @var int $maxHeight */
+        $maxHeight = config('cdn.image.max_height', 1080);
+        /** @var int $qualityConf */
+        $qualityConf = config('cdn.image.quality', 85);
+        /** @var string $format */
+        $format = config('cdn.image.format', 'auto');
+
         return [
-            'width' => (int) ($width ?? config('cdn.image.max_width', 1920)),
-            'height' => (int) ($height ?? config('cdn.image.max_height', 1080)),
-            'quality' => (int) ($quality ?? config('cdn.image.quality', 85)),
-            'format' => (string) config('cdn.image.format', 'auto'),
+            'width' => (int) ($width ?? $maxWidth),
+            'height' => (int) ($height ?? $maxHeight),
+            'quality' => (int) ($quality ?? $qualityConf),
+            'format' => $format,
         ];
     }
 

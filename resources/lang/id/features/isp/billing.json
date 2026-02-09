@@ -97,8 +97,12 @@
             "prorata": "Aktifkan Prorata",
             "prorata_desc": "Hitung tagihan bulan pertama secara proporsional.",
             "tax_enabled": "Aktifkan Pajak (PPN)",
-            "tax_rate": "Tarif Pajak",
+            "tax_ppn": "Pajak PPN (%)",
+            "tax_bhp": "Pajak BHP (%)",
+            "tax_uso": "Pajak USO (%)",
+            "tax_rate": "Tarif Pajak (Legacy)",
             "tax_rate_help": "Persentase pajak yang ditambahkan ke total tagihan.",
+            "invoice_due_days": "Jatuh Tempo Invoice (Hari)",
             "suspend_behavior": "Perilaku Suspend"
         }
     },

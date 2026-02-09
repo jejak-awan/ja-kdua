@@ -31,77 +31,37 @@
                 <div class="flex items-center gap-4">
                     <div class="relative flex-1 max-w-xs">
                         <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <input 
+                        <Input 
                             v-model="search"
                             type="text" 
-                            class="w-full bg-muted/50 border-border/50 rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+                            class="pl-10"
                             :placeholder="$t('common.placeholders.search', 'Search inventory...')"
                         />
                     </div>
                 </div>
             </CardHeader>
             <CardContent class="p-0">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-muted-foreground uppercase bg-muted/30">
-                            <tr>
-                                <th class="px-6 py-3 font-medium">{{ $t('common.labels.name', 'Item Name') }}</th>
-                                <th class="px-6 py-3 font-medium">{{ $t('common.labels.category', 'Category') }}</th>
-                                <th class="px-6 py-3 font-medium text-right">{{ $t('isp.admin.inventory.stock', 'Stock') }}</th>
-                                <th class="px-6 py-3 font-medium text-right">{{ $t('isp.admin.inventory.unit_price', 'Price') }}</th>
-                                <th class="px-6 py-3 font-medium text-right">{{ $t('common.labels.actions', 'Actions') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-border/40">
-                            <tr v-for="item in filteredItems" :key="item.id" class="hover:bg-muted/20 transition-colors group">
-                                <td class="px-6 py-4">
-                                    <div>
-                                        <p class="font-medium">{{ item.name }}</p>
-                                        <p class="text-[10px] text-muted-foreground font-mono">SKU: {{ item.sku || 'N/A' }}</p>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <Badge variant="outline" class="text-[10px]">{{ item.category }}</Badge>
-                                </td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex flex-col items-end">
-                                        <span :class="['font-bold', item.stock <= item.min_stock ? 'text-destructive' : '']">
-                                            {{ item.stock }} {{ item.unit }}
-                                        </span>
-                                        <span v-if="item.stock <= item.min_stock" class="text-[9px] text-destructive uppercase font-bold tracking-tighter">Low Stock</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-right font-mono text-xs">
-                                    Rp{{ formatCurrency(item.unit_price) }}
-                                </td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <Button variant="outline" size="sm" class="h-8 text-xs" @click="adjustStock(item)">
-                                            <ArrowLeftRight class="w-3.5 h-3.5 mr-1" />
-                                            {{ $t('common.actions.adjust', 'Adjust') }}
-                                        </Button>
-                                        <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive" @click="deleteItem(item.id)">
-                                            <Trash2 class="w-3.5 h-3.5" />
-                                        </Button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <DataTable
+                    :table="table"
+                    :loading="loading"
+                    :empty-message="t('isp.admin.inventory.empty', 'No inventory items found.')"
+                />
             </CardContent>
         </Card>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, h } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
+import { useConfirm } from '@/composables/useConfirm';
+import { useVueTable, getCoreRowModel, getSortedRowModel, createColumnHelper, type SortingState } from '@tanstack/vue-table';
 import { 
     Card, CardHeader, CardContent, 
-    Button, Badge 
+    Button, Badge, Input, DataTable
 } from '@/components/ui';
+
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
@@ -112,11 +72,99 @@ import ShoppingCart from 'lucide-vue-next/dist/esm/icons/shopping-cart.js';
 import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 const loading = ref(true);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const items = ref<any[]>([]);
+const sorting = ref<SortingState>([]);
+
+interface InventoryItem {
+    id: number;
+    name: string;
+    sku: string | null;
+    category: string;
+    stock: number;
+    min_stock: number;
+    unit: string;
+    unit_price: number;
+}
+
+const items = ref<InventoryItem[]>([]);
 const search = ref('');
 const showAddModal = ref(false);
+
+const columnHelper = createColumnHelper<InventoryItem>();
+
+const columns = [
+    columnHelper.accessor('name', {
+        header: t('common.labels.name', 'Item Name'),
+        cell: ({ row }) => h('div', [
+            h('p', { class: 'font-medium' }, row.original.name),
+            h('p', { class: 'text-[10px] text-muted-foreground font-mono' }, `SKU: ${row.original.sku || 'N/A'}`)
+        ])
+    }),
+    columnHelper.accessor('category', {
+        header: t('common.labels.category', 'Category'),
+        cell: ({ row }) => h(Badge, { variant: 'outline', class: 'text-[10px]' }, () => row.original.category)
+    }),
+    columnHelper.accessor('stock', {
+        header: () => h('div', { class: 'text-right' }, t('isp.admin.inventory.stock', 'Stock')),
+        cell: ({ row }) => {
+            const item = row.original;
+            const isLowStock = item.stock <= item.min_stock;
+            return h('div', { class: 'flex flex-col items-end' }, [
+                h('span', { class: `font-bold ${isLowStock ? 'text-destructive' : ''}` }, `${item.stock} ${item.unit}`),
+                isLowStock ? h('span', { class: 'text-[9px] text-destructive uppercase font-bold tracking-tighter' }, 'Low Stock') : null
+            ]);
+        }
+    }),
+    columnHelper.accessor('unit_price', {
+        header: () => h('div', { class: 'text-right' }, t('isp.admin.inventory.unit_price', 'Price')),
+        cell: ({ row }) => h('div', { class: 'text-right font-mono text-xs' }, `Rp${formatCurrency(row.original.unit_price)}`)
+    }),
+    columnHelper.display({
+        id: 'actions',
+        header: () => h('div', { class: 'text-right' }, t('common.labels.actions', 'Actions')),
+        cell: ({ row }) => h('div', { class: 'flex items-center justify-end gap-2' }, [
+            h(Button, {
+                variant: 'outline',
+                size: 'sm',
+                onClick: () => adjustStock(row.original),
+                class: 'h-8 text-xs'
+            }, () => [
+                h(ArrowLeftRight, { class: 'w-3.5 h-3.5 mr-1' }),
+                t('common.actions.adjust', 'Adjust')
+            ]),
+            h(Button, {
+                variant: 'ghost',
+                size: 'icon',
+                onClick: () => deleteItem(row.original.id),
+                class: 'h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+            }, () => h(Trash2, { class: 'w-3.5 h-3.5' }))
+        ])
+    })
+];
+
+const filteredItems = computed(() => {
+    if (!search.value) return items.value;
+    const s = search.value.toLowerCase();
+    return items.value.filter(i => 
+        i.name.toLowerCase().includes(s) || 
+        i.sku?.toLowerCase().includes(s)
+    );
+});
+
+const table = useVueTable({
+    get data() { return filteredItems.value },
+    columns,
+    state: {
+        get sorting() { return sorting.value }
+    },
+    onSortingChange: updaterOrValue => {
+        sorting.value = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue;
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: row => String(row.id),
+});
 
 const fetchData = async () => {
     loading.value = true;
@@ -130,15 +178,6 @@ const fetchData = async () => {
     }
 };
 
-const filteredItems = computed(() => {
-    if (!search.value) return items.value;
-    const s = search.value.toLowerCase();
-    return items.value.filter(i => 
-        i.name.toLowerCase().includes(s) || 
-        i.sku?.toLowerCase().includes(s)
-    );
-});
-
 const inventoryStats = computed(() => [
     { label: 'Total Items', value: items.value.length, icon: Package, color: 'bg-blue-500/10 text-blue-500' },
     { label: 'Low Stock', value: items.value.filter(i => i.stock <= i.min_stock).length, icon: TriangleAlert, color: 'bg-destructive/10 text-destructive' },
@@ -148,13 +187,20 @@ const inventoryStats = computed(() => [
 
 const formatCurrency = (val: number) => new Intl.NumberFormat('id-ID').format(val);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const adjustStock = (item: any) => {
+const adjustStock = (item: InventoryItem) => {
     console.warn('Adjust stock', item.id);
+    // TODO: Open stock adjustment modal
 };
 
 const deleteItem = async (id: number) => {
-    if (!confirm(t('common.messages.confirm_delete', 'Are you sure?'))) return;
+    const confirmed = await confirm({
+        title: t('common.actions.delete', 'Delete'),
+        message: t('common.messages.confirm_delete', 'Are you sure?'),
+        variant: 'danger',
+        confirmText: t('common.actions.delete', 'Delete'),
+    });
+    if (!confirmed) return;
+    
     try {
         await api.delete(`/admin/ja/isp/inventory/${id}`);
         await fetchData();

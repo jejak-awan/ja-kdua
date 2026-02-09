@@ -235,6 +235,75 @@ export const getIcon = (name: string) => {
             h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z' }),
             h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M12 9v2m0 4h.01' })
         ]),
+        map: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6zm6-3v15m6-15v15' })
+        ]),
+        package: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z' }),
+            h('polyline', { points: '3.27 6.96 12 12.01 20.73 6.96', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+            h('line', { x1: '12', y1: '22.08', x2: '12', y2: '12', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
+        ]),
+        'file-check': () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z' }),
+            h('polyline', { points: '14 2 14 8 20 8', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 15l2 2 4-4' })
+        ]),
+        'file-plus': () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z' }),
+            h('polyline', { points: '14 2 14 8 20 8', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+            h('line', { x1: '12', y1: '18', x2: '12', y2: '12', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+            h('line', { x1: '9', y1: '15', x2: '15', y2: '15', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
+        ]),
+        server: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('rect', { x: '2', y: '2', width: '20', height: '8', rx: '2', ry: '2', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+            h('rect', { x: '2', y: '14', width: '20', height: '8', rx: '2', ry: '2', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+            h('line', { x1: '6', y1: '6', x2: '6', y2: '6', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+            h('line', { x1: '6', y1: '18', x2: '6', y2: '18', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
+        ]),
+        router: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('rect', { x: '2', y: '14', width: '20', height: '8', rx: '2', 'stroke-width': '2' }),
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M6.01 18H6m11.99 0h-.01' }),
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M20 14c0-4.42-3.58-8-8-8S4 9.58 4 14' }),
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M17 14c0-2.76-2.24-5-5-5s-5 2.24-5 5' })
+        ]),
+        box: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z' }),
+            h('polyline', { points: '3.27 6.96 12 12.01 20.73 6.96', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+            h('line', { x1: '12', y1: '22.08', x2: '12', y2: '12', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
+        ]),
+        zap: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('polygon', { points: '13 2 3 14 12 14 11 22 21 10 12 10 13 2', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
+        ]),
+        'credit-card': () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('rect', { x: '1', y: '4', width: '22', height: '16', rx: '2', ry: '2', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+            h('line', { x1: '1', y1: '10', x2: '23', y2: '10', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
+        ]),
+        history: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' })
+        ]),
+        wallet: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M20 12V8a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2v-4' }),
+            h('rect', { x: '14', y: '11', width: '8', height: '5', rx: '2', 'stroke-width': '2' }),
+            h('circle', { cx: '18', cy: '13.5', r: '1', 'stroke-width': '2' })
+        ]),
+        'trending-up': () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('polyline', { points: '23 6 13.5 15.5 8.5 10.5 1 18', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+            h('polyline', { points: '17 6 23 6 23 12', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
+        ]),
+        ticket: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M2 9a3 3 0 010 6v2a2 2 0 002 2h16a2 2 0 002-2v-2a3 3 0 010-6V7a2 2 0 00-2-2H4a2 2 0 00-2 2v2z' }),
+            h('line', { x1: '13', y1: '5', x2: '13', y2: '19', 'stroke-dasharray': '2 2', 'stroke-width': '2', 'stroke-linecap': 'round' })
+        ]),
+        wand: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M15 4V2m0 18v-2M8 5L6.5 3.5M15 15l1.5 1.5M4 11H2m18 0h-2M10 7L8.5 5.5M15 5l-8 8m0 0l2 2 8-8-2-2z' })
+        ]),
+        user: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2' }),
+            h('circle', { cx: '8.5', cy: '7', r: '4', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
+        ]),
+        menu: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M4 6h16M4 12h16M4 18h16' })
+        ]),
     };
     return icons[name as keyof typeof icons] || icons.dashboard;
 };

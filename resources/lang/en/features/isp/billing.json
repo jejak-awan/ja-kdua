@@ -78,9 +78,87 @@
             "inactive": "Inactive"
         }
     },
+    "settings": {
+        "title": "Billing Settings",
+        "subtitle": "Configure billing cycles, taxes, and isolation.",
+        "tabs": {
+            "general": "General",
+            "tax": "Tax",
+            "isolation": "Isolation & Termination"
+        },
+        "fields": {
+            "payment_type": "Payment Type",
+            "cycle_type": "Billing Cycle",
+            "invoice_date": "Invoice Generation Date",
+            "invoice_date_help": "Date when invoices are generated each month.",
+            "isolation_date": "Auto Isolation Date",
+            "isolation_date_help": "Date when service is disconnected if unpaid.",
+            "isolation_time": "Isolation Time",
+            "prorata": "Enable Prorata",
+            "prorata_desc": "Calculate first month bill proportionally.",
+            "tax_enabled": "Enable Tax (VAT/PPN)",
+            "tax_ppn": "VAT/PPN Rate (%)",
+            "tax_bhp": "BHP Tax (%)",
+            "tax_uso": "USO Tax (%)",
+            "tax_rate": "Tax Rate (Legacy)",
+            "tax_rate_help": "Tax percentage added to total bill.",
+            "invoice_due_days": "Invoice Due Days",
+            "suspend_behavior": "Suspend Behavior"
+        }
+    },
+    "payments": {
+        "title": "Payment History",
+        "subtitle": "Monitor transactions and customer payment status.",
+        "transactions": "transactions",
+        "awaiting": "awaiting",
+        "failed_tx": "failed transactions",
+        "search_placeholder": "Search transaction ID, customer...",
+        "all_gateways": "All Gateways",
+        "no_data": "No payment data found.",
+        "stats": {
+            "today": "Today",
+            "this_month": "This Month",
+            "pending": "Pending",
+            "failed": "Failed"
+        },
+        "columns": {
+            "id": "Transaction ID",
+            "customer": "Customer",
+            "invoice": "Invoice",
+            "amount": "Amount",
+            "gateway": "Gateway",
+            "status": "Status",
+            "date": "Date"
+        },
+        "status": {
+            "success": "Success",
+            "pending": "Pending",
+            "failed": "Failed",
+            "expired": "Expired"
+        }
+    },
+    "gateway": {
+        "title": "Payment Gateway",
+        "subtitle": "Configure automated payment integration.",
+        "midtrans_desc": "Most popular payment gateway in Indonesia",
+        "xendit_desc": "Payment solution for digital business",
+        "manual": "Manual Transfer",
+        "manual_desc": "Payment via bank transfer",
+        "merchant_id": "Merchant ID",
+        "server_key": "Server Key",
+        "client_key": "Client Key",
+        "api_key": "API Key",
+        "callback_token": "Callback Token",
+        "sandbox_mode": "Sandbox Mode (Testing)",
+        "bank_name": "Bank Name",
+        "account_number": "Account Number",
+        "account_name": "Account Owner Name",
+        "webhook_config": "Webhook Configuration",
+        "webhook_desc": "Copy the following URL to your gateway dashboard."
+    },
     "customers_manager": {
-        "title": "Data Berlangganan",
-        "subtitle": "Kelola data pelanggan, informasi teknis, and financial.",
+        "title": "Subscription Data",
+        "subtitle": "Manage customer data, technical info, and financial.",
         "new": "New Customer",
         "edit": "Edit Customer",
         "delete": "Delete Customer",
@@ -89,7 +167,7 @@
             "identity": "Identity",
             "address": "Installation Address",
             "internet": "Internet",
-            "billing": "Plan & Billing",
+            "billing": "Plan & Financial",
             "invoice": "Invoice"
         },
         "fields": {

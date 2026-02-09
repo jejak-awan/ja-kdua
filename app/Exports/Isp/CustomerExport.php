@@ -2,18 +2,28 @@
 
 namespace App\Exports\Isp;
 
-use App\Models\IspCustomer;
+use App\Models\Isp\Customer;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
+/**
+ * @implements WithMapping<Customer>
+ */
 class CustomerExport implements FromCollection, WithHeadings, WithMapping
 {
-    public function collection()
+    /**
+     * @return Collection<int, Customer>
+     */
+    public function collection(): Collection
     {
-        return IspCustomer::with(['user', 'plan'])->get();
+        return Customer::with(['user', 'plan'])->get();
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function headings(): array
     {
         return [
@@ -29,6 +39,10 @@ class CustomerExport implements FromCollection, WithHeadings, WithMapping
         ];
     }
 
+    /**
+     * @param Customer $customer
+     * @return array<int, mixed>
+     */
     public function map($customer): array
     {
         return [
@@ -40,7 +54,7 @@ class CustomerExport implements FromCollection, WithHeadings, WithMapping
             $customer->address_street,
             $customer->plan->name ?? '-',
             $customer->status,
-            $customer->created_at->format('Y-m-d'),
+            $customer->created_at ? $customer->created_at->format('Y-m-d') : '-',
         ];
     }
 }

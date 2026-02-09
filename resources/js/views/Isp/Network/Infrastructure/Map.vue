@@ -18,7 +18,7 @@
         </Card>
 
         <!-- Node Details Overlay (Optional) -->
-        <div v-if="selectedNode" class="fixed bottom-10 right-10 z-[1000] w-72 transition-all">
+        <div v-if="selectedNode" class="fixed bottom-10 right-10 z-[1000] w-72 transition-opacity">
             <Card class="p-4 shadow-2xl border-primary/20 bg-background/95 backdrop-blur">
                 <div class="flex justify-between items-start mb-2">
                     <h3 class="font-bold text-lg">{{ selectedNode.name }}</h3>

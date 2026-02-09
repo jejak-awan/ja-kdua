@@ -20,20 +20,32 @@ class InvoiceGenerated extends Notification
         $this->invoice = $invoice;
     }
 
+    /**
+     * @param mixed $notifiable
+     * @return array<int, string>
+     */
     public function via($notifiable): array
     {
         return [WhatsAppChannel::class];
     }
 
+    /**
+     * @param mixed $notifiable
+     */
     public function toWhatsApp($notifiable): string
     {
         $month = $this->invoice->created_at ? $this->invoice->created_at->translatedFormat('F Y') : date('F Y');
-        $amount = number_format((float) $this->invoice->amount, 0, ',', '.');
+        /** @var string|float|int $amountRaw */
+        $amountRaw = $this->invoice->amount ?? 0;
+        $amount = number_format((float) $amountRaw, 0, ',', '.');
         $dueDate = $this->invoice->due_date ? $this->invoice->due_date->format('d/m/Y') : '-';
 
-        return "Halo {$notifiable->name},\n\n".
+        /** @var string $name */
+        $name = is_object($notifiable) && property_exists($notifiable, 'name') ? (string) $notifiable->name : 'Pelanggan';
+
+        return "Halo {$name},\n\n".
                "Tagihan internet Anda untuk bulan *{$month}* telah terbit.\n\n".
-               "No. Invoice: {$this->invoice->invoice_number}\n".
+               "No. Invoice: " . (string) $this->invoice->invoice_number . "\n".
                "Total: Rp {$amount}\n".
                "Jatuh Tempo: {$dueDate}\n\n".
                "Mohon segera lakukan pembayaran sebelum tanggal jatuh tempo untuk menghindari isolir otomatis.\n\n".

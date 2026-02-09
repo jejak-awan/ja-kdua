@@ -32,10 +32,9 @@ class CleanupOldLogs extends Command
      */
     public function handle(): int
     {
-        $retentionDays = $this->option('days')
-            ?? Setting::get('log_retention_days', 90);
-
-        $retentionDays = (int) $retentionDays;
+        $retentionDaysRaw = $this->option('days') ?? Setting::get('log_retention_days', 90);
+        /** @var int $retentionDays */
+        $retentionDays = is_numeric($retentionDaysRaw) ? (int) $retentionDaysRaw : 90;
 
         if ($retentionDays <= 0) {
             $this->info('Log retention is set to keep forever (0 days). No cleanup performed.');

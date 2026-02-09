@@ -81,13 +81,30 @@
         "need_speed_title": "Need More Speed?",
         "need_speed_desc": "You're approaching 80% of your peak bandwidth during evening hours. Consider upgrading your plan for a smoother experience.",
         "upgrade_button": "Upgrade Plan",
-        "error_load": "Failed to load usage data"
+        "error_load": "Failed to load usage data",
+        "quota_used": "Quota Used",
+        "quota_remaining": "Quota Remaining",
+        "throttled_notice": "Your speed is currently limited (FUP active).",
+        "unlimited": "Unlimited"
     },
     "profile": {
         "title": "Customer Profile",
+        "subtitle": "Manage your personal information and account security.",
         "full_name": "Full Name",
         "subscription_plan": "Subscription Plan",
         "not_active": "Not Active",
-        "member_placeholder": "K2NET Member"
+        "member_placeholder": "K2NET Member",
+        "phone": "WhatsApp Number",
+        "address": "Installation Address",
+        "email": "Email Address",
+        "security_title": "Security & Password",
+        "current_password": "Current Password",
+        "new_password": "New Password",
+        "confirm_password": "Confirm New Password",
+        "update_success": "Profile updated successfully.",
+        "tabs": {
+            "info": "General Information",
+            "security": "Security"
+        }
     }
 }

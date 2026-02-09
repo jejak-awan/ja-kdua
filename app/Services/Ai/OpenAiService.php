@@ -13,7 +13,9 @@ class OpenAiService implements AiProviderInterface
 
     public function __construct(?string $apiKey = null)
     {
-        $this->apiKey = $apiKey ?? (string) \App\Models\Setting::get('openai_api_key', '');
+        /** @var mixed $val */
+        $val = \App\Models\Setting::get('openai_api_key', '');
+        $this->apiKey = $apiKey ?? (is_string($val) ? $val : '');
     }
 
     public function getName(): string
@@ -27,7 +29,9 @@ class OpenAiService implements AiProviderInterface
             throw new \Exception('OpenAI API Key is not configured.');
         }
 
-        $model = $model ?: ((string) \App\Models\Setting::get('openai_model', '') ?: 'gpt-4o-mini');
+        /** @var mixed $val */
+        $val = \App\Models\Setting::get('openai_model', '');
+        $model = $model ?: (is_string($val) && $val !== '' ? $val : 'gpt-4o-mini');
 
         try {
             $messages = [
@@ -80,20 +84,11 @@ class OpenAiService implements AiProviderInterface
             /** @var array<int, array{id: string, name: string}> $models */
             $models = [];
 
-            if (is_array($data['data'])) {
-                foreach ($data['data'] as $m) {
-                    if (! is_array($m) || ! isset($m['id'])) {
-                        continue;
-                    }
-
-                    // Filter for chat models usually starting with gpt-
-                    if (str_contains(strval($m['id']), 'gpt')) {
-                        $models[] = [
-                            'id' => strval($m['id']),
-                            'name' => strval($m['id']),
-                        ];
-                    }
-                }
+            foreach ($data['data'] as $m) {
+                $models[] = [
+                    'id' => strval($m['id']),
+                    'name' => strval($m['id']),
+                ];
             }
 
             // Sort models alphabetically

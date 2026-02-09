@@ -15,7 +15,10 @@ class ScheduledTaskController extends BaseApiController
      */
     public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        $perPage = (int) $request->input('per_page', 10);
+        $perPageInput = $request->input('per_page', 10);
+        /** @var int $perPage */
+        $perPage = is_numeric($perPageInput) ? (int) $perPageInput : 10;
+
         $tasks = ScheduledTask::orderBy('name')->paginate($perPage);
 
         return $this->paginated($tasks, 'Scheduled tasks retrieved successfully');
@@ -118,7 +121,10 @@ class ScheduledTaskController extends BaseApiController
             'user_id' => auth()->id(),
         ]);
 
-        return $this->success($task->fresh(), 'Scheduled task updated successfully');
+        /** @var \App\Models\ScheduledTask $freshTask */
+        $freshTask = $task->fresh();
+
+        return $this->success($freshTask, 'Scheduled task updated successfully');
     }
 
     /**
@@ -175,7 +181,9 @@ class ScheduledTaskController extends BaseApiController
             ]);
 
             // Execute the command
+            /** @var int $exitCode */
             $exitCode = Artisan::call($task->command);
+            /** @var string $output */
             $output = Artisan::output();
 
             if (empty(trim($output)) && $exitCode === 0) {
@@ -195,8 +203,11 @@ class ScheduledTaskController extends BaseApiController
                 'exit_code' => $exitCode,
             ]);
 
+            /** @var \App\Models\ScheduledTask $freshTask */
+            $freshTask = $task->fresh();
+
             return $this->success([
-                'task' => $task->fresh(),
+                'task' => $freshTask,
                 'output' => $output,
                 'exit_code' => $exitCode,
             ], 'Task executed successfully');
@@ -313,7 +324,9 @@ class ScheduledTaskController extends BaseApiController
                 'user_id' => auth()->id(),
             ]);
 
+            /** @var int $exitCode */
             $exitCode = Artisan::call($fullCommand);
+            /** @var string $output */
             $output = Artisan::output();
 
             return $this->success([

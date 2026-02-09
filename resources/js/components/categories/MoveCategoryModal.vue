@@ -1,71 +1,79 @@
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card rounded-lg max-w-md w-full">
-                <!-- Header -->
-                <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">
-                        {{ t('features.categories.move.title') }}
-                    </h3>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        @click="$emit('close')"
-                    >
-                        <X class="w-5 h-5" />
-                    </Button>
-                </div>
+    <Dialog :open="true" @update:open="$emit('close')">
+        <DialogContent class="max-w-md">
+            <DialogHeader>
+                <DialogTitle>
+                    {{ t('features.categories.move.title') }}
+                </DialogTitle>
+            </DialogHeader>
 
-                <!-- Content -->
-                <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
-                    <div>
-                        <p class="text-sm text-muted-foreground mb-4">
-                            {{ t('features.categories.move.description', { name: category.name }) }}
-                        </p>
-                        <label class="block text-sm font-medium text-foreground mb-1">
+            <!-- Content -->
+            <form @submit.prevent="handleSubmit" class="space-y-4 py-4">
+                <div>
+                    <p class="text-sm text-muted-foreground mb-4">
+                        {{ t('features.categories.move.description', { name: category.name }) }}
+                    </p>
+                    <div class="grid gap-2">
+                        <Label>
                             {{ t('features.categories.move.newParent') }}
-                        </label>
-                        <select
-                            v-model="selectedParentId"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        </Label>
+                        <Select 
+                            :model-value="selectedParentId === null ? 'null' : String(selectedParentId)"
+                            @update:model-value="(val) => selectedParentId = (val === 'null' ? null : val)"
                         >
-                            <option :value="null">{{ t('features.categories.form.noParent') }}</option>
-                            <option
-                                v-for="cat in availableParents"
-                                :key="cat.id"
-                                :value="cat.id"
-                            >
-                                {{ getCategoryPath(cat) }}
-                            </option>
-                        </select>
+                            <SelectTrigger>
+                                <SelectValue :placeholder="t('features.categories.form.noParent')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="null">{{ t('features.categories.form.noParent') }}</SelectItem>
+                                <SelectItem
+                                    v-for="cat in availableParents"
+                                    :key="cat.id"
+                                    :value="String(cat.id)"
+                                >
+                                    {{ getCategoryPath(cat) }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
-                </form>
-
-                <!-- Footer -->
-                <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <Button
-                        variant="outline"
-                        @click="$emit('close')"
-                    >
-                        {{ t('features.categories.move.cancel') }}
-                    </Button>
-                    <Button
-                        @click="handleSubmit"
-                        :disabled="saving"
-                    >
-                        {{ saving ? t('features.categories.move.moving') : t('features.categories.move.submit') }}
-                    </Button>
                 </div>
-            </div>
-        </div>
-    </div>
+            </form>
+
+            <DialogFooter>
+                <Button
+                    variant="outline"
+                    @click="$emit('close')"
+                >
+                    {{ t('features.categories.move.cancel') }}
+                </Button>
+                <Button
+                    @click="handleSubmit"
+                    :disabled="saving"
+                >
+                    {{ saving ? t('features.categories.move.moving') : t('features.categories.move.submit') }}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import X from 'lucide-vue-next/dist/esm/icons/x.js';
-import { Button } from '@/components/ui';
+import { 
+    Button, 
+    Dialog, 
+    DialogContent, 
+    DialogHeader, 
+    DialogTitle, 
+    DialogFooter,
+    Label,
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem
+} from '@/components/ui';
 import { useToast } from '@/composables/useToast';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { moveCategorySchema } from '@/schemas';

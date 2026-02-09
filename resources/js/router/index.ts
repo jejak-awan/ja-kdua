@@ -217,6 +217,27 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('../views/Isp/Inventory/Vouchers.vue'),
             },
             {
+                path: 'isp/vouchers/print/:batchId',
+                name: 'isp.vouchers.print',
+                component: () => import('../views/Isp/Inventory/BatchPrint.vue'),
+                meta: { layout: 'empty' }
+            },
+            {
+                path: 'isp/reports/sales',
+                name: 'isp.reports.sales',
+                component: () => import('../views/Isp/Reports/SalesReport.vue'),
+            },
+            {
+                path: 'isp/hotspot/ip-bindings',
+                name: 'isp.hotspot.ip-bindings',
+                component: () => import('../views/Isp/Hotspot/IpBindings.vue'),
+            },
+            {
+                path: 'isp/hotspot/cookies',
+                name: 'isp.hotspot.cookies',
+                component: () => import('../views/Isp/Hotspot/Cookies.vue'),
+            },
+            {
                 path: 'isp/admin/monitoring',
                 name: 'isp.infra.map',
                 component: () => import('../views/Isp/Network/Infrastructure/Map.vue'),
@@ -234,12 +255,48 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: 'isp/monitor/traffic',
                 name: 'isp.monitor.traffic',
-                component: () => import('../views/Isp/Monitoring/RealtimeTraffic.vue'),
+                component: () => import('../views/Isp/Monitor/TrafficMonitor.vue'),
             },
             {
                 path: 'isp/monitoring/sessions',
                 name: 'isp-active-sessions',
                 component: () => import('../views/Isp/Monitoring/ActiveSessions.vue'),
+                meta: { permission: 'manage settings' }
+            },
+            {
+                path: 'isp/monitoring/radius/sessions',
+                name: 'isp-radius-sessions',
+                component: () => import('../views/Isp/Monitoring/RadiusSessions.vue'),
+                meta: { permission: 'manage settings' }
+            },
+            {
+                path: 'isp/monitoring/radius/logs',
+                name: 'isp-radius-logs',
+                component: () => import('../views/Isp/Monitoring/RadiusLogs.vue'),
+                meta: { permission: 'manage settings' }
+            },
+            {
+                path: 'isp/network/ip-pools',
+                name: 'isp-network-ip-pools',
+                component: () => import('../views/Isp/Network/IpPool/Index.vue'),
+                meta: { permission: 'manage settings' }
+            },
+            {
+                path: 'isp/network/ip-pools/create',
+                name: 'isp-network-ip-pools-create',
+                component: () => import('../views/Isp/Network/IpPool/Form.vue'),
+                meta: { permission: 'manage settings' }
+            },
+            {
+                path: 'isp/network/ip-pools/:id',
+                name: 'isp-network-ip-pools-detail',
+                component: () => import('../views/Isp/Network/IpPool/Detail.vue'),
+                meta: { permission: 'manage settings' }
+            },
+            {
+                path: 'isp/network/ip-pools/:id/edit',
+                name: 'isp-network-ip-pools-edit',
+                component: () => import('../views/Isp/Network/IpPool/Form.vue'),
                 meta: { permission: 'manage settings' }
             },
             {
@@ -424,24 +481,6 @@ const routes: Array<RouteRecordRaw> = [
                 path: 'security-journal',
                 name: 'security-journal',
                 component: () => import('../views/admin/pulse/security/Index.vue'),
-            },
-            {
-                path: 'security-journal/csp-reports',
-                name: 'security.csp-reports',
-                component: () => import('../views/admin/pulse/security/CspReports.vue'),
-                meta: { permission: 'manage settings' },
-            },
-            {
-                path: 'security-journal/slow-queries',
-                name: 'security.slow-queries',
-                component: () => import('../views/admin/pulse/security/SlowQueries.vue'),
-                meta: { permission: 'manage settings' },
-            },
-            {
-                path: 'security-journal/dependency-vulnerabilities',
-                name: 'security.dependency-vulnerabilities',
-                component: () => import('../views/admin/pulse/security/DependencyVulnerabilities.vue'),
-                meta: { permission: 'manage settings' },
             },
             {
                 path: 'system',

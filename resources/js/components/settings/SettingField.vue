@@ -125,7 +125,7 @@
         <div v-else-if="type === 'image' || type === 'media'" class="flex items-center gap-3">
             <!-- Preview/Placeholder Box -->
             <div 
-                class="h-10 w-24 border rounded-md overflow-hidden bg-muted/30 flex items-center justify-center flex-shrink-0 shadow-sm transition-all"
+                class="h-10 w-24 border rounded-md overflow-hidden bg-muted/30 flex items-center justify-center flex-shrink-0 shadow-sm transition-colors"
                 :class="{ 'border-2 border-dashed border-muted-foreground/30': !localValue }"
             >
                 <img v-if="localValue" :src="(localValue as string)" class="w-full h-full object-contain p-1" alt="Preview">

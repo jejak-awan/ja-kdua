@@ -144,6 +144,7 @@ class ThemeService
     /**
      * Get theme setting with fallback
      *
+     * @param  mixed  $default
      * @return mixed
      */
     public function getThemeSetting(Theme $theme, string $key, $default = null)
@@ -167,10 +168,16 @@ class ThemeService
 
         // Check manifest defaults
         $manifest = $theme->getManifest();
-        if ($manifest && isset($manifest['settings_schema'][$key]['default'])) {
-            $value = $manifest['settings_schema'][$key]['default'];
-
-            return $this->hooks ? $this->hooks->applyFilter('theme.setting', $value, $theme, $key, $default) : $value;
+        if (is_array($manifest) && isset($manifest['settings_schema']) && is_array($manifest['settings_schema'])) {
+            $settingsSchema = $manifest['settings_schema'];
+            if (isset($settingsSchema[$key]) && is_array($settingsSchema[$key])) {
+                $schema = $settingsSchema[$key];
+                if (isset($schema['default'])) {
+                    $value = $schema['default'];
+ 
+                    return $this->hooks ? $this->hooks->applyFilter('theme.setting', $value, $theme, $key, $default) : $value;
+                }
+            }
         }
 
         return $this->hooks ? $this->hooks->applyFilter('theme.setting', $default, $theme, $key, $default) : $default;
@@ -199,10 +206,12 @@ class ThemeService
 
                 // Load CSS files from manifest or directory
                 $manifest = $theme->getManifest();
-                if ($manifest && isset($manifest['assets']['css']) && is_array($manifest['assets']['css'])) {
+                if (is_array($manifest) && isset($manifest['assets']) && is_array($manifest['assets']) && isset($manifest['assets']['css']) && is_array($manifest['assets']['css'])) {
                     // Use CSS files from manifest
                     foreach ($manifest['assets']['css'] as $cssFile) {
-                        $assets['css'][] = "themes/{$theme->path}/{$cssFile}";
+                        if (is_string($cssFile)) {
+                            $assets['css'][] = "themes/{$theme->path}/{$cssFile}";
+                        }
                     }
                 } else {
                     // Fallback: scan directory
@@ -217,10 +226,12 @@ class ThemeService
                 }
 
                 // Load JS files from manifest or directory
-                if ($manifest && isset($manifest['assets']['js']) && is_array($manifest['assets']['js'])) {
+                if (is_array($manifest) && isset($manifest['assets']) && is_array($manifest['assets']) && isset($manifest['assets']['js']) && is_array($manifest['assets']['js'])) {
                     // Use JS files from manifest
                     foreach ($manifest['assets']['js'] as $jsFile) {
-                        $assets['js'][] = "themes/{$theme->path}/{$jsFile}";
+                        if (is_string($jsFile)) {
+                            $assets['js'][] = "themes/{$theme->path}/{$jsFile}";
+                        }
                     }
                 } else {
                     // Fallback: scan directory
@@ -281,8 +292,11 @@ class ThemeService
         }
 
         // Check required themes
-        if (isset($theme->dependencies['themes'])) {
+        if (isset($theme->dependencies['themes']) && is_iterable($theme->dependencies['themes'])) {
             foreach ($theme->dependencies['themes'] as $requiredTheme) {
+                if (! is_string($requiredTheme)) {
+                    continue;
+                }
                 $parent = Theme::where('slug', $requiredTheme)->first();
                 if (! $parent || ! $parent->is_active) {
                     return false;
@@ -291,8 +305,11 @@ class ThemeService
         }
 
         // Check required plugins
-        if (isset($theme->dependencies['plugins'])) {
+        if (isset($theme->dependencies['plugins']) && is_iterable($theme->dependencies['plugins'])) {
             foreach ($theme->dependencies['plugins'] as $requiredPlugin) {
+                if (! is_string($requiredPlugin)) {
+                    continue;
+                }
                 $plugin = \App\Models\Plugin::where('slug', $requiredPlugin)->first();
                 if (! $plugin || ! $plugin->is_active) {
                     return false;
@@ -308,13 +325,15 @@ class ThemeService
      */
     public function getThemeCustomCss(Theme $theme): string
     {
-        $css = (string) ($theme->getAttribute('custom_css') ?? '');
+        $customCss = $theme->getAttribute('custom_css');
+        $css = is_string($customCss) ? $customCss : '';
 
         // Add parent theme custom CSS if exists
         if ($theme->hasParent()) {
             $parent = $theme->getParent();
             if ($parent instanceof Theme) {
-                $parentCss = (string) $parent->getAttribute('custom_css');
+                $parentCustomCss = $parent->getAttribute('custom_css');
+                $parentCss = is_string($parentCustomCss) ? $parentCustomCss : '';
                 if ($parentCss) {
                     $css = $parentCss."\n\n".$css;
                 }
@@ -332,13 +351,15 @@ class ThemeService
         $variables = [];
         $manifest = $theme->getManifest();
 
-        if ($manifest && isset($manifest['settings_schema'])) {
+        if ($manifest && isset($manifest['settings_schema']) && is_iterable($manifest['settings_schema'])) {
             foreach ($manifest['settings_schema'] as $key => $setting) {
-                if ($setting['type'] === 'color') {
-                    $value = $this->getThemeSetting($theme, $key, $setting['default'] ?? null);
-                    if ($value) {
-                        $cssKey = '--theme-'.str_replace('_', '-', $key);
-                        $variables[] = "{$cssKey}: {$value};";
+                if (is_array($setting) && isset($setting['type']) && $setting['type'] === 'color') {
+                    $default = $setting['default'] ?? null;
+                    $value = $this->getThemeSetting($theme, (string) $key, $default);
+                    if ($value !== null) {
+                        $cssKey = '--theme-'.str_replace('_', '-', (string) $key);
+                        $valueStr = is_scalar($value) ? (string) $value : '';
+                        $variables[] = "{$cssKey}: {$valueStr};";
                     }
                 }
             }
@@ -387,6 +408,8 @@ class ThemeService
 
     /**
      * Scan themes directory and register themes
+     *
+     * @return array<int, Theme>
      */
     public function scanThemes(): array
     {
@@ -420,18 +443,18 @@ class ThemeService
                         $theme = Theme::updateOrCreate(
                             ['slug' => $slug],
                             [
-                                'name' => (string) ($manifest['name'] ?? $slug),
-                                'type' => (string) ($manifest['type'] ?? 'frontend'),
+                                'name' => is_scalar($vName = $manifest['name'] ?? $slug) ? (string) $vName : $slug,
+                                'type' => is_scalar($vType = $manifest['type'] ?? 'frontend') ? (string) $vType : 'frontend',
                                 'path' => $slug, // Store relative path (slug)
-                                'version' => (string) ($manifest['version'] ?? '1.0.0'),
-                                'description' => (string) ($manifest['description'] ?? null),
-                                'author' => (string) ($manifest['author'] ?? null),
-                                'author_url' => (string) ($manifest['author_url'] ?? null),
-                                'license' => (string) ($manifest['license'] ?? null),
-                                'parent_theme' => (string) ($manifest['parent_theme'] ?? null),
+                                'version' => is_scalar($vVer = $manifest['version'] ?? '1.0.0') ? (string) $vVer : '1.0.0',
+                                'description' => is_scalar($vDesc = $manifest['description'] ?? null) ? (string) $vDesc : '',
+                                'author' => is_scalar($vAuth = $manifest['author'] ?? null) ? (string) $vAuth : '',
+                                'author_url' => is_scalar($vAuthUrl = $manifest['author_url'] ?? null) ? (string) $vAuthUrl : '',
+                                'license' => is_scalar($vLic = $manifest['license'] ?? null) ? (string) $vLic : '',
+                                'parent_theme' => is_scalar($vParent = $manifest['parent_theme'] ?? null) ? (string) $vParent : null,
                                 'dependencies' => $dependencies,
                                 'supports' => $supports,
-                                'requires_cms_version' => $requires['cms_version'] ?? null,
+                                'requires_cms_version' => is_array($requires) ? ($requires['cms_version'] ?? null) : null,
                                 'status' => 'active', // Set as active by default
                             ]
                         );

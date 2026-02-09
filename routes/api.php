@@ -505,6 +505,10 @@ Route::prefix('v1')->group(function () {
             Route::get('dependency-vulnerabilities/statistics', [App\Http\Controllers\Api\V1\DependencyVulnerabilityController::class, 'statistics'])->middleware('permission:manage settings');
             Route::put('dependency-vulnerabilities/{id}', [App\Http\Controllers\Api\V1\DependencyVulnerabilityController::class, 'update'])->middleware('permission:manage settings');
             Route::post('run-dependency-audit', [App\Http\Controllers\Api\V1\DependencyVulnerabilityController::class, 'runAudit'])->middleware('permission:manage settings');
+
+            // All Dependency Packages (composer + npm)
+            Route::get('dependency-packages', [App\Http\Controllers\Api\V1\DependencyPackageController::class, 'index'])->middleware('permission:manage settings');
+            Route::get('dependency-packages/statistics', [App\Http\Controllers\Api\V1\DependencyPackageController::class, 'statistics'])->middleware('permission:manage settings');
         });
 
         // Scheduled Tasks - Custom routes MUST come BEFORE apiResource
@@ -591,6 +595,19 @@ Route::prefix('v1')->group(function () {
             Route::get('monitor/sessions', [App\Http\Controllers\Api\Isp\MonitorController::class, 'sessions']);
             Route::post('monitor/disconnect', [App\Http\Controllers\Api\Isp\MonitorController::class, 'disconnect']);
 
+            // RADIUS Monitoring
+            Route::prefix('radius')->group(function () {
+                Route::get('sessions', [App\Http\Controllers\Api\Isp\RadiusMonitorController::class, 'sessions']);
+                Route::get('logs', [App\Http\Controllers\Api\Isp\RadiusMonitorController::class, 'logs']);
+                Route::get('status', [App\Http\Controllers\Api\Isp\RadiusMonitorController::class, 'status']);
+            });
+
+            // IP Pool Management
+            Route::apiResource('ip-pools', App\Http\Controllers\Api\Isp\IpPoolController::class);
+            Route::get('ip-pools/{ip_pool}/addresses', [App\Http\Controllers\Api\Isp\IpPoolController::class, 'addresses']);
+            Route::patch('ip-pool-addresses/{address}', [App\Http\Controllers\Api\Isp\IpPoolController::class, 'updateAddress']);
+            Route::post('ip-pools/{ip_pool}/regenerate', [App\Http\Controllers\Api\Isp\IpPoolController::class, 'regenerateAddresses']);
+
             // Sync
             Route::post('sync/{id}', [App\Http\Controllers\Api\Isp\SyncController::class, 'syncCustomer']);
             Route::post('sync-all', [App\Http\Controllers\Api\Isp\SyncController::class, 'syncAll']);
@@ -611,6 +628,7 @@ Route::prefix('v1')->group(function () {
             Route::get('member/usage', [App\Http\Controllers\Api\Isp\MemberPortalController::class, 'usage']);
             Route::post('member/service-request', [App\Http\Controllers\Api\Isp\MemberPortalController::class, 'requestService']);
             Route::post('member/diagnostics', [App\Http\Controllers\Api\Isp\MemberPortalController::class, 'diagnostics']);
+            Route::put('member/profile', [App\Http\Controllers\Api\Isp\MemberPortalController::class, 'updateProfile']);
 
             // Payments
             Route::get('payments/gateways', [App\Http\Controllers\Api\Isp\PaymentController::class, 'indexGateways']);
@@ -689,8 +707,27 @@ Route::prefix('v1')->group(function () {
             Route::prefix('vouchers')->group(function () {
                 Route::get('/', [App\Http\Controllers\Api\Isp\VoucherController::class, 'index']);
                 Route::post('/generate', [App\Http\Controllers\Api\Isp\VoucherController::class, 'generate']);
+                Route::get('/sales-report', [App\Http\Controllers\Api\Isp\VoucherController::class, 'salesReport']);
+                Route::get('/summary', [App\Http\Controllers\Api\Isp\VoucherController::class, 'summary']);
+                Route::get('/export/script', [App\Http\Controllers\Api\Isp\VoucherController::class, 'exportScript']);
+                Route::get('/export/csv', [App\Http\Controllers\Api\Isp\VoucherController::class, 'exportCsv']);
                 Route::delete('/batch/{batchId}', [App\Http\Controllers\Api\Isp\VoucherController::class, 'destroyBatch']);
                 Route::delete('/{voucher}', [App\Http\Controllers\Api\Isp\VoucherController::class, 'destroy']);
+            });
+
+            // Hotspot (Phase 9)
+            Route::prefix('hotspot')->group(function () {
+                // IP Bindings
+                Route::get('/ip-bindings', [App\Http\Controllers\Api\Isp\HotspotController::class, 'ipBindings']);
+                Route::post('/ip-bindings', [App\Http\Controllers\Api\Isp\HotspotController::class, 'addIpBinding']);
+                Route::delete('/ip-bindings/{id}', [App\Http\Controllers\Api\Isp\HotspotController::class, 'removeIpBinding']);
+                Route::patch('/ip-bindings/{id}/toggle', [App\Http\Controllers\Api\Isp\HotspotController::class, 'toggleIpBinding']);
+                // Cookies
+                Route::get('/cookies', [App\Http\Controllers\Api\Isp\HotspotController::class, 'cookies']);
+                Route::delete('/cookies/{id}', [App\Http\Controllers\Api\Isp\HotspotController::class, 'removeCookie']);
+                // Interfaces (for Traffic Monitor)
+                Route::get('/interfaces', [App\Http\Controllers\Api\Isp\HotspotController::class, 'interfaces']);
+                Route::get('/interface-traffic', [App\Http\Controllers\Api\Isp\HotspotController::class, 'interfaceTraffic']);
             });
         });
     });

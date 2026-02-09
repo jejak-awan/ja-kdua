@@ -41,13 +41,17 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow
+    DataTable
 } from '@/components/ui';
+import { h } from 'vue';
+import { 
+    useVueTable, 
+    getCoreRowModel, 
+    createColumnHelper,
+    getSortedRowModel,
+    type SortingState,
+    type RowSelectionState
+} from '@tanstack/vue-table';
 
 interface ContentStats {
     total: number;
@@ -101,6 +105,146 @@ const statusFilter = ref('all');
 const perPage = ref('10');
 const selectedContents = ref<number[]>([]);
 const bulkAction = ref('');
+
+const columnHelper = createColumnHelper<Content>();
+
+const columns = [
+    columnHelper.display({
+        id: 'select',
+        header: ({ table }) => h(Checkbox, {
+            checked: table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate'),
+            'onUpdate:checked': (val) => table.toggleAllPageRowsSelected(!!val),
+        }),
+        cell: ({ row }) => h(Checkbox, {
+            checked: row.getIsSelected(),
+            'onUpdate:checked': (val) => row.toggleSelected(!!val),
+        }),
+        size: 50,
+    }),
+    columnHelper.accessor('title', {
+        header: t('common.labels.title'),
+        cell: ({ row }) => {
+            const content = row.original;
+            return h('div', { class: 'flex flex-col gap-0.5' }, [
+                h('div', { class: 'flex items-center gap-2' }, [
+                    h('span', { class: 'text-sm font-semibold text-foreground group-hover:text-primary transition-colors' }, content.title),
+                    content.deleted_at ? h(Badge, { variant: 'destructive', class: 'h-4.5 text-[9px] px-1.5 font-bold tracking-wider' }, t('features.content.status.trashed')) : null
+                ]),
+                h('span', { class: 'text-xs text-muted-foreground/70 font-mono' }, content.slug)
+            ]);
+        }
+    }),
+    columnHelper.accessor('author', {
+        header: t('common.labels.author'),
+        cell: ({ row }) => {
+            const author = row.original.author;
+            return h('div', { class: 'flex items-center gap-2' }, [
+                h('div', { class: 'w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary' }, getUserInitials(author?.name)),
+                h('span', { class: 'text-sm text-foreground/80' }, author?.name)
+            ]);
+        }
+    }),
+    columnHelper.accessor('status', {
+        header: t('common.labels.status'),
+        cell: ({ row }) => {
+            const status = row.original.status || '';
+            return h(Badge, {
+                variant: 'outline',
+                class: cn('capitalize border-none px-2 py-0.5', getStatusBadgeClass(status))
+            }, t(`features.content.status.${status}`));
+        }
+    }),
+    columnHelper.accessor('is_featured', {
+        header: t('features.content.form.featured'),
+        cell: ({ row }) => h(Switch, {
+            checked: !!row.original.is_featured,
+            'onUpdate:checked': () => toggleFeatured(row.original)
+        })
+    }),
+    columnHelper.accessor('created_at', {
+        header: t('common.labels.date'),
+        cell: ({ row }) => h('div', { class: 'flex items-center gap-1.5 text-xs text-muted-foreground' }, [
+            h(Calendar, { class: 'w-3.5 h-3.5' }),
+            formatDate(row.original.created_at)
+        ])
+    }),
+    columnHelper.accessor('editor_type', {
+        header: t('common.labels.type'),
+        cell: ({ row }) => {
+            const isBuilder = row.original.editor_type === 'builder';
+            return h('div', { class: 'flex items-center gap-1.5' }, [
+                h(isBuilder ? Layout : Type, { class: 'w-3.5 h-3.5 text-muted-foreground' }),
+                h('span', { class: 'text-xs capitalize text-muted-foreground' }, 
+                    isBuilder ? 'Builder' : t('features.content.form.useDefault').replace(t('features.content.form.useDefault').split(' ')[0], '').trim()
+                )
+            ]);
+        }
+    }),
+    columnHelper.display({
+        id: 'actions',
+        header: () => h('div', { class: 'text-right' }, t('common.actions.title')),
+        cell: ({ row }) => {
+            const content = row.original;
+            return h('div', { class: 'flex justify-end items-center gap-1' }, [
+                content.deleted_at 
+                    ? [
+                        authStore.hasPermission('delete content') && h(Button, {
+                            variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-success',
+                            onClick: () => handleRestore(content), title: t('common.actions.restore')
+                        }, [h(RotateCcw, { class: 'w-4 h-4' })]),
+                        authStore.hasPermission('delete content') && h(Button, {
+                            variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-destructive',
+                            onClick: () => handleForceDelete(content), title: t('common.actions.deletePermanently')
+                        }, [h(Trash2, { class: 'w-4 h-4' })])
+                    ]
+                    : [
+                        authStore.hasPermission('edit content') && h(Button, {
+                            variant: 'ghost', size: 'icon', class: 'h-8 w-8',
+                            onClick: () => handleEdit(content), title: t('common.actions.edit')
+                        }, [h(Pencil, { class: 'w-4 h-4' })]),
+                        authStore.hasPermission('delete content') && h(Button, {
+                            variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-destructive',
+                            onClick: () => handleDelete(content), title: t('common.actions.delete')
+                        }, [h(Trash2, { class: 'w-4 h-4' })])
+                    ]
+            ]);
+        }
+    })
+];
+
+const sorting = ref<SortingState>([]);
+const rowSelection = ref<RowSelectionState>({});
+
+const table = useVueTable({
+    get data() { return contents.value },
+    columns,
+    state: {
+        get sorting() { return sorting.value },
+        get rowSelection() { return rowSelection.value },
+    },
+    onSortingChange: updaterOrValue => {
+        sorting.value = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue;
+    },
+    onRowSelectionChange: updaterOrValue => {
+        rowSelection.value = typeof updaterOrValue === 'function' ? updaterOrValue(rowSelection.value) : updaterOrValue;
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: row => String(row.id),
+    enableRowSelection: true,
+});
+
+// Sync selectedContents with rowSelection for bulk actions
+watch(rowSelection, (newSelection) => {
+    selectedContents.value = Object.keys(newSelection)
+        .filter(key => newSelection[key])
+        .map(id => Number(id));
+}, { deep: true });
+
+// Clear selection when contents change
+watch(contents, () => {
+    rowSelection.value = {};
+});
 
 const stats = ref<ContentStats>({
     total: 0,
@@ -159,17 +303,6 @@ const fetchStats = async () => {
     }
 };
 
-const allSelected = computed(() => {
-    return contents.value.length > 0 && selectedContents.value.length === contents.value.length;
-});
-
-const toggleSelectAll = (checked: boolean) => {
-    if (checked) {
-        selectedContents.value = contents.value.map(c => c.id);
-    } else {
-        selectedContents.value = [];
-    }
-};
 
 const toggleFeatured = async (content: Content) => {
     const previousState = !!content.is_featured;
@@ -569,98 +702,12 @@ onMounted(() => {
             </div>
 
             <!-- Table -->
-            <div class="relative overflow-x-auto">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead class="w-12 px-6">
-                                <Checkbox
-                                    :checked="allSelected"
-                                    @update:checked="toggleSelectAll"
-                                />
-                            </TableHead>
-                            <TableHead class="px-6 py-4 text-xs text-muted-foreground/70">{{ t('common.labels.title') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-xs text-muted-foreground/70">{{ t('common.labels.author') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-xs text-muted-foreground/70">{{ t('common.labels.status') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-xs text-muted-foreground/70">{{ t('features.content.form.featured') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-xs text-muted-foreground/70">{{ t('common.labels.date') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-xs text-muted-foreground/70">{{ t('common.labels.type') }}</TableHead>
-                            <TableHead class="px-6 py-4 text-center text-xs text-muted-foreground/70">{{ t('common.actions.title') }}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow v-for="content in contents" :key="content.id" class="group">
-                            <TableCell class="px-6">
-                                <Checkbox
-                                    :checked="selectedContents.includes(content.id)"
-                                    @update:checked="(checked) => {
-                                        if (checked) selectedContents.push(content.id)
-                                        else selectedContents = selectedContents.filter(id => id !== content.id)
-                                    }"
-                                />
-                            </TableCell>
-                            <TableCell class="px-6 py-4">
-                                <div class="flex flex-col gap-0.5">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{{ content.title }}</span>
-                                        <Badge v-if="content.deleted_at" variant="destructive" class="h-4.5 text-[9px] px-1.5 font-bold tracking-wider">
-                                            {{ t('features.content.status.trashed') }}
-                                        </Badge>
-                                    </div>
-                                    <span class="text-xs text-muted-foreground/70 font-mono">{{ content.slug }}</span>
-                                </div>
-                            </TableCell>
-                            <TableCell class="px-6 py-4">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
-                                        {{ getUserInitials(content.author?.name) }}
-                                    </div>
-                                    <span class="text-sm text-foreground/80">{{ content.author?.name }}</span>
-                                </div>
-                            </TableCell>
-                            <TableCell class="px-6 py-4">
-                                <Badge variant="outline" :class="getStatusBadgeClass(content.status || '')" class="capitalize border-none px-2 py-0.5">
-                                    {{ $t(`features.content.status.${content.status}`) }}
-                                </Badge>
-                            </TableCell>
-                            <TableCell class="px-6 py-4">
-                                <Switch :checked="!!content.is_featured" @update:checked="toggleFeatured(content)" />
-                            </TableCell>
-                            <TableCell class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                    <Calendar class="w-3.5 h-3.5" />
-                                    {{ formatDate(content.created_at) }}
-                                </div>
-                            </TableCell>
-                            <TableCell class="px-6 py-4">
-                                <div class="flex items-center gap-1.5">
-                                    <component :is="content.editor_type === 'builder' ? Layout : Type" class="w-3.5 h-3.5 text-muted-foreground" />
-                                    <span class="text-xs capitalize text-muted-foreground">{{ content.editor_type === 'builder' ? 'Builder' : $t('features.content.form.useDefault').replace($t('features.content.form.useDefault').split(' ')[0], '').trim() }}</span>
-                                </div>
-                            </TableCell>
-                            <TableCell class="px-6 py-4 text-right">
-                                <div class="flex justify-end items-center gap-1">
-                                    <template v-if="content.deleted_at">
-                                        <Button variant="ghost" size="icon" class="h-8 w-8 text-success" @click="handleRestore(content)" v-if="authStore.hasPermission('delete content')" :title="t('common.actions.restore')">
-                                            <RotateCcw class="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive" @click="handleForceDelete(content)" v-if="authStore.hasPermission('delete content')" :title="t('common.actions.deletePermanently')">
-                                            <Trash2 class="w-4 h-4" />
-                                        </Button>
-                                    </template>
-                                    <template v-else>
-                                        <Button variant="ghost" size="icon" class="h-8 w-8" @click="handleEdit(content)" v-if="authStore.hasPermission('edit content')" :title="t('common.actions.edit')">
-                                            <Pencil class="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive" @click="handleDelete(content)" v-if="authStore.hasPermission('delete content')" :title="t('common.actions.delete')">
-                                            <Trash2 class="w-4 h-4" />
-                                        </Button>
-                                    </template>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
+            <div class="overflow-x-auto">
+                <DataTable
+                    :table="table"
+                    :loading="loading"
+                    :empty-message="t('common.messages.empty.default')"
+                />
             </div>
             
             <div class="px-6 py-4 border-t border-border">

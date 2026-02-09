@@ -23,6 +23,9 @@ class BillingPlan extends Model
         'type', // prepaid, postpaid
         'features',
         'is_active',
+        'fup_limit_gb',
+        'fup_speed',
+        'fup_enabled',
     ];
 
     protected $casts = [
@@ -33,6 +36,8 @@ class BillingPlan extends Model
         'shared_users' => 'integer',
         'active_period' => 'integer',
         'is_active' => 'boolean',
+        'fup_limit_gb' => 'double',
+        'fup_enabled' => 'boolean',
     ];
 
     /**

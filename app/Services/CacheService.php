@@ -186,6 +186,7 @@ class CacheService
      */
     public function getCacheDriverInfo(): array
     {
+        /** @var string|null $driver */
         $driver = config('cache.default');
         $redisAvailable = $this->isRedisAvailable();
 
@@ -201,11 +202,18 @@ class CacheService
 
     /**
      * Smart cache remember - uses Redis if available, falls back to file
+     *
+     * @template TCacheValue
+     * @param string $key
+     * @param int $ttlSeconds
+     * @param \Closure(): TCacheValue $callback
+     * @return TCacheValue
      */
     public function smartRemember(string $key, int $ttlSeconds, \Closure $callback): mixed
     {
         $store = $this->getPreferredStore();
 
+        /** @var TCacheValue */
         return Cache::store($store)->remember($key, $ttlSeconds, $callback);
     }
 }

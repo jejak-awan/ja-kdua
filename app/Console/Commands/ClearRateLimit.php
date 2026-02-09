@@ -60,7 +60,7 @@ class ClearRateLimit extends Command
     /**
      * Clear rate limit for specific IP
      */
-    protected function clearRateLimitForIp(string $ip)
+    protected function clearRateLimitForIp(string $ip): void
     {
         // Clear throttle rate limit
         $key = "throttle:5,1:{$ip}";
@@ -79,7 +79,7 @@ class ClearRateLimit extends Command
     /**
      * Clear all rate limits
      */
-    protected function clearAllRateLimits()
+    protected function clearAllRateLimits(): bool
     {
         $cleared = 0;
 
@@ -115,7 +115,9 @@ class ClearRateLimit extends Command
                 $this->info('You can clear specific IP rate limits using: php artisan rate-limit:clear --ip=<ip_address>');
             }
         } else {
-            $this->warn("Cache driver '{$driver}' doesn't support bulk clearing.");
+            /** @var string $driverStr */
+            $driverStr = is_string($driver) ? $driver : 'unknown';
+            $this->warn("Cache driver '{$driverStr}' doesn't support bulk clearing.");
             $this->info('Please clear rate limits for specific IPs using: php artisan rate-limit:clear --ip=<ip_address>');
         }
 

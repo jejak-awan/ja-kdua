@@ -109,71 +109,11 @@
             </div>
 
             <CardContent class="p-0">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead class="w-[50px]">
-                                <Checkbox 
-                                    v-if="authStore.hasPermission('delete tags')"
-                                    :checked="selectedIds.length === tags.length && tags.length > 0"
-                                    @update:checked="toggleAll"
-                                />
-                            </TableHead>
-                            <TableHead class="text-xs text-muted-foreground/70">{{ $t('features.tags.table.name') }}</TableHead>
-                            <TableHead class="hidden md:table-cell text-xs text-muted-foreground/70">{{ $t('features.tags.table.slug') }}</TableHead>
-                            <TableHead class="hidden lg:table-cell text-xs text-muted-foreground/70">{{ $t('features.tags.table.description') }}</TableHead>
-                            <TableHead class="text-right text-xs text-muted-foreground/70">{{ $t('features.tags.table.usage') }}</TableHead>
-                            <TableHead class="w-[100px] text-right text-xs text-muted-foreground/70">{{ $t('features.tags.table.actions') }}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow v-if="loading">
-                            <TableCell colspan="6" class="h-24 text-center">
-                                <Loader2 class="h-6 w-6 animate-spin mx-auto" />
-                            </TableCell>
-                        </TableRow>
-                        
-                        <TableRow v-else-if="tags.length === 0">
-                            <TableCell colspan="6" class="h-32 text-center">
-                                <div class="flex flex-col items-center justify-center space-y-2">
-                                    <TagIcon class="h-8 w-8 text-muted-foreground/20" />
-                                    <p class="text-sm text-muted-foreground">{{ $t('features.tags.empty') }}</p>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-
-                        <TableRow v-else v-for="tag in tags" :key="tag.id" :class="cn('group', selectedIds.includes(tag.id) ? 'bg-muted/50' : '')">
-                            <TableCell>
-                                <Checkbox 
-                                    v-if="authStore.hasPermission('delete tags')"
-                                    :checked="selectedIds.includes(tag.id)"
-                                    @update:checked="(val) => toggleSelection(tag.id, val)"
-                                />
-                            </TableCell>
-                            <TableCell class="font-medium">
-                                {{ tag.name }}
-                                <div class="md:hidden text-xs text-muted-foreground mt-1">{{ tag.slug }}</div>
-                            </TableCell>
-                            <TableCell class="hidden md:table-cell text-muted-foreground">{{ tag.slug }}</TableCell>
-                            <TableCell class="hidden lg:table-cell max-w-[300px] truncate" :title="tag.description">
-                                {{ tag.description || '-' }}
-                            </TableCell>
-                            <TableCell class="text-right">
-                                <Badge variant="secondary" class="font-mono">{{ tag.contents_count || 0 }}</Badge>
-                            </TableCell>
-                            <TableCell>
-                                <div class="flex justify-end gap-1">
-                                    <Button v-if="authStore.hasPermission('edit tags')" variant="ghost" size="icon" @click="openEditModal(tag)" class="h-8 w-8">
-                                        <Edit class="w-4 h-4" />
-                                    </Button>
-                                    <Button v-if="authStore.hasPermission('delete tags')" variant="ghost" size="icon" class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" @click="deleteTag(tag)">
-                                        <Trash2 class="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
+                <DataTable
+                    :table="table"
+                    :loading="loading"
+                    :empty-message="$t('features.tags.empty')"
+                />
             </CardContent>
             
             <!-- Pagination -->
@@ -199,22 +139,19 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import TagIcon from 'lucide-vue-next/dist/esm/icons/tag.js';
 import BarChart3 from 'lucide-vue-next/dist/esm/icons/chart-bar-stacked.js';
 import MousePointer2 from 'lucide-vue-next/dist/esm/icons/mouse-pointer-2.js';
 import Edit from 'lucide-vue-next/dist/esm/icons/pen.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import SearchIcon from 'lucide-vue-next/dist/esm/icons/search.js';
-import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import api from '@/services/api';
 import { useConfirm } from '@/composables/useConfirm';
 import { useToast } from '@/composables/useToast';
 import { debounce } from '@/utils/debounce';
 import { parseResponse, type PaginationData } from '@/utils/responseParser';
-import { cn } from '@/lib/utils';
 import TagFormModal from './TagFormModal.vue';
 
 // UI Components
@@ -225,18 +162,22 @@ import {
     Checkbox,
     Card,
     Pagination,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+    DataTable,
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue
 } from '@/components/ui';
+import { h } from 'vue';
+import { 
+    useVueTable, 
+    getCoreRowModel, 
+    createColumnHelper,
+    getSortedRowModel,
+    type SortingState,
+    type RowSelectionState
+} from '@tanstack/vue-table';
 
 import { useAuthStore } from '@/stores/auth';
 import type { Tag } from '@/types/cms';
@@ -267,6 +208,94 @@ const pagination = ref<PaginationData>({
 // Modal State
 const showModal = ref(false);
 const editingTag = ref<Tag | null>(null);
+
+const columnHelper = createColumnHelper<Tag>();
+
+const columns = [
+    columnHelper.display({
+        id: 'select',
+        header: ({ table }) => h(Checkbox, {
+            checked: table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate'),
+            'onUpdate:checked': (val) => table.toggleAllPageRowsSelected(!!val),
+        }),
+        cell: ({ row }) => h(Checkbox, {
+            checked: row.getIsSelected(),
+            'onUpdate:checked': (val) => row.toggleSelected(!!val),
+        }),
+        size: 50,
+    }),
+    columnHelper.accessor('name', {
+        header: t('features.tags.table.name'),
+        cell: ({ row }) => h('div', { class: 'font-medium' }, [
+            row.original.name,
+            h('div', { class: 'md:hidden text-xs text-muted-foreground mt-1' }, row.original.slug)
+        ])
+    }),
+    columnHelper.accessor('slug', {
+        header: t('features.tags.table.slug'),
+        cell: ({ row }) => h('span', { class: 'text-muted-foreground' }, row.original.slug),
+        meta: { className: 'hidden md:table-cell' }
+    }),
+    columnHelper.accessor('description', {
+        header: t('features.tags.table.description'),
+        cell: ({ row }) => h('div', { class: 'max-w-[300px] truncate', title: row.original.description }, row.original.description || '-'),
+        meta: { className: 'hidden lg:table-cell' }
+    }),
+    columnHelper.accessor('contents_count', {
+        header: () => h('div', { class: 'text-right' }, t('features.tags.table.usage')),
+        cell: ({ row }) => h('div', { class: 'text-right' }, [
+            h(Badge, { variant: 'secondary', class: 'font-mono' }, String(row.original.contents_count || 0))
+        ])
+    }),
+    columnHelper.display({
+        id: 'actions',
+        header: () => h('div', { class: 'text-right' }, t('features.tags.table.actions')),
+        cell: ({ row }) => h('div', { class: 'flex justify-end gap-1' }, [
+            authStore.hasPermission('edit tags') && h(Button, {
+                variant: 'ghost', size: 'icon', class: 'h-8 w-8',
+                onClick: () => openEditModal(row.original)
+            }, [h(Edit, { class: 'w-4 h-4' })]),
+            authStore.hasPermission('delete tags') && h(Button, {
+                variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10',
+                onClick: () => deleteTag(row.original)
+            }, [h(Trash2, { class: 'w-4 h-4' })])
+        ])
+    })
+];
+
+const sorting = ref<SortingState>([]);
+const rowSelection = ref<RowSelectionState>({});
+
+const table = useVueTable({
+    get data() { return tags.value },
+    columns,
+    state: {
+        get sorting() { return sorting.value },
+        get rowSelection() { return rowSelection.value },
+    },
+    onSortingChange: updaterOrValue => {
+        sorting.value = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue;
+    },
+    onRowSelectionChange: updaterOrValue => {
+        rowSelection.value = typeof updaterOrValue === 'function' ? updaterOrValue(rowSelection.value) : updaterOrValue;
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: row => String(row.id),
+    enableRowSelection: true,
+});
+
+// Sync selectedIds with rowSelection for bulk actions
+watch(rowSelection, (newSelection) => {
+    selectedIds.value = Object.keys(newSelection)
+        .filter(key => newSelection[key])
+        .map(id => Number(id));
+}, { deep: true });
+
+// Clear selection when tags change
+watch(tags, () => {
+    rowSelection.value = {};
+});
 
 const onSearchInput = debounce(() => {
     fetchTags(1);
@@ -319,23 +348,6 @@ const changePerPage = (value: string | number) => {
     fetchTags(1);
 };
 
-const toggleSelection = (id: number, checked: boolean) => {
-    if (checked) {
-        if (!selectedIds.value.includes(id)) {
-            selectedIds.value.push(id);
-        }
-    } else {
-        selectedIds.value = selectedIds.value.filter(i => i !== id);
-    }
-};
-
-const toggleAll = (checked: boolean) => {
-    if (checked) {
-        selectedIds.value = tags.value.map(t => t.id);
-    } else {
-        selectedIds.value = [];
-    }
-};
 
 const bulkDelete = async () => {
     if (selectedIds.value.length === 0) return;

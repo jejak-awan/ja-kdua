@@ -17,13 +17,10 @@
       </p>
       <div v-if="showPerPage" class="flex items-center gap-2">
         <span>{{ $t('common.pagination.rowsPerPage') }}</span>
-        <Select :model-value="String(perPage)" @update:model-value="handlePerPageChange">
-          <RadixSelectTrigger class="flex h-8 w-[65px] items-center justify-between rounded-lg border border-border/50 bg-transparent px-2.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 hover:bg-muted/30 transition-colors outline-none">
-            <RadixSelectValue />
-            <RadixSelectIcon as-child>
-              <ChevronDown class="h-3.5 w-3.5 opacity-50" />
-            </RadixSelectIcon>
-          </RadixSelectTrigger>
+        <Select v-model="selectValue">
+          <SelectTrigger class="h-8 w-[70px] bg-transparent border-border/50 text-xs">
+            <SelectValue :placeholder="String(perPage)" />
+          </SelectTrigger>
           <SelectContent side="top" :side-offset="5">
             <SelectItem v-for="option in perPageOptions" :key="option" :value="String(option)">
               {{ option }}
@@ -111,13 +108,7 @@ import ChevronLeft from 'lucide-vue-next/dist/esm/icons/chevron-left.js';
 import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
 import ChevronsLeft from 'lucide-vue-next/dist/esm/icons/chevrons-left.js';
 import ChevronsRight from 'lucide-vue-next/dist/esm/icons/chevrons-right.js';
-import ChevronDown from 'lucide-vue-next/dist/esm/icons/chevron-down.js';
-import { 
-  SelectTrigger as RadixSelectTrigger, 
-  SelectValue as RadixSelectValue,
-  SelectIcon as RadixSelectIcon 
-} from 'radix-vue';
-import { Button, Select, SelectContent, SelectItem } from '@/components/ui';
+import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { useI18n } from 'vue-i18n';
 
@@ -147,6 +138,7 @@ const emit = defineEmits<{
   'update:currentPage': [page: number];
   'update:perPage': [perPage: number];
   'page-change': [page: number];
+  'per-page-change': [perPage: number];
 }>();
 
 // Computed properties
@@ -214,11 +206,19 @@ const goToPage = (page: number | string) => {
   emit('page-change', page);
 };
 
+// Computed properties
+const selectValue = computed({
+  get: () => String(props.perPage),
+  set: (val: string) => handlePerPageChange(val)
+});
+
 const handlePerPageChange = (value: string) => {
   const newPerPage = parseInt(value, 10);
   emit('update:perPage', newPerPage);
+  emit('per-page-change', newPerPage);
   // Reset to page 1 when changing per page
   emit('update:currentPage', 1);
   emit('page-change', 1);
 };
+
 </script>

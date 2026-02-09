@@ -147,134 +147,25 @@
       </Button>
     </div>
 
-    <!-- Tasks List -->
-    <div v-else class="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
-      <div class="overflow-x-auto">
-        <Table>
-          <TableHeader class="bg-muted/50 border-b">
-            <TableRow>
-              <TableHead class="w-10 px-6 py-3">
-                <Checkbox 
-                  :checked="isAllSelected"
-                  @update:checked="toggleSelectAll"
-                />
-              </TableHead>
-              <TableHead class="px-6 py-3 font-medium text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.table.name') }}</TableHead>
-              <TableHead class="px-6 py-3 font-medium text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.table.command') }}</TableHead>
-              <TableHead class="px-6 py-3 font-medium text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.table.schedule') }}</TableHead>
-              <TableHead class="px-6 py-3 font-medium text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.table.last_run') }}</TableHead>
-              <TableHead class="px-6 py-3 font-medium text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.table.status') }}</TableHead>
-              <TableHead class="px-6 py-3 font-medium text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.table.active') }}</TableHead>
-              <TableHead class="px-6 py-3 font-medium text-right text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.table.actions') }}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody class="divide-y divide-border">
-            <TableRow 
-              v-for="task in tasks" 
-              :key="task.id" 
-              class="group hover:bg-muted/50 transition-colors"
-              :class="{ 'bg-muted/30': selectedTasks.includes(task.id) }"
-            >
-              <TableCell class="px-6 py-4">
-                <Checkbox 
-                  :checked="selectedTasks.includes(task.id)"
-                  @update:checked="(checked) => toggleSelection(task.id)"
-                />
-              </TableCell>
-              <TableCell class="px-6 py-4 font-semibold">{{ task.name }}</TableCell>
-              <TableCell class="px-6 py-4">
-                <code class="text-[11px] bg-muted/50 px-2 py-0.5 rounded border border-border dark:bg-muted/20">{{ task.command }}</code>
-              </TableCell>
-              <TableCell class="px-6 py-4">
-                <code class="text-[11px] font-mono font-bold text-primary">{{ task.schedule }}</code>
-              </TableCell>
-              <TableCell class="px-6 py-4">
-                <div v-if="task.last_run_at" class="flex flex-col">
-                  <span class="text-sm font-medium">{{ formatDate(task.last_run_at) }}</span>
-                  <span class="text-[10px] text-muted-foreground tabular-nums">{{ task.last_run_duration ? (task.last_run_duration / 1000).toFixed(2) + 's' : '' }}</span>
-                </div>
-                <span v-else class="text-muted-foreground text-sm italic">{{ $t('common.labels.never') }}</span>
-              </TableCell>
-              <TableCell class="px-6 py-4">
-                <Badge 
-                  :variant="getStatusVariant(task.status)"
-                  class="capitalize text-[10px] px-2 py-0"
-                >
-                  {{ $t('features.scheduled_tasks.status.' + (task.status || 'pending')) }}
-                </Badge>
-              </TableCell>
-              <TableCell class="px-6 py-4">
-                 <Button 
-                    size="sm" 
-                    :variant="task.is_active ? 'default' : 'secondary'"
-                    @click="toggleActive(task)"
-                    class="h-6 text-[10px] font-bold px-2"
-                    :title="task.is_active 
-                      ? $t('features.scheduled_tasks.tooltips.click_to_deactivate') 
-                      : $t('features.scheduled_tasks.tooltips.click_to_activate')"
-                  >
-                    {{ task.is_active ? $t('common.labels.active') : $t('common.labels.inactive') }}
-                  </Button>
-              </TableCell>
-              <TableCell class="px-6 py-4 text-right">
-                <div class="flex justify-end gap-1">
-                  <Button 
-                    size="icon" 
-                    variant="ghost"
-                    @click="runTask(task)"
-                    :disabled="running === task.id"
-                    :title="$t('common.actions.run')"
-                    class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                  >
-                    <Loader2 v-if="running === task.id" class="w-4 h-4 animate-spin" />
-                    <Play v-else class="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    size="icon" 
-                    variant="ghost"
-                    @click="viewOutput(task)"
-                    v-if="task.output"
-                    :title="$t('features.scheduled_tasks.output.title')"
-                    class="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                  >
-                    <FileText class="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    size="icon" 
-                    variant="ghost"
-                    @click="editTask(task)"
-                    :title="$t('common.actions.edit')"
-                    class="h-8 w-8 text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                  >
-                    <Pencil class="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    size="icon" 
-                    variant="ghost"
-                    @click="confirmDelete(task)"
-                    :title="$t('common.actions.delete')"
-                    class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 class="w-4 h-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
-    </div>
-    
-    <!-- Pagination -->
-    <div class="mt-6">
-        <Pagination
-            v-if="pagination.total > 0"
-            :total-items="pagination.total"
-            :per-page="pagination.per_page"
-            :current-page="pagination.current_page"
-            @page-change="changePage"
-            @update:per-page="handlePerPageChange"
+    <!-- Tasks List Template (TanStack) -->
+    <div v-else class="bg-card border border-border rounded-lg overflow-hidden shadow-sm p-0">
+        <DataTable
+            :table="table"
+            :loading="loading"
+            :empty-message="$t('features.scheduled_tasks.no_tasks')"
         />
+        
+        <!-- Pagination -->
+        <div class="px-6 py-4 border-t border-border/40">
+            <Pagination
+                v-if="pagination.total > 0"
+                :total-items="pagination.total"
+                :per-page="pagination.per_page"
+                :current-page="pagination.current_page"
+                @page-change="changePage"
+                @update:per-page="handlePerPageChange"
+            />
+        </div>
     </div>
 
     <!-- Create/Edit Dialog -->
@@ -443,7 +334,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, h } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { debounce } from '@/utils/debounce';
 
@@ -455,12 +346,6 @@ import { useAuthStore } from '@/stores/auth';
 
 // UI Components
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
     Dialog,
     DialogContent,
     DialogHeader,
@@ -477,8 +362,19 @@ import {
     SelectContent,
     SelectItem,
     Pagination,
-    Checkbox
+    Checkbox,
+    DataTable
 } from '@/components/ui';
+
+
+import { 
+    useVueTable, 
+    getCoreRowModel, 
+    createColumnHelper,
+    getSortedRowModel,
+    type SortingState,
+    type RowSelectionState
+} from '@tanstack/vue-table';
 
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Play from 'lucide-vue-next/dist/esm/icons/play.js';
@@ -631,6 +527,130 @@ const copyCronScript = async () => {
 const selectedTasks = ref<number[]>([]);
 const bulkActionSelection = ref('');
 
+const columnHelper = createColumnHelper<ScheduledTask>();
+
+const columns = [
+    columnHelper.display({
+        id: 'select',
+        header: ({ table }) => h(Checkbox, {
+            checked: table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate'),
+            'onUpdate:checked': (val) => table.toggleAllPageRowsSelected(!!val),
+        }),
+        cell: ({ row }) => h(Checkbox, {
+            checked: row.getIsSelected(),
+            'onUpdate:checked': (val) => row.toggleSelected(!!val),
+        }),
+        size: 50,
+    }),
+    columnHelper.accessor('name', {
+        header: t('features.scheduled_tasks.table.name'),
+        cell: ({ row }) => h('span', { class: 'font-semibold' }, row.original.name)
+    }),
+    columnHelper.accessor('command', {
+        header: t('features.scheduled_tasks.table.command'),
+        cell: ({ row }) => h('code', { class: 'text-[11px] bg-muted/50 px-2 py-0.5 rounded border border-border dark:bg-muted/20' }, row.original.command)
+    }),
+    columnHelper.accessor('schedule', {
+        header: t('features.scheduled_tasks.table.schedule'),
+        cell: ({ row }) => h('code', { class: 'text-[11px] font-mono font-bold text-primary' }, row.original.schedule)
+    }),
+    columnHelper.accessor('last_run_at', {
+        header: t('features.scheduled_tasks.table.last_run'),
+        cell: ({ row }) => {
+            const task = row.original;
+            if (!task.last_run_at) return h('span', { class: 'text-muted-foreground text-sm italic' }, t('common.labels.never'));
+            return h('div', { class: 'flex flex-col' }, [
+                h('span', { class: 'text-sm font-medium' }, formatDate(task.last_run_at)),
+                h('span', { class: 'text-[10px] text-muted-foreground tabular-nums' }, task.last_run_duration ? (task.last_run_duration / 1000).toFixed(2) + 's' : '')
+            ]);
+        }
+    }),
+    columnHelper.accessor('status', {
+        header: t('features.scheduled_tasks.table.status'),
+        cell: ({ row }) => h(Badge, {
+            variant: getStatusVariant(row.original.status),
+            class: 'capitalize text-[10px] px-2 py-0'
+        }, t('features.scheduled_tasks.status.' + (row.original.status || 'pending')))
+    }),
+    columnHelper.accessor('is_active', {
+        header: t('features.scheduled_tasks.table.active'),
+        cell: ({ row }) => {
+            const task = row.original;
+            return h(Button, {
+                size: 'sm',
+                variant: task.is_active ? 'default' : 'secondary',
+                onClick: () => toggleActive(task),
+                class: 'h-6 text-[10px] font-bold px-2',
+                title: task.is_active ? t('features.scheduled_tasks.tooltips.click_to_deactivate') : t('features.scheduled_tasks.tooltips.click_to_activate')
+            }, task.is_active ? t('common.labels.active') : t('common.labels.inactive'));
+        }
+    }),
+    columnHelper.display({
+        id: 'actions',
+        header: () => h('div', { class: 'text-right' }, t('features.scheduled_tasks.table.actions')),
+        cell: ({ row }) => {
+            const task = row.original;
+            return h('div', { class: 'flex justify-end gap-1 opacity-100 group-hover:opacity-100 transition-opacity' }, [
+                h(Button, {
+                    size: 'icon', variant: 'ghost', onClick: () => runTask(task),
+                    disabled: running.value === task.id,
+                    class: 'h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
+                    title: t('common.actions.run')
+                }, [running.value === task.id ? h(Loader2, { class: 'w-4 h-4 animate-spin' }) : h(Play, { class: 'w-4 h-4' })]),
+                task.output && h(Button, {
+                    size: 'icon', variant: 'ghost', onClick: () => viewOutput(task),
+                    class: 'h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20',
+                    title: t('features.scheduled_tasks.output.title')
+                }, [h(FileText, { class: 'w-4 h-4' })]),
+                h(Button, {
+                    size: 'icon', variant: 'ghost', onClick: () => editTask(task),
+                    class: 'h-8 w-8 text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/20',
+                    title: t('common.actions.edit')
+                }, [h(Pencil, { class: 'w-4 h-4' })]),
+                h(Button, {
+                    size: 'icon', variant: 'ghost', onClick: () => confirmDelete(task),
+                    class: 'h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10',
+                    title: t('common.actions.delete')
+                }, [h(Trash2, { class: 'w-4 h-4' })])
+            ]);
+        }
+    })
+];
+
+const sorting = ref<SortingState>([]);
+const rowSelection = ref<RowSelectionState>({});
+
+const table = useVueTable({
+    get data() { return tasks.value },
+    columns,
+    state: {
+        get sorting() { return sorting.value },
+        get rowSelection() { return rowSelection.value },
+    },
+    onSortingChange: updaterOrValue => {
+        sorting.value = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue;
+    },
+    onRowSelectionChange: updaterOrValue => {
+        rowSelection.value = typeof updaterOrValue === 'function' ? updaterOrValue(rowSelection.value) : updaterOrValue;
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: row => String(row.id),
+    enableRowSelection: true,
+});
+
+// Sync selectedTasks with rowSelection
+watch(rowSelection, (newSelection: RowSelectionState) => {
+    selectedTasks.value = Object.keys(newSelection)
+        .filter(key => newSelection[key])
+        .map(id => Number(id));
+}, { deep: true });
+
+// Clear selection when tasks change
+watch(tasks, () => {
+    rowSelection.value = {};
+});
+
 const pagination = ref<PaginationInfo>({
     current_page: 1,
     last_page: 1,
@@ -664,9 +684,6 @@ const isDirty = computed(() => {
     return JSON.stringify(form.value) !== initialForm.value;
 });
 
-const isAllSelected = computed(() => {
-    return tasks.value.length > 0 && selectedTasks.value.length === tasks.value.length;
-});
 
 const isSuperAdmin = computed(() => {
   return authStore.user?.roles?.some(role => role.name === 'super-admin');
@@ -753,22 +770,7 @@ const handlePerPageChange = (perPage: number) => {
     // fetchTasks will be called by the page-change event emitted by Pagination component immediately after
 };
 
-// Selection Logic
-const toggleSelection = (id: number) => {
-    if (selectedTasks.value.includes(id)) {
-        selectedTasks.value = selectedTasks.value.filter(taskId => taskId !== id);
-    } else {
-        selectedTasks.value.push(id);
-    }
-};
-
-const toggleSelectAll = (checked: boolean) => {
-    if (checked) {
-        selectedTasks.value = tasks.value.map(t => t.id);
-    } else {
-        selectedTasks.value = [];
-    }
-};
+// Selection Logic (Removed - now handled by TanStack Table)
 
 // Bulk Actions
 const handleBulkAction = async (action: string) => {

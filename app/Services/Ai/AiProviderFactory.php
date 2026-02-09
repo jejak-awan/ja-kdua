@@ -8,7 +8,9 @@ class AiProviderFactory
     {
         // If no provider specified, get default from settings
         if (! $provider) {
-            $provider = (string) \App\Models\Setting::get('ai_default_provider', 'gemini');
+            /** @var mixed $defaultProvider */
+            $defaultProvider = \App\Models\Setting::get('ai_default_provider', 'gemini');
+            $provider = is_string($defaultProvider) ? $defaultProvider : 'gemini';
         }
 
         return match ($provider) {

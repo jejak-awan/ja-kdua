@@ -58,14 +58,14 @@
                 </CardHeader>
                 <CardContent class="p-0">
                     <div class="divide-y divide-border/40">
-                        <div v-for="customer in topTalkers" :key="customer.id" class="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors">
+                        <div v-for="customer in topTalkers" :key="customer.username" class="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold">
-                                    {{ customer.name.charAt(0) }}
+                                    {{ customer.name ? customer.name.charAt(0) : '?' }}
                                 </div>
                                 <div>
                                     <p class="text-sm font-medium">{{ customer.name }}</p>
-                                    <p class="text-[10px] text-muted-foreground">ID: #{{ customer.id }}</p>
+                                    <p class="text-[10px] text-muted-foreground">User: {{ customer.username }}</p>
                                 </div>
                             </div>
                             <div class="text-right">
@@ -174,7 +174,7 @@ const chartData = computed<ChartData<'line'>>(() => {
             {
                 label: t('common.labels.inbound', 'Inbound'),
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                data: usage.value.history.map((h: any) => h.in),
+                data: usage.value.history.map((h: any) => h.up),
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 fill: true,
@@ -183,7 +183,7 @@ const chartData = computed<ChartData<'line'>>(() => {
             {
                 label: t('common.labels.outbound', 'Outbound'),
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                data: usage.value.history.map((h: any) => h.out),
+                data: usage.value.history.map((h: any) => h.down),
                 borderColor: '#f97316',
                 backgroundColor: 'rgba(249, 115, 22, 0.1)',
                 fill: true,

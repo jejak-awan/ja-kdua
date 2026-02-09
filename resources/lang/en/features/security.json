@@ -188,6 +188,7 @@
         },
         "filters": {
             "route": "Route",
+            "routePlaceholder": "Search by route path...",
             "minDuration": "Min Duration (ms)",
             "dateFrom": "Date From",
             "dateTo": "Date To"
@@ -244,6 +245,32 @@
             "acknowledged": "Acknowledged",
             "patched": "Patched",
             "ignored": "Ignored"
+        }
+    },
+    "packages": {
+        "title": "All Packages",
+        "description": "Complete list of all Composer and NPM dependencies",
+        "showAll": "Show All Packages",
+        "empty": "No packages found in project lock files",
+        "stats": {
+            "total": "Total Packages",
+            "composer": "Composer",
+            "npm": "NPM",
+            "secure": "Secure",
+            "vulnerable": "Vulnerable"
+        },
+        "filters": {
+            "status": "Security Status"
+        },
+        "table": {
+            "package": "Package",
+            "version": "Version",
+            "source": "Source",
+            "status": "Status"
+        },
+        "status": {
+            "secure": "Secure",
+            "vulnerable": "Vulnerable"
         }
     }
 }

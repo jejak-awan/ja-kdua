@@ -41,7 +41,7 @@ class SearchController extends BaseApiController
         $limitRaw = $request->input('limit', 20);
         $limit = is_numeric($limitRaw) ? (int) $limitRaw : 20;
 
-        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Content> $results */
+        /** @var array<int, \App\Models\Content> $results */
         $results = $this->searchService->search($query, $filters, $limit);
 
         return $this->success($results, 'Search results retrieved successfully');

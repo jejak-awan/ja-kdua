@@ -142,6 +142,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         \App\Models\MediaFolder::observe(\App\Observers\MediaFolderObserver::class);
+        \App\Models\Isp\Customer::observe(\App\Observers\Isp\CustomerObserver::class);
 
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {

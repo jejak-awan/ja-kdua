@@ -26,7 +26,16 @@ export interface Customer {
     billing_notes?: string;
     is_taxed?: boolean;
     unique_code?: number;
+    address_list?: string;
     plan?: BillingPlan;
+    current_usage_bytes?: number;
+    last_usage_reset_at?: string;
+    is_fup_active?: boolean;
+    // Common appends/display fields
+    name?: string;
+    balance?: number;
+    router_name?: string;
+    ip_address?: string;
 }
 
 export interface IspUser extends User {
@@ -58,6 +67,8 @@ export interface IspOutage {
     status: string;
 }
 
+export type IspStatus = 'active' | 'isolated' | 'inactive' | 'suspended' | 'pending' | 'cancelled' | 'paid' | 'unpaid';
+
 export interface IspInvoice {
     id: number;
     billing_period: string;
@@ -65,8 +76,10 @@ export interface IspInvoice {
     due_date: string;
     status: 'paid' | 'unpaid' | 'cancelled';
     user?: {
+        id: number;
         name: string;
         email: string;
+        phone?: string;
     };
 }
 
@@ -84,12 +97,20 @@ export interface IspMemberDashboard {
         name: string;
         email: string;
     };
+    customer?: Customer;
     connection?: IspConnection;
     device?: IspDevice;
     active_outages?: IspOutage[];
     unpaid_balance: number;
     invoices?: IspInvoice[];
     traffic_history?: IspTrafficData[];
+    fup?: {
+        enabled: boolean;
+        limit_gb: number;
+        usage_gb: number;
+        is_throttled: boolean;
+        throttled_speed?: string;
+    };
 }
 
 export interface IspSupportTicket {
@@ -199,6 +220,9 @@ export interface BillingPlan {
     price: number;
     cost_price: number;
     commission: number;
+    fup_limit_gb?: number;
+    fup_speed?: string;
+    fup_enabled?: boolean;
     is_active: boolean;
     features: string[];
 }
@@ -242,5 +266,8 @@ export interface IspNetworkProfile {
     download_limit: number;
     upload_limit: number;
     burst_limit: string | null;
+    fup_limit_gb: number | null;
+    fup_speed: string | null;
+    fup_enabled: boolean;
     status: string;
 }

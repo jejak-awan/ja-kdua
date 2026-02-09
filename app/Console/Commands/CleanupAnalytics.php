@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\AnalyticsEvent;
 use App\Models\AnalyticsSession;
 use App\Models\AnalyticsVisit;
+use App\Models\Setting;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -81,7 +82,6 @@ class CleanupAnalytics extends Command
         $this->newLine();
         $this->info('Deleting records...');
 
-        // Delete in batches to avoid memory issues
         $deleted = [
             'visits' => 0,
             'events' => 0,
@@ -89,23 +89,32 @@ class CleanupAnalytics extends Command
         ];
 
         // Delete visits
-        $this->output->write('Deleting visits... ');
-        $deleted['visits'] = (int) AnalyticsVisit::where('visited_at', '<', $cutoffDate)->delete();
-        $this->info("Done ({$deleted['visits']} records)");
+        $daysVisitsRaw = Setting::get('analytics_retention_days', 90);
+        /** @var int $daysVisits */
+        $daysVisits = is_numeric($daysVisitsRaw) ? (int) $daysVisitsRaw : 90;
+        /** @var int $countVisits */
+        $countVisits = AnalyticsVisit::where('visited_at', '<', now()->subDays($daysVisits))->delete();
+        $this->info(sprintf('Deleted %d old visits.', $countVisits));
 
         // Delete events
-        $this->output->write('Deleting events... ');
-        $deleted['events'] = (int) AnalyticsEvent::where('occurred_at', '<', $cutoffDate)->delete();
-        $this->info("Done ({$deleted['events']} records)");
+        $daysEventsRaw = Setting::get('analytics_event_retention_days', 60);
+        /** @var int $daysEvents */
+        $daysEvents = is_numeric($daysEventsRaw) ? (int) $daysEventsRaw : 60;
+        /** @var int $countEvents */
+        $countEvents = AnalyticsEvent::where('occurred_at', '<', now()->subDays($daysEvents))->delete();
+        $this->info(sprintf('Deleted %d old events.', $countEvents));
 
         // Delete sessions
-        $this->output->write('Deleting sessions... ');
-        $deleted['sessions'] = (int) AnalyticsSession::where('started_at', '<', $cutoffDate)->delete();
-        $this->info("Done ({$deleted['sessions']} records)");
+        $daysSessionsRaw = Setting::get('analytics_visitor_retention_days', 30);
+        /** @var int $daysSessions */
+        $daysSessions = is_numeric($daysSessionsRaw) ? (int) $daysSessionsRaw : 30;
+        /** @var int $countSessions */
+        $countSessions = AnalyticsSession::where('started_at', '<', now()->subDays($daysSessions))->delete();
+        $this->info(sprintf('Deleted %d old sessions.', $countSessions));
 
         $this->newLine();
-        $totalDeleted = array_sum($deleted);
-        $this->info("Cleanup complete! Deleted {$totalDeleted} total records.");
+        $totalDeleted = $countVisits + $countEvents + $countSessions;
+        $this->info(sprintf('Cleanup complete! Deleted %d total records.', $totalDeleted));
 
         Log::info('Analytics cleanup completed', [
             'retention_days' => $retentionDays,

@@ -15,13 +15,13 @@ class SearchService
      * @param  int  $limit
      * @return array{results: \Illuminate\Support\Collection<int, array<string, mixed>>, total: int, query: string, suggestions: array<int, array{text: string, type: string}>, is_loose?: bool}
      */
-    public function search($query, $filters = [], $limit = 20)
+    public function search($query, $filters = [], $limit = 20): array
     {
         if (empty(trim($query))) {
             return [
-                'results' => [],
+                'results' => collect(),
                 'total' => 0,
-                'query' => $query,
+                'query' => (string) $query,
                 'suggestions' => [],
             ];
         }
@@ -63,16 +63,19 @@ class SearchService
         return [
             'results' => $results->map(function ($index) {
                 /** @var SearchIndex $index */
-                return [
+                /** @var array<string, mixed> $mapped */
+                $mapped = [
                     'id' => $index->id,
-                    'type' => $index->type,
-                    'title' => $index->title,
-                    'excerpt' => $index->excerpt,
-                    'url' => $index->url,
-                    'searchable_type' => $index->searchable_type,
-                    'searchable_id' => $index->searchable_id,
+                    'type' => (string) $index->type,
+                    'title' => (string) $index->title,
+                    'excerpt' => is_scalar($index->excerpt) ? (string) $index->excerpt : null,
+                    'url' => is_scalar($index->url) ? (string) $index->url : null,
+                    'searchable_type' => (string) $index->searchable_type,
+                    'searchable_id' => (int) $index->searchable_id,
                     'relevance_score' => $index->getAttribute('relevance_score'),
                 ];
+
+                return $mapped;
             }),
             'total' => $results->count(),
             'query' => (string) $query,
@@ -84,8 +87,9 @@ class SearchService
     /**
      * @param  \Illuminate\Database\Eloquent\Builder<SearchIndex>  $queryBuilder
      * @param  string  $query
+     * @param  bool  $strict
      */
-    protected function applySearchLogic($queryBuilder, $query, $strict = true): void
+    protected function applySearchLogic($queryBuilder, $query, bool $strict = true): void
     {
         if (config('database.default') === 'mysql' || config('database.default') === 'mariadb') {
             $prepared = $this->prepareSearchQuery($query, $strict);
@@ -120,13 +124,13 @@ class SearchService
      */
     protected function applyFilters($queryBuilder, $filters): void
     {
-        if (isset($filters['type'])) {
+        if (isset($filters['type']) && is_string($filters['type'])) {
             $queryBuilder->where('type', $filters['type']);
         }
-        if (isset($filters['date_from'])) {
+        if (isset($filters['date_from']) && is_string($filters['date_from'])) {
             $queryBuilder->whereDate('created_at', '>=', $filters['date_from']);
         }
-        if (isset($filters['date_to'])) {
+        if (isset($filters['date_to']) && is_string($filters['date_to'])) {
             $queryBuilder->whereDate('created_at', '<=', $filters['date_to']);
         }
     }
@@ -136,11 +140,12 @@ class SearchService
      *
      * @param  string  $query
      * @param  string  $type
-     * @return array<string, mixed>
+     * @param  int  $limit
+     * @return array{results: \Illuminate\Support\Collection<int, array<string, mixed>>, total: int, query: string, suggestions: array<int, array{text: string, type: string}>, is_loose?: bool}
      */
-    public function searchByType($query, $type, $limit = 20)
+    public function searchByType($query, $type, int $limit = 20): array
     {
-        return $this->search($query, ['type' => $type], $limit);
+        return $this->search((string) $query, ['type' => $type], $limit);
     }
 
     /**
@@ -175,20 +180,25 @@ class SearchService
                 ->get();
         }
 
-        return $suggestions->map(function ($index) {
+        /** @var array<int, array{text: string, type: string}> $result */
+        $result = $suggestions->map(function ($index) {
+            /** @var SearchIndex $index */
             return [
-                'text' => $index->title,
-                'type' => $index->type,
+                'text' => (string) $index->title,
+                'type' => (string) $index->type,
             ];
-        });
+        })->toArray();
+
+        return $result;
     }
 
     /**
      * Prepare query for MySQL FullText
      *
      * @param  string  $query
+     * @param  bool  $strict
      */
-    protected function prepareSearchQuery($query, $strict = true): string
+    protected function prepareSearchQuery($query, bool $strict = true): string
     {
         // Prepare query for MySQL FULLTEXT search
         $terms = explode(' ', trim($query));

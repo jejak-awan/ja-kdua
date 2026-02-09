@@ -2,28 +2,37 @@
 
 namespace App\Imports\Isp;
 
-use App\Models\IspCustomer;
+use App\Models\Isp\Customer;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class CustomerImport implements ToModel, WithHeadingRow
 {
-    public function model(array $row)
+    /**
+     * @param array<string, mixed> $row
+     * @return Model|null
+     */
+    public function model(array $row): ?Model
     {
         // Skip if name is empty
         if (empty($row['nama_pelanggan'])) {
             return null;
         }
 
-        $phone = $this->sanitizePhone($row['phone'] ?? '');
+        /** @var string|null $phoneRaw */
+        $phoneRaw = $row['phone'] ?? '';
+        $phone = $this->sanitizePhone($phoneRaw ?? '');
 
         // Find or create user
+        /** @var string $name */
+        $name = $row['nama_pelanggan'];
         $user = User::firstOrCreate(
             ['phone' => $phone],
             [
-                'name' => $row['nama_pelanggan'],
+                'name' => $name,
                 'email' => $phone.'@example.com', // Dummy email if needed
                 'password' => Hash::make($phone), // Default password is phone number
                 'role' => 'customer', // Assuming 'customer' role exists or just default user
@@ -33,21 +42,33 @@ class CustomerImport implements ToModel, WithHeadingRow
         // Determine status
         $status = isset($row['aktif']) && $row['aktif'] == 1 ? 'active' : 'inactive';
 
-        // Update or Create IspCustomer
-        return IspCustomer::updateOrCreate(
+        // Update or Create Customer
+        /** @var string|null $identity */
+        $identity = $row['identitas'] ?? null;
+        /** @var string|null $alamat */
+        $alamat = $row['alamat'] ?? null;
+
+        return Customer::updateOrCreate(
             ['user_id' => $user->id],
             [
-                'identity_number' => $row['identitas'] ?? null,
-                'address_street' => $row['alamat'] ?? null,
+                'identity_number' => $identity,
+                'address_street' => $alamat,
                 'status' => $status,
                 // Add default billing plan if needed or leave null
             ]
         );
     }
 
-    private function sanitizePhone($phone)
+    /**
+     * @param mixed $phone
+     * @return string
+     */
+    private function sanitizePhone(mixed $phone): string
     {
+        if (!is_string($phone) && !is_numeric($phone)) {
+            return '';
+        }
         // Simple sanitization, remove non-numeric
-        return preg_replace('/[^0-9]/', '', $phone);
+        return (string) preg_replace('/[^0-9]/', '', (string) $phone);
     }
 }

@@ -23,6 +23,8 @@ class SecurityAlertService
 
     /**
      * Get all security alerts
+     *
+     * @return array<int, array<string, mixed>>
      */
     public function getAlerts(): array
     {
@@ -46,12 +48,18 @@ class SecurityAlertService
             // Sort by severity and time
             usort($alerts, function ($a, $b) {
                 $severityOrder = ['critical' => 0, 'warning' => 1, 'info' => 2];
-                $severityDiff = ($severityOrder[$a['severity']] ?? 3) - ($severityOrder[$b['severity']] ?? 3);
+                $aSev = is_string($a['severity'] ?? null) ? $a['severity'] : 'info';
+                $bSev = is_string($b['severity'] ?? null) ? $b['severity'] : 'info';
+                
+                $severityDiff = ($severityOrder[$aSev] ?? 3) - ($severityOrder[$bSev] ?? 3);
                 if ($severityDiff !== 0) {
                     return $severityDiff;
                 }
 
-                return strtotime($b['timestamp']) - strtotime($a['timestamp']);
+                $aTime = is_string($a['timestamp'] ?? null) ? $a['timestamp'] : now()->toDateTimeString();
+                $bTime = is_string($b['timestamp'] ?? null) ? $b['timestamp'] : now()->toDateTimeString();
+
+                return strtotime($bTime) - strtotime($aTime);
             });
 
             return array_slice($alerts, 0, 20); // Max 20 alerts
@@ -91,8 +99,8 @@ class SecurityAlertService
                 ->get();
 
             foreach ($failedByIp as $record) {
-                $count = (int) $record->getAttribute('count');
-                $ipAddress = (string) $record->getAttribute('ip_address');
+                $count = is_scalar($c = $record->getAttribute('count')) ? (int) $c : 0;
+                $ipAddress = is_scalar($ip = $record->getAttribute('ip_address')) ? (string) $ip : 'unknown';
                 $alerts[] = [
                     'id' => 'failed_login_'.md5($ipAddress),
                     'type' => 'failed_login',
@@ -175,7 +183,7 @@ class SecurityAlertService
             foreach ($multipleIpLogins as $record) {
                 $user = $record->user;
                 if ($user) {
-                    $ipCount = (int) $record->getAttribute('ip_count');
+                    $ipCount = is_scalar($ipc = $record->getAttribute('ip_count')) ? (int) $ipc : 0;
                     $alerts[] = [
                         'id' => 'multiple_ip_'.$record->user_id,
                         'type' => 'multiple_ip_login',
@@ -200,7 +208,7 @@ class SecurityAlertService
                 ->get();
 
             foreach ($bruteForce as $record) {
-                $count = (int) $record->getAttribute('count');
+                $count = is_scalar($c = $record->getAttribute('count')) ? (int) $c : 0;
                 $alerts[] = [
                     'id' => 'brute_force_'.$record->user_id,
                     'type' => 'brute_force',

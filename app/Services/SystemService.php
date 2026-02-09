@@ -10,6 +10,8 @@ class SystemService
 {
     /**
      * Get system information
+     *
+     * @return array<string, mixed>
      */
     public function getSystemInfo(): array
     {
@@ -22,24 +24,24 @@ class SystemService
             'server' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
             'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
             'database' => DB::connection()->getDatabaseName(),
-            'timezone' => config('app.timezone'),
-            'locale' => config('app.locale'),
+            'timezone' => is_scalar($tz = config('app.timezone')) ? (string) $tz : 'UTC',
+            'locale' => is_scalar($loc = config('app.locale')) ? (string) $loc : 'en',
             'environment' => app()->environment(),
-            'debug_mode' => config('app.debug'),
-            'cache_driver' => config('cache.default'),
-            'queue_driver' => config('queue.default'),
-            'session_driver' => config('session.driver'),
+            'debug_mode' => (bool) config('app.debug'),
+            'cache_driver' => is_scalar($cd = config('cache.default')) ? (string) $cd : 'file',
+            'queue_driver' => is_scalar($qd = config('queue.default')) ? (string) $qd : 'sync',
+            'session_driver' => is_scalar($sd = config('session.driver')) ? (string) $sd : 'file',
             // Memory usage info
-            'memory_usage' => $memoryInfo['used'] ?? null,
-            'memory_usage_percent' => $memoryInfo['percent'] ?? 0,
-            'memory_total' => $memoryInfo['total'] ?? null,
+            'memory_usage' => $memoryInfo['used'],
+            'memory_usage_percent' => $memoryInfo['percent'],
+            'memory_total' => $memoryInfo['total'],
             // Disk usage info
             'disk_usage' => [
-                'used' => $diskInfo['used'] ?? '0 B',
-                'total' => $diskInfo['total'] ?? '0 B',
-                'percent' => $diskInfo['percent'] ?? 0,
+                'used' => $diskInfo['used'],
+                'total' => $diskInfo['total'],
+                'percent' => $diskInfo['percent'],
             ],
-            'disk_usage_percent' => $diskInfo['percent'] ?? 0,
+            'disk_usage_percent' => $diskInfo['percent'],
             // Uptime
             'uptime' => $this->getUptime(),
             'queue_health' => $this->getQueueHealth(),
@@ -48,6 +50,8 @@ class SystemService
 
     /**
      * Get queue connection health and worker status
+     *
+     * @return array{driver: string, last_seen: mixed, is_active: bool, status: string, message: string}
      */
     public function getQueueHealth(): array
     {
@@ -66,13 +70,13 @@ class SystemService
         $isActive = false;
         if ($driver === 'sync') {
             $isActive = true;
-        } elseif ($lastSeen) {
+        } elseif (is_string($lastSeen)) {
             // If seen in the last 5 minutes, consider it active
             $isActive = now()->parse($lastSeen)->diffInMinutes() < 5;
         }
 
         return [
-            'driver' => (string) $driver,
+            'driver' => is_scalar($driver) ? (string) $driver : 'sync',
             'last_seen' => $lastSeen,
             'is_active' => $isActive,
             'status' => $isActive ? 'ok' : ($driver === 'sync' ? 'ok' : 'warning'),
@@ -84,63 +88,73 @@ class SystemService
 
     /**
      * Get application statistics
+     *
+     * @return array<string, mixed>
      */
     public function getStatistics(): array
     {
-        return Cache::remember('system_statistics', 300, function (): array {
+        $cached = Cache::get('system_statistics');
+        if (is_array($cached)) {
+            /** @var array<string, mixed> $cached */
+            return $cached;
+        }
+
+        try {
+            // Get page views/visits count (if analytics exists)
+            $totalVisits = 0;
             try {
-                // Get page views/visits count (if analytics exists)
-                $totalVisits = 0;
-                try {
-                    if (class_exists(\App\Models\PageView::class)) {
-                        $totalVisits = \App\Models\PageView::count();
-                    } elseif (class_exists(\App\Models\Analytics::class)) {
-                        $totalVisits = \App\Models\Analytics::count();
-                    }
-                } catch (\Exception $e) {
-                    // Visits tracking not available
+                if (class_exists(\App\Models\PageView::class)) {
+                    $totalVisits = \App\Models\PageView::count();
+                } elseif (class_exists(\App\Models\Analytics::class)) {
+                    $totalVisits = \App\Models\Analytics::count();
                 }
-
-                return [
-                    // Flat keys for frontend compatibility
-                    'total_contents' => \App\Models\Content::count(),
-                    'total_users' => \App\Models\User::count(),
-                    'total_media' => \App\Models\Media::count(),
-                    'total_visits' => $totalVisits,
-                    // Detailed nested data (for extended use)
-                    'contents' => [
-                        'total' => \App\Models\Content::count(),
-                        'published' => \App\Models\Content::where('status', 'published')->count(),
-                        'draft' => \App\Models\Content::where('status', 'draft')->count(),
-                        'archived' => \App\Models\Content::where('status', 'archived')->count(),
-                    ],
-                    'users' => [
-                        'total' => \App\Models\User::count(),
-                        'verified' => \App\Models\User::whereNotNull('email_verified_at')->count(),
-                    ],
-                    'media' => [
-                        'total' => \App\Models\Media::count(),
-                        'total_size' => \App\Models\Media::sum('size'),
-                    ],
-                    'categories' => \App\Models\Category::count(),
-                    'tags' => \App\Models\Tag::count(),
-                    'comments' => \App\Models\Comment::count(),
-                    'forms' => \App\Models\Form::count(),
-                    'form_submissions' => \App\Models\FormSubmission::count(),
-                    'total_email_templates' => \App\Models\EmailTemplate::count(),
-                    'newsletter_subscribers' => \App\Models\NewsletterSubscriber::count(),
-                    'email' => [
-                        'templates' => \App\Models\EmailTemplate::count(),
-                        'subscribers' => \App\Models\NewsletterSubscriber::count(),
-                        'smtp_status' => Cache::get('email_smtp_status', 'unknown'),
-                    ],
-                ];
             } catch (\Exception $e) {
-                Log::error('System statistics error: '.$e->getMessage());
-
-                return $this->getDefaultStatistics();
+                // Visits tracking not available
             }
-        });
+
+            $stats = [
+                // Flat keys for frontend compatibility
+                'total_contents' => \App\Models\Content::count(),
+                'total_users' => \App\Models\User::count(),
+                'total_media' => \App\Models\Media::count(),
+                'total_visits' => $totalVisits,
+                // Detailed nested data (for extended use)
+                'contents' => [
+                    'total' => \App\Models\Content::count(),
+                    'published' => \App\Models\Content::where('status', 'published')->count(),
+                    'draft' => \App\Models\Content::where('status', 'draft')->count(),
+                    'archived' => \App\Models\Content::where('status', 'archived')->count(),
+                ],
+                'users' => [
+                    'total' => \App\Models\User::count(),
+                    'verified' => \App\Models\User::whereNotNull('email_verified_at')->count(),
+                ],
+                'media' => [
+                    'total' => \App\Models\Media::count(),
+                    'total_size' => \App\Models\Media::sum('size'),
+                ],
+                'categories' => \App\Models\Category::count(),
+                'tags' => \App\Models\Tag::count(),
+                'comments' => \App\Models\Comment::count(),
+                'forms' => \App\Models\Form::count(),
+                'form_submissions' => \App\Models\FormSubmission::count(),
+                'total_email_templates' => \App\Models\EmailTemplate::count(),
+                'newsletter_subscribers' => \App\Models\NewsletterSubscriber::count(),
+                'email' => [
+                    'templates' => \App\Models\EmailTemplate::count(),
+                    'subscribers' => \App\Models\NewsletterSubscriber::count(),
+                    'smtp_status' => Cache::get('email_smtp_status', 'unknown'),
+                ],
+            ];
+
+            Cache::put('system_statistics', $stats, 300);
+
+            return $stats;
+        } catch (\Exception $e) {
+            Log::error('System statistics error: '.$e->getMessage());
+
+            return $this->getDefaultStatistics();
+        }
     }
 
     /**
@@ -174,10 +188,11 @@ class SystemService
         try {
             // Try reading from /proc/uptime (Linux)
             if (file_exists('/proc/uptime')) {
-                $uptime = file_get_contents('/proc/uptime');
-                $uptime = explode(' ', $uptime);
-
-                return (int) $uptime[0];
+                $uptimeRaw = file_get_contents('/proc/uptime');
+                if ($uptimeRaw !== false) {
+                    $uptimeArray = explode(' ', $uptimeRaw);
+                    return (int) $uptimeArray[0];
+                }
             }
 
             // Fallback: try uptime command
@@ -197,6 +212,8 @@ class SystemService
 
     /**
      * Get comprehensive system health
+     *
+     * @return array<string, mixed>
      */
     public function getSystemHealth(): array
     {
@@ -226,6 +243,8 @@ class SystemService
 
     /**
      * Get CPU usage
+     *
+     * @return array{percent: float, load: float, cores: int, status: string}
      */
     public function getCpuUsage(): array
     {
@@ -240,11 +259,15 @@ class SystemService
                 // Fallback to reading cpuinfo lines
                 elseif (file_exists('/proc/cpuinfo')) {
                     $cpuinfo = file_get_contents('/proc/cpuinfo');
-                    $cores = substr_count($cpuinfo, 'processor');
+                    if ($cpuinfo !== false) {
+                        $cores = substr_count($cpuinfo, 'processor');
+                    }
                 }
             } elseif (file_exists('/proc/cpuinfo')) {
                 $cpuinfo = file_get_contents('/proc/cpuinfo');
-                $cores = substr_count($cpuinfo, 'processor');
+                if ($cpuinfo !== false) {
+                    $cores = substr_count($cpuinfo, 'processor');
+                }
             }
 
             if ($cores < 1) {
@@ -258,27 +281,30 @@ class SystemService
                 usleep(200000); // Sleep 200ms
                 $stat2 = file_get_contents('/proc/stat');
 
-                $info1 = $this->parseProcStat($stat1);
-                $info2 = $this->parseProcStat($stat2);
+                if ($stat1 !== false && $stat2 !== false) {
+                    $info1 = $this->parseProcStat($stat1);
+                    $info2 = $this->parseProcStat($stat2);
 
-                if ($info1 && $info2) {
-                    // Calculate deltas
-                    $diffTotal = $info2['total'] - $info1['total'];
-                    $diffIdle = $info2['idle'] - $info1['idle'];
+                    if ($info1 && $info2) {
+                        // Calculate deltas
+                        $diffTotal = $info2['total'] - $info1['total'];
+                        $diffIdle = $info2['idle'] - $info1['idle'];
 
-                    // Prevent division by zero
-                    if ($diffTotal > 0) {
-                        $cpuPercent = (($diffTotal - $diffIdle) / $diffTotal) * 100;
+                        // Prevent division by zero
+                        if ($diffTotal > 0) {
+                            $cpuPercent = (($diffTotal - $diffIdle) / $diffTotal) * 100;
 
-                        // Get load average just for display
-                        $load = sys_getloadavg();
+                            // Get load average just for display
+                            $load = sys_getloadavg();
+                            $loadAvg = is_array($load) ? (float) $load[0] : 0.0;
 
-                        return [
-                            'percent' => round($cpuPercent, 2),
-                            'load' => $load[0] ?? 0,
-                            'cores' => $cores,
-                            'status' => $cpuPercent > 90 ? 'critical' : ($cpuPercent > 75 ? 'warning' : 'ok'),
-                        ];
+                            return [
+                                'percent' => round($cpuPercent, 2),
+                                'load' => $loadAvg,
+                                'cores' => $cores,
+                                'status' => $cpuPercent > 90 ? 'critical' : ($cpuPercent > 75 ? 'warning' : 'ok'),
+                            ];
+                        }
                     }
                 }
             }
@@ -286,16 +312,18 @@ class SystemService
             // Fallback to Load Average if /proc/stat fails
             if (file_exists('/proc/loadavg')) {
                 $load = sys_getloadavg();
-                // Load is number of runnable processes.
-                // Load 1.0 on 1 core = 100%. Load 8.0 on 8 cores = 100%.
-                $cpuPercent = min(100, ($load[0] * 100) / $cores);
+                if (is_array($load)) {
+                    // Load is number of runnable processes.
+                    // Load 1.0 on 1 core = 100%. Load 8.0 on 8 cores = 100%.
+                    $cpuPercent = min(100, ($load[0] * 100) / $cores);
 
-                return [
-                    'percent' => round($cpuPercent, 2),
-                    'load' => $load[0],
-                    'cores' => $cores,
-                    'status' => $cpuPercent > 90 ? 'critical' : ($cpuPercent > 75 ? 'warning' : 'ok'),
-                ];
+                    return [
+                        'percent' => round($cpuPercent, 2),
+                        'load' => (float) $load[0],
+                        'cores' => $cores,
+                        'status' => $cpuPercent > 90 ? 'critical' : ($cpuPercent > 75 ? 'warning' : 'ok'),
+                    ];
+                }
             }
         } catch (\Exception $e) {
             Log::debug('CPU usage error: '.$e->getMessage());
@@ -306,6 +334,9 @@ class SystemService
 
     /**
      * Parse /proc/stat content
+     *
+     * @param string $content
+     * @return array{total: float|int, idle: float|int}|null
      */
     private function parseProcStat($content): ?array
     {
@@ -314,19 +345,24 @@ class SystemService
         foreach ($lines as $line) {
             if (str_starts_with($line, 'cpu ')) {
                 // Format: cpu  user nice system idle iowait irq softirq steal guest guest_nice
-                $parts = preg_split('/\s+/', trim($line));
+                $partsRaw = preg_split('/\s+/', trim($line));
+                if ($partsRaw === false) {
+                    continue;
+                }
+                $parts = $partsRaw;
                 // Remove 'cpu'
                 array_shift($parts);
 
                 // Sum all columns for total time
-                $total = array_sum($parts);
+                $numParts = array_map('floatval', $parts);
+                $total = array_sum($numParts);
                 // Idle is the 4th column (index 3) + iowait (index 4) usually considered idle regarding CPU utilization?
                 // Standard calculation: Idle = idle + iowait
                 // Linux 2.6+:
                 // user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice
                 // indexes: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 
-                $idle = ($parts[3] ?? 0) + ($parts[4] ?? 0);
+                $idle = ($numParts[3] ?? 0) + ($numParts[4] ?? 0);
 
                 return ['total' => $total, 'idle' => $idle];
             }
@@ -337,6 +373,8 @@ class SystemService
 
     /**
      * Get memory usage
+     *
+     * @return array{percent: float, used: string, total: string, available: string, status: string}
      */
     public function getMemoryUsage(): array
     {
@@ -365,20 +403,29 @@ class SystemService
             Log::debug('Memory usage error: '.$e->getMessage());
         }
 
-        return ['percent' => 0, 'used' => '0 B', 'total' => '0 B', 'status' => 'unknown'];
+        return ['percent' => 0.0, 'used' => '0 B', 'total' => '0 B', 'available' => '0 B', 'status' => 'unknown'];
     }
 
     /**
      * Get disk usage
+     *
+     * @return array{percent: float, used: string, total: string, free: string, status: string}
      */
     public function getDiskUsage(): array
     {
         try {
             $path = base_path();
-            $total = disk_total_space($path);
-            $free = disk_free_space($path);
+            $totalRaw = @disk_total_space($path);
+            $freeRaw = @disk_free_space($path);
+ 
+            if ($totalRaw === false || $freeRaw === false) {
+                return ['percent' => 0.0, 'used' => '0 B', 'total' => '0 B', 'free' => '0 B', 'status' => 'unknown'];
+            }
+ 
+            $total = (float) $totalRaw;
+            $free = (float) $freeRaw;
             $used = $total - $free;
-            $percent = ($used / $total) * 100;
+            $percent = $total > 0 ? ($used / $total) * 100 : 0;
 
             return [
                 'percent' => round($percent, 2),
@@ -388,12 +435,14 @@ class SystemService
                 'status' => $percent > 90 ? 'critical' : ($percent > 75 ? 'warning' : 'ok'),
             ];
         } catch (\Exception $e) {
-            return ['percent' => 0, 'used' => '0 B', 'total' => '0 B', 'status' => 'unknown'];
+            return ['percent' => 0.0, 'used' => '0 B', 'total' => '0 B', 'free' => '0 B', 'status' => 'unknown'];
         }
     }
 
     /**
      * Check database connection
+     *
+     * @return array{status: string, message: string}
      */
     public function checkDatabase(): array
     {
@@ -438,6 +487,8 @@ class SystemService
 
     /**
      * Get cache size and count
+     *
+     * @return array{size: string, count: int}
      */
     public function getCacheStats(string $driver = 'file'): array
     {
@@ -473,6 +524,8 @@ class SystemService
 
     /**
      * Get cache status with stats
+     *
+     * @return array<string, mixed>
      */
     public function getCacheStatus(): array
     {
@@ -484,7 +537,8 @@ class SystemService
         $size = '0 B';
 
         // Check if driver is redis or redis_failover (starts with 'redis')
-        if (str_starts_with((string) $driver, 'redis')) {
+        $driverStr = is_scalar($driver) ? (string) $driver : 'file';
+        if (str_starts_with($driverStr, 'redis')) {
             try {
                 $redis = \Illuminate\Support\Facades\Redis::connection();
                 $redis->ping();
@@ -514,9 +568,9 @@ class SystemService
             $enabled = true; // Assume active if config exists
             try {
                 if ($driver === 'database') {
-                    /** @var string $tableName */
-                    $tableName = config('cache.stores.database.table', 'cache');
-                    $keys = DB::table($tableName)->count();
+            $tableNameRaw = config('cache.stores.database.table', 'cache');
+            $tableName = is_scalar($tableNameRaw) ? (string) $tableNameRaw : 'cache';
+            $keys = DB::table($tableName)->count();
                 }
             } catch (\Exception $e) {
                 $enabled = false;
@@ -526,7 +580,7 @@ class SystemService
         return [
             'status' => $enabled ? 'Active' : 'Inactive',
             'enabled' => $enabled,
-            'driver' => (string) $driver,
+            'driver' => is_scalar($driver) ? (string) $driver : 'unknown',
             'hits' => $hits,
             'misses' => $misses,
             'keys' => $keys,
@@ -544,9 +598,9 @@ class SystemService
         try {
             $database = DB::connection()->getDatabaseName();
             /** @var array<int, \stdClass> $size */
-            $size = DB::select('SELECT 
+            $size = DB::select('SELECT
                 ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS size_mb
-                FROM information_schema.TABLES 
+                FROM information_schema.TABLES
                 WHERE table_schema = ?', [$database]);
 
             $sizeMb = $size[0]->size_mb ?? 0;
@@ -570,11 +624,11 @@ class SystemService
         try {
             $database = DB::connection()->getDatabaseName();
             /** @var array<int, \stdClass> $tables */
-            $tables = DB::select('SELECT 
+            $tables = DB::select('SELECT
                 table_name,
                 ROUND((data_length + index_length) / 1024 / 1024, 2) AS size_mb,
                 table_rows
-                FROM information_schema.TABLES 
+                FROM information_schema.TABLES
                 WHERE table_schema = ?
                 ORDER BY (data_length + index_length) DESC
                 LIMIT 10', [$database]);
@@ -601,8 +655,9 @@ class SystemService
         $bytes = max($bytes, 0);
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
         $pow = min($pow, count($units) - 1);
-        $bytes /= pow(1024, $pow);
+        $divisor = pow(1024, $pow);
+        $bytes /= $divisor;
 
-        return round($bytes, $precision).' '.$units[$pow];
+        return round($bytes, $precision).' '.$units[(int) $pow];
     }
 }

@@ -734,6 +734,7 @@ class ContentController extends BaseApiController
             }
         }
 
+        /** @var array<int, int|string> $contentIds */
         $contentIds = $query->pluck('id')->toArray();
         $categoryIdRaw = $validated['category_id'] ?? null;
         $categoryId = is_numeric($categoryIdRaw) ? (int) $categoryIdRaw : null;

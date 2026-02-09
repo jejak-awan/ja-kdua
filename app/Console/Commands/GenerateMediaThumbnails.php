@@ -26,7 +26,7 @@ class GenerateMediaThumbnails extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $this->info('Generating thumbnails for media images...');
 

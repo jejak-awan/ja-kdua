@@ -1,0 +1,17 @@
+{
+    "ip_bindings": {
+        "title": "IP Bindings",
+        "subtitle": "Manage MAC/IP bypass rules for hotspot login",
+        "add_title": "Add IP Binding",
+        "add_desc": "Bypass hotspot login for a specific MAC or IP address",
+        "add_success": "IP Binding added successfully",
+        "empty": "No IP bindings found"
+    },
+    "cookies": {
+        "title": "Hotspot Cookies",
+        "subtitle": "Active 'remember me' sessions for hotspot users",
+        "expires_in": "Expires In",
+        "confirm_delete": "This will log the user out. Continue?",
+        "empty": "No active cookies found"
+    }
+}

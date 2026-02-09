@@ -156,39 +156,28 @@
                         </template>
 
                         <!-- MINIMIZED MODE: Group Icon with Floating Menu -->
-                        <div 
-                            v-else 
-                            class="relative group"
-                            @mouseenter="openPopup(section.key, $event)"
-                            @mouseleave="scheduleClosePopup(section.key)"
-                        >
-                            <button
-                                @click="togglePopup(section.key, $event)"
-                                class="w-full flex items-center justify-center p-2.5 rounded-xl cursor-pointer"
-                                :class="[
-                                    isSectionActive(section.key) || activePopup === section.key
-                                        ? 'bg-accent text-foreground'
-                                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                                ]"
-                            >
-                                <component :is="section.icon" class="w-5 h-5" />
-                            </button>
-
-                            <!-- Floating Submenu (Teleported to body) -->
-                            <Teleport to="body">
-                                    <div 
-                                        v-if="activePopup === section.key"
-                                        ref="popups"
-                                        class="fixed z-[9999] w-56 bg-popover border border-border/40 rounded-xl py-2 ml-2 max-h-[90vh] overflow-y-auto"
-                                        :style="{ top: popupTop + 'px', left: popupLeft + 'px' }"
-                                        @mouseenter="openPopup(section.key)"
-                                        @mouseleave="scheduleClosePopup(section.key)"
+                        <div v-else class="flex justify-center p-1">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger as-child>
+                                    <button
+                                        class="w-full flex items-center justify-center p-2.5 rounded-xl cursor-pointer transition-colors focus:outline-none"
+                                        :class="[
+                                            isSectionActive(section.key)
+                                                ? 'bg-accent text-foreground'
+                                                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                                        ]"
                                     >
-                                        <!-- Header -->
-                                        <div class="px-3 py-1.5 text-xs font-semibold text-muted-foreground tracking-wide border-b border-border mb-1">
-                                            {{ t(section.labelKey) }}
-                                        </div>
-                                        
+                                        <component :is="section.icon" class="w-5 h-5" />
+                                    </button>
+                                </DropdownMenuTrigger>
+
+                                <DropdownMenuContent side="right" :side-offset="12" class="w-56 p-0 overflow-hidden">
+                                    <!-- Header -->
+                                    <div class="px-3 py-2 text-xs font-semibold text-muted-foreground tracking-wide border-b border-border bg-muted/30">
+                                        {{ t(section.labelKey) }}
+                                    </div>
+                                    
+                                    <div class="max-h-[80vh] overflow-y-auto py-1">
                                         <!-- Items -->
                                         <template v-for="item in filteredNavigation[section.key]" :key="item.name || item.label">
                                             <div v-if="item.type === 'divider'" class="py-2 px-3 flex items-center gap-2">
@@ -199,43 +188,53 @@
                                             
                                             <!-- Sub-category Header in Popover -->
                                             <div v-else-if="item.children && item.children.length > 0" class="mt-2 first:mt-0">
-                                                <div class="px-3 py-1 text-[10px] uppercase font-bold text-muted-foreground/50 tracking-widest">
+                                                <DropdownMenuLabel class="px-3 py-1 text-[10px] uppercase font-bold text-muted-foreground/50 tracking-widest">
                                                     {{ getNavigationLabel(item) }}
-                                                </div>
-                                                <router-link
+                                                </DropdownMenuLabel>
+                                                
+                                                <DropdownMenuItem
                                                     v-for="subItem in item.children"
                                                     :key="subItem.name || subItem.label"
-                                                    :to="subItem.to || ''"
-                                                    @click="activePopup = null; $emit('close')"
-                                                    class="flex items-center px-3 py-1.5 text-xs font-medium hover:bg-accent mx-1 rounded-lg"
-                                                    :class="[
-                                                        $route.name === subItem.name
-                                                            ? 'text-foreground bg-accent'
-                                                            : 'text-muted-foreground hover:text-accent-foreground'
-                                                    ]"
+                                                    as-child
                                                 >
-                                                    <component :is="getIcon(subItem.icon || subItem.name || '')" class="w-3.5 h-3.5 flex-shrink-0 mr-2" />
-                                                    <span class="truncate">{{ getNavigationLabel(subItem) }}</span>
-                                                </router-link>
+                                                    <router-link
+                                                        :to="subItem.to || ''"
+                                                        @click="$emit('close')"
+                                                        class="flex items-center px-3 py-1.5 text-xs font-medium cursor-pointer"
+                                                        :class="[
+                                                            $route.name === subItem.name
+                                                                ? 'text-foreground bg-accent'
+                                                                : 'text-muted-foreground'
+                                                        ]"
+                                                    >
+                                                        <component :is="getIcon(subItem.icon || subItem.name || '')" class="w-3.5 h-3.5 flex-shrink-0 mr-2 opacity-70" />
+                                                        <span class="truncate">{{ getNavigationLabel(subItem) }}</span>
+                                                    </router-link>
+                                                </DropdownMenuItem>
                                             </div>
 
-                                            <router-link
+                                            <DropdownMenuItem
                                                 v-else
-                                                :to="item.to || ''"
-                                                @click="activePopup = null; $emit('close')"
-                                                class="flex items-center px-3 py-2 text-sm font-medium hover:bg-accent mx-1 rounded-xl"
-                                                :class="[
-                                                    $route.name === item.name
-                                                        ? 'text-foreground bg-accent'
-                                                        : 'text-muted-foreground hover:text-accent-foreground'
-                                                ]"
+                                                as-child
                                             >
-                                                <component :is="getIcon(item.icon || item.name || '')" class="w-4 h-4 flex-shrink-0 mr-2.5" />
-                                                <span class="truncate">{{ getNavigationLabel(item) }}</span>
-                                            </router-link>
+                                                <router-link
+                                                    :to="item.to || ''"
+                                                    @click="$emit('close')"
+                                                    class="flex items-center px-3 py-2 text-sm font-medium cursor-pointer"
+                                                    :class="[
+                                                        $route.name === item.name
+                                                            ? 'text-foreground bg-accent'
+                                                            : 'text-muted-foreground'
+                                                    ]"
+                                                >
+                                                    <component :is="getIcon(item.icon || item.name || '')" class="w-4 h-4 flex-shrink-0 mr-2.5 opacity-70" />
+                                                    <span class="truncate">{{ getNavigationLabel(item) }}</span>
+                                                </router-link>
+                                            </DropdownMenuItem>
                                         </template>
                                     </div>
-                            </Teleport>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
 </div>
                 </template>
@@ -245,7 +244,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, nextTick, type Component } from 'vue';
+import { computed, ref, watch, onMounted, nextTick as _nextTick, type Component } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { navigationGroups, type NavItem } from '@/utils/navigation';
@@ -258,7 +257,12 @@ import {
     Tooltip, 
     TooltipContent, 
     TooltipProvider, 
-    TooltipTrigger 
+    TooltipTrigger,
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel
 } from '@/components/ui';
 import type { User } from '@/types/auth';
 
@@ -268,13 +272,13 @@ interface SidebarSection {
     icon: Component | string;
 }
 
-defineProps<{
+const _props = defineProps<{
     sidebarMinimized?: boolean;
     sidebarOpen?: boolean;
     user?: User | null;
 }>();
 
-defineEmits<{
+const _emit = defineEmits<{
     (e: 'toggle-minimize'): void;
     (e: 'close'): void;
     (e: 'logout'): void;
@@ -298,11 +302,6 @@ const sidebarSections: SidebarSection[] = [
 
 const expandedSections = ref<Record<string, boolean>>({});
 const expandedSubSections = ref<Record<string, boolean>>({});
-const activePopup = ref<string | null>(null);
-const popupTop = ref(0);
-const popupLeft = ref(0);
-const popups = ref<(HTMLElement | null)[]>([]);
-let popupCloseTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const initializeExpandedSections = () => {
     if (sidebarSections.length > 0) {
@@ -353,63 +352,6 @@ const isSubSectionActive = (item: NavItem) => {
     return isItemActive(item);
 };
 
-const closePopup = (key: string) => {
-    if (activePopup.value === key) {
-        activePopup.value = null;
-    }
-};
-
-const scheduleClosePopup = (key: string) => {
-    popupCloseTimeout = setTimeout(() => {
-        closePopup(key);
-    }, 150);
-};
-
-const openPopup = async (key: string, event: MouseEvent | null = null) => {
-    if (popupCloseTimeout) {
-        clearTimeout(popupCloseTimeout);
-        popupCloseTimeout = null;
-    }
-    
-    if (event) {
-        const target = event.currentTarget as HTMLElement;
-        let anchor = target;
-        if (target.tagName !== 'BUTTON') {
-             const btn = target.querySelector('button');
-             if (btn) anchor = btn;
-        }
-        
-        const rect = anchor.getBoundingClientRect();
-        popupTop.value = rect.top;
-        popupLeft.value = rect.right;
-    }
-    
-    activePopup.value = key;
-
-    await nextTick();
-
-    if (popups.value && popups.value.length > 0) {
-        const content = popups.value.find(el => el);
-        if (content) {
-            const rect = content.getBoundingClientRect();
-            const windowHeight = window.innerHeight;
-            const bottomEdge = rect.top + rect.height;
-            
-            if (bottomEdge > windowHeight - 20) {
-                popupTop.value = Math.max(10, windowHeight - rect.height - 20);
-            }
-        }
-    }
-};
-
-const togglePopup = (key: string, event: MouseEvent) => {
-    if (activePopup.value === key) {
-        activePopup.value = null;
-    } else {
-        openPopup(key, event);
-    }
-};
-
 const isSectionActive = (key: string) => {
     const items = filteredNavigation.value[key] || [];
     return items.some(item => isItemActive(item));
@@ -427,6 +369,8 @@ const filteredNavigation = computed(() => {
 });
 
 const getNavigationLabel = (item: NavItem) => {
+    if (item.labelKey && te(item.labelKey)) return t(item.labelKey);
+
     if (item.type === 'divider') {
         const key = `common.navigation.sections.${item.label}`;
         return te(key) ? t(key) : item.label || '';

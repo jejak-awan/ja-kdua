@@ -1,0 +1,23 @@
+{
+    "admin": {
+        "vouchers": {
+            "title": "Mesin Voucher Hotspot",
+            "subtitle": "Generate massal dan kelola voucher akses hotspot.",
+            "generate": "Generate Batch",
+            "generate_title": "Generate Batch Baru",
+            "generate_success": "Batch berhasil di-generate dan sinkron ke RADIUS",
+            "pattern": "Pola Kode",
+            "duration": "Durasi Validitas",
+            "print_batch": "Cetak Batch",
+            "empty": "Voucher tidak ditemukan.",
+            "sales_report": "Laporan Penjualan",
+            "sales_report_subtitle": "Analisis penjualan voucher dan tren pendapatan",
+            "today": "Hari Ini",
+            "this_month": "Bulan Ini",
+            "selected_period": "Periode Terpilih",
+            "no_sales_data": "Tidak ada data penjualan untuk periode ini",
+            "revenue": "Pendapatan",
+            "vouchers_sold": "Voucher Terjual"
+        }
+    }
+}

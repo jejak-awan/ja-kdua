@@ -26,7 +26,10 @@ class CheckMaintenanceMode
         }
 
         // 2. Check for scheduling (End Time)
-        $endTime = Setting::get('maintenance_end_time');
+        $endTimeRaw = Setting::get('maintenance_end_time');
+        /** @var string|null $endTime */
+        $endTime = is_string($endTimeRaw) ? $endTimeRaw : null;
+
         if ($endTime) {
             try {
                 $endDateTime = \Illuminate\Support\Carbon::parse($endTime);
@@ -42,6 +45,7 @@ class CheckMaintenanceMode
 
         // 3. Allow access if it's an Admin
         $user = $request->user();
+        /** @var \App\Models\User|null $user */
         if ($user && ($user->hasRole('admin') || $user->can('view settings'))) {
             return $next($request);
         }
@@ -52,13 +56,24 @@ class CheckMaintenanceMode
         }
 
         // 5. Return maintenance view for everything else
+        /** @var string $title */
+        $title = Setting::get('maintenance_title', 'Coming Soon');
+        /** @var string $message */
+        $message = Setting::get('maintenance_message', 'We are currently working on something awesome. Please check back later.');
+        /** @var bool $countdownEnabled */
+        $countdownEnabled = (bool) Setting::get('maintenance_countdown_enabled', false);
+        /** @var string $siteName */
+        $siteName = Setting::get('site_name', 'JA-CMS');
+        /** @var string $siteLogo */
+        $siteLogo = Setting::get('site_logo', '');
+
         return response()->view('maintenance', [
-            'title' => Setting::get('maintenance_title', 'Coming Soon'),
-            'message' => Setting::get('maintenance_message', 'We are currently working on something awesome. Please check back later.'),
-            'countdownEnabled' => Setting::get('maintenance_countdown_enabled', false),
+            'title' => $title,
+            'message' => $message,
+            'countdownEnabled' => $countdownEnabled,
             'endTime' => $endTime,
-            'siteName' => Setting::get('site_name', 'JA-CMS'),
-            'siteLogo' => Setting::get('site_logo', ''),
+            'siteName' => $siteName,
+            'siteLogo' => $siteLogo,
         ], 503);
     }
 

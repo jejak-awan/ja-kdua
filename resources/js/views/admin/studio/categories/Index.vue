@@ -74,96 +74,11 @@
             </div>
             <CardContent class="p-0">
                 <div class="rounded-md border-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead class="w-[40px] text-center">
-                                    <Checkbox 
-                                        v-if="authStore.hasPermission('delete categories')"
-                                        :checked="isAllSelected"
-                                        @update:checked="toggleSelectAll"
-                                    />
-                                </TableHead>
-                                <TableHead class="text-xs text-muted-foreground/70">{{ $t('features.categories.table.name') }}</TableHead>
-                                <TableHead class="text-xs text-muted-foreground/70">{{ $t('features.categories.table.slug') }}</TableHead>
-                                <TableHead class="text-xs text-muted-foreground/70">{{ $t('features.categories.table.status') }}</TableHead>
-                                <TableHead class="text-center text-xs text-muted-foreground/70">{{ $t('features.categories.table.actions') }}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            <TableRow v-if="loading">
-                                <TableCell colspan="5" class="h-24 text-center">
-                                    <Loader2 class="h-6 w-6 animate-spin mx-auto" />
-                                </TableCell>
-                            </TableRow>
-                            
-                            <TableRow v-else-if="flatCategories.length === 0">
-                                <TableCell colspan="5" class="h-24 text-center text-muted-foreground">
-                                    {{ $t('features.categories.empty') }}
-                                </TableCell>
-                            </TableRow>
- 
-                            <TableRow 
-                                v-for="category in flatCategories" 
-                                :key="category.id"
-                                class="group"
-                            >
-                                <TableCell class="text-center">
-                                    <Checkbox 
-                                        v-if="authStore.hasPermission('delete categories')"
-                                        :checked="selectedIds.includes(category.id)" 
-                                        @update:checked="(checked: boolean | string) => toggleSelect(!!checked, category.id)"
-                                    />
-                                </TableCell>
-                                <TableCell>
-                                    <div :style="{ paddingLeft: `${category._depth * 24}px` }" class="flex items-center">
-                                        <Button 
-                                            v-if="hasChildren(category)"
-                                            variant="ghost"
-                                            size="icon"
-                                            class="h-6 w-6 mr-2 shrink-0"
-                                            @click.stop="toggleExpand(category.id)"
-                                        >
-                                            <ChevronRight 
-                                                class="w-4 h-4 transition-transform duration-200"
-                                                :class="{ 'rotate-90': expandedIds.includes(category.id) }"
-                                            />
-                                        </Button>
-                                        <span v-else class="w-6 mr-2 shrink-0"></span>
-                                        <span class="font-medium">{{ category.name }}</span>
-                                    </div>
-                                </TableCell>
-                                <TableCell class="text-muted-foreground font-mono text-xs">{{ category.slug }}</TableCell>
-                                <TableCell>
-                                    <Badge :variant="(category.is_active ? 'default' : 'secondary')">
-                                        {{ category.is_active ? $t('features.categories.status.active') : $t('features.categories.status.inactive') }}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell class="text-center">
-                                    <div class="flex justify-center gap-1">
-                                        <Button 
-                                            v-if="authStore.hasPermission('edit categories')"
-                                            variant="ghost" 
-                                            size="icon" 
-                                            class="h-8 w-8 text-muted-foreground hover:text-foreground" 
-                                            @click="openEditModal(category)"
-                                        >
-                                            <Edit2 class="w-4 h-4" />
-                                        </Button>
-                                        <Button 
-                                            v-if="authStore.hasPermission('delete categories')"
-                                            variant="ghost" 
-                                            size="icon" 
-                                            class="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" 
-                                            @click="deleteCategory(category)"
-                                        >
-                                            <Trash2 class="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
+                <DataTable
+                    :table="table"
+                    :loading="loading"
+                    :empty-message="$t('features.categories.empty')"
+                />
                 </div>
             </CardContent>
             <Pagination
@@ -195,7 +110,6 @@ import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
-import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import Edit2 from 'lucide-vue-next/dist/esm/icons/pen-line.js';
 import ChevronRight from 'lucide-vue-next/dist/esm/icons/chevron-right.js';
@@ -212,18 +126,22 @@ import {
     Card,
     CardContent,
     Pagination,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+    DataTable,
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue
 } from '@/components/ui';
+import { h } from 'vue';
+import { 
+    useVueTable, 
+    getCoreRowModel, 
+    createColumnHelper,
+    getSortedRowModel,
+    type SortingState,
+    type RowSelectionState
+} from '@tanstack/vue-table';
 
 // Stores & Composables
 import { useAuthStore } from '@/stores/auth';
@@ -316,6 +234,119 @@ const flattenTree = (nodes: Category[], depth = 0): FlatCategory[] => {
 const flatCategories = computed(() => {
     return flattenTree(categories.value);
 });
+
+const columnHelper = createColumnHelper<FlatCategory>();
+
+const columns = [
+    columnHelper.display({
+        id: 'select',
+        header: ({ table }) => h('div', { class: 'text-center' }, [
+            authStore.hasPermission('delete categories') && h(Checkbox, {
+                checked: table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate'),
+                'onUpdate:checked': (val) => table.toggleAllPageRowsSelected(!!val),
+            })
+        ]),
+        cell: ({ row }) => h('div', { class: 'text-center' }, [
+            authStore.hasPermission('delete categories') && h(Checkbox, {
+                checked: row.getIsSelected(),
+                'onUpdate:checked': (val) => row.toggleSelected(!!val),
+            })
+        ]),
+        size: 40,
+    }),
+    columnHelper.accessor('name', {
+        header: t('features.categories.table.name'),
+        cell: ({ row }) => {
+            const category = row.original;
+            return h('div', {
+                style: { paddingLeft: `${category._depth * 24}px` },
+                class: 'flex items-center'
+            }, [
+                hasChildren(category) ? h(Button, {
+                    variant: 'ghost',
+                    size: 'icon',
+                    class: 'h-6 w-6 mr-2 shrink-0',
+                    onClick: (e: Event) => {
+                        e.stopPropagation();
+                        toggleExpand(category.id);
+                    }
+                }, [
+                    h(ChevronRight, {
+                        class: [
+                            'w-4 h-4 transition-transform duration-200',
+                            expandedIds.value.includes(category.id) ? 'rotate-90' : ''
+                        ]
+                    })
+                ]) : h('span', { class: 'w-6 mr-2 shrink-0' }),
+                h('span', { class: 'font-medium' }, category.name)
+            ]);
+        }
+    }),
+    columnHelper.accessor('slug', {
+        header: t('features.categories.table.slug'),
+        cell: ({ row }) => h('span', { class: 'text-muted-foreground font-mono text-xs' }, row.original.slug)
+    }),
+    columnHelper.accessor('is_active', {
+        header: t('features.categories.table.status'),
+        cell: ({ row }) => h(Badge, {
+            variant: row.original.is_active ? 'default' : 'secondary'
+        }, row.original.is_active ? t('features.categories.status.active') : t('features.categories.status.inactive'))
+    }),
+    columnHelper.display({
+        id: 'actions',
+        header: () => h('div', { class: 'text-center' }, t('features.categories.table.actions')),
+        cell: ({ row }) => h('div', { class: 'flex justify-center gap-1' }, [
+            authStore.hasPermission('edit categories') && h(Button, {
+                variant: 'ghost',
+                size: 'icon',
+                class: 'h-8 w-8 text-muted-foreground hover:text-foreground',
+                onClick: () => openEditModal(row.original)
+            }, [h(Edit2, { class: 'w-4 h-4' })]),
+            authStore.hasPermission('delete categories') && h(Button, {
+                variant: 'ghost',
+                size: 'icon',
+                class: 'h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10',
+                onClick: () => deleteCategory(row.original)
+            }, [h(Trash2, { class: 'w-4 h-4' })])
+        ])
+    })
+];
+
+const sorting = ref<SortingState>([]);
+const rowSelection = ref<RowSelectionState>({});
+
+const table = useVueTable({
+    get data() { return flatCategories.value },
+    columns,
+    state: {
+        get sorting() { return sorting.value },
+        get rowSelection() { return rowSelection.value },
+    },
+    onSortingChange: updaterOrValue => {
+        sorting.value = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue;
+    },
+    onRowSelectionChange: updaterOrValue => {
+        rowSelection.value = typeof updaterOrValue === 'function' ? updaterOrValue(rowSelection.value) : updaterOrValue;
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: row => String(row.id),
+    enableRowSelection: true,
+});
+
+// Sync selectedIds with rowSelection for bulk actions
+watch(rowSelection, (newSelection) => {
+    selectedIds.value = Object.keys(newSelection)
+        .filter(key => newSelection[key])
+        .map(id => Number(id));
+}, { deep: true });
+
+// Clear selection when categories change
+watch(categories, () => {
+    rowSelection.value = {};
+});
+
+
 
 const fetchCategories = async (page = 1) => {
     loading.value = true;
@@ -426,27 +457,6 @@ const deleteCategory = async (category: Category) => {
 };
 
 // Bulk Actions
-const toggleSelect = (checked: boolean, id: number) => {
-    if (checked) {
-        if (!selectedIds.value.includes(id)) selectedIds.value.push(id);
-    } else {
-        selectedIds.value = selectedIds.value.filter(itemId => itemId !== id);
-    }
-};
-
-const toggleSelectAll = (checked: boolean) => {
-    if (checked) {
-        // Select all VISIBLE items (flat)
-        selectedIds.value = flatCategories.value.map((c: FlatCategory) => c.id);
-    } else {
-        selectedIds.value = [];
-    }
-};
-
-const isAllSelected = computed(() => {
-    return flatCategories.value.length > 0 && 
-           flatCategories.value.every((c: FlatCategory) => selectedIds.value.includes(c.id));
-});
 
 const confirmBulkDelete = async () => {
    const confirmed = await confirm({

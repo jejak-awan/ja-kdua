@@ -234,12 +234,15 @@ class FormSubmissionController extends BaseApiController
         @ini_set('memory_limit', '512M');
         @set_time_limit(120);
 
+        /** @var \Illuminate\Database\Eloquent\Builder<\App\Models\FormSubmission> $exportQuery */
+        $exportQuery = $query->getQuery();
+
         if ($format === 'csv') {
-            return Excel::download(new FormSubmissionsExport($query, $fieldKeys), "{$filename}.csv", \Maatwebsite\Excel\Excel::CSV);
+            return Excel::download(new FormSubmissionsExport($exportQuery, $fieldKeys), "{$filename}.csv", \Maatwebsite\Excel\Excel::CSV);
         }
 
         if ($format === 'pdf') {
-            $submissions = $query->get();
+            $submissions = $exportQuery->get();
             if (empty($fieldKeys)) {
                 $fieldKeys = collect($submissions)->flatMap(function ($s) {
                     return array_keys($s->data ?? []);
@@ -265,7 +268,7 @@ class FormSubmissionController extends BaseApiController
                 ->header('Content-Type', 'application/pdf');
         }
 
-        return Excel::download(new FormSubmissionsExport($query, $fieldKeys), "{$filename}.xlsx");
+        return Excel::download(new FormSubmissionsExport($exportQuery, $fieldKeys), "{$filename}.xlsx");
     }
 
     /**

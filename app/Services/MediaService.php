@@ -21,6 +21,8 @@ class MediaService
 
     /**
      * Upload and process a media file
+     *
+     * @param array<string, mixed> $metadata
      */
     public function upload(UploadedFile $file, ?int $folderId = null, bool $optimize = true, ?int $authorId = null, bool $isShared = false, array $metadata = []): Media
     {
@@ -29,16 +31,25 @@ class MediaService
             $this->sanitizeSvg($file->getRealPath());
         }
 
-        $path = $file->store('media', 'public');
+        $pathRaw = $file->store('media', 'public');
+        $path = is_string($pathRaw) ? $pathRaw : '';
         $fullPath = Storage::disk('public')->path($path);
 
         // Optimize image if requested (and not SVG, since we just sanitized/saved it, but optimizeImage might support it?)
         // optimizeImage uses Intervention which might not handle SVGs well depending on driver.
         // Usually we don't optimize SVGs with ImageManager.
-        if ($optimize && str_starts_with($file->getMimeType(), 'image/') && $file->getMimeType() !== 'image/svg+xml') {
-            $maxWidth = (int) Setting::get('media_max_width', 1920);
-            $quality = (int) Setting::get('media_optimization_quality', 85);
-            $autoConvert = Setting::get('media_auto_convert_webp', true);
+        $mimeTypeStr = (string) $file->getMimeType(); // Original mime type as string for checks
+        $mimeType = $mimeTypeStr; // This variable will hold the final mime type for the media record
+        if ($optimize && str_starts_with($mimeTypeStr, 'image/') && $mimeTypeStr !== 'image/svg+xml') {
+            /** @var mixed $maxWidthRaw */
+            $maxWidthRaw = Setting::get('media_max_width', 1920);
+            $maxWidth = is_numeric($maxWidthRaw) ? (int) $maxWidthRaw : 1920;
+
+            /** @var mixed $qualityRaw */
+            $qualityRaw = Setting::get('media_optimization_quality', 85);
+            $quality = is_numeric($qualityRaw) ? (int) $qualityRaw : 85;
+
+            $autoConvert = (bool) Setting::get('media_auto_convert_webp', true);
 
             $this->optimizeImage($fullPath, $maxWidth, $quality);
 
@@ -53,27 +64,33 @@ class MediaService
             }
         }
 
+        $metadataCaption = $metadata['caption'] ?? null;
+        $metadataAlt = $metadata['alt'] ?? null;
+
         $media = Media::create([
             'name' => $fileName ?? $file->getClientOriginalName(),
             'file_name' => $fileName ?? $file->getClientOriginalName(),
-            'mime_type' => $mimeType ?? $file->getMimeType(),
+            'mime_type' => $mimeType,
             'disk' => 'public',
             'path' => $path,
             'size' => filesize($fullPath),
             'folder_id' => $folderId,
             'author_id' => $authorId,
             'is_shared' => $isShared,
-            'caption' => isset($metadata['caption']) ? (string) $metadata['caption'] : null,
-            'alt' => isset($metadata['alt']) ? (string) $metadata['alt'] : $file->getClientOriginalName(),
+            'caption' => is_scalar($metadataCaption) ? (string) $metadataCaption : null,
+            'alt' => is_scalar($metadataAlt) ? (string) $metadataAlt : $file->getClientOriginalName(),
         ]);
 
         // Sync tags if provided
         if (! empty($metadata['tags']) && is_array($metadata['tags'])) {
-            $this->syncTags($media, $metadata['tags']);
+            /** @var array<int, string> $tags */
+            $tags = $metadata['tags'];
+            $this->syncTags($media, $tags);
         }
 
         // Auto-generate thumbnail for images
-        if (str_starts_with($media->mime_type, 'image/')) {
+        $mediaMimeType = (string) $media->mime_type;
+        if (str_starts_with($mediaMimeType, 'image/')) {
             try {
                 $this->generateThumbnail($media);
             } catch (\Exception $e) {
@@ -137,7 +154,7 @@ class MediaService
             $image = $manager->read($fullPath);
 
             $pathInfo = pathinfo($fullPath);
-            $filename = $pathInfo['filename'] ?? uniqid();
+            $filename = $pathInfo['filename'];
             $dirname = $pathInfo['dirname'] ?? '.';
             $newPath = $dirname.'/'.$filename.'.webp';
 
@@ -172,8 +189,8 @@ class MediaService
             mkdir($thumbnailDir, 0755, true);
         }
 
-        $pathInfo = pathinfo($media->path);
-        $fileName = $pathInfo['filename'] ?? uniqid();
+        $pathInfo = pathinfo((string) $media->path);
+        $fileName = $pathInfo['filename'];
         $extension = $pathInfo['extension'] ?? '';
 
         // SVG files get converted to PNG for thumbnail
@@ -297,7 +314,7 @@ class MediaService
                 'type' => 'file',
                 'size' => $media->size,
                 'extension' => pathinfo($fileName, PATHINFO_EXTENSION),
-                'mime_type' => $media->mime_type,
+                'mime_type' => $media->mime_type ?: 'application/octet-stream',
                 'deleted_by' => \Illuminate\Support\Facades\Auth::id(),
                 'deleted_at' => now(),
             ]);
@@ -481,6 +498,10 @@ class MediaService
 
     /**
      * Perform bulk action on media
+     *
+     * @param array<int, int> $mediaIds
+     * @param array<int, int> $folderIds
+     * @return array{media_count: int, folder_count: int}
      */
     public function bulkAction(string $action, array $mediaIds, ?int $folderId = null, ?string $altText = null, array $folderIds = []): array
     {
@@ -609,8 +630,13 @@ class MediaService
 
         return $usages->map(function ($usage) {
             /** @var \App\Models\MediaUsage $usage */
-            $modelClass = (string) $usage->getAttribute('model_type');
-            $modelId = (int) $usage->getAttribute('model_id');
+            /** @var mixed $modelTypeRaw */
+            $modelTypeRaw = $usage->getAttribute('model_type');
+            $modelClass = is_string($modelTypeRaw) ? $modelTypeRaw : '';
+
+            /** @var mixed $modelIdRaw */
+            $modelIdRaw = $usage->getAttribute('model_id');
+            $modelId = is_numeric($modelIdRaw) ? (int) $modelIdRaw : 0;
 
             $model = null;
             try {
@@ -626,11 +652,11 @@ class MediaService
                 'id' => $usage->id,
                 'model_type' => $modelClass,
                 'model_id' => $modelId,
-                'field_name' => $usage->getAttribute('field_name'),
+                'field_name' => is_scalar($usage->getAttribute('field_name')) ? (string) $usage->getAttribute('field_name') : '',
                 'model' => $model ? [
                     'id' => $model->getKey(),
-                    'title' => (string) ($model->getAttribute('title') ?? $model->getAttribute('name') ?? 'N/A'),
-                    'slug' => $model->getAttribute('slug'),
+                    'title' => is_scalar($titleAttr = ($model->getAttribute('title') ?: ($model->getAttribute('name') ?: 'N/A'))) ? (string) $titleAttr : 'N/A',
+                    'slug' => is_scalar($model->getAttribute('slug')) ? (string) $model->getAttribute('slug') : null,
                     'type' => class_basename($modelClass),
                 ] : [
                     'id' => $modelId,
@@ -639,7 +665,7 @@ class MediaService
                 ],
                 'created_at' => $usage->created_at,
             ];
-        })->toArray();
+        })->all();
     }
 
     /**
@@ -658,13 +684,14 @@ class MediaService
             $manager = new \Intervention\Image\ImageManager($driver);
             $image = $manager->read($imageFile->getRealPath());
 
-            $autoConvert = Setting::get('media_auto_convert_webp', true);
-            $quality = (int) Setting::get('media_optimization_quality', 85);
+            $autoConvert = (bool) Setting::get('media_auto_convert_webp', true);
+            $qualityRaw = Setting::get('media_optimization_quality', 85);
+            $quality = is_numeric($qualityRaw) ? (int) $qualityRaw : 85;
 
             if ($saveAsNew) {
-                $pathInfo = pathinfo($media->path);
+                $pathInfo = pathinfo((string) $media->path);
                 $dirname = $pathInfo['dirname'] ?? 'media';
-                $filename = (string) ($pathInfo['filename'] ?? uniqid());
+                $filename = $pathInfo['filename'];
                 $extension = (string) ($pathInfo['extension'] ?? 'jpg');
 
                 $finalExtension = $autoConvert ? 'webp' : $extension;
@@ -714,8 +741,8 @@ class MediaService
 
             if ($autoConvert && $media->mime_type !== 'image/webp') {
                 // Convert to webp even on overwrite
-                $pathInfo = pathinfo($media->path);
-                $filename = (string) ($pathInfo['filename'] ?? uniqid());
+                $pathInfo = pathinfo((string) $media->path);
+                $filename = $pathInfo['filename'];
                 $dirname = (string) ($pathInfo['dirname'] ?? 'media');
                 $newFileName = $filename.'.webp';
                 $newPath = $dirname.'/'.$newFileName;

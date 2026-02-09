@@ -37,7 +37,7 @@ class ThemeHooksService
     /**
      * Execute an action hook
      */
-    public function doAction(string $hook, ...$args): void
+    public function doAction(string $hook, mixed ...$args): void
     {
         if (! isset($this->actions[$hook])) {
             return;

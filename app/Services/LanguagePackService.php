@@ -22,8 +22,10 @@ class LanguagePackService
 {
     protected string $langPath;
 
+    /** @var array<int, string> */
     protected array $protectedLocales = ['en', 'id']; // Cannot be deleted
 
+    /** @var array<int, string> */
     // Allowed file extensions in language packs
     protected array $allowedExtensions = ['json', 'js'];
 
@@ -33,6 +35,7 @@ class LanguagePackService
     // Maximum total extracted size (5MB)
     protected int $maxTotalSize = 5242880;
 
+    /** @var array<int, string> */
     // Dangerous patterns that indicate malicious content
     protected array $dangerousPatterns = [
         // PHP code
@@ -122,9 +125,9 @@ class LanguagePackService
         }
 
         $hasIndex = File::exists($path.'/index.js');
-        /** @var array<int, string>|false $jsonFiles */
+        /** @var list<string>|false $jsonFiles */
         $jsonFiles = glob($path.'/*.json');
-        /** @var array<int, string>|false $nestedJsonFiles */
+        /** @var list<string>|false $nestedJsonFiles */
         $nestedJsonFiles = glob($path.'/*/*.json');
 
         $hasJson = ($jsonFiles !== false && count($jsonFiles) > 0) || ($nestedJsonFiles !== false && count($nestedJsonFiles) > 0);
@@ -232,11 +235,11 @@ class LanguagePackService
         if (! $validation['valid']) {
             $zip->close();
             Log::warning('Language pack import blocked', [
-                'reason' => $validation['message'],
+                'reason' => $validation['message'] ?? 'Unknown security violation',
                 'file' => $zipPath,
             ]);
 
-            return ['success' => false, 'message' => $validation['message']];
+            return ['success' => false, 'message' => $validation['message'] ?? 'Import blocked for security reasons'];
         }
 
         $locale = $targetLocale ?? $validation['locale'] ?? 'unknown';
@@ -262,7 +265,7 @@ class LanguagePackService
             if (! $contentValidation['valid']) {
                 $this->cleanupTempDirectory($tempExtractPath);
 
-                return ['success' => false, 'message' => $contentValidation['message']];
+                return ['success' => false, 'message' => $contentValidation['message'] ?? 'Invalid extracted content'];
             }
 
             // Move validated content to lang directory

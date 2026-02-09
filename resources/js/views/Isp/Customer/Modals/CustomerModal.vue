@@ -188,6 +188,40 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Usage Section -->
+                            <div v-if="customer && (customer.customer || customer.isp_customer)" class="border-t pt-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <Gauge class="w-4 h-4 text-primary" />
+                                        <h3 class="text-sm font-medium">Data Usage</h3>
+                                    </div>
+                                    <div v-if="(customer.customer || customer.isp_customer)?.is_fup_active" class="flex items-center gap-1.5 px-2 py-0.5 bg-amber-500/10 text-amber-600 rounded-full text-[10px] font-bold uppercase tracking-wider border border-amber-500/20">
+                                        <ShieldAlert class="w-3 h-3" />
+                                        Throttled
+                                    </div>
+                                </div>
+                                <div class="space-y-2 p-3 bg-muted/30 rounded-xl border border-border/50">
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="text-muted-foreground">Current Consumption</span>
+                                        <span class="font-bold font-mono">{{ formatBytes((customer.customer || customer.isp_customer)?.current_usage_bytes || 0) }}</span>
+                                    </div>
+                                    <div class="w-full bg-muted h-2 rounded-full overflow-hidden">
+                                        <div 
+                                            class="h-full transition-all duration-500" 
+                                            :class="usagePercentage >= 90 ? 'bg-destructive' : usagePercentage >= 75 ? 'bg-amber-500' : 'bg-primary'"
+                                            :style="{ width: `${usagePercentage}%` }"
+                                        ></div>
+                                    </div>
+                                    <div class="flex justify-between text-[10px] text-muted-foreground mt-1">
+                                        <span>{{ usagePercentage }}% used</span>
+                                        <span v-if="(customer.customer || customer.isp_customer)?.last_usage_reset_at">
+                                            Reset: {{ new Date((customer.customer || customer.isp_customer)!.last_usage_reset_at!).toLocaleDateString() }}
+                                        </span>
+                                        <span v-else>Reset: -</span>
+                                    </div>
+                                </div>
+                            </div>
                         </TabsContent>
 
                         <!-- Billing Tab -->
@@ -322,6 +356,8 @@ import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
 import EyeOff from 'lucide-vue-next/dist/esm/icons/eye-off.js';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import ShieldAlert from 'lucide-vue-next/dist/esm/icons/shield-alert.js';
+import Gauge from 'lucide-vue-next/dist/esm/icons/gauge.js';
 import type { BillingPlan, IspUser, Customer } from '@/types/isp';
 import * as L from 'leaflet';
 import { formatCurrency } from '@/utils/format';
@@ -397,6 +433,25 @@ const removeInvoiceItem = (index: number) => {
 
 const invoiceItemsTotal = computed(() => {
     return form.value.invoice_items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+});
+
+const formatBytes = (bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const usagePercentage = computed(() => {
+    const c = props.customer;
+    if (!c) return 0;
+    const profile = (c.customer || c.isp_customer || {}) as Customer;
+    const plan = plans.value.find(p => p.id === Number(profile.billing_plan_id));
+    if (!plan || !plan.fup_enabled || !plan.fup_limit_gb) return 0;
+    
+    const usageGb = (profile.current_usage_bytes || 0) / (1024 * 1024 * 1024);
+    return Math.min(Math.round((usageGb / plan.fup_limit_gb) * 100), 100);
 });
 
 // Fetch resources

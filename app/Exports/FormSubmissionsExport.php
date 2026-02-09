@@ -2,6 +2,8 @@
 
 namespace App\Exports;
 
+use App\Models\FormSubmission;
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -10,29 +12,42 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
+/**
+ * @implements WithMapping<FormSubmission>
+ */
 class FormSubmissionsExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping, WithStyles
 {
     /**
-     * @var \Illuminate\Database\Eloquent\Builder
+     * @var Builder<FormSubmission>
      */
     protected $query;
 
+    /**
+     * @var array<int, string>
+     */
     protected $fieldKeys;
 
-    public function __construct($query, array $fieldKeys)
+    /**
+     * @param Builder<FormSubmission> $query
+     * @param array<int, string> $fieldKeys
+     */
+    public function __construct(Builder $query, array $fieldKeys)
     {
         $this->query = $query;
         $this->fieldKeys = $fieldKeys;
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder<FormSubmission>
      */
-    public function query()
+    public function query(): Builder
     {
         return $this->query;
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function headings(): array
     {
         return array_merge([
@@ -44,18 +59,20 @@ class FormSubmissionsExport implements FromQuery, ShouldAutoSize, WithHeadings, 
     }
 
     /**
-     * @param  \App\Models\FormSubmission  $submission
+     * @param FormSubmission $submission
+     * @return array<int, mixed>
      */
     public function map($submission): array
     {
         $row = [
             $submission->id,
-            $submission->created_at->format('Y-m-d H:i:s'),
+            $submission->created_at ? $submission->created_at->format('Y-m-d H:i:s') : '-',
             $submission->ip_address,
-            ucfirst($submission->status),
+            ucfirst((string) $submission->status),
         ];
 
         foreach ($this->fieldKeys as $key) {
+            /** @var mixed $value */
             $value = $submission->data[$key] ?? '';
             $row[] = is_array($value) ? implode(', ', $value) : $value;
         }
@@ -63,7 +80,11 @@ class FormSubmissionsExport implements FromQuery, ShouldAutoSize, WithHeadings, 
         return $row;
     }
 
-    public function styles(Worksheet $sheet)
+    /**
+     * @param Worksheet $sheet
+     * @return array<int|string, mixed>
+     */
+    public function styles(Worksheet $sheet): array
     {
         return [
             1 => [

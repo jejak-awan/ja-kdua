@@ -17,6 +17,7 @@ class StrongPassword implements Rule
 
     protected bool $requireSymbol;
 
+    /** @var array<int, string> */
     protected array $failedChecks = [];
 
     /**
@@ -25,11 +26,20 @@ class StrongPassword implements Rule
      */
     public function __construct()
     {
-        $this->minLength = (int) Setting::get('password_min_length', 8);
-        $this->requireUppercase = (bool) Setting::get('password_require_uppercase', true);
-        $this->requireLowercase = (bool) Setting::get('password_require_lowercase', true);
-        $this->requireNumber = (bool) Setting::get('password_require_number', true);
-        $this->requireSymbol = (bool) Setting::get('password_require_symbol', false);
+        $minLenRaw = Setting::get('password_min_length', 8);
+        $this->minLength = is_numeric($minLenRaw) ? (int) $minLenRaw : 8;
+        
+        $upperRaw = Setting::get('password_require_uppercase', true);
+        $this->requireUppercase = filter_var($upperRaw, FILTER_VALIDATE_BOOLEAN);
+        
+        $lowerRaw = Setting::get('password_require_lowercase', true);
+        $this->requireLowercase = filter_var($lowerRaw, FILTER_VALIDATE_BOOLEAN);
+        
+        $numRaw = Setting::get('password_require_number', true);
+        $this->requireNumber = filter_var($numRaw, FILTER_VALIDATE_BOOLEAN);
+        
+        $symRaw = Setting::get('password_require_symbol', false);
+        $this->requireSymbol = filter_var($symRaw, FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
@@ -42,6 +52,10 @@ class StrongPassword implements Rule
     public function passes($attribute, $value)
     {
         $this->failedChecks = [];
+
+        if (!is_string($value)) {
+            return false;
+        }
 
         if (strlen($value) < $this->minLength) {
             $this->failedChecks[] = "at least {$this->minLength} characters";

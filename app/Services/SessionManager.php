@@ -19,8 +19,8 @@ class SessionManager
 
         // Determine lifetime based on role hierarchy
         $lifetime = $user->isAtLeastRole('admin')
-            ? (int) config('session.admin_lifetime', 120)  // 2 hours for admins
-            : (int) config('session.user_lifetime', 480);  // 8 hours for regular users
+            ? (is_scalar($vAdmin = config('session.admin_lifetime', 120)) ? (int) $vAdmin : 120)  // 2 hours for admins
+            : (is_scalar($vUser = config('session.user_lifetime', 480)) ? (int) $vUser : 480);  // 8 hours for regular users
 
         // Set session lifetime dynamically
         config(['session.lifetime' => $lifetime]);
@@ -34,6 +34,9 @@ class SessionManager
      */
     public static function getLifetime(): int
     {
-        return (int) Session::get('session_lifetime', (int) config('session.lifetime'));
+        $defaultLifetime = is_scalar($vDef = config('session.lifetime')) ? (int) $vDef : 120;
+        $sessionLifetime = Session::get('session_lifetime', $defaultLifetime);
+
+        return is_scalar($sessionLifetime) ? (int) $sessionLifetime : $defaultLifetime;
     }
 }

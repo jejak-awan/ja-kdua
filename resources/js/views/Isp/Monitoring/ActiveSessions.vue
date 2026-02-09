@@ -39,85 +39,12 @@
                 </div>
             </div>
 
-            <div v-else-if="loading && sessions.length === 0" class="p-24 text-center">
-                <Loader2 class="w-10 h-10 animate-spin mx-auto text-primary opacity-50" />
-                <p class="mt-4 text-sm font-medium text-muted-foreground animate-pulse">{{ t('isp.monitor.connecting') }}</p>
-            </div>
-
-            <div v-else class="overflow-x-auto">
-                <Table>
-                    <TableHeader class="bg-muted/30">
-                        <TableRow>
-                            <TableHead class="w-[280px] py-4">{{ t('isp.monitor.active_sessions.table.customer') }}</TableHead>
-                            <TableHead class="py-4">{{ t('isp.monitor.active_sessions.table.ip_address') }}</TableHead>
-                            <TableHead class="py-4">{{ t('isp.monitor.active_sessions.table.uptime') }}</TableHead>
-                            <TableHead class="text-center py-4">{{ t('isp.monitor.active_sessions.table.type') }}</TableHead>
-                            <TableHead class="py-4">{{ t('isp.monitor.active_sessions.table.caller_id') }}</TableHead>
-                            <TableHead class="text-right py-4 pr-6">{{ t('isp.monitor.active_sessions.table.actions') }}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow v-for="session in sessions" :key="session.type + '-' + session.id" class="hover:bg-primary/5 transition-all duration-300 group">
-                            <TableCell class="py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                                        <User class="w-5 h-5 font-bold" />
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="font-semibold text-foreground tracking-tight">{{ session.name }}</span>
-                                        <span class="text-[10px] text-muted-foreground font-mono uppercase tracking-widest opacity-60">{{ session.service || 'Default' }}</span>
-                                    </div>
-                                </div>
-                            </TableCell>
-                            <TableCell class="py-4">
-                                <div class="flex items-center gap-2 font-mono text-[11px] text-foreground/80">
-                                    <Globe class="w-3.5 h-3.5 text-primary/40" />
-                                    {{ session.address }}
-                                </div>
-                            </TableCell>
-                            <TableCell class="py-4">
-                                <div class="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                                    <Clock class="w-3.5 h-3.5 opacity-50" />
-                                    {{ session.uptime }}
-                                </div>
-                            </TableCell>
-                            <TableCell class="py-4 text-center">
-                                <Badge 
-                                    :variant="session.type === 'pppoe' ? 'default' : 'secondary'" 
-                                    class="text-[9px] font-bold uppercase tracking-tighter px-2 py-0.5 rounded-md"
-                                >
-                                    {{ session.type }}
-                                </Badge>
-                            </TableCell>
-                            <TableCell class="py-4">
-                                <span class="font-mono text-[10px] text-muted-foreground/70 bg-muted/20 px-1.5 py-0.5 rounded">
-                                    {{ session.caller_id || 'N/A' }}
-                                </span>
-                            </TableCell>
-                            <TableCell class="py-4 text-right pr-6">
-                                <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    class="h-8 w-8 p-0 text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-full transition-all group-hover:scale-110" 
-                                    @click="disconnect(session)"
-                                    :loading="disconnecting === session.id"
-                                >
-                                    <Trash2 class="w-4 h-4" />
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                        <TableRow v-if="sessions.length === 0 && !loading">
-                            <TableCell colspan="6" class="p-24 text-center">
-                                <div class="flex flex-col items-center justify-center gap-3 py-10">
-                                    <div class="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center">
-                                        <CircleAlert class="w-8 h-8 text-muted-foreground/30" />
-                                    </div>
-                                    <h4 class="text-sm font-medium text-muted-foreground">{{ t('isp.monitor.active_sessions.messages.no_sessions') }}</h4>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
+            <div v-else class="p-0">
+                <DataTable
+                    :table="table"
+                    :loading="loading"
+                    :empty-message="t('isp.monitor.active_sessions.messages.no_sessions')"
+                />
             </div>
         </Card>
     </div>
@@ -135,21 +62,24 @@ import {
     SelectItem, 
     SelectTrigger, 
     SelectValue,
-    Table,
-    TableHeader,
-    TableBody,
-    TableRow,
-    TableHead,
-    TableCell
+    DataTable
 } from '@/components/ui';
+
+import { h } from 'vue';
+import { 
+    useVueTable, 
+    getCoreRowModel, 
+    createColumnHelper,
+    getSortedRowModel,
+    type SortingState
+} from '@tanstack/vue-table';
+
 import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
 import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
 import User from 'lucide-vue-next/dist/esm/icons/user.js';
 import Globe from 'lucide-vue-next/dist/esm/icons/globe.js';
 import Clock from 'lucide-vue-next/dist/esm/icons/clock.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
-import CircleAlert from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
-import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 
@@ -177,6 +107,79 @@ const selectedRouterId = ref<string>('');
 const sessions = ref<Session[]>([]);
 const loading = ref(false);
 const disconnecting = ref<string | null>(null);
+
+const columnHelper = createColumnHelper<Session>();
+
+const columns = [
+    columnHelper.accessor('name', {
+        header: t('isp.monitor.active_sessions.table.customer'),
+        cell: ({ row }) => h('div', { class: 'flex items-center gap-3' }, [
+            h('div', { class: 'w-10 h-10 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-primary group-hover:scale-110 transition-transform' }, [
+                h(User, { class: 'w-5 h-5 font-bold' })
+            ]),
+            h('div', { class: 'flex flex-col' }, [
+                h('span', { class: 'font-semibold text-foreground tracking-tight' }, row.original.name),
+                h('span', { class: 'text-[10px] text-muted-foreground font-mono uppercase tracking-widest opacity-60' }, row.original.service || 'Default')
+            ])
+        ])
+    }),
+    columnHelper.accessor('address', {
+        header: t('isp.monitor.active_sessions.table.ip_address'),
+        cell: ({ row }) => h('div', { class: 'flex items-center gap-2 font-mono text-[11px] text-foreground/80' }, [
+            h(Globe, { class: 'w-3.5 h-3.5 text-primary/40' }),
+            row.original.address
+        ])
+    }),
+    columnHelper.accessor('uptime', {
+        header: t('isp.monitor.active_sessions.table.uptime'),
+        cell: ({ row }) => h('div', { class: 'flex items-center gap-2 text-xs font-medium text-muted-foreground' }, [
+            h(Clock, { class: 'w-3.5 h-3.5 opacity-50' }),
+            row.original.uptime
+        ])
+    }),
+    columnHelper.accessor('type', {
+        header: t('isp.monitor.active_sessions.table.type'),
+        cell: ({ row }) => h(Badge, {
+            variant: row.original.type === 'pppoe' ? 'default' : 'secondary',
+            class: 'text-[9px] font-bold uppercase tracking-tighter px-2 py-0.5 rounded-md'
+        }, row.original.type)
+    }),
+    columnHelper.accessor('caller_id', {
+        header: t('isp.monitor.active_sessions.table.caller_id'),
+        cell: ({ row }) => h('span', { class: 'font-mono text-[10px] text-muted-foreground/70 bg-muted/20 px-1.5 py-0.5 rounded' }, row.original.caller_id || 'N/A')
+    }),
+    columnHelper.display({
+        id: 'actions',
+        header: () => h('div', { class: 'text-right' }, t('isp.monitor.active_sessions.table.actions')),
+        cell: ({ row }) => h('div', { class: 'text-right' }, [
+            h(Button, {
+                variant: 'ghost',
+                size: 'sm',
+                class: 'h-8 w-8 p-0 text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-full transition-all group-hover:scale-110',
+                onClick: () => disconnect(row.original),
+                loading: disconnecting.value === row.original.id
+            }, [
+                h(Trash2, { class: 'w-4 h-4' })
+            ])
+        ])
+    })
+];
+
+const sorting = ref<SortingState>([]);
+
+const table = useVueTable({
+    get data() { return sessions.value },
+    columns,
+    state: {
+        get sorting() { return sorting.value },
+    },
+    onSortingChange: updaterOrValue => {
+        sorting.value = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue;
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: row => row.id,
+});
 
 const fetchRouters = async () => {
     try {

@@ -26,16 +26,17 @@ class ContentService
     /**
      * Get published contents with filtering and caching
      *
-     * @return array{data: \Illuminate\Pagination\LengthAwarePaginator<Content>|\Illuminate\Database\Eloquent\Collection<int, Content>, paginated: bool}
+     * @return array{data: \Illuminate\Pagination\LengthAwarePaginator<int, Content>|\Illuminate\Database\Eloquent\Collection<int, Content>, paginated: bool}
      */
     public function getPublishedContents(Request $request): array
     {
-        $cacheKey = 'contents_published_'.md5($request->getQueryString());
+        $cacheKey = 'contents_published_'.md5((string) $request->getQueryString());
 
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($request) {
+            /** @var \Illuminate\Database\Eloquent\Builder<Content> $query */
             $query = Content::with(['author', 'category', 'tags'])
                 ->where('status', 'published')
-                ->where(function ($q) {
+                ->where(function (\Illuminate\Database\Eloquent\Builder $q) {
                     $q->whereNull('published_at')
                         ->orWhere('published_at', '<=', Carbon::now());
                 });
@@ -44,15 +45,16 @@ class ContentService
             $this->applySorting($query, $request);
 
             // Limit or pagination
-            $limit = $request->get('limit');
-            if ($limit) {
+            $limitRaw = $request->get('limit');
+            if ($limitRaw !== null && is_numeric($limitRaw)) {
                 return [
-                    'data' => $query->limit($limit)->get(),
+                    'data' => $query->limit((int) $limitRaw)->get(),
                     'paginated' => false,
                 ];
             }
 
-            $perPage = $request->get('per_page', 12);
+            $perPageRaw = $request->get('per_page', 12);
+            $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 12;
 
             return [
                 'data' => $query->paginate($perPage),
@@ -104,7 +106,9 @@ class ContentService
      */
     public function applySorting($query, Request $request): void
     {
-        $sortBy = $request->get('sort', '-published_at');
+        $sortByRaw = $request->get('sort', '-published_at');
+        $sortBy = is_string($sortByRaw) ? $sortByRaw : '-published_at';
+
         if (str_starts_with($sortBy, '-')) {
             $query->orderBy(substr($sortBy, 1), 'desc');
         } else {
@@ -121,6 +125,7 @@ class ContentService
     {
         $cacheKey = 'content_related_'.$slug;
 
+        /** @var array<int, array<string, mixed>> */
         return Cache::remember($cacheKey, now()->addHours(2), function () use ($slug, $limit) {
             $content = Content::where('slug', $slug)->first();
             if (! $content) {
@@ -166,6 +171,8 @@ class ContentService
 
     /**
      * Create new content
+     *
+     * @param array<string, mixed> $data
      */
     public function create(array $data, int $userId, bool $createRevision = false): Content
     {
@@ -173,26 +180,43 @@ class ContentService
 
         // Handle published_at scheduling
         if (isset($data['published_at']) && $data['published_at']) {
-            $data['published_at'] = Carbon::parse($data['published_at']);
+            /** @var mixed $pubAt */
+            $pubAt = $data['published_at'];
+            $data['published_at'] = Carbon::parse(is_string($pubAt) ? $pubAt : (is_numeric($pubAt) ? (string) $pubAt : null));
         }
 
         // Extract related data
-        $tags = $data['tags'] ?? [];
-        $newTags = $data['new_tags'] ?? [];
-        $customFields = $data['custom_fields'] ?? null;
+        /** @var mixed $tagsRaw */
+        $tagsRaw = $data['tags'] ?? [];
+        $tags = is_array($tagsRaw) ? $tagsRaw : [];
+
+        /** @var mixed $newTagsRaw */
+        $newTagsRaw = $data['new_tags'] ?? [];
+        $newTags = is_array($newTagsRaw) ? $newTagsRaw : [];
+
+        /** @var mixed $customFieldsRaw */
+        $customFieldsRaw = $data['custom_fields'] ?? null;
+        $customFields = is_array($customFieldsRaw) ? $customFieldsRaw : null;
+
         // Keep editor_type
         // Generate slug if not provided
         if (empty($data['slug'])) {
-            $data['slug'] = $this->generateUniqueSlug($data['title']);
+            /** @var mixed $titleRaw */
+            $titleRaw = $data['title'] ?? '';
+            $data['slug'] = $this->generateUniqueSlug(is_string($titleRaw) ? $titleRaw : (is_numeric($titleRaw) ? (string) $titleRaw : ''));
         }
 
         $content = Content::create($data);
 
         // Create new tags and get their IDs
         foreach ($newTags as $tagName) {
+            $tagNameStr = is_scalar($tagName) ? (string) $tagName : '';
+            if ($tagNameStr === '') {
+                continue;
+            }
             $tag = Tag::firstOrCreate(
-                ['slug' => Str::slug($tagName)],
-                ['name' => $tagName, 'slug' => Str::slug($tagName)]
+                ['slug' => Str::slug($tagNameStr)],
+                ['name' => $tagNameStr, 'slug' => Str::slug($tagNameStr)]
             );
             $tags[] = $tag->id;
         }
@@ -204,6 +228,7 @@ class ContentService
 
         // Save custom fields
         if ($customFields !== null) {
+            /** @var array<string, mixed> $customFields */
             $this->saveCustomFields($content, $customFields);
         }
 
@@ -236,6 +261,8 @@ class ContentService
 
     /**
      * Update existing content
+     *
+     * @param array<string, mixed> $data
      */
     public function update(Content $content, array $data, int $userId, bool $createRevision = false, ?string $revisionNote = null): Content
     {
@@ -245,24 +272,39 @@ class ContentService
         }
 
         // Extract related data
-        $tags = $data['tags'] ?? [];
-        $newTags = $data['new_tags'] ?? [];
-        $customFields = $data['custom_fields'] ?? null;
+        /** @var mixed $tagsRaw */
+        $tagsRaw = $data['tags'] ?? [];
+        $tags = is_array($tagsRaw) ? $tagsRaw : [];
+
+        /** @var mixed $newTagsRaw */
+        $newTagsRaw = $data['new_tags'] ?? [];
+        $newTags = is_array($newTagsRaw) ? $newTagsRaw : [];
+
+        /** @var mixed $customFieldsRaw */
+        $customFieldsRaw = $data['custom_fields'] ?? null;
+        $customFields = is_array($customFieldsRaw) ? $customFieldsRaw : null;
+
         // Keep editor_type
         unset($data['create_revision'], $data['revision_note'], $data['tags'], $data['new_tags'], $data['custom_fields']);
 
         // Handle published_at
         if (isset($data['published_at'])) {
-            $data['published_at'] = $data['published_at'] ? Carbon::parse($data['published_at']) : null;
+            /** @var mixed $pubAt */
+            $pubAt = $data['published_at'];
+            $data['published_at'] = $pubAt ? Carbon::parse(is_string($pubAt) ? $pubAt : (is_numeric($pubAt) ? (string) $pubAt : null)) : null;
         }
 
         $content->update($data);
 
         // Create new tags and get their IDs
         foreach ($newTags as $tagName) {
+            $tagNameStr = is_scalar($tagName) ? (string) $tagName : '';
+            if ($tagNameStr === '') {
+                continue;
+            }
             $tag = Tag::firstOrCreate(
-                ['slug' => Str::slug($tagName)],
-                ['name' => $tagName, 'slug' => Str::slug($tagName)]
+                ['slug' => Str::slug($tagNameStr)],
+                ['name' => $tagNameStr, 'slug' => Str::slug($tagNameStr)]
             );
             $tags[] = $tag->id;
         }
@@ -274,6 +316,7 @@ class ContentService
 
         // Save custom fields
         if ($customFields !== null) {
+            /** @var array<string, mixed> $customFields */
             $this->saveCustomFields($content, $customFields);
         }
 
@@ -371,6 +414,8 @@ class ContentService
 
     /**
      * Perform bulk action on contents
+     *
+     * @param array<int, int|string> $contentIds
      */
     public function bulkAction(string $action, array $contentIds, ?int $categoryId = null): int
     {
@@ -421,6 +466,8 @@ class ContentService
 
     /**
      * Save custom fields
+     *
+     * @param array<string, mixed> $customFields
      */
     public function saveCustomFields(Content $content, array $customFields): void
     {

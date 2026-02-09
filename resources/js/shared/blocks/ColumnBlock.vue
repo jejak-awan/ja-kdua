@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="column-block transition-all duration-300" 
+    class="column-block transition-[width] duration-300" 
     :class="[columnSize, alignmentClass]"
     :style="columnStyles"
   >

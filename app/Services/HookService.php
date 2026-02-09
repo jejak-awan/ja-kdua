@@ -29,8 +29,10 @@ class HookService
 
     /**
      * Execute a hook
+     *
+     * @param mixed ...$args
      */
-    public static function doHook(string $hookName, ...$args): mixed
+    public static function doHook(string $hookName, mixed ...$args): mixed
     {
         if (! isset(self::$hooks[$hookName])) {
             return $args[0] ?? null;

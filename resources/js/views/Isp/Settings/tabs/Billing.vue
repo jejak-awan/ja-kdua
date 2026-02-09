@@ -60,19 +60,35 @@
                             <Label for="tax_enabled" class="cursor-pointer">{{ t('isp.billing.settings.fields.tax_enabled') }}</Label>
                         </div>
                         
-                        <div v-if="formData.billing_tax_enabled" class="space-y-2 animate-in fade-in slide-in-from-top-2">
-                            <Label>{{ t('isp.billing.settings.fields.tax_rate') }} (%)</Label>
-                            <div class="relative">
-                                <Input 
-                                    type="number" 
-                                    :model-value="(formData.billing_tax_rate as string | number)" 
-                                    @update:model-value="(v) => updateField('billing_tax_rate', Number(v))" 
-                                    step="0.1" 
-                                    min="0" 
-                                    max="100" 
-                                    class="pr-8" 
-                                />
-                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
+                        <div v-if="formData.billing_tax_enabled" class="space-y-4 animate-in fade-in slide-in-from-top-2">
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="space-y-2">
+                                    <Label>{{ t('isp.billing.settings.fields.tax_ppn') }} (%)</Label>
+                                    <Input 
+                                        type="number" 
+                                        :model-value="Number((formData.billing_tax_ppn as number) * 100).toFixed(1)" 
+                                        @update:model-value="(v) => updateField('billing_tax_ppn', Number(v) / 100)" 
+                                        step="0.1" 
+                                    />
+                                </div>
+                                <div class="space-y-2">
+                                    <Label>{{ t('isp.billing.settings.fields.tax_bhp') }} (%)</Label>
+                                    <Input 
+                                        type="number" 
+                                        :model-value="Number((formData.billing_tax_bhp as number) * 100).toFixed(2)" 
+                                        @update:model-value="(v) => updateField('billing_tax_bhp', Number(v) / 100)" 
+                                        step="0.01" 
+                                    />
+                                </div>
+                                <div class="space-y-2">
+                                    <Label>{{ t('isp.billing.settings.fields.tax_uso') }} (%)</Label>
+                                    <Input 
+                                        type="number" 
+                                        :model-value="Number((formData.billing_tax_uso as number) * 100).toFixed(2)" 
+                                        @update:model-value="(v) => updateField('billing_tax_uso', Number(v) / 100)" 
+                                        step="0.01" 
+                                    />
+                                </div>
                             </div>
                             <p class="text-xs text-muted-foreground">
                                 {{ t('isp.billing.settings.fields.tax_rate_help') }}
@@ -85,17 +101,30 @@
                 <AccordionItem value="isolation">
                     <AccordionTrigger>{{ t('isp.billing.settings.tabs.isolation') }}</AccordionTrigger>
                     <AccordionContent class="space-y-4 pt-4">
-                         <div class="space-y-2">
-                            <Label>{{ t('isp.billing.settings.fields.suspend_behavior') }}</Label>
-                            <Select :model-value="(formData.billing_suspend_behavior as string)" @update:model-value="(v) => updateField('billing_suspend_behavior', v)">
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="payment_date">On Due Date (Jatuh Tempo)</SelectItem>
-                                    <SelectItem value="isolation_date">On Specific Isolation Date</SelectItem>
-                                </SelectContent>
-                            </Select>
+                         <div class="grid grid-cols-2 gap-4">
+                             <div class="space-y-2">
+                                <Label>{{ t('isp.billing.settings.fields.suspend_behavior') }}</Label>
+                                <Select :model-value="(formData.billing_suspend_behavior as string)" @update:model-value="(v) => updateField('billing_suspend_behavior', v)">
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="payment_date">On Due Date (Jatuh Tempo)</SelectItem>
+                                        <SelectItem value="isolation_date">On Specific Isolation Date</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div class="space-y-2">
+                                <Label>{{ t('isp.billing.settings.fields.invoice_due_days') }}</Label>
+                                <Input 
+                                    type="number" 
+                                    :model-value="(formData.billing_invoice_due_days as string | number)" 
+                                    @update:model-value="(v) => updateField('billing_invoice_due_days', Number(v))" 
+                                    min="1" 
+                                    max="30" 
+                                />
+                                <p class="text-xs text-muted-foreground">Jumlah hari dari tgl dibuat hingga jatuh tempo.</p>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">

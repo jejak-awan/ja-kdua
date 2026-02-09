@@ -25,7 +25,7 @@ class UpdateCloudflareIps extends Command
     /**
      * The path to store the cached IPs.
      */
-    protected $cachePath;
+    protected string $cachePath;
 
     public function __construct()
     {
@@ -83,7 +83,7 @@ class UpdateCloudflareIps extends Command
         }
     }
 
-    private function isValidCidr($cidr)
+    protected function isValidCidr(string $cidr): bool
     {
         $parts = explode('/', $cidr);
         if (count($parts) != 2) {

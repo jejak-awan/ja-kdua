@@ -5,22 +5,28 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Isp;
 
 use App\Http\Controllers\Api\V1\BaseApiController;
+use App\Models\Isp\Customer;
 use App\Models\Isp\CustomerDevice;
 use App\Models\Isp\Invoice;
 use App\Models\Isp\Outage;
 use App\Models\Isp\ServiceNode;
 use App\Models\Isp\ServiceRequest;
 use App\Services\Isp\MikrotikService;
+use App\Services\Isp\RadiusIntegration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class MemberPortalController extends BaseApiController
 {
     protected MikrotikService $mikrotik;
+    protected RadiusIntegration $radius;
 
-    public function __construct(MikrotikService $mikrotik)
+    public function __construct(MikrotikService $mikrotik, RadiusIntegration $radius)
     {
         $this->mikrotik = $mikrotik;
+        $this->radius = $radius;
     }
 
     /**
@@ -28,6 +34,7 @@ class MemberPortalController extends BaseApiController
      */
     public function dashboard(): \Illuminate\Http\JsonResponse
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
         if (! $user) {
             return $this->unauthorized();
@@ -97,14 +104,31 @@ class MemberPortalController extends BaseApiController
 
         $trafficResult = $this->mikrotik->getTrafficHistory();
 
+        // 5. FUP Status
+        $fup = null;
+        if ($customer) {
+            $plan = $customer->plan;
+            if ($plan && $plan->fup_enabled) {
+                $fup = [
+                    'enabled' => true,
+                    'limit_gb' => $plan->fup_limit_gb,
+                    'usage_gb' => round($customer->current_usage_bytes / (1024 * 1024 * 1024), 2),
+                    'is_throttled' => $customer->is_fup_active,
+                    'throttled_speed' => $plan->fup_speed,
+                ];
+            }
+        }
+
         return $this->success([
             'user' => $user,
+            'customer' => $customer,
             'device' => $device,
             'invoices' => $invoices,
             'unpaid_balance' => $unpaidBalance,
             'connection' => $connection,
             'active_outages' => $outages,
             'traffic_history' => $trafficResult['data'],
+            'fup' => $fup,
         ], 'Member dashboard data retrieved successfully');
     }
 
@@ -113,6 +137,7 @@ class MemberPortalController extends BaseApiController
      */
     public function invoices(Request $request): \Illuminate\Http\JsonResponse
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
         if (! $user) {
             return $this->unauthorized();
@@ -135,16 +160,32 @@ class MemberPortalController extends BaseApiController
      */
     public function usage(): \Illuminate\Http\JsonResponse
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
         if (! $user) {
             return $this->unauthorized();
         }
 
         $userId = (int) $user->id;
-        $usageResult = $this->mikrotik->getCustomerUsageHistory($userId);
-
+        
         /** @var \App\Models\Isp\Customer|null $customer */
         $customer = $user->customer;
+        
+        $daily = [];
+        $monthly = [];
+        $isSimulated = true;
+
+        if ($customer && $customer->mikrotik_login) {
+            $daily = $this->radius->getCustomerUsageDaily($customer->mikrotik_login);
+            $monthly = $this->radius->getCustomerUsageMonthly($customer->mikrotik_login);
+            $isSimulated = false;
+        } else {
+            // Fallback to simulated if not a radius customer
+            $usageResult = $this->mikrotik->getCustomerUsageHistory($userId);
+            $daily = $usageResult['daily'];
+            $monthly = $usageResult['monthly'];
+        }
+
         $connection = ['status' => 'unknown'];
 
         if ($customer && $customer->mikrotik_login) {
@@ -158,7 +199,7 @@ class MemberPortalController extends BaseApiController
                     $connection = [
                         'status' => 'connected',
                         'latency' => '---',
-                        'uptime' => $session['uptime'],
+                        'uptime' => (string) $session['uptime'],
                     ];
                 } else {
                     $connection = ['status' => 'offline'];
@@ -168,12 +209,55 @@ class MemberPortalController extends BaseApiController
 
         return $this->success([
             'usage' => [
-                'daily' => $usageResult['daily'],
-                'monthly' => $usageResult['monthly'],
+                'daily' => $daily,
+                'monthly' => $monthly,
             ],
-            'connection' => $connection,
-            'is_simulated' => $usageResult['is_simulated'],
+            'connection' => (array) $connection,
+            'is_simulated' => $isSimulated,
         ], 'Usage history retrieved successfully');
+    }
+
+    /**
+     * Update member profile.
+     */
+    public function updateProfile(Request $request): \Illuminate\Http\JsonResponse
+    {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if (! $user) {
+            return $this->unauthorized();
+        }
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|email|unique:users,email,'.$user->id,
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
+            'current_password' => 'required_with:new_password|current_password',
+            'new_password' => ['nullable', 'confirmed', Password::min(8)],
+        ]);
+
+        /** @var \App\Models\User $user */
+        if (isset($validated['name']) && is_string($validated['name'])) $user->name = $validated['name'];
+        if (isset($validated['email']) && is_string($validated['email'])) $user->email = $validated['email'];
+        if (isset($validated['phone']) && is_string($validated['phone'])) $user->phone = $validated['phone'];
+
+        if (isset($validated['new_password']) && is_string($validated['new_password'])) {
+            $user->password = Hash::make($validated['new_password']);
+        }
+
+        $user->save();
+
+        /** @var Customer|null $customer */
+        $customer = $user->customer;
+        if ($customer) {
+            if (isset($validated['address']) && is_string($validated['address'])) {
+                $customer->address_street = $validated['address'];
+            }
+            $customer->save();
+        }
+
+        return $this->success($user, 'Profile updated successfully');
     }
 
     /**
@@ -181,6 +265,7 @@ class MemberPortalController extends BaseApiController
      */
     public function requestService(Request $request): \Illuminate\Http\JsonResponse
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
         if (! $user) {
             return $this->unauthorized();
@@ -209,6 +294,7 @@ class MemberPortalController extends BaseApiController
      */
     public function diagnostics(): \Illuminate\Http\JsonResponse
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
         if (! $user) {
             return $this->unauthorized();
@@ -228,7 +314,7 @@ class MemberPortalController extends BaseApiController
 
                 if ($session) {
                     $sessionStatus = 'success';
-                    $sessionMessage = 'Active session found on router: '.$router->name;
+                    $sessionMessage = 'Active session found on router: '.(string) $router->name;
                 } else {
                     $sessionStatus = 'error';
                     $sessionMessage = 'User is not connected to the router';

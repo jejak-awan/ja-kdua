@@ -12,24 +12,24 @@ use Illuminate\Support\Facades\Cache;
 class SecurityService
 {
     // Cache prefix for all security-related keys
-    protected $cachePrefix = 'security:';
+    protected string $cachePrefix = 'security:';
 
     // Account lockout settings
-    protected $accountLockMinutes = 15;
+    protected int $accountLockMinutes = 15;
 
     // Progressive blocking settings
-    protected $maxFailedAttempts;
+    protected int $maxFailedAttempts;
 
-    protected $baseBlockMinutes;
+    protected int $baseBlockMinutes;
 
-    protected $maxBlockMinutes = 60; // Maximum block duration in minutes
+    protected int $maxBlockMinutes = 60; // Maximum block duration in minutes
 
-    protected $offenseResetHours = 24; // Reset offense count after this many hours
+    protected int $offenseResetHours = 24; // Reset offense count after this many hours
 
     public function __construct()
     {
-        $this->maxFailedAttempts = (int) \App\Models\Setting::get('login_attempts_limit', 5);
-        $this->baseBlockMinutes = (int) \App\Models\Setting::get('block_duration_minutes', 15);
+        $this->maxFailedAttempts = is_scalar($v1 = \App\Models\Setting::get('login_attempts_limit', 5)) ? (int) $v1 : 5;
+        $this->baseBlockMinutes = is_scalar($v2 = \App\Models\Setting::get('block_duration_minutes', 15)) ? (int) $v2 : 15;
         // Ensure baseBlockMinutes is at least 1 to avoid math issues or immediate expiry
         $this->baseBlockMinutes = max(1, $this->baseBlockMinutes);
         $this->accountLockMinutes = $this->baseBlockMinutes;
@@ -99,7 +99,8 @@ class SecurityService
     protected function incrementFailedAttempts(string $identifier, string $type = 'ip'): int
     {
         $key = $this->cachePrefix."failed_attempts:{$type}:{$identifier}";
-        $attempts = Cache::get($key, 0) + 1;
+        $current = Cache::get($key, 0);
+        $attempts = (is_numeric($current) ? (int) $current : 0) + 1;
 
         // Store with TTL so it auto-expires (no manual cache:clear needed)
         Cache::put($key, $attempts, now()->addMinutes($this->accountLockMinutes));
@@ -113,8 +114,9 @@ class SecurityService
     public function getFailedAttempts(string $identifier, string $type = 'ip'): int
     {
         $key = $this->cachePrefix."failed_attempts:{$type}:{$identifier}";
-
-        return (int) Cache::get($key, 0);
+        $attempts = Cache::get($key, 0);
+ 
+        return is_numeric($attempts) ? (int) $attempts : 0;
     }
 
     /**
@@ -135,7 +137,8 @@ class SecurityService
 
         // Get and increment offense count
         $offenseKey = $this->cachePrefix."offense_count:{$ipAddress}";
-        $offenseCount = (int) Cache::get($offenseKey, 0) + 1;
+        $currentOffense = Cache::get($offenseKey, 0);
+        $offenseCount = (is_numeric($currentOffense) ? (int) $currentOffense : 0) + 1;
         Cache::put($offenseKey, $offenseCount, now()->addHours($this->offenseResetHours));
 
         // Calculate progressive block duration (exponential backoff)
@@ -197,13 +200,13 @@ class SecurityService
         $key = $this->cachePrefix."block_until:{$ipAddress}";
         $blockUntil = Cache::get($key);
 
-        if (! $blockUntil) {
+        if (! is_string($blockUntil)) {
             return 0;
         }
 
         $remaining = Carbon::parse($blockUntil)->diffInSeconds(now(), false);
 
-        return max(0, -$remaining);
+        return (int) max(0, -$remaining);
     }
 
     /**
@@ -216,7 +219,7 @@ class SecurityService
         return [
             'is_blocked' => $this->isIpBlocked($ipAddress),
             'remaining_seconds' => $this->getRemainingBlockTime($ipAddress),
-            'offense_count' => (int) Cache::get($this->cachePrefix."offense_count:{$ipAddress}", 0),
+            'offense_count' => is_numeric($offenseCount = Cache::get($this->cachePrefix."offense_count:{$ipAddress}", 0)) ? (int) $offenseCount : 0,
             'failed_attempts' => $this->getFailedAttempts($ipAddress),
         ];
     }
@@ -368,13 +371,13 @@ class SecurityService
         $key = $this->cachePrefix."account_locked:{$email}";
         $lockUntil = Cache::get($key);
 
-        if (! $lockUntil) {
+        if (! is_string($lockUntil)) {
             return 0;
         }
 
         $remaining = Carbon::parse($lockUntil)->diffInSeconds(now(), false);
 
-        return max(0, -$remaining);
+        return (int) max(0, -$remaining);
     }
 
     /**
@@ -395,6 +398,8 @@ class SecurityService
 
     /**
      * Record suspicious activity.
+     *
+     * @param  array<string, mixed>  $metadata
      */
     public function recordSuspiciousActivity(string $description, ?User $user = null, array $metadata = []): void
     {

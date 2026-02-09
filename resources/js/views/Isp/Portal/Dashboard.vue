@@ -108,6 +108,55 @@
                         </div>
                     </div>
                 </Card>
+
+                <!-- FUP Status Card -->
+                <Card v-if="data.fup?.enabled" class="p-6 relative overflow-hidden group">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center gap-2">
+                            <Zap class="w-4 h-4 text-primary" />
+                            <h3 class="text-sm font-bold uppercase tracking-wider opacity-60">{{ $t('isp.usage.quota_used') }}</h3>
+                        </div>
+                        <Badge :variant="data.fup.is_throttled ? 'destructive' : 'outline'" class="animate-in fade-in zoom-in duration-300">
+                            {{ data.fup.is_throttled ? $t('isp.usage.throttled_notice') : $t('isp.member.dashboard.service_active') }}
+                        </Badge>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-end mb-1">
+                            <div>
+                                <span class="text-3xl font-bold">{{ data.fup.usage_gb }}</span>
+                                <span class="text-muted-foreground ml-1">GB</span>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] text-muted-foreground uppercase font-bold opacity-60">{{ $t('isp.usage.quota_remaining') }}</p>
+                                <p class="text-sm font-mono font-bold">{{ Math.max(0, (data.fup.limit_gb || 0) - data.fup.usage_gb).toFixed(2) }} GB</p>
+                            </div>
+                        </div>
+
+                        <!-- Custom Progress Bar -->
+                        <div class="h-3 w-full bg-muted rounded-full overflow-hidden p-[2px]">
+                            <div 
+                                class="h-full rounded-full transition-all duration-1000 ease-out"
+                                :class="data.fup.is_throttled ? 'bg-destructive' : 'bg-primary'"
+                                :style="{ width: `${Math.min(100, (data.fup.usage_gb / (data.fup.limit_gb || 1)) * 100)}%` }" 
+                            />
+                        </div>
+
+                        <div class="flex justify-between text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
+                            <span>0 GB</span>
+                            <span>{{ data.fup.limit_gb || $t('isp.usage.unlimited') }} GB</span>
+                        </div>
+
+                        <div v-if="data.fup.is_throttled" class="p-3 bg-destructive/10 border border-destructive/20 rounded-xl flex items-start gap-3 mt-4 animate-in slide-in-from-bottom-2">
+                            <AlertTriangle class="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                            <p class="text-xs text-destructive leading-tight">
+                                {{ $t('isp.usage.throttled_notice') }} <br />
+                                <span class="font-bold opacity-80">Max Speed: {{ data.fup.throttled_speed }}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <Activity class="absolute -left-4 -bottom-4 w-24 h-24 text-primary opacity-[0.02]" />
+                </Card>
             </div>
 
             <!-- Right Column: Billing & Actions -->
@@ -216,9 +265,11 @@ const requesting = ref(false);
 
 const chartData = computed(() => {
     const history = ensureArray<IspTrafficData>(data.value.traffic_history);
+    if (history.length === 0) return [];
+    
     return history.map(h => ({
-        period: h.time || h.date || '',
-        visits: h.in
+        period: String(h.time || h.date || ''),
+        visits: Number(h.in) + Number(h.out)
     }));
 });
 

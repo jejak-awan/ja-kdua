@@ -45,6 +45,8 @@ class GeoIpService
 
     /**
      * Fetch location data from ip-api.com
+     *
+     * @return array{country: string|null, city: string|null, country_code: string|null}
      */
     protected function fetchFromApi(string $ipAddress): array
     {
@@ -60,9 +62,9 @@ class GeoIpService
 
                 if (($data['status'] ?? '') === 'success') {
                     return [
-                        'country' => isset($data['country']) ? (string) $data['country'] : null,
-                        'country_code' => isset($data['countryCode']) ? (string) $data['countryCode'] : null,
-                        'city' => isset($data['city']) ? (string) $data['city'] : null,
+                        'country' => is_scalar($data['country'] ?? null) ? (string) $data['country'] : null,
+                        'country_code' => is_scalar($data['countryCode'] ?? null) ? (string) $data['countryCode'] : null,
+                        'city' => is_scalar($data['city'] ?? null) ? (string) $data['city'] : null,
                     ];
                 }
             }
@@ -113,6 +115,8 @@ class GeoIpService
 
     /**
      * Get default location (when lookup fails or IP is local)
+     *
+     * @return array{country: string|null, city: string|null, country_code: string|null}
      */
     protected function getDefaultLocation(): array
     {

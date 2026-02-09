@@ -9,16 +9,19 @@ use App\Models\Isp\Customer;
 use App\Models\Isp\Invoice;
 use App\Models\Isp\ServiceNode;
 use App\Services\Isp\MikrotikService;
+use App\Services\Isp\RadiusIntegration;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class AnalyticsController extends BaseApiController
 {
     protected MikrotikService $mikrotik;
+    protected RadiusIntegration $radius;
 
-    public function __construct(MikrotikService $mikrotik)
+    public function __construct(MikrotikService $mikrotik, RadiusIntegration $radius)
     {
         $this->mikrotik = $mikrotik;
+        $this->radius = $radius;
     }
 
     /**
@@ -53,15 +56,13 @@ class AnalyticsController extends BaseApiController
      */
     public function usage(): JsonResponse
     {
-        // Aggregated from MikrotikService (simulated for now)
-        $historyResult = $this->mikrotik->getTrafficHistory();
-        $history = $historyResult['data'];
+        $history = $this->radius->getGlobalUsageDaily();
 
         return $this->success([
             'history' => $history,
-            'peak_in' => collect($history)->max('in'),
-            'peak_out' => collect($history)->max('out'),
-            'is_simulated' => $historyResult['is_simulated'],
+            'peak_in' => collect($history)->max('up'),
+            'peak_out' => collect($history)->max('down'),
+            'is_simulated' => false,
         ], 'Usage trends retrieved successfully');
     }
 
@@ -94,25 +95,22 @@ class AnalyticsController extends BaseApiController
      */
     public function topTalkers(): JsonResponse
     {
-        // TODO: Implement real usage tracking via RADIUS accounting or traffic table
-        $customers = Customer::with('user')
-            ->limit(10)
-            ->get()
-            ->map(function (Customer $customer): array {
-                return [
-                    'id' => $customer->id,
-                    'name' => $customer->user->name,
-                    'usage_gb' => rand(50, 500), // Simulated - no accounting data available
-                    'status' => $customer->status,
-                ];
-            })
-            ->sortByDesc('usage_gb')
-            ->values();
+        $topTalkers = $this->radius->getTopTalkers(10);
+        
+        // Enrich with customer names
+        $enriched = collect($topTalkers)->map(function ($row) {
+            $customer = Customer::with('user')->where('mikrotik_login', $row['username'])->first();
+            return [
+                'username' => $row['username'],
+                'name' => $customer ? $customer->user->name : $row['username'],
+                'usage_gb' => $row['total_gb'],
+                'status' => $customer ? $customer->status : 'Inactive',
+            ];
+        });
 
         return $this->success([
-            'data' => $customers,
-            'is_simulated' => true,
-            'notice' => 'Usage data is simulated. Real accounting infrastructure required.',
+            'data' => $enriched,
+            'is_simulated' => false,
         ], 'Top talkers retrieved successfully');
     }
 

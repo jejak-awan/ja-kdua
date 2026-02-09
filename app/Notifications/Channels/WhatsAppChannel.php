@@ -29,8 +29,14 @@ class WhatsAppChannel
 
         $message = $notification->toWhatsApp($notifiable);
 
-        // Try to get phone from notifiable, prioritie 'phone' attribute
-        $to = $notifiable->phone ?? $notifiable->routeNotificationFor('whatsapp');
+        /** @var mixed $toRaw */
+        $toRaw = null;
+        if (is_object($notifiable)) {
+            $toRaw = property_exists($notifiable, 'phone') ? $notifiable->phone : (method_exists($notifiable, 'routeNotificationFor') ? $notifiable->routeNotificationFor('whatsapp') : null);
+        }
+
+        /** @var string|null $to */
+        $to = is_string($toRaw) ? $toRaw : (is_numeric($toRaw) ? (string) $toRaw : null);
 
         if (! $to || ! is_string($message)) {
             return;

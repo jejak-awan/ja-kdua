@@ -1,5 +1,8 @@
 {
     "title": "Pengguna",
+    "subtitle": "Kelola pengguna, peran, dan izin akses dalam sistem.",
+    "subtitleCreate": "Isi informasi di bawah ini untuk membuat pengguna baru.",
+    "subtitleEdit": "Perbarui informasi pengguna untuk menyesuaikan profil dan akses.",
     "createNew": "Buat Pengguna Baru",
     "search": "Cari pengguna berdasarkan nama, email atau telepon...",
     "allRoles": "Semua Peran",

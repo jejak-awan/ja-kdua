@@ -3,6 +3,7 @@ import {
   FlexRender,
   type Table as TanStackTable,
 } from '@tanstack/vue-table'
+import { cn } from '@/lib/utils'
 
 import Table from './Table.vue'
 import TableBody from './TableBody.vue'
@@ -11,6 +12,9 @@ import TableHead from './TableHead.vue'
 import TableHeader from './TableHeader.vue'
 import TableRow from './TableRow.vue'
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js'
+import ArrowUpDown from 'lucide-vue-next/dist/esm/icons/arrow-up-down.js'
+import ArrowUp from 'lucide-vue-next/dist/esm/icons/arrow-up.js'
+import ArrowDown from 'lucide-vue-next/dist/esm/icons/arrow-down.js'
 
 interface DataTableProps {
   table: TanStackTable<TData>
@@ -38,37 +42,54 @@ defineProps<DataTableProps>()
             <TableHead
               v-for="header in headerGroup.headers"
               :key="header.id"
-              class="h-11 px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground"
+              class="h-11 px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap"
               :style="{ width: header.getSize() !== 150 ? `${header.getSize()}px` : undefined }"
             >
-              <FlexRender
+              <div
                 v-if="!header.isPlaceholder"
-                :render="header.column.columnDef.header"
-                :props="header.getContext()"
-              />
+                :class="cn(
+                  'flex items-center gap-2',
+                  header.column.getCanSort() ? 'cursor-pointer select-none' : ''
+                )"
+                @click="header.column.getToggleSortingHandler()?.($event)"
+              >
+                <FlexRender
+                  :render="header.column.columnDef.header"
+                  :props="header.getContext()"
+                />
+                
+                <template v-if="header.column.getCanSort()">
+                  <ArrowUp v-if="header.column.getIsSorted() === 'asc'" class="ml-1 h-3 w-3" />
+                  <ArrowDown v-else-if="header.column.getIsSorted() === 'desc'" class="ml-1 h-3 w-3" />
+                  <ArrowUpDown v-else class="ml-1 h-3 w-3 opacity-30 group-hover:opacity-100 transition-opacity" />
+                </template>
+              </div>
             </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           <template v-if="table.getRowModel().rows?.length">
-            <TableRow
-              v-for="row in table.getRowModel().rows"
-              :key="row.id"
-              :data-state="row.getIsSelected() ? 'selected' : undefined"
-              class="group hover:bg-muted/30 transition-colors border-border/40"
-              @click="table.options.meta?.onRowClick?.(row.original)"
-            >
-              <TableCell
-                v-for="cell in row.getVisibleCells()"
-                :key="cell.id"
-                class="px-4 py-3"
-              >
-                <FlexRender
-                  :render="cell.column.columnDef.cell"
-                  :props="cell.getContext()"
-                />
-              </TableCell>
-            </TableRow>
+            <template v-for="row in table.getRowModel().rows" :key="row.id">
+              <slot name="row" :row="row">
+                <TableRow
+                  :key="row.id"
+                  :data-state="row.getIsSelected() ? 'selected' : undefined"
+                  class="group hover:bg-muted/30 transition-colors border-border/40"
+                  @click="table.options.meta?.onRowClick?.(row.original)"
+                >
+                  <TableCell
+                    v-for="cell in row.getVisibleCells()"
+                    :key="cell.id"
+                    class="px-4 py-3"
+                  >
+                    <FlexRender
+                      :render="cell.column.columnDef.cell"
+                      :props="cell.getContext()"
+                    />
+                  </TableCell>
+                </TableRow>
+              </slot>
+            </template>
           </template>
           <TableRow v-else>
             <TableCell

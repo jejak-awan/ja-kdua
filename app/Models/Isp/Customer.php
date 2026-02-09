@@ -85,6 +85,9 @@ class Customer extends Model
         'olt_id',
         'odp_id',
         'odp_port',
+        'current_usage_bytes',
+        'last_usage_reset_at',
+        'is_fup_active',
     ];
 
     protected $casts = [
@@ -96,6 +99,9 @@ class Customer extends Model
         'longitude' => 'float',
         'odp_id' => 'integer',
         'odp_port' => 'integer',
+        'current_usage_bytes' => 'integer',
+        'last_usage_reset_at' => 'datetime',
+        'is_fup_active' => 'boolean',
     ];
 
     /**

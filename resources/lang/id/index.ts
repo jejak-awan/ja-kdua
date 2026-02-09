@@ -58,6 +58,8 @@ import ispContracts from './features/isp/contracts.json';
 
 
 import ispCustomers from './features/isp/customers.json';
+import ispVouchers from './features/isp/vouchers.json';
+import ispHotspot from './features/isp/hotspot.json';
 
 
 import scheduled_tasks from './features/scheduled_tasks.json';
@@ -82,6 +84,8 @@ export default {
         contracts: ispContracts,
         service_requests: ispServiceRequests,
         customers: ispCustomers,
+        admin: ispVouchers.admin,
+        hotspot: ispHotspot,
     },
     common: {
         actions,

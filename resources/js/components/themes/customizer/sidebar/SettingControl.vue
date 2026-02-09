@@ -33,18 +33,19 @@
 
         <!-- Select -->
         <div v-else-if="setting.type === 'select'" class="relative">
-            <select
-                :value="(modelValue as string)"
-                @change="handleInput(($event.target as HTMLSelectElement).value); $emit('change')"
-                class="w-full h-9 pl-3 pr-8 bg-background border rounded-lg text-sm appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors cursor-pointer"
+            <Select 
+                :model-value="String(modelValue)" 
+                @update:model-value="(val) => { handleInput(val); $emit('change'); }"
             >
-                <option v-for="opt in setting.options" :key="String(opt.value)" :value="opt.value">
-                    {{ opt.label }}
-                </option>
-            </select>
-            <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-muted-foreground">
-                <ChevronsUpDown class="w-4 h-4" />
-            </div>
+                <SelectTrigger class="h-9">
+                    <SelectValue :placeholder="setting.placeholder || 'Select option'" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem v-for="opt in setting.options" :key="String(opt.value)" :value="String(opt.value)">
+                        {{ opt.label }}
+                    </SelectItem>
+                </SelectContent>
+            </Select>
         </div>
         
         <!-- Range Slider -->
@@ -75,18 +76,13 @@
         ></textarea>
 
         <!-- Toggle Switch -->
-        <label v-else-if="setting.type === 'checkbox'" class="flex items-center cursor-pointer gap-3 p-2 border rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-            <div class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus-within:ring-2 focus-within:ring-primary/20 focus-within:ring-offset-2" :class="modelValue ? 'bg-primary' : 'bg-input'">
-                <input 
-                    type="checkbox" 
-                    class="sr-only" 
-                    :checked="(modelValue as boolean)"
-                    @change="handleInput(($event.target as HTMLInputElement).checked); $emit('change')"
-                >
-                <span class="translate-x-1 inline-block h-3 w-3 transform rounded-full bg-background shadow-sm transition-transform" :class="modelValue ? 'translate-x-5' : 'translate-x-1'"></span>
-            </div>
+        <div v-else-if="setting.type === 'checkbox'" class="flex items-center justify-between p-3 border rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors">
             <span class="text-sm font-medium text-foreground select-none">{{ modelValue ? 'Enabled' : 'Disabled' }}</span>
-        </label>
+            <Switch 
+                :checked="(modelValue as boolean)"
+                @update:checked="(val) => { handleInput(val); $emit('change'); }"
+            />
+        </div>
 
         <!-- Media Picker -->
         <div v-else-if="setting.type === 'media'" class="space-y-2">
@@ -130,10 +126,17 @@
 
 <script setup lang="ts">
 import type { ThemeSetting } from '@/types/theme';
-import ChevronsUpDown from 'lucide-vue-next/dist/esm/icons/chevrons-up-down.js';
 import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
 import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
 import Image from 'lucide-vue-next/dist/esm/icons/image.js';
+import { 
+    Select, 
+    SelectTrigger, 
+    SelectValue, 
+    SelectContent, 
+    SelectItem,
+    Switch
+} from '@/components/ui';
 
 defineProps<{
     setting: ThemeSetting;

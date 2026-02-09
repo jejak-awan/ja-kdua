@@ -868,24 +868,25 @@ class MediaController extends BaseApiController
             return $this->validationError(['ids' => ['Media or Folder IDs are required.']], 'The selected action is invalid.');
         }
 
-        // Filter Media IDs
+        /** @var array<int, int> $existingMediaIds */
         $existingMediaIds = [];
         if (! empty($ids)) {
             $query = Media::withTrashed()->whereIn('id', $ids);
             if (! $user->can('manage media')) {
                 $query->where('author_id', $user->id);
             }
-            $existingMediaIds = $query->pluck('id')->toArray();
+            $existingMediaIds = array_map(fn ($id) => is_numeric($id) ? (int) $id : 0, $query->pluck('id')->toArray());
         }
 
         // Filter Folder IDs
+        /** @var array<int, int> $existingFolderIds */
         $existingFolderIds = [];
         if (! empty($folderIds)) {
             $folderQuery = \App\Models\MediaFolder::withTrashed()->whereIn('id', $folderIds);
             if (! $user->can('manage media')) {
                 $folderQuery->where('author_id', $user->id);
             }
-            $existingFolderIds = $folderQuery->pluck('id')->toArray();
+            $existingFolderIds = array_map(fn ($id) => is_numeric($id) ? (int) $id : 0, $folderQuery->pluck('id')->toArray());
         }
 
         $folderIdRaw = $request->input('folder_id');

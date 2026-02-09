@@ -10,3 +10,4 @@ export * from './file-manager';
 export * from './forms';
 export * from './comments';
 export * from './custom-fields';
+export * from './isp';

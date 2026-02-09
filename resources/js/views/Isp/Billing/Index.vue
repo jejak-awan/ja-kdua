@@ -64,11 +64,19 @@
         </div>
 
         <Tabs v-model="activeTab" class="w-full">
-            <TabsList class="mb-4">
-                <TabsTrigger value="invoices">{{ $t('isp.billing.tabs.invoices') }}</TabsTrigger>
-                <TabsTrigger value="plans">{{ $t('isp.billing.tabs.plans') }}</TabsTrigger>
-                <TabsTrigger value="requests">{{ $t('isp.billing.tabs.requests') }}</TabsTrigger>
-            </TabsList>
+            <div class="mb-10 flex items-center justify-between">
+                <TabsList class="bg-transparent p-0 h-auto gap-0">
+                    <TabsTrigger value="invoices" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
+                        {{ $t('isp.billing.tabs.invoices') }}
+                    </TabsTrigger>
+                    <TabsTrigger value="plans" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
+                        {{ $t('isp.billing.tabs.plans') }}
+                    </TabsTrigger>
+                    <TabsTrigger value="requests" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
+                        {{ $t('isp.billing.tabs.requests') }}
+                    </TabsTrigger>
+                </TabsList>
+            </div>
 
             <TabsContent value="invoices">
                 <Card>

@@ -1,20 +1,23 @@
 <template>
     <div>
             <!-- Header -->
-        <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.users.title') }}</h1>
+        <div class="mb-10 flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('features.users.title') }}</h1>
+                <p class="text-muted-foreground">{{ $t('features.users.subtitle') }}</p>
+            </div>
             <router-link :to="{ name: 'users.create' }" v-if="authStore.hasPermission('create users')">
-                <Button>
-                    <Plus class="w-5 h-5 mr-2" />
+                <Button class="gap-2 rounded-xl">
+                    <Plus class="w-4 h-4" />
                     {{ $t('features.users.createNew') }}
                 </Button>
             </router-link>
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-10">
             <Card
-                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-primary/50', { 'border-primary ring-2 ring-primary/20': verificationFilter === 'all' && !activeStatFilter })"
+                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-primary/50 rounded-xl border-border/50 transition-all duration-300', { 'border-primary ring-2 ring-primary/20': verificationFilter === 'all' && !activeStatFilter })"
                 @click="clearFilters"
             >
                 <div class="flex items-center justify-between">
@@ -26,7 +29,7 @@
                 </div>
             </Card>
             <Card
-                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-primary/50', { 'border-primary ring-2 ring-primary/20': verificationFilter === 'verified' })"
+                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-primary/50 rounded-xl border-border/50 transition-all duration-300', { 'border-primary ring-2 ring-primary/20': verificationFilter === 'verified' })"
                 @click="setVerificationFilter('verified')"
             >
                 <div class="flex items-center justify-between">
@@ -38,7 +41,7 @@
                 </div>
             </Card>
             <Card
-                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-warning/50', { 'border-warning ring-2 ring-warning/20': verificationFilter === 'unverified' })"
+                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-warning/50 rounded-xl border-border/50 transition-all duration-300', { 'border-warning ring-2 ring-warning/20': verificationFilter === 'unverified' })"
                 @click="setVerificationFilter('unverified')"
             >
                 <div class="flex items-center justify-between">
@@ -50,7 +53,7 @@
                 </div>
             </Card>
             <Card
-                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-success/50', { 'border-success ring-2 ring-success/20': activeStatFilter === 'recent' })"
+                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-success/50 rounded-xl border-border/50 transition-all duration-300', { 'border-success ring-2 ring-success/20': activeStatFilter === 'recent' })"
                 @click="setStatFilter('recent')"
             >
                 <div class="flex items-center justify-between">
@@ -62,7 +65,7 @@
                 </div>
             </Card>
             <Card
-                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-info/50', { 'border-info ring-2 ring-info/20': activeStatFilter === 'active' })"
+                :class="cn('p-4 cursor-pointer hover:shadow-md hover:border-info/50 rounded-xl border-border/50 transition-all duration-300', { 'border-info ring-2 ring-info/20': activeStatFilter === 'active' })"
                 @click="setStatFilter('active')"
             >
                 <div class="flex items-center justify-between">
@@ -76,7 +79,7 @@
         </div>
 
         <!-- content -->
-        <Card class="overflow-hidden">
+        <Card class="overflow-hidden rounded-xl border-border/50 shadow-sm">
             <!-- Filters & Actions -->
             <div class="px-6 py-4 border-b border-border/40">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -156,188 +159,11 @@
             </div>
 
             <CardContent class="p-0">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead class="w-[50px] px-6">
-                                <Checkbox 
-                                    :checked="isAllSelected"
-                                    @update:checked="toggleSelectAll"
-                                />
-                            </TableHead>
-                            <TableHead class="px-6 text-xs text-muted-foreground/70">
-                                {{ $t('features.users.table.user') }}
-                            </TableHead>
-                            <TableHead class="px-6 text-xs text-muted-foreground/70">
-                                {{ $t('features.users.table.email') }}
-                            </TableHead>
-                            <TableHead class="px-6 text-xs text-muted-foreground/70">
-                                {{ $t('features.users.table.roles') }}
-                            </TableHead>
-                            <TableHead class="px-6 text-xs text-muted-foreground/70">
-                                {{ $t('features.users.table.lastLogin') }}
-                            </TableHead>
-                            <TableHead class="px-6 text-center text-xs text-muted-foreground/70">
-                                {{ $t('features.users.table.actions') }}
-                            </TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow v-if="loading">
-                            <TableCell colspan="6" class="h-24 text-center">
-                                <Loader2 class="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
-                            </TableCell>
-                        </TableRow>
-
-                        <TableRow v-else-if="users.length === 0">
-                            <TableCell colspan="6" class="h-32 text-center text-muted-foreground">
-                                <div class="flex flex-col items-center justify-center space-y-2">
-                                    <Users class="h-8 w-8 text-muted-foreground/20" />
-                                    <p>{{ $t('features.users.empty') }}</p>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-
-                        <TableRow v-else v-for="user in users" :key="user.id" class="group">
-                            <TableCell class="px-6">
-                                <Checkbox 
-                                    :checked="selectedIds.includes(user.id)"
-                                    @update:checked="toggleSelection(user.id)"
-                                />
-                            </TableCell>
-                            <TableCell class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-9 w-9">
-                                        <img
-                                            v-if="user.avatar"
-                                            :src="typeof user.avatar === 'string' ? user.avatar : user.avatar.url"
-                                            :alt="user.name"
-                                            class="h-9 w-9 rounded-full object-cover"
-                                        >
-                                        <div
-                                            v-else
-                                            class="h-9 w-9 rounded-full bg-muted flex items-center justify-center border border-border/40"
-                                        >
-                                            <span class="text-muted-foreground font-medium text-xs">
-                                                {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-foreground">
-                                            {{ user.name }}
-                                            <span v-if="user.deleted_at" class="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-destructive/10 text-destructive uppercase tracking-wide">
-                                                {{ $t('common.labels.deleted') }}
-                                            </span>
-                                        </div>
-                                        <div v-if="user.phone" class="text-[10px] text-muted-foreground font-mono uppercase tracking-tight">{{ user.phone }}</div>
-                                    </div>
-                                </div>
-                            </TableCell>
-                            <TableCell class="px-6 py-4">
-                                <div class="text-sm text-foreground">{{ user.email }}</div>
-                                <div v-if="user.email_verified_at" class="text-[10px] text-primary font-bold uppercase tracking-wider">
-                                    {{ $t('features.users.status.verified') }}
-                                </div>
-                                <div v-else class="text-[10px] text-muted-foreground italic uppercase tracking-wider">
-                                    {{ $t('features.users.status.unverified') }}
-                                </div>
-                            </TableCell>
-                            <TableCell class="px-6 py-4">
-                                <div class="flex flex-wrap gap-1.5">
-                                    <Badge
-                                        v-for="role in (user.roles || [])"
-                                        :key="role.id"
-                                        variant="secondary"
-                                        class="h-5 text-[10px] px-2 font-semibold uppercase tracking-wider"
-                                    >
-                                        {{ role.name }}
-                                    </Badge>
-                                    <span v-if="!user.roles || user.roles.length === 0" class="text-xs text-muted-foreground italic">
-                                        {{ $t('features.users.status.noRoles') }}
-                                    </span>
-                                </div>
-                            </TableCell>
-                            <TableCell class="px-6 py-4 text-sm text-muted-foreground">
-                                <div v-if="user.last_login_at" class="text-xs">
-                                    {{ formatDate(user.last_login_at) }}
-                                </div>
-                                <div v-else class="text-xs text-muted-foreground/50">
-                                    {{ $t('features.users.status.never') }}
-                                </div>
-                            </TableCell>
-                            <TableCell class="px-6 py-4">
-                                <div class="flex justify-center items-center gap-1">
-                                    <Button
-                                        v-if="!user.email_verified_at && authStore.hasPermission('edit users')"
-                                        variant="ghost"
-                                        size="icon"
-                                        @click="verifyUser(user)"
-                                        class="h-8 w-8 text-primary hover:bg-primary/10"
-                                        :title="$t('features.users.actions.verify')"
-                                        :disabled="!canManage(user)"
-                                    >
-                                        <CheckCheck class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
-                                    </Button>
-                                    <Button
-                                        v-if="authStore.hasPermission('edit users')"
-                                        variant="ghost"
-                                        size="icon"
-                                        @click="forceLogoutUser(user)"
-                                        class="h-8 w-8 text-warning hover:bg-warning/10"
-                                        :title="$t('features.users.actions.forceLogout')"
-                                        :disabled="!canManage(user)"
-                                    >
-                                        <LogOut class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
-                                    </Button>
-                                    <Button
-                                        v-if="authStore.hasPermission('edit users')"
-                                        variant="ghost"
-                                        size="icon"
-                                        @click="editUser(user)"
-                                        class="h-8 w-8 text-primary hover:bg-primary/10"
-                                        :title="$t('common.actions.edit')"
-                                        :disabled="!canManage(user)"
-                                    >
-                                        <Pencil class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
-                                    </Button>
-                                    <Button
-                                        v-if="authStore.hasPermission('delete users') && !user.deleted_at"
-                                        variant="ghost"
-                                        size="icon"
-                                        @click="deleteUser(user)"
-                                        class="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                        :title="$t('common.actions.delete')"
-                                        :disabled="!canDelete(user)"
-                                    >
-                                        <Trash2 class="w-4 h-4" :class="{ 'opacity-50': !canDelete(user) }" />
-                                    </Button>
-                                    
-                                    <Button
-                                        v-if="user.deleted_at && authStore.hasPermission('delete users')"
-                                        variant="ghost"
-                                        size="icon"
-                                        @click="restoreUser(user)"
-                                        class="h-8 w-8 text-success hover:bg-success/10"
-                                        :title="$t('common.actions.restore')"
-                                    >
-                                        <RotateCcw class="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                        v-if="user.deleted_at && authStore.hasPermission('delete users')"
-                                        variant="ghost"
-                                        size="icon"
-                                        @click="forceDeleteUser(user)"
-                                        class="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                        :title="$t('common.actions.forceDelete')"
-                                    >
-                                        <Trash2 class="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
+                <DataTable
+                    :table="table"
+                    :loading="loading"
+                    :empty-message="$t('features.users.empty')"
+                />
 
                 <!-- Pagination -->
                 <Pagination
@@ -358,7 +184,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import api from '@/services/api';
@@ -367,6 +193,7 @@ import { parseResponse, ensureArray, type PaginationData } from '@/utils/respons
 import { useToast } from '@/composables/useToast';
 import {
     Pagination,
+    Button,
     Input,
     Card,
     Select,
@@ -376,16 +203,19 @@ import {
     SelectItem,
     Checkbox,
     Badge,
-    Table,
-    TableHeader,
-    TableBody,
-    TableRow,
-    TableCell,
-    TableHead
+    DataTable
 } from '@/components/ui';
+import { h } from 'vue';
+import { 
+    useVueTable, 
+    getCoreRowModel, 
+    createColumnHelper,
+    getSortedRowModel,
+    type SortingState,
+    type RowSelectionState
+} from '@tanstack/vue-table';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
-import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import Users from 'lucide-vue-next/dist/esm/icons/users.js';
 import LogOut from 'lucide-vue-next/dist/esm/icons/log-out.js';
 import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
@@ -415,6 +245,157 @@ const pagination = ref<PaginationData | null>(null);
 const authStore = useAuthStore();
 
 const { confirm } = useConfirm();
+const columnHelper = createColumnHelper<User>();
+
+const columns = [
+    columnHelper.display({
+        id: 'select',
+        header: ({ table }) => h(Checkbox, {
+            checked: table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate'),
+            'onUpdate:checked': (val) => table.toggleAllPageRowsSelected(!!val),
+        }),
+        cell: ({ row }) => h(Checkbox, {
+            checked: row.getIsSelected(),
+            'onUpdate:checked': (val) => row.toggleSelected(!!val),
+        }),
+        size: 50,
+    }),
+    columnHelper.accessor('name', {
+        header: t('features.users.table.user'),
+        cell: ({ row }) => {
+            const user = row.original;
+            const avatarUrl = user.avatar ? (typeof user.avatar === 'string' ? user.avatar : user.avatar.url) : null;
+            
+            return h('div', { class: 'flex items-center' }, [
+                h('div', { class: 'flex-shrink-0 h-9 w-9' }, [
+                    avatarUrl 
+                        ? h('img', { src: avatarUrl, class: 'h-9 w-9 rounded-full object-cover' })
+                        : h('div', { class: 'h-9 w-9 rounded-full bg-muted flex items-center justify-center border border-border/40' }, [
+                            h('span', { class: 'text-muted-foreground font-medium text-xs' }, user?.name?.charAt(0)?.toUpperCase() || 'U')
+                        ])
+                ]),
+                h('div', { class: 'ml-4' }, [
+                    h('div', { class: 'text-sm font-medium text-foreground flex items-center gap-2' }, [
+                        user.name,
+                        user.deleted_at ? h(Badge, { variant: 'destructive', class: 'text-[10px] h-4 px-1' }, t('common.labels.deleted')) : null
+                    ]),
+                    user.phone ? h('div', { class: 'text-[10px] text-muted-foreground font-mono uppercase tracking-tight' }, user.phone) : null
+                ])
+            ]);
+        }
+    }),
+    columnHelper.accessor('email', {
+        header: t('features.users.table.email'),
+        cell: ({ row }) => {
+            const user = row.original;
+            return h('div', [
+                h('div', { class: 'text-sm text-foreground' }, user.email),
+                user.email_verified_at 
+                    ? h('div', { class: 'text-[10px] text-primary font-bold uppercase tracking-wider' }, t('features.users.status.verified'))
+                    : h('div', { class: 'text-[10px] text-muted-foreground italic uppercase tracking-wider' }, t('features.users.status.unverified'))
+            ]);
+        }
+    }),
+    columnHelper.accessor('roles', {
+        header: t('features.users.table.roles'),
+        cell: ({ row }) => {
+            const roles = row.original.roles || [];
+            if (roles.length === 0) return h('span', { class: 'text-xs text-muted-foreground italic' }, t('features.users.status.noRoles'));
+            
+            return h('div', { class: 'flex flex-wrap gap-1.5' }, roles.map(role => h(Badge, {
+                variant: 'secondary',
+                class: 'h-5 text-[10px] px-2 font-semibold uppercase tracking-wider'
+            }, role.name)));
+        }
+    }),
+    columnHelper.accessor('last_login_at', {
+        header: t('features.users.table.lastLogin'),
+        cell: ({ row }) => {
+            const date = row.original.last_login_at;
+            if (!date) return h('div', { class: 'text-xs text-muted-foreground/50' }, t('features.users.status.never'));
+            return h('div', { class: 'text-xs' }, formatDate(date));
+        }
+    }),
+    columnHelper.display({
+        id: 'actions',
+        header: () => h('div', { class: 'text-center' }, t('features.users.table.actions')),
+        cell: ({ row }) => {
+            const user = row.original;
+            const canManageUser = canManage(user);
+            const canDeleteUser = canDelete(user);
+            
+            return h('div', { class: 'flex justify-center items-center gap-1' }, [
+                !user.email_verified_at && authStore.hasPermission('edit users') && h(Button, {
+                    variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-primary hover:bg-primary/10',
+                    disabled: !canManageUser, onClick: () => verifyUser(user), title: t('features.users.actions.verify')
+                }, [h(CheckCheck, { class: 'w-4 h-4' })]),
+                
+                authStore.hasPermission('edit users') && h(Button, {
+                    variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-warning hover:bg-warning/10',
+                    disabled: !canManageUser, onClick: () => forceLogoutUser(user), title: t('features.users.actions.forceLogout')
+                }, [h(LogOut, { class: 'w-4 h-4' })]),
+                
+                authStore.hasPermission('edit users') && h(Button, {
+                    variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-primary hover:bg-primary/10',
+                    disabled: !canManageUser, onClick: () => editUser(user), title: t('common.actions.edit')
+                }, [h(Pencil, { class: 'w-4 h-4' })]),
+                
+                user.deleted_at 
+                    ? [
+                        authStore.hasPermission('delete users') && h(Button, {
+                            variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-success hover:bg-success/10',
+                            onClick: () => restoreUser(user), title: t('common.actions.restore')
+                        }, [h(RotateCcw, { class: 'w-4 h-4' })]),
+                        authStore.hasPermission('delete users') && h(Button, {
+                            variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-destructive hover:bg-destructive/10',
+                            onClick: () => forceDeleteUser(user), title: t('common.actions.forceDelete')
+                        }, [h(Trash2, { class: 'w-4 h-4' })])
+                    ]
+                    : [
+                        authStore.hasPermission('delete users') && h(Button, {
+                            variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-destructive hover:bg-destructive/10',
+                            disabled: !canDeleteUser, onClick: () => deleteUser(user), title: t('common.actions.delete')
+                        }, [h(Trash2, { class: 'w-4 h-4' })])
+                    ]
+            ]);
+        }
+    })
+];
+
+const sorting = ref<SortingState>([]);
+const rowSelection = ref<RowSelectionState>({});
+
+const table = useVueTable({
+    get data() { return users.value },
+    columns,
+    state: {
+        get sorting() { return sorting.value },
+        get rowSelection() { return rowSelection.value },
+    },
+    onSortingChange: updaterOrValue => {
+        sorting.value = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue;
+    },
+    onRowSelectionChange: updaterOrValue => {
+        rowSelection.value = typeof updaterOrValue === 'function' ? updaterOrValue(rowSelection.value) : updaterOrValue;
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: row => String(row.id),
+    enableRowSelection: true,
+});
+
+// Sync selectedIds with rowSelection for bulk actions
+watch(rowSelection, (newSelection) => {
+    selectedIds.value = Object.keys(newSelection)
+        .filter(key => newSelection[key])
+        .map(id => Number(id));
+}, { deep: true });
+
+// Clear selection when users change (pagination/filter)
+watch(users, () => {
+    rowSelection.value = {};
+});
+
 const stats = ref<{
     total: number;
     verified: number;
@@ -691,26 +672,6 @@ const forceDeleteUser = async (user: User) => {
 
 const selectedIds = ref<number[]>([]);
 
-const isAllSelected = computed(() => {
-    return users.value.length > 0 && selectedIds.value.length === users.value.length;
-});
-
-const toggleSelection = (id: number) => {
-    const index = selectedIds.value.indexOf(id);
-    if (index === -1) {
-        selectedIds.value.push(id);
-    } else {
-        selectedIds.value.splice(index, 1);
-    }
-};
-
-const toggleSelectAll = (checked: boolean) => {
-    if (checked) {
-        selectedIds.value = users.value.map(u => u.id);
-    } else {
-        selectedIds.value = [];
-    }
-};
 
 const bulkActionSelection = ref('');
 

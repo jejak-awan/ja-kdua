@@ -7,7 +7,7 @@ parameters:
     paths:
         - app
     excludePaths:
-        - app/Services/Isp/MikrotikService.php  # Exclude until routeros-api-php package is installed
+        []
     scanDirectories:
         - vendor/laravel/framework/src
     bootstrapFiles:

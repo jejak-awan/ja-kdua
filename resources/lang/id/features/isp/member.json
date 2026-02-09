@@ -81,10 +81,27 @@
         "need_speed_title": "Butuh Kecepatan Lebih?",
         "need_speed_desc": "Penggunaan bandwidth Anda mendekati 80% pada jam sibuk. Pertimbangkan paket lebih tinggi.",
         "upgrade_button": "Upgrade Paket",
-        "error_load": "Gagal memuat data penggunaan"
+        "error_load": "Gagal memuat data penggunaan",
+        "quota_used": "Kuota Terpakai",
+        "quota_remaining": "Sisa Kuota",
+        "throttled_notice": "Kecepatan Anda saat ini dibatasi (FUP aktif).",
+        "unlimited": "Tanpa Batas"
     },
     "profile": {
         "title": "Profil Pelanggan",
+        "subtitle": "Kelola informasi pribadi dan keamanan akun Anda.",
+        "phone": "Nomor WhatsApp",
+        "address": "Alamat Pemasangan",
+        "email": "Alamat Email",
+        "security_title": "Keamanan & Kata Sandi",
+        "current_password": "Kata Sandi Saat Ini",
+        "new_password": "Kata Sandi Baru",
+        "confirm_password": "Konfirmasi Kata Sandi Baru",
+        "update_success": "Profil berhasil diperbarui.",
+        "tabs": {
+            "info": "Informasi Umum",
+            "security": "Keamanan"
+        },
         "full_name": "Nama Lengkap",
         "subscription_plan": "Paket Langganan",
         "not_active": "Tidak Aktif",

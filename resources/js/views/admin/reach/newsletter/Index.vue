@@ -78,125 +78,48 @@
             </div>
 
             <!-- Table -->
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead class="w-[50px]">
-                            <Checkbox 
-                                :checked="isAllSelected"
-                                @update:checked="toggleSelectAll"
-                            />
-                        </TableHead>
-                        <TableHead>{{ $t('features.newsletter.table.subscriber') }}</TableHead>
-                        <TableHead>{{ $t('features.newsletter.table.status') }}</TableHead>
-                        <TableHead>{{ $t('features.newsletter.table.joinedAt') }}</TableHead>
-                        <TableHead>{{ $t('features.newsletter.table.source') }}</TableHead>
-                        <TableHead class="text-center">{{ $t('features.newsletter.table.actions') }}</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    <TableRow v-if="loading">
-                        <TableCell colspan="6" class="h-24 text-center">
-                            {{ $t('features.newsletter.messages.loading') }}
-                        </TableCell>
-                    </TableRow>
-                    <TableRow v-else-if="subscribers.length === 0">
-                        <TableCell colspan="6" class="h-24 text-center">
-                            {{ $t('features.newsletter.messages.empty') }}
-                        </TableCell>
-                    </TableRow>
-                    <TableRow v-for="subscriber in subscribers" :key="subscriber.id">
-                        <TableCell>
-                            <Checkbox 
-                                :checked="selectedIds.includes(subscriber.id)"
-                                @update:checked="toggleSelection(subscriber.id)"
-                            />
-                        </TableCell>
-                        <TableCell>
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-9 w-9">
-                                    <div class="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs border border-primary/20">
-                                        {{ (subscriber.name || subscriber.email).charAt(0).toUpperCase() }}
-                                    </div>
-                                </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-medium text-foreground flex items-center gap-2">
-                                        {{ subscriber.name || $t('features.newsletter.messages.noName') }}
-                                        <Badge v-if="subscriber.deleted_at" variant="destructive" class="h-4.5 text-[10px] px-1.5 uppercase font-bold tracking-wider">
-                                            {{ t('common.labels.deleted') }}
-                                        </Badge>
-                                    </div>
-                                    <div class="text-xs text-muted-foreground">
-                                        {{ subscriber.email }}
-                                    </div>
-                                </div>
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                            <Badge
-                                variant="outline"
-                                :class="subscriber.status === 'subscribed' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'"
-                            >
-                                {{ $t(`features.newsletter.filters.${subscriber.status}`) }}
-                            </Badge>
-                        </TableCell>
-                        <TableCell class="text-xs text-muted-foreground">
-                            {{ formatDate(subscriber.created_at) }}
-                        </TableCell>
-                        <TableCell class="text-xs text-muted-foreground truncated max-w-[150px]" :title="subscriber.source">
-                            {{ subscriber.source }}
-                        </TableCell>
-                        <TableCell>
-                            <div class="flex items-center justify-center">
-                                <Button
-                                    v-if="subscriber.deleted_at"
-                                    variant="ghost"
-                                    size="icon"
-                                    @click="restoreSubscriber(subscriber)"
-                                    class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10"
-                                    :title="$t('common.actions.restore')"
-                                >
-                                    <RotateCcw class="w-4 h-4" />
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    @click="deleteSubscriber(subscriber)"
-                                    class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    :title="subscriber.deleted_at ? $t('common.actions.forceDelete') : $t('features.newsletter.actions.delete')"
-                                >
-                                    <Trash2 class="w-4 h-4" />
-                                </Button>
-                            </div>
-                        </TableCell>
-                    </TableRow>
-                </TableBody>
-            </Table>
+            <div class="p-0">
+                <DataTable
+                    :table="table"
+                    :loading="loading"
+                    :empty-message="$t('features.newsletter.messages.empty')"
+                />
+            </div>
 
             <!-- Pagination -->
-            <Pagination
-                v-if="pagination.total > 0"
-                :current-page="pagination.current_page"
-                :total-items="pagination.total"
-                :per-page="filters.per_page"
-                :show-page-numbers="true"
-                @page-change="changePage"
-                @update:per-page="changePerPage"
-                class="mt-4 px-4 pb-4"
-            />
+            <div class="px-6 py-4 border-t border-border/40">
+                <Pagination
+                    v-if="pagination && pagination.total > 0"
+                    :current-page="pagination.current_page"
+                    :total-items="pagination.total"
+                    :per-page="Number(pagination.per_page || 15)"
+                    :show-page-numbers="true"
+                    @page-change="changePage"
+                    @update:per-page="changePerPage"
+                />
+            </div>
         </Card>
     </div>
 </template>
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
 import { parseResponse } from '@/utils/responseParser';
-import { Badge, Button, Card, Checkbox, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
+import { Badge, Button, Card, Checkbox, Input, Pagination, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, DataTable } from '@/components/ui';
+
+import { h } from 'vue';
+import { 
+    useVueTable, 
+    getCoreRowModel, 
+    createColumnHelper,
+    getSortedRowModel,
+    type SortingState
+} from '@tanstack/vue-table';
 
 import Download from 'lucide-vue-next/dist/esm/icons/download.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
@@ -234,6 +157,107 @@ const filters = ref({
     trashed: 'without',
     page: 1,
     per_page: 15,
+});
+
+const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
+
+const columnHelper = createColumnHelper<Subscriber>();
+
+const columns = [
+    columnHelper.display({
+        id: 'select',
+        header: ({ table }) => h(Checkbox, {
+            checked: table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate'),
+            'onUpdate:checked': (val) => table.toggleAllPageRowsSelected(!!val),
+        }),
+        cell: ({ row }) => h(Checkbox, {
+            checked: row.getIsSelected(),
+            'onUpdate:checked': (val) => row.toggleSelected(!!val),
+        }),
+        size: 50,
+    }),
+    columnHelper.accessor('name', {
+        header: t('features.newsletter.table.subscriber'),
+        cell: ({ row }) => {
+            const subscriber = row.original;
+            const initial = (subscriber.name || subscriber.email).charAt(0).toUpperCase();
+            
+            return h('div', { class: 'flex items-center' }, [
+                h('div', { class: 'flex-shrink-0 h-9 w-9' }, [
+                    h('div', { class: 'h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs border border-primary/20' }, initial)
+                ]),
+                h('div', { class: 'ml-4' }, [
+                    h('div', { class: 'text-sm font-medium text-foreground flex items-center gap-2' }, [
+                        subscriber.name || t('features.newsletter.messages.noName'),
+                        subscriber.deleted_at ? h(Badge, { variant: 'destructive', class: 'h-4.5 text-[10px] px-1.5 uppercase font-bold tracking-wider' }, t('common.labels.deleted')) : null
+                    ]),
+                    h('div', { class: 'text-xs text-muted-foreground' }, subscriber.email)
+                ])
+            ]);
+        }
+    }),
+    columnHelper.accessor('status', {
+        header: t('features.newsletter.table.status'),
+        cell: ({ row }) => {
+            const status = row.original.status;
+            return h(Badge, {
+                variant: 'outline',
+                class: status === 'subscribed' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'
+            }, t(`features.newsletter.filters.${status}`));
+        }
+    }),
+    columnHelper.accessor('created_at', {
+        header: t('features.newsletter.table.joinedAt'),
+        cell: ({ row }) => h('span', { class: 'text-xs text-muted-foreground' }, formatDate(row.original.created_at))
+    }),
+    columnHelper.accessor('source', {
+        header: t('features.newsletter.table.source'),
+        cell: ({ row }) => h('span', { class: 'text-xs text-muted-foreground truncated max-w-[150px]', title: row.original.source || '' }, row.original.source || '-')
+    }),
+    columnHelper.display({
+        id: 'actions',
+        header: () => h('div', { class: 'text-center' }, t('features.newsletter.table.actions')),
+        cell: ({ row }) => {
+            const subscriber = row.original;
+            return h('div', { class: 'flex items-center justify-center gap-1' }, [
+                subscriber.deleted_at && h(Button, {
+                    variant: 'ghost', size: 'icon', onClick: () => restoreSubscriber(subscriber),
+                    class: 'h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10',
+                    title: t('common.actions.restore')
+                }, [h(RotateCcw, { class: 'w-4 h-4' })]),
+                h(Button, {
+                    variant: 'ghost', size: 'icon', onClick: () => deleteSubscriber(subscriber),
+                    class: 'h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10',
+                    title: subscriber.deleted_at ? t('common.actions.forceDelete') : t('features.newsletter.actions.delete')
+                }, [h(Trash2, { class: 'w-4 h-4' })])
+            ]);
+        }
+    })
+];
+
+const sorting = ref<SortingState>([]);
+
+const table = useVueTable({
+    get data() { return subscribers.value },
+    columns,
+    state: {
+        get sorting() { return sorting.value }
+    },
+    onSortingChange: updaterOrValue => {
+        sorting.value = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue;
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: row => String(row.id),
 });
 
 const fetchSubscribers = async () => {
@@ -346,16 +370,6 @@ const exportCsv = async () => {
     }
 };
 
-const formatDate = (dateString: string) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-};
 
 const bulkActionSelection = ref('');
 
@@ -367,26 +381,6 @@ const handleBulkAction = async (value: string) => {
 
 const selectedIds = ref<(string | number)[]>([]);
 
-const isAllSelected = computed(() => {
-    return subscribers.value.length > 0 && selectedIds.value.length === subscribers.value.length;
-});
-
-const toggleSelection = (id: string | number) => {
-    const index = selectedIds.value.indexOf(id);
-    if (index === -1) {
-        selectedIds.value.push(id);
-    } else {
-        selectedIds.value.splice(index, 1);
-    }
-};
-
-const toggleSelectAll = (checked: boolean) => {
-    if (checked) {
-        selectedIds.value = subscribers.value.map(s => s.id);
-    } else {
-        selectedIds.value = [];
-    }
-};
 
 const bulkAction = async (action: string) => {
     if (selectedIds.value.length === 0) return;

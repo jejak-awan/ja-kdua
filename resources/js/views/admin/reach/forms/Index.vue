@@ -279,222 +279,13 @@
             </Card>
         </div>
 
-        <!-- List View -->
-        <Card v-else class="overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-muted/50">
-                        <tr>
-                            <th class="px-4 py-3 w-[50px]">
-                                <Checkbox 
-                                    :checked="isAllSelected"
-                                    @update:checked="toggleSelectAll"
-                                />
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
-                                {{ $t('features.forms.modal.formName') }}
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
-                                {{ $t('features.forms.modal.slug') }}
-                            </th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground">
-                                {{ $t('features.forms.stats.fields', { count: '' }).replace('{count}', '').trim() }}
-                            </th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                {{ $t('features.forms.stats.views', { count: '' }).replace(/^[0-9\s]+/, '').trim() }}
-                            </th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                {{ $t('features.forms.stats.starts', { count: '' }).replace(/^[0-9\s]+/, '').trim() }}
-                            </th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                {{ $t('features.forms.actions.submissions') }}
-                            </th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                {{ $t('features.forms.stats.conversion', { rate: '' }).replace(/^[0-9%/\s]+/, '').trim() }}
-                            </th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
-                                Status
-                            </th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
-                                {{ $t('common.actions.title') }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-border">
-                        <tr v-for="form in filteredForms" :key="form.id" class="hover:bg-muted/30 transition-colors">
-                            <td class="px-4 py-4">
-                                <Checkbox 
-                                    :checked="selectedIds.includes(form.id)"
-                                    @update:checked="toggleSelection(form.id)"
-                                />
-                            </td>
-                            <td class="px-4 py-4">
-                                <div>
-                                    <p class="font-medium text-foreground">
-                                        {{ form.name }}
-                                        <span v-if="form.deleted_at" class="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-destructive/10 text-destructive uppercase tracking-wide">
-                                            {{ $t('common.labels.deleted') }}
-                                        </span>
-                                    </p>
-                                    <p v-if="form.description" class="text-sm text-muted-foreground line-clamp-1">{{ form.description }}</p>
-                                </div>
-                            </td>
-                            <td class="px-4 py-4">
-                                <code class="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">{{ form.slug }}</code>
-                            </td>
-                            <td class="px-4 py-4 text-right">
-                                <span class="text-sm text-muted-foreground">{{ countFormFields(form) }}</span>
-                            </td>
-                            <td class="px-4 py-4 text-right font-mono text-xs">
-                                {{ form.view_count || 0 }}
-                            </td>
-                            <td class="px-4 py-4 text-right font-mono text-xs">
-                                {{ form.start_count || 0 }}
-                            </td>
-                            <td class="px-4 py-4 text-right">
-                                <span class="font-medium px-2 py-0.5 rounded-full bg-primary/5 text-primary tracking-tight">
-                                    {{ form.submission_count || 0 }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-4 text-right">
-                                <span class="text-xs font-bold text-emerald-600">
-                                    {{ calculateConversion(form) }}%
-                                </span>
-                            </td>
-                            <td class="px-4 py-4 text-center">
-                                <Badge
-                                    :variant="form.is_active ? 'success' : 'secondary'"
-                                >
-                                    {{ form.is_active ? $t('features.forms.filters.active') : $t('features.forms.filters.inactive') }}
-                                </Badge>
-                            </td>
-                            <td class="px-4 py-4">
-                                <div class="flex items-center justify-center space-x-1">
-                                    <Tooltip>
-                                        <TooltipTrigger as-child>
-                                            <Button @click="editForm(form)" variant="ghost" size="icon" class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10">
-                                                <Pencil class="w-4 h-4" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>{{ $t('common.actions.edit') }}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-
-                                    <Tooltip>
-                                        <TooltipTrigger as-child>
-                                            <Button @click="viewSubmissions(form)" variant="ghost" size="icon" class="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10">
-                                                <Inbox class="w-4 h-4" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>{{ $t('features.forms.actions.submissions') }}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-
-                                    <Tooltip>
-                                        <TooltipTrigger as-child>
-                                            <Button
-                                                @click="openDuplicateDialog(form)"
-                                                variant="ghost"
-                                                size="icon"
-                                                class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50"
-                                            >
-                                                <Copy class="w-4 h-4" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>{{ $t('features.forms.actions.duplicate') }}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-
-                                    <Tooltip>
-                                        <TooltipTrigger as-child>
-                                            <Button
-                                                @click="toggleFormStatus(form)"
-                                                variant="ghost"
-                                                size="icon"
-                                                :class="form.is_active ? 'h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10' : 'h-8 w-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10'"
-                                            >
-                                                <Ban v-if="form.is_active" class="w-4 h-4" />
-                                                <Check v-else class="w-4 h-4" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>{{ form.is_active ? $t('common.actions.deactivate') : $t('common.actions.activate') }}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-
-                                    <Tooltip>
-                                        <TooltipTrigger as-child>
-                                            <Button
-                                                @click="openShareDialog(form)"
-                                                variant="ghost"
-                                                size="icon"
-                                                class="h-8 w-8 text-sky-500 hover:text-sky-600 hover:bg-sky-50"
-                                            >
-                                                <Share2 class="w-4 h-4" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>{{ $t('features.forms.actions.share') }}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-
-                                    <Tooltip v-if="!form.deleted_at">
-                                        <TooltipTrigger as-child>
-                                            <Button
-                                                @click="deleteForm(form)"
-                                                variant="ghost"
-                                                size="icon"
-                                                class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                            >
-                                                <Trash2 class="w-4 h-4" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>{{ $t('common.actions.delete') }}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-
-                                    <Tooltip v-if="form.deleted_at">
-                                        <TooltipTrigger as-child>
-                                            <Button
-                                                @click="restoreForm(form)"
-                                                variant="ghost"
-                                                size="icon"
-                                                class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-                                            >
-                                                <RotateCcw class="w-4 h-4" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>{{ $t('common.actions.restore') }}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-
-                                    <Tooltip v-if="form.deleted_at">
-                                        <TooltipTrigger as-child>
-                                            <Button
-                                                @click="forceDeleteForm(form)"
-                                                variant="ghost"
-                                                size="icon"
-                                                class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                            >
-                                                <Trash2 class="w-4 h-4" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>{{ $t('common.actions.forceDelete') }}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </Card>
+        <div v-else>
+            <DataTable
+                :table="table"
+                :loading="loading"
+                :empty-message="$t('features.forms.messages.empty')"
+            />
+        </div>
 
 
         <!-- Share Dialog -->
@@ -596,7 +387,15 @@ import { useConfirm } from '@/composables/useConfirm';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
-import { Badge, Button, Card, Checkbox, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Label, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui';
+import { Badge, Button, Card, Checkbox, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Label, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, DataTable } from '@/components/ui';
+import { h } from 'vue';
+import { 
+    useVueTable, 
+    getCoreRowModel, 
+    createColumnHelper,
+    getSortedRowModel,
+    type SortingState
+} from '@tanstack/vue-table';
 
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Search from 'lucide-vue-next/dist/esm/icons/search.js';
@@ -641,6 +440,143 @@ const showDuplicateDialog = ref(false);
 const duplicatingForm = ref<Form | null>(null);
 const duplicating = ref(false);
 
+const columnHelper = createColumnHelper<Form>();
+
+const columns = [
+    columnHelper.display({
+        id: 'select',
+        header: ({ table }) => h(Checkbox, {
+            checked: table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate'),
+            'onUpdate:checked': (val) => table.toggleAllPageRowsSelected(!!val),
+        }),
+        cell: ({ row }) => h(Checkbox, {
+            checked: row.getIsSelected(),
+            'onUpdate:checked': (val) => row.toggleSelected(!!val),
+        }),
+        size: 50,
+    }),
+    columnHelper.accessor('name', {
+        header: t('features.forms.modal.formName'),
+        cell: ({ row }) => h('div', [
+            h('p', { class: 'font-medium text-foreground' }, [
+                row.original.name,
+                row.original.deleted_at ? h('span', { class: 'ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-destructive/10 text-destructive uppercase tracking-wide' }, t('common.labels.deleted')) : null
+            ]),
+            row.original.description ? h('p', { class: 'text-sm text-muted-foreground line-clamp-1' }, row.original.description) : null
+        ])
+    }),
+    columnHelper.accessor('slug', {
+        header: t('features.forms.modal.slug'),
+        cell: ({ row }) => h('code', { class: 'text-sm text-muted-foreground bg-muted px-2 py-1 rounded' }, row.original.slug)
+    }),
+    columnHelper.display({
+        id: 'fields',
+        header: () => h('div', { class: 'text-right' }, t('features.forms.stats.fields', { count: '' }).replace('{count}', '').trim()),
+        cell: ({ row }) => h('div', { class: 'text-right' }, [
+            h('span', { class: 'text-sm text-muted-foreground' }, String(countFormFields(row.original)))
+        ])
+    }),
+    columnHelper.accessor('view_count', {
+        header: () => h('div', { class: 'text-right' }, t('features.forms.stats.views', { count: '' }).replace(/^[0-9\s]+/, '').trim()),
+        cell: ({ row }) => h('div', { class: 'text-right font-mono text-xs' }, String(row.original.view_count || 0))
+    }),
+    columnHelper.accessor('start_count', {
+        header: () => h('div', { class: 'text-right' }, t('features.forms.stats.starts', { count: '' }).replace(/^[0-9\s]+/, '').trim()),
+        cell: ({ row }) => h('div', { class: 'text-right font-mono text-xs' }, String(row.original.start_count || 0))
+    }),
+    columnHelper.accessor('submission_count', {
+        header: () => h('div', { class: 'text-right' }, t('features.forms.actions.submissions')),
+        cell: ({ row }) => h('div', { class: 'text-right' }, [
+            h('span', { class: 'font-medium px-2 py-0.5 rounded-full bg-primary/5 text-primary tracking-tight' }, String(row.original.submission_count || 0))
+        ])
+    }),
+    columnHelper.display({
+        id: 'conversion',
+        header: () => h('div', { class: 'text-right' }, t('features.forms.stats.conversion', { rate: '' }).replace(/^[0-9%/\s]+/, '').trim()),
+        cell: ({ row }) => h('div', { class: 'text-right' }, [
+            h('span', { class: 'text-xs font-bold text-emerald-600' }, `${calculateConversion(row.original)}%`)
+        ])
+    }),
+    columnHelper.accessor('is_active', {
+        header: () => h('div', { class: 'text-center' }, 'Status'),
+        cell: ({ row }) => h('div', { class: 'text-center' }, [
+            h(Badge, { variant: row.original.is_active ? 'success' : 'secondary' }, row.original.is_active ? t('features.forms.filters.active') : t('features.forms.filters.inactive'))
+        ])
+    }),
+    columnHelper.display({
+        id: 'actions',
+        header: () => h('div', { class: 'text-center' }, t('common.actions.title')),
+        cell: ({ row }) => h('div', { class: 'flex items-center justify-center space-x-1' }, [
+            h(Tooltip, {}, {
+                default: () => [
+                    h(TooltipTrigger, { asChild: true }, {
+                        default: () => h(Button, { onClick: () => editForm(row.original), variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10' }, [h(Pencil, { class: 'w-4 h-4' })])
+                    }),
+                    h(TooltipContent, {}, { default: () => h('p', t('common.actions.edit')) })
+                ]
+            }),
+            h(Tooltip, {}, {
+                default: () => [
+                    h(TooltipTrigger, { asChild: true }, {
+                        default: () => h(Button, { onClick: () => viewSubmissions(row.original), variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10' }, [h(Inbox, { class: 'w-4 h-4' })])
+                    }),
+                    h(TooltipContent, {}, { default: () => h('p', t('features.forms.actions.submissions')) })
+                ]
+            }),
+            h(Tooltip, {}, {
+                default: () => [
+                    h(TooltipTrigger, { asChild: true }, {
+                        default: () => h(Button, { onClick: () => openDuplicateDialog(row.original), variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50' }, [h(Copy, { class: 'w-4 h-4' })])
+                    }),
+                    h(TooltipContent, {}, { default: () => h('p', t('features.forms.actions.duplicate')) })
+                ]
+            }),
+            h(Tooltip, {}, {
+                default: () => [
+                    h(TooltipTrigger, { asChild: true }, {
+                        default: () => h(Button, { onClick: () => toggleFormStatus(row.original), variant: 'ghost', size: 'icon', class: row.original.is_active ? 'h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10' : 'h-8 w-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10' }, [
+                            row.original.is_active ? h(Ban, { class: 'w-4 h-4' }) : h(Check, { class: 'w-4 h-4' })
+                        ])
+                    }),
+                    h(TooltipContent, {}, { default: () => h('p', row.original.is_active ? t('common.actions.deactivate') : t('common.actions.activate')) })
+                ]
+            }),
+            h(Tooltip, {}, {
+                default: () => [
+                    h(TooltipTrigger, { asChild: true }, {
+                        default: () => h(Button, { onClick: (e: Event) => { e.stopPropagation(); openShareDialog(row.original); }, variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-sky-500 hover:text-sky-600 hover:bg-sky-50' }, [h(Share2, { class: 'w-4 h-4' })])
+                    }),
+                    h(TooltipContent, {}, { default: () => h('p', t('features.forms.actions.share')) })
+                ]
+            }),
+            !row.original.deleted_at && h(Tooltip, {}, {
+                default: () => [
+                    h(TooltipTrigger, { asChild: true }, {
+                        default: () => h(Button, { onClick: () => deleteForm(row.original), variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10' }, [h(Trash2, { class: 'w-4 h-4' })])
+                    }),
+                    h(TooltipContent, {}, { default: () => h('p', t('common.actions.delete')) })
+                ]
+            }),
+            row.original.deleted_at && h(Tooltip, {}, {
+                default: () => [
+                    h(TooltipTrigger, { asChild: true }, {
+                        default: () => h(Button, { onClick: () => restoreForm(row.original), variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50' }, [h(RotateCcw, { class: 'w-4 h-4' })])
+                    }),
+                    h(TooltipContent, {}, { default: () => h('p', t('common.actions.restore')) })
+                ]
+            }),
+            row.original.deleted_at && h(Tooltip, {}, {
+                default: () => [
+                    h(TooltipTrigger, { asChild: true }, {
+                        default: () => h(Button, { onClick: () => forceDeleteForm(row.original), variant: 'ghost', size: 'icon', class: 'h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10' }, [h(Trash2, { class: 'w-4 h-4' })])
+                    }),
+                    h(TooltipContent, {}, { default: () => h('p', t('common.actions.forceDelete')) })
+                ]
+            })
+        ])
+    })
+];
+
 const filteredForms = computed(() => {
     let result = forms.value;
 
@@ -660,6 +596,13 @@ const filteredForms = computed(() => {
 
     return result;
 });
+
+const sorting = ref<SortingState>([]);
+
+const calculateConversion = (form: Form) => {
+    if (!form.view_count || form.view_count === 0) return 0
+    return Math.round(((form.submission_count || 0) / form.view_count) * 100)
+}
 
 // Count form field blocks (form_input, form_textarea, form_select, etc.) recursively
 const countFormFields = (form: Form): number => {
@@ -681,6 +624,20 @@ const countFormFields = (form: Form): number => {
     countBlocks(form.blocks || []);
     return count;
 };
+
+const table = useVueTable({
+    get data() { return filteredForms.value },
+    columns,
+    state: {
+        get sorting() { return sorting.value }
+    },
+    onSortingChange: updaterOrValue => {
+        sorting.value = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue;
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: row => String(row.id),
+});
 
 const openShareDialog = (form: Form) => {
     sharingForm.value = form;
@@ -842,24 +799,12 @@ const forceDeleteForm = async (form: Form) => {
 
 const selectedIds = ref<(number | string)[]>([]);
 
-const isAllSelected = computed(() => {
-    return filteredForms.value.length > 0 && selectedIds.value.length === filteredForms.value.length;
-});
-
-const toggleSelection = (formId: number | string) => {
-    const index = selectedIds.value.indexOf(formId);
+const toggleSelection = (id: number | string) => {
+    const index = selectedIds.value.indexOf(id);
     if (index === -1) {
-        selectedIds.value.push(formId);
+        selectedIds.value.push(id);
     } else {
         selectedIds.value.splice(index, 1);
-    }
-};
-
-const toggleSelectAll = (checked: boolean) => {
-    if (checked) {
-        selectedIds.value = filteredForms.value.map(f => f.id);
-    } else {
-        selectedIds.value = [];
     }
 };
 
@@ -912,10 +857,6 @@ const performBulkAction = async (action: string) => {
     }
 };
 
-const calculateConversion = (form: Form) => {
-    if (!form.view_count || form.view_count === 0) return 0
-    return Math.round(((form.submission_count || 0) / form.view_count) * 100)
-}
 
 onMounted(() => {
     fetchForms();

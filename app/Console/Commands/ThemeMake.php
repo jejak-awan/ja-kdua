@@ -66,13 +66,19 @@ class ThemeMake extends Command
         // Update theme.json with type and parent
         $manifestPath = "{$themePath}/theme.json";
         if (file_exists($manifestPath)) {
-            $manifest = json_decode(file_get_contents($manifestPath), true);
-            if (is_array($manifest)) {
-                $manifest['type'] = $type;
-                if ($parent) {
-                    $manifest['parent_theme'] = $parent;
+            $jsonContent = file_get_contents($manifestPath);
+            if ($jsonContent === false) {
+                $this->error('Could not read theme.json');
+                // Continue without updating manifest if read fails, or return Command::FAILURE;
+            } else {
+                $manifest = json_decode($jsonContent, true);
+                if (is_array($manifest)) {
+                    $manifest['type'] = $type;
+                    if ($parent) {
+                        $manifest['parent_theme'] = $parent;
+                    }
+                    file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
                 }
-                file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             }
         }
 

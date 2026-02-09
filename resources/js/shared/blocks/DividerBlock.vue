@@ -7,7 +7,7 @@
   >
     <div class="divider-wrapper container mx-auto" :style="containerStyles">
         <div 
-            class="divider-line w-full h-px bg-slate-200 dark:bg-slate-800 transition-all duration-700"
+            class="divider-line w-full h-px bg-slate-200 dark:bg-slate-800 transition-[background-color,height,opacity] duration-700"
             :style="lineStyles"
         />
         

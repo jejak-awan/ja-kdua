@@ -64,53 +64,62 @@ class DynamicTagService
         // Strip {{ and }}
         $key = trim(str_replace(['{{', '}}'], '', $tag));
 
-        // Post/Page tags
+        // 1. Post/Page tags
         if ($content && str_starts_with($key, 'post_')) {
             $author = $content->author;
-
-            return match ($key) {
-                'post_title' => (string) ($content->title ?? ''),
-                'post_excerpt' => (string) ($content->excerpt ?? ''),
-                'post_content' => (string) ($content->body ?? ''),
-                'post_date' => ($content->published_at ?? $content->created_at ?? now())->format('M d, Y'),
-                'post_author' => $author instanceof \App\Models\User ? $author->name : '',
-                'post_author_avatar' => $author instanceof \App\Models\User ? (string) ($author->getAttribute('avatar') ?? '') : '',
-                'post_featured_image' => (string) ($content->getAttribute('featured_image') ?? ''),
+            $resolved = match ($key) {
+                'post_title' => (string) $content->title,
+                'post_excerpt' => (string) $content->excerpt,
+                'post_content' => (string) $content->body,
+                'post_date' => ($content->published_at ?? ($content->created_at ?? now()))->format('M d, Y'),
+                'post_author' => (string) $author->name,
+                'post_author_avatar' => is_scalar($avatar = $author->getAttribute('avatar')) ? (string) $avatar : '',
+                'post_featured_image' => is_scalar($featuredImage = $content->getAttribute('featured_image')) ? (string) $featuredImage : '',
                 'post_url' => url('/'.$content->slug),
                 'post_category' => $content->category ? (string) $content->category->name : '',
-                'post_tags' => (string) ($content->tags->pluck('name')->join(', ') ?? ''),
+                'post_tags' => $content->tags->pluck('name')->join(', '),
                 default => ''
             };
+
+            return is_scalar($resolved) ? (string) $resolved : '';
         }
 
-        // Loop item tags
+        // 2. Loop item tags
         if ($loopItem && str_starts_with($key, 'loop_')) {
-            return match ($key) {
-                'loop_title' => (string) ($loopItem['title'] ?? ''),
-                'loop_excerpt' => (string) ($loopItem['excerpt'] ?? ''),
-                'loop_date' => (string) ($loopItem['date'] ?? ''),
-                'loop_author' => (string) ($loopItem['author'] ?? ''),
-                'loop_thumbnail' => (string) ($loopItem['thumbnail'] ?? $loopItem['featured_image'] ?? ''),
-                'loop_url' => (string) ($loopItem['url'] ?? ''),
-                'loop_category' => (string) ($loopItem['category'] ?? ''),
-                'loop_index' => (string) ($loopItem['index'] ?? '0'),
+            $resolvedValue = match ($key) {
+                'loop_title' => is_scalar($loopItem['title'] ?? null) ? (string) $loopItem['title'] : '',
+                'loop_excerpt' => is_scalar($loopItem['excerpt'] ?? null) ? (string) $loopItem['excerpt'] : '',
+                'loop_date' => is_scalar($loopItem['date'] ?? null) ? (string) $loopItem['date'] : '',
+                'loop_author' => is_scalar($loopItem['author'] ?? null) ? (string) $loopItem['author'] : '',
+                'loop_thumbnail' => is_scalar($thumbRaw = ($loopItem['thumbnail'] ?? ($loopItem['featured_image'] ?? null))) ? (string) $thumbRaw : '',
+                'loop_url' => is_scalar($loopItem['url'] ?? null) ? (string) $loopItem['url'] : '',
+                'loop_category' => is_scalar($loopItem['category'] ?? null) ? (string) $loopItem['category'] : '',
+                'loop_index' => is_scalar($loopItem['index'] ?? null) ? (string) $loopItem['index'] : '0',
                 default => ''
             };
+
+            return (string) $resolvedValue;
         }
 
-        // Site tags
+        // 3. Site tags
         if (str_starts_with($key, 'site_') || str_starts_with($key, 'current_')) {
-            return match ($key) {
-                'site_title' => (string) Setting::get('site_title', (string) config('app.name')),
-                'site_tagline' => (string) Setting::get('site_tagline', ''),
-                'site_logo' => (string) Setting::get('site_logo', ''),
+            /** @var mixed $appName */
+            $appName = config('app.name') ?? 'Laravel';
+            $appNameStr = is_scalar($appName) ? (string) $appName : 'Laravel';
+
+            $resolvedValue = match ($key) {
+                'site_title' => is_scalar($siteTitle = Setting::get('site_title', $appNameStr)) ? (string) $siteTitle : $appNameStr,
+                'site_tagline' => is_scalar($siteTagline = Setting::get('site_tagline', '')) ? (string) $siteTagline : '',
+                'site_logo' => is_scalar($siteLogo = Setting::get('site_logo', '')) ? (string) $siteLogo : '',
                 'current_date' => now()->format('M d, Y'),
                 'current_year' => (string) now()->year,
                 default => ''
             };
+
+            return (string) $resolvedValue;
         }
 
-        // Archive tags
+        // 4. Archive tags
         if (str_starts_with($key, 'archive_')) {
             return match ($key) {
                 'archive_title' => 'Archive',
@@ -120,19 +129,21 @@ class DynamicTagService
             };
         }
 
-        // User tags (no user context on public frontend, return empty)
+        // 5. User tags
         if (str_starts_with($key, 'user_')) {
             $user = auth()->user();
             if (! $user instanceof \App\Models\User) {
                 return '';
             }
 
-            return match ($key) {
-                'user_name' => (string) ($user->name ?? ''),
-                'user_email' => (string) ($user->email ?? ''),
-                'user_avatar' => (string) $user->getAttribute('avatar') ?? '',
+            $resolvedValue = match ($key) {
+                'user_name' => (string) $user->name,
+                'user_email' => (string) $user->email,
+                'user_avatar' => is_scalar($avatar = $user->getAttribute('avatar')) ? (string) $avatar : '',
                 default => ''
             };
+
+            return (string) $resolvedValue;
         }
 
         return '';

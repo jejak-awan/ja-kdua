@@ -138,6 +138,7 @@ const fetchCustomers = async () => {
         });
 
         if (markers.value.length > 0 && mapInstance.value) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const group = L.featureGroup(markers.value as any);
             (mapInstance.value as L.Map).fitBounds(group.getBounds().pad(0.2));
         }

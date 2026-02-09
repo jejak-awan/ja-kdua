@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\CspReport;
+use App\Models\Setting;
 use Illuminate\Console\Command;
 
 class CleanupCspReports extends Command
@@ -13,11 +14,13 @@ class CleanupCspReports extends Command
 
     public function handle(): int
     {
-        $days = (int) $this->option('days');
+        $daysRaw = $this->option('days') ?? Setting::get('csp_reports_retention_days', 30);
+        /** @var int $days */
+        $days = is_numeric($daysRaw) ? (int) $daysRaw : 30;
+        /** @var int $count */
+        $count = CspReport::where('created_at', '<', now()->subDays($days))->delete();
 
-        $deleted = (int) CspReport::where('created_at', '<', now()->subDays($days))->delete();
-
-        $this->info("Deleted {$deleted} CSP report(s) older than {$days} days.");
+        $this->info(sprintf('Deleted %d CSP report(s) older than %d days.', $count, $days));
 
         return Command::SUCCESS;
     }

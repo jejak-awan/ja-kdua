@@ -52,7 +52,6 @@ class ThemeCacheService
     {
         $cacheKey = self::PREFIX_ACTIVE.$type;
 
-        /** @var ?Theme $theme */
         $theme = Cache::remember($cacheKey, self::TTL_LONG, function () use ($callback) {
             if ($callback) {
                 return $callback();
@@ -61,7 +60,7 @@ class ThemeCacheService
             return null;
         });
 
-        return $theme;
+        return $theme instanceof Theme ? $theme : null;
     }
 
     /**
@@ -71,7 +70,7 @@ class ThemeCacheService
     {
         $driver = config('cache.default');
 
-        return in_array($driver, ['redis', 'memcached']);
+        return is_string($driver) && in_array($driver, ['redis', 'memcached']);
     }
 
     /**
@@ -88,11 +87,11 @@ class ThemeCacheService
             return Cache::tags(['theme', "theme.{$theme->id}"])->remember(
                 $cacheKey,
                 self::TTL_LONG,
-                $callback
+                fn () => $callback()
             );
         }
 
-        return Cache::remember($cacheKey, self::TTL_LONG, $callback);
+        return Cache::remember($cacheKey, self::TTL_LONG, fn () => $callback());
     }
 
     /**
@@ -106,20 +105,14 @@ class ThemeCacheService
         $cacheKey = self::PREFIX_ASSETS.$theme->id;
 
         if ($this->tagsSupported()) {
-            /** @var array{css: array<int, string>, js: array<int, string>} $assets */
-            $assets = Cache::tags(['theme', "theme.{$theme->id}"])->remember(
+            return Cache::tags(['theme', "theme.{$theme->id}"])->remember(
                 $cacheKey,
                 self::TTL_VERY_LONG,
-                $callback
+                fn (): array => $callback()
             );
-
-            return $assets;
         }
 
-        /** @var array{css: array<int, string>, js: array<int, string>} $assets */
-        $assets = Cache::remember($cacheKey, self::TTL_VERY_LONG, $callback);
-
-        return $assets;
+        return Cache::remember($cacheKey, self::TTL_VERY_LONG, fn (): array => $callback());
     }
 
     /**
@@ -133,20 +126,14 @@ class ThemeCacheService
         $cacheKey = self::PREFIX_MANIFEST.$theme->id;
 
         if ($this->tagsSupported()) {
-            /** @var array<string, mixed> $manifest */
-            $manifest = Cache::tags(['theme', "theme.{$theme->id}"])->remember(
+            return Cache::tags(['theme', "theme.{$theme->id}"])->remember(
                 $cacheKey,
                 self::TTL_VERY_LONG,
-                $callback
+                fn (): array => $callback()
             );
-
-            return $manifest;
         }
 
-        /** @var array<string, mixed> $manifest */
-        $manifest = Cache::remember($cacheKey, self::TTL_VERY_LONG, $callback);
-
-        return $manifest;
+        return Cache::remember($cacheKey, self::TTL_VERY_LONG, fn (): array => $callback());
     }
 
     /**
@@ -160,24 +147,20 @@ class ThemeCacheService
         $cacheKey = self::PREFIX_TEMPLATES.$theme->id;
 
         if ($this->tagsSupported()) {
-            /** @var array<int, string> $templates */
-            $templates = Cache::tags(['theme', "theme.{$theme->id}"])->remember(
+            return Cache::tags(['theme', "theme.{$theme->id}"])->remember(
                 $cacheKey,
                 self::TTL_LONG,
-                $callback
+                fn (): array => $callback()
             );
-
-            return $templates;
         }
 
-        /** @var array<int, string> $templates */
-        $templates = Cache::remember($cacheKey, self::TTL_LONG, $callback);
-
-        return $templates;
+        return Cache::remember($cacheKey, self::TTL_LONG, fn (): array => $callback());
     }
 
     /**
      * Cache partial list
+     *
+     * @return mixed
      */
     public function rememberPartials(Theme $theme, callable $callback)
     {
@@ -187,15 +170,17 @@ class ThemeCacheService
             return Cache::tags(['theme', "theme.{$theme->id}"])->remember(
                 $cacheKey,
                 self::TTL_LONG,
-                $callback
+                fn () => $callback()
             );
         }
 
-        return Cache::remember($cacheKey, self::TTL_LONG, $callback);
+        return Cache::remember($cacheKey, self::TTL_LONG, fn () => $callback());
     }
 
     /**
      * Cache layout list
+     *
+     * @return mixed
      */
     public function rememberLayouts(Theme $theme, callable $callback)
     {
@@ -205,15 +190,17 @@ class ThemeCacheService
             return Cache::tags(['theme', "theme.{$theme->id}"])->remember(
                 $cacheKey,
                 self::TTL_LONG,
-                $callback
+                fn () => $callback()
             );
         }
 
-        return Cache::remember($cacheKey, self::TTL_LONG, $callback);
+        return Cache::remember($cacheKey, self::TTL_LONG, fn () => $callback());
     }
 
     /**
      * Cache widget area
+     *
+     * @return mixed
      */
     public function rememberWidgetArea(string $location, callable $callback)
     {
@@ -223,21 +210,23 @@ class ThemeCacheService
             return Cache::tags(['theme', 'widgets', "widgets.{$location}"])->remember(
                 $cacheKey,
                 self::TTL_MEDIUM,
-                $callback
+                fn () => $callback()
             );
         }
 
-        return Cache::remember($cacheKey, self::TTL_MEDIUM, $callback);
+        return Cache::remember($cacheKey, self::TTL_MEDIUM, fn () => $callback());
     }
 
     /**
      * Cache processed shortcodes
+     *
+     * @return mixed
      */
     public function rememberShortcode(string $content, callable $callback)
     {
         $cacheKey = self::PREFIX_SHORTCODES.md5($content);
 
-        return Cache::remember($cacheKey, self::TTL_MEDIUM, $callback);
+        return Cache::remember($cacheKey, self::TTL_MEDIUM, fn () => $callback());
     }
 
     /**
@@ -328,9 +317,12 @@ class ThemeCacheService
      */
     public function getStats(): array
     {
+        $driver = config('cache.default');
+        $driverStr = is_scalar($driver) ? (string) $driver : 'unknown';
+ 
         return [
-            'driver' => (string) config('cache.default'),
-            'tags_supported' => config('cache.default') === 'redis',
+            'driver' => $driverStr,
+            'tags_supported' => $driverStr === 'redis',
             'ttl_short' => self::TTL_SHORT,
             'ttl_medium' => self::TTL_MEDIUM,
             'ttl_long' => self::TTL_LONG,

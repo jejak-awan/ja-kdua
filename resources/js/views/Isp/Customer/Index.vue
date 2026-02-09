@@ -117,7 +117,7 @@ import { useToast } from '@/composables/useToast';
 import type { IspUser } from '@/types/isp';
 import {
     Button, Input, Card, Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
-    DataTable, Popover, PopoverTrigger, PopoverContent
+    DataTable, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem
 } from '@/components/ui';
 import { 
     useVueTable, 
@@ -186,31 +186,25 @@ const columns = [
         id: 'actions',
         header: () => h('div', { class: 'text-right' }, t('common.actions.title')),
         cell: info => {
-            return h(Popover, [
-                h(PopoverTrigger, { asChild: true }, [
+            return h(DropdownMenu, [
+                h(DropdownMenuTrigger, { asChild: true }, [
                     h(Button, { variant: 'ghost', class: 'h-8 w-8 p-0' }, [
                         h(MoreHorizontal, { class: 'h-4 w-4' })
                     ])
                 ]),
-                h(PopoverContent, { align: 'end', class: 'w-40 p-0' }, [
-                    h('div', { class: 'grid gap-1 p-1' }, [
-                        h(Button, { 
-                            variant: 'ghost', 
-                            class: 'w-full justify-start font-normal',
-                            onClick: () => editCustomer(info.row.original)
-                        }, [
-                            h(Pencil, { class: 'mr-2 h-4 w-4' }),
-                            t('common.actions.edit')
-                        ]),
-                        h('div', { class: 'h-px bg-muted my-1' }),
-                        h(Button, { 
-                            variant: 'ghost', 
-                            class: 'w-full justify-start font-normal text-destructive hover:text-destructive',
-                            onClick: () => confirmDeleteCustomer(info.row.original.id)
-                        }, [
-                            h(Trash2, { class: 'mr-2 h-4 w-4' }),
-                            t('common.actions.delete')
-                        ])
+                h(DropdownMenuContent, { align: 'end', class: 'w-40' }, [
+                    h(DropdownMenuItem, { 
+                        onClick: () => editCustomer(info.row.original)
+                    }, [
+                        h(Pencil, { class: 'mr-2 h-4 w-4' }),
+                        t('common.actions.edit')
+                    ]),
+                    h(DropdownMenuItem, { 
+                        class: 'text-destructive focus:text-destructive',
+                        onClick: () => confirmDeleteCustomer(info.row.original.id)
+                    }, [
+                        h(Trash2, { class: 'mr-2 h-4 w-4' }),
+                        t('common.actions.delete')
                     ])
                 ])
             ]);

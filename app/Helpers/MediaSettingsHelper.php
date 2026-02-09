@@ -15,7 +15,11 @@ class MediaSettingsHelper
      */
     public static function getMaxUploadSize(): int
     {
-        return (int) Setting::get('max_upload_size', 10240); // Default 10MB
+        $size = Setting::get('max_upload_size', 10240);
+        /** @var int $sizeInt */
+        $sizeInt = is_numeric($size) ? (int) $size : 10240;
+
+        return $sizeInt;
     }
 
     /**
@@ -25,9 +29,11 @@ class MediaSettingsHelper
      */
     public static function getAllowedImageTypes(): array
     {
-        $types = (string) Setting::get('allowed_image_types', 'jpg,jpeg,png,gif,webp,svg');
+        $types = Setting::get('allowed_image_types', 'jpg,jpeg,png,gif,webp,svg');
+        /** @var string $typesStr */
+        $typesStr = is_string($types) ? $types : 'jpg,jpeg,png,gif,webp,svg';
 
-        return array_map('trim', explode(',', $types));
+        return array_map('trim', explode(',', $typesStr));
     }
 
     /**
@@ -37,13 +43,17 @@ class MediaSettingsHelper
      */
     public static function getAllowedFileTypes(): array
     {
-        $types = (string) Setting::get('allowed_file_types', 'pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar');
+        $types = Setting::get('allowed_file_types', 'pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar');
+        /** @var string $typesStr */
+        $typesStr = is_string($types) ? $types : 'pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar';
 
-        return array_map('trim', explode(',', $types));
+        return array_map('trim', explode(',', $typesStr));
     }
 
     /**
      * Get all allowed extensions (images + files)
+     *
+     * @return array<int, string>
      */
     public static function getAllowedExtensions(): array
     {
@@ -76,7 +86,11 @@ class MediaSettingsHelper
      */
     public static function getThumbnailWidth(): int
     {
-        return (int) Setting::get('thumbnail_width', 300);
+        $width = Setting::get('thumbnail_width', 300);
+        /** @var int $widthInt */
+        $widthInt = is_numeric($width) ? (int) $width : 300;
+
+        return $widthInt;
     }
 
     /**
@@ -84,7 +98,11 @@ class MediaSettingsHelper
      */
     public static function getThumbnailHeight(): int
     {
-        return (int) Setting::get('thumbnail_height', 300);
+        $height = Setting::get('thumbnail_height', 300);
+        /** @var int $heightInt */
+        $heightInt = is_numeric($height) ? (int) $height : 300;
+
+        return $heightInt;
     }
 
     /**
@@ -92,11 +110,17 @@ class MediaSettingsHelper
      */
     public static function getStorageDriver(): string
     {
-        return Setting::get('storage_driver', 'local');
+        $driver = Setting::get('storage_driver', 'local');
+        /** @var string $driverStr */
+        $driverStr = is_string($driver) ? $driver : 'local';
+
+        return $driverStr;
     }
 
     /**
      * Get validation rules for file upload
+     *
+     * @return array<string, array<int, string>>
      */
     public static function getUploadValidationRules(): array
     {
@@ -115,6 +139,8 @@ class MediaSettingsHelper
 
     /**
      * Get validation rules for image upload only
+     *
+     * @return array<string, array<int, string>>
      */
     public static function getImageUploadValidationRules(): array
     {

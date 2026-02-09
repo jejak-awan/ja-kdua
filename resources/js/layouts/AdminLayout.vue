@@ -1,6 +1,6 @@
 <template>
     <div 
-        class="min-h-screen bg-sidebar text-foreground admin-instant"
+        class="min-h-screen bg-background text-foreground admin-instant"
         :class="{ 'no-transitions': resizing }"
     >
         <!-- Sidebar -->

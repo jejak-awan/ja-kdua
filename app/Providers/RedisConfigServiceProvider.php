@@ -67,7 +67,6 @@ class RedisConfigServiceProvider extends ServiceProvider
 
         // Build settings array using model accessor (handles decryption)
         $settings = $redisSettings->mapWithKeys(function ($setting) {
-            // @phpstan-ignore-next-line
             return [(string) $setting->key => $setting->value]; // This uses getValueAttribute accessor
         });
 

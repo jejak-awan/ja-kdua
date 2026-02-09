@@ -42,5 +42,43 @@
         "upload_rate": "Kecepatan Unggah",
         "download": "Unduh (Rx)",
         "upload": "Unggah (Tx)"
+    },
+    "radius_logs": {
+        "title": "Log Autentikasi (RADIUS)",
+        "subtitle": "Riwayat upaya login pengguna ke server RADIUS.",
+        "empty": "Belum ada riwayat autentikasi.",
+        "table": {
+            "time": "Waktu",
+            "user_pass": "User / Password",
+            "status": "Status",
+            "nas_ip": "NAS IP",
+            "reply_message": "Reply Message / Error"
+        },
+        "messages": {
+            "error_load": "Gagal mengambil riwayat log RADIUS"
+        }
+    },
+    "radius_sessions": {
+        "title": "Sesi Online (RADIUS)",
+        "subtitle": "Daftar pengguna yang sedang terhubung melalui FreeRADIUS.",
+        "status": "FreeRADIUS: {status}",
+        "empty": "Tidak ada sesi aktif di FreeRADIUS.",
+        "table": {
+            "user": "Pengguna",
+            "ip_address": "IP Address",
+            "nas_ip": "VLAN / NAS IP",
+            "start_time": "Mulai Sesi",
+            "duration": "Durasi",
+            "traffic": "Traffic (Up/Down)",
+            "actions": "Aksi"
+        },
+        "actions": {
+            "disconnect_title": "Putuskan User",
+            "disconnect_confirm": "Putuskan koneksi user {username}?",
+            "disconnect_request_sent": "CoA Request Sent",
+            "disconnect_payload": "Mengirim permintaan disconnect via CoA...",
+            "error_fetch": "Gagal mengambil data RADIUS",
+            "error_disconnect": "Gagal memutus sesi"
+        }
     }
 }

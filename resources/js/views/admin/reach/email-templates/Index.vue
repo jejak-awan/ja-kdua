@@ -11,106 +11,51 @@
             </router-link>
         </div>
 
-        <div class="bg-card border border-border rounded-lg">
-            <div class="px-6 py-4 border-b border-border">
+        <Card>
+            <CardHeader class="p-4 border-b border-border">
                 <div class="flex items-center space-x-4">
-                    <input
-                        v-model="search"
-                        type="text"
-                        :placeholder="$t('features.email_templates.list.search')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                    >
+                    <div class="relative flex-1 max-w-xs">
+                        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                            v-model="search"
+                            type="text"
+                            class="pl-10"
+                            :placeholder="$t('features.email_templates.list.search')"
+                        />
+                    </div>
                 </div>
-            </div>
-
-            <div v-if="loading" class="p-6 text-center">
-                <p class="text-muted-foreground">Loading...</p>
-            </div>
-
-            <div v-else-if="filteredTemplates.length === 0" class="p-6 text-center">
-                <p class="text-muted-foreground">{{ $t('features.email_templates.list.empty') }}</p>
-            </div>
-
-            <table v-else class="min-w-full divide-y divide-border">
-                <thead class="bg-muted">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.email_templates.table.name') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.email_templates.table.subject') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.email_templates.table.type') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.email_templates.table.updated') }}
-                        </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.email_templates.table.actions') }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-card divide-y divide-border">
-                    <tr v-for="template in filteredTemplates" :key="template.id" class="hover:bg-muted/50 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-foreground">{{ template.name }}</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-sm text-foreground">{{ template.subject || '-' }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                                {{ template.type || 'custom' }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                            {{ formatDate(template.updated_at) }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex justify-end space-x-2">
-                                <button
-                                    @click="previewTemplate(template)"
-                                    class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
-                                >
-                                    {{ $t('common.actions.preview') }}
-                                </button>
-                                <button
-                                    @click="sendTestEmail(template)"
-                                    class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 transition-colors"
-                                >
-                                    Test
-                                </button>
-                                <router-link
-                                    :to="{ name: 'email-templates.edit', params: { id: template.id } }"
-                                    class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 transition-colors"
-                                >
-                                    {{ $t('common.actions.edit') }}
-                                </router-link>
-                                <button
-                                    @click="handleDelete(template)"
-                                    class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
-                                >
-                                    {{ $t('common.actions.delete') }}
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+            </CardHeader>
+            <CardContent class="p-0">
+                <DataTable
+                    :table="table"
+                    :loading="loading"
+                    :empty-message="t('features.email_templates.list.empty')"
+                />
+            </CardContent>
+        </Card>
     </div>
 </template>
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, h } from 'vue';
+import { RouterLink } from 'vue-router';
 import api from '@/services/api';
 import toast from '@/services/toast';
+import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/composables/useConfirm';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
-import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import { useVueTable, getCoreRowModel, getSortedRowModel, createColumnHelper, type SortingState } from '@tanstack/vue-table';
+import { Card, CardHeader, CardContent, Input, Button, Badge, DataTable } from '@/components/ui';
 
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Search from 'lucide-vue-next/dist/esm/icons/search.js';
+import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
+import Send from 'lucide-vue-next/dist/esm/icons/send.js';
+import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+
+const { t } = useI18n();
 const { confirm } = useConfirm();
 
 interface Template {
@@ -124,6 +69,7 @@ interface Template {
 const templates = ref<Template[]>([]);
 const loading = ref(false);
 const search = ref('');
+const sorting = ref<SortingState>([]);
 
 const filteredTemplates = computed(() => {
     if (!search.value) return templates.value;
@@ -133,6 +79,79 @@ const filteredTemplates = computed(() => {
         template.name.toLowerCase().includes(searchLower) ||
         (template.subject && template.subject.toLowerCase().includes(searchLower))
     );
+});
+
+const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString();
+};
+
+const columnHelper = createColumnHelper<Template>();
+
+const columns = [
+    columnHelper.accessor('name', {
+        header: t('features.email_templates.table.name'),
+        cell: ({ row }) => h('div', { class: 'text-sm font-medium text-foreground' }, row.original.name)
+    }),
+    columnHelper.accessor('subject', {
+        header: t('features.email_templates.table.subject'),
+        cell: ({ row }) => h('div', { class: 'text-sm text-foreground' }, row.original.subject || '-')
+    }),
+    columnHelper.accessor('type', {
+        header: t('features.email_templates.table.type'),
+        cell: ({ row }) => h(Badge, { 
+            variant: 'secondary',
+            class: 'text-xs'
+        }, () => row.original.type || 'custom')
+    }),
+    columnHelper.accessor('updated_at', {
+        header: t('features.email_templates.table.updated'),
+        cell: ({ row }) => h('span', { class: 'text-sm text-muted-foreground' }, formatDate(row.original.updated_at))
+    }),
+    columnHelper.display({
+        id: 'actions',
+        header: () => h('div', { class: 'text-right' }, t('features.email_templates.table.actions')),
+        cell: ({ row }) => h('div', { class: 'flex justify-end gap-1' }, [
+            h(Button, {
+                variant: 'ghost',
+                size: 'icon',
+                onClick: () => previewTemplate(row.original),
+                title: t('common.actions.preview'),
+                class: 'h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-100'
+            }, () => h(Eye, { class: 'w-4 h-4' })),
+            h(Button, {
+                variant: 'ghost',
+                size: 'icon',
+                onClick: () => sendTestEmail(row.original),
+                title: 'Test',
+                class: 'h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-100'
+            }, () => h(Send, { class: 'w-4 h-4' })),
+            h(RouterLink, {
+                to: { name: 'email-templates.edit', params: { id: row.original.id } },
+                class: 'inline-flex items-center justify-center h-8 w-8 rounded-md text-indigo-600 hover:text-indigo-700 hover:bg-indigo-100 transition-colors'
+            }, () => h(Pencil, { class: 'w-4 h-4' })),
+            h(Button, {
+                variant: 'ghost',
+                size: 'icon',
+                onClick: () => handleDelete(row.original),
+                title: t('common.actions.delete'),
+                class: 'h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+            }, () => h(Trash2, { class: 'w-4 h-4' }))
+        ])
+    })
+];
+
+const table = useVueTable({
+    get data() { return filteredTemplates.value },
+    columns,
+    state: {
+        get sorting() { return sorting.value }
+    },
+    onSortingChange: updaterOrValue => {
+        sorting.value = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue;
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: row => String(row.id),
 });
 
 const fetchTemplates = async () => {
@@ -175,10 +194,10 @@ const sendTestEmail = async (template: Template) => {
 
 const handleDelete = async (template: Template) => {
     const confirmed = await confirm({
-        title: 'Delete Template',
-        message: `Are you sure you want to delete "${template.name}"?`,
+        title: t('common.actions.delete', 'Delete'),
+        message: t('features.email_templates.confirm_delete', `Are you sure you want to delete "${template.name}"?`),
         variant: 'danger',
-        confirmText: 'Delete',
+        confirmText: t('common.actions.delete', 'Delete'),
     });
 
     if (!confirmed) return;
@@ -193,12 +212,7 @@ const handleDelete = async (template: Template) => {
     }
 };
 
-const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString();
-};
-
 onMounted(() => {
     fetchTemplates();
 });
 </script>
-

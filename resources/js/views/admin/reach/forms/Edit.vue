@@ -91,13 +91,13 @@
         <div v-if="!loading">
             <!-- Tabs Navigation -->
             <Tabs default-value="fields" class="w-full">
-                <div class="flex items-center justify-between mb-2">
-                    <TabsList class="bg-muted/50 p-1 rounded-lg">
-                        <TabsTrigger value="fields" class="px-6 py-2 rounded-md transition-all active:scale-95">
+                <div class="mb-10 flex items-center justify-between">
+                    <TabsList class="bg-transparent p-0 h-auto gap-0">
+                        <TabsTrigger value="fields" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                             <LayoutDashboard class="h-4 w-4 mr-2" />
                             {{ $t('features.forms.modal.tabs.fields') }}
                         </TabsTrigger>
-                        <TabsTrigger value="settings" class="px-6 py-2 rounded-md transition-all active:scale-95">
+                        <TabsTrigger value="settings" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                             <Settings2 class="h-4 w-4 mr-2" />
                             {{ $t('features.forms.modal.tabs.settings') }}
                         </TabsTrigger>

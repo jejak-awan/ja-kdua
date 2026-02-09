@@ -18,10 +18,15 @@ class QueryPerformanceService
 
     /**
      * Get query log
+     *
+     * @return array<int, array{query: string, bindings: array<mixed>, time: float}>
      */
     public function getQueryLog(): array
     {
-        return DB::getQueryLog();
+        /** @var array<int, array{query: string, bindings: array<mixed>, time: float}> $log */
+        $log = DB::getQueryLog();
+
+        return $log;
     }
 
     /**
@@ -46,14 +51,14 @@ class QueryPerformanceService
         $selectQueries = [];
 
         foreach ($queries as $query) {
-            $time = $query['time'] ?? 0;
+            $time = $query['time'];
             $analysis['total_time'] += $time;
 
             // Detect slow queries (> 100ms)
             if ($time > 100) {
                 $analysis['slow_queries'][] = [
                     'query' => $query['query'],
-                    'bindings' => $query['bindings'] ?? [],
+                    'bindings' => $query['bindings'],
                     'time' => $time,
                 ];
             }
@@ -113,10 +118,12 @@ class QueryPerformanceService
     protected function extractQueryPattern(string $query): string
     {
         // Remove bindings placeholders
-        $pattern = preg_replace('/\?/', '*', $query);
+        $patternRaw = preg_replace('/\?/', '*', $query);
+        $pattern = is_string($patternRaw) ? $patternRaw : $query;
+
         // Extract table name
         if (preg_match('/from\s+`?(\w+)`?/i', $pattern, $matches)) {
-            return $matches[1];
+            return (string) $matches[1];
         }
 
         return substr($pattern, 0, 50);
@@ -132,11 +139,11 @@ class QueryPerformanceService
         $slowQueries = [];
 
         foreach ($queries as $query) {
-            $time = $query['time'] ?? 0;
+            $time = $query['time'];
             if ($time > $threshold) {
                 $slowQueries[] = [
                     'query' => $query['query'],
-                    'bindings' => $query['bindings'] ?? [],
+                    'bindings' => $query['bindings'],
                     'time' => $time,
                     'timestamp' => now()->toDateTimeString(),
                 ];
@@ -153,6 +160,8 @@ class QueryPerformanceService
 
     /**
      * Get performance statistics
+     *
+     * @return array<string, mixed>
      */
     public function getPerformanceStats(): array
     {
@@ -168,21 +177,25 @@ class QueryPerformanceService
             ];
         }
 
-        $totalTime = (float) array_sum(array_column($queries, 'time'));
-        $slowQueries = array_filter($queries, fn (array $q) => ($q['time'] ?? 0) > 100);
+        /** @var non-empty-array<int, float> $times */
+        $times = array_column($queries, 'time');
+        $totalTime = (float) array_sum($times);
+        $slowQueries = array_filter($queries, fn (array $q) => $q['time'] > 100);
 
         return [
             'total_queries' => count($queries),
             'total_time' => round($totalTime, 2),
             'average_time' => round($totalTime / count($queries), 2),
             'slow_queries_count' => count($slowQueries),
-            'max_time' => round((float) max(array_column($queries, 'time')), 2),
-            'min_time' => round((float) min(array_column($queries, 'time')), 2),
+            'max_time' => round((float) max($times), 2),
+            'min_time' => round((float) min($times), 2),
         ];
     }
 
     /**
      * Cache performance metrics
+     *
+     * @param  array<string, mixed>  $metrics
      */
     public function cacheMetrics(string $key, array $metrics, int $ttl = 60): void
     {
@@ -191,9 +204,14 @@ class QueryPerformanceService
 
     /**
      * Get cached metrics
+     *
+     * @return array<string, mixed>|null
      */
     public function getCachedMetrics(string $key): ?array
     {
-        return Cache::get("query_performance:{$key}");
+        /** @var array<string, mixed>|null $metrics */
+        $metrics = Cache::get("query_performance:{$key}");
+
+        return $metrics;
     }
 }

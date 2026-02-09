@@ -100,8 +100,13 @@
     },
     "backups": {
         "title": "Backups",
+        "description": "Manage system backups and restoration points",
         "create": "Create Backup",
         "creating": "Creating...",
+        "actions": {
+            "restore": "Restore Backup",
+            "delete": "Delete Backup"
+        },
         "stats": {
             "total": "Total Backups",
             "size": "Total Size",

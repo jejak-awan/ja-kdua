@@ -13,7 +13,9 @@ class DeepSeekService implements AiProviderInterface
 
     public function __construct(?string $apiKey = null)
     {
-        $this->apiKey = $apiKey ?? (string) \App\Models\Setting::get('deepseek_api_key', '');
+        /** @var mixed $val */
+        $val = \App\Models\Setting::get('deepseek_api_key', '');
+        $this->apiKey = $apiKey ?? (is_string($val) ? $val : '');
     }
 
     public function getName(): string
@@ -27,7 +29,9 @@ class DeepSeekService implements AiProviderInterface
             throw new \Exception('DeepSeek API Key is not configured.');
         }
 
-        $model = $model ?: ((string) \App\Models\Setting::get('deepseek_model', '') ?: 'deepseek-chat');
+        /** @var mixed $val */
+        $val = \App\Models\Setting::get('deepseek_model', '');
+        $model = $model ?: (is_string($val) && $val !== '' ? $val : 'deepseek-chat');
 
         try {
             $messages = [
@@ -80,17 +84,11 @@ class DeepSeekService implements AiProviderInterface
             /** @var array<int, array{id: string, name: string}> $models */
             $models = [];
 
-            if (is_array($data['data'])) {
-                foreach ($data['data'] as $m) {
-                    if (! is_array($m) || ! isset($m['id'])) {
-                        continue;
-                    }
-
-                    $models[] = [
-                        'id' => strval($m['id']),
-                        'name' => strval($m['id']),
-                    ];
-                }
+            foreach ($data['data'] as $m) {
+                $models[] = [
+                    'id' => strval($m['id']),
+                    'name' => strval($m['id']),
+                ];
             }
 
             return $models;

@@ -18,7 +18,10 @@
         "fields": {
             "download": "Download Limit (Mbps)",
             "upload": "Upload Limit (Mbps)",
-            "burst": "Burst Limit"
+            "burst": "Burst Limit",
+            "fup_limit": "FUP Limit (GB)",
+            "fup_speed": "FUP Speed (e.g. 2M/2M)",
+            "fup_enabled": "Enable FUP"
         }
     },
     "profiles_manager": {
@@ -170,5 +173,91 @@
         "odp": "ODP / POP",
         "router": "Customer Router",
         "offline": "Offline"
+    },
+    "ip_pool": {
+        "title": "IP Pool Management",
+        "subtitle": "Manage IP address allocation for customers",
+        "list_title": "IP Pool List",
+        "list_desc": "Available IP pools to be allocated to customers",
+        "add": "Add Pool",
+        "edit": "Edit IP Pool",
+        "create": "Add IP Pool",
+        "create_desc": "Create a new IP pool for customer allocation",
+        "refresh": "Refresh",
+        "regenerate": "Regenerate",
+        "fields": {
+            "name": "Pool Name",
+            "network": "Network (CIDR)",
+            "network_hint": "Format: IP/prefix (cannot be changed after creation)",
+            "network_placeholder": "e.g., 10.10.10.0/24",
+            "gateway": "Gateway",
+            "vlan_id": "VLAN ID",
+            "dns_primary": "Primary DNS",
+            "dns_secondary": "Secondary DNS",
+            "router": "Router",
+            "status": "Status",
+            "description": "Description",
+            "description_placeholder": "Notes about this pool...",
+            "generate_auto": "Auto-generate IP addresses from CIDR"
+        },
+        "table": {
+            "name": "Pool Name",
+            "network": "Network",
+            "gateway": "Gateway",
+            "router": "Router",
+            "status": "Status",
+            "usage": "Usage",
+            "actions": "Actions"
+        },
+        "address": {
+            "title": "IP Address List",
+            "all": "All addresses",
+            "filter": "Filter",
+            "reset": "reset",
+            "ip": "IP Address",
+            "status": "Status",
+            "customer": "Customer",
+            "assigned_at": "Assigned At",
+            "notes": "Notes"
+        },
+        "status": {
+            "active": "Active",
+            "inactive": "Inactive",
+            "available": "Available",
+            "assigned": "Assigned",
+            "reserved": "Reserved"
+        },
+        "stats": {
+            "total": "Total",
+            "available": "Available",
+            "assigned": "Assigned",
+            "reserved": "Reserved"
+        },
+        "info": "Pool Information",
+        "empty": "No IP Pools yet. Click \"Add Pool\" to create.",
+        "empty_filter": "No addresses match the filter",
+        "select_router": "Select router (optional)",
+        "no_router": "None",
+        "messages": {
+            "fetch_error": "Failed to fetch IP Pool data",
+            "delete_success": "Pool deleted successfully",
+            "delete_error": "Failed to delete pool",
+            "create_success": "Pool created successfully",
+            "update_success": "Pool updated successfully",
+            "save_error": "Failed to save pool",
+            "regenerate_success": "{count} addresses regenerated",
+            "regenerate_error": "Failed to regenerate addresses",
+            "pool_error": "Failed to fetch pool data"
+        },
+        "confirm_delete": "Are you sure you want to delete pool \"{name}\"?",
+        "confirm_regenerate": "This will delete available addresses and regenerate them. Continue?"
+    },
+    "settings": {
+        "radius_title": "RADIUS Configuration",
+        "radius_subtitle": "Technical settings for FreeRADIUS and CoA integration.",
+        "fields": {
+            "coa_port": "CoA Port (Mikrotik)",
+            "default_speed": "Fallback Speed (FUP)"
+        }
     }
 }

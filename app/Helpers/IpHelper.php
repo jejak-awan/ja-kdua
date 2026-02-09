@@ -16,7 +16,10 @@ class IpHelper
 
         // Check if TrustProxies middleware already set the real IP
         if ($request->attributes->has('real_client_ip')) {
-            return (string) $request->attributes->get('real_client_ip');
+            /** @var string $realIp */
+            $realIp = $request->attributes->get('real_client_ip');
+
+            return $realIp;
         }
 
         // Try to get from various headers (fallback if middleware not loaded)
@@ -74,6 +77,8 @@ class IpHelper
 
     /**
      * Get all proxy-related headers for debugging.
+     *
+     * @return array<string, mixed>
      */
     public static function getProxyHeaders(?Request $request = null): array
     {

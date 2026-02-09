@@ -70,7 +70,7 @@ class CacheHelper
     {
         $cacheKey = self::key(self::PREFIX_API, $key);
 
-        return Cache::remember($cacheKey, $ttl, function () use ($callback) {
+        return Cache::remember($cacheKey, $ttl, function () use ($callback) : mixed {
             try {
                 return $callback();
             } catch (\Exception $e) {
@@ -88,10 +88,20 @@ class CacheHelper
         $cacheKey = self::key(self::PREFIX_CONTENT, (string) $id);
 
         if (self::supportsTagging()) {
-            return Cache::tags(['content'])->remember($cacheKey, $ttl, $callback);
+            /** @var mixed $result */
+            $result = Cache::tags(['content'])->remember($cacheKey, $ttl, function () use ($callback) : mixed {
+                return $callback();
+            });
+
+            return $result;
         }
 
-        return Cache::remember($cacheKey, $ttl, $callback);
+        /** @var mixed $result */
+        $result = Cache::remember($cacheKey, $ttl, function () use ($callback) : mixed {
+            return $callback();
+        });
+
+        return $result;
     }
 
     /**
@@ -102,10 +112,20 @@ class CacheHelper
         $cacheKey = self::key(self::PREFIX_MEDIA, (string) $id);
 
         if (self::supportsTagging()) {
-            return Cache::tags(['media'])->remember($cacheKey, $ttl, $callback);
+            /** @var mixed $result */
+            $result = Cache::tags(['media'])->remember($cacheKey, $ttl, function () use ($callback) : mixed {
+                return $callback();
+            });
+
+            return $result;
         }
 
-        return Cache::remember($cacheKey, $ttl, $callback);
+        /** @var mixed $result */
+        $result = Cache::remember($cacheKey, $ttl, function () use ($callback) : mixed {
+            return $callback();
+        });
+
+        return $result;
     }
 
     /**
@@ -116,10 +136,20 @@ class CacheHelper
         $cacheKey = self::key(self::PREFIX_CATEGORY, (string) $id);
 
         if (self::supportsTagging()) {
-            return Cache::tags(['categories'])->remember($cacheKey, $ttl, $callback);
+            /** @var mixed $result */
+            $result = Cache::tags(['categories'])->remember($cacheKey, $ttl, function () use ($callback) : mixed {
+                return $callback();
+            });
+
+            return $result;
         }
 
-        return Cache::remember($cacheKey, $ttl, $callback);
+        /** @var mixed $result */
+        $result = Cache::remember($cacheKey, $ttl, function () use ($callback) : mixed {
+            return $callback();
+        });
+
+        return $result;
     }
 
     /**
@@ -129,7 +159,12 @@ class CacheHelper
     {
         $cacheKey = self::key(self::PREFIX_STATISTICS, $type);
 
-        return Cache::remember($cacheKey, $ttl, $callback);
+        /** @var mixed $result */
+        $result = Cache::remember($cacheKey, $ttl, function () use ($callback) : mixed {
+            return $callback();
+        });
+
+        return $result;
     }
 
     /**
@@ -299,8 +334,11 @@ class CacheHelper
      */
     public static function getStats(): array
     {
+        /** @var string|null $driver */
+        $driver = config('cache.default');
+
         return [
-            'driver' => config('cache.default'),
+            'driver' => $driver,
             'available' => self::isAvailable(),
             'supports_tagging' => self::supportsTagging(),
         ];

@@ -190,12 +190,12 @@ const stats = computed(() => {
     
     if (viewType.value === 'daily') {
         const data = usageData.value.usage.daily;
-        const totalDown = data.reduce((acc, curr) => acc + curr.down, 0) / 1024; // MB to GB placeholder
-        const totalUp = data.reduce((acc, curr) => acc + curr.up, 0) / 1024;
+        const totalDownRaw = data.reduce((acc, curr) => acc + curr.down, 0); // MB
+        const totalUpRaw = data.reduce((acc, curr) => acc + curr.up, 0); // MB
         const peak = Math.max(...data.map(d => d.down));
         return { 
-            totalDown: totalDown.toFixed(2), 
-            totalUp: totalUp.toFixed(2), 
+            totalDown: (totalDownRaw / 1024).toFixed(2), 
+            totalUp: (totalUpRaw / 1024).toFixed(2), 
             peakSpeed: peak.toFixed(1) 
         };
     } else {
@@ -267,7 +267,7 @@ const chartOptions: ChartOptions<'line'> = {
 const fetchUsage = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/api/v1/admin/ja/isp/member/usage');
+        const response = await api.get('/admin/ja/isp/member/usage');
         if (response.data.success) {
             usageData.value = response.data.data;
         }

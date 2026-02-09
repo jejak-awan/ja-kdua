@@ -8,28 +8,36 @@
         </div>
 
         <Tabs v-model="activeTab" class="w-full">
-            <TabsList class="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
-                <TabsTrigger 
-                    value="whatsapp"
-                    class="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-2"
-                >
-                    WhatsApp & Notifications
-                </TabsTrigger>
-                <TabsTrigger 
-                    value="billing"
-                    class="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-2"
-                >
-                    Billing Configuration
-                </TabsTrigger>
-                <TabsTrigger 
-                    value="network"
-                    class="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-2"
-                >
-                    Network & Map
-                </TabsTrigger>
-            </TabsList>
+            <div class="mb-10 flex items-center justify-between">
+                <TabsList class="bg-transparent p-0 h-auto gap-0">
+                    <TabsTrigger 
+                        value="whatsapp"
+                        class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors"
+                    >
+                        WhatsApp & Notifications
+                    </TabsTrigger>
+                    <TabsTrigger 
+                        value="billing"
+                        class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors"
+                    >
+                        Billing Configuration
+                    </TabsTrigger>
+                    <TabsTrigger 
+                        value="network"
+                        class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors"
+                    >
+                        Network & Map
+                    </TabsTrigger>
+                    <TabsTrigger 
+                        value="radius"
+                        class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors"
+                    >
+                        RADIUS Configuration
+                    </TabsTrigger>
+                </TabsList>
+            </div>
 
-            <div class="mt-6">
+            <div class="">
                 <!-- WhatsApp Tab -->
                 <TabsContent value="whatsapp" class="space-y-4">
                     <WhatsAppSettings 
@@ -59,6 +67,16 @@
                         @save="saveSettings"
                     />
                 </TabsContent>
+
+                <!-- RADIUS Tab -->
+                <TabsContent value="radius" class="space-y-4">
+                    <RadiusSettings 
+                        :settings="settings"
+                        v-model:form-data="formData" 
+                        :saving="saving"
+                        @save="saveSettings"
+                    />
+                </TabsContent>
             </div>
         </Tabs>
     </div>
@@ -70,6 +88,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui';
 import WhatsAppSettings from './tabs/WhatsApp.vue'; 
 import BillingSettings from './tabs/Billing.vue';
 import NetworkSettings from './tabs/Network.vue';
+import RadiusSettings from './tabs/Radius.vue';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
@@ -127,12 +146,20 @@ const fetchSettings = async () => {
         ensureSetting('billing_prorata', false, 'isp_billing');
         ensureSetting('billing_tax_enabled', false, 'isp_billing');
         ensureSetting('billing_tax_rate', 11, 'isp_billing');
+        ensureSetting('billing_tax_ppn', 0.11, 'isp_billing');
+        ensureSetting('billing_tax_bhp', 0.005, 'isp_billing');
+        ensureSetting('billing_tax_uso', 0.0125, 'isp_billing');
+        ensureSetting('billing_invoice_due_days', 7, 'isp_billing');
         ensureSetting('billing_suspend_behavior', 'isolation_date', 'isp_billing');
 
         // Network Defaults (Group: isp_network)
         ensureSetting('network_map_default_lat', -6.200000, 'isp_network');
         ensureSetting('network_map_default_lng', 106.816666, 'isp_network');
         ensureSetting('network_map_default_zoom', 12, 'isp_network');
+
+        // RADIUS Defaults (Group: isp_radius)
+        ensureSetting('radius_coa_port', 1700, 'isp_radius');
+        ensureSetting('radius_default_speed', '10M/10M', 'isp_radius');
 
         // Initialize form data
         formData.value = {};
@@ -155,12 +182,14 @@ const saveSettings = async () => {
             .filter(key => 
                 key.startsWith('whatsapp_') || 
                 key.startsWith('billing_') || 
-                key.startsWith('network_')
+                key.startsWith('network_') ||
+                key.startsWith('radius_')
             ) 
             .map(key => {
                 let group = 'whatsapp';
                 if (key.startsWith('billing_')) group = 'isp_billing';
                 if (key.startsWith('network_')) group = 'isp_network';
+                if (key.startsWith('radius_')) group = 'isp_radius';
                 
                 return {
                     key,

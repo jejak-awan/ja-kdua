@@ -3,18 +3,18 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="blurb-block transition-all duration-300 group"
+    class="blurb-block transition-[transform,filter] duration-300 group"
     :id="(settings.html_id as string)"
     :aria-label="(settings.aria_label as string) || 'Feature Blurb'"
     :style="cardStyles"
   >
-    <div class="blurb-container flex flex-col p-8 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800 hover:border-primary/40 hover:bg-primary/5 transition-all duration-500" :style="containerStyles">
+    <div class="blurb-container flex flex-col p-8 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800 hover:border-primary/40 hover:bg-primary/5 transition-colors duration-500" :style="containerStyles">
         <!-- Icon -->
         <div 
             v-if="settings.icon"
             class="blurb-icon-wrapper w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-900 flex items-center justify-center mb-8 group-hover:bg-primary transition-colors duration-500 shadow-sm group-hover:shadow-primary/40"
         >
-             <LucideIcon :name="(settings.icon as string)" class="w-8 h-8 opacity-40 group-hover:opacity-100 group-hover:text-white transition-all transform group-hover:scale-110" />
+             <LucideIcon :name="(settings.icon as string)" class="w-8 h-8 opacity-40 group-hover:opacity-100 group-hover:text-white transition-[opacity,transform] transform group-hover:scale-110" />
         </div>
 
         <!-- Title -->

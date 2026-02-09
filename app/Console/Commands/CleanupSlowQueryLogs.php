@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Setting;
 use App\Models\SlowQuery;
 use Illuminate\Console\Command;
 
@@ -13,11 +14,13 @@ class CleanupSlowQueryLogs extends Command
 
     public function handle(): int
     {
-        $days = (int) $this->option('days');
+        $daysRaw = $this->option('days') ?? Setting::get('slow_query_retention_days', 7);
+        /** @var int $days */
+        $days = is_numeric($daysRaw) ? (int) $daysRaw : 7;
+        /** @var int $count */
+        $count = SlowQuery::where('created_at', '<', now()->subDays($days))->delete();
 
-        $deleted = (int) SlowQuery::where('created_at', '<', now()->subDays($days))->delete();
-
-        $this->info("Deleted {$deleted} slow query log(s) older than {$days} days.");
+        $this->info(sprintf('Deleted %d slow query log(s) older than %d days.', $count, $days));
 
         return Command::SUCCESS;
     }

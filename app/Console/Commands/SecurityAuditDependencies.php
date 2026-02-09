@@ -43,13 +43,24 @@ class SecurityAuditDependencies extends Command
         return Command::SUCCESS;
     }
 
-    protected function parseComposerAudit($json)
+    protected function parseComposerAudit(string $json): void
     {
         try {
             $data = json_decode($json, true);
+            if (! is_array($data)) {
+                return;
+            }
 
-            if (isset($data['advisories']) && is_array($data['advisories']) && count($data['advisories']) > 0) {
-                foreach ($data['advisories'] as $advisory) {
+            $advisories = $data['advisories'] ?? [];
+            if (! is_array($advisories)) {
+                return;
+            }
+
+            foreach ($advisories as $package => $alerts) {
+                if (! is_array($alerts)) {
+                    continue;
+                }
+                foreach ($alerts as $advisory) {
                     if (! is_array($advisory)) {
                         continue;
                     }
@@ -74,31 +85,37 @@ class SecurityAuditDependencies extends Command
         }
     }
 
-    protected function parseNpmAudit($json)
+    protected function parseNpmAudit(string $json): void
     {
         try {
             $data = json_decode($json, true);
+            if (! is_array($data)) {
+                return;
+            }
 
-            if (isset($data['vulnerabilities']) && is_array($data['vulnerabilities']) && count($data['vulnerabilities']) > 0) {
-                foreach ($data['vulnerabilities'] as $name => $vuln) {
-                    if (! is_array($vuln)) {
-                        continue;
-                    }
-                    DependencyVulnerability::updateOrCreate(
-                        [
-                            'package_name' => $name,
-                            'version' => $vuln['range'] ?? 'unknown',
-                            'cve' => $vuln['via'][0]['cve'] ?? null,
-                        ],
-                        [
-                            'severity' => strtolower($vuln['severity'] ?? 'medium'),
-                            'fixed_in' => $vuln['fixAvailable'] ? 'available' : null,
-                            'source' => 'npm',
-                            'description' => $vuln['via'][0]['title'] ?? '',
-                            'status' => 'new',
-                        ]
-                    );
+            $vulnerabilities = $data['vulnerabilities'] ?? [];
+            if (! is_array($vulnerabilities)) {
+                return;
+            }
+
+            foreach ($vulnerabilities as $name => $vuln) {
+                if (! is_array($vuln)) {
+                    continue;
                 }
+                DependencyVulnerability::updateOrCreate(
+                    [
+                        'package_name' => $name,
+                        'version' => $vuln['range'] ?? 'unknown',
+                        'cve' => $vuln['via'][0]['cve'] ?? null,
+                    ],
+                    [
+                        'severity' => strtolower($vuln['severity'] ?? 'medium'),
+                        'fixed_in' => ($vuln['fixAvailable'] ?? false) ? 'available' : null,
+                        'source' => 'npm',
+                        'description' => $vuln['via'][0]['title'] ?? '',
+                        'status' => 'new',
+                    ]
+                );
             }
         } catch (\Exception $e) {
             $this->error('Failed to parse npm audit: '.$e->getMessage());

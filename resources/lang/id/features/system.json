@@ -100,8 +100,13 @@
     },
     "backups": {
         "title": "Cadangan",
+        "description": "Kelola cadangan sistem dan titik pemulihan",
         "create": "Buat Cadangan",
         "creating": "Membuat...",
+        "actions": {
+            "restore": "Pulihkan Cadangan",
+            "delete": "Hapus Cadangan"
+        },
         "stats": {
             "total": "Total Cadangan",
             "size": "Total Ukuran",

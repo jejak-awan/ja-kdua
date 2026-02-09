@@ -63,7 +63,9 @@ class CommentSecurityService
      */
     protected function exceedsLinkLimit(string $content): bool
     {
-        $maxLinks = (int) Setting::get('comments.security.max_links', 2);
+        /** @var mixed $maxLinksRaw */
+        $maxLinksRaw = Setting::get('comments.security.max_links', 2);
+        $maxLinks = is_numeric($maxLinksRaw) ? (int) $maxLinksRaw : 2;
 
         // Count http/https occurrences
         $linkCount = substr_count(strtolower($content), 'http://') +

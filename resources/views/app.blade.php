@@ -36,50 +36,29 @@
         window.jaCmsData = @json($jaCmsData ?? []);
     </script>
 
-    {{-- Critical CSS - Must match app.css exactly --}}
+    {{-- Critical CSS - Prevent Flash --}}
     <style>
-        /* CSS Custom Properties - Synced with app.css */
         :root {
-            /* Light mode - Shadcn Zinc matches app.css */
-            --background: 240 4.8% 95.9%;
-            --foreground: 240 10% 3.9%;
+            --background: 0 0% 100%;
+            --foreground: 222 47% 11%;
             --card: 0 0% 100%;
-            --card-foreground: 240 10% 3.9%;
-            --border: 240 5.9% 90%;
-            --muted: 240 4.8% 95.9%;
-            --muted-foreground: 240 3.8% 46.1%;
-            --accent: 240 4.8% 95.9%;
-            --accent-foreground: 240 5.9% 10%;
-            /* Sidebar - Light mode */
+            --border: 220 13% 91%;
             --sidebar: 0 0% 100%;
-            --sidebar-foreground: 240 5.9% 10%;
-            --sidebar-accent: 240 4.8% 95.9%;
         }
         
         .dark {
-            /* Dark mode - Shadcn Zinc matches app.css */
-            --background: 240 10% 3.9%;
-            --foreground: 0 0% 98%;
-            --card: 240 10% 3.9%;
-            --card-foreground: 0 0% 98%;
-            --border: 240 3.7% 15.9%;
-            --muted: 240 3.7% 15.9%;
-            --muted-foreground: 240 5% 64.9%;
-            --accent: 240 3.7% 15.9%;
-            --accent-foreground: 0 0% 98%;
-            /* Sidebar - Dark mode matches bg */
-            --sidebar: 240 10% 3.9%;
-            --sidebar-foreground: 240 4.8% 95.9%;
-            --sidebar-accent: 240 3.7% 15.9%;
+            --background: 240 10% 2%;
+            --foreground: 210 40% 98%;
+            --card: 240 10% 4%;
+            --border: 240 10% 18%;
+            --sidebar: 240 10% 2%;
         }
 
-        /* Prevent white flash - apply bg immediately */
         html, body {
             background-color: hsl(var(--background));
             color: hsl(var(--foreground));
         }
 
-        /* Critical element colors */
         .bg-background { background-color: hsl(var(--background)); }
         .bg-card { background-color: hsl(var(--card)); }
         .bg-sidebar { background-color: hsl(var(--sidebar)); }

@@ -14,11 +14,15 @@ class CaptchaService
 
     public function __construct()
     {
-        $this->method = (string) Setting::get('captcha_method', 'slider');
+        /** @var mixed $methodRaw */
+        $methodRaw = Setting::get('captcha_method', 'slider');
+        $this->method = is_string($methodRaw) ? $methodRaw : 'slider';
     }
 
     /**
      * Generate a captcha challenge based on the configured method.
+     *
+     * @return array<string, mixed>
      */
     public function generate(): array
     {
@@ -80,13 +84,19 @@ class CaptchaService
      */
     public static function getMethod(): string
     {
-        return Setting::get('captcha_method', 'slider');
+        /** @var mixed $methodRaw */
+        $methodRaw = Setting::get('captcha_method', 'slider');
+
+        return is_string($methodRaw) ? $methodRaw : 'slider';
     }
 
     // ========================================
     // Slider Captcha
     // ========================================
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function generateSliderChallenge(): array
     {
         $token = Str::random(32);
@@ -120,6 +130,9 @@ class CaptchaService
     // Math Captcha
     // ========================================
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function generateMathChallenge(): array
     {
         $token = Str::random(32);
@@ -154,6 +167,9 @@ class CaptchaService
     // Image Captcha
     // ========================================
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function generateImageChallenge(): array
     {
         $token = Str::random(32);
@@ -182,15 +198,15 @@ class CaptchaService
         $image = imagecreatetruecolor($width, $height);
 
         // Colors
-        $bgColor = imagecolorallocate($image, 245, 245, 245);
+        $bgColor = imagecolorallocate($image, 245, 245, 245) ?: 0;
         $textColors = [
-            imagecolorallocate($image, 50, 50, 150),
-            imagecolorallocate($image, 150, 50, 50),
-            imagecolorallocate($image, 50, 150, 50),
-            imagecolorallocate($image, 100, 100, 100),
+            imagecolorallocate($image, 50, 50, 150) ?: 0,
+            imagecolorallocate($image, 150, 50, 50) ?: 0,
+            imagecolorallocate($image, 50, 150, 50) ?: 0,
+            imagecolorallocate($image, 100, 100, 100) ?: 0,
         ];
-        $lineColor = imagecolorallocate($image, 200, 200, 200);
-        $noiseColor = imagecolorallocate($image, 180, 180, 180);
+        $lineColor = imagecolorallocate($image, 200, 200, 200) ?: 0;
+        $noiseColor = imagecolorallocate($image, 180, 180, 180) ?: 0;
 
         // Fill background
         imagefill($image, 0, 0, $bgColor);
@@ -229,7 +245,7 @@ class CaptchaService
             $char = $code[$i];
 
             $angle = rand(-15, 15);
-            $color = $textColors[array_rand($textColors)];
+            $color = (int) $textColors[array_rand($textColors)];
 
             $x = $startX + ($i * $charPadding) + rand(-2, 2);
             $y = ($height / 2) + ($fontSize / 2) + rand(-2, 2); // Baseline position
@@ -252,7 +268,7 @@ class CaptchaService
         // Output to string
         ob_start();
         imagepng($image);
-        $imageData = ob_get_clean();
+        $imageData = (string) ob_get_clean();
         imagedestroy($image);
 
         return $imageData;

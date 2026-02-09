@@ -1,0 +1,23 @@
+{
+    "admin": {
+        "vouchers": {
+            "title": "Hotspot Voucher Engine",
+            "subtitle": "Bulk generate and manage hotspot access vouchers.",
+            "generate": "Generate Batch",
+            "generate_title": "Generate New Batch",
+            "generate_success": "Batch generated and synced to RADIUS successfully",
+            "pattern": "Code Pattern",
+            "duration": "Validity Duration",
+            "print_batch": "Print Batch",
+            "empty": "No vouchers found.",
+            "sales_report": "Sales Report",
+            "sales_report_subtitle": "Voucher sales analytics and revenue trends",
+            "today": "Today",
+            "this_month": "This Month",
+            "selected_period": "Selected Period",
+            "no_sales_data": "No sales data for this period",
+            "revenue": "Revenue",
+            "vouchers_sold": "Vouchers Sold"
+        }
+    }
+}

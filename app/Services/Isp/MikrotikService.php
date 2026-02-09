@@ -55,7 +55,7 @@ class MikrotikService
      */
     public function getGlobalStats(): array
     {
-        $nodes = ServiceNode::where('status', 'active')->where('type', 'Router')->get();
+        $nodes = \App\Models\Isp\ServiceNode::where('status', 'active')->where('type', 'Router')->get();
         $totalIn = 0.0;
         $totalOut = 0.0;
         $totalClients = 0;
@@ -210,6 +210,342 @@ class MikrotikService
             Log::error('Mikrotik Traffic Query Failed: '.$e->getMessage());
 
             return null;
+        }
+    }
+
+    // ============================================================
+    // IP BINDING METHODS (Phase 9)
+    // ============================================================
+
+    /**
+     * Get all IP Bindings from the hotspot.
+     *
+     * @return array<int, array{id: string, mac: string, address: string, type: string, disabled: bool, comment: string|null}>
+     */
+    public function getIpBindings(): array
+    {
+        if (!$this->ensureConnected()) {
+            return [];
+        }
+
+        try {
+            /** @var array<int, array<string, string>> $response */
+            $response = $this->client?->comm('/ip/hotspot/ip-binding/print') ?? [];
+
+            return array_map(function (array $row): array {
+                return [
+                    'id' => (string) ($row['.id'] ?? ''),
+                    'mac' => (string) ($row['mac-address'] ?? ''),
+                    'address' => (string) ($row['address'] ?? ''),
+                    'type' => (string) ($row['type'] ?? 'regular'),
+                    'disabled' => ($row['disabled'] ?? 'false') === 'true',
+                    'comment' => $row['comment'] ?? null,
+                ];
+            }, $response);
+
+        } catch (Exception $e) {
+            Log::error('Mikrotik IP Binding Query Failed: '.$e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Add a new IP Binding (bypass hotspot login for specific MAC/IP).
+     *
+     * @param array{mac?: string, address?: string, type?: string, comment?: string} $data
+     */
+    public function addIpBinding(array $data): bool
+    {
+        if (!$this->ensureConnected()) {
+            return false;
+        }
+
+        try {
+            $params = [];
+            if (!empty($data['mac'])) {
+                $params['mac-address'] = $data['mac'];
+            }
+            if (!empty($data['address'])) {
+                $params['address'] = $data['address'];
+            }
+            $params['type'] = $data['type'] ?? 'bypassed';
+            if (!empty($data['comment'])) {
+                $params['comment'] = $data['comment'];
+            }
+
+            $this->client?->comm('/ip/hotspot/ip-binding/add', $params);
+            return true;
+
+        } catch (Exception $e) {
+            Log::error('Mikrotik IP Binding Add Failed: '.$e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Remove an IP Binding by ID.
+     */
+    public function removeIpBinding(string $id): bool
+    {
+        if (!$this->ensureConnected()) {
+            return false;
+        }
+
+        try {
+            $this->client?->comm('/ip/hotspot/ip-binding/remove', ['.id' => $id]);
+            return true;
+
+        } catch (Exception $e) {
+            Log::error('Mikrotik IP Binding Remove Failed: '.$e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Toggle IP Binding enable/disable.
+     */
+    public function toggleIpBinding(string $id, bool $disabled): bool
+    {
+        if (!$this->ensureConnected()) {
+            return false;
+        }
+
+        try {
+            $action = $disabled ? 'disable' : 'enable';
+            $this->client?->comm('/ip/hotspot/ip-binding/'.$action, ['.id' => $id]);
+            return true;
+
+        } catch (Exception $e) {
+            Log::error('Mikrotik IP Binding Toggle Failed: '.$e->getMessage());
+            return false;
+        }
+    }
+
+    // ============================================================
+    // HOTSPOT COOKIES METHODS (Phase 9)
+    // ============================================================
+
+    /**
+     * Get all Hotspot Cookies (active "remember me" sessions).
+     *
+     * @return array<int, array{id: string, user: string, mac: string, domain: string, expires_in: string}>
+     */
+    public function getHotspotCookies(): array
+    {
+        if (!$this->ensureConnected()) {
+            return [];
+        }
+
+        try {
+            /** @var array<int, array<string, string>> $response */
+            $response = $this->client?->comm('/ip/hotspot/cookie/print') ?? [];
+
+            return array_map(function (array $row): array {
+                return [
+                    'id' => (string) ($row['.id'] ?? ''),
+                    'user' => (string) ($row['user'] ?? ''),
+                    'mac' => (string) ($row['mac-address'] ?? ''),
+                    'domain' => (string) ($row['domain'] ?? ''),
+                    'expires_in' => (string) ($row['expires-in'] ?? '0s'),
+                ];
+            }, $response);
+
+        } catch (Exception $e) {
+            Log::error('Mikrotik Hotspot Cookies Query Failed: '.$e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Remove a Hotspot Cookie by ID.
+     */
+    public function removeHotspotCookie(string $id): bool
+    {
+        if (!$this->ensureConnected()) {
+            return false;
+        }
+
+        try {
+            $this->client?->comm('/ip/hotspot/cookie/remove', ['.id' => $id]);
+            return true;
+
+        } catch (Exception $e) {
+            Log::error('Mikrotik Hotspot Cookie Remove Failed: '.$e->getMessage());
+            return false;
+        }
+    }
+
+    // ============================================================
+    // ROUTER INTERFACES (Phase 11)
+    // ============================================================
+
+    /**
+     * Get all interfaces from the router.
+     *
+     * @return array<int, array{name: string, type: string, running: bool, disabled: bool}>
+     */
+    public function getInterfaces(): array
+    {
+        if (!$this->ensureConnected()) {
+            return [];
+        }
+
+        try {
+            /** @var array<int, array<string, string>> $response */
+            $response = $this->client?->comm('/interface/print') ?? [];
+
+            return array_map(function (array $row): array {
+                return [
+                    'name' => (string) ($row['name'] ?? ''),
+                    'type' => (string) ($row['type'] ?? ''),
+                    'running' => ($row['running'] ?? 'false') === 'true',
+                    'disabled' => ($row['disabled'] ?? 'false') === 'true',
+                ];
+            }, $response);
+
+        } catch (Exception $e) {
+            Log::error('Mikrotik Interfaces Query Failed: '.$e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Ensure connected to Mikrotik before making API calls.
+     */
+    protected function ensureConnected(): bool
+    {
+        if ($this->client && $this->client->connected) {
+            return true;
+        }
+
+        /** @var string $host */
+        $host = config('services.mikrotik.host', '');
+        /** @var string $user */
+        $user = config('services.mikrotik.user', '');
+        /** @var string $pass */
+        $pass = config('services.mikrotik.pass', '');
+        $portVal = config('services.mikrotik.port', 8728);
+        $port = is_numeric($portVal) ? (int) $portVal : 8728;
+
+        if (empty($host) || empty($user)) {
+            Log::warning('Mikrotik credentials not configured');
+            return false;
+        }
+
+        return $this->connect($host, $user, $pass, $port);
+    }
+
+    // ============================================================
+    // USER ACTIVITY & QUICK ACTIONS (Mikhmon-inspired)
+    // ============================================================
+
+    /**
+     * Get hotspot user statistics.
+     *
+     * @return array<string, mixed>
+     */
+    public function getUserStats(string $username): array
+    {
+        if (!$this->ensureConnected()) {
+            return [];
+        }
+
+        try {
+            /** @var array<int, array<string, string>> $response */
+            $response = $this->client?->comm('/ip/hotspot/user/print', [
+                '?name' => $username,
+            ]) ?? [];
+
+            if (empty($response)) {
+                return [];
+            }
+
+            $user = $response[0];
+
+            return [
+                'username' => (string) ($user['name'] ?? ''),
+                'profile' => (string) ($user['profile'] ?? ''),
+                'limit_uptime' => (string) ($user['limit-uptime'] ?? '0s'),
+                'limit_bytes_in' => (int) ($user['limit-bytes-in'] ?? 0),
+                'limit_bytes_out' => (int) ($user['limit-bytes-out'] ?? 0),
+                'uptime' => (string) ($user['uptime'] ?? '0s'),
+                'bytes_in' => (int) ($user['bytes-in'] ?? 0),
+                'bytes_out' => (int) ($user['bytes-out'] ?? 0),
+                'disabled' => ($user['disabled'] ?? 'false') === 'true',
+                'comment' => $user['comment'] ?? null,
+            ];
+
+        } catch (Exception $e) {
+            Log::error('Mikrotik User Stats Query Failed: '.$e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Disconnect active hotspot user by username.
+     */
+    public function disconnectUser(string $username): bool
+    {
+        if (!$this->ensureConnected()) {
+            return false;
+        }
+
+        try {
+            /** @var array<int, array<string, string>> $active */
+            $active = $this->client?->comm('/ip/hotspot/active/print', [
+                '?user' => $username,
+            ]) ?? [];
+
+            if (empty($active)) {
+                return true; // User not active
+            }
+
+            foreach ($active as $session) {
+                $id = $session['.id'] ?? '';
+                if (!empty($id)) {
+                    $this->client?->comm('/ip/hotspot/active/remove', ['.id' => $id]);
+                }
+            }
+
+            return true;
+
+        } catch (Exception $e) {
+            Log::error('Mikrotik Disconnect User Failed: '.$e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Reset user counters (usage, uptime).
+     */
+    public function resetUserCounters(string $username): bool
+    {
+        if (!$this->ensureConnected()) {
+            return false;
+        }
+
+        try {
+            /** @var array<int, array<string, string>> $users */
+            $users = $this->client?->comm('/ip/hotspot/user/print', [
+                '?name' => $username,
+            ]) ?? [];
+
+            if (empty($users)) {
+                return false;
+            }
+
+            $id = $users[0]['.id'] ?? '';
+            if (empty($id)) {
+                return false;
+            }
+
+            $this->client?->comm('/ip/hotspot/user/reset-counters', ['.id' => $id]);
+
+            return true;
+
+        } catch (Exception $e) {
+            Log::error('Mikrotik Reset Counters Failed: '.$e->getMessage());
+            return false;
         }
     }
 }

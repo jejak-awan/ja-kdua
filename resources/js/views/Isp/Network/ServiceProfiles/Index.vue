@@ -35,6 +35,27 @@
                                 <Input id="upload" type="number" v-model="form.upload_limit" required />
                             </div>
                         </div>
+                        <div class="space-y-4 pt-2 border-t border-border/40">
+                            <div class="flex items-center justify-between">
+                                <div class="space-y-0.5">
+                                    <Label>{{ t('isp.network.profiles.fields.fup_enabled') }}</Label>
+                                    <p class="text-[0.8rem] text-muted-foreground">Aktifkan kebijakan penggunaan wajar.</p>
+                                </div>
+                                <Switch v-model:checked="form.fup_enabled" />
+                            </div>
+                            
+                            <div v-if="form.fup_enabled" class="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 duration-300">
+                                <div class="space-y-2">
+                                    <Label for="fup_limit">{{ t('isp.network.profiles.fields.fup_limit') }}</Label>
+                                    <Input id="fup_limit" type="number" v-model="(form.fup_limit_gb as any)" :required="form.fup_enabled" />
+                                </div>
+                                <div class="space-y-2">
+                                    <Label for="fup_speed">{{ t('isp.network.profiles.fields.fup_speed') }}</Label>
+                                    <Input id="fup_speed" v-model="form.fup_speed" placeholder="e.g. 2M/2M" :required="form.fup_enabled" />
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="space-y-2">
                             <Label for="burst">{{ t('isp.network.profiles.fields.burst') }}</Label>
                             <Input id="burst" v-model="form.burst_limit" placeholder="e.g. 100M/100M 20M/20M" />
@@ -83,6 +104,10 @@
                         </div>
                         <div v-if="profile.burst_limit" class="text-xs p-2 bg-muted rounded-lg text-muted-foreground font-mono">
                             {{ t('isp.network.profiles_manager.burst_label') }}: {{ profile.burst_limit }}
+                        </div>
+                        <div v-if="profile.fup_enabled" class="flex items-center gap-2 p-2 bg-amber-500/5 text-amber-600 dark:text-amber-400 border border-amber-500/10 rounded-lg text-xs font-medium">
+                            <ShieldAlert class="w-3.5 h-3.5" />
+                            FUP: {{ profile.fup_limit_gb }} GB @ {{ profile.fup_speed }}
                         </div>
                     </div>
                 </CardContent>
@@ -135,6 +160,23 @@
                         <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">{{ t('isp.network.profiles_manager.burst_label') }}</span>
                         <p class="text-sm font-mono mt-1">{{ selectedProfile.burst_limit }}</p>
                     </div>
+
+                    <div v-if="selectedProfile?.fup_enabled" class="p-4 bg-amber-500/5 rounded-xl border border-amber-500/10 space-y-3">
+                        <div class="flex items-center gap-2 text-amber-600">
+                            <ShieldAlert class="w-4 h-4" />
+                            <span class="text-xs font-bold uppercase tracking-wider">Fair Usage Policy (FUP)</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 pt-1">
+                            <div class="space-y-0.5">
+                                <p class="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Threshold</p>
+                                <p class="text-lg font-bold">{{ selectedProfile.fup_limit_gb }} GB</p>
+                            </div>
+                            <div class="space-y-0.5">
+                                <p class="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Throttled Speed</p>
+                                <p class="text-lg font-bold">{{ selectedProfile.fup_speed }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <DialogFooter>
                     <Button variant="outline" @click="isViewDialogOpen = false" class="w-full rounded-xl">
@@ -169,7 +211,8 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger
+    DialogTrigger,
+    Switch
 } from '@/components/ui';
 import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
 import Pencil from 'lucide-vue-next/dist/esm/icons/pencil.js';
@@ -177,6 +220,7 @@ import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import ArrowDownCircle from 'lucide-vue-next/dist/esm/icons/circle-arrow-down.js';
 import ArrowUpCircle from 'lucide-vue-next/dist/esm/icons/circle-arrow-up.js';
+import ShieldAlert from 'lucide-vue-next/dist/esm/icons/shield-alert.js';
 
 const { t } = useI18n();
 const toast = useToast();
@@ -194,7 +238,10 @@ const form = ref({
     name: '',
     download_limit: 50,
     upload_limit: 20,
-    burst_limit: ''
+    burst_limit: '',
+    fup_limit_gb: null as number | null,
+    fup_speed: '',
+    fup_enabled: false
 });
 
 const fetchProfiles = async () => {
@@ -240,7 +287,10 @@ const editProfile = (profile: IspNetworkProfile) => {
         name: profile.name,
         download_limit: profile.download_limit,
         upload_limit: profile.upload_limit,
-        burst_limit: profile.burst_limit || ''
+        burst_limit: profile.burst_limit || '',
+        fup_limit_gb: profile.fup_limit_gb,
+        fup_speed: profile.fup_speed || '',
+        fup_enabled: profile.fup_enabled || false
     };
     isDialogOpen.value = true;
 };
@@ -251,7 +301,10 @@ const resetForm = () => {
         name: '',
         download_limit: 50,
         upload_limit: 20,
-        burst_limit: ''
+        burst_limit: '',
+        fup_limit_gb: undefined as unknown as number, // Default to undefined for input compatibility
+        fup_speed: '',
+        fup_enabled: false
     };
 };
 

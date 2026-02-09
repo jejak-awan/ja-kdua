@@ -3,7 +3,7 @@
     :module="module" 
     :mode="mode" 
     :device="device"
-    class="alert-block transition-all duration-300"
+    class="alert-block transition-colors duration-300"
     :id="(settings.html_id as string)"
     :aria-label="(settings.aria_label as string) || 'Alert Notification'"
   >

@@ -38,6 +38,7 @@ class BackupService
 
         // Fallback to native exec if Symfony Process fails or exec function is available
         if (function_exists('exec')) {
+            /** @var array<int, string> $output */
             \exec($command, $output, $returnCode);
 
             return ['output' => $output, 'returnCode' => (int) $returnCode];
@@ -70,16 +71,25 @@ class BackupService
         ]);
 
         try {
-            /** @var string $defaultConnection */
-            $defaultConnection = config('database.default');
-            /** @var string $database */
-            $database = config("database.connections.{$defaultConnection}.database", '');
-            /** @var string $username */
-            $username = config("database.connections.{$defaultConnection}.username", '');
-            /** @var string $password */
-            $password = config("database.connections.{$defaultConnection}.password", '');
-            /** @var string $host */
-            $host = config("database.connections.{$defaultConnection}.host", '');
+            /** @var mixed $defaultConnectionRaw */
+            $defaultConnectionRaw = config('database.default');
+            $defaultConnection = is_string($defaultConnectionRaw) ? $defaultConnectionRaw : 'mysql';
+
+            /** @var mixed $databaseRaw */
+            $databaseRaw = config("database.connections.{$defaultConnection}.database", '');
+            $database = is_string($databaseRaw) ? $databaseRaw : '';
+
+            /** @var mixed $usernameRaw */
+            $usernameRaw = config("database.connections.{$defaultConnection}.username", '');
+            $username = is_string($usernameRaw) ? $usernameRaw : '';
+
+            /** @var mixed $passwordRaw */
+            $passwordRaw = config("database.connections.{$defaultConnection}.password", '');
+            $password = is_string($passwordRaw) ? $passwordRaw : '';
+
+            /** @var mixed $hostRaw */
+            $hostRaw = config("database.connections.{$defaultConnection}.host", '');
+            $host = is_string($hostRaw) ? $hostRaw : '';
 
             // Determine temporary path for the SQL file
             // We use the same directory structure but temporary filename
@@ -165,8 +175,10 @@ class BackupService
             $zipPath = Storage::disk('local')->path($targetPath);
             $zip = new \ZipArchive;
 
-            /** @var string|null $encryptionPassword */
-            $encryptionPassword = config('backup.archive_password');
+            /** @var mixed $encPassConfig */
+            $encPassConfig = config('backup.archive_password');
+            /** @var string $encryptionPassword */
+            $encryptionPassword = is_string($encPassConfig) ? $encPassConfig : '';
             if (empty($encryptionPassword)) {
                 $encryptionPassword = \Illuminate\Support\Str::random(16);
             }
@@ -242,7 +254,9 @@ class BackupService
         try {
             $disk = strval($backup->disk ?? 'local');
             $path = strval($backup->path);
-            $fullPath = Storage::disk($disk)->path($path);
+            /** @var \Illuminate\Contracts\Filesystem\Filesystem $adapter */
+            $adapter = Storage::disk($disk);
+            $fullPath = $adapter->path($path);
 
             if (! file_exists($fullPath)) {
                 throw new \Exception('Backup file not found');
@@ -265,7 +279,15 @@ class BackupService
                     }
 
                     // Get password from DB or Env or App Key
-                    $encryptionPassword = (string) ($backup->getAttribute('password') ?? config('backup.archive_password') ?: config('app.key'));
+                    /** @var mixed $backupPass */
+                    $backupPass = $backup->getAttribute('password');
+                    /** @var mixed $configPass */
+                    $configPass = config('backup.archive_password');
+                    /** @var mixed $appKey */
+                    $appKey = config('app.key');
+
+                    /** @var string $encryptionPassword */
+                    $encryptionPassword = is_string($backupPass) ? $backupPass : (is_string($configPass) ? $configPass : (is_string($appKey) ? $appKey : ''));
 
                     if ($encryptionPassword) {
                         $zip->setPassword($encryptionPassword);
@@ -463,18 +485,29 @@ class BackupService
      */
     public function getScheduleSettings(): array
     {
-        /** @var bool $enabled */
-        $enabled = \App\Models\Setting::get('backup_schedule_enabled', false);
-        /** @var string $frequency */
-        $frequency = \App\Models\Setting::get('backup_schedule_frequency', 'daily');
-        /** @var string $time */
-        $time = \App\Models\Setting::get('backup_schedule_time', '02:00');
-        /** @var int $retentionDays */
-        $retentionDays = \App\Models\Setting::get('backup_retention_days', 30);
-        /** @var int $maxBackups */
-        $maxBackups = \App\Models\Setting::get('backup_max_count', 10);
-        /** @var string|null $lastRun */
-        $lastRun = \App\Models\Setting::get('backup_last_run');
+        /** @var mixed $enabledRaw */
+        $enabledRaw = \App\Models\Setting::get('backup_schedule_enabled', false);
+        $enabled = is_bool($enabledRaw) ? $enabledRaw : (bool) $enabledRaw;
+
+        /** @var mixed $frequencyRaw */
+        $frequencyRaw = \App\Models\Setting::get('backup_schedule_frequency', 'daily');
+        $frequency = is_string($frequencyRaw) ? $frequencyRaw : 'daily';
+
+        /** @var mixed $timeRaw */
+        $timeRaw = \App\Models\Setting::get('backup_schedule_time', '02:00');
+        $time = is_string($timeRaw) ? $timeRaw : '02:00';
+
+        /** @var mixed $retentionDaysRaw */
+        $retentionDaysRaw = \App\Models\Setting::get('backup_retention_days', 30);
+        $retentionDays = is_numeric($retentionDaysRaw) ? (int) $retentionDaysRaw : 30;
+
+        /** @var mixed $maxBackupsRaw */
+        $maxBackupsRaw = \App\Models\Setting::get('backup_max_count', 10);
+        $maxBackups = is_numeric($maxBackupsRaw) ? (int) $maxBackupsRaw : 10;
+
+        /** @var mixed $lastRunRaw */
+        $lastRunRaw = \App\Models\Setting::get('backup_last_run');
+        $lastRun = is_string($lastRunRaw) ? $lastRunRaw : null;
 
         return [
             'enabled' => $enabled,
@@ -575,24 +608,29 @@ class BackupService
      */
     protected function calculateNextRun(): ?string
     {
-        $settings = [
-            'enabled' => (bool) \App\Models\Setting::get('backup_schedule_enabled', false),
-            'frequency' => (string) \App\Models\Setting::get('backup_schedule_frequency', 'daily'),
-            'time' => (string) \App\Models\Setting::get('backup_schedule_time', '02:00'),
-        ];
+        /** @var mixed $enabledRaw */
+        $enabledRaw = \App\Models\Setting::get('backup_schedule_enabled', false);
+        /** @var mixed $frequencyRaw */
+        $frequencyRaw = \App\Models\Setting::get('backup_schedule_frequency', 'daily');
+        /** @var mixed $timeRaw */
+        $timeRaw = \App\Models\Setting::get('backup_schedule_time', '02:00');
 
-        if (! $settings['enabled']) {
+        $enabled = is_bool($enabledRaw) ? $enabledRaw : (bool) $enabledRaw;
+        $frequency = is_string($frequencyRaw) ? $frequencyRaw : 'daily';
+        $time = is_string($timeRaw) ? $timeRaw : '02:00';
+
+        if (! $enabled) {
             return null;
         }
 
-        $time = explode(':', $settings['time']);
-        $hour = (int) $time[0];
-        $minute = (int) ($time[1] ?? 0);
+        $timeParts = explode(':', $time);
+        $hour = (int) $timeParts[0];
+        $minute = (int) ($timeParts[1] ?? 0);
 
         $next = now()->setTime($hour, $minute, 0);
 
         if ($next->isPast()) {
-            switch ($settings['frequency']) {
+            switch ($frequency) {
                 case 'weekly':
                     $next->addWeek();
                     break;
@@ -644,8 +682,10 @@ class BackupService
                     $this->addFolderToZip($zip, $uploadsPath, 'uploads');
                 }
 
-                /** @var string|null $encryptionPassword */
-                $encryptionPassword = config('backup.archive_password');
+                /** @var mixed $encPassConfig */
+                $encPassConfig = config('backup.archive_password');
+                /** @var string $encryptionPassword */
+                $encryptionPassword = is_string($encPassConfig) ? $encPassConfig : '';
                 if (empty($encryptionPassword)) {
                     $encryptionPassword = \Illuminate\Support\Str::random(16);
                 }

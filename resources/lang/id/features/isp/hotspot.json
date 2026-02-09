@@ -1,0 +1,17 @@
+{
+    "ip_bindings": {
+        "title": "IP Binding",
+        "subtitle": "Kelola aturan bypass MAC/IP untuk login hotspot",
+        "add_title": "Tambah IP Binding",
+        "add_desc": "Bypass login hotspot untuk MAC atau IP tertentu",
+        "add_success": "IP Binding berhasil ditambahkan",
+        "empty": "Tidak ada IP binding ditemukan"
+    },
+    "cookies": {
+        "title": "Hotspot Cookies",
+        "subtitle": "Sesi 'ingat saya' aktif untuk pengguna hotspot",
+        "expires_in": "Kedaluwarsa Dalam",
+        "confirm_delete": "Ini akan logout user. Lanjutkan?",
+        "empty": "Tidak ada cookie aktif ditemukan"
+    }
+}

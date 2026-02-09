@@ -7,163 +7,165 @@
             </p>
         </div>
 
-        <Tabs v-model="activeTab" class="w-full">
-            <div class="mb-8">
-                <TabsList class="bg-transparent p-0 h-auto gap-0">
-                    <TabsTrigger value="profile" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
-                        <User class="w-4 h-4 mr-2" />
-                        {{ $t('features.profile.tabs.profile') }}
-                    </TabsTrigger>
-                    <TabsTrigger value="password" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
-                        <KeyRound class="w-4 h-4 mr-2" />
-                        {{ $t('features.profile.tabs.password') }}
-                    </TabsTrigger>
-                    <TabsTrigger value="two-factor" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
-                        <ShieldCheck class="w-4 h-4 mr-2" />
-                        {{ $t('features.profile.tabs.two-factor') }}
-                    </TabsTrigger>
-                    <TabsTrigger value="history" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
-                        <History class="w-4 h-4 mr-2" />
-                        {{ $t('features.profile.tabs.history') }}
-                    </TabsTrigger>
-                </TabsList>
-            </div>
+        <div class="w-full">
+            <Tabs v-model="activeTab" class="w-full">
+                <div class="mb-10 flex items-center justify-between">
+                    <TabsList class="bg-transparent p-0 h-auto gap-0">
+                        <TabsTrigger value="profile" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
+                            <User class="w-4 h-4 mr-2" />
+                            {{ $t('features.profile.tabs.profile') }}
+                        </TabsTrigger>
+                        <TabsTrigger value="password" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
+                            <KeyRound class="w-4 h-4 mr-2" />
+                            {{ $t('features.profile.tabs.password') }}
+                        </TabsTrigger>
+                        <TabsTrigger value="two-factor" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
+                            <ShieldCheck class="w-4 h-4 mr-2" />
+                            {{ $t('features.profile.tabs.two-factor') }}
+                        </TabsTrigger>
+                        <TabsTrigger value="history" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
+                            <History class="w-4 h-4 mr-2" />
+                            {{ $t('features.profile.tabs.history') }}
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
 
-            <TabsContent value="profile" class="px-6 space-y-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{{ $t('features.profile.tabs.profile') }}</CardTitle>
-                        <CardDescription>
-                            {{ $t('features.profile.subtitle') }}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent class="space-y-6">
-                        <!-- Avatar Upload -->
-                        <div class="flex items-center gap-x-6">
-                             <div class="relative">
-                                <Avatar class="h-24 w-24">
-                                    <AvatarImage :src="profileForm.avatar || ''" alt="Avatar" />
-                                    <AvatarFallback class="text-lg">{{ getInitials(profileForm.name) }}</AvatarFallback>
-                                </Avatar>
-                                 <button
-                                    v-if="profileForm.avatar"
-                                    type="button"
-                                    class="absolute -top-1 -right-1 rounded-full bg-destructive p-1 text-destructive-foreground hover:bg-destructive/90 shadow-sm"
-                                    @click="profileForm.avatar = null"
-                                    title="Remove Avatar"
-                                >
-                                    <X class="h-3 w-3" />
-                                </button>
-                             </div>
-                             <div>
-                                <MediaPicker
-                                    :label="$t('features.users.form.selectAvatar')"
-                                    @selected="(media: { url: string }) => profileForm.avatar = media.url"
-                                />
-                                <p class="mt-2 text-xs text-muted-foreground">
-                                    JPG, GIF or PNG. 1MB max.
-                                </p>
-                             </div>
-                        </div>
+                <TabsContent value="profile" class="space-y-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{{ $t('features.profile.tabs.profile') }}</CardTitle>
+                            <CardDescription>
+                                {{ $t('features.profile.subtitle') }}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent class="space-y-6">
+                            <!-- Avatar Upload -->
+                            <div class="flex items-center gap-x-6">
+                                <div class="relative">
+                                    <Avatar class="h-24 w-24">
+                                        <AvatarImage :src="profileForm.avatar || ''" alt="Avatar" />
+                                        <AvatarFallback class="text-lg">{{ getInitials(profileForm.name) }}</AvatarFallback>
+                                    </Avatar>
+                                    <button
+                                        v-if="profileForm.avatar"
+                                        type="button"
+                                        class="absolute -top-1 -right-1 rounded-full bg-destructive p-1 text-destructive-foreground hover:bg-destructive/90 shadow-sm"
+                                        @click="profileForm.avatar = null"
+                                        title="Remove Avatar"
+                                    >
+                                        <X class="h-3 w-3" />
+                                    </button>
+                                </div>
+                                <div>
+                                    <MediaPicker
+                                        :label="$t('features.users.form.selectAvatar')"
+                                        @selected="(media: { url: string }) => profileForm.avatar = media.url"
+                                    />
+                                    <p class="mt-2 text-xs text-muted-foreground">
+                                        JPG, GIF or PNG. 1MB max.
+                                    </p>
+                                </div>
+                            </div>
 
-                        <Separator class="my-4" />
+                            <Separator class="my-4" />
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-2">
-                                <Label for="name">{{ $t('features.profile.form.name') }}</Label>
-                                <Input id="name" v-model="profileForm.name" type="text" />
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <Label for="name">{{ $t('features.profile.form.name') }}</Label>
+                                    <Input id="name" v-model="profileForm.name" type="text" />
+                                </div>
+
+                                <div class="space-y-2">
+                                    <Label for="email">{{ $t('features.profile.form.email') }}</Label>
+                                    <Input id="email" v-model="profileForm.email" type="email" />
+                                </div>
+
+                                <div class="space-y-2">
+                                    <Label for="phone">{{ $t('features.profile.form.phone') }}</Label>
+                                    <Input id="phone" v-model="profileForm.phone" type="text" />
+                                </div>
+
+                                <div class="space-y-2">
+                                    <Label for="location">{{ $t('features.profile.form.location') }}</Label>
+                                    <Input id="location" v-model="profileForm.location" type="text" />
+                                </div>
                             </div>
 
                             <div class="space-y-2">
-                                <Label for="email">{{ $t('features.profile.form.email') }}</Label>
-                                <Input id="email" v-model="profileForm.email" type="email" />
+                                <Label for="bio">{{ $t('features.profile.form.bio') }}</Label>
+                                <Textarea id="bio" v-model="profileForm.bio" rows="4" />
+                            </div>
+
+                            <div class="flex justify-end">
+                                <Button :disabled="saving || !isProfileDirty" @click="updateProfile">
+                                    <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
+                                    {{ saving ? $t('features.profile.form.saving') : $t('features.profile.form.save') }}
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="password" class="space-y-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{{ $t('features.profile.tabs.password') }}</CardTitle>
+                            <CardDescription>
+                                {{ $t('features.profile.form.passwordHelp') }}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent class="space-y-4 max-w-lg">
+                            <div class="space-y-2">
+                                <Label for="current_password">{{ $t('features.profile.form.currentPassword') }}</Label>
+                                <Input id="current_password" v-model="passwordForm.current_password" type="password" />
                             </div>
 
                             <div class="space-y-2">
-                                <Label for="phone">{{ $t('features.profile.form.phone') }}</Label>
-                                <Input id="phone" v-model="profileForm.phone" type="text" />
+                                <Label for="new_password">{{ $t('features.profile.form.newPassword') }}</Label>
+                                <Input id="new_password" v-model="passwordForm.password" type="password" />
                             </div>
 
                             <div class="space-y-2">
-                                <Label for="location">{{ $t('features.profile.form.location') }}</Label>
-                                <Input id="location" v-model="profileForm.location" type="text" />
+                                <Label for="confirm_password">{{ $t('features.profile.form.confirmPassword') }}</Label>
+                                <Input id="confirm_password" v-model="passwordForm.password_confirmation" type="password" />
                             </div>
-                        </div>
 
-                        <div class="space-y-2">
-                            <Label for="bio">{{ $t('features.profile.form.bio') }}</Label>
-                            <Textarea id="bio" v-model="profileForm.bio" rows="4" />
-                        </div>
+                            <div class="flex justify-end pt-4">
+                                <Button :disabled="changingPassword || !isPasswordValid" @click="updatePassword">
+                                    <Loader2 v-if="changingPassword" class="mr-2 h-4 w-4 animate-spin" />
+                                    {{ changingPassword ? $t('features.profile.form.changing') : $t('features.profile.form.changePassword') }}
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
 
-                        <div class="flex justify-end">
-                            <Button :disabled="saving || !isProfileDirty" @click="updateProfile">
-                                <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
-                                {{ saving ? $t('features.profile.form.saving') : $t('features.profile.form.save') }}
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </TabsContent>
+                <TabsContent value="two-factor" class="space-y-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{{ $t('features.profile.tabs.twoFactor') }}</CardTitle>
+                            <CardDescription>
+                                {{ $t('features.profile.form.twoFactorDescription') || 'Secure your account with multi-factor authentication.' }}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent class="pb-10">
+                            <TwoFactorSettings />
+                        </CardContent>
+                    </Card>
+                </TabsContent>
 
-            <TabsContent value="password" class="px-6 space-y-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{{ $t('features.profile.tabs.password') }}</CardTitle>
-                        <CardDescription>
-                            {{ $t('features.profile.form.passwordHelp') }}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent class="space-y-4 max-w-lg">
-                        <div class="space-y-2">
-                            <Label for="current_password">{{ $t('features.profile.form.currentPassword') }}</Label>
-                            <Input id="current_password" v-model="passwordForm.current_password" type="password" />
-                        </div>
-
-                        <div class="space-y-2">
-                            <Label for="new_password">{{ $t('features.profile.form.newPassword') }}</Label>
-                            <Input id="new_password" v-model="passwordForm.password" type="password" />
-                        </div>
-
-                        <div class="space-y-2">
-                            <Label for="confirm_password">{{ $t('features.profile.form.confirmPassword') }}</Label>
-                            <Input id="confirm_password" v-model="passwordForm.password_confirmation" type="password" />
-                        </div>
-
-                        <div class="flex justify-end pt-4">
-                            <Button :disabled="changingPassword || !isPasswordValid" @click="updatePassword">
-                                <Loader2 v-if="changingPassword" class="mr-2 h-4 w-4 animate-spin" />
-                                {{ changingPassword ? $t('features.profile.form.changing') : $t('features.profile.form.changePassword') }}
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </TabsContent>
-
-            <TabsContent value="two-factor" class="px-6 space-y-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{{ $t('features.profile.tabs.twoFactor') }}</CardTitle>
-                        <CardDescription>
-                            {{ $t('features.profile.form.twoFactorDescription') || 'Secure your account with multi-factor authentication.' }}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent class="pb-10">
-                        <TwoFactorSettings />
-                    </CardContent>
-                </Card>
-            </TabsContent>
-
-            <TabsContent value="history" class="px-6 space-y-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{{ $t('features.profile.tabs.history') }}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <LoginHistory />
-                    </CardContent>
-                </Card>
-            </TabsContent>
-        </Tabs>
+                <TabsContent value="history" class="space-y-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{{ $t('features.profile.tabs.history') }}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <LoginHistory />
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
+        </div>
     </div>
 </template>
 
