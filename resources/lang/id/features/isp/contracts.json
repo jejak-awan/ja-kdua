@@ -1,0 +1,58 @@
+{
+    "title": "Manajemen Kontrak",
+    "subtitle": "Kelola perjanjian layanan dan kontrak pelanggan.",
+    "new": "Kontrak Baru",
+    "edit": "Edit Kontrak",
+    "modal_subtitle": "Isi detail kontrak layanan.",
+    "search_placeholder": "Cari nomor kontrak, pelanggan...",
+    "all_types": "Semua Tipe",
+    "no_data": "Belum ada kontrak.",
+    "select_customer": "Pilih Pelanggan",
+    "select_plan": "Pilih Paket",
+    "stats": {
+        "active": "Kontrak Aktif",
+        "expiring_soon": "Segera Berakhir",
+        "expired": "Kadaluarsa",
+        "total_value": "Total Nilai"
+    },
+    "columns": {
+        "number": "No. Kontrak",
+        "customer": "Pelanggan",
+        "type": "Tipe",
+        "plan": "Paket",
+        "value": "Nilai",
+        "period": "Periode",
+        "status": "Status"
+    },
+    "status": {
+        "active": "Aktif",
+        "pending": "Pending",
+        "expired": "Kadaluarsa",
+        "terminated": "Diterminasi"
+    },
+    "types": {
+        "residential": "Residential",
+        "business": "Business",
+        "enterprise": "Enterprise"
+    },
+    "fields": {
+        "customer": "Pelanggan",
+        "type": "Tipe Kontrak",
+        "plan": "Paket Langganan",
+        "duration": "Durasi",
+        "start_date": "Tanggal Mulai",
+        "monthly_value": "Nilai Bulanan",
+        "notes": "Catatan"
+    },
+    "actions": {
+        "new": "Buat Kontrak",
+        "download": "Unduh PDF",
+        "renew": "Perpanjang",
+        "terminate": "Terminasi"
+    },
+    "messages": {
+        "renewed": "Kontrak berhasil diperpanjang",
+        "terminated": "Kontrak berhasil diterminasi",
+        "confirm_terminate": "Yakin ingin terminasi kontrak ini?"
+    }
+}

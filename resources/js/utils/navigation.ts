@@ -48,6 +48,7 @@ export const navigationGroups: Record<string, NavItem[]> = {
         { name: 'isp-subscription-customers', to: '/admin/isp/subscription/customers', label: 'Manajemen Pelanggan', permission: 'manage settings' },
         { name: 'isp.customers.map', to: '/admin/isp/customers/map', label: 'Peta Pelanggan', permission: 'manage settings' },
         { name: 'isp-subscription-profiles', to: '/admin/isp/subscription/profiles', label: 'Profil Langganan', permission: 'manage settings' },
+        { name: 'isp-contracts', to: '/admin/isp/contracts', label: 'Kontrak Layanan', permission: 'manage settings' },
         { name: 'isp.admin.service-requests', to: '/admin/isp/admin/service-requests', label: 'Pengajuan Layanan', permission: 'manage settings' },
 
         // Network & Infrastructure

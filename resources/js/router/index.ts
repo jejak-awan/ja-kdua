@@ -273,6 +273,11 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('../views/Isp/Customer/Index.vue'),
             },
             {
+                path: 'isp/contracts',
+                name: 'isp-contracts',
+                component: () => import('../views/Isp/Customers/Contracts/Index.vue'),
+            },
+            {
                 path: 'isp/customers/map',
                 name: 'isp.customers.map',
                 component: () => import('../views/Isp/Customer/Map.vue'),
