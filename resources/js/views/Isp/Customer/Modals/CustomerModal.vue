@@ -320,8 +320,11 @@ import {
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
 import Eye from 'lucide-vue-next/dist/esm/icons/eye.js';
 import EyeOff from 'lucide-vue-next/dist/esm/icons/eye-off.js';
-import type { BillingPlan, IspUser } from '@/types/isp';
+import Plus from 'lucide-vue-next/dist/esm/icons/plus.js';
+import Trash2 from 'lucide-vue-next/dist/esm/icons/trash-2.js';
+import type { BillingPlan, IspUser, Customer } from '@/types/isp';
 import * as L from 'leaflet';
+import { formatCurrency } from '@/utils/format';
 
 const props = defineProps<{
     open: boolean;
@@ -347,8 +350,8 @@ const routers = ref<DropdownItem[]>([]);
 const servers = ref<DropdownItem[]>([]);
 
 // Map state
-let map: L.Map | null = null;
-let marker: L.Marker | null = null;
+let mapInstance: L.Map | null = null;
+let markerInstance: L.Marker | null = null;
 
 // Form state
 const form = ref({
@@ -415,7 +418,7 @@ const fetchResources = async () => {
 };
 
 const initMap = () => {
-    if (map) return;
+    if (mapInstance) return;
     
     // Default Jakarta
     const lat = -6.2088;
@@ -424,39 +427,39 @@ const initMap = () => {
     const container = document.getElementById('map');
     if (!container) return;
 
-    map = L.map('map').setView([lat, lng], 13);
+    mapInstance = L.map('map').setView([lat, lng], 13);
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    }).addTo(mapInstance);
 
-    map.on('click', (e) => {
+    mapInstance.on('click', (e) => {
         const { lat, lng } = e.latlng;
         updateMarker(lat, lng);
     });
 };
 
 const updateMarker = (lat: number, lng: number) => {
-    if (!map) return;
+    if (!mapInstance) return;
     
-    if (marker) {
-        marker.setLatLng([lat, lng]);
+    if (markerInstance) {
+        markerInstance.setLatLng([lat, lng]);
     } else {
-        marker = L.marker([lat, lng]).addTo(map);
+        markerInstance = L.marker([lat, lng]).addTo(mapInstance);
     }
     form.value.coordinates = `${lat}, ${lng}`;
 };
 
 watch(() => form.value.coordinates, (val) => {
-    if (val && map) {
+    if (val && mapInstance) {
         const [lat, lng] = val.split(',').map(s => parseFloat(s.trim()));
         if (!isNaN(lat) && !isNaN(lng)) {
-             if (!marker) {
-                marker = L.marker([lat, lng]).addTo(map);
+             if (!markerInstance) {
+                markerInstance = L.marker([lat, lng]).addTo(mapInstance);
             } else {
-                marker.setLatLng([lat, lng]);
+                markerInstance.setLatLng([lat, lng]);
             }
-            map.setView([lat, lng], 15);
+            mapInstance.setView([lat, lng], 15);
         }
     }
 });
@@ -465,7 +468,7 @@ watch(() => activeTab.value, (tab) => {
     if (tab === 'address') {
         nextTick(() => { 
             initMap();
-            map?.invalidateSize();
+            mapInstance?.invalidateSize();
         });
     }
 });
@@ -476,8 +479,7 @@ watch(() => props.open, (isOpen) => {
         
         if (props.customer) {
             const c = props.customer;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const profile = (c.customer || c.isp_customer || {}) as any;
+            const profile = (c.customer || c.isp_customer || {}) as Customer;
             
             form.value = {
                 name: c.name,
@@ -546,10 +548,10 @@ watch(() => props.open, (isOpen) => {
         activeTab.value = 'identity';
         
         // Reset Map
-        if (map) {
-            map.remove();
-            map = null;
-            marker = null;
+        if (mapInstance) {
+            mapInstance.remove();
+            mapInstance = null;
+            markerInstance = null;
         }
     }
 });
@@ -563,9 +565,5 @@ const save = () => {
         server_id: form.value.server_id_str ? Number(form.value.server_id_str) : null,
         is_taxed: form.value.is_taxed ? 1 : 0
     });
-};
-
-const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
 };
 </script>

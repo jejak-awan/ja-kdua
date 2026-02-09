@@ -128,7 +128,7 @@
                             <TableCell class="text-right">
                                 <div class="flex justify-end gap-1">
                                     <Tooltip>
-                                        <TooltipTrigger asChild>
+                                        <TooltipTrigger as-child>
                                             <Button variant="ghost" size="sm" @click="viewContract(contract)">
                                                 <Eye class="w-4 h-4" />
                                             </Button>
@@ -136,7 +136,7 @@
                                         <TooltipContent>{{ t('common.actions.view') }}</TooltipContent>
                                     </Tooltip>
                                     <Tooltip>
-                                        <TooltipTrigger asChild>
+                                        <TooltipTrigger as-child>
                                             <Button variant="ghost" size="sm" @click="editContract(contract)">
                                                 <Pencil class="w-4 h-4" />
                                             </Button>
@@ -144,7 +144,7 @@
                                         <TooltipContent>{{ t('common.actions.edit') }}</TooltipContent>
                                     </Tooltip>
                                     <Tooltip>
-                                        <TooltipTrigger asChild>
+                                        <TooltipTrigger as-child>
                                             <Button variant="ghost" size="sm" @click="downloadContract(contract)">
                                                 <Download class="w-4 h-4" />
                                             </Button>
@@ -152,7 +152,7 @@
                                         <TooltipContent>{{ t('isp.contracts.actions.download') }}</TooltipContent>
                                     </Tooltip>
                                     <Tooltip v-if="canRenew(contract)">
-                                        <TooltipTrigger asChild>
+                                        <TooltipTrigger as-child>
                                             <Button variant="ghost" size="sm" @click="renewContract(contract)">
                                                 <RotateCw class="w-4 h-4" />
                                             </Button>
@@ -160,7 +160,7 @@
                                         <TooltipContent>{{ t('isp.contracts.actions.renew') }}</TooltipContent>
                                     </Tooltip>
                                     <Tooltip v-if="contract.status === 'active'">
-                                        <TooltipTrigger asChild>
+                                        <TooltipTrigger as-child>
                                             <Button variant="ghost" size="sm" class="text-destructive" @click="terminateContract(contract)">
                                                 <CircleX class="w-4 h-4" />
                                             </Button>
@@ -448,7 +448,7 @@ const saveContract = async () => {
         toastService.service.success(t('common.messages.saved'));
         showModal.value = false;
         loadContracts();
-    } catch (error) {
+    } catch (_error) {
         toastService.service.error(t('common.messages.error'));
     } finally {
         saving.value = false;
@@ -456,7 +456,7 @@ const saveContract = async () => {
 };
 
 const viewContract = (contract: Contract) => {
-    console.log('View contract:', contract);
+    console.warn('View contract:', contract);
 };
 
 const downloadContract = (contract: Contract) => {
@@ -468,7 +468,7 @@ const renewContract = async (contract: Contract) => {
         await api.post(`/admin/isp/contracts/${contract.id}/renew`);
         toastService.service.success(t('isp.contracts.messages.renewed'));
         loadContracts();
-    } catch (error) {
+    } catch (_error) {
         toastService.service.error(t('common.messages.error'));
     }
 };
@@ -479,7 +479,7 @@ const terminateContract = async (contract: Contract) => {
         await api.post(`/admin/isp/contracts/${contract.id}/terminate`);
         toastService.service.success(t('isp.contracts.messages.terminated'));
         loadContracts();
-    } catch (error) {
+    } catch (_error) {
         toastService.service.error(t('common.messages.error'));
     }
 };

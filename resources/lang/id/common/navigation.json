@@ -62,7 +62,15 @@
         "monitoring": "Pemantauan",
         "system": "Pengaturan",
         "developer": "Dev",
-        "isp": "K2NET"
+        "isp": "K2NET",
+        "monitoring_&_analitik": "Monitoring & Analitik",
+        "konfigurasi": "Konfigurasi",
+        "pelanggan": "Pelanggan",
+        "jaringan": "Jaringan",
+        "penagihan": "Penagihan",
+        "inventaris": "Inventaris",
+        "dukungan": "Dukungan",
+        "portal_pelanggan": "Portal Pelanggan"
     },
     "breadcrumbs": {
         "home": "Beranda",

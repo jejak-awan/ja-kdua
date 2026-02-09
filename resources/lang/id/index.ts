@@ -54,6 +54,10 @@ import ispBilling from './features/isp/billing.json';
 import ispInfra from './features/isp/infra.json';
 import ispMember from './features/isp/member.json';
 import ispMonitor from './features/isp/monitor.json';
+import ispContracts from './features/isp/contracts.json';
+
+
+import ispCustomers from './features/isp/customers.json';
 
 
 import scheduled_tasks from './features/scheduled_tasks.json';
@@ -75,7 +79,9 @@ export default {
         billing: ispBilling,
         infra: ispInfra,
         monitor: ispMonitor,
+        contracts: ispContracts,
         service_requests: ispServiceRequests,
+        customers: ispCustomers,
     },
     common: {
         actions,

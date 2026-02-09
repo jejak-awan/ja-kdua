@@ -613,8 +613,13 @@ Route::prefix('v1')->group(function () {
             Route::post('member/diagnostics', [App\Http\Controllers\Api\Isp\MemberPortalController::class, 'diagnostics']);
 
             // Payments
+            Route::get('payments/gateways', [App\Http\Controllers\Api\Isp\PaymentController::class, 'indexGateways']);
+            Route::put('payments/gateways/{gateway}', [App\Http\Controllers\Api\Isp\PaymentController::class, 'updateGateway']);
             Route::post('payments/invoice/{invoice}/create', [App\Http\Controllers\Api\Isp\PaymentController::class, 'createTransaction']);
             Route::post('payments/callback', [App\Http\Controllers\Api\Isp\PaymentController::class, 'callback']);
+ 
+            // Contracts
+            Route::apiResource('contracts', App\Http\Controllers\Api\Isp\ContractController::class);
 
             // Service Requests (Admin)
             Route::prefix('service-requests')->group(function () {

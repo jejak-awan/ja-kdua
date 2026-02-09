@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Card, Button } from '@/components/ui';
 import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
@@ -71,7 +71,7 @@ const refreshTopology = async () => {
 // Placeholder for graph rendering logic
 const renderGraph = () => {
     // Logic to render nodes (OLT -> ODP -> Customers)
-    console.log('Rendering topology graph...');
+    console.warn('Rendering topology graph...');
 };
 
 onMounted(() => {

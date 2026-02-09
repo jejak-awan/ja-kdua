@@ -64,7 +64,7 @@ import {
 } from '@/components/ui'
 
 interface Props {
-    settings: any[];
+    settings: unknown[];
     formData: Record<string, unknown>;
     saving: boolean;
 }

@@ -487,7 +487,7 @@ const openCreateModal = async () => {
             lat = Number(res.data.data.network_map_default_lat) || lat;
             lng = Number(res.data.data.network_map_default_lng) || lng;
         }
-    } catch (e) {
+    } catch (_e) {
         console.warn('Failed to load network settings, using defaults');
     }
 

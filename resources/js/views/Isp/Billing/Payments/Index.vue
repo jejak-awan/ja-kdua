@@ -257,7 +257,7 @@ const exportPayments = () => {
 };
 
 const viewPayment = (payment: Payment) => {
-    console.log('View payment:', payment);
+    console.warn('View payment:', payment);
 };
 
 onMounted(() => {

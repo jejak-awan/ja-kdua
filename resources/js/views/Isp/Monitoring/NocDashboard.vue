@@ -141,7 +141,7 @@ const fetchData = async () => {
         globalStats.value = data.global || globalStats.value;
         nodes.value = ensureArray(data.nodes);
         historyData.value = ensureArray(data.history);
-        lastUpdated.value = new Date().toLocaleTimeString();
+        lastUpdated.value = new Date().toLocaleTimeString('id-ID');
     } catch (error: unknown) {
         // Narrow error to check for axios cancellation
         const err = error as Record<string, unknown>;

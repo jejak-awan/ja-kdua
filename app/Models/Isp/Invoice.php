@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $tax
  * @property int $unique_code
  * @property string $amount
- * @property \Carbon\Carbon $due_date
+ * @property \Carbon\Carbon|null $due_date
  * @property string $status
  * @property string $billing_period
  * @property-read string $invoice_number

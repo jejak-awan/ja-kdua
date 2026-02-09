@@ -1,0 +1,22 @@
+{
+    "title": "Customer Management",
+    "subtitle": "Manage subscribers, billing, and connectivity.",
+    "map_title": "Customer Geolocation Map",
+    "map_subtitle": "Real-time overview of customer distribution and status",
+    "list_view": "List View",
+    "status": "Status",
+    "coordinates": "Location",
+    "view_profile": "View Profile",
+    "contact": "Contact",
+    "stats": {
+        "total": "Total Customers",
+        "active": "Active",
+        "isolated": "Isolated",
+        "inactive": "Inactive"
+    },
+    "actions": {
+        "import": "Import Customers",
+        "export": "Export Customers",
+        "new": "New Customer"
+    }
+}

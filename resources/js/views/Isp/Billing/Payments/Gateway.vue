@@ -269,7 +269,7 @@ const saveGateway = async (gateway: string) => {
         const data = gateway === 'midtrans' ? midtrans : gateway === 'xendit' ? xendit : manual;
         await api.post(`/admin/isp/payment-gateways/${gateway}`, data);
         toastService.service.success(t('common.messages.saved'));
-    } catch (error) {
+    } catch (_error) {
         toastService.service.error(t('common.messages.error'));
     } finally {
         saving.value = false;

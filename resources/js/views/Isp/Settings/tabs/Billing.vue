@@ -7,7 +7,6 @@
             </p>
 
             <Accordion type="single" class="w-full" collapsible :default-value="'general'">
-                
                 <!-- General Settings -->
                 <AccordionItem value="general">
                     <AccordionTrigger>{{ t('isp.billing.settings.tabs.general') }}</AccordionTrigger>
@@ -164,7 +163,7 @@ import {
 } from '@/components/ui'
 
 interface Props {
-    settings: any[];
+    settings: unknown[];
     formData: Record<string, unknown>;
     saving: boolean;
 }

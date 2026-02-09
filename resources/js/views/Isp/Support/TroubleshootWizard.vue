@@ -48,9 +48,9 @@
                              {{ t('isp.support.wizard.steps.billing.title') }}
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Card class="p-4 border-l-4" :class="selectedCustomer.balance <= 0 ? 'border-l-success' : 'border-l-destructive'">
+                            <Card class="p-4 border-l-4" :class="(selectedCustomer?.balance || 0) <= 0 ? 'border-l-success' : 'border-l-destructive'">
                                 <div class="text-sm text-muted-foreground">Current Balance</div>
-                                <div class="text-2xl font-bold">Rp {{ formatNumber(selectedCustomer.balance) }}</div>
+                                <div class="text-2xl font-bold">Rp {{ formatNumber(selectedCustomer?.balance || 0) }}</div>
                             </Card>
                             <Card class="p-4 border-l-4" :class="selectedCustomer.status === 'active' ? 'border-l-success' : 'border-l-warning'">
                                 <div class="text-sm text-muted-foreground">Account Status</div>
@@ -88,10 +88,10 @@
                             </div>
                         </div>
                         <div class="flex justify-between">
-                            <Button variant="outline" @click="prevStep">Back</Button>
+                            <Button variant="outline" @click="prevStep">{{ t('common.actions.back') }}</Button>
                             <Button @click="checkRouter" :disabled="checkingRouter">
                                 <RefreshCw v-if="checkingRouter" class="w-4 h-4 mr-2 animate-spin" />
-                                {{ checkingRouter ? 'Checking...' : 'Re-check & Next' }}
+                                {{ checkingRouter ? t('common.loading') : t('common.actions.next') }}
                             </Button>
                         </div>
                     </div>
@@ -109,8 +109,8 @@
                             <p class="text-sm text-muted-foreground">Optical Power Level</p>
                         </div>
                         <div class="flex justify-between">
-                            <Button variant="outline" @click="prevStep">Back</Button>
-                            <Button @click="nextStep">Next: Ping Test</Button>
+                            <Button variant="outline" @click="prevStep">{{ t('common.actions.back') }}</Button>
+                            <Button @click="nextStep">{{ t('common.actions.next') }}</Button>
                         </div>
                     </div>
 
@@ -126,11 +126,10 @@
                             </div>
                         </div>
                         <div class="flex justify-between">
-                             <Button variant="outline" @click="prevStep">Back</Button>
-                             <Button @click="finishWizard" class="bg-green-600 hover:bg-green-700 text-white">Finish Diagnosis</Button>
+                             <Button variant="outline" @click="prevStep">{{ t('common.actions.back') }}</Button>
+                             <Button @click="finishWizard" class="bg-green-600 hover:bg-green-700 text-white">{{ t('isp.support.wizard.finish', 'Finish Diagnosis') }}</Button>
                         </div>
                     </div>
-
                 </div>
             </div>
         </Card>
@@ -148,11 +147,14 @@ import Router from 'lucide-vue-next/dist/esm/icons/router.js';
 import Signal from 'lucide-vue-next/dist/esm/icons/signal.js';
 import Activity from 'lucide-vue-next/dist/esm/icons/activity.js';
 import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import api from '@/services/api';
+import { formatNumber } from '@/utils/format';
+import type { Customer } from '@/types/isp';
 
 const { t } = useI18n();
 const search = ref('');
 const loading = ref(false);
-const selectedCustomer = ref<any>(null);
+const selectedCustomer = ref<Customer | null>(null);
 const currentStep = ref(1);
 const totalSteps = 4;
 
@@ -162,21 +164,31 @@ const checkingRouter = ref(false);
 const signalStrength = ref(-18.5);
 const pingLogs = ref<string[]>([]);
 
-const formatNumber = (num: number) => num.toLocaleString('id-ID');
-
-const searchCustomer = () => {
+const searchCustomer = async () => {
+    if (!search.value) return;
     loading.value = true;
-    setTimeout(() => {
-        selectedCustomer.value = {
-            id: 1,
-            name: 'John Doe',
-            balance: 0,
-            status: 'active',
-            router_name: 'Mikrotik-Home-1',
-            ip_address: '192.168.88.10'
-        };
+    try {
+        const response = await api.get('/admin/ja/isp/customers', { params: { search: search.value } });
+        // Handle paginated response
+        const data = response.data?.data || response.data;
+        const results = Array.isArray(data) ? data : (data?.data || []);
+        
+        if (results.length > 0) {
+            const firstResult = results[0];
+            // Map User + Customer profile to the expected format
+            selectedCustomer.value = {
+                ...firstResult.customer,
+                name: firstResult.name,
+                id: firstResult.id // Using User ID as the main reference
+            };
+        } else {
+            console.warn('No customer found');
+        }
+    } catch (error) {
+        console.error('Failed to search customer', error);
+    } finally {
         loading.value = false;
-    }, 1000);
+    }
 };
 
 const nextStep = () => {

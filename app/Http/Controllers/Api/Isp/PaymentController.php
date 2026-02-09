@@ -6,16 +6,26 @@ namespace App\Http\Controllers\Api\Isp;
 
 use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Isp\Invoice;
+use App\Models\Isp\PaymentGateway;
+use App\Services\Isp\PaymentGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
 
 class PaymentController extends BaseApiController
 {
+    protected PaymentGatewayService $paymentService;
+
+    public function __construct(PaymentGatewayService $paymentService)
+    {
+        $this->paymentService = $paymentService;
+    }
+
     /**
      * Create a payment transaction for an invoice.
      */
-    public function createTransaction(Request $request, Invoice $invoice): \Illuminate\Http\JsonResponse
+    public function createTransaction(Request $request, Invoice $invoice): JsonResponse
     {
         $user = Auth::user();
         if (! $user || $invoice->user_id !== $user->id) {
@@ -26,35 +36,63 @@ class PaymentController extends BaseApiController
             return $this->error('Invoice is already paid');
         }
 
-        // Simulation of Midtrans Snap token generation
-        $token = 'snap-token-'.bin2hex(random_bytes(16));
-        $redirectUrl = 'https://app.sandbox.midtrans.com/snap/v2/vtweb/'.$token;
+        $transaction = $this->paymentService->initializePayment($invoice);
 
-        return $this->success([
-            'token' => $token,
-            'redirect_url' => $redirectUrl,
-            'amount' => $invoice->amount,
-            'invoice_id' => $invoice->id,
-        ], 'Payment transaction initialized');
+        return $this->success($transaction, 'Payment transaction initialized');
+    }
+
+    /**
+     * Display a listing of payment gateways.
+     */
+    public function indexGateways(): JsonResponse
+    {
+        return $this->success(PaymentGateway::all());
+    }
+
+    /**
+     * Update gateway configuration.
+     */
+    public function updateGateway(Request $request, PaymentGateway $gateway): JsonResponse
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'config' => 'required|array',
+            'is_active' => 'required|boolean',
+        ]);
+
+        if ($request->input('is_active')) {
+            // Deactivate other gateways
+            PaymentGateway::where('id', '!=', $gateway->id)->update(['is_active' => false]);
+        }
+
+        $gateway->update($request->only(['name', 'config', 'is_active']));
+
+        return $this->success($gateway, 'Gateway updated successfully');
     }
 
     /**
      * Handle payment gateway callback (Webhook).
      */
-    public function callback(Request $request): \Illuminate\Http\JsonResponse
+    public function callback(Request $request): JsonResponse
     {
         // Simulated webhook logic
-        $orderId = $request->input('order_id');
-        $status = $request->input('transaction_status');
+        $orderIdRaw = $request->input('order_id');
+        $orderId = is_scalar($orderIdRaw) ? (string) $orderIdRaw : '';
+        
+        $statusRaw = $request->input('transaction_status');
+        $status = is_scalar($statusRaw) ? (string) $statusRaw : '';
 
         Log::info('Payment callback received', ['order_id' => $orderId, 'status' => $status]);
 
         // In real app, verify signature and update invoice status
         if ($status === 'settlement' || $status === 'capture') {
-            // $invoice = Invoice::find($orderId);
-            // $invoice->update(['status' => 'paid']);
+            $invoice = Invoice::find($orderId);
+            if ($invoice) {
+                $invoice->update(['status' => 'paid']);
+            }
         }
 
         return response()->json(['status' => 'ok']);
     }
 }
+

@@ -1,0 +1,22 @@
+{
+    "title": "Manajemen Pelanggan",
+    "subtitle": "Kelola pelanggan, penagihan, dan konektivitas.",
+    "map_title": "Peta Geolokasi Pelanggan",
+    "map_subtitle": "Ikhtisar real-time distribusi dan status pelanggan",
+    "list_view": "Tampilan Daftar",
+    "status": "Status",
+    "coordinates": "Lokasi",
+    "view_profile": "Lihat Profil",
+    "contact": "Hubungi",
+    "stats": {
+        "total": "Total Pelanggan",
+        "active": "Aktif",
+        "isolated": "Terisolasi",
+        "inactive": "Tidak Aktif"
+    },
+    "actions": {
+        "import": "Impor Pelanggan",
+        "export": "Ekspor Pelanggan",
+        "new": "Pelanggan Baru"
+    }
+}

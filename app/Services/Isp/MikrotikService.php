@@ -8,12 +8,12 @@ use App\Models\Isp\ServiceNode;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use RouterOS\Client;
-use RouterOS\Query;
+use App\Services\Isp\RouterOSAPI; // Assuming RouterOSAPI is a local class in the same namespace
 
 class MikrotikService
 {
-    protected ?Client $client = null;
+    /** @var RouterOSAPI|null */
+    protected ?RouterOSAPI $client = null;
 
     protected RouterService $routerService;
 
@@ -143,15 +143,11 @@ class MikrotikService
     public function connect(string $host, string $user, string $pass, int $port = 8728): bool
     {
         try {
-            $this->client = new Client([
-                'host' => $host,
-                'user' => $user,
-                'pass' => $pass,
-                'port' => $port,
-                'timeout' => 3,
-            ]);
+            $this->client = new RouterOSAPI();
+            $this->client->port = $port;
+            $this->client->timeout = 3;
 
-            return true;
+            return $this->client->connect($host, $user, $pass);
         } catch (Exception $e) {
             Log::error('Mikrotik Connection Failed: '.$e->getMessage());
 
@@ -174,7 +170,7 @@ class MikrotikService
             ];
         }
 
-        if (! $this->client) {
+        if (! $this->client || ! $this->client->connected) {
             /** @var string $host */
             $host = config('services.mikrotik.host', '');
             /** @var string $user */
@@ -182,7 +178,7 @@ class MikrotikService
             /** @var string $pass */
             $pass = config('services.mikrotik.pass', '');
             /** @var int $port */
-            $port = (int) config('services.mikrotik.port', 8728);
+            $port = config('services.mikrotik.port', 8728);
 
             if (! $this->connect($host, $user, $pass, $port)) {
                 return null;
@@ -194,11 +190,10 @@ class MikrotikService
                 return null;
             }
 
-            $query = new Query('/interface/monitor-traffic');
-            $query->equal('interface', $interfaceName);
-            $query->equal('once');
-
-            $response = $this->client->query($query)->read();
+            $response = $this->client->comm('/interface/monitor-traffic', [
+                'interface' => $interfaceName,
+                'once' => '',
+            ]);
 
             if (empty($response)) {
                 return null;
@@ -207,8 +202,8 @@ class MikrotikService
             $data = $response[0];
 
             return [
-                'rx' => round(($data['rx-bits-per-second'] ?? 0) / 1000000, 2),
-                'tx' => round(($data['tx-bits-per-second'] ?? 0) / 1000000, 2),
+                'rx' => round(((float) ($data['rx-bits-per-second'] ?? 0)) / 1000000, 2),
+                'tx' => round(((float) ($data['tx-bits-per-second'] ?? 0)) / 1000000, 2),
             ];
 
         } catch (Exception $e) {

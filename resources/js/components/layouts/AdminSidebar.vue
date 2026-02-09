@@ -91,6 +91,52 @@
                                         <span class="text-[10px] uppercase font-bold text-muted-foreground/30 tracking-widest whitespace-nowrap">{{ getNavigationLabel(item) }}</span>
                                         <div class="h-px bg-border flex-1"></div>
                                     </div>
+                                    
+                                    <!-- SUB-DROPDOWN -->
+                                    <div v-else-if="item.children && item.children.length > 0" class="space-y-0.5">
+                                        <button 
+                                            @click="toggleSubSection(item.label || '')"
+                                            class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-xl group pl-9"
+                                            :class="[
+                                                isSubSectionActive(item)
+                                                    ? 'text-foreground hover:bg-accent'
+                                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                                            ]"
+                                        >
+                                            <div class="flex items-center gap-2.5">
+                                                <component :is="getIcon(item.icon || '')" class="w-4 h-4 flex-shrink-0" />
+                                                <span class="truncate">{{ getNavigationLabel(item) }}</span>
+                                            </div>
+                                            <component 
+                                                :is="getIcon('chevron-down')" 
+                                                :class="{ 'rotate-180': expandedSubSections[item.label || ''] }"
+                                                class="w-3.5 h-3.5 transition-transform duration-200"
+                                            />
+                                        </button>
+                                        
+                                        <div 
+                                            v-show="expandedSubSections[item.label || '']"
+                                            class="mt-0.5 space-y-0.5"
+                                        >
+                                            <router-link
+                                                v-for="subItem in item.children"
+                                                :key="subItem.name || subItem.label"
+                                                :to="subItem.to || ''"
+                                                @click="$emit('close')"
+                                                class="flex items-center px-3 py-1.5 text-xs font-medium rounded-xl group pl-16"
+                                                :class="[
+                                                    $route.name === subItem.name
+                                                        ? 'bg-accent text-foreground font-semibold'
+                                                        : 'text-muted-foreground/80 hover:bg-accent hover:text-accent-foreground'
+                                                ]"
+                                            >
+                                                <component :is="getIcon(subItem.icon || subItem.name || '')" class="w-3.5 h-3.5 flex-shrink-0 mr-2" />
+                                                <span class="truncate">{{ getNavigationLabel(subItem) }}</span>
+                                            </router-link>
+                                        </div>
+                                    </div>
+
+                                    <!-- NORMAL ITEM -->
                                     <router-link
                                         v-else
                                         :to="item.to || ''"
@@ -102,7 +148,7 @@
                                                 : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                                         ]"
                                     >
-                                        <component :is="getIcon(item.name || '')" class="w-4 h-4 flex-shrink-0 mr-2.5" />
+                                        <component :is="getIcon(item.icon || item.name || '')" class="w-4 h-4 flex-shrink-0 mr-2.5" />
                                         <span class="truncate">{{ getNavigationLabel(item) }}</span>
                                     </router-link>
                                 </template>
@@ -150,6 +196,29 @@
                                                 <span class="text-[10px] uppercase font-bold text-muted-foreground/30 tracking-widest whitespace-nowrap">{{ getNavigationLabel(item) }}</span>
                                                 <div class="h-px bg-border flex-1"></div>
                                             </div>
+                                            
+                                            <!-- Sub-category Header in Popover -->
+                                            <div v-else-if="item.children && item.children.length > 0" class="mt-2 first:mt-0">
+                                                <div class="px-3 py-1 text-[10px] uppercase font-bold text-muted-foreground/50 tracking-widest">
+                                                    {{ getNavigationLabel(item) }}
+                                                </div>
+                                                <router-link
+                                                    v-for="subItem in item.children"
+                                                    :key="subItem.name || subItem.label"
+                                                    :to="subItem.to || ''"
+                                                    @click="activePopup = null; $emit('close')"
+                                                    class="flex items-center px-3 py-1.5 text-xs font-medium hover:bg-accent mx-1 rounded-lg"
+                                                    :class="[
+                                                        $route.name === subItem.name
+                                                            ? 'text-foreground bg-accent'
+                                                            : 'text-muted-foreground hover:text-accent-foreground'
+                                                    ]"
+                                                >
+                                                    <component :is="getIcon(subItem.icon || subItem.name || '')" class="w-3.5 h-3.5 flex-shrink-0 mr-2" />
+                                                    <span class="truncate">{{ getNavigationLabel(subItem) }}</span>
+                                                </router-link>
+                                            </div>
+
                                             <router-link
                                                 v-else
                                                 :to="item.to || ''"
@@ -161,7 +230,7 @@
                                                         : 'text-muted-foreground hover:text-accent-foreground'
                                                 ]"
                                             >
-                                                <component :is="getIcon(item.name || '')" class="w-4 h-4 flex-shrink-0 mr-2.5" />
+                                                <component :is="getIcon(item.icon || item.name || '')" class="w-4 h-4 flex-shrink-0 mr-2.5" />
                                                 <span class="truncate">{{ getNavigationLabel(item) }}</span>
                                             </router-link>
                                         </template>
@@ -228,6 +297,7 @@ const sidebarSections: SidebarSection[] = [
 ];
 
 const expandedSections = ref<Record<string, boolean>>({});
+const expandedSubSections = ref<Record<string, boolean>>({});
 const activePopup = ref<string | null>(null);
 const popupTop = ref(0);
 const popupLeft = ref(0);
@@ -240,13 +310,31 @@ const initializeExpandedSections = () => {
     }
 };
 
+const isItemActive = (item: NavItem): boolean => {
+    if (item.name === $route.name) return true;
+    if (item.children && item.children.length > 0) {
+        return item.children.some(child => child.name === $route.name);
+    }
+    return false;
+};
+
 const autoExpandActiveSection = () => {
-    expandedSections.value = {};
     for (const section of sidebarSections) {
         const items = filteredNavigation.value[section.key] || [];
-        if (items.some(item => item.name === $route.name)) {
+        
+        let sectionHasActive = false;
+        items.forEach(item => {
+            if (isItemActive(item)) {
+                sectionHasActive = true;
+                // If it's a sub-section with children, expand it
+                if (item.label && item.children && item.children.some(c => c.name === $route.name)) {
+                    expandedSubSections.value[item.label] = true;
+                }
+            }
+        });
+
+        if (sectionHasActive) {
             expandedSections.value[section.key] = true;
-            break;
         }
     }
 };
@@ -255,6 +343,14 @@ const toggleSection = (key: string) => {
     const isCurrentlyExpanded = expandedSections.value[key];
     expandedSections.value = {};
     expandedSections.value[key] = !isCurrentlyExpanded;
+};
+
+const toggleSubSection = (key: string) => {
+    expandedSubSections.value[key] = !expandedSubSections.value[key];
+};
+
+const isSubSectionActive = (item: NavItem) => {
+    return isItemActive(item);
 };
 
 const closePopup = (key: string) => {
@@ -316,7 +412,7 @@ const togglePopup = (key: string, event: MouseEvent) => {
 
 const isSectionActive = (key: string) => {
     const items = filteredNavigation.value[key] || [];
-    return items.some(item => item.name === $route.name);
+    return items.some(item => isItemActive(item));
 };
 
 const filteredNavigation = computed(() => {
@@ -335,7 +431,24 @@ const getNavigationLabel = (item: NavItem) => {
         const key = `common.navigation.sections.${item.label}`;
         return te(key) ? t(key) : item.label || '';
     }
+    
+    // For nested groups that don't have a route name but have a label
+    if (!item.name && item.label) {
+        // Try to translate from navigation.sections first
+        const sectionKey = `common.navigation.sections.${item.label.toLowerCase().replace(/\s+/g, '_')}`;
+        if (te(sectionKey)) return t(sectionKey);
+        return item.label;
+    }
+
     if (!item.name) return item.label || '';
+    
+    // Try isp namespace first if it's an isp route
+    if (item.name.startsWith('isp')) {
+        const ispKey = item.name.replace(/-/g, '.');
+        const fullIspKey = `isp.${ispKey}`;
+        if (te(fullIspKey)) return t(fullIspKey);
+    }
+
     const camelName = item.name.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
     const key = `common.navigation.menu.${camelName}`;
     return te(key) ? t(key) : item.label || '';

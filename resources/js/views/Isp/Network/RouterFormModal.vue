@@ -93,8 +93,8 @@ async function handleSubmit() {
         }
         emit('refresh');
         emit('close');
-    } catch (_err) {
-        toastError.action(_err as Record<string, unknown>);
+    } catch (error) {
+        toastError.action(error as Record<string, unknown>);
     } finally {
         isSaving.value = false;
     }
@@ -161,7 +161,7 @@ async function handleSubmit() {
                                     <SelectValue placeholder="Select Method" />
                                 </SelectTrigger>
                                 <SelectContent class="rounded-xl">
-                                    <SelectItem value="none">NONE</SelectItem>
+                                    <SelectItem value="none">{{ t('isp.network.data_server.script.options.pppoe_only') }} (NONE)</SelectItem>
                                     <SelectItem value="snmp">SNMP</SelectItem>
                                     <SelectItem value="api">MIKROTIK API</SelectItem>
                                 </SelectContent>
