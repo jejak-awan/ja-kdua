@@ -18,9 +18,8 @@ class WhatsAppChannel
 
     /**
      * Send the given notification.
-     * 
-     * @param mixed $notifiable
-     * @param Notification $notification
+     *
+     * @param  mixed  $notifiable
      */
     public function send($notifiable, Notification $notification): void
     {
@@ -29,7 +28,7 @@ class WhatsAppChannel
         }
 
         $message = $notification->toWhatsApp($notifiable);
-        
+
         // Try to get phone from notifiable, prioritie 'phone' attribute
         $to = $notifiable->phone ?? $notifiable->routeNotificationFor('whatsapp');
 

@@ -109,9 +109,17 @@ export interface IspSupportTicket {
     };
 }
 
-export interface IspUsageData {
+export interface IspUsageHistory {
     daily: IspTrafficData[];
     monthly: IspTrafficData[];
+}
+
+export interface IspUsageData {
+    usage: IspUsageHistory;
+    connection?: {
+        status: 'connected' | 'disconnected';
+        latency?: string;
+    };
 }
 
 export interface NetworkNode {

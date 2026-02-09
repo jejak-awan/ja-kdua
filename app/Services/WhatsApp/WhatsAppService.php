@@ -10,14 +10,23 @@ use Illuminate\Support\Facades\Log;
 class WhatsAppService implements WhatsAppServiceInterface
 {
     protected string $driver;
+
     protected string $apiUrl;
+
     protected string $apiKey;
 
     public function __construct()
     {
-        $this->driver = config('services.whatsapp.driver', 'log');
-        $this->apiUrl = config('services.whatsapp.url', '');
-        $this->apiKey = config('services.whatsapp.key', '');
+        /** @var string $driver */
+        $driver = config('services.whatsapp.driver', 'log');
+        /** @var string $apiUrl */
+        $apiUrl = config('services.whatsapp.url', '');
+        /** @var string $apiKey */
+        $apiKey = config('services.whatsapp.key', '');
+
+        $this->driver = $driver;
+        $this->apiUrl = $apiUrl;
+        $this->apiKey = $apiKey;
     }
 
     /**
@@ -30,6 +39,7 @@ class WhatsAppService implements WhatsAppServiceInterface
 
         if ($this->driver === 'log') {
             Log::info("WhatsApp (Log Driver) -> {$to}: {$message}");
+
             return true;
         }
 
@@ -56,13 +66,16 @@ class WhatsAppService implements WhatsAppServiceInterface
 
             if ($response->successful()) {
                 Log::info("WhatsApp Sent -> {$to}");
+
                 return true;
             }
 
-            Log::error("WhatsApp Failed -> {$to}: " . $response->body());
+            Log::error("WhatsApp Failed -> {$to}: ".$response->body());
+
             return false;
         } catch (\Exception $e) {
-            Log::error("WhatsApp Exception -> {$to}: " . $e->getMessage());
+            Log::error("WhatsApp Exception -> {$to}: ".$e->getMessage());
+
             return false;
         }
     }
@@ -73,13 +86,13 @@ class WhatsAppService implements WhatsAppServiceInterface
     protected function normalizeNumber(string $number): string
     {
         $number = preg_replace('/[^0-9]/', '', $number) ?? '';
-        
+
         if (str_starts_with($number, '08')) {
-            return '62' . substr($number, 1);
+            return '62'.substr($number, 1);
         }
-        
+
         if (str_starts_with($number, '8')) {
-            return '62' . $number;
+            return '62'.$number;
         }
 
         return $number;

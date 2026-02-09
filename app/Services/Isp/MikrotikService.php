@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Isp;
 
 use App\Models\Isp\ServiceNode;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use RouterOS\Client;
@@ -160,11 +161,13 @@ class MikrotikService
 
     /**
      * Get real-time traffic for a specific interface.
+     *
+     * @return array{rx: float, tx: float}|null
      */
     public function getInterfaceTraffic(string $interfaceName): ?array
     {
         // Mock for local dev without creds
-        if (config('app.env') === 'local' && ! env('MIKROTIK_HOST')) {
+        if (config('app.env') === 'local' && ! config('services.mikrotik.host')) {
             return [
                 'rx' => round(rand(1000000, 50000000) / 1000000, 2),
                 'tx' => round(rand(500000, 10000000) / 1000000, 2),
@@ -172,17 +175,25 @@ class MikrotikService
         }
 
         if (! $this->client) {
-            if (! $this->connect(
-                config('services.mikrotik.host', env('MIKROTIK_HOST', '')),
-                config('services.mikrotik.user', env('MIKROTIK_USER', '')),
-                config('services.mikrotik.pass', env('MIKROTIK_PASS', '')),
-                (int) config('services.mikrotik.port', env('MIKROTIK_PORT', 8728))
-            )) {
+            /** @var string $host */
+            $host = config('services.mikrotik.host', '');
+            /** @var string $user */
+            $user = config('services.mikrotik.user', '');
+            /** @var string $pass */
+            $pass = config('services.mikrotik.pass', '');
+            /** @var int $port */
+            $port = (int) config('services.mikrotik.port', 8728);
+
+            if (! $this->connect($host, $user, $pass, $port)) {
                 return null;
             }
         }
 
         try {
+            if ($this->client === null) {
+                return null;
+            }
+
             $query = new Query('/interface/monitor-traffic');
             $query->equal('interface', $interfaceName);
             $query->equal('once');
