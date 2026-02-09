@@ -1,0 +1,58 @@
+{
+    "title": "Contract Management",
+    "subtitle": "Manage customer service agreements and contracts.",
+    "new": "New Contract",
+    "edit": "Edit Contract",
+    "modal_subtitle": "Fill in the service contract details.",
+    "search_placeholder": "Search contract number, customer...",
+    "all_types": "All Types",
+    "no_data": "No contracts yet.",
+    "select_customer": "Select Customer",
+    "select_plan": "Select Plan",
+    "stats": {
+        "active": "Active Contracts",
+        "expiring_soon": "Expiring Soon",
+        "expired": "Expired",
+        "total_value": "Total Value"
+    },
+    "columns": {
+        "number": "Contract No.",
+        "customer": "Customer",
+        "type": "Type",
+        "plan": "Plan",
+        "value": "Value",
+        "period": "Period",
+        "status": "Status"
+    },
+    "status": {
+        "active": "Active",
+        "pending": "Pending",
+        "expired": "Expired",
+        "terminated": "Terminated"
+    },
+    "types": {
+        "residential": "Residential",
+        "business": "Business",
+        "enterprise": "Enterprise"
+    },
+    "fields": {
+        "customer": "Customer",
+        "type": "Contract Type",
+        "plan": "Subscription Plan",
+        "duration": "Duration",
+        "start_date": "Start Date",
+        "monthly_value": "Monthly Value",
+        "notes": "Notes"
+    },
+    "actions": {
+        "new": "Create Contract",
+        "download": "Download PDF",
+        "renew": "Renew",
+        "terminate": "Terminate"
+    },
+    "messages": {
+        "renewed": "Contract renewed successfully",
+        "terminated": "Contract terminated successfully",
+        "confirm_terminate": "Are you sure you want to terminate this contract?"
+    }
+}
