@@ -102,6 +102,56 @@
             "suspend_behavior": "Perilaku Suspend"
         }
     },
+    "payments": {
+        "title": "Riwayat Pembayaran",
+        "subtitle": "Pantau transaksi dan status pembayaran pelanggan.",
+        "transactions": "transaksi",
+        "awaiting": "menunggu",
+        "failed_tx": "transaksi gagal",
+        "search_placeholder": "Cari ID transaksi, pelanggan...",
+        "all_gateways": "Semua Gateway",
+        "no_data": "Belum ada data pembayaran.",
+        "stats": {
+            "today": "Hari Ini",
+            "this_month": "Bulan Ini",
+            "pending": "Tertunda",
+            "failed": "Gagal"
+        },
+        "columns": {
+            "id": "ID Transaksi",
+            "customer": "Pelanggan",
+            "invoice": "Invoice",
+            "amount": "Jumlah",
+            "gateway": "Gateway",
+            "status": "Status",
+            "date": "Tanggal"
+        },
+        "status": {
+            "success": "Berhasil",
+            "pending": "Tertunda",
+            "failed": "Gagal",
+            "expired": "Kadaluarsa"
+        }
+    },
+    "gateway": {
+        "title": "Payment Gateway",
+        "subtitle": "Konfigurasi integrasi pembayaran otomatis.",
+        "midtrans_desc": "Gateway pembayaran terpopuler di Indonesia",
+        "xendit_desc": "Solusi pembayaran untuk bisnis digital",
+        "manual": "Transfer Manual",
+        "manual_desc": "Pembayaran via transfer bank",
+        "merchant_id": "Merchant ID",
+        "server_key": "Server Key",
+        "client_key": "Client Key",
+        "api_key": "API Key",
+        "callback_token": "Callback Token",
+        "sandbox_mode": "Mode Sandbox (Testing)",
+        "bank_name": "Nama Bank",
+        "account_number": "Nomor Rekening",
+        "account_name": "Nama Pemilik Rekening",
+        "webhook_config": "Konfigurasi Webhook",
+        "webhook_desc": "Salin URL berikut ke dashboard gateway Anda."
+    },
     "customers_manager": {
         "title": "Data Berlangganan",
         "subtitle": "Kelola data pelanggan, informasi teknis, dan keuangan.",

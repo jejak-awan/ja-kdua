@@ -248,6 +248,21 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('../views/Isp/Billing/Index.vue'),
             },
             {
+                path: 'isp/billing/payments',
+                name: 'isp-payments',
+                component: () => import('../views/Isp/Billing/Payments/Index.vue'),
+            },
+            {
+                path: 'isp/billing/gateway',
+                name: 'isp-payment-gateway',
+                component: () => import('../views/Isp/Billing/Payments/Gateway.vue'),
+            },
+            {
+                path: 'isp/admin',
+                name: 'isp-admin',
+                component: () => import('../views/Isp/Administration/Index.vue'),
+            },
+            {
                 path: 'isp/subscription/profiles',
                 name: 'isp-subscription-profiles',
                 component: () => import('../views/Isp/Customer/Profiles.vue'),

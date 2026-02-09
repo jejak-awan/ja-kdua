@@ -63,6 +63,8 @@ export const navigationGroups: Record<string, NavItem[]> = {
         // Billing
         { type: 'divider', label: 'Penagihan' },
         { name: 'isp-billing', to: '/admin/isp/billing', label: 'Penagihan', permission: 'manage settings' },
+        { name: 'isp-payments', to: '/admin/isp/billing/payments', label: 'Riwayat Pembayaran', permission: 'manage settings' },
+        { name: 'isp-payment-gateway', to: '/admin/isp/billing/gateway', label: 'Payment Gateway', permission: 'manage settings' },
         { name: 'isp.admin.analytics.revenue', to: '/admin/isp/admin/analytics/revenue', label: 'Laporan Pendapatan', permission: 'manage settings' },
 
         // Inventory
