@@ -56,7 +56,7 @@ export const SystemMonitor = {
             try {
                 // Use a dedicated simple endpoint or just the root
                 // Using fetch directly to bypass axios interceptors if needed
-                const response = await fetch('/api/v1/system/health', {
+                const response = await fetch('/api/core/system/health', {
                     method: 'GET',
                     headers: { 'Accept': 'application/json' },
                     cache: 'no-store'

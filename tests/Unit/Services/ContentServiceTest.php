@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Services;
 
-use App\Models\Category;
-use App\Models\Content;
-use App\Models\ContentRevision;
-use App\Models\Tag;
-use App\Models\User;
-use App\Services\ContentService;
+use App\Models\Core\Category;
+use App\Models\Core\Content;
+use App\Models\Core\ContentRevision;
+use App\Models\Core\Tag;
+use App\Models\Core\User;
+use App\Services\Core\ContentService;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 

@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\Media;
-use App\Models\MediaFolder;
-use App\Models\Tag;
-use App\Models\User;
+use App\Models\Core\Media;
+use App\Models\Core\MediaFolder;
+use App\Models\Core\Tag;
+use App\Models\Core\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -14,13 +14,18 @@ use Tests\TestCase;
 
 class MediaManagementTest extends TestCase
 {
-    // use RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seedPermissionsAndRoles();
         Storage::fake('public');
     }
+
+
+    // use RefreshDatabase;
+
+
 
     /**
      * Test admin can upload media file.
@@ -32,7 +37,7 @@ class MediaManagementTest extends TestCase
 
         $file = TestHelpers::createTestImage('test.jpg');
 
-        $response = $this->postJson('/api/v1/admin/ja/media/upload', [
+        $response = $this->postJson('/api/core/admin/ja/media/upload', [
             'file' => $file,
         ]);
 
@@ -66,7 +71,7 @@ class MediaManagementTest extends TestCase
         $admin = $this->createAdminUser();
         $this->actingAs($admin, 'sanctum');
 
-        $response = $this->postJson('/api/v1/admin/ja/media/upload', []);
+        $response = $this->postJson('/api/core/admin/ja/media/upload', []);
 
         TestHelpers::assertApiValidationError($response);
         $response->assertJsonValidationErrors(['file']);
@@ -83,7 +88,7 @@ class MediaManagementTest extends TestCase
         $folder = MediaFolder::factory()->create();
         $file = TestHelpers::createTestImage('test.jpg');
 
-        $response = $this->postJson('/api/v1/admin/ja/media/upload', [
+        $response = $this->postJson('/api/core/admin/ja/media/upload', [
             'file' => $file,
             'folder_id' => $folder->id,
         ]);
@@ -104,7 +109,7 @@ class MediaManagementTest extends TestCase
 
         Media::factory()->count(5)->create();
 
-        $response = $this->getJson('/api/v1/admin/ja/media');
+        $response = $this->getJson('/api/core/admin/ja/media');
 
         TestHelpers::assertApiPaginated($response);
         $response->assertJsonCount(5, 'data.data');
@@ -122,7 +127,7 @@ class MediaManagementTest extends TestCase
         Media::factory()->count(3)->create(['folder_id' => $folder->id]);
         Media::factory()->count(2)->create(['folder_id' => null]);
 
-        $response = $this->getJson("/api/v1/admin/ja/media?folder_id={$folder->id}");
+        $response = $this->getJson("/api/core/admin/ja/media?folder_id={$folder->id}");
 
         TestHelpers::assertApiPaginated($response);
         $response->assertJsonCount(3, 'data.data');
@@ -139,7 +144,7 @@ class MediaManagementTest extends TestCase
         Media::factory()->image()->count(3)->create();
         Media::factory()->document()->count(2)->create();
 
-        $response = $this->getJson('/api/v1/admin/ja/media?mime_type=image');
+        $response = $this->getJson('/api/core/admin/ja/media?mime_type=image');
 
         TestHelpers::assertApiPaginated($response);
         $response->assertJsonCount(3, 'data.data');
@@ -156,7 +161,7 @@ class MediaManagementTest extends TestCase
         Media::factory()->create(['name' => 'test-image.jpg']);
         Media::factory()->create(['name' => 'other-file.pdf']);
 
-        $response = $this->getJson('/api/v1/admin/ja/media?search=test');
+        $response = $this->getJson('/api/core/admin/ja/media?search=test');
 
         TestHelpers::assertApiPaginated($response);
         $response->assertJsonCount(1, 'data.data');
@@ -172,7 +177,7 @@ class MediaManagementTest extends TestCase
 
         $media = Media::factory()->create();
 
-        $response = $this->getJson("/api/v1/admin/ja/media/{$media->id}");
+        $response = $this->getJson("/api/core/admin/ja/media/{$media->id}");
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJson([
@@ -193,7 +198,7 @@ class MediaManagementTest extends TestCase
 
         $media = Media::factory()->create();
 
-        $response = $this->putJson("/api/v1/admin/ja/media/{$media->id}", [
+        $response = $this->putJson("/api/core/admin/ja/media/{$media->id}", [
             'name' => 'Updated Name',
             'alt' => 'Updated Alt Text',
             'description' => 'Updated description',
@@ -217,7 +222,7 @@ class MediaManagementTest extends TestCase
 
         $media = Media::factory()->create();
 
-        $response = $this->deleteJson("/api/v1/admin/ja/media/{$media->id}");
+        $response = $this->deleteJson("/api/core/admin/ja/media/{$media->id}");
 
         TestHelpers::assertApiSuccess($response);
         $this->assertSoftDeleted('media', [
@@ -237,7 +242,7 @@ class MediaManagementTest extends TestCase
         $folder = MediaFolder::factory()->create();
 
         // Test bulk move
-        $response = $this->postJson('/api/v1/admin/ja/media/bulk-action', [
+        $response = $this->postJson('/api/core/admin/ja/media/bulk-action', [
             'action' => 'move',
             'ids' => $media->pluck('id')->toArray(),
             'folder_id' => $folder->id,
@@ -269,7 +274,7 @@ class MediaManagementTest extends TestCase
         $imageContent = base64_decode('/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwA/8A8A');
         Storage::disk('public')->put($media->path, $imageContent);
 
-        $response = $this->postJson("/api/v1/admin/ja/media/{$media->id}/thumbnail");
+        $response = $this->postJson("/api/core/admin/ja/media/{$media->id}/thumbnail");
 
         // Thumbnail generation might fail in test environment, but endpoint should be accessible
         $response->assertStatus(200);
@@ -285,7 +290,7 @@ class MediaManagementTest extends TestCase
 
         $media = Media::factory()->document()->create();
 
-        $response = $this->postJson("/api/v1/admin/ja/media/{$media->id}/thumbnail");
+        $response = $this->postJson("/api/core/admin/ja/media/{$media->id}/thumbnail");
 
         TestHelpers::assertApiError($response);
     }
@@ -306,7 +311,7 @@ class MediaManagementTest extends TestCase
         $imageContent = base64_decode('/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwA/8A8A');
         Storage::disk('public')->put($media->path, $imageContent);
 
-        $response = $this->postJson("/api/v1/admin/ja/media/{$media->id}/resize", [
+        $response = $this->postJson("/api/core/admin/ja/media/{$media->id}/resize", [
             'width' => 800,
             'height' => 600,
         ]);
@@ -325,7 +330,7 @@ class MediaManagementTest extends TestCase
 
         $media = Media::factory()->image()->create();
 
-        $response = $this->postJson("/api/v1/admin/ja/media/{$media->id}/resize", []);
+        $response = $this->postJson("/api/core/admin/ja/media/{$media->id}/resize", []);
 
         TestHelpers::assertApiValidationError($response);
     }
@@ -340,7 +345,7 @@ class MediaManagementTest extends TestCase
 
         $media = Media::factory()->create();
 
-        $response = $this->getJson("/api/v1/admin/ja/media/{$media->id}/usage");
+        $response = $this->getJson("/api/core/admin/ja/media/{$media->id}/usage");
 
         TestHelpers::assertApiSuccess($response);
         // API returns array of usages directly, not wrapped in usage_count/usages
@@ -357,7 +362,7 @@ class MediaManagementTest extends TestCase
 
         $file = TestHelpers::createTestImage('test.jpg');
 
-        $response = $this->postJson('/api/v1/admin/ja/media/upload', [
+        $response = $this->postJson('/api/core/admin/ja/media/upload', [
             'file' => $file,
         ]);
 
@@ -374,7 +379,7 @@ class MediaManagementTest extends TestCase
 
         $media = Media::factory()->create();
 
-        $response = $this->putJson("/api/v1/admin/ja/media/{$media->id}", [
+        $response = $this->putJson("/api/core/admin/ja/media/{$media->id}", [
             'name' => 'Updated Name',
         ]);
 
@@ -391,7 +396,7 @@ class MediaManagementTest extends TestCase
 
         $media = Media::factory()->create();
 
-        $response = $this->deleteJson("/api/v1/admin/ja/media/{$media->id}");
+        $response = $this->deleteJson("/api/core/admin/ja/media/{$media->id}");
 
         $response->assertStatus(403);
     }
@@ -407,7 +412,7 @@ class MediaManagementTest extends TestCase
         // Create a file larger than 10MB
         $file = UploadedFile::fake()->create('large.jpg', 11000); // 11MB
 
-        $response = $this->postJson('/api/v1/admin/ja/media/upload', [
+        $response = $this->postJson('/api/core/admin/ja/media/upload', [
             'file' => $file,
         ]);
 
@@ -426,7 +431,7 @@ class MediaManagementTest extends TestCase
         $media = Media::factory()->create();
         $tags = ['tag1', 'tag2', 'new tag'];
 
-        $response = $this->putJson("/api/v1/admin/ja/media/{$media->id}", [
+        $response = $this->putJson("/api/core/admin/ja/media/{$media->id}", [
             'name' => $media->name,
             'tags' => $tags,
         ]);
@@ -452,7 +457,7 @@ class MediaManagementTest extends TestCase
         $path = $media->path;
         Storage::disk($media->disk)->put($path, 'test content');
 
-        $response = $this->deleteJson("/api/v1/admin/ja/media/{$media->id}?permanent=true");
+        $response = $this->deleteJson("/api/core/admin/ja/media/{$media->id}?permanent=true");
 
         TestHelpers::assertApiSuccess($response);
         $this->assertDatabaseMissing('media', ['id' => $media->id]);
@@ -468,10 +473,10 @@ class MediaManagementTest extends TestCase
         $this->actingAs($admin, 'sanctum');
 
         $media = Media::factory()->create();
-        $this->deleteJson("/api/v1/admin/ja/media/{$media->id}");
+        $this->deleteJson("/api/core/admin/ja/media/{$media->id}");
         $this->assertSoftDeleted('media', ['id' => $media->id]);
 
-        $response = $this->postJson("/api/v1/admin/ja/media/{$media->id}/restore");
+        $response = $this->postJson("/api/core/admin/ja/media/{$media->id}/restore");
 
         TestHelpers::assertApiSuccess($response);
         $this->assertDatabaseHas('media', [
@@ -490,10 +495,10 @@ class MediaManagementTest extends TestCase
 
         $media = Media::factory()->count(3)->create();
         foreach ($media as $item) {
-            $this->deleteJson("/api/v1/admin/ja/media/{$item->id}");
+            $this->deleteJson("/api/core/admin/ja/media/{$item->id}");
         }
 
-        $response = $this->postJson('/api/v1/admin/ja/media/empty-trash');
+        $response = $this->postJson('/api/core/admin/ja/media/empty-trash');
 
         TestHelpers::assertApiSuccess($response);
         $this->assertEquals(0, Media::onlyTrashed()->count());

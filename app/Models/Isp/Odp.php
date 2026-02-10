@@ -30,6 +30,8 @@ class Odp extends Model
     /** @use HasFactory<\Database\Factories\Isp\OdpFactory> */
     use HasFactory;
 
+    protected $table = 'odps';
+
     protected $fillable = [
         'name',
         'olt_id',

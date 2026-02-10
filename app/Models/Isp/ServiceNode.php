@@ -6,6 +6,7 @@ namespace App\Models\Isp;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -73,12 +74,34 @@ class ServiceNode extends Model
     }
 
     /**
-     * Get the devices connected to this node.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<CustomerDevice, $this>
+     * @return HasMany<CustomerDevice, $this>
      */
-    public function devices(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function devices(): HasMany
     {
         return $this->hasMany(CustomerDevice::class, 'node_id');
+    }
+
+    /**
+     * @return HasMany<Outage, $this>
+     */
+    public function outages(): HasMany
+    {
+        return $this->hasMany(Outage::class, 'node_id');
+    }
+
+    /**
+     * @return HasMany<Subnet, $this>
+     */
+    public function subnets(): HasMany
+    {
+        return $this->hasMany(Subnet::class, 'node_id');
+    }
+
+    /**
+     * @return HasMany<IpPool, $this>
+     */
+    public function ipPools(): HasMany
+    {
+        return $this->hasMany(IpPool::class, 'router_id');
     }
 }

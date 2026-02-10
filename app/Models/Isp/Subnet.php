@@ -8,6 +8,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property int $node_id
+ * @property string $name
+ * @property string $prefix
+ * @property string|null $gateway
+ * @property int|null $vlan_id
+ * @property string $type
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\Isp\ServiceNode $node
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Isp\IpAddress> $ipAddresses
+ */
 class Subnet extends Model
 {
     /** @use HasFactory<\Database\Factories\Isp\SubnetFactory> */

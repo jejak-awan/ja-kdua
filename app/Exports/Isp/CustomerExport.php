@@ -40,7 +40,7 @@ class CustomerExport implements FromCollection, WithHeadings, WithMapping
     }
 
     /**
-     * @param Customer $customer
+     * @param  Customer  $customer
      * @return array<int, mixed>
      */
     public function map($customer): array

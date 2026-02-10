@@ -2,8 +2,8 @@
 
 namespace Database\Factories\Isp;
 
+use App\Models\Core\User;
 use App\Models\Isp\CustomerDevice;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

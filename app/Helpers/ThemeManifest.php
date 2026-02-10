@@ -311,18 +311,18 @@ class ThemeManifest
 
             if (isset($assets['css'])) {
                 foreach ($assets['css'] as $cssFile) {
-                    $cssPath = "{$this->path}/" . (string) $cssFile;
+                    $cssPath = "{$this->path}/".(string) $cssFile;
                     if (! file_exists($cssPath)) {
-                        $errors[] = "CSS file not found: " . (string) $cssFile;
+                        $errors[] = 'CSS file not found: '.(string) $cssFile;
                     }
                 }
             }
 
             if (isset($assets['js'])) {
                 foreach ($assets['js'] as $jsFile) {
-                    $jsPath = "{$this->path}/" . (string) $jsFile;
+                    $jsPath = "{$this->path}/".(string) $jsFile;
                     if (! file_exists($jsPath)) {
-                        $errors[] = "JS file not found: " . (string) $jsFile;
+                        $errors[] = 'JS file not found: '.(string) $jsFile;
                     }
                 }
             }
@@ -340,7 +340,7 @@ class ThemeManifest
                 /** @var string|null $settingType */
                 $settingType = $setting['type'] ?? null;
                 if ($settingType !== null && ! in_array($settingType, $validTypes)) {
-                    $errors[] = "Setting '{$key}' has invalid type: " . (string) $settingType;
+                    $errors[] = "Setting '{$key}' has invalid type: ".(string) $settingType;
                 }
 
                 if ($settingType === 'select') {
@@ -392,7 +392,7 @@ class ThemeManifest
     {
         /** @var string $screenshot */
         $screenshot = $this->manifest['screenshot'] ?? 'screenshot.png';
-        $screenshotPath = "{$this->path}/" . (string) $screenshot;
+        $screenshotPath = "{$this->path}/".(string) $screenshot;
 
         return file_exists($screenshotPath) ? $screenshotPath : null;
     }

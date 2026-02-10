@@ -2,8 +2,8 @@
 
 namespace App\Imports\Isp;
 
+use App\Models\Core\User;
 use App\Models\Isp\Customer;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -12,8 +12,7 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 class CustomerImport implements ToModel, WithHeadingRow
 {
     /**
-     * @param array<string, mixed> $row
-     * @return Model|null
+     * @param  array<string, mixed>  $row
      */
     public function model(array $row): ?Model
     {
@@ -59,15 +58,12 @@ class CustomerImport implements ToModel, WithHeadingRow
         );
     }
 
-    /**
-     * @param mixed $phone
-     * @return string
-     */
     private function sanitizePhone(mixed $phone): string
     {
-        if (!is_string($phone) && !is_numeric($phone)) {
+        if (! is_string($phone) && ! is_numeric($phone)) {
             return '';
         }
+
         // Simple sanitization, remove non-numeric
         return (string) preg_replace('/[^0-9]/', '', (string) $phone);
     }

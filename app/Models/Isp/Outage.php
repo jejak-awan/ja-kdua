@@ -8,6 +8,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property int|null $node_id
+ * @property string $title
+ * @property string $description
+ * @property string $type
+ * @property string $status
+ * @property \Illuminate\Support\Carbon $started_at
+ * @property \Illuminate\Support\Carbon|null $resolved_at
+ * @property array<string, mixed>|null $metadata
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\Isp\ServiceNode|null $node
+ */
 class Outage extends Model
 {
     /** @use HasFactory<\Database\Factories\Isp\OutageFactory> */

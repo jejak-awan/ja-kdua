@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Isp;
 
-use App\Models\Isp\PaymentGateway;
 use App\Models\Isp\Invoice;
+use App\Models\Isp\PaymentGateway;
 use Illuminate\Support\Facades\Log;
 
 class PaymentGatewayService
@@ -27,7 +27,7 @@ class PaymentGatewayService
     {
         $gateway = $this->getActiveGateway();
 
-        if (!$gateway) {
+        if (! $gateway) {
             // Fallback to simulation if no gateway configured
             return $this->simulateMidtrans($invoice);
         }
@@ -43,7 +43,7 @@ class PaymentGatewayService
     /**
      * Initialize Midtrans payment
      *
-     * @param array<string, mixed> $config
+     * @param  array<string, mixed>  $config
      * @return array<string, mixed>
      */
     protected function initializeMidtrans(Invoice $invoice, array $config): array
@@ -62,8 +62,8 @@ class PaymentGatewayService
      */
     protected function simulateMidtrans(Invoice $invoice): array
     {
-        $token = 'snap-token-' . bin2hex(random_bytes(16));
-        $redirectUrl = 'https://app.sandbox.midtrans.com/snap/v2/vtweb/' . $token;
+        $token = 'snap-token-'.bin2hex(random_bytes(16));
+        $redirectUrl = 'https://app.sandbox.midtrans.com/snap/v2/vtweb/'.$token;
 
         return [
             'token' => $token,

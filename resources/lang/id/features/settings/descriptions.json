@@ -2,6 +2,7 @@
     "descriptions": {
         "site_name": "Nama aplikasi Anda yang ditampilkan di seluruh situs",
         "site_logo": "URL logo situs Anda yang digunakan untuk branding",
+        "site_favicon": "Ikon yang ditampilkan di tab browser",
         "site_description": "Deskripsi singkat situs Anda untuk SEO dan tag meta",
         "site_url": "URL dasar situs web Anda",
         "admin_email": "Alamat email administrator utama untuk notifikasi sistem",

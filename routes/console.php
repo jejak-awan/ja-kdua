@@ -15,7 +15,7 @@ Artisan::command('inspire', function () {
  */
 try {
     if (\Illuminate\Support\Facades\Schema::hasTable('scheduled_tasks')) {
-        $tasks = \App\Models\ScheduledTask::where('is_active', true)->get();
+        $tasks = \App\Models\Core\ScheduledTask::where('is_active', true)->get();
 
         foreach ($tasks as $task) {
             $taskId = $task->id;
@@ -26,20 +26,20 @@ try {
                 ->withoutOverlapping()
                 ->before(function () use ($taskId) {
                     // Mark task as running
-                    \App\Models\ScheduledTask::where('id', $taskId)->update([
+                    \App\Models\Core\ScheduledTask::where('id', $taskId)->update([
                         'status' => 'running',
                         'last_run_at' => now(),
                     ]);
                 })
                 ->after(function () use ($taskId) {
                     // Mark task as completed
-                    \App\Models\ScheduledTask::where('id', $taskId)->update([
+                    \App\Models\Core\ScheduledTask::where('id', $taskId)->update([
                         'status' => 'completed',
                     ]);
                 })
                 ->onFailure(function () use ($taskId) {
                     // Mark task as failed
-                    \App\Models\ScheduledTask::where('id', $taskId)->update([
+                    \App\Models\Core\ScheduledTask::where('id', $taskId)->update([
                         'status' => 'failed',
                     ]);
                 });

@@ -21,7 +21,7 @@ class InvoiceGenerated extends Notification
     }
 
     /**
-     * @param mixed $notifiable
+     * @param  mixed  $notifiable
      * @return array<int, string>
      */
     public function via($notifiable): array
@@ -30,7 +30,7 @@ class InvoiceGenerated extends Notification
     }
 
     /**
-     * @param mixed $notifiable
+     * @param  mixed  $notifiable
      */
     public function toWhatsApp($notifiable): string
     {
@@ -45,7 +45,7 @@ class InvoiceGenerated extends Notification
 
         return "Halo {$name},\n\n".
                "Tagihan internet Anda untuk bulan *{$month}* telah terbit.\n\n".
-               "No. Invoice: " . (string) $this->invoice->invoice_number . "\n".
+               'No. Invoice: '.(string) $this->invoice->invoice_number."\n".
                "Total: Rp {$amount}\n".
                "Jatuh Tempo: {$dueDate}\n\n".
                "Mohon segera lakukan pembayaran sebelum tanggal jatuh tempo untuk menghindari isolir otomatis.\n\n".

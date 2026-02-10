@@ -24,7 +24,7 @@ class CustomerObserver
      */
     public function saved(Customer $customer): void
     {
-        if (!$customer->mikrotik_login || !$customer->mikrotik_password) {
+        if (! $customer->mikrotik_login || ! $customer->mikrotik_password) {
             return;
         }
 
@@ -81,14 +81,16 @@ class CustomerObserver
             ->whereHas('availableAddresses')
             ->first();
 
-        if (!$pool) {
+        if (! $pool) {
             Log::warning("CustomerObserver: No available IP pools for customer #{$customer->id}");
+
             return null;
         }
 
         $address = $pool->assignToCustomer($customer);
         if ($address) {
             Log::info("CustomerObserver: Assigned IP {$address->ip_address} to customer #{$customer->id}");
+
             return $address->ip_address;
         }
 

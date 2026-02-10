@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Models\Setting;
+use App\Models\Core\Setting;
 use Illuminate\Contracts\Validation\Rule;
 
 class StrongPassword implements Rule
@@ -28,16 +28,16 @@ class StrongPassword implements Rule
     {
         $minLenRaw = Setting::get('password_min_length', 8);
         $this->minLength = is_numeric($minLenRaw) ? (int) $minLenRaw : 8;
-        
+
         $upperRaw = Setting::get('password_require_uppercase', true);
         $this->requireUppercase = filter_var($upperRaw, FILTER_VALIDATE_BOOLEAN);
-        
+
         $lowerRaw = Setting::get('password_require_lowercase', true);
         $this->requireLowercase = filter_var($lowerRaw, FILTER_VALIDATE_BOOLEAN);
-        
+
         $numRaw = Setting::get('password_require_number', true);
         $this->requireNumber = filter_var($numRaw, FILTER_VALIDATE_BOOLEAN);
-        
+
         $symRaw = Setting::get('password_require_symbol', false);
         $this->requireSymbol = filter_var($symRaw, FILTER_VALIDATE_BOOLEAN);
     }
@@ -53,7 +53,7 @@ class StrongPassword implements Rule
     {
         $this->failedChecks = [];
 
-        if (!is_string($value)) {
+        if (! is_string($value)) {
             return false;
         }
 

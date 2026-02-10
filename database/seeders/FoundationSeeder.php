@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Setting;
+use App\Models\Core\Setting;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
@@ -74,6 +74,9 @@ class FoundationSeeder extends Seeder
             // Logs & Analytics
             'view logs', 'delete logs',
             'view analytics', 'view activity logs', 'view security logs',
+
+            // ISP Module
+            'manage isp',
         ];
 
         foreach ($permissions as $permission) {
@@ -288,7 +291,7 @@ class FoundationSeeder extends Seeder
         ];
 
         foreach ($settings as $setting) {
-            \App\Models\RedisSetting::updateOrCreate(['key' => $setting['key']], $setting);
+            \App\Models\Core\RedisSetting::updateOrCreate(['key' => $setting['key']], $setting);
         }
     }
 }

@@ -59,7 +59,7 @@ class RedisConfigServiceProvider extends ServiceProvider
     protected function loadRedisSettingsFromDatabase(): void
     {
         // Use model collection to properly apply value accessor (decryption)
-        $redisSettings = \App\Models\RedisSetting::all();
+        $redisSettings = \App\Models\Core\RedisSetting::all();
 
         if ($redisSettings->isEmpty()) {
             return;

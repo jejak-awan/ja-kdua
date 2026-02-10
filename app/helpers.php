@@ -12,7 +12,7 @@ if (! function_exists('theme')) {
      *
      * @param  string  $type  Theme type (frontend, admin, email)
      */
-    function theme(string $type = 'frontend'): ?\App\Models\Theme
+    function theme(string $type = 'frontend'): ?\App\Models\Core\Theme
     {
         return \App\Helpers\ThemeHelper::activeTheme($type);
     }
@@ -76,7 +76,7 @@ if (! function_exists('theme_menu')) {
      *
      * @param  string  $slug  Menu slug
      */
-    function theme_menu(string $slug): ?\App\Models\Menu
+    function theme_menu(string $slug): ?\App\Models\Core\Menu
     {
         return \App\Helpers\ThemeHelper::getMenu($slug);
     }

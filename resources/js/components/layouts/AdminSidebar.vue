@@ -360,10 +360,25 @@ const isSectionActive = (key: string) => {
 const filteredNavigation = computed(() => {
     const filtered: Record<string, NavItem[]> = {};
     for (const [group, items] of Object.entries(navigationGroups)) {
-        filtered[group] = items.filter(item => {
-            if (!item.permission) return true;
-            return authStore.hasPermission(item.permission);
-        });
+        filtered[group] = items
+            .map(item => {
+                const newItem = { ...item };
+                if (newItem.children) {
+                    newItem.children = newItem.children.filter(child => {
+                        if (!child.permission) return true;
+                        return authStore.hasPermission(child.permission);
+                    });
+                }
+                return newItem;
+            })
+            .filter(item => {
+                // If it's a parent item with children, only show if it has visible children
+                if (item.children && item.children.length === 0 && !item.to) {
+                    return false;
+                }
+                if (!item.permission) return true;
+                return authStore.hasPermission(item.permission);
+            });
     }
     return filtered;
 });

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Services;
 
-use App\Models\Setting;
-use App\Services\CommentSecurityService;
+use App\Models\Core\Setting;
+use App\Services\Core\CommentSecurityService;
 use Tests\TestCase;
 
 class CommentSecurityServiceTest extends TestCase

@@ -8,9 +8,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $pool_id
+ * @property string $ip_address
+ * @property int|null $customer_id
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $assigned_at
+ * @property string|null $notes
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Isp\IpPool $pool
+ * @property-read \App\Models\Isp\Customer|null $customer
+ */
 class IpPoolAddress extends Model
 {
+    /** @use HasFactory<\Database\Factories\Isp\IpPoolAddressFactory> */
+    use HasFactory;
 
+    protected $table = 'ip_pool_addresses';
 
     protected $fillable = [
         'pool_id',
@@ -60,7 +76,7 @@ class IpPoolAddress extends Model
     /**
      * Reserve this address (not available for automatic assignment).
      */
-    public function reserve(string $notes = null): bool
+    public function reserve(?string $notes = null): bool
     {
         return $this->update([
             'status' => 'reserved',

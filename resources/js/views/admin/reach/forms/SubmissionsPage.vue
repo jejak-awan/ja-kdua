@@ -718,7 +718,7 @@ const exportSubmissions = async (format = 'xlsx') => {
             ...(dateTo.value && { date_to: dateTo.value })
         });
         const baseUrl = import.meta.env.VITE_API_URL || '';
-        const url = `${baseUrl}/api/v1/admin/ja/forms/${formId.value}/submissions/export?${params.toString()}`;
+        const url = `${baseUrl}/api/core/admin/ja/forms/${formId.value}/submissions/export?${params.toString()}`;
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', `submissions-${formId.value}.${format}`);
@@ -736,7 +736,7 @@ const exportPdf = (submission: Submission) => {
     if (!submission) return;
     try {
         const baseUrl = import.meta.env.VITE_API_URL || '';
-        const exportUrl = `${baseUrl}/api/v1/admin/ja/form-submissions/${submission.id}/export-pdf`;
+        const exportUrl = `${baseUrl}/api/core/admin/ja/form-submissions/${submission.id}/export-pdf`;
         window.open(exportUrl, '_blank');
     } catch (error: unknown) {
         logger.error('Failed to export PDF:', error);

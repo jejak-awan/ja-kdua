@@ -1,0 +1,150 @@
+{
+    "title": "ISP Settings",
+    "subtitle": "Manage configuration for ISP-related features and integrations.",
+    "tabs": {
+        "whatsapp": "WhatsApp",
+        "billing": "Billing",
+        "network": "Network",
+        "radius": "RADIUS",
+        "branding": "Branding",
+        "integrations": "Integrations"
+    },
+    "whatsapp": {
+        "title": "WhatsApp Configuration",
+        "subtitle": "Configure the WhatsApp driver and credentials for sending notifications.",
+        "fields": {
+            "driver": "Driver",
+            "api_url": "API URL",
+            "api_key": "API Key"
+        },
+        "drivers": {
+            "log": "Log (Testing via laravel.log)",
+            "http": "HTTP Api (Wablas, Fonnte, etc)"
+        }
+    },
+    "billing": {
+        "title": "Billing Settings",
+        "subtitle": "Configure billing cycles, taxes, and isolation.",
+        "tabs": {
+            "general": "General",
+            "tax": "Tax",
+            "isolation": "Isolation & Termination"
+        },
+        "fields": {
+            "payment_type": "Payment Type",
+            "cycle_type": "Billing Cycle",
+            "prorata": "Enable Prorata",
+            "prorata_desc": "Calculate first month bill proportionally.",
+            "tax_enabled": "Enable Tax (VAT/PPN)",
+            "tax_ppn": "VAT/PPN Rate (%)",
+            "tax_bhp": "BHP Tax (%)",
+            "tax_uso": "USO Tax (%)",
+            "tax_rate_help": "These values will be applied to automated invoice generation.",
+            "suspend_behavior": "Suspend Behavior",
+            "invoice_due_days": "Invoice Due Days",
+            "invoice_due_days_help": "Number of days from creation until due date.",
+            "invoice_date": "Invoice Generation Date",
+            "invoice_date_help": "Date when invoices are generated each month.",
+            "isolation_date": "Auto Isolation Date",
+            "isolation_date_help": "Date when service is disconnected if unpaid.",
+            "isolation_time": "Isolation Time"
+        },
+        "options": {
+            "prepaid": "Prepaid (Prabayar)",
+            "postpaid": "Postpaid (Pascabayar)",
+            "fixed": "Fixed Date (e.g. 1st of Month)",
+            "profile": "Profile Duration (30 Days)",
+            "monthly": "Anniversary (Installation Date)",
+            "payment_date": "On Due Date (Jatuh Tempo)",
+            "isolation_date": "On Specific Isolation Date"
+        }
+    },
+    "network": {
+        "title": "Network Configuration",
+        "subtitle": "Configure default map location and other network preferences.",
+        "fields": {
+            "map_lat": "Default Map Latitude",
+            "map_lng": "Default Map Longitude",
+            "map_zoom": "Default Map Zoom Level"
+        },
+        "help": {
+            "map_lat": "Default center latitude for new maps.",
+            "map_lng": "Default center longitude for new maps."
+        }
+    },
+    "radius": {
+        "title": "RADIUS Configuration",
+        "subtitle": "Configure RADIUS server settings and fallbacks.",
+        "fields": {
+            "coa_port": "COA Port",
+            "default_speed": "Default Fallback Speed"
+        },
+        "help": {
+            "coa_port": "Default CoA port for Mikrotik is 1700.",
+            "default_speed": "Fallback speed if plan has no limit defined."
+        }
+    },
+    "branding": {
+        "document_identity": "Document Identity",
+        "company_info": "Company Information",
+        "invoice_layout": "Invoice Layout",
+        "invoice_notes": "Invoice Notes & Footer",
+        "doc_preview": "Doc Preview",
+        "no_doc_logo": "No Document Logo",
+        "invoice_preview": "Invoice Branding Preview",
+        "logo_size": "Relative Logo Size",
+        "labels": {
+            "invoice_logo": "Invoice Logo",
+            "company_name": "Company Name",
+            "company_slogan": "Company Slogan",
+            "company_address": "Company Address",
+            "company_whatsapp": "Company WhatsApp",
+            "invoice_kop": "Invoice Header (KOP)",
+            "invoice_watermark": "Invoice Watermark",
+            "invoice_signature_name": "Signature Name",
+            "invoice_signature_image": "Signature Image",
+            "invoice_signature_title": "Signature Title",
+            "invoice_show_bank_account": "Show Bank Account",
+            "invoice_note_unpaid": "UNPAID Invoice Note",
+            "invoice_note_paid": "PAID Invoice Note",
+            "invoice_footer": "Invoice Footer Text"
+        },
+        "descriptions": {
+            "invoice_logo": "Specific logo used for PDF Invoices and billing documents.",
+            "company_name": "Company name that will appear on invoices and reports",
+            "company_slogan": "Short company slogan",
+            "company_address": "Complete company address for invoice header",
+            "company_whatsapp": "WhatsApp number for customer support",
+            "invoice_kop": "Invoice header image (recommended 776x100 px)",
+            "invoice_watermark": "Transparent background image for invoice",
+            "invoice_signature_name": "Name of the person signing the invoice",
+            "invoice_signature_image": "Digital signature image",
+            "invoice_signature_title": "Position of the person signing the invoice",
+            "invoice_show_bank_account": "Show the list of bank accounts on the invoice",
+            "invoice_note_unpaid": "Note that appears if the invoice is unpaid",
+            "invoice_note_paid": "Note that appears if the invoice is paid",
+            "invoice_footer": "Footer text that appears at the bottom of the invoice"
+        }
+    },
+    "integrations": {
+        "custom_domain": "Custom Domain",
+        "mutasibank": "MUTASIBANK.CO.ID",
+        "moota": "MOOTA.CO.ID",
+        "payment_gateways": "Payment Gateways",
+        "gateway_title": "Automated Payment Gateways",
+        "gateway_manage": "Manage Gateways",
+        "labels": {
+            "custom_domain": "Custom Domain",
+            "mutasibank_api_key": "MutasiBank API Key",
+            "moota_api_key": "Moota API Key",
+            "integrations_payment_gateways": "Payment Gateways",
+            "integrations_payment_gateways_manage": "Manage Gateways"
+        },
+        "descriptions": {
+            "custom_domain": "Custom domain for member panel",
+            "mutasibank_api_key": "API Key from MutasiBank.co.id",
+            "moota_api_key": "API Key for Moota.co.id integration to automatically check mutations.",
+            "integrations_payment_gateways": "Configure various payment gateways (Midtrans, Xendit, Manual) to receive payments from customers."
+        }
+    }
+}

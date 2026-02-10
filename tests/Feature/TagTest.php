@@ -2,13 +2,19 @@
 
 namespace Tests\Feature;
 
-use App\Models\Tag;
-use App\Models\User;
+use App\Models\Core\Tag;
+use App\Models\Core\User;
 use Tests\Helpers\TestHelpers;
 use Tests\TestCase;
 
 class TagTest extends TestCase
 {
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seedPermissionsAndRoles();
+    }
     /**
      * Test admin can list all tags.
      */
@@ -19,7 +25,7 @@ class TagTest extends TestCase
 
         Tag::factory()->count(5)->create();
 
-        $response = $this->getJson('/api/v1/admin/ja/tags');
+        $response = $this->getJson('/api/core/admin/ja/tags');
 
         TestHelpers::assertApiSuccess($response);
         $this->assertIsArray($response->json('data'));
@@ -35,7 +41,7 @@ class TagTest extends TestCase
 
         Tag::factory()->count(3)->create();
 
-        $response = $this->getJson('/api/v1/admin/ja/tags/statistics');
+        $response = $this->getJson('/api/core/admin/ja/tags/statistics');
 
         TestHelpers::assertApiSuccess($response);
     }
@@ -54,7 +60,7 @@ class TagTest extends TestCase
             'description' => 'Test tag description',
         ];
 
-        $response = $this->postJson('/api/v1/admin/ja/tags', $tagData);
+        $response = $this->postJson('/api/core/admin/ja/tags', $tagData);
 
         TestHelpers::assertApiSuccess($response, 201);
         $this->assertDatabaseHas('tags', [
@@ -71,7 +77,7 @@ class TagTest extends TestCase
         $admin = $this->createAdminUser();
         $this->actingAs($admin, 'sanctum');
 
-        $response = $this->postJson('/api/v1/admin/ja/tags', []);
+        $response = $this->postJson('/api/core/admin/ja/tags', []);
 
         TestHelpers::assertApiValidationError($response);
         $response->assertJsonValidationErrors(['name']);
@@ -87,7 +93,7 @@ class TagTest extends TestCase
 
         $existing = Tag::factory()->create();
 
-        $response = $this->postJson('/api/v1/admin/ja/tags', [
+        $response = $this->postJson('/api/core/admin/ja/tags', [
             'name' => $existing->name, // Duplicate name
         ]);
 
@@ -104,7 +110,7 @@ class TagTest extends TestCase
 
         $tag = Tag::factory()->create();
 
-        $response = $this->getJson("/api/v1/admin/ja/tags/{$tag->id}");
+        $response = $this->getJson("/api/core/admin/ja/tags/{$tag->id}");
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJson([
@@ -125,7 +131,7 @@ class TagTest extends TestCase
 
         $tag = Tag::factory()->create();
 
-        $response = $this->putJson("/api/v1/admin/ja/tags/{$tag->id}", [
+        $response = $this->putJson("/api/core/admin/ja/tags/{$tag->id}", [
             'name' => 'Updated Tag Name',
             'slug' => 'updated-tag-name-'.uniqid(),
         ]);
@@ -147,7 +153,7 @@ class TagTest extends TestCase
 
         $tag = Tag::factory()->create();
 
-        $response = $this->deleteJson("/api/v1/admin/ja/tags/{$tag->id}");
+        $response = $this->deleteJson("/api/core/admin/ja/tags/{$tag->id}");
 
         TestHelpers::assertApiSuccess($response);
         $this->assertSoftDeleted('tags', [
@@ -166,7 +172,7 @@ class TagTest extends TestCase
         $tags = Tag::factory()->count(3)->create();
         $ids = $tags->pluck('id')->toArray();
 
-        $response = $this->postJson('/api/v1/admin/ja/tags/bulk-delete', [
+        $response = $this->postJson('/api/core/admin/ja/tags/bulk-delete', [
             'ids' => $ids,
         ]);
 
@@ -180,7 +186,7 @@ class TagTest extends TestCase
     {
         Tag::factory()->count(3)->create();
 
-        $response = $this->getJson('/api/v1/cms/tags');
+        $response = $this->getJson('/api/core/cms/tags');
 
         TestHelpers::assertApiSuccess($response);
     }
@@ -190,7 +196,7 @@ class TagTest extends TestCase
      */
     public function test_unauthenticated_user_cannot_create_tags(): void
     {
-        $response = $this->postJson('/api/v1/admin/ja/tags', [
+        $response = $this->postJson('/api/core/admin/ja/tags', [
             'name' => 'Test Tag',
         ]);
 
@@ -205,7 +211,7 @@ class TagTest extends TestCase
         $user = $this->createUser();
         $this->actingAs($user, 'sanctum');
 
-        $response = $this->postJson('/api/v1/admin/ja/tags', [
+        $response = $this->postJson('/api/core/admin/ja/tags', [
             'name' => 'Test Tag',
         ]);
 

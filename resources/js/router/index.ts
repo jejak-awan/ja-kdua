@@ -178,49 +178,84 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: 'isp/infra',
                 name: 'isp-infra',
-                component: () => import('../views/Isp/Network/Infrastructure/Index.vue'),
+                component: () => import('../views/Isp/NetOps/Infrastructure/Index.vue'),
             },
             {
                 path: 'isp/settings',
                 name: 'isp-settings',
-                component: () => import('../views/Isp/Settings/Index.vue'),
+                component: () => import('../views/Isp/Support/Settings/Index.vue'),
                 meta: { permission: 'manage settings' },
             },
             {
                 path: 'isp/admin/service-requests',
                 name: 'isp.admin.service-requests',
-                component: () => import('../views/Isp/Customer/ServiceRequests.vue'),
+                component: () => import('../views/Isp/Business/Customer/ServiceRequests.vue'),
             },
             {
                 path: 'isp/admin/analytics/usage',
                 name: 'isp.admin.analytics.usage',
-                component: () => import('../views/Isp/Monitoring/UsageDashboard.vue'),
+                component: () => import('../views/Isp/Monitor/UsageDashboard.vue'),
             },
             {
                 path: 'isp/admin/analytics/revenue',
                 name: 'isp.admin.analytics.revenue',
-                component: () => import('../views/Isp/Billing/Reports/Revenue.vue'),
+                component: () => import('../views/Isp/Business/Billing/Reports/Revenue.vue'),
             },
             {
                 path: 'isp/odp',
                 name: 'isp-odp',
-                component: () => import('../views/Isp/Network/Odp/Index.vue'),
+                component: () => import('../views/Isp/NetOps/Odp/Index.vue'),
             },
             {
                 path: 'isp/inventory',
                 name: 'isp-inventory',
-                component: () => import('../views/Isp/Inventory/Stock.vue'),
+                component: () => import('../views/Isp/Business/Inventory/Stock.vue'),
             },
             {
                 path: 'isp/vouchers',
                 name: 'isp-vouchers',
-                component: () => import('../views/Isp/Inventory/Vouchers.vue'),
+                component: () => import('../views/Isp/Business/Inventory/Vouchers.vue'),
+            },
+            {
+                path: 'isp/vouchers/sold',
+                name: 'isp-vouchers-sold',
+                component: () => import('../views/Isp/Business/Inventory/Sold.vue'),
             },
             {
                 path: 'isp/vouchers/print/:batchId',
                 name: 'isp.vouchers.print',
-                component: () => import('../views/Isp/Inventory/BatchPrint.vue'),
+                component: () => import('../views/Isp/Business/Inventory/BatchPrint.vue'),
                 meta: { layout: 'empty' }
+            },
+            {
+                path: 'isp/partners',
+                name: 'isp-partners',
+                component: () => import('../views/Isp/Business/Partner/Index.vue'),
+            },
+            {
+                path: 'isp/coupons',
+                name: 'isp-coupons',
+                component: () => import('../views/Isp/Business/Billing/Coupons.vue'),
+            },
+            {
+                path: 'isp/whatsapp',
+                name: 'isp-whatsapp',
+                component: () => import('../views/Isp/Support/WhatsApp/Index.vue'),
+            },
+            {
+                path: 'isp/print-templates',
+                name: 'isp-print-templates',
+                component: () => import('../views/Isp/Support/Settings/PrintTemplates.vue'),
+            },
+            {
+                path: 'isp/tools/bgp',
+                name: 'isp-bgp-toolkit',
+                component: () => import('../views/Isp/Support/Tools/BgpToolkit.vue'),
+            },
+            {
+                path: 'isp/admin/activity-logs',
+                name: 'isp-activity-logs',
+                component: () => import('../views/Isp/Admin/ActivityLogs.vue'),
             },
             {
                 path: 'isp/reports/sales',
@@ -240,17 +275,17 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: 'isp/admin/monitoring',
                 name: 'isp.infra.map',
-                component: () => import('../views/Isp/Network/Infrastructure/Map.vue'),
+                component: () => import('../views/Isp/NetOps/Infrastructure/Map.vue'),
             },
             {
                 path: 'isp/network/topology',
                 name: 'isp.network.topology',
-                component: () => import('../views/Isp/Network/Topology/Index.vue'),
+                component: () => import('../views/Isp/NetOps/Topology/Index.vue'),
             },
             {
                 path: 'isp/monitor',
                 name: 'isp-monitor',
-                component: () => import('../views/Isp/Monitoring/NocDashboard.vue'),
+                component: () => import('../views/Isp/Monitor/NocDashboard.vue'),
             },
             {
                 path: 'isp/monitor/traffic',
@@ -260,59 +295,59 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: 'isp/monitoring/sessions',
                 name: 'isp-active-sessions',
-                component: () => import('../views/Isp/Monitoring/ActiveSessions.vue'),
+                component: () => import('../views/Isp/Monitor/ActiveSessions.vue'),
                 meta: { permission: 'manage settings' }
             },
             {
                 path: 'isp/monitoring/radius/sessions',
                 name: 'isp-radius-sessions',
-                component: () => import('../views/Isp/Monitoring/RadiusSessions.vue'),
+                component: () => import('../views/Isp/Monitor/RadiusSessions.vue'),
                 meta: { permission: 'manage settings' }
             },
             {
                 path: 'isp/monitoring/radius/logs',
                 name: 'isp-radius-logs',
-                component: () => import('../views/Isp/Monitoring/RadiusLogs.vue'),
+                component: () => import('../views/Isp/Monitor/RadiusLogs.vue'),
                 meta: { permission: 'manage settings' }
             },
             {
                 path: 'isp/network/ip-pools',
                 name: 'isp-network-ip-pools',
-                component: () => import('../views/Isp/Network/IpPool/Index.vue'),
+                component: () => import('../views/Isp/NetOps/IpPool/Index.vue'),
                 meta: { permission: 'manage settings' }
             },
             {
                 path: 'isp/network/ip-pools/create',
                 name: 'isp-network-ip-pools-create',
-                component: () => import('../views/Isp/Network/IpPool/Form.vue'),
+                component: () => import('../views/Isp/NetOps/IpPool/Form.vue'),
                 meta: { permission: 'manage settings' }
             },
             {
                 path: 'isp/network/ip-pools/:id',
                 name: 'isp-network-ip-pools-detail',
-                component: () => import('../views/Isp/Network/IpPool/Detail.vue'),
+                component: () => import('../views/Isp/NetOps/IpPool/Detail.vue'),
                 meta: { permission: 'manage settings' }
             },
             {
                 path: 'isp/network/ip-pools/:id/edit',
                 name: 'isp-network-ip-pools-edit',
-                component: () => import('../views/Isp/Network/IpPool/Form.vue'),
+                component: () => import('../views/Isp/NetOps/IpPool/Form.vue'),
                 meta: { permission: 'manage settings' }
             },
             {
                 path: 'isp/billing',
                 name: 'isp-billing',
-                component: () => import('../views/Isp/Billing/Index.vue'),
+                component: () => import('../views/Isp/Business/Billing/Index.vue'),
             },
             {
                 path: 'isp/billing/payments',
                 name: 'isp-payments',
-                component: () => import('../views/Isp/Billing/Payments/Index.vue'),
+                component: () => import('../views/Isp/Business/Billing/Payments/Index.vue'),
             },
             {
                 path: 'isp/billing/gateway',
                 name: 'isp-payment-gateway',
-                component: () => import('../views/Isp/Billing/Payments/Gateway.vue'),
+                component: () => import('../views/Isp/Business/Billing/Payments/Gateway.vue'),
             },
             {
                 path: 'isp/admin',
@@ -322,47 +357,47 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: 'isp/subscription/profiles',
                 name: 'isp-subscription-profiles',
-                component: () => import('../views/Isp/Customer/Profiles.vue'),
+                component: () => import('../views/Isp/Business/Customer/Profiles.vue'),
             },
             {
                 path: 'isp/subscription/customers',
                 name: 'isp-subscription-customers',
-                component: () => import('../views/Isp/Customer/Index.vue'),
+                component: () => import('../views/Isp/Business/Customer/Index.vue'),
             },
             {
                 path: 'isp/contracts',
                 name: 'isp-contracts',
-                component: () => import('../views/Isp/Customers/Contracts/Index.vue'),
+                component: () => import('../views/Isp/Business/Customer/Contracts/Index.vue'),
             },
             {
                 path: 'isp/customers/map',
                 name: 'isp.customers.map',
-                component: () => import('../views/Isp/Customer/Map.vue'),
+                component: () => import('../views/Isp/Business/Customer/Map.vue'),
             },
             {
                 path: 'isp/member',
                 name: 'isp-member',
-                component: () => import('../views/Isp/Portal/Dashboard.vue'),
+                component: () => import('../views/Isp/Business/Portal/Dashboard.vue'),
             },
             {
                 path: 'isp/member/invoices',
                 name: 'isp.member.invoices',
-                component: () => import('../views/Isp/Portal/Invoices.vue'),
+                component: () => import('../views/Isp/Business/Portal/Invoices.vue'),
             },
             {
                 path: 'isp/member/usage',
                 name: 'isp.member.usage',
-                component: () => import('../views/Isp/Portal/UsageAnalytics.vue'),
+                component: () => import('../views/Isp/Business/Portal/UsageAnalytics.vue'),
             },
             {
                 path: 'isp/member/support',
                 name: 'isp-member-support',
-                component: () => import('../views/Isp/Portal/Support.vue'),
+                component: () => import('../views/Isp/Business/Portal/Support.vue'),
             },
             {
                 path: 'isp/member/diagnostics',
                 name: 'isp.member.diagnostics',
-                component: () => import('../views/Isp/Portal/Diagnostics.vue'),
+                component: () => import('../views/Isp/Business/Portal/Diagnostics.vue'),
             },
             {
                 path: 'isp/support',
@@ -377,22 +412,22 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: 'isp/network/ipam',
                 name: 'isp-network-ipam',
-                component: () => import('../views/Isp/Network/Ipam/Index.vue'),
+                component: () => import('../views/Isp/NetOps/Ipam/Index.vue'),
             },
             {
                 path: 'isp/network/profiles',
                 name: 'isp-network-profiles',
-                component: () => import('../views/Isp/Network/ServiceProfiles/Index.vue'),
+                component: () => import('../views/Isp/NetOps/ServiceProfiles/Index.vue'),
             },
             {
                 path: 'isp/network/routers',
                 name: 'isp-router',
-                component: () => import('../views/Isp/Network/Routers/Index.vue'),
+                component: () => import('../views/Isp/NetOps/Routers/Index.vue'),
             },
             {
                 path: 'isp/outages',
                 name: 'isp-outages',
-                component: () => import('../views/Isp/Network/Outages/Index.vue'),
+                component: () => import('../views/Isp/NetOps/Outages/Index.vue'),
             },
             {
                 path: 'profile',

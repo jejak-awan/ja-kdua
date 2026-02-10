@@ -4,10 +4,24 @@ declare(strict_types=1);
 
 namespace App\Models\Isp;
 
-use App\Models\User;
+use App\Models\Core\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $inventory_id
+ * @property string $type
+ * @property int $quantity
+ * @property int|null $customer_id
+ * @property int $user_id
+ * @property string|null $notes
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Isp\Inventory $item
+ * @property-read \App\Models\Isp\Customer|null $customer
+ * @property-read \App\Models\Core\User $user
+ */
 class InventoryTransaction extends Model
 {
     protected $table = 'isp_inventory_transactions';
@@ -34,11 +48,11 @@ class InventoryTransaction extends Model
     }
 
     /**
-     * @return BelongsTo<User, $this>
+     * @return BelongsTo<Customer, $this>
      */
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 
     /**

@@ -2,24 +2,25 @@
 
 namespace Tests\Feature;
 
-use App\Models\AnalyticsEvent;
-use App\Models\AnalyticsSession;
-use App\Models\AnalyticsVisit;
-use App\Models\Content;
-use App\Models\User;
+use App\Models\Core\AnalyticsEvent;
+use App\Models\Core\AnalyticsSession;
+use App\Models\Core\AnalyticsVisit;
+use App\Models\Core\Content;
+use App\Models\Core\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Helpers\TestHelpers;
 use Tests\TestCase;
 
 class AnalyticsTest extends TestCase
 {
-    // use RefreshDatabase;
+    use RefreshDatabase;
 
     protected User $admin;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seedPermissionsAndRoles();
 
         // Create admin user with analytics permission
         $this->admin = $this->createAdminUser();
@@ -42,7 +43,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/ja/analytics/overview');
+            ->getJson('/api/core/admin/ja/analytics/overview');
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonStructure([
@@ -78,7 +79,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/ja/analytics/visits?group_by=day');
+            ->getJson('/api/core/admin/ja/analytics/visits?group_by=day');
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonStructure([
@@ -113,7 +114,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/ja/analytics/top-pages?limit=3');
+            ->getJson('/api/core/admin/ja/analytics/top-pages?limit=3');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -154,7 +155,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/ja/analytics/top-content?limit=5');
+            ->getJson('/api/core/admin/ja/analytics/top-content?limit=5');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -168,23 +169,23 @@ class AnalyticsTest extends TestCase
     public function test_admin_can_get_device_statistics(): void
     {
         // Create sessions from different devices
-        \App\Models\AnalyticsSession::factory()->count(10)->create([
+        \App\Models\Core\AnalyticsSession::factory()->count(10)->create([
             'device_type' => 'desktop',
             'started_at' => now()->subDays(1),
         ]);
 
-        \App\Models\AnalyticsSession::factory()->count(5)->create([
+        \App\Models\Core\AnalyticsSession::factory()->count(5)->create([
             'device_type' => 'mobile',
             'started_at' => now()->subDays(1),
         ]);
 
-        \App\Models\AnalyticsSession::factory()->count(2)->create([
+        \App\Models\Core\AnalyticsSession::factory()->count(2)->create([
             'device_type' => 'tablet',
             'started_at' => now()->subDays(1),
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/ja/analytics/devices');
+            ->getJson('/api/core/admin/ja/analytics/devices');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -198,23 +199,23 @@ class AnalyticsTest extends TestCase
     public function test_admin_can_get_browser_statistics(): void
     {
         // Create sessions from different browsers
-        \App\Models\AnalyticsSession::factory()->count(8)->create([
+        \App\Models\Core\AnalyticsSession::factory()->count(8)->create([
             'browser' => 'Chrome',
             'started_at' => now()->subDays(1),
         ]);
 
-        \App\Models\AnalyticsSession::factory()->count(5)->create([
+        \App\Models\Core\AnalyticsSession::factory()->count(5)->create([
             'browser' => 'Firefox',
             'started_at' => now()->subDays(1),
         ]);
 
-        \App\Models\AnalyticsSession::factory()->count(3)->create([
+        \App\Models\Core\AnalyticsSession::factory()->count(3)->create([
             'browser' => 'Safari',
             'started_at' => now()->subDays(1),
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/ja/analytics/browsers');
+            ->getJson('/api/core/admin/ja/analytics/browsers');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -228,23 +229,23 @@ class AnalyticsTest extends TestCase
     public function test_admin_can_get_country_statistics(): void
     {
         // Create sessions from different countries
-        \App\Models\AnalyticsSession::factory()->count(10)->create([
+        \App\Models\Core\AnalyticsSession::factory()->count(10)->create([
             'country' => 'United States',
             'started_at' => now()->subDays(1),
         ]);
 
-        \App\Models\AnalyticsSession::factory()->count(5)->create([
+        \App\Models\Core\AnalyticsSession::factory()->count(5)->create([
             'country' => 'United Kingdom',
             'started_at' => now()->subDays(1),
         ]);
 
-        \App\Models\AnalyticsSession::factory()->count(3)->create([
+        \App\Models\Core\AnalyticsSession::factory()->count(3)->create([
             'country' => 'Indonesia',
             'started_at' => now()->subDays(1),
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/ja/analytics/countries');
+            ->getJson('/api/core/admin/ja/analytics/countries');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -274,7 +275,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/ja/analytics/referrers?limit=5');
+            ->getJson('/api/core/admin/ja/analytics/referrers?limit=5');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -301,7 +302,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/ja/analytics/events');
+            ->getJson('/api/core/admin/ja/analytics/events');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -331,7 +332,7 @@ class AnalyticsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/ja/analytics/event-stats');
+            ->getJson('/api/core/admin/ja/analytics/event-stats');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -347,7 +348,7 @@ class AnalyticsTest extends TestCase
         $user = $this->createUser();
 
         $response = $this->actingAs($user, 'sanctum')
-            ->getJson('/api/v1/admin/ja/analytics/overview');
+            ->getJson('/api/core/admin/ja/analytics/overview');
 
         $response->assertStatus(403);
     }
@@ -357,13 +358,13 @@ class AnalyticsTest extends TestCase
      */
     public function test_unauthenticated_user_cannot_access_analytics(): void
     {
-        $response = $this->getJson('/api/v1/admin/ja/analytics/overview');
+        $response = $this->getJson('/api/core/admin/ja/analytics/overview');
         $response->assertStatus(401);
 
-        $response = $this->getJson('/api/v1/admin/ja/analytics/visits');
+        $response = $this->getJson('/api/core/admin/ja/analytics/visits');
         $response->assertStatus(401);
 
-        $response = $this->getJson('/api/v1/admin/ja/analytics/top-pages');
+        $response = $this->getJson('/api/core/admin/ja/analytics/top-pages');
         $response->assertStatus(401);
     }
 }

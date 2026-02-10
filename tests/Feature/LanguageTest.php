@@ -2,25 +2,28 @@
 
 namespace Tests\Feature;
 
-use App\Models\Language;
-use App\Models\Translation;
-use App\Models\User;
+use App\Models\Core\Language;
+use App\Models\Core\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Helpers\TestHelpers;
 use Tests\TestCase;
 
 class LanguageTest extends TestCase
 {
-    // use RefreshDatabase;
-
-    protected User $admin;
 
     protected function setUp(): void
     {
         parent::setUp();
-
+        $this->seedPermissionsAndRoles();
         $this->admin = $this->createAdminUser();
     }
+
+
+    // use RefreshDatabase;
+
+    protected User $admin;
+
+
 
     /**
      * Test admin can list all languages.
@@ -31,7 +34,7 @@ class LanguageTest extends TestCase
         Language::factory()->count(2)->create(['is_active' => false]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/ja/languages');
+            ->getJson('/api/core/admin/ja/languages');
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonStructure([
@@ -66,7 +69,7 @@ class LanguageTest extends TestCase
         ];
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->postJson('/api/v1/admin/ja/languages', $languageData);
+            ->postJson('/api/core/admin/ja/languages', $languageData);
 
         TestHelpers::assertApiSuccess($response, 201);
         $response->assertJsonFragment([
@@ -87,7 +90,7 @@ class LanguageTest extends TestCase
     public function test_language_creation_requires_code_and_name(): void
     {
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->postJson('/api/v1/admin/ja/languages', []);
+            ->postJson('/api/core/admin/ja/languages', []);
 
         TestHelpers::assertApiValidationError($response);
         $response->assertJsonValidationErrors(['code', 'name']);
@@ -101,7 +104,7 @@ class LanguageTest extends TestCase
         Language::factory()->create(['code' => 'en']);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->postJson('/api/v1/admin/ja/languages', [
+            ->postJson('/api/core/admin/ja/languages', [
                 'code' => 'en',
                 'name' => 'English',
             ]);
@@ -121,7 +124,7 @@ class LanguageTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->postJson('/api/v1/admin/ja/languages', [
+            ->postJson('/api/core/admin/ja/languages', [
                 'code' => 'id',
                 'name' => 'Indonesian',
                 'is_default' => true,
@@ -157,7 +160,7 @@ class LanguageTest extends TestCase
         ];
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->putJson("/api/v1/admin/ja/languages/{$language->id}", $updateData);
+            ->putJson("/api/core/admin/ja/languages/{$language->id}", $updateData);
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonFragment([
@@ -182,7 +185,7 @@ class LanguageTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->deleteJson("/api/v1/admin/ja/languages/{$language->id}");
+            ->deleteJson("/api/core/admin/ja/languages/{$language->id}");
 
         TestHelpers::assertApiSuccess($response);
 
@@ -201,7 +204,7 @@ class LanguageTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->deleteJson("/api/v1/admin/ja/languages/{$language->id}");
+            ->deleteJson("/api/core/admin/ja/languages/{$language->id}");
 
         TestHelpers::assertApiValidationError($response);
         $response->assertJsonValidationErrors(['language']);
@@ -240,10 +243,10 @@ class LanguageTest extends TestCase
      */
     public function test_unauthenticated_user_cannot_access_languages(): void
     {
-        $response = $this->getJson('/api/v1/admin/ja/languages');
+        $response = $this->getJson('/api/core/admin/ja/languages');
         $response->assertStatus(401);
 
-        $response = $this->postJson('/api/v1/admin/ja/languages', []);
+        $response = $this->postJson('/api/core/admin/ja/languages', []);
         $response->assertStatus(401);
     }
 
@@ -255,7 +258,7 @@ class LanguageTest extends TestCase
         $user = $this->createUser();
 
         $response = $this->actingAs($user, 'sanctum')
-            ->getJson('/api/v1/admin/ja/languages');
+            ->getJson('/api/core/admin/ja/languages');
 
         $response->assertStatus(403);
     }

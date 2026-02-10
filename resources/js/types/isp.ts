@@ -18,7 +18,7 @@ export interface Customer {
     status: 'active' | 'isolated' | 'inactive' | 'suspended';
     mikrotik_login?: string;
     mikrotik_password?: string;
-    reseller_id?: number;
+    partner_id?: number;
     router_id?: number;
     server_id?: number;
     service_category?: string;
@@ -27,7 +27,7 @@ export interface Customer {
     is_taxed?: boolean;
     unique_code?: number;
     address_list?: string;
-    plan?: BillingPlan;
+    plan?: IspPlan;
     current_usage_bytes?: number;
     last_usage_reset_at?: string;
     is_fup_active?: boolean;
@@ -207,25 +207,51 @@ export interface ServiceRequest {
     };
 }
 
-export interface BillingPlan {
+export interface IspPlan {
     id: number;
     name: string;
-    description?: string;
+    type: 'fiber' | 'hotspot';
+
+    // Bandwidth
+    download_limit?: string;
+    upload_limit?: string;
+    burst_limit?: string;
+
+    // Network
     mikrotik_group?: string;
-    speed_limit?: string; // Legacy
     mikrotik_rate_limit?: string;
-    shared_users?: number;
-    active_period?: number;
-    type: string;
+
+    // Business
     price: number;
     cost_price: number;
     commission: number;
+    partner_price?: number;
+    mikrotik_profile?: string;
+
+    // Policy
+    shared_users: number;
+    active_period: number;
+    quota_limit_mb?: number;
+
+    // FUP
     fup_limit_gb?: number;
     fup_speed?: string;
-    fup_enabled?: boolean;
-    is_active: boolean;
-    features: string[];
+    fup_enabled: boolean;
+
+    // UI & Status
+    color?: string;
+    description?: string;
+    status: string;
+    features?: string[] | null;
+
+    // Legacy mapping
+    speed_limit?: string;
+    is_active?: boolean;
 }
+
+// Aliases for legacy support during migration
+export type BillingPlan = IspPlan;
+export type IspNetworkProfile = IspPlan;
 export interface NetworkSubnet {
     id: number;
     node_id: number;
@@ -260,14 +286,211 @@ export interface Outage {
     node?: { name: string };
 }
 
-export interface IspNetworkProfile {
+
+export interface Voucher {
+    id: number;
+    code: string;
+    profile_id: number | null;
+    batch_id: number | null;
+    status: 'available' | 'sold' | 'used' | 'expired' | 'disabled';
+    sold_at: string | null;
+    used_at: string | null;
+    partner_id: number | null;
+    customer_id: number | null;
+    price: number;
+    partner_price: number | null;
+    partner?: Partner;
+    profile?: IspPlan;
+    batch?: VoucherBatch;
+}
+
+export interface VoucherBatch {
     id: number;
     name: string;
-    download_limit: number;
-    upload_limit: number;
-    burst_limit: string | null;
-    fup_limit_gb: number | null;
-    fup_speed: string | null;
-    fup_enabled: boolean;
+    partner_id: number | null;
+    quantity: number;
+    prefix: string | null;
+    created_at: string;
+    profile?: IspPlan;
+}
+
+export interface Partner {
+    id: number;
+    user_id: number;
+    name: string;
+    phone: string | null;
+    address: string | null;
+    category: 'reseller' | 'biller';
+    saldo: number;
+    limit_hutang: number;
+    commission_rate: number;
+    status: 'active' | 'inactive';
+    created_at: string;
+    user?: { id: number; name: string; email: string };
+    transactions?: Transaction[];
+}
+
+export interface Transaction {
+    id: number;
+    parent_type: string;
+    parent_id: number;
+    type: 'credit' | 'debit';
+    amount: number;
+    saldo_before: number;
+    saldo_after: number;
+    category: string;
+    description: string | null;
+    reference_type: string | null;
+    reference_id: number | null;
+    created_by: number | null;
+    created_at: string;
+    creator?: { id: number; name: string };
+}
+
+export interface Contract {
+    id: number;
+    customer_id: number;
+    start_date: string;
+    end_date: string;
+    terms: string | null;
+    status: 'active' | 'expired' | 'terminated';
+    created_at: string;
+    customer?: Customer;
+}
+
+export interface Coupon {
+    id: number;
+    code: string;
+    type: 'percentage' | 'fixed';
+    value: number;
+    max_uses: number | null;
+    used_count: number;
+    min_purchase: number | null;
+    applicable_plans: number[] | null;
+    starts_at: string | null;
+    expires_at: string | null;
+    is_active: boolean;
+    created_at: string;
+}
+
+export interface CouponUsage {
+    id: number;
+    coupon_id: number;
+    customer_id: number;
+    invoice_id: number | null;
+    discount_amount: number;
+    created_at: string;
+}
+
+export interface Inventory {
+    id: number;
+    name: string;
+    sku: string | null;
+    category: string | null;
+    quantity: number;
+    min_stock: number;
+    unit: string;
+    cost_price: number | null;
+    sell_price: number | null;
     status: string;
+    created_at: string;
+}
+
+export interface InventoryTransaction {
+    id: number;
+    inventory_id: number;
+    type: 'in' | 'out' | 'adjustment';
+    quantity: number;
+    customer_id: number | null;
+    user_id: number | null;
+    notes: string | null;
+    created_at: string;
+}
+
+export interface CustomerDevice {
+    id: number;
+    customer_id: number;
+    node_id: number | null;
+    type: string;
+    serial_number: string;
+    mac_address: string | null;
+    status: string;
+    activated_at: string | null;
+    expiration_date: string | null;
+    metadata?: Record<string, unknown>;
+}
+
+// Deprecated or removed: CustomerTransaction is now part of Transaction
+
+export interface IpPool {
+    id: number;
+    name: string;
+    network: string;
+    gateway: string | null;
+    dns_primary: string | null;
+    dns_secondary: string | null;
+    vlan_id: number | null;
+    router_id: number | null;
+    status: string;
+    description: string | null;
+    router?: NetworkNode;
+    usage_stats?: {
+        total: number;
+        available: number;
+        assigned: number;
+        reserved: number;
+        usage_percent: number;
+    };
+}
+
+export interface IpPoolAddress {
+    id: number;
+    pool_id: number;
+    ip_address: string;
+    customer_id: number | null;
+    status: 'available' | 'assigned' | 'reserved';
+    assigned_at: string | null;
+    notes: string | null;
+    customer?: Customer;
+}
+
+export interface PrintTemplate {
+    id: number;
+    name: string;
+    type: 'invoice' | 'voucher' | 'receipt' | 'contract';
+    content: string;
+    page_size: string;
+    orientation: string;
+    is_default: boolean;
+    created_at: string;
+}
+
+export interface WaTemplate {
+    id: number;
+    name: string;
+    content: string;
+    variables: string[];
+    created_at: string;
+}
+
+export interface WaBlast {
+    id: number;
+    name: string;
+    template_id: number | null;
+    message: string;
+    target_filter: Record<string, unknown>;
+    status: 'draft' | 'sending' | 'sent' | 'failed';
+    sent_count: number;
+    failed_count: number;
+    created_at: string;
+}
+
+export interface WaSchedule {
+    id: number;
+    name: string;
+    event: string;
+    template_id: number;
+    delay_hours: number;
+    is_active: boolean;
+    created_at: string;
 }

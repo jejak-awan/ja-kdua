@@ -2,14 +2,20 @@
 
 namespace Tests\Feature;
 
-use App\Models\Form;
-use App\Models\FormSubmission;
-use App\Models\User;
+use App\Models\Core\Form;
+use App\Models\Core\FormSubmission;
+use App\Models\Core\User;
 use Tests\Helpers\TestHelpers;
 use Tests\TestCase;
 
 class FormTest extends TestCase
 {
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seedPermissionsAndRoles();
+    }
     /**
      * Test admin can list all forms.
      */
@@ -20,7 +26,7 @@ class FormTest extends TestCase
 
         Form::factory()->count(3)->create();
 
-        $response = $this->getJson('/api/v1/admin/ja/forms');
+        $response = $this->getJson('/api/core/admin/ja/forms');
 
         TestHelpers::assertApiSuccess($response);
     }
@@ -40,7 +46,7 @@ class FormTest extends TestCase
             'is_active' => true,
         ];
 
-        $response = $this->postJson('/api/v1/admin/ja/forms', $formData);
+        $response = $this->postJson('/api/core/admin/ja/forms', $formData);
 
         TestHelpers::assertApiSuccess($response, 201);
         $this->assertDatabaseHas('forms', [
@@ -57,7 +63,7 @@ class FormTest extends TestCase
         $admin = $this->createAdminUser();
         $this->actingAs($admin, 'sanctum');
 
-        $response = $this->postJson('/api/v1/admin/ja/forms', []);
+        $response = $this->postJson('/api/core/admin/ja/forms', []);
 
         TestHelpers::assertApiValidationError($response);
         $response->assertJsonValidationErrors(['name']);
@@ -73,7 +79,7 @@ class FormTest extends TestCase
 
         $form = Form::factory()->create();
 
-        $response = $this->getJson("/api/v1/admin/ja/forms/{$form->id}");
+        $response = $this->getJson("/api/core/admin/ja/forms/{$form->id}");
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJson([
@@ -94,7 +100,7 @@ class FormTest extends TestCase
 
         $form = Form::factory()->create();
 
-        $response = $this->putJson("/api/v1/admin/ja/forms/{$form->id}", [
+        $response = $this->putJson("/api/core/admin/ja/forms/{$form->id}", [
             'name' => 'Updated Form Name',
         ]);
 
@@ -115,7 +121,7 @@ class FormTest extends TestCase
 
         $form = Form::factory()->create();
 
-        $response = $this->deleteJson("/api/v1/admin/ja/forms/{$form->id}");
+        $response = $this->deleteJson("/api/core/admin/ja/forms/{$form->id}");
 
         TestHelpers::assertApiSuccess($response);
         $this->assertSoftDeleted('forms', [
@@ -137,7 +143,10 @@ class FormTest extends TestCase
 
         $form = Form::factory()->create();
 
-        $response = $this->postJson("/api/v1/admin/ja/forms/{$form->id}/duplicate");
+        $response = $this->postJson("/api/core/admin/ja/forms/{$form->id}/duplicate", [
+            'title' => $form->name.' (Copy)',
+            'slug' => $form->slug.'-copy',
+        ]);
 
         TestHelpers::assertApiSuccess($response, 201);
     }
@@ -153,7 +162,7 @@ class FormTest extends TestCase
         $form = Form::factory()->create();
         FormSubmission::factory()->count(3)->create(['form_id' => $form->id]);
 
-        $response = $this->getJson("/api/v1/admin/ja/forms/{$form->id}/submissions");
+        $response = $this->getJson("/api/core/admin/ja/forms/{$form->id}/submissions");
 
         TestHelpers::assertApiSuccess($response);
     }
@@ -165,7 +174,7 @@ class FormTest extends TestCase
     {
         $form = Form::factory()->create(['is_active' => true]);
 
-        $response = $this->getJson("/api/v1/cms/forms/{$form->slug}");
+        $response = $this->getJson("/api/core/cms/forms/{$form->slug}");
 
         $response->assertStatus(200);
         $response->assertJson([
@@ -200,7 +209,7 @@ class FormTest extends TestCase
             ],
         ]);
 
-        $response = $this->postJson("/api/v1/cms/forms/{$form->slug}/submit", [
+        $response = $this->postJson("/api/core/cms/forms/{$form->slug}/submit", [
             'name' => 'John Doe',
             'email' => 'john@example.com',
         ]);
@@ -227,7 +236,7 @@ class FormTest extends TestCase
             ],
         ]);
 
-        $response = $this->postJson("/api/v1/cms/forms/{$form->slug}/submit", []);
+        $response = $this->postJson("/api/core/cms/forms/{$form->slug}/submit", []);
 
         TestHelpers::assertApiValidationError($response);
     }
@@ -237,7 +246,7 @@ class FormTest extends TestCase
      */
     public function test_unauthenticated_user_cannot_manage_forms(): void
     {
-        $response = $this->postJson('/api/v1/admin/ja/forms', [
+        $response = $this->postJson('/api/core/admin/ja/forms', [
             'name' => 'Test Form',
         ]);
 
@@ -252,7 +261,7 @@ class FormTest extends TestCase
         $user = $this->createUser();
         $this->actingAs($user, 'sanctum');
 
-        $response = $this->postJson('/api/v1/admin/ja/forms', [
+        $response = $this->postJson('/api/core/admin/ja/forms', [
             'name' => 'Test Form',
         ]);
 

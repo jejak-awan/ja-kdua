@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
+use App\Models\Core\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -28,7 +28,7 @@ class UserPreferencesTest extends TestCase
     public function test_can_get_preferences_when_authenticated(): void
     {
         $response = $this->withToken($this->token)
-            ->getJson('/api/v1/profile/preferences');
+            ->getJson('/api/core/profile/preferences');
 
         $response->assertOk()
             ->assertJsonStructure([
@@ -49,7 +49,7 @@ class UserPreferencesTest extends TestCase
 
     public function test_preferences_rejected_when_unauthenticated(): void
     {
-        $response = $this->getJson('/api/v1/profile/preferences');
+        $response = $this->getJson('/api/core/profile/preferences');
 
         $response->assertUnauthorized();
     }
@@ -57,7 +57,7 @@ class UserPreferencesTest extends TestCase
     public function test_can_update_dark_mode_preference(): void
     {
         $response = $this->withToken($this->token)
-            ->putJson('/api/v1/profile/preferences', [
+            ->putJson('/api/core/profile/preferences', [
                 'dark_mode' => 'dark',
             ]);
 
@@ -77,7 +77,7 @@ class UserPreferencesTest extends TestCase
     public function test_can_update_locale_preference(): void
     {
         $response = $this->withToken($this->token)
-            ->putJson('/api/v1/profile/preferences', [
+            ->putJson('/api/core/profile/preferences', [
                 'locale' => 'id',
             ]);
 
@@ -97,7 +97,7 @@ class UserPreferencesTest extends TestCase
     public function test_can_update_multiple_preferences(): void
     {
         $response = $this->withToken($this->token)
-            ->putJson('/api/v1/profile/preferences', [
+            ->putJson('/api/core/profile/preferences', [
                 'dark_mode' => 'light',
                 'locale' => 'id',
             ]);
@@ -120,7 +120,7 @@ class UserPreferencesTest extends TestCase
     public function test_invalid_dark_mode_value_rejected(): void
     {
         $response = $this->withToken($this->token)
-            ->putJson('/api/v1/profile/preferences', [
+            ->putJson('/api/core/profile/preferences', [
                 'dark_mode' => 'invalid_value',
             ]);
 
@@ -132,14 +132,14 @@ class UserPreferencesTest extends TestCase
     {
         // Set preferences
         $this->withToken($this->token)
-            ->putJson('/api/v1/profile/preferences', [
+            ->putJson('/api/core/profile/preferences', [
                 'dark_mode' => 'dark',
                 'locale' => 'id',
             ]);
 
         // Get preferences in new request
         $response = $this->withToken($this->token)
-            ->getJson('/api/v1/profile/preferences');
+            ->getJson('/api/core/profile/preferences');
 
         $response->assertOk()
             ->assertJson([

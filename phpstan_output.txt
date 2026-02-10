@@ -1,0 +1,425 @@
+Note: Using configuration file /var/www/ja-kdua/phpstan.neon.
+ ------ --------------------------------- 
+  Line   Models/Core/AnalyticsEvent.php   
+ ------ --------------------------------- 
+  :29    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\AnalyticsEve  
+         ntFactory.                       
+         🪪  class.notFound               
+  :29    Type                             
+         Database\Factories\AnalyticsEve  
+         ntFactory in generic type        
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\AnalyticsEventFactory> i  
+         n PHPDoc tag @use is not         
+         subtype of template type         
+         TFactory of                      
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Core/AnalyticsSession.ph  
+         p                                
+ ------ --------------------------------- 
+  :34    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\AnalyticsSes  
+         sionFactory.                     
+         🪪  class.notFound               
+  :34    Type                             
+         Database\Factories\AnalyticsSes  
+         sionFactory in generic type      
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\AnalyticsSessionFactory>  
+         in PHPDoc tag @use is not        
+         subtype of template type         
+         TFactory of                      
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Core/AnalyticsVisit.php   
+ ------ --------------------------------- 
+  :35    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\AnalyticsVis  
+         itFactory.                       
+         🪪  class.notFound               
+  :35    Type                             
+         Database\Factories\AnalyticsVis  
+         itFactory in generic type        
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\AnalyticsVisitFactory> i  
+         n PHPDoc tag @use is not         
+         subtype of template type         
+         TFactory of                      
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Core/Category.php         
+ ------ --------------------------------- 
+  :14    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\CategoryFact  
+         ory.                             
+         🪪  class.notFound               
+  :14    Type                             
+         Database\Factories\CategoryFact  
+         ory in generic type              
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\CategoryFactory> in PHPD  
+         oc tag @use is not subtype of    
+         template type TFactory of        
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Core/Content.php          
+ ------ --------------------------------- 
+  :52    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\ContentFacto  
+         ry.                              
+         🪪  class.notFound               
+  :52    Type                             
+         Database\Factories\ContentFacto  
+         ry in generic type               
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\ContentFactory> in PHPDo  
+         c tag @use is not subtype of     
+         template type TFactory of        
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Core/ContentRevision.php  
+ ------ --------------------------------- 
+  :12    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\ContentRevis  
+         ionFactory.                      
+         🪪  class.notFound               
+  :12    Type                             
+         Database\Factories\ContentRevis  
+         ionFactory in generic type       
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\ContentRevisionFactory>   
+         in PHPDoc tag @use is not        
+         subtype of template type         
+         TFactory of                      
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Core/Form.php             
+ ------ --------------------------------- 
+  :36    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\FormFactory.  
+         🪪  class.notFound               
+  :36    Type                             
+         Database\Factories\FormFactory   
+         in generic type                  
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\FormFactory> in PHPDoc t  
+         ag @use is not subtype of        
+         template type TFactory of        
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Core/FormSubmission.php   
+ ------ --------------------------------- 
+  :29    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\FormSubmissi  
+         onFactory.                       
+         🪪  class.notFound               
+  :29    Type                             
+         Database\Factories\FormSubmissi  
+         onFactory in generic type        
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\FormSubmissionFactory> i  
+         n PHPDoc tag @use is not         
+         subtype of template type         
+         TFactory of                      
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Core/Language.php         
+ ------ --------------------------------- 
+  :25    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\LanguageFact  
+         ory.                             
+         🪪  class.notFound               
+  :25    Type                             
+         Database\Factories\LanguageFact  
+         ory in generic type              
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\LanguageFactory> in PHPD  
+         oc tag @use is not subtype of    
+         template type TFactory of        
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Core/Media.php            
+ ------ --------------------------------- 
+  :23    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\MediaFactory  
+         .                                
+         🪪  class.notFound               
+  :23    Type                             
+         Database\Factories\MediaFactory  
+         in generic type                  
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\MediaFactory> in PHPDoc   
+         tag @use is not subtype of       
+         template type TFactory of        
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Core/MediaFolder.php      
+ ------ --------------------------------- 
+  :31    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\MediaFolderF  
+         actory.                          
+         🪪  class.notFound               
+  :31    Type                             
+         Database\Factories\MediaFolderF  
+         actory in generic type           
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\MediaFolderFactory> in P  
+         HPDoc tag @use is not subtype    
+         of template type TFactory of     
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Core/Tag.php              
+ ------ --------------------------------- 
+  :13    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\TagFactory.   
+         🪪  class.notFound               
+  :13    Type                             
+         Database\Factories\TagFactory    
+         in generic type                  
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\TagFactory> in PHPDoc ta  
+         g @use is not subtype of         
+         template type TFactory of        
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Core/Theme.php            
+ ------ --------------------------------- 
+  :40    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\ThemeFactory  
+         .                                
+         🪪  class.notFound               
+  :40    Type                             
+         Database\Factories\ThemeFactory  
+         in generic type                  
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\ThemeFactory> in PHPDoc   
+         tag @use is not subtype of       
+         template type TFactory of        
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Core/User.php             
+ ------ --------------------------------- 
+  :36    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\UserFactory.  
+         🪪  class.notFound               
+  :36    Type                             
+         Database\Factories\UserFactory   
+         in generic type                  
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\UserFactory> in PHPDoc t  
+         ag @use is not subtype of        
+         template type TFactory of        
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Core/Webhook.php          
+ ------ --------------------------------- 
+  :12    PHPDoc tag @use has invalid      
+         type                             
+         Database\Factories\WebhookFacto  
+         ry.                              
+         🪪  class.notFound               
+  :12    Type                             
+         Database\Factories\WebhookFacto  
+         ry in generic type               
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory<Database\Fac  
+         tories\WebhookFactory> in PHPDo  
+         c tag @use is not subtype of     
+         template type TFactory of        
+         Illuminate\Database\Eloquent\Fa  
+         ctories\Factory of trait         
+         Illuminate\Database\Eloquent\Fa  
+         ctories\HasFactory.              
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Models/Isp/Customer.php          
+ ------ --------------------------------- 
+  :57    PHPDoc tag @property-read for    
+         property                         
+         App\Models\Isp\Customer::$trans  
+         actions contains unknown class   
+         App\Models\Isp\CustomerTransact  
+         ion.                             
+         🪪  class.notFound               
+         💡  Learn more at                
+         https://phpstan.org/user-guide/  
+         discovering-symbols              
+  :57    Type                             
+         App\Models\Isp\CustomerTransact  
+         ion in generic type              
+         Illuminate\Database\Eloquent\Co  
+         llection<int, App\Models\Isp\Cu  
+         stomerTransaction> in PHPDoc ta  
+         g @property-read for property    
+         App\Models\Isp\Customer::$trans  
+         actions is not subtype of        
+         template type TModel of          
+         Illuminate\Database\Eloquent\Mo  
+         del of class                     
+         Illuminate\Database\Eloquent\Co  
+         llection.                        
+         🪪  generics.notSubtype          
+ ------ --------------------------------- 
+
+ ------ --------------------------------- 
+  Line   Services/Isp/ProvisioningServic  
+         e.php                            
+ ------ --------------------------------- 
+  :31    Call to function assert() with   
+         true will always evaluate to     
+         true.                            
+         🪪  function.alreadyNarrowedType  
+         💡  Because the type is coming   
+         from a PHPDoc, you can turn off  
+         this check by setting treatPhpD  
+         ocTypesAsCertain: false in your  
+          phpstan.neon.                   
+  :31    Instanceof between               
+         App\Models\Isp\Customer and      
+         App\Models\Isp\Customer will     
+         always evaluate to true.         
+         🪪  instanceof.alwaysTrue        
+         💡  Because the type is coming   
+         from a PHPDoc, you can turn off  
+         this check by setting treatPhpD  
+         ocTypesAsCertain: false in your  
+          phpstan.neon.                   
+  :34    Call to function assert() with   
+         true will always evaluate to     
+         true.                            
+         🪪  function.alreadyNarrowedType  
+         💡  Because the type is coming   
+         from a PHPDoc, you can turn off  
+         this check by setting treatPhpD  
+         ocTypesAsCertain: false in your  
+          phpstan.neon.                   
+  :34    Instanceof between               
+         App\Models\Core\User and         
+         App\Models\Core\User will        
+         always evaluate to true.         
+         🪪  instanceof.alwaysTrue        
+         💡  Because the type is coming   
+         from a PHPDoc, you can turn off  
+         this check by setting treatPhpD  
+         ocTypesAsCertain: false in your  
+          phpstan.neon.                   
+ ------ --------------------------------- 
+
+ [ERROR] Found 36 errors                  
+

@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Services\MediaService;
+use App\Models\Core\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -42,7 +41,7 @@ class DatabaseSeeder extends Seeder
 
         // 5. Sync Media Files
         $this->command->info('Scanning for media files...');
-        $mediaService = new MediaService;
+        $mediaService = new \App\Services\Core\MediaService;
         $stats = $mediaService->scan();
         $this->command->info("Media sync: Scanned {$stats['scanned']} files, added {$stats['added']} new files.");
 

@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\Category;
-use App\Models\Content;
-use App\Models\Menu;
-use App\Models\MenuItem;
-use App\Models\Tag;
-use App\Models\User;
+use App\Models\Core\Category;
+use App\Models\Core\Content;
+use App\Models\Core\Menu;
+use App\Models\Core\MenuItem;
+use App\Models\Core\Tag;
+use App\Models\Core\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -492,7 +492,7 @@ class SampleContentSeeder extends Seeder
         ];
 
         foreach ($folders as $folder) {
-            \App\Models\MediaFolder::updateOrCreate(
+            \App\Models\Core\MediaFolder::updateOrCreate(
                 ['slug' => $folder['slug']],
                 array_merge($folder, ['author_id' => $user->id])
             );
@@ -516,7 +516,7 @@ class SampleContentSeeder extends Seeder
             // Add 1-3 comments per post
             $count = rand(1, 3);
             for ($i = 0; $i < $count; $i++) {
-                \App\Models\Comment::create([
+                \App\Models\Core\Comment::create([
                     'content_id' => $post->id,
                     'user_id' => $user->id,
                     'name' => $user->name,

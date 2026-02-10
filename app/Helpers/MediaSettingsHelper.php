@@ -2,7 +2,7 @@
 
 namespace App\Helpers;
 
-use App\Models\Setting;
+use App\Models\Core\Setting;
 
 /**
  * Helper class for media-related settings

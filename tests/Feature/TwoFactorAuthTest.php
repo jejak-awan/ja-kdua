@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
+use App\Models\Core\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\Helpers\TestHelpers;
@@ -10,18 +10,21 @@ use Tests\TestCase;
 
 class TwoFactorAuthTest extends TestCase
 {
-    // use RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
-
+        $this->seedPermissionsAndRoles();
         // Admin user setup if needed by some shared helpers
         $this->createAdminUser();
-
         // Enable 2FA setting globally for testing
-        \App\Models\Setting::set('enable_2fa', true, 'boolean');
+        \App\Models\Core\Setting::set('enable_2fa', true, 'boolean');
     }
+
+
+    // use RefreshDatabase;
+
+
 
     /**
      * Test user can generate 2FA QR code.
@@ -31,7 +34,7 @@ class TwoFactorAuthTest extends TestCase
         $user = $this->createUser();
         $this->actingAs($user, 'sanctum');
 
-        $response = $this->postJson('/api/v1/two-factor/generate');
+        $response = $this->postJson('/api/core/two-factor/generate');
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonStructure([
@@ -54,9 +57,9 @@ class TwoFactorAuthTest extends TestCase
         $this->actingAs($user, 'sanctum');
 
         // Generate 2FA first
-        $this->postJson('/api/v1/two-factor/generate');
+        $this->postJson('/api/core/two-factor/generate');
 
-        $response = $this->postJson('/api/v1/two-factor/verify', [
+        $response = $this->postJson('/api/core/two-factor/verify', [
             'code' => '000000', // Invalid code
         ]);
 
@@ -71,7 +74,7 @@ class TwoFactorAuthTest extends TestCase
         $user = $this->createUser();
         $this->actingAs($user, 'sanctum');
 
-        $response = $this->getJson('/api/v1/two-factor/status');
+        $response = $this->getJson('/api/core/two-factor/status');
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonStructure([
@@ -93,7 +96,7 @@ class TwoFactorAuthTest extends TestCase
         ]);
         $this->actingAs($user, 'sanctum');
 
-        $response = $this->postJson('/api/v1/two-factor/disable', [
+        $response = $this->postJson('/api/core/two-factor/disable', [
             'password' => 'password',
         ]);
 
@@ -112,15 +115,15 @@ class TwoFactorAuthTest extends TestCase
         $this->actingAs($user, 'sanctum');
 
         // Setup 2FA first
-        $this->postJson('/api/v1/two-factor/generate');
+        $this->postJson('/api/core/two-factor/generate');
 
         // Mock enabled state
-        $twoFactor = \App\Models\TwoFactorAuth::where('user_id', $user->id)->first();
+        $twoFactor = \App\Models\Core\TwoFactorAuth::where('user_id', $user->id)->first();
         if ($twoFactor) {
             $twoFactor->update(['enabled' => true]);
         }
 
-        $response = $this->postJson('/api/v1/two-factor/regenerate-backup-codes', [
+        $response = $this->postJson('/api/core/two-factor/regenerate-backup-codes', [
             'password' => 'password',
         ]);
 
@@ -147,7 +150,7 @@ class TwoFactorAuthTest extends TestCase
             'email_verified_at' => now(),
         ]);
 
-        $response = $this->postJson('/api/v1/two-factor/verify-code', [
+        $response = $this->postJson('/api/core/two-factor/verify-code', [
             'user_id' => $user->id,
             'code' => '123456',
         ]);

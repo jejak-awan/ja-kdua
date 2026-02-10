@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
+use App\Models\Core\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +15,7 @@ class SvgUploadSecurityTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seedPermissionsAndRoles();
         Storage::fake('public');
     }
 
@@ -27,7 +28,7 @@ class SvgUploadSecurityTest extends TestCase
         $file = UploadedFile::fake()->createWithContent('malicious.svg', $maliciousSvg);
 
         $response = $this->actingAs($user, 'sanctum')
-            ->postJson('/api/v1/admin/ja/media/upload', [
+            ->postJson('/api/core/admin/ja/media/upload', [
                 'file' => $file,
             ]);
 
@@ -49,7 +50,7 @@ class SvgUploadSecurityTest extends TestCase
         $file = UploadedFile::fake()->createWithContent('evil.svg', $maliciousSvg);
 
         $response = $this->actingAs($user, 'sanctum')
-            ->postJson('/api/v1/admin/ja/file-manager/upload', [
+            ->postJson('/api/core/admin/ja/file-manager/upload', [
                 'file' => $file,
                 'disk' => 'public',
                 'path' => 'uploads',

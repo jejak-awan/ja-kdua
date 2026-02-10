@@ -27,14 +27,8 @@ class ProvisioningService
     public function executeRequest(ServiceRequest $serviceRequest): bool
     {
         try {
-            $user = $serviceRequest->customer;
-            if (! $user) {
-                throw new \Exception('User not found for service request');
-            }
-            $customer = $user->customer;
-            if (! $customer) {
-                throw new \Exception('Customer profile not found for user');
-            }
+            $customer = $serviceRequest->customer;
+            $user = $customer->user;
 
             Log::info("Executing provisioning for Request ID: {$serviceRequest->id}", [
                 'type' => $serviceRequest->type,
@@ -51,15 +45,13 @@ class ProvisioningService
             }
 
             // 2. Register ONU on OLT if applicable
-            $device = CustomerDevice::where('customer_id', $user->id)->where('type', 'ONU')->first();
+            $device = CustomerDevice::where('customer_id', $customer->id)->where('type', 'ONU')->first();
             if ($device && $customer->olt_id) {
-                $olt = \App\Models\Isp\Olt::find($customer->olt_id);
-                if ($olt) {
-                    $this->oltService->registerOnu($olt, $device->serial_number, [
-                        'vlan' => $customer->vlan ?? 100, // This might still be missing on model, added to docblock
-                        'profile' => $serviceRequest->details['olt_profile'] ?? 'BASIC',
-                    ]);
-                }
+                $olt = \App\Models\Isp\Olt::findOrFail($customer->olt_id);
+                $this->oltService->registerOnu($olt, $device->serial_number, [
+                    'vlan' => $customer->vlan ?? 100, // This might still be missing on model, added to docblock
+                    'profile' => $serviceRequest->details['olt_profile'] ?? 'BASIC',
+                ]);
             }
 
             // 3. Update associated device lifecycle if applicable

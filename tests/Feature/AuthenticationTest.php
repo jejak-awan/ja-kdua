@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
+use App\Models\Core\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -26,7 +26,7 @@ class AuthenticationTest extends TestCase
             'email_verified_at' => now(),
         ]);
 
-        $response = $this->postJson('/api/v1/login', [
+        $response = $this->postJson('/api/core/login', [
             'email' => $email,
             'password' => 'password',
         ]);
@@ -60,7 +60,7 @@ class AuthenticationTest extends TestCase
             'password' => Hash::make('password'),
         ]);
 
-        $response = $this->postJson('/api/v1/login', [
+        $response = $this->postJson('/api/core/login', [
             'email' => 'nonexistent_'.uniqid().'@example.com',
             'password' => 'wrong-password',
         ]);
@@ -80,7 +80,7 @@ class AuthenticationTest extends TestCase
             'password' => Hash::make('password'),
         ]);
 
-        $response = $this->postJson('/api/v1/login', [
+        $response = $this->postJson('/api/core/login', [
             'email' => $email,
             'password' => 'password',
         ]);
@@ -97,7 +97,7 @@ class AuthenticationTest extends TestCase
      */
     public function test_login_requires_email_and_password(): void
     {
-        $response = $this->postJson('/api/v1/login', []);
+        $response = $this->postJson('/api/core/login', []);
 
         TestHelpers::assertApiValidationError($response);
         $response->assertJsonValidationErrors(['email', 'password']);
@@ -110,7 +110,7 @@ class AuthenticationTest extends TestCase
     {
         $userData = TestHelpers::getUserData();
 
-        $response = $this->postJson('/api/v1/register', $userData);
+        $response = $this->postJson('/api/core/register', $userData);
 
         TestHelpers::assertApiSuccess($response, 201);
         // Registration returns user and token
@@ -133,7 +133,7 @@ class AuthenticationTest extends TestCase
      */
     public function test_registration_requires_all_fields(): void
     {
-        $response = $this->postJson('/api/v1/register', []);
+        $response = $this->postJson('/api/core/register', []);
 
         TestHelpers::assertApiValidationError($response);
         $response->assertJsonValidationErrors(['name', 'email', 'password']);
@@ -148,7 +148,7 @@ class AuthenticationTest extends TestCase
             'email' => 'existing@example.com',
         ]);
 
-        $response = $this->postJson('/api/v1/register', [
+        $response = $this->postJson('/api/core/register', [
             'name' => 'Test User',
             'email' => 'existing@example.com',
             'password' => 'password',
@@ -164,7 +164,7 @@ class AuthenticationTest extends TestCase
      */
     public function test_registration_requires_password_confirmation(): void
     {
-        $response = $this->postJson('/api/v1/register', [
+        $response = $this->postJson('/api/core/register', [
             'name' => 'Test User',
             'email' => 'reg_'.uniqid().'@example.com',
             'password' => 'password',
@@ -183,7 +183,7 @@ class AuthenticationTest extends TestCase
         $user = $this->createUser();
         $token = $user->createToken('test-token')->plainTextToken;
 
-        $response = $this->postJson('/api/v1/logout', [], [
+        $response = $this->postJson('/api/core/logout', [], [
             'Authorization' => 'Bearer '.$token,
         ]);
 
@@ -195,7 +195,7 @@ class AuthenticationTest extends TestCase
      */
     public function test_unauthenticated_user_cannot_logout(): void
     {
-        $response = $this->postJson('/api/v1/logout');
+        $response = $this->postJson('/api/core/logout');
 
         $response->assertStatus(401);
     }
@@ -208,7 +208,7 @@ class AuthenticationTest extends TestCase
         $user = $this->createUser();
         $this->actingAs($user, 'sanctum');
 
-        $response = $this->getJson('/api/v1/user');
+        $response = $this->getJson('/api/core/user');
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJson([
@@ -223,7 +223,7 @@ class AuthenticationTest extends TestCase
      */
     public function test_unauthenticated_user_cannot_get_profile(): void
     {
-        $response = $this->getJson('/api/v1/user');
+        $response = $this->getJson('/api/core/user');
 
         $response->assertStatus(401);
     }
@@ -240,7 +240,7 @@ class AuthenticationTest extends TestCase
 
         Notification::fake();
 
-        $response = $this->postJson('/api/v1/forgot-password', [
+        $response = $this->postJson('/api/core/forgot-password', [
             'email' => $email,
         ]);
 
@@ -252,7 +252,7 @@ class AuthenticationTest extends TestCase
      */
     public function test_password_reset_requires_valid_email(): void
     {
-        $response = $this->postJson('/api/v1/forgot-password', [
+        $response = $this->postJson('/api/core/forgot-password', [
             'email' => 'invalid-email',
         ]);
 
@@ -273,7 +273,7 @@ class AuthenticationTest extends TestCase
 
         // Request password reset first to get token
         Notification::fake();
-        $this->postJson('/api/v1/forgot-password', [
+        $this->postJson('/api/core/forgot-password', [
             'email' => $email,
         ]);
 
@@ -293,7 +293,7 @@ class AuthenticationTest extends TestCase
             ]
         );
 
-        $response = $this->postJson('/api/v1/reset-password', [
+        $response = $this->postJson('/api/core/reset-password', [
             'token' => $token,
             'email' => $email,
             'password' => 'NewPassword123!',
@@ -317,7 +317,7 @@ class AuthenticationTest extends TestCase
             'email' => $email,
         ]);
 
-        $response = $this->postJson('/api/v1/reset-password', [
+        $response = $this->postJson('/api/core/reset-password', [
             'token' => 'invalid-token',
             'email' => $email,
             'password' => 'NewPassword123!',
@@ -332,7 +332,7 @@ class AuthenticationTest extends TestCase
      */
     public function test_password_reset_requires_all_fields(): void
     {
-        $response = $this->postJson('/api/v1/reset-password', []);
+        $response = $this->postJson('/api/core/reset-password', []);
 
         TestHelpers::assertApiValidationError($response);
         $response->assertJsonValidationErrors(['token', 'email', 'password']);

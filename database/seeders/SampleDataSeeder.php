@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\Category;
-use App\Models\Comment;
-use App\Models\Content;
-use App\Models\NewsletterSubscriber;
-use App\Models\Tag;
-use App\Models\User;
+use App\Models\Core\Category;
+use App\Models\Core\Comment;
+use App\Models\Core\Content;
+use App\Models\Core\NewsletterSubscriber;
+use App\Models\Core\Tag;
+use App\Models\Core\User;
 use Illuminate\Database\Seeder;
 
 class SampleDataSeeder extends Seeder
@@ -89,7 +89,7 @@ class SampleDataSeeder extends Seeder
         }
 
         // 3. Sample Form Submissions
-        $contactForm = \App\Models\Form::where('slug', 'contact-form')->first();
+        $contactForm = \App\Models\Core\Form::where('slug', 'contact-form')->first();
         if ($contactForm) {
             $submissions = [
                 [
@@ -110,7 +110,7 @@ class SampleDataSeeder extends Seeder
             ];
 
             foreach ($submissions as $sub) {
-                \App\Models\FormSubmission::create([
+                \App\Models\Core\FormSubmission::create([
                     'form_id' => $contactForm->id,
                     'data' => $sub['data'],
                     'ip_address' => $sub['ip_address'],

@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use App\Models\Category;
-use App\Models\Content;
-use App\Models\Form;
-use App\Models\Media;
-use App\Models\MediaFolder;
-use App\Models\User;
+use App\Models\Core\Category;
+use App\Models\Core\Content;
+use App\Models\Core\Form;
+use App\Models\Core\Media;
+use App\Models\Core\MediaFolder;
+use App\Models\Core\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -23,6 +23,7 @@ class E2EFlowTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seedPermissionsAndRoles();
         Storage::fake('public');
 
         // Start a session for login tests that need it
@@ -37,7 +38,7 @@ class E2EFlowTest extends TestCase
     public function test_complete_login_flow(): void
     {
         // Step 1: Login
-        $response = $this->postJson('/api/v1/login', [
+        $response = $this->postJson('/api/core/login', [
             'email' => $this->admin->email,
             'password' => 'password',
         ]);
@@ -49,7 +50,7 @@ class E2EFlowTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer '.$token,
             'Accept' => 'application/json',
-        ])->getJson('/api/v1/user');
+        ])->getJson('/api/core/user');
 
         TestHelpers::assertApiSuccess($response);
         $this->assertEquals($this->admin->email, $response->json('data.email'));
@@ -58,7 +59,7 @@ class E2EFlowTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer '.$token,
             'Accept' => 'application/json',
-        ])->postJson('/api/v1/logout');
+        ])->postJson('/api/core/logout');
 
         TestHelpers::assertApiSuccess($response);
 
@@ -77,7 +78,7 @@ class E2EFlowTest extends TestCase
         $category = Category::factory()->create();
 
         // Step 1: Create content as draft
-        $response = $this->withAuth($token)->postJson('/api/v1/admin/ja/contents', [
+        $response = $this->withAuth($token)->postJson('/api/core/admin/ja/contents', [
             'title' => 'Test Article',
             'slug' => 'test-article-'.uniqid(),
             'body' => 'This is test content body',
@@ -91,12 +92,12 @@ class E2EFlowTest extends TestCase
         $contentId = $response->json('data.id');
 
         // Step 2: View content details
-        $response = $this->withAuth($token)->getJson("/api/v1/admin/ja/contents/{$contentId}");
+        $response = $this->withAuth($token)->getJson("/api/core/admin/ja/contents/{$contentId}");
         TestHelpers::assertApiSuccess($response);
         $this->assertEquals('draft', $response->json('data.status'));
 
         // Step 3: Update content
-        $response = $this->withAuth($token)->putJson("/api/v1/admin/ja/contents/{$contentId}", [
+        $response = $this->withAuth($token)->putJson("/api/core/admin/ja/contents/{$contentId}", [
             'title' => 'Updated Test Article',
             'body' => 'Updated content body',
             'status' => 'published',
@@ -107,16 +108,16 @@ class E2EFlowTest extends TestCase
 
         // Step 4: View published content via public API
         $slug = $response->json('data.slug');
-        $response = $this->getJson("/api/v1/cms/contents/{$slug}");
+        $response = $this->getJson("/api/core/cms/contents/{$slug}");
         TestHelpers::assertApiSuccess($response);
         $this->assertEquals('Updated Test Article', $response->json('data.title'));
 
         // Step 5: Delete content
-        $response = $this->withAuth($token)->deleteJson("/api/v1/admin/ja/contents/{$contentId}");
+        $response = $this->withAuth($token)->deleteJson("/api/core/admin/ja/contents/{$contentId}");
         TestHelpers::assertApiSuccess($response);
 
         // Step 6: Verify content is deleted
-        $response = $this->withAuth($token)->getJson("/api/v1/admin/ja/contents/{$contentId}");
+        $response = $this->withAuth($token)->getJson("/api/core/admin/ja/contents/{$contentId}");
         $response->assertStatus(404);
     }
 
@@ -130,7 +131,7 @@ class E2EFlowTest extends TestCase
 
         // Step 1: Upload media file
         $file = UploadedFile::fake()->image('test.jpg', 800, 600);
-        $response = $this->withAuth($token)->postJson('/api/v1/admin/ja/media/upload', [
+        $response = $this->withAuth($token)->postJson('/api/core/admin/ja/media/upload', [
             'file' => $file,
             'folder_id' => $folder->id,
         ]);
@@ -139,7 +140,7 @@ class E2EFlowTest extends TestCase
         $mediaId = $response->json('data.media.id');
 
         // Step 2: View media details
-        $response = $this->withAuth($token)->getJson("/api/v1/admin/ja/media/{$mediaId}");
+        $response = $this->withAuth($token)->getJson("/api/core/admin/ja/media/{$mediaId}");
         TestHelpers::assertApiSuccess($response);
         $mediaData = $response->json('data');
         $this->assertNotNull($mediaData);
@@ -148,7 +149,7 @@ class E2EFlowTest extends TestCase
 
         // Step 3: Update media metadata (use actingAs for PUT requests)
         $this->actingAs($this->admin, 'sanctum');
-        $response = $this->putJson("/api/v1/admin/ja/media/{$mediaId}", [
+        $response = $this->putJson("/api/core/admin/ja/media/{$mediaId}", [
             'alt' => 'Test image alt text',
             'description' => 'Test image description',
         ]);
@@ -157,7 +158,7 @@ class E2EFlowTest extends TestCase
         $this->assertEquals('Test image alt text', $response->json('data.alt'));
 
         // Step 4: Generate thumbnail
-        $response = $this->withAuth($token)->postJson("/api/v1/admin/ja/media/{$mediaId}/thumbnail", [
+        $response = $this->withAuth($token)->postJson("/api/core/admin/ja/media/{$mediaId}/thumbnail", [
             'width' => 300,
             'height' => 300,
         ]);
@@ -165,12 +166,12 @@ class E2EFlowTest extends TestCase
         TestHelpers::assertApiSuccess($response);
 
         // Step 5: List all media
-        $response = $this->withAuth($token)->getJson('/api/v1/admin/ja/media');
+        $response = $this->withAuth($token)->getJson('/api/core/admin/ja/media');
         TestHelpers::assertApiPaginated($response);
         $this->assertGreaterThan(0, $response->json('data.total'));
 
         // Step 6: Delete media
-        $response = $this->withAuth($token)->deleteJson("/api/v1/admin/ja/media/{$mediaId}");
+        $response = $this->withAuth($token)->deleteJson("/api/core/admin/ja/media/{$mediaId}");
         TestHelpers::assertApiSuccess($response);
     }
 
@@ -181,47 +182,48 @@ class E2EFlowTest extends TestCase
     {
         $token = $this->getAuthToken($this->admin);
 
-        // Step 1: Create form
-        $response = $this->withAuth($token)->postJson('/api/v1/admin/ja/forms', [
+        // Step 1: Create form with Builder Blocks
+        $response = $this->withAuth($token)->postJson('/api/core/admin/ja/forms', [
             'name' => 'Contact Form',
             'slug' => 'contact-form-'.uniqid(),
             'description' => 'Test contact form',
             'is_active' => true,
+            'blocks' => [
+                [
+                    'type' => 'form_input',
+                    'settings' => [
+                        'label' => 'Name',
+                        'field_id' => 'name',
+                        'type' => 'text',
+                        'is_required' => true,
+                    ],
+                ],
+                [
+                    'type' => 'form_input',
+                    'settings' => [
+                        'label' => 'Email',
+                        'field_id' => 'email',
+                        'type' => 'email',
+                        'is_required' => true,
+                    ],
+                ],
+            ],
         ]);
 
         TestHelpers::assertApiSuccess($response, 201);
         $formId = $response->json('data.id');
 
-        // Step 2: Add form fields
-        $response = $this->withAuth($token)->postJson("/api/v1/admin/ja/forms/{$formId}/fields", [
-            'label' => 'Name',
-            'name' => 'name',
-            'type' => 'text',
-            'required' => true,
-            'sort_order' => 1,
-        ]);
-
-        TestHelpers::assertApiSuccess($response, 201);
-
-        $response = $this->withAuth($token)->postJson("/api/v1/admin/ja/forms/{$formId}/fields", [
-            'label' => 'Email',
-            'name' => 'email',
-            'type' => 'email',
-            'required' => true,
-            'sort_order' => 2,
-        ]);
-
-        TestHelpers::assertApiSuccess($response, 201);
+        // Step 2: Skipped (Fields are added via blocks in Step 1)
 
         // Step 3: Get form (public)
         $slug = Form::find($formId)->slug;
-        $response = $this->getJson("/api/v1/cms/forms/{$slug}");
+        $response = $this->getJson("/api/core/cms/forms/{$slug}");
         $response->assertStatus(200);
         // Public form endpoint returns direct JSON, not wrapped in success response
         $this->assertEquals('Contact Form', $response->json('name'));
 
         // Step 4: Submit form (public)
-        $response = $this->postJson("/api/v1/admin/ja/forms/{$formId}/submit", [
+        $response = $this->postJson("/api/core/admin/ja/forms/{$formId}/submit", [
             'name' => 'John Doe',
             'email' => 'john@example.com',
         ]);
@@ -229,14 +231,14 @@ class E2EFlowTest extends TestCase
         TestHelpers::assertApiSuccess($response, 201);
 
         // Step 5: View submissions (admin)
-        $response = $this->withAuth($token)->getJson("/api/v1/admin/ja/forms/{$formId}/submissions");
+        $response = $this->withAuth($token)->getJson("/api/core/admin/ja/forms/{$formId}/submissions");
         TestHelpers::assertApiSuccess($response);
         $submissions = $response->json('data');
         $this->assertIsArray($submissions);
         $this->assertGreaterThan(0, count($submissions));
 
         // Step 6: Delete form
-        $response = $this->withAuth($token)->deleteJson("/api/v1/admin/ja/forms/{$formId}");
+        $response = $this->withAuth($token)->deleteJson("/api/core/admin/ja/forms/{$formId}");
         TestHelpers::assertApiSuccess($response);
     }
 
@@ -248,7 +250,7 @@ class E2EFlowTest extends TestCase
     protected function getAuthToken(User $user): string
     {
         // Login to establish session and use actingAs for subsequent requests
-        $this->postJson('/api/v1/login', [
+        $this->postJson('/api/core/login', [
             'email' => $user->email,
             'password' => 'password',
         ]);

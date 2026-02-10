@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Services;
 
-use App\Models\AnalyticsEvent;
-use App\Services\AnalyticsService;
+use App\Models\Core\AnalyticsEvent;
+use App\Services\Core\AnalyticsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

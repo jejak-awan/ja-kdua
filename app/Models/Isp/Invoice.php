@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string $invoice_number
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
- * @property-read \App\Models\User $user
+ * @property-read \App\Models\Core\User $user
  * @property-read \Illuminate\Database\Eloquent\Collection<int, InvoiceItem> $items
  */
 class Invoice extends Model
@@ -66,10 +66,10 @@ class Invoice extends Model
     /**
      * Get the user that owns the invoice.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this>
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Core\User, $this>
      */
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(\App\Models\Core\User::class, 'user_id');
     }
 }

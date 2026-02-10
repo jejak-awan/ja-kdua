@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\Core\User;
 use App\Models\Isp\BillingPlan;
 use App\Models\Isp\CustomerDevice;
 use App\Models\Isp\Invoice;
 use App\Models\Isp\ServiceNode;
-use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class IspSeeder extends Seeder

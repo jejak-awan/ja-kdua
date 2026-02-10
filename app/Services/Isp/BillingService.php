@@ -75,13 +75,13 @@ class BillingService
 
             if ($customer->is_taxed) {
                 // Get dynamic tax rates from settings or use hardcoded defaults
-                $ppnVal = \App\Models\Setting::get('billing_tax_ppn', 0.11);
+                $ppnVal = \App\Models\Core\Setting::get('billing_tax_ppn', 0.11);
                 $ppnRate = is_numeric($ppnVal) ? (float) $ppnVal : 0.11;
 
-                $bhpVal = \App\Models\Setting::get('billing_tax_bhp', 0.005);
+                $bhpVal = \App\Models\Core\Setting::get('billing_tax_bhp', 0.005);
                 $bhpRate = is_numeric($bhpVal) ? (float) $bhpVal : 0.005;
 
-                $usoVal = \App\Models\Setting::get('billing_tax_uso', 0.0125);
+                $usoVal = \App\Models\Core\Setting::get('billing_tax_uso', 0.0125);
                 $usoRate = is_numeric($usoVal) ? (float) $usoVal : 0.0125;
 
                 $ppn = round($subtotal * $ppnRate, 2);
@@ -91,7 +91,7 @@ class BillingService
             }
 
             $finalAmount = $subtotal + $tax + (float) $uniqueCode;
-            $dueDaysVal = \App\Models\Setting::get('billing_invoice_due_days', 7);
+            $dueDaysVal = \App\Models\Core\Setting::get('billing_invoice_due_days', 7);
             $dueDays = is_numeric($dueDaysVal) ? (int) $dueDaysVal : 7;
 
             $invoice = Invoice::create([

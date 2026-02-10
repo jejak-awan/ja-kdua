@@ -137,7 +137,7 @@ public function test_feature_does_something(): void
  * Create a new content item.
  *
  * @param  array  $data
- * @return \App\Models\Content
+ * @return \App\Models\Core\Content
  * @throws \Illuminate\Validation\ValidationException
  */
 public function createContent(array $data): Content

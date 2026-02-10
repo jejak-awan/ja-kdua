@@ -17,7 +17,7 @@ class BackupPasswordTest extends TestCase
         // Ensure no env password is set
         putenv('BACKUP_ARCHIVE_PASSWORD');
 
-        $service = new \App\Services\BackupService;
+        $service = new \App\Services\Core\BackupService;
 
         // Mock ZipArchive to avoid actual file system ops complexity or just run it?
         // Running it requires DB connection.
@@ -37,7 +37,7 @@ class BackupPasswordTest extends TestCase
         // Let's rely on manual verification via Tinker or just creating a Backup record manually to test the 'encrypted' cast.
 
         $password = 'secret-123';
-        $backup = \App\Models\Backup::create([
+        $backup = \App\Models\Core\Backup::create([
             'name' => 'test_backup',
             'type' => 'database',
             'disk' => 'local',

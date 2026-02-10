@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         // Trust proxies for correct client IP detection
-        $middleware->prepend(\App\Http\Middleware\TrustProxies::class);
+        $middleware->prepend(\App\Http\Middleware\Core\TrustProxies::class);
 
         // Enable Sanctum stateful API for SPA
         $middleware->statefulApi();
@@ -25,16 +25,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn () => route('login'));
 
         $middleware->web(append: [
-            \App\Http\Middleware\CheckMaintenanceMode::class,
-            \App\Http\Middleware\HandleRedirects::class,
+            \App\Http\Middleware\Core\CheckMaintenanceMode::class,
+            \App\Http\Middleware\Core\HandleRedirects::class,
             \Illuminate\Session\Middleware\AuthenticateSession::class,
-            \App\Http\Middleware\SecurityHeaders::class,
-            \App\Http\Middleware\TrackAnalytics::class,
+            \App\Http\Middleware\Core\SecurityHeaders::class,
+            \App\Http\Middleware\Core\TrackAnalytics::class,
         ]);
 
         // Register permission middleware alias
         $middleware->alias([
-            'permission' => \App\Http\Middleware\CheckPermission::class,
+            'permission' => \App\Http\Middleware\Core\CheckPermission::class,
         ]);
 
         // Exempt analytics from CSRF protection (public tracking endpoint)

@@ -2,8 +2,8 @@
 
 namespace App\Helpers;
 
-use App\Models\Theme;
-use App\Services\ThemeService;
+use App\Models\Core\Theme;
+use App\Services\Core\ThemeService;
 
 /**
  * Theme Helper Class
@@ -118,10 +118,10 @@ class ThemeHelper
     /**
      * Get menu by slug (for API use)
      */
-    public static function getMenu(string $slug): ?\App\Models\Menu
+    public static function getMenu(string $slug): ?\App\Models\Core\Menu
     {
         try {
-            return \App\Models\Menu::where('slug', $slug)
+            return \App\Models\Core\Menu::where('slug', $slug)
                 ->where('is_active', true)
                 ->with(['items' => function ($query) {
                     $query->where('is_active', true)

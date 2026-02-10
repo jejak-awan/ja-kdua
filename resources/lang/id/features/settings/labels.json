@@ -2,6 +2,7 @@
     "labels": {
         "site_name": "Nama Situs",
         "site_logo": "Logo Situs",
+        "site_favicon": "Favicon Situs",
         "site_description": "Deskripsi Situs",
         "site_url": "URL Situs",
         "admin_email": "Email Admin",

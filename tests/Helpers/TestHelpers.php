@@ -2,10 +2,10 @@
 
 namespace Tests\Helpers;
 
-use App\Models\Category;
-use App\Models\Content;
-use App\Models\Tag;
-use App\Models\User;
+use App\Models\Core\Category;
+use App\Models\Core\Content;
+use App\Models\Core\Tag;
+use App\Models\Core\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 

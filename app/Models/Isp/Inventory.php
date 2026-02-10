@@ -8,6 +8,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string|null $sku
+ * @property string $category
+ * @property string $unit
+ * @property int $stock
+ * @property int $min_stock
+ * @property float $unit_price
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Isp\InventoryTransaction> $transactions
+ */
 class Inventory extends Model
 {
     /** @use HasFactory<\Database\Factories\Isp\InventoryFactory> */

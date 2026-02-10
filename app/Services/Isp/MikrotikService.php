@@ -8,11 +8,11 @@ use App\Models\Isp\ServiceNode;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use App\Services\Isp\RouterOSAPI; // Assuming RouterOSAPI is a local class in the same namespace
+
+// Assuming RouterOSAPI is a local class in the same namespace
 
 class MikrotikService
 {
-    /** @var RouterOSAPI|null */
     protected ?RouterOSAPI $client = null;
 
     protected RouterService $routerService;
@@ -143,7 +143,7 @@ class MikrotikService
     public function connect(string $host, string $user, string $pass, int $port = 8728): bool
     {
         try {
-            $this->client = new RouterOSAPI();
+            $this->client = new RouterOSAPI;
             $this->client->port = $port;
             $this->client->timeout = 3;
 
@@ -224,7 +224,7 @@ class MikrotikService
      */
     public function getIpBindings(): array
     {
-        if (!$this->ensureConnected()) {
+        if (! $this->ensureConnected()) {
             return [];
         }
 
@@ -245,6 +245,7 @@ class MikrotikService
 
         } catch (Exception $e) {
             Log::error('Mikrotik IP Binding Query Failed: '.$e->getMessage());
+
             return [];
         }
     }
@@ -252,32 +253,34 @@ class MikrotikService
     /**
      * Add a new IP Binding (bypass hotspot login for specific MAC/IP).
      *
-     * @param array{mac?: string, address?: string, type?: string, comment?: string} $data
+     * @param  array{mac?: string, address?: string, type?: string, comment?: string}  $data
      */
     public function addIpBinding(array $data): bool
     {
-        if (!$this->ensureConnected()) {
+        if (! $this->ensureConnected()) {
             return false;
         }
 
         try {
             $params = [];
-            if (!empty($data['mac'])) {
+            if (! empty($data['mac'])) {
                 $params['mac-address'] = $data['mac'];
             }
-            if (!empty($data['address'])) {
+            if (! empty($data['address'])) {
                 $params['address'] = $data['address'];
             }
             $params['type'] = $data['type'] ?? 'bypassed';
-            if (!empty($data['comment'])) {
+            if (! empty($data['comment'])) {
                 $params['comment'] = $data['comment'];
             }
 
             $this->client?->comm('/ip/hotspot/ip-binding/add', $params);
+
             return true;
 
         } catch (Exception $e) {
             Log::error('Mikrotik IP Binding Add Failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -287,16 +290,18 @@ class MikrotikService
      */
     public function removeIpBinding(string $id): bool
     {
-        if (!$this->ensureConnected()) {
+        if (! $this->ensureConnected()) {
             return false;
         }
 
         try {
             $this->client?->comm('/ip/hotspot/ip-binding/remove', ['.id' => $id]);
+
             return true;
 
         } catch (Exception $e) {
             Log::error('Mikrotik IP Binding Remove Failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -306,17 +311,19 @@ class MikrotikService
      */
     public function toggleIpBinding(string $id, bool $disabled): bool
     {
-        if (!$this->ensureConnected()) {
+        if (! $this->ensureConnected()) {
             return false;
         }
 
         try {
             $action = $disabled ? 'disable' : 'enable';
             $this->client?->comm('/ip/hotspot/ip-binding/'.$action, ['.id' => $id]);
+
             return true;
 
         } catch (Exception $e) {
             Log::error('Mikrotik IP Binding Toggle Failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -332,7 +339,7 @@ class MikrotikService
      */
     public function getHotspotCookies(): array
     {
-        if (!$this->ensureConnected()) {
+        if (! $this->ensureConnected()) {
             return [];
         }
 
@@ -352,6 +359,7 @@ class MikrotikService
 
         } catch (Exception $e) {
             Log::error('Mikrotik Hotspot Cookies Query Failed: '.$e->getMessage());
+
             return [];
         }
     }
@@ -361,16 +369,18 @@ class MikrotikService
      */
     public function removeHotspotCookie(string $id): bool
     {
-        if (!$this->ensureConnected()) {
+        if (! $this->ensureConnected()) {
             return false;
         }
 
         try {
             $this->client?->comm('/ip/hotspot/cookie/remove', ['.id' => $id]);
+
             return true;
 
         } catch (Exception $e) {
             Log::error('Mikrotik Hotspot Cookie Remove Failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -386,7 +396,7 @@ class MikrotikService
      */
     public function getInterfaces(): array
     {
-        if (!$this->ensureConnected()) {
+        if (! $this->ensureConnected()) {
             return [];
         }
 
@@ -405,6 +415,7 @@ class MikrotikService
 
         } catch (Exception $e) {
             Log::error('Mikrotik Interfaces Query Failed: '.$e->getMessage());
+
             return [];
         }
     }
@@ -429,6 +440,7 @@ class MikrotikService
 
         if (empty($host) || empty($user)) {
             Log::warning('Mikrotik credentials not configured');
+
             return false;
         }
 
@@ -446,7 +458,7 @@ class MikrotikService
      */
     public function getUserStats(string $username): array
     {
-        if (!$this->ensureConnected()) {
+        if (! $this->ensureConnected()) {
             return [];
         }
 
@@ -477,6 +489,7 @@ class MikrotikService
 
         } catch (Exception $e) {
             Log::error('Mikrotik User Stats Query Failed: '.$e->getMessage());
+
             return [];
         }
     }
@@ -486,7 +499,7 @@ class MikrotikService
      */
     public function disconnectUser(string $username): bool
     {
-        if (!$this->ensureConnected()) {
+        if (! $this->ensureConnected()) {
             return false;
         }
 
@@ -502,7 +515,7 @@ class MikrotikService
 
             foreach ($active as $session) {
                 $id = $session['.id'] ?? '';
-                if (!empty($id)) {
+                if (! empty($id)) {
                     $this->client?->comm('/ip/hotspot/active/remove', ['.id' => $id]);
                 }
             }
@@ -511,6 +524,7 @@ class MikrotikService
 
         } catch (Exception $e) {
             Log::error('Mikrotik Disconnect User Failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -520,7 +534,7 @@ class MikrotikService
      */
     public function resetUserCounters(string $username): bool
     {
-        if (!$this->ensureConnected()) {
+        if (! $this->ensureConnected()) {
             return false;
         }
 
@@ -545,6 +559,7 @@ class MikrotikService
 
         } catch (Exception $e) {
             Log::error('Mikrotik Reset Counters Failed: '.$e->getMessage());
+
             return false;
         }
     }

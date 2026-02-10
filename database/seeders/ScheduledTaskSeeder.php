@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\ScheduledTask;
+use App\Models\Core\ScheduledTask;
 use Illuminate\Database\Seeder;
 
 class ScheduledTaskSeeder extends Seeder

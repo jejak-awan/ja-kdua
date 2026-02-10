@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\Category;
-use App\Models\Content;
-use App\Models\User;
+use App\Models\Core\Category;
+use App\Models\Core\Content;
+use App\Models\Core\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Tests\Helpers\TestHelpers;
@@ -12,17 +12,21 @@ use Tests\TestCase;
 
 class SeoToolsTest extends TestCase
 {
-    use RefreshDatabase;
-
-    protected User $admin;
 
     protected function setUp(): void
     {
         parent::setUp();
-
+        $this->seedPermissionsAndRoles();
         // Create admin user with permissions
         $this->admin = $this->createAdminUser();
     }
+
+
+    use RefreshDatabase;
+
+    protected User $admin;
+
+
 
     /**
      * Test admin can generate sitemap.
@@ -30,7 +34,7 @@ class SeoToolsTest extends TestCase
     public function test_admin_can_generate_sitemap(): void
     {
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/ja/seo/sitemap');
+            ->getJson('/api/core/admin/ja/seo/sitemap');
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonStructure([
@@ -53,7 +57,7 @@ class SeoToolsTest extends TestCase
     public function test_admin_can_get_robots_txt(): void
     {
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/ja/seo/robots-txt');
+            ->getJson('/api/core/admin/ja/seo/robots-txt');
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonStructure([
@@ -78,7 +82,7 @@ class SeoToolsTest extends TestCase
         $newContent = "User-agent: *\nDisallow: /admin\n\nSitemap: ".url('/sitemap.xml');
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->putJson('/api/v1/admin/ja/seo/robots-txt', [
+            ->putJson('/api/core/admin/ja/seo/robots-txt', [
                 'content' => $newContent,
             ]);
 
@@ -103,7 +107,7 @@ class SeoToolsTest extends TestCase
     public function test_robots_txt_update_requires_content(): void
     {
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->putJson('/api/v1/admin/ja/seo/robots-txt', []);
+            ->putJson('/api/core/admin/ja/seo/robots-txt', []);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['content']);
@@ -128,7 +132,7 @@ class SeoToolsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson("/api/v1/admin/ja/contents/{$content->id}/seo-analysis");
+            ->getJson("/api/core/admin/ja/contents/{$content->id}/seo-analysis");
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonStructure([
@@ -171,7 +175,7 @@ class SeoToolsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson("/api/v1/admin/ja/contents/{$content->id}/seo-analysis");
+            ->getJson("/api/core/admin/ja/contents/{$content->id}/seo-analysis");
 
         TestHelpers::assertApiSuccess($response);
 
@@ -203,7 +207,7 @@ class SeoToolsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson("/api/v1/admin/ja/contents/{$content->id}/schema");
+            ->getJson("/api/core/admin/ja/contents/{$content->id}/schema");
 
         TestHelpers::assertApiSuccess($response);
 
@@ -235,7 +239,7 @@ class SeoToolsTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson("/api/v1/admin/ja/contents/{$content->id}/schema");
+            ->getJson("/api/core/admin/ja/contents/{$content->id}/schema");
 
         TestHelpers::assertApiSuccess($response);
 
@@ -251,7 +255,7 @@ class SeoToolsTest extends TestCase
         $user = $this->createUser();
 
         $response = $this->actingAs($user, 'sanctum')
-            ->putJson('/api/v1/admin/ja/seo/robots-txt', [
+            ->putJson('/api/core/admin/ja/seo/robots-txt', [
                 'content' => 'Test content',
             ]);
 
@@ -263,13 +267,13 @@ class SeoToolsTest extends TestCase
      */
     public function test_unauthenticated_user_cannot_access_seo_tools(): void
     {
-        $response = $this->getJson('/api/v1/admin/ja/seo/sitemap');
+        $response = $this->getJson('/api/core/admin/ja/seo/sitemap');
         $response->assertStatus(401);
 
-        $response = $this->getJson('/api/v1/admin/ja/seo/robots-txt');
+        $response = $this->getJson('/api/core/admin/ja/seo/robots-txt');
         $response->assertStatus(401);
 
-        $response = $this->putJson('/api/v1/admin/ja/seo/robots-txt', [
+        $response = $this->putJson('/api/core/admin/ja/seo/robots-txt', [
             'content' => 'Test',
         ]);
         $response->assertStatus(401);

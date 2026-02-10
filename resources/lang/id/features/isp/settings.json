@@ -1,0 +1,150 @@
+{
+    "title": "Pengaturan ISP",
+    "subtitle": "Kelola konfigurasi fitur dan integrasi khusus ISP.",
+    "tabs": {
+        "whatsapp": "WhatsApp",
+        "billing": "Penagihan",
+        "network": "Jaringan",
+        "radius": "RADIUS",
+        "branding": "Branding",
+        "integrations": "Integrasi"
+    },
+    "whatsapp": {
+        "title": "Konfigurasi WhatsApp",
+        "subtitle": "Atur driver WhatsApp dan kredensial untuk pengiriman notifikasi.",
+        "fields": {
+            "driver": "Driver",
+            "api_url": "URL API",
+            "api_key": "API Key"
+        },
+        "drivers": {
+            "log": "Log (Uji coba melalui laravel.log)",
+            "http": "HTTP Api (Wablas, Fonnte, dll)"
+        }
+    },
+    "billing": {
+        "title": "Pengaturan Penagihan",
+        "subtitle": "Konfigurasi siklus penagihan, pajak, dan isolasi otomatis.",
+        "tabs": {
+            "general": "Umum",
+            "tax": "Pajak",
+            "isolation": "Isolasi & Terminasi"
+        },
+        "fields": {
+            "payment_type": "Tipe Pembayaran",
+            "cycle_type": "Siklus Penagihan",
+            "prorata": "Aktifkan Prorata",
+            "prorata_desc": "Hitung tagihan bulan pertama secara proporsional.",
+            "tax_enabled": "Aktifkan Pajak (PPN)",
+            "tax_ppn": "Tarif PPN (%)",
+            "tax_bhp": "Pajak BHP (%)",
+            "tax_uso": "Pajak USO (%)",
+            "tax_rate_help": "Nilai-nilai ini akan diterapkan pada pembuatan invoice otomatis.",
+            "suspend_behavior": "Perilaku Suspend",
+            "invoice_due_days": "Jatuh Tempo Invoice",
+            "invoice_due_days_help": "Jumlah hari dari tanggal dibuat hingga jatuh tempo.",
+            "invoice_date": "Tanggal Pembuatan Invoice",
+            "invoice_date_help": "Tanggal saat invoice dibuat setiap bulannya.",
+            "isolation_date": "Tanggal Isolasi Otomatis",
+            "isolation_date_help": "Tanggal saat layanan diputus jika belum lunas.",
+            "isolation_time": "Waktu Isolasi"
+        },
+        "options": {
+            "prepaid": "Prepaid (Prabayar)",
+            "postpaid": "Postpaid (Pascabayar)",
+            "fixed": "Tanggal Tetap (misal tgl 1)",
+            "profile": "Durasi Profil (30 Hari)",
+            "monthly": "Ulang Tahun (Tgl Pasang)",
+            "payment_date": "Saat Jatuh Tempo",
+            "isolation_date": "Pada Tanggal Isolasi Spesifik"
+        }
+    },
+    "network": {
+        "title": "Konfigurasi Jaringan",
+        "subtitle": "Atur lokasi default peta dan preferensi jaringan lainnya.",
+        "fields": {
+            "map_lat": "Latitude Default Peta",
+            "map_lng": "Longitude Default Peta",
+            "map_zoom": "Level Zoom Default"
+        },
+        "help": {
+            "map_lat": "Latitude pusat default untuk peta baru.",
+            "map_lng": "Longitude pusat default untuk peta baru."
+        }
+    },
+    "radius": {
+        "title": "Konfigurasi RADIUS",
+        "subtitle": "Atur pengaturan server RADIUS dan nilai fallback.",
+        "fields": {
+            "coa_port": "Port COA",
+            "default_speed": "Keadaan Speed Fallback"
+        },
+        "help": {
+            "coa_port": "Port CoA default untuk Mikrotik adalah 1700.",
+            "default_speed": "Speed yang digunakan jika paket tidak memiliki limit."
+        }
+    },
+    "branding": {
+        "document_identity": "Identitas Dokumen",
+        "company_info": "Informasi Perusahaan",
+        "invoice_layout": "Layout Invoice",
+        "invoice_notes": "Catatan & Footer Invoice",
+        "doc_preview": "Pratinjau Dokumen",
+        "no_doc_logo": "Tanpa Logo Dokumen",
+        "invoice_preview": "Pratinjau Branding Invoice",
+        "logo_size": "Ukuran Logo Relatif",
+        "labels": {
+            "invoice_logo": "Logo Invoice",
+            "company_name": "Nama Perusahaan",
+            "company_slogan": "Slogan Perusahaan",
+            "company_address": "Alamat Perusahaan",
+            "company_whatsapp": "WhatsApp Perusahaan",
+            "invoice_kop": "Header Invoice (KOP)",
+            "invoice_watermark": "Watermark Invoice",
+            "invoice_signature_name": "Nama Penandatangan",
+            "invoice_signature_image": "Gambar Tanda Tangan",
+            "invoice_signature_title": "Jabatan Penandatangan",
+            "invoice_show_bank_account": "Tampilkan Rekening Bank",
+            "invoice_note_unpaid": "Catatan Invoice UNPAID",
+            "invoice_note_paid": "Catatan Invoice PAID",
+            "invoice_footer": "Teks Footer Invoice"
+        },
+        "descriptions": {
+            "invoice_logo": "Logo khusus yang digunakan pada PDF Invoice dan dokumen penagihan.",
+            "company_name": "Nama perusahaan yang akan muncul pada invoice dan laporan",
+            "company_slogan": "Slogan pendek perusahaan",
+            "company_address": "Alamat lengkap perusahaan untuk header invoice",
+            "company_whatsapp": "Nomor WhatsApp untuk dukungan pelanggan",
+            "invoice_kop": "Gambar header invoice (disarankan 776x100 px)",
+            "invoice_watermark": "Gambar latar belakang transparan untuk invoice",
+            "invoice_signature_name": "Nama orang yang menandatangani invoice",
+            "invoice_signature_image": "Gambar tanda tangan digital",
+            "invoice_signature_title": "Jabatan orang yang menandatangani invoice",
+            "invoice_show_bank_account": "Tampilkan daftar rekening bank pada invoice",
+            "invoice_note_unpaid": "Catatan yang muncul jika invoice belum lunas",
+            "invoice_note_paid": "Catatan yang muncul jika invoice sudah lunas",
+            "invoice_footer": "Teks footer yang muncul di bagian bawah invoice"
+        }
+    },
+    "integrations": {
+        "custom_domain": "Custom Domain",
+        "mutasibank": "MUTASIBANK.CO.ID",
+        "moota": "MOOTA.CO.ID",
+        "payment_gateways": "Gateway Pembayaran",
+        "gateway_title": "Gateway Pembayaran Otomatis",
+        "gateway_manage": "Kelola Gateway",
+        "labels": {
+            "custom_domain": "Custom Domain",
+            "mutasibank_api_key": "MutasiBank API Key",
+            "moota_api_key": "Moota API Key",
+            "integrations_payment_gateways": "Gateway Pembayaran",
+            "integrations_payment_gateways_manage": "Kelola Gateway"
+        },
+        "descriptions": {
+            "custom_domain": "Domain kustom untuk panel member",
+            "mutasibank_api_key": "API Key dari MutasiBank.co.id",
+            "moota_api_key": "API Key untuk integrasi Moota.co.id untuk pengecekan mutasi otomatis.",
+            "integrations_payment_gateways": "Konfigurasi berbagai gateway pembayaran (Midtrans, Xendit, Manual) untuk menerima pembayaran dari pelanggan."
+        }
+    }
+}

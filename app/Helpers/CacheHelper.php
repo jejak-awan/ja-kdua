@@ -70,7 +70,7 @@ class CacheHelper
     {
         $cacheKey = self::key(self::PREFIX_API, $key);
 
-        return Cache::remember($cacheKey, $ttl, function () use ($callback) : mixed {
+        return Cache::remember($cacheKey, $ttl, function () use ($callback): mixed {
             try {
                 return $callback();
             } catch (\Exception $e) {
@@ -89,7 +89,7 @@ class CacheHelper
 
         if (self::supportsTagging()) {
             /** @var mixed $result */
-            $result = Cache::tags(['content'])->remember($cacheKey, $ttl, function () use ($callback) : mixed {
+            $result = Cache::tags(['content'])->remember($cacheKey, $ttl, function () use ($callback): mixed {
                 return $callback();
             });
 
@@ -97,7 +97,7 @@ class CacheHelper
         }
 
         /** @var mixed $result */
-        $result = Cache::remember($cacheKey, $ttl, function () use ($callback) : mixed {
+        $result = Cache::remember($cacheKey, $ttl, function () use ($callback): mixed {
             return $callback();
         });
 
@@ -113,7 +113,7 @@ class CacheHelper
 
         if (self::supportsTagging()) {
             /** @var mixed $result */
-            $result = Cache::tags(['media'])->remember($cacheKey, $ttl, function () use ($callback) : mixed {
+            $result = Cache::tags(['media'])->remember($cacheKey, $ttl, function () use ($callback): mixed {
                 return $callback();
             });
 
@@ -121,7 +121,7 @@ class CacheHelper
         }
 
         /** @var mixed $result */
-        $result = Cache::remember($cacheKey, $ttl, function () use ($callback) : mixed {
+        $result = Cache::remember($cacheKey, $ttl, function () use ($callback): mixed {
             return $callback();
         });
 
@@ -137,7 +137,7 @@ class CacheHelper
 
         if (self::supportsTagging()) {
             /** @var mixed $result */
-            $result = Cache::tags(['categories'])->remember($cacheKey, $ttl, function () use ($callback) : mixed {
+            $result = Cache::tags(['categories'])->remember($cacheKey, $ttl, function () use ($callback): mixed {
                 return $callback();
             });
 
@@ -145,7 +145,7 @@ class CacheHelper
         }
 
         /** @var mixed $result */
-        $result = Cache::remember($cacheKey, $ttl, function () use ($callback) : mixed {
+        $result = Cache::remember($cacheKey, $ttl, function () use ($callback): mixed {
             return $callback();
         });
 
@@ -160,7 +160,7 @@ class CacheHelper
         $cacheKey = self::key(self::PREFIX_STATISTICS, $type);
 
         /** @var mixed $result */
-        $result = Cache::remember($cacheKey, $ttl, function () use ($callback) : mixed {
+        $result = Cache::remember($cacheKey, $ttl, function () use ($callback): mixed {
             return $callback();
         });
 

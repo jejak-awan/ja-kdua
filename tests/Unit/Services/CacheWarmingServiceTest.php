@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Services;
 
-use App\Models\Category;
-use App\Models\Content;
-use App\Models\Language;
-use App\Models\Media;
-use App\Models\Tag;
-use App\Services\CacheWarmingService;
+use App\Models\Core\Category;
+use App\Models\Core\Content;
+use App\Models\Core\Language;
+use App\Models\Core\Media;
+use App\Models\Core\Tag;
+use App\Services\Core\CacheWarmingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;

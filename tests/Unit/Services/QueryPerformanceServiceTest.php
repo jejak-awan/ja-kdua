@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Services;
 
-use App\Services\QueryPerformanceService;
+use App\Services\Core\QueryPerformanceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;

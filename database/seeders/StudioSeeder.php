@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\Category;
-use App\Models\Form;
-use App\Models\Menu;
-use App\Models\MenuItem;
-use App\Models\Tag;
-use App\Models\User;
+use App\Models\Core\Category;
+use App\Models\Core\Form;
+use App\Models\Core\Menu;
+use App\Models\Core\MenuItem;
+use App\Models\Core\Tag;
+use App\Models\Core\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 

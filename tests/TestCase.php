@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use App\Models\User;
+use App\Models\Core\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -41,8 +41,8 @@ abstract class TestCase extends BaseTestCase
             return false; // Token-based auth never uses "remember me"
         });
 
-        // Seed permissions and roles
-        $this->seedPermissionsAndRoles();
+        // NOTE: Permissions and roles seeding removed from setUp() for performance
+        // Tests that need permissions should call $this->seedPermissionsAndRoles() manually
     }
 
     /**

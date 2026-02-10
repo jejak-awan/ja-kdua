@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\FormSubmission;
+use App\Models\Core\FormSubmission;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -28,8 +28,8 @@ class FormSubmissionsExport implements FromQuery, ShouldAutoSize, WithHeadings, 
     protected $fieldKeys;
 
     /**
-     * @param Builder<FormSubmission> $query
-     * @param array<int, string> $fieldKeys
+     * @param  Builder<FormSubmission>  $query
+     * @param  array<int, string>  $fieldKeys
      */
     public function __construct(Builder $query, array $fieldKeys)
     {
@@ -59,7 +59,7 @@ class FormSubmissionsExport implements FromQuery, ShouldAutoSize, WithHeadings, 
     }
 
     /**
-     * @param FormSubmission $submission
+     * @param  FormSubmission  $submission
      * @return array<int, mixed>
      */
     public function map($submission): array
@@ -81,7 +81,6 @@ class FormSubmissionsExport implements FromQuery, ShouldAutoSize, WithHeadings, 
     }
 
     /**
-     * @param Worksheet $sheet
      * @return array<int|string, mixed>
      */
     public function styles(Worksheet $sheet): array

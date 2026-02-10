@@ -349,6 +349,7 @@ const fetchSettings = async () => {
         ensureSetting('maintenance_countdown_enabled', false, 'boolean', 'general');
         ensureSetting('maintenance_end_time', '', 'datetime', 'general');
         ensureSetting('site_logo', '', 'image', 'general', 'Site Logo');
+        ensureSetting('site_favicon', '', 'image', 'general', 'Site Favicon');
 
         initializeFormData();
     } catch (error: unknown) {

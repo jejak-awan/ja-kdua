@@ -17,7 +17,7 @@ class OltService
      */
     public function getDriver(Olt $olt): OltDriver
     {
-        return match (strtoupper($olt->type)) {
+        return match (strtoupper((string) $olt->type)) {
             'ZTE' => new ZteOltDriver($olt),
             'MOCK' => new MockOltDriver($olt),
             default => throw new \InvalidArgumentException("Unsupported OLT type: {$olt->type}"),

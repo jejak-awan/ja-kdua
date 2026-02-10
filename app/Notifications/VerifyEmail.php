@@ -44,7 +44,7 @@ class VerifyEmail extends Notification
         /** @var int $expire */
         $expire = Config::get('auth.verification.expire', 60);
 
-        /** @var \App\Models\User $notifiable */
+        /** @var \App\Models\Core\User $notifiable */
         return URL::temporarySignedRoute(
             'verification.verify',
             Carbon::now()->addMinutes($expire),

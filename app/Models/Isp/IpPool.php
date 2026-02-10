@@ -9,9 +9,28 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $network
+ * @property string|null $gateway
+ * @property string|null $dns_primary
+ * @property string|null $dns_secondary
+ * @property int|null $vlan_id
+ * @property int|null $router_id
+ * @property string $status
+ * @property string|null $description
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Isp\ServiceNode|null $router
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Isp\IpPoolAddress> $addresses
+ */
 class IpPool extends Model
 {
+    /** @use HasFactory<\Database\Factories\Isp\IpPoolFactory> */
+    use HasFactory;
 
+    protected $table = 'ip_pools';
 
     protected $fillable = [
         'name',
@@ -136,7 +155,7 @@ class IpPool extends Model
     {
         /** @var IpPoolAddress|null $address */
         $address = $this->availableAddresses()->first();
-        if (!$address) {
+        if (! $address) {
             return null;
         }
 

@@ -21,7 +21,7 @@ class PaymentReceived extends Notification
     }
 
     /**
-     * @param mixed $notifiable
+     * @param  mixed  $notifiable
      * @return array<int, string>
      */
     public function via($notifiable): array
@@ -30,7 +30,7 @@ class PaymentReceived extends Notification
     }
 
     /**
-     * @param mixed $notifiable
+     * @param  mixed  $notifiable
      */
     public function toWhatsApp($notifiable): string
     {
@@ -42,7 +42,7 @@ class PaymentReceived extends Notification
         $name = is_object($notifiable) && property_exists($notifiable, 'name') ? (string) $notifiable->name : 'Pelanggan';
 
         return "Terima kasih {$name},\n\n".
-               "Pembayaran untuk Invoice *" . (string) $this->invoice->invoice_number . "* sebesar *Rp {$amount}* telah berhasil kami terima.\n\n".
+               'Pembayaran untuk Invoice *'.(string) $this->invoice->invoice_number."* sebesar *Rp {$amount}* telah berhasil kami terima.\n\n".
                "Layanan internet Anda aktif kembali (jika sebelumnya terisolir).\n\n".
                'Selamat menikmati layanan kami.';
     }

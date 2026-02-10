@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Isp;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -22,6 +21,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property array<string, mixed>|null $metadata
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property-read Customer $customer
+ * @property-read ServiceNode|null $node
  */
 class CustomerDevice extends Model
 {
@@ -51,11 +52,11 @@ class CustomerDevice extends Model
     /**
      * Get the customer that owns the device.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this>
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Customer, $this>
      */
     public function customer(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 
     /**

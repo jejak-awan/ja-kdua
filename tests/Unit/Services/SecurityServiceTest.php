@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Services;
 
-use App\Models\IpList;
-use App\Models\SecurityLog;
-use App\Models\User;
-use App\Services\SecurityService;
+use App\Models\Core\IpList;
+use App\Models\Core\SecurityLog;
+use App\Models\Core\User;
+use App\Services\Core\SecurityService;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 

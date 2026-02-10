@@ -5,7 +5,6 @@ namespace App\Console\Commands\Isp;
 use App\Models\Isp\Customer;
 use App\Services\Isp\RadiusIntegration;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 
 class CheckFup extends Command
 {
@@ -42,14 +41,14 @@ class CheckFup extends Command
 
         $customers = $query->get();
 
-        $this->info("Checking FUP for " . $customers->count() . " active customers...");
+        $this->info('Checking FUP for '.$customers->count().' active customers...');
 
         foreach ($customers as $customer) {
             $this->comment("Processing {$customer->mikrotik_login}...");
-            
+
             // 1. Sync usage from radacct
             $radius->syncUsageData($customer);
-            
+
             // 2. Refresh customer model to get latest data
             $customer->refresh();
 

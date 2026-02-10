@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Services;
 
-use App\Services\CacheService;
+use App\Services\Core\CacheService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;

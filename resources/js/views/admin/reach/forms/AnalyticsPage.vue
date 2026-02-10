@@ -531,7 +531,7 @@ const exportData = (format = 'xlsx') => {
         })
     });
     const baseUrl = import.meta.env.VITE_API_URL || '';
-    const url = `${baseUrl}/api/v1/admin/ja/forms/${formId.value}/submissions/export?${params.toString()}`;
+    const url = `${baseUrl}/api/core/admin/ja/forms/${formId.value}/submissions/export?${params.toString()}`;
     window.open(url, '_blank');
 };
 

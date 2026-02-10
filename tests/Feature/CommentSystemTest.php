@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\Content;
-use App\Models\User;
+use App\Models\Core\Content;
+use App\Models\Core\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Helpers\TestHelpers;
 use Tests\TestCase;
@@ -12,13 +12,19 @@ class CommentSystemTest extends TestCase
 {
     // use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seedPermissionsAndRoles();
+    }
+
     /**
      * Test user can post a comment on published content.
      */
     public function test_user_can_post_comment_on_published_content(): void
     {
         // Mock CaptchaService to always return true
-        $this->mock(\App\Services\CaptchaService::class, function ($mock) {
+        $this->mock(\App\Services\Core\CaptchaService::class, function ($mock) {
             $mock->shouldReceive('verify')->andReturn(true);
         });
 
@@ -26,7 +32,7 @@ class CommentSystemTest extends TestCase
         $content = Content::factory()->published()->create();
 
         // Controller expects 'name' and 'email' for guest comments, plus captcha_token/captcha_input
-        $response = $this->postJson("/api/v1/cms/contents/{$content->id}/comments", [
+        $response = $this->postJson("/api/core/cms/contents/{$content->id}/comments", [
             'body' => 'This is a test comment',
             'name' => $user->name,
             'email' => $user->email,
@@ -59,7 +65,7 @@ class CommentSystemTest extends TestCase
         $this->withoutMiddleware('throttle');
         $content = Content::factory()->published()->create();
 
-        $response = $this->postJson("/api/v1/cms/contents/{$content->id}/comments", [
+        $response = $this->postJson("/api/core/cms/contents/{$content->id}/comments", [
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
@@ -91,7 +97,7 @@ class CommentSystemTest extends TestCase
             ],
         ]);
 
-        $response = $this->getJson("/api/v1/cms/contents/{$content->id}/comments");
+        $response = $this->getJson("/api/core/cms/contents/{$content->id}/comments");
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonCount(2, 'data');
@@ -111,7 +117,7 @@ class CommentSystemTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $response = $this->getJson("/api/v1/cms/contents/{$content->id}/comments");
+        $response = $this->getJson("/api/core/cms/contents/{$content->id}/comments");
 
         TestHelpers::assertApiSuccess($response);
         $response->assertJsonCount(0, 'data');
@@ -133,7 +139,7 @@ class CommentSystemTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $response = $this->putJson("/api/v1/admin/ja/comments/{$comment->id}/approve");
+        $response = $this->putJson("/api/core/admin/ja/comments/{$comment->id}/approve");
 
         TestHelpers::assertApiSuccess($response);
         $this->assertDatabaseHas('comments', [
@@ -158,7 +164,7 @@ class CommentSystemTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $response = $this->putJson("/api/v1/admin/ja/comments/{$comment->id}/reject");
+        $response = $this->putJson("/api/core/admin/ja/comments/{$comment->id}/reject");
 
         TestHelpers::assertApiSuccess($response);
         $this->assertDatabaseHas('comments', [
@@ -183,7 +189,7 @@ class CommentSystemTest extends TestCase
             'status' => 'approved',
         ]);
 
-        $response = $this->deleteJson("/api/v1/admin/ja/comments/{$comment->id}");
+        $response = $this->deleteJson("/api/core/admin/ja/comments/{$comment->id}");
 
         TestHelpers::assertApiSuccess($response);
         $this->assertSoftDeleted('comments', [
@@ -201,7 +207,7 @@ class CommentSystemTest extends TestCase
 
         // Make 15 requests (limit is 10 per minute)
         for ($i = 0; $i < 15; $i++) {
-            $response = $this->postJson("/api/v1/cms/contents/{$content->id}/comments", [
+            $response = $this->postJson("/api/core/cms/contents/{$content->id}/comments", [
                 'body' => "Comment {$i}",
                 'name' => 'Test User',
                 'email' => "test{$i}@example.com", // Unique email to ensure guest ID doesn't conflict?

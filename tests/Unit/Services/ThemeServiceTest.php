@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Services;
 
-use App\Models\Theme;
-use App\Services\ThemeService;
+use App\Models\Core\Theme;
+use App\Services\Core\ThemeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

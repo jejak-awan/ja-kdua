@@ -74,14 +74,15 @@ class RadiusIntegration
      */
     public function sendDisconnectRequest(\App\Models\Isp\Customer $customer): bool
     {
-        if (!$customer->mikrotik_login) {
+        if (! $customer->mikrotik_login) {
             return false;
         }
 
         /** @var \App\Models\Isp\ServiceNode|null $router */
         $router = \App\Models\Isp\ServiceNode::find($customer->router_id);
-        if (!$router || !$router->ip_address) {
+        if (! $router || ! $router->ip_address) {
             Log::warning("Radius CoA: Unable to find router/IP for customer #{$customer->id}");
+
             return false;
         }
 
@@ -92,7 +93,7 @@ class RadiusIntegration
         $username = $customer->mikrotik_login;
 
         // Note: Mikrotik listens for CoA on port 1700 by default.
-        $coaPortSetting = \App\Models\Setting::get('radius_coa_port', 1700);
+        $coaPortSetting = \App\Models\Core\Setting::get('radius_coa_port', 1700);
         $coaPort = is_numeric($coaPortSetting) ? (int) $coaPortSetting : 1700;
         $command = sprintf(
             'echo "User-Name=%s" | radclient -t 1 -r 1 %s:%d disconnect %s 2>&1',
@@ -110,13 +111,16 @@ class RadiusIntegration
 
             if ($resultCode === 0) {
                 Log::info("Radius CoA: Successfully sent disconnect to {$ip} for {$username}");
+
                 return true;
             }
 
-            Log::error("Radius CoA: Failed to send disconnect. Exit code: {$resultCode}. Output: " . implode("\n", $output));
+            Log::error("Radius CoA: Failed to send disconnect. Exit code: {$resultCode}. Output: ".implode("\n", $output));
+
             return false;
         } catch (\Exception $e) {
-            Log::error("Radius CoA Error for {$username}: " . $e->getMessage());
+            Log::error("Radius CoA Error for {$username}: ".$e->getMessage());
+
             return false;
         }
     }
@@ -155,14 +159,14 @@ class RadiusIntegration
      */
     public function syncUsageData(\App\Models\Isp\Customer $customer): void
     {
-        if (!$customer->mikrotik_login) {
+        if (! $customer->mikrotik_login) {
             return;
         }
 
         try {
             // Default to start of current month if not set
             $since = $customer->last_usage_reset_at ?: now()->startOfMonth();
-            
+
             $usage = DB::connection($this->connection)
                 ->table('radacct')
                 ->where('username', $customer->mikrotik_login)
@@ -178,9 +182,9 @@ class RadiusIntegration
                 'last_usage_reset_at' => $since,
             ]);
 
-            Log::info("Radius Sync: Usage synced for {$customer->mikrotik_login}: " . number_format($totalBytes / (1024 * 1024), 2) . " MB since {$since}");
+            Log::info("Radius Sync: Usage synced for {$customer->mikrotik_login}: ".number_format($totalBytes / (1024 * 1024), 2)." MB since {$since}");
         } catch (\Exception $e) {
-            Log::error("Radius Sync: Failed to sync usage for {$customer->mikrotik_login}: " . $e->getMessage());
+            Log::error("Radius Sync: Failed to sync usage for {$customer->mikrotik_login}: ".$e->getMessage());
         }
     }
 
@@ -190,7 +194,7 @@ class RadiusIntegration
     public function applyFup(\App\Models\Isp\Customer $customer): bool
     {
         $plan = $customer->plan;
-        if (!$plan || !$plan->fup_enabled || !$plan->fup_limit_gb || !$plan->fup_speed) {
+        if (! $plan || ! $plan->fup_enabled || ! $plan->fup_limit_gb || ! $plan->fup_speed) {
             return false;
         }
 
@@ -198,9 +202,9 @@ class RadiusIntegration
         $isOverLimit = $usageGb >= $plan->fup_limit_gb;
 
         // If status changed or needs enforcement
-        if ($isOverLimit && !$customer->is_fup_active) {
+        if ($isOverLimit && ! $customer->is_fup_active) {
             Log::info("Radius FUP: Enabling throttling for {$customer->mikrotik_login} ({$usageGb} GB >= {$plan->fup_limit_gb} GB)");
-            
+
             // Update radreply
             DB::connection($this->connection)->table('radreply')
                 ->updateOrInsert(
@@ -210,13 +214,14 @@ class RadiusIntegration
 
             $customer->update(['is_fup_active' => true]);
             $this->sendDisconnectRequest($customer);
+
             return true;
-        } 
-        
-        if (!$isOverLimit && $customer->is_fup_active) {
+        }
+
+        if (! $isOverLimit && $customer->is_fup_active) {
             Log::info("Radius FUP: Disabling throttling for {$customer->mikrotik_login} (Usage reset or under limit)");
-            
-            $defaultSpeedSetting = \App\Models\Setting::get('radius_default_speed', '10M/10M');
+
+            $defaultSpeedSetting = \App\Models\Core\Setting::get('radius_default_speed', '10M/10M');
             $defaultSpeed = is_string($defaultSpeedSetting) ? $defaultSpeedSetting : '10M/10M';
 
             // Restore original plan speed
@@ -228,6 +233,7 @@ class RadiusIntegration
 
             $customer->update(['is_fup_active' => false]);
             $this->sendDisconnectRequest($customer);
+
             return true;
         }
 
@@ -236,13 +242,13 @@ class RadiusIntegration
 
     /**
      * Get aggregate usage for last 24 hours by hour.
-     * 
+     *
      * @return array<int, array{time: string, up: float, down: float}>
      */
     public function getCustomerUsageDaily(string $username): array
     {
         $since = now()->subHours(24);
-        
+
         $results = DB::connection($this->connection)
             ->table('radacct')
             ->where('username', $username)
@@ -275,13 +281,13 @@ class RadiusIntegration
 
     /**
      * Get aggregate usage for last 30 days by day.
-     * 
+     *
      * @return array<int, array{date: string, up: float, down: float}>
      */
     public function getCustomerUsageMonthly(string $username): array
     {
         $since = now()->subDays(30);
-        
+
         $results = DB::connection($this->connection)
             ->table('radacct')
             ->where('username', $username)
@@ -314,13 +320,13 @@ class RadiusIntegration
 
     /**
      * Get aggregate usage for the last 24 hours (global/all users).
-     * 
+     *
      * @return array<int, array{time: string, up: float, down: float}>
      */
     public function getGlobalUsageDaily(): array
     {
         $since = now()->subHours(24);
-        
+
         $results = DB::connection($this->connection)
             ->table('radacct')
             ->where('acctstarttime', '>=', $since)
@@ -352,13 +358,13 @@ class RadiusIntegration
 
     /**
      * Get top users by bandwidth consumption.
-     * 
+     *
      * @return array<int, array{username: string, total_gb: float}>
      */
     public function getTopTalkers(int $limit = 10): array
     {
         $since = now()->subDays(30);
-        
+
         $results = DB::connection($this->connection)
             ->table('radacct')
             ->where('acctstarttime', '>=', $since)
@@ -404,12 +410,12 @@ class RadiusIntegration
             // Scan /proc for freeradius process
             $procDirs = glob('/proc/[0-9]*', GLOB_ONLYDIR);
             foreach ($procDirs ?: [] as $procDir) {
-                $commFile = $procDir . '/comm';
+                $commFile = $procDir.'/comm';
                 if (file_exists($commFile)) {
                     $comm = trim((string) @file_get_contents($commFile));
                     if ($comm === 'freeradius') {
                         $status['running'] = true;
-                        $statFile = $procDir . '/stat';
+                        $statFile = $procDir.'/stat';
                         if (file_exists($statFile)) {
                             $status['since'] = date('Y-m-d H:i:s', (int) filectime($statFile));
                         }
@@ -418,7 +424,7 @@ class RadiusIntegration
                 }
             }
         } catch (\Exception $e) {
-            Log::error("Radius Status Error: " . $e->getMessage());
+            Log::error('Radius Status Error: '.$e->getMessage());
         }
 
         return $status;

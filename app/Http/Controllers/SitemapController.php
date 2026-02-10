@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use App\Models\Content;
+use App\Models\Core\Category;
+use App\Models\Core\Content;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
 

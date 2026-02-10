@@ -2,15 +2,15 @@
 
 namespace Database\Factories\Isp;
 
-use App\Models\Isp\BillingPlan;
+use App\Models\Isp\IspPlan;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Isp\BillingPlan>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Isp\IspPlan>
  */
 class BillingPlanFactory extends Factory
 {
-    protected $model = BillingPlan::class;
+    protected $model = IspPlan::class;
 
     public function definition(): array
     {

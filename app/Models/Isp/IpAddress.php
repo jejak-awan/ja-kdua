@@ -8,6 +8,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property int $subnet_id
+ * @property int|null $device_id
+ * @property string $address
+ * @property string $status
+ * @property string|null $notes
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\Isp\Subnet $subnet
+ * @property-read \App\Models\Isp\CustomerDevice|null $device
+ */
 class IpAddress extends Model
 {
     /** @use HasFactory<\Database\Factories\Isp\IpAddressFactory> */

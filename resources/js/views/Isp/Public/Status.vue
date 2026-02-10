@@ -142,7 +142,7 @@ const loading = ref(true);
 const fetchStatus = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/api/v1/public/isp/status');
+        const response = await api.get('/api/core/public/isp/status');
         if (response.data.success) {
             statusData.value = response.data.data;
         }

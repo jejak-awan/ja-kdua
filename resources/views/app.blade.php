@@ -7,7 +7,7 @@
 
     <title>{{ config('app.name', 'JA CMS') }}</title>
     @php
-        $themeService = app(\App\Services\ThemeService::class);
+        $themeService = app(\App\Services\Core\ThemeService::class);
         $activeTheme = $themeService->getActiveTheme('frontend');
         $favicon = $activeTheme ? $themeService->getThemeSetting($activeTheme, 'brand_favicon') : null;
         

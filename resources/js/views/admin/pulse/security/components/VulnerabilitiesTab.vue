@@ -174,7 +174,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, h, watch, onMounted } from 'vue';
+import { ref, computed, h, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useVueTable, getCoreRowModel, getSortedRowModel, createColumnHelper, type SortingState } from '@tanstack/vue-table';
 import api from '@/services/api';

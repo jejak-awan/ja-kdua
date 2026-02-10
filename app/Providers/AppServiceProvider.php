@@ -20,15 +20,15 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Register ThemeHooksService as singleton
-        $this->app->singleton(\App\Services\ThemeHooksService::class);
+        $this->app->singleton(\App\Services\Core\ThemeHooksService::class);
 
         // Register ThemeCacheService as singleton
-        $this->app->singleton(\App\Services\ThemeCacheService::class);
+        $this->app->singleton(\App\Services\Core\ThemeCacheService::class);
 
         // Bind WhatsApp Service
         $this->app->bind(
-            \App\Services\WhatsApp\WhatsAppServiceInterface::class,
-            \App\Services\WhatsApp\WhatsAppService::class
+            \App\Services\Isp\WhatsApp\WhatsAppServiceInterface::class,
+            \App\Services\Isp\WhatsApp\WhatsAppClient::class
         );
 
     }
@@ -44,7 +44,7 @@ class AppServiceProvider extends ServiceProvider
             try {
                 $data = Cache::remember('ja_cms_global_data', 3600, function () {
                     // 1. Post Types
-                    $postTypes = \App\Models\Content::distinct()->pluck('type')->filter()->values()->all();
+                    $postTypes = \App\Models\Core\Content::distinct()->pluck('type')->filter()->values()->all();
                     if (empty($postTypes)) {
                         $postTypes = ['post', 'page'];
                     }
@@ -71,12 +71,12 @@ class AppServiceProvider extends ServiceProvider
                     ];
 
                     // 4. Users
-                    $userOptions = \App\Models\User::select('id', 'name')->get()->map(function ($user) {
+                    $userOptions = \App\Models\Core\User::select('id', 'name')->get()->map(function ($user) {
                         return ['label' => $user->name, 'value' => $user->id];
                     })->all();
 
                     // 5. Posts
-                    $postOptions = \App\Models\Content::where('type', '!=', 'revision')
+                    $postOptions = \App\Models\Core\Content::where('type', '!=', 'revision')
                         ->select('id', 'title', 'type')
                         ->latest()
                         ->get()
@@ -89,16 +89,16 @@ class AppServiceProvider extends ServiceProvider
                         })->all();
 
                     // 6. Terms
-                    $categories = \App\Models\Category::select('id', 'name')->get()->map(function ($c) {
+                    $categories = \App\Models\Core\Category::select('id', 'name')->get()->map(function ($c) {
                         return ['label' => $c->name, 'value' => $c->id, 'taxonomy' => 'category'];
                     });
-                    $tags = \App\Models\Tag::select('id', 'name')->get()->map(function ($t) {
+                    $tags = \App\Models\Core\Tag::select('id', 'name')->get()->map(function ($t) {
                         return ['label' => $t->name, 'value' => $t->id, 'taxonomy' => 'post_tag'];
                     });
                     $termOptions = $categories->merge($tags)->values()->all();
 
                     // 7. Forms
-                    $formOptions = \App\Models\Form::where('is_active', true)
+                    $formOptions = \App\Models\Core\Form::where('is_active', true)
                         ->select('id', 'name', 'slug')
                         ->latest()
                         ->get()
@@ -141,13 +141,13 @@ class AppServiceProvider extends ServiceProvider
             return $user->hasRole('super-admin') ? true : null;
         });
 
-        \App\Models\MediaFolder::observe(\App\Observers\MediaFolderObserver::class);
+        \App\Models\Core\MediaFolder::observe(\App\Observers\Core\MediaFolderObserver::class);
         \App\Models\Isp\Customer::observe(\App\Observers\Isp\CustomerObserver::class);
 
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
                 // Load Performance Settings
-                $performanceSettings = \App\Models\Setting::where('group', 'performance')
+                $performanceSettings = \App\Models\Core\Setting::where('group', 'performance')
                     ->whereIn('key', [
                         'enable_cache', 'cache_driver', 'cache_ttl',
                         'enable_cdn', 'cdn_url', 'cdn_preset', 'cdn_included_dirs', 'cdn_excluded_extensions',
@@ -167,13 +167,13 @@ class AppServiceProvider extends ServiceProvider
                 }
 
                 // Load Session Lifetime
-                $sessionLifetime = \App\Models\Setting::where('key', 'session_lifetime')->value('value');
+                $sessionLifetime = \App\Models\Core\Setting::where('key', 'session_lifetime')->value('value');
                 if (is_numeric($sessionLifetime)) {
                     config(['session.lifetime' => intval($sessionLifetime)]);
                 }
 
                 // Load Media Settings (Storage Driver + AWS)
-                $mediaSettings = \App\Models\Setting::where('group', 'media')
+                $mediaSettings = \App\Models\Core\Setting::where('group', 'media')
                     ->whereIn('key', [
                         'storage_driver',
                         'aws_access_key_id', 'aws_secret_access_key', 'aws_default_region', 'aws_bucket', 'aws_endpoint',
@@ -187,7 +187,7 @@ class AppServiceProvider extends ServiceProvider
                     });
 
                 // Load WhatsApp Settings
-                $whatsappSettings = \App\Models\Setting::where('group', 'whatsapp')
+                $whatsappSettings = \App\Models\Core\Setting::where('group', 'whatsapp')
                     ->whereIn('key', ['whatsapp_driver', 'whatsapp_api_url', 'whatsapp_api_key'])
                     ->get()
                     ->flatMap(function ($setting) {
