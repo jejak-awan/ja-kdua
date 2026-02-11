@@ -9,12 +9,12 @@ use Tests\TestCase;
 
 class TagTest extends TestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
         $this->seedPermissionsAndRoles();
     }
+
     /**
      * Test admin can list all tags.
      */

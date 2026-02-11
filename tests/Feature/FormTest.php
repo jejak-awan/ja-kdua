@@ -10,12 +10,12 @@ use Tests\TestCase;
 
 class FormTest extends TestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
         $this->seedPermissionsAndRoles();
     }
+
     /**
      * Test admin can list all forms.
      */

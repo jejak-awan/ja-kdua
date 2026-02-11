@@ -11,7 +11,6 @@ use Tests\TestCase;
 
 class WebhookTest extends TestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -19,12 +18,9 @@ class WebhookTest extends TestCase
         $this->admin = $this->createAdminUser();
     }
 
-
     // use RefreshDatabase;
 
     protected User $admin;
-
-
 
     /**
      * Test admin can list all webhooks.

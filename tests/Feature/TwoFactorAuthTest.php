@@ -10,7 +10,6 @@ use Tests\TestCase;
 
 class TwoFactorAuthTest extends TestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -21,10 +20,7 @@ class TwoFactorAuthTest extends TestCase
         \App\Models\Core\Setting::set('enable_2fa', true, 'boolean');
     }
 
-
     // use RefreshDatabase;
-
-
 
     /**
      * Test user can generate 2FA QR code.

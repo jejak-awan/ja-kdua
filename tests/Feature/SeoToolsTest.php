@@ -12,7 +12,6 @@ use Tests\TestCase;
 
 class SeoToolsTest extends TestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -21,12 +20,9 @@ class SeoToolsTest extends TestCase
         $this->admin = $this->createAdminUser();
     }
 
-
     use RefreshDatabase;
 
     protected User $admin;
-
-
 
     /**
      * Test admin can generate sitemap.

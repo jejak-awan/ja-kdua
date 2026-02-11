@@ -14,7 +14,6 @@ use Tests\TestCase;
 
 class MediaManagementTest extends TestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -22,10 +21,7 @@ class MediaManagementTest extends TestCase
         Storage::fake('public');
     }
 
-
     // use RefreshDatabase;
-
-
 
     /**
      * Test admin can upload media file.

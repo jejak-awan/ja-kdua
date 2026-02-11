@@ -69,7 +69,7 @@ class SearchFunctionalityTest extends TestCase
     public function test_search_can_filter_by_type(): void
     {
         $this->markTestSkipped('Search indexing not working correctly in test environment');
-        
+
         // Create different types of content
         $uniqueTitle = 'UniqueTestContent'.uniqid();
         $content = Content::factory()->published()->create([

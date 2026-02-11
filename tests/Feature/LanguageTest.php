@@ -10,7 +10,6 @@ use Tests\TestCase;
 
 class LanguageTest extends TestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -18,12 +17,9 @@ class LanguageTest extends TestCase
         $this->admin = $this->createAdminUser();
     }
 
-
     // use RefreshDatabase;
 
     protected User $admin;
-
-
 
     /**
      * Test admin can list all languages.
