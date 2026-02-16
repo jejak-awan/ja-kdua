@@ -7,8 +7,25 @@
     "throughput_subtitle": "Penggunaan bandwidth agregat real-time (Mbps)",
     "incoming": "Masuk",
     "outgoing": "Keluar",
-    "node_cpu": "Beban CPU",
+    "node_cpu": "Load CPU",
     "connecting": "Menghubungkan...",
+    "aggregation": "Agregasi",
+    "throughput": "Throughput",
+    "total_in": "Total Masuk",
+    "total_out": "Total Keluar",
+    "avg_load": "Rata-rata Load",
+    "latency": "Latensi",
+    "realtime": "Real-time",
+    "historical": "Historis",
+    "active_nodes": "Node Aktif",
+    "system_status": "Status Sistem",
+    "latency_unit": "Latensi (ms)",
+    "health_status": {
+        "healthy": "Sehat",
+        "warning": "Peringatan",
+        "critical": "Kritis",
+        "connecting": "Menghubungkan"
+    },
     "active_sessions": {
         "title": "Sesi Online",
         "description": "Pantau dan kelola koneksi pelanggan yang aktif.",
@@ -41,7 +58,8 @@
         "download_rate": "Kecepatan Unduh",
         "upload_rate": "Kecepatan Unggah",
         "download": "Unduh (Rx)",
-        "upload": "Unggah (Tx)"
+        "upload": "Unggah (Tx)",
+        "view_report": "Laporan"
     },
     "radius_logs": {
         "title": "Log Autentikasi (RADIUS)",
@@ -80,5 +98,50 @@
             "error_fetch": "Gagal mengambil data RADIUS",
             "error_disconnect": "Gagal memutus sesi"
         }
+    },
+    "report_title": "Laporan Trafik & SLA Jaringan",
+    "report_desc": "Analisa performa historis dan ketersediaan layanan.",
+    "select_router": "Pilih Router",
+    "select_interface": "Pilih Interface",
+    "traffic_details": "Rincian Trafik",
+    "sla_health": "Status SLA & Kesehatan",
+    "availability": "Ketersediaan",
+    "samples": "Sampel",
+    "online": "Online",
+    "avg_latency": "Rata-rata Latensi",
+    "no_report": "Dapatkan Laporan Performa",
+    "view_report": "Laporan",
+    "health_center": {
+        "title": "Pusat Kesehatan Jaringan",
+        "subtitle": "Pantau vital jaringan, kepatuhan SLA, dan peringatan sistem.",
+        "vitals": {
+            "title": "Tanda Vital Jaringan",
+            "latency": "Latensi",
+            "packet_loss": "Packet Loss",
+            "uptime": "Uptime",
+            "jitter": "Jitter"
+        },
+        "alerts": {
+            "title": "Peringatan Sistem",
+            "no_alerts": "Tidak ada peringatan aktif",
+            "critical": "Kritis",
+            "warning": "Peringatan",
+            "info": "Info"
+        }
+    },
+    "enterprise_assurance": {
+        "title": "Jaminan Enterprise",
+        "subtitle": "Buat Sertifikat Kesehatan Jaringan resmi untuk klien Anda.",
+        "customer_search": "Cari Pelanggan",
+        "search_placeholder": "Masukkan ID atau Nama Pelanggan...",
+        "generate": "Buat Sertifikat",
+        "generating": "Membuat..."
+    },
+    "coverage_heatmap": {
+        "title": "Peta Sebaran Sinyal",
+        "subtitle": "Visualisasikan cakupan jaringan dan kekuatan sinyal di area layanan.",
+        "signal_strength": "Kekuatan Sinyal",
+        "customer_density": "Kepadatan Pelanggan",
+        "no_data": "Tidak ada data geolokasi tersedia."
     }
 }

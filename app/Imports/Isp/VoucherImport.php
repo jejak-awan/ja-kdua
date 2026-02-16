@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Imports\Isp;
 
-use App\Models\Isp\Voucher;
-use App\Services\Isp\RadiusIntegration;
+use App\Models\Isp\Billing\Voucher;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -14,9 +13,9 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 
 class VoucherImport implements ToModel, WithHeadingRow, WithValidation
 {
-    protected RadiusIntegration $radius;
+    protected \App\Services\Isp\Network\RadiusService $radius;
 
-    public function __construct(RadiusIntegration $radius)
+    public function __construct(\App\Services\Isp\Network\RadiusService $radius)
     {
         $this->radius = $radius;
     }

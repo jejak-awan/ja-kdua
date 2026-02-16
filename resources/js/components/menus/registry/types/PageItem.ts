@@ -12,7 +12,7 @@ const definition: MenuItemDefinition = {
 
     // Data source for fetching pages
     dataSource: {
-        endpoint: '/admin/ja/contents?type=page&status=published',
+        endpoint: '/admin/janet/contents?type=page&status=published',
         labelField: 'title',
         valueField: 'id'
     },
@@ -30,7 +30,7 @@ const definition: MenuItemDefinition = {
             type: 'data_select',
             label: 'features.menus.form.selectPage',
             required: true,
-            source: '/admin/ja/contents?type=page&status=published',
+            source: '/admin/janet/contents?type=page&status=published',
             labelField: 'title',
             valueField: 'id'
         },

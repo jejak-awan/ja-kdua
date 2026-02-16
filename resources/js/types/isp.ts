@@ -36,6 +36,13 @@ export interface Customer {
     balance?: number;
     router_name?: string;
     ip_address?: string;
+    risk?: RiskMetadata;
+}
+
+export interface RiskMetadata {
+    score: number;
+    level: 'Healthy' | 'Warning' | 'Critical';
+    color: 'success' | 'warning' | 'destructive';
 }
 
 export interface IspUser extends User {
@@ -145,7 +152,10 @@ export interface IspUsageData {
 
 export interface NetworkNode {
     id: number;
+    pretty_id: string;
+    ip_type: string;
     name: string;
+    description?: string;
     type: string;
     ip_address: string;
     secret?: string;
@@ -159,6 +169,10 @@ export interface NetworkNode {
     snmp_port?: number;
     last_active_count?: number;
     is_connected?: boolean;
+    radius_enabled?: boolean;
+    radius_secret?: string;
+    sub_type?: 'core' | 'gateway' | 'distribution';
+    is_vpn_server?: boolean;
     status: string;
     location_lat: number;
     location_lng: number;
@@ -174,9 +188,9 @@ export interface DataServer {
 export interface MonitorNode {
     node_id: number;
     name: string;
-    status: string;
-    latency: number;
-    cpu_load: number;
+    status?: string;
+    latency?: number;
+    cpu?: number;
     traffic_in: number;
     traffic_out: number;
 }
@@ -493,4 +507,88 @@ export interface WaSchedule {
     delay_hours: number;
     is_active: boolean;
     created_at: string;
+}
+
+export interface Olt {
+    id: number;
+    name: string;
+    type: string;
+    ip_address: string;
+    port: number;
+    username: string;
+    password?: string;
+    status: 'active' | 'maintenance' | 'inactive';
+    created_at: string;
+    updated_at: string;
+    // Appends
+    odps?: Odp[];
+    signals_count?: number;
+    command_logs_count?: number;
+    discovery_pending?: OltDiscoveryResult[];
+}
+
+export interface Odp {
+    id: number;
+    olt_id: number;
+    name: string;
+    status: string;
+    total_ports: number;
+}
+
+export interface OltDiscoveryResult {
+    sn: string;
+    interface: string;
+    model?: string;
+}
+
+export interface OltCommandLog {
+    id: number;
+    olt_id: number;
+    user_id: number | null;
+    command: string;
+    response?: string;
+    is_success: boolean;
+    execution_time_ms: number;
+    created_at: string;
+    olt?: Olt;
+    user?: User;
+}
+
+export interface OltSignal {
+    id: number;
+    olt_id: number;
+    onu_serial: string;
+    interface: string;
+    rx_power: number;
+    tx_power: number;
+    temperature: number;
+    voltage: number;
+    bias_current: number;
+    created_at: string;
+}
+
+export interface OltSignalStats {
+    min_rx: number;
+    max_rx: number;
+    avg_rx: number;
+    sample_count: number;
+}
+
+export interface TechnicianDeployment {
+    id: number;
+    technician_id: number;
+    customer_id: number;
+    service_request_id?: number;
+    type: 'installation' | 'repair' | 'maintenance';
+    status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+    scheduled_at: string;
+    completed_at?: string;
+    notes?: string;
+    technician?: User;
+    customer?: Customer;
+    service_request?: ServiceRequest;
+}
+
+export interface Technician extends User {
+    distance_km?: number;
 }

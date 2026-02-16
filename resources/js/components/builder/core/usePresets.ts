@@ -30,7 +30,7 @@ export function usePresets() {
         loading.value = true
         try {
             const params = type ? { type } : {}
-            const response = await api.get('/admin/ja/builder-presets', { params })
+            const response = await api.get('/admin/janet/builder-presets', { params })
             const data = response.data?.data || response.data
             presets.value = Array.isArray(data) ? data : (data.data || [])
         } catch (err) {
@@ -47,7 +47,7 @@ export function usePresets() {
      */
     const savePreset = async (module: PresetModule, name: string) => {
         try {
-            const response = await api.post('/admin/ja/builder-presets', {
+            const response = await api.post('/admin/janet/builder-presets', {
                 type: module.type,
                 name: name,
                 settings: JSON.parse(JSON.stringify(module.settings))
@@ -71,7 +71,7 @@ export function usePresets() {
      */
     const deletePreset = async (presetId: number | string) => {
         try {
-            const response = await api.delete(`/admin/ja/builder-presets/${presetId}`)
+            const response = await api.delete(`/admin/janet/builder-presets/${presetId}`)
             if (response.data?.success) {
                 toast.success.action('Preset deleted')
                 presets.value = presets.value.filter(p => p.id !== presetId)

@@ -1,0 +1,125 @@
+
+
+#COPY PASTE SEMUA SCRIPT JANET DIBAWAH INI KE NEW TERMINAL MIKROTIK
+#JIKA DIBUKA MENGGUNAKAN WINDOWS 11, AGAR TIDAK ERROR BUKA FILE INI DENGAN NOTEPAD++
+#Link download notepad++ = https://notepad-plus-plus.org/downloads
+#######################################################################
+
+/snmp community
+set [ find default=yes ] disabled=yes write-access=no
+rem [find name!=public]
+add addresses=172.31.192.1 name=JANET write-access=yes
+/snmp
+set enabled=yes trap-community=JANET trap-version=2
+/system identity
+set name="RO GW1 K2NET"
+/sy log dis num=2
+/system clock
+set time-zone-autodetect=no time-zone-name=Asia/Jakarta
+/radius incoming
+set accept=yes port=3799
+/ip dns 
+
+set allow-remote-requests=yes
+/system scheduler
+rem [find name~"JANET"]
+rem [find name~"JANET"]
+/interface sstp-client
+rem [find name~"JA"]
+/interface ovpn-client
+rem [find name~"JA"]
+/interface l2tp-client
+rem [find name~"JA"]
+/ppp profile
+rem [find name=JAVPN]
+
+/system ntp client server rem [find]
+/system ntp client set enabled=yes server=162.159.200.1,162.159.200.123
+
+/radius
+rem [find]
+add address=172.31.192.1 comment=JANET authentication-port=5591 accounting-port=5592 secret="306a18b78f1c09be8949" service=ppp,login src-address=172.31.233.151 timeout=3s
+/radius
+set require-message-auth=no num=0
+
+/ip pool
+add comment="Network : 10.200.192.0/20" name=JAPOOL ranges=10.200.192.100-10.200.207.254
+add comment="Network 10.200.208.0/23" name=JAISOLIR ranges=10.200.208.10-10.200.209.254
+/ppp profile
+add insert-queue-before=first local-address=10.200.192.1 name=JANET only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.208.1 name=JAISOLIR comment="default by JANET (jangan dirubah)" only-one=yes remote-address=JAISOLIR
+add insert-queue-before=first local-address=10.200.192.1 name="2. Paket-10Mbaru" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="2. Paket-5M" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="3. Paket-10M" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="4. Paket-20M" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="7. Paket-100M" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="8.Paket-15M" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="BTM-FREE" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="FreeAccount" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="Paket-20Mbaru" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-B10" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-B15" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-B20" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-bbn100" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-BCSR" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-CSRMargahayu" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-G10" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-G15" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-G20" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-Gtimserver" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-pelajar" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-W10" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-W15" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-W20" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-W30" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paket-W50" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="paketWCSR" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="SERVER-BTM10" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="SERVER-BTM20" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="SERVER-BTM5" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="SERVER-BTM50" only-one=yes remote-address=JAPOOL
+add insert-queue-before=first local-address=10.200.192.1 name="Server-FA bukan CSR" only-one=yes remote-address=JAPOOL
+
+/ppp aaa
+set use-radius=yes accounting=yes
+set interim-update=0s
+#NAT REDIRECT ISOLIR TO WEBPROXY
+/ip firewall nat
+rem [find src-address-list~"JA"]
+add action=redirect chain=dstnat comment="JAISOLIR" dst-address=!103.253.27.164 dst-port=80,443,8080 protocol=tcp src-address-list=JAISOLIR to-ports=3125
+/ip firewall filter
+rem [find src-address-list~"JA"]
+add action=reject chain=forward comment=JAISOLIR dst-address=!103.253.27.164 protocol=tcp reject-with=icmp-network-unreachable src-address-list=JAISOLIR
+add action=reject chain=forward comment=JAISOLIR dst-address=!103.253.27.164 dst-port=!53,5353 protocol=udp reject-with=icmp-network-unreachable src-address-list=JAISOLIR
+#WEBPROXY REDIRECT TO UJA ISOLIR
+/ip proxy
+set cache-administrator=webmaster@JANET.com enabled=yes max-cache-object-size=1KiB max-cache-size=none max-client-connections=50 max-fresh-time=5m max-server-connections=50 port=3125
+/ip proxy access
+rem [find]
+
+add action=redirect action-data=http://103.253.27.164 src-address=10.200.208.0/23
+
+/ppp profile
+add change-tcp-mss=yes comment="default by JANET (jangan dirubah)" name=JAVPN only-one=yes use-encryption=yes
+/interface ovpn-client
+add connect-to=server2.JAcloud.biz name=JACLOUD profile=JAVPN user=knet114648804@JAcloud.id password=114648804 disabled=no
+
+/system scheduler
+rem [find name=JANETfailover]
+add interval=7s name=JANETfailover on-event="{\r\
+    \n:global intname JACLOUD\r\
+    \n:global indexvpn ([:pick [/system clock get time] 6 8] % 20+1)\r\
+    \n:global jenisvpn [/interface get \$intname type];\r\
+    \n:global address \"server\$indexvpn.JAcloud.biz\"\r\
+    \n:local pingresult ([/ping 172.31.192.1 interface=\$intname count=5])\r\
+    \n:if (\$pingresult = 0) do={\r\
+    \n     /int set \$intname disabled=no;\r\
+    \n    :if ( \$jenisvpn = \"sstp-out\" ) do={ /int sstp-client set connect-\
+    to=\$address comment=\"ServerVPN\$indexvpn\" [find name=\$intname] }\r\
+    \n    :if ( \$jenisvpn = \"ovpn-out\" ) do={ /int ovpn-client set connect-\
+    to=\$address comment=\"ServerVPN\$indexvpn\" [find name=\$intname] }\r\
+    \n    :if ( \$jenisvpn = \"l2tp-out\" ) do={ /int l2tp-client set connect-\
+    to=\$address comment=\"ServerVPN\$indexvpn\" [find name=\$intname] }\r\
+    \n}\r\
+    \n}"
+    

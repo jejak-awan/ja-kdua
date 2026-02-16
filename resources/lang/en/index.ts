@@ -3,6 +3,7 @@ import labels from './common/labels.json';
 import validation from './common/validation.json';
 import messages from './common/messages.json';
 import navigation from './common/navigation.json';
+import placeholders from './common/placeholders.json';
 import pagination from './common/pagination.json';
 import status from './common/status.json';
 import time from './common/time.json';
@@ -48,19 +49,23 @@ import securityAlerts from './features/security_alerts.json';
 import ispSupport from './features/isp/support.json';
 import ispNetwork from './features/isp/network.json';
 import ispOutages from './features/isp/outages.json';
-import ispCore from './features/isp/core.json';
 import ispServiceRequests from './features/isp/service_requests.json';
 import ispBilling from './features/isp/billing.json';
 import ispInfra from './features/isp/infra.json';
 import ispMember from './features/isp/member.json';
 import ispMonitor from './features/isp/monitor.json';
 import ispContracts from './features/isp/contracts.json';
-
+import ispRadius from './features/isp/radius.json';
+import ispCommon from './common/isp.json';
+import ispAdmin from './features/isp/admin.json';
 
 import ispCustomers from './features/isp/customers.json';
+import ispInventory from './features/isp/inventory.json';
 import ispVouchers from './features/isp/vouchers.json';
+import ispPartners from './features/isp/partners.json';
 import ispHotspot from './features/isp/hotspot.json';
 import ispSettings from './features/isp/settings.json';
+// import olt from './features/isp/olt.json';
 
 
 import scheduled_tasks from './features/scheduled_tasks.json';
@@ -74,7 +79,7 @@ export default {
     builder,
     ispServiceRequests,
     isp: {
-        ...ispCore,
+        common: ispCommon,
         support: ispSupport,
         network: ispNetwork,
         outages: ispOutages,
@@ -85,9 +90,16 @@ export default {
         contracts: ispContracts,
         service_requests: ispServiceRequests,
         customers: ispCustomers,
-        admin: ispVouchers.admin,
+        admin: {
+            ...ispAdmin,
+            ...ispVouchers.admin,
+            inventory: ispInventory,
+            partner: ispPartners
+        },
         hotspot: ispHotspot,
         settings: ispSettings,
+        radius: ispRadius,
+        olt: ispInfra.olt,
     },
     common: {
         actions,
@@ -95,6 +107,7 @@ export default {
         validation,
         messages,
         navigation,
+        placeholders,
         pagination,
         status,
         time,
@@ -142,6 +155,29 @@ export default {
         scheduled_tasks,
         command_runner,
         email_templates,
-        editor
+        editor,
+        isp: {
+            common: ispCommon,
+            support: ispSupport,
+            network: ispNetwork,
+            outages: ispOutages,
+            member: ispMember,
+            billing: ispBilling,
+            infra: ispInfra,
+            monitor: ispMonitor,
+            contracts: ispContracts,
+            service_requests: ispServiceRequests,
+            customers: ispCustomers,
+            admin: {
+                ...ispAdmin,
+                ...ispVouchers.admin,
+                inventory: ispInventory,
+                partner: ispPartners
+            },
+            hotspot: ispHotspot,
+            settings: ispSettings,
+            radius: ispRadius,
+            olt: ispInfra.olt,
+        }
     },
 };

@@ -228,13 +228,13 @@ const filteredWebhooks = computed(() => {
 const fetchWebhooks = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/ja/webhooks');
+        const response = await api.get('/admin/janet/webhooks');
         const { data } = parseResponse(response);
         webhooks.value = ensureArray(data);
         
         // Fetch statistics
         try {
-            const statsResponse = await api.get('/admin/ja/webhooks/statistics');
+            const statsResponse = await api.get('/admin/janet/webhooks/statistics');
             statistics.value = parseSingleResponse<WebhookStats>(statsResponse);
         } catch {
             // Calculate from webhooks if endpoint doesn't exist
@@ -259,7 +259,7 @@ const editWebhook = (webhook: Webhook) => {
 
 const testWebhook = async (webhook: Webhook) => {
     try {
-        await api.post(`/admin/ja/webhooks/${webhook.id}/test`);
+        await api.post(`/admin/janet/webhooks/${webhook.id}/test`);
         toast.success.action(t('features.developer.webhooks.messages.test_success'));
     } catch (error: unknown) {
         logger.error('Failed to test webhook:', error);
@@ -278,7 +278,7 @@ const deleteWebhook = async (webhook: Webhook) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/ja/webhooks/${webhook.id}`);
+        await api.delete(`/admin/janet/webhooks/${webhook.id}`);
         toast.success.delete('Webhook');
         fetchWebhooks();
     } catch (error: unknown) {

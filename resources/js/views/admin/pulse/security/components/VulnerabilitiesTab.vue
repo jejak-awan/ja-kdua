@@ -286,7 +286,7 @@ const fetchPackages = async (): Promise<void> => {
         if (params.source === 'all') delete params.source;
         if (params.status === 'all') delete params.status;
         
-        const response = await api.get('/admin/ja/security/dependency-packages', { params });
+        const response = await api.get('/admin/janet/security/dependency-packages', { params });
         const result = response.data?.data ? response.data.data : response.data;
         packages.value = (result.data as Package[]) || [];
         packagePagination.value = {
@@ -303,7 +303,7 @@ const fetchPackages = async (): Promise<void> => {
 
 const fetchPackageStats = async (): Promise<void> => {
     try {
-        const response = await api.get('/admin/ja/security/dependency-packages/statistics');
+        const response = await api.get('/admin/janet/security/dependency-packages/statistics');
         packageStats.value = (response.data?.data as PackageStats) || null;
     } catch (error: unknown) {
         logger.error('Failed to fetch package stats:', error);

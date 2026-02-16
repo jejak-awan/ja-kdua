@@ -10,10 +10,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @OA\Tag(name="Dashboard")
+ */
 class DashboardController extends BaseApiController
 {
     /**
-     * Get admin dashboard data (full access)
+     * @OA\Get(
+     *     path="/api/admin/ja/dashboard/admin",
+     *     summary="Get admin dashboard data",
+     *     tags={"Dashboard"},
+     *
+     *     @OA\Response(response=200, description="Dashboard data retrieved successfully"),
+     *     security={{"sanctum":{}}}
+     * )
      */
     public function admin(Request $request): \Illuminate\Http\JsonResponse
     {
@@ -34,7 +44,16 @@ class DashboardController extends BaseApiController
     }
 
     /**
-     * Get creator dashboard data (scoped to user)
+     * @OA\Get(
+     *     path="/api/admin/ja/dashboard/creator",
+     *     summary="Get creator dashboard data",
+     *     tags={"Dashboard"},
+     *
+     *     @OA\Parameter(name="days", in="query", @OA\Schema(type="integer", default=30)),
+     *
+     *     @OA\Response(response=200, description="Dashboard data retrieved successfully"),
+     *     security={{"sanctum":{}}}
+     * )
      */
     public function creator(Request $request): \Illuminate\Http\JsonResponse
     {
@@ -66,7 +85,14 @@ class DashboardController extends BaseApiController
     }
 
     /**
-     * Get viewer dashboard data (minimal)
+     * @OA\Get(
+     *     path="/api/admin/ja/dashboard/viewer",
+     *     summary="Get viewer dashboard data",
+     *     tags={"Dashboard"},
+     *
+     *     @OA\Response(response=200, description="Dashboard data retrieved successfully"),
+     *     security={{"sanctum":{}}}
+     * )
      */
     public function viewer(Request $request): \Illuminate\Http\JsonResponse
     {
@@ -133,7 +159,7 @@ class DashboardController extends BaseApiController
      */
     private function getMediaByType(): \Illuminate\Support\Collection
     {
-        return Media::select(DB::raw("SUBSTRING_INDEX(mime_type, '/', 1) as type"), DB::raw('count(*) as count'))
+        return Media::select(DB::raw("split_part(mime_type, '/', 1) as type"), DB::raw('count(*) as count'))
             ->groupBy('type')
             ->get();
     }
@@ -143,7 +169,7 @@ class DashboardController extends BaseApiController
      */
     private function getUserActivity(): \Illuminate\Support\Collection
     {
-        return User::select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
+        return User::select(DB::raw('created_at::date as date'), DB::raw('count(*) as count'))
             ->where('created_at', '>=', now()->subDays(30))
             ->groupBy('date')
             ->orderBy('date')
@@ -226,7 +252,7 @@ class DashboardController extends BaseApiController
             }
         })
             ->where('visited_at', '>=', now()->subDays($days))
-            ->select(DB::raw('DATE(visited_at) as date'), DB::raw('count(*) as count'))
+            ->select(DB::raw('visited_at::date as date'), DB::raw('count(*) as count'))
             ->groupBy('date')
             ->orderBy('date')
             ->get();

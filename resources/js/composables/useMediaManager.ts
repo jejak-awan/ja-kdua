@@ -103,7 +103,7 @@ export function useMediaManager() {
             if (dateFromFilter.value) params.date_from = dateFromFilter.value;
             if (dateToFilter.value) params.date_to = dateToFilter.value;
 
-            const response = await api.get('/admin/ja/media', { params });
+            const response = await api.get('/admin/janet/media', { params });
             const { data, pagination: paginationData } = parseResponse(response);
             mediaList.value = ensureArray(data);
             if (paginationData) pagination.value = paginationData;
@@ -116,7 +116,7 @@ export function useMediaManager() {
 
     const fetchStatistics = async () => {
         try {
-            const response = await api.get('/admin/ja/media/statistics');
+            const response = await api.get('/admin/janet/media/statistics');
             statistics.value = response.data?.data || response.data;
         } catch {
             // logger.error('Failed to fetch media statistics:', error);
@@ -125,7 +125,7 @@ export function useMediaManager() {
 
     const fetchFolders = async () => {
         try {
-            const response = await api.get('/admin/ja/media-folders', { params: { tree: true, trashed: 'with' } });
+            const response = await api.get('/admin/janet/media-folders', { params: { tree: true, trashed: 'with' } });
             const { data } = parseResponse(response);
             treeFolders.value = ensureArray(data);
 
@@ -147,7 +147,7 @@ export function useMediaManager() {
 
     const fetchTags = async () => {
         try {
-            const response = await api.get('/admin/ja/tags', {
+            const response = await api.get('/admin/janet/tags', {
                 params: { usage: 'media' }
             });
             tags.value = response.data.data || [];
@@ -158,7 +158,7 @@ export function useMediaManager() {
 
     const fetchFilters = async () => {
         try {
-            const response = await api.get('/admin/ja/media/filters');
+            const response = await api.get('/admin/janet/media/filters');
             if (response.data.success) {
                 availableFilters.value = response.data.data;
             }
@@ -189,7 +189,7 @@ export function useMediaManager() {
 
     const restoreMedia = async (media: Media) => {
         try {
-            await api.post(`/admin/ja/media/${media.id}/restore`);
+            await api.post(`/admin/janet/media/${media.id}/restore`);
             await fetchMedia();
             fetchStatistics();
             toast.success.action(t('features.media.messages.restoreSuccess') || 'Media restored successfully');
@@ -200,7 +200,7 @@ export function useMediaManager() {
 
     const restoreFolder = async (folder: MediaFolder) => {
         try {
-            await api.post(`/admin/ja/media-folders/${folder.id}/restore`);
+            await api.post(`/admin/janet/media-folders/${folder.id}/restore`);
             await fetchFolders();
             fetchStatistics();
             toast.success.action(t('features.media.messages.folderRestoreSuccess') || 'Folder restored successfully');
@@ -219,7 +219,7 @@ export function useMediaManager() {
         });
         if (!confirmed) return;
         try {
-            await api.post('/admin/ja/media/empty-trash');
+            await api.post('/admin/janet/media/empty-trash');
             await fetchMedia();
             await fetchFolders();
             fetchStatistics();
@@ -240,7 +240,7 @@ export function useMediaManager() {
         });
         if (!confirmed) return;
         try {
-            const url = isPermanent ? `/admin/ja/media/${media.id}/force-delete` : `/admin/ja/media/${media.id}/delete`;
+            const url = isPermanent ? `/admin/janet/media/${media.id}/force-delete` : `/admin/janet/media/${media.id}/delete`;
             await api.post(url);
             toast.success.action(t('features.media.messages.deleteSuccess') || 'Media deleted successfully');
             await fetchMedia();
@@ -261,7 +261,7 @@ export function useMediaManager() {
         });
         if (!confirmed) return;
         try {
-            const url = isPermanent ? `/admin/ja/media-folders/${folder.id}/force-delete` : `/admin/ja/media-folders/${folder.id}/delete`;
+            const url = isPermanent ? `/admin/janet/media-folders/${folder.id}/force-delete` : `/admin/janet/media-folders/${folder.id}/delete`;
             await api.post(url);
             toast.success.action(t('features.media.messages.folderDeleted') || 'Folder deleted successfully');
             await fetchFolders();
@@ -324,7 +324,7 @@ export function useMediaManager() {
             if (!confirmed) return;
             bulkProcessing.value = true;
             try {
-                await api.post('/admin/ja/media/bulk-action', { action: 'delete', ids: selectedMedia.value });
+                await api.post('/admin/janet/media/bulk-action', { action: 'delete', ids: selectedMedia.value });
                 await fetchMedia();
                 fetchStatistics();
                 selectedMedia.value = [];
@@ -347,7 +347,7 @@ export function useMediaManager() {
             }
             bulkProcessing.value = true;
             try {
-                await api.post('/admin/ja/media/bulk-action', {
+                await api.post('/admin/janet/media/bulk-action', {
                     action: action === 'restore' ? 'restore' : 'delete_permanent',
                     ids: selectedMedia.value,
                     folder_ids: selectedFolders.value
@@ -372,7 +372,7 @@ export function useMediaManager() {
         } else if (action === 'move') {
             bulkProcessing.value = true;
             try {
-                await api.post('/admin/ja/media/bulk-action', {
+                await api.post('/admin/janet/media/bulk-action', {
                     action: 'move',
                     ids: selectedMedia.value,
                     folder_id: options.folderId,
@@ -388,7 +388,7 @@ export function useMediaManager() {
         } else if (action === 'update_alt') {
             bulkProcessing.value = true;
             try {
-                await api.post('/admin/ja/media/bulk-action', {
+                await api.post('/admin/janet/media/bulk-action', {
                     action: 'update_alt',
                     ids: selectedMedia.value,
                     alt_text: options.altText,
@@ -404,7 +404,7 @@ export function useMediaManager() {
         } else if (action === 'download') {
             bulkProcessing.value = true;
             try {
-                const response = await api.post('/admin/ja/media/download-zip', { ids: selectedMedia.value }, { responseType: 'blob' });
+                const response = await api.post('/admin/janet/media/download-zip', { ids: selectedMedia.value }, { responseType: 'blob' });
                 const blob = new Blob([response.data], { type: 'application/zip' });
                 const url = window.URL.createObjectURL(blob);
                 const link = document.createElement('a');

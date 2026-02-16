@@ -85,45 +85,90 @@
             "port": "Port",
             "management_port": "Port Manajemen",
             "api_port": "Port API",
-            "snmp_port": "Port SNMP"
+            "snmp_port": "Port SNMP",
+            "pretty_id": "ID Router",
+            "ip_type": "Tipe IP",
+            "node_type": "Tipe Node",
+            "radius_secret": "Secret Radius",
+            "auto_allocate": "Alokasi Otomatis",
+            "vpn_server": "Server VPN",
+            "lat": "Latitude",
+            "lng": "Longitude",
+            "physical_location": "Lokasi Fisik"
         },
+        "status_online": "Online",
+        "status_offline": "Offline",
         "search_placeholder": "Cari Router...",
-        "new": "Tambah Router",
+        "new": "Router Baru",
         "edit": "Edit Router",
         "messages": {
             "success_create": "Router berhasil ditambahkan",
             "success_update": "Router berhasil diperbarui",
-            "success_delete": "Router berhasil dihapus"
+            "success_delete": "Router berhasil dihapus",
+            "success_restore": "Router berhasil dipulihkan",
+            "success_force_delete": "Router berhasil dihapus secara permanen"
+        },
+        "tabs": {
+            "general": "UMUM",
+            "integration": "INTEGRASI"
+        },
+        "placeholders": {
+            "search": "Cari Router...",
+            "custom_desc": "Masukkan deskripsi kustom...",
+            "port": "misal: 8728",
+            "ip": "misal: 10.0.0.1",
+            "auto_allocate": "Dialokasikan Otomatis oleh Sistem"
+        },
+        "presets": {
+            "core": "Core Router",
+            "gateway": "Router Gateway",
+            "distribution": "Router Distribusi",
+            "custom": "Kustom",
+            "selection_placeholder": "Pilih tipe atau kustom..."
+        },
+        "help": {
+            "vpn_server": "Izinkan router lain terhubung melalui VPN",
+            "status_active": "Router online dan berfungsi",
+            "status_inactive": "Pengaturan integrasi sangat disarankan",
+            "integration_desc": "Secret MikroTik API, SNMP, dan Radius dapat dikonfigurasi dari tab Integrasi {context}.",
+            "vpn_radius_note": "Catatan: Untuk koneksi VPN RADIUS, pastikan server Radius dapat diakses oleh router.",
+            "radius_secret_match": "Harus cocok dengan konfigurasi Radius MikroTik.",
+            "mode": "Mode Koneksi",
+            "tunnel": "Tipe Tunnel",
+            "rear_vpn_ip": "IP VPN Belakang",
+            "preview": "Pratinjau",
+            "generate": "Generate Script",
+            "reset": "Reset & Ubah Opsi",
+            "context_above": "di atas",
+            "context_after": "setelah menambahkan router"
+        },
+        "types": {
+            "router": "Router MikroTik",
+            "olt": "Node OLT",
+            "pop": "POP / Access Point"
         }
+    },
+    "connectivity": {
+        "title": "Konektivitas",
+        "method": "Metode Koneksi",
+        "status": "Status Koneksi",
+        "username": "Username API",
+        "password": "Password API",
+        "snmp_community": "SNMP Community",
+        "connected": "Tersambung",
+        "disconnected": "Terputus",
+        "active_clients": "Klien Aktif"
     },
     "data_server": {
         "title": "Data Server",
         "add": "Tambah Data",
         "fields": {
-            "name": "Server Name"
+            "name": "Nama Server"
         },
         "messages": {
             "success_create": "Data server berhasil ditambahkan",
             "success_update": "Data server berhasil diperbarui",
             "success_delete": "Data server berhasil dihapus"
-        },
-        "instructions": {
-            "edit_hint": "Klik pada kolom server name untuk mengubah data",
-            "matching_hint": "Server name harus sama dengan yang ada di mikrotik",
-            "hotspot_path": "untuk hotspot lihat di menu IP->Hotspot->Servers->Name",
-            "ppp_path": "Untuk PPP lihat di menu PPP->PPPoE Servers->Service name",
-            "purpose": "Fungsi data server ini adalah untuk mengunci klien agar hanya bisa melakukan otentikasi dari satu server"
-        },
-        "connectivity": {
-            "title": "Konektivitas",
-            "method": "Metode Koneksi",
-            "status": "Status Koneksi",
-            "username": "Username API",
-            "password": "Password API",
-            "snmp_community": "SNMP Community",
-            "connected": "CONNECTED",
-            "disconnected": "DISCONNECTED",
-            "active_clients": "Klien Aktif"
         },
         "script": {
             "title": "Script MikroTik",
@@ -133,21 +178,21 @@
             "download": "Download Script",
             "fields": {
                 "router_name": "Nama Router",
-                "ip_address": "IP Address"
+                "ip_address": "Alamat IP"
             },
             "options": {
                 "select": "-Pilih-",
                 "os_v6": "RouterOS v6",
                 "os_v7": "RouterOS v7",
-                "vpn_script": "SCRIPT VPN",
-                "pppoe_only": "PPPoE ONLY",
-                "hotspot_only": "HOTSPOT ONLY",
-                "pppoe_hotspot": "PPPoE + HOTSPOT"
+                "vpn_script": "Script VPN",
+                "pppoe_only": "Hanya PPPoE",
+                "hotspot_only": "Hanya Hotspot",
+                "pppoe_hotspot": "PPPoE + Hotspot"
             }
         }
     },
     "routing": {
-        "title": "STATIC ROUTING VPN",
+        "title": "Static Routing VPN",
         "instructions": {
             "item1": "Static routing digunakan jika anda menggunakan Loadbalance di mikrotik",
             "item2": "Fungsi static routing ini untuk menentukan jalur VPN agar tetap berada di jalur paling stabil dan tidak terputus putus",
@@ -159,7 +204,13 @@
             "gateway_hint": "(Lihat di menu IP - Routes pada mikrotik anda)"
         },
         "actions": {
-            "get_script": "Ambil Script"
+            "get_script": "Ambil Script",
+            "bulk_delete": "Hapus Terpilih",
+            "bulk_restore": "Pulihkan Terpilih",
+            "bulk_activate": "Aktifkan Terpilih",
+            "bulk_deactivate": "Nonaktifkan Terpilih",
+            "to_trash": "Ke Tong Sampah",
+            "delete_permanent": "Hapus Permanen"
         },
         "messages": {
             "copied": "Script berhasil disalin!"
@@ -175,7 +226,7 @@
         "offline": "Offline"
     },
     "ip_pool": {
-        "title": "IP Pool Management",
+        "title": "Manajemen IP Pool",
         "subtitle": "Kelola alokasi IP address untuk pelanggan",
         "list_title": "Daftar IP Pool",
         "list_desc": "Pool IP yang tersedia untuk dialokasikan ke pelanggan",
@@ -214,11 +265,11 @@
             "all": "Semua alamat",
             "filter": "Filter",
             "reset": "reset",
-            "ip": "IP Address",
+            "ip": "Alamat IP",
             "status": "Status",
             "customer": "Pelanggan",
-            "assigned_at": "Assigned At",
-            "notes": "Notes"
+            "assigned_at": "Ditentukan Pada",
+            "notes": "Catatan"
         },
         "status": {
             "active": "Aktif",
@@ -258,6 +309,33 @@
         "fields": {
             "coa_port": "Port CoA (Mikrotik)",
             "default_speed": "Kecepatan Fallback (FUP)"
+        }
+    },
+    "vpn": {
+        "title": "Manajemen Klien VPN",
+        "subtitle": "Kelola PPP Secret di {router}",
+        "sidebar_title": "Router (API)",
+        "search_router": "Cari router...",
+        "no_routers": "Tidak ada router API ditemukan.",
+        "create": "Buat Klien VPN",
+        "creating": "Mengambil secret dari router...",
+        "empty_title": "Tidak ada klien VPN ditemukan",
+        "empty_desc": "Buat VPN secret pertama Anda dengan mengeklik tombol \"Buat Klien VPN\" di atas.",
+        "select_router_title": "Pilih router",
+        "select_router_desc": "Silakan pilih router dengan fitur API dari sidebar kiri untuk mengelola klien VPN dan PPP secret-nya.",
+        "modal": {
+            "title": "Klien VPN Baru",
+            "subtitle": "Tambahkan PPP Secret baru ke router MikroTik.",
+            "username": "Username",
+            "password": "Password",
+            "service": "Layanan",
+            "profile": "Profil",
+            "remote_address": "Alamat Remote (Opsional)",
+            "comment": "Komentar"
+        },
+        "messages": {
+            "success_create": "VPN Secret berhasil dibuat",
+            "success_delete": "VPN Secret berhasil dihapus"
         }
     }
 }

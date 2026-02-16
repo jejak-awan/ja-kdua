@@ -1,0 +1,83 @@
+{
+    "title": "Radius Management",
+    "subtitle": "Monitor active sessions and manage radius nodes.",
+    "tabs": {
+        "nodes": "Radius Nodes",
+        "zones": "Service Zones",
+        "sessions": "Live Sessions",
+        "logs": "Auth Logs"
+    },
+    "stats": {
+        "active_sessions": "Active Sessions",
+        "total_routers": "Total Routers",
+        "total_users": "Total Users",
+        "service_status": "Radius Service",
+        "operational": "Operational",
+        "offline": "Offline",
+        "refresh": "Refresh Stats",
+        "active_sessions_desc": "Global connections",
+        "total_routers_desc": "Registered NAS",
+        "total_users_desc": "Total Credentials",
+        "no_nodes_desc": "No Nodes Configured"
+    },
+    "nodes": {
+        "title": "Radius Server Nodes",
+        "subtitle": "Manage physical server endpoints for FreeRADIUS authentication.",
+        "local_node": "Local FreeRADIUS Node"
+    },
+    "zones": {
+        "title": "Service Zones",
+        "subtitle": "Define Service Names to lock users to specific areas.",
+        "enforce_locking": "Enforce Locking",
+        "add_zone": "Add Zone",
+        "add_zone_desc": "Create a Service Zone to group and lock users.",
+        "fields": {
+            "name": "Zone Name",
+            "ip": "IP Address (Optional)",
+            "ip_desc": "Router/NAS IP for reference.",
+            "status": "Status"
+        },
+        "messages": {
+            "success_add": "Service Zone added",
+            "success_update": "Service Zone updated",
+            "success_delete": "Service Zone deleted",
+            "toggle_active": "Zone {status}",
+            "enforce_enabled": "Service Zone Locking Enabled",
+            "enforce_disabled": "Service Zone Locking Disabled"
+        }
+    },
+    "sessions": {
+        "title": "Active Accounting Sessions",
+        "subtitle": "Real-time data from accounting for currently connected users.",
+        "sync": "Sync Data",
+        "fields": {
+            "username": "Username",
+            "client_ip": "Client IP",
+            "nas_router": "NAS / Router",
+            "mac_address": "MAC Address",
+            "up_since": "Up Since"
+        }
+    },
+    "logs": {
+        "title": "Authentication History",
+        "subtitle": "Audit log of all access request attempts.",
+        "fields": {
+            "username": "Username",
+            "result": "Result",
+            "date_time": "Date & Time"
+        },
+        "results": {
+            "accepted": "Accepted",
+            "rejected": "Rejected"
+        }
+    },
+    "actions": {
+        "disconnect": "Disconnect",
+        "sync": "Sync Data",
+        "refresh": "Refresh"
+    },
+    "messages": {
+        "confirm_disconnect": "Are you sure you want to disconnect session for user \"{name}\"?",
+        "success_disconnect": "Disconnect request sent (CoA)"
+    }
+}

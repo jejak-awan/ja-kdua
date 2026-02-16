@@ -1,13 +1,16 @@
 {
+    "title": "Infrastructure Management",
+    "subtitle": "Manage your network nodes, OLTs, and core routers.",
     "map_title": "Infrastructure Map",
     "map_subtitle": "Geographical view of your network topology.",
     "list_view": "List View",
+    "inventory": "Inventory",
+    "vpn": "VPN",
     "type": "Type",
     "status": "Status",
-    "view_details": "VIEW FULL DETAILS",
+    "view_details": "View Full Details",
     "nodes": {
-        "title": "Infrastructure Management",
-        "subtitle": "Manage your network nodes, OLTs, and core routers.",
+        "title": "Nodes",
         "add_node": "Add Node",
         "stats": {
             "total": "Total Nodes",
@@ -24,7 +27,10 @@
             "actions": "Actions",
             "search_placeholder": "Search nodes or IP...",
             "lat": "Latitude",
-            "lng": "Longitude"
+            "lng": "Longitude",
+            "api_username": "API Username",
+            "api_password": "API Password",
+            "snmp_community": "SNMP Community"
         },
         "types": {
             "all": "All Types",
@@ -39,18 +45,150 @@
             "inactive": "Offline"
         }
     },
+    "router": {
+        "title": "Routers & Servers",
+        "add": "Add Router",
+        "fields": {
+            "name": "Router Name",
+            "ip": "IP Address",
+            "pretty_id": "Router ID",
+            "ip_type": "IP Type",
+            "node_type": "Node Type",
+            "radius_secret": "Radius Secret",
+            "online": "Online",
+            "management_port": "Mgmt Port",
+            "api_port": "API Port",
+            "snmp_port": "SNMP Port",
+            "vpn_server": "VPN Server",
+            "connection_type": "Connection Type",
+            "auto_allocate": "Auto Allocate",
+            "physical_location": "Physical Location"
+        },
+        "presets": {
+            "core": "Core Router",
+            "router": "Router Gateway",
+            "distribution": "Distribution Router",
+            "custom": "Custom",
+            "selection_placeholder": "Select a preset or custom..."
+        },
+        "placeholders": {
+            "custom_desc": "Enter custom description...",
+            "auto_allocate": "Allocated by IPAM",
+            "ip": "e.g. 10.0.0.1",
+            "port": "e.g. 8728"
+        },
+        "help": {
+            "vpn_server": "Enable VPN server capabilities on this node.",
+            "status_active": "Node is online and operational.",
+            "status_inactive": "Node is currently inactive or in setup.",
+            "integration_desc": "Configure API, SNMP, and Radius secrets in the Integration tab {context}.",
+            "context_above": "above",
+            "context_after": "after adding the node",
+            "vpn_radius_note": "Note: VPN RADIUS requires the node to be reachable by the Radius server.",
+            "radius_secret_match": "Must match the secret on the MikroTik/NAS.",
+            "mode": "Connection Mode",
+            "tunnel": "Tunnel Type",
+            "rear_vpn_ip": "Rear VPN IP",
+            "preview": "Script Preview",
+            "generate": "Generate Script",
+            "reset": "Reset Options"
+        },
+        "types": {
+            "router": "MikroTik Router",
+            "olt": "OLT Node",
+            "pop": "POP / Access Point"
+        },
+        "status_online": "Online",
+        "status_offline": "Offline",
+        "tabs": {
+            "general": "GENERAL",
+            "integration": "INTEGRATION"
+        },
+        "messages": {
+            "script_generated": "Configuration script generated successfully"
+        },
+        "script_modal_title": "Generate Configuration Script"
+    },
+    "olt": {
+        "title": "OLT Ecosystem",
+        "subtitle": "Manage and monitor multi-vendor OLT infrastructure.",
+        "add_olt": "Add OLT",
+        "fields": {
+            "vendor": "Vendor",
+            "model": "Model",
+            "hardware": "Hardware Details",
+            "signal": "Signal Quality",
+            "reachability": "Reachability",
+            "port": "SSH Port",
+            "sn": "Serial Number",
+            "interface": "Interface / Port",
+            "name": "OLT Name",
+            "ip_address": "IP Address",
+            "username": "Username",
+            "password": "Password",
+            "vendor_type": "Vendor Type"
+        },
+        "details": {
+            "tabs": {
+                "overview": "Overview",
+                "telemetry": "Telemetry",
+                "audit": "Audit Log",
+                "topology": "Topology"
+            },
+            "overview": {
+                "hardware": "Hardware Details",
+                "system_health": "System Health",
+                "ssh_reachability": "SSH Reachability",
+                "reachable": "REACHABLE",
+                "unreachable": "UNREACHABLE",
+                "link_new_odp": "Link New ODP"
+            }
+        },
+        "telemetry": {
+            "optical_power": "Optical Power Distribution",
+            "rx_power": "Average Rx Power",
+            "samples": "samples"
+        },
+        "discovery": {
+            "title": "ZTP Discovery",
+            "subtitle": "Manage and provision discovered unconfigured equipment.",
+            "scan": "Scan Equipment",
+            "no_equipment": "No equipment discovered",
+            "no_equipment_desc": "All connected equipment is properly configured or pending registration.",
+            "discovered_badge": "Discovered",
+            "provision": "Provision Now",
+            "unknown_parent": "Unknown OLT"
+        },
+        "messages": {
+            "discovery_started": "ZTP Scan started, this may take a few seconds...",
+            "save_first": "Save configuration first."
+        }
+    },
     "modals": {
-        "create_title": "Add New Infrastructure Node",
-        "edit_title": "Edit Infrastructure Node",
-        "save": "Save Node",
-        "delete_confirm": "Are you sure you want to delete {name}?"
+        "create_title": "Add New Infrastructure",
+        "edit_title": "Edit Infrastructure",
+        "save": "Save Changes",
+        "delete_confirm": "Are you sure you want to delete {name}?",
+        "test_connection": "Test Connection"
     },
     "messages": {
         "no_nodes": "No infrastructure nodes found.",
-        "success_create": "Node created successfully",
-        "success_update": "Node updated successfully",
-        "success_delete": "Node deleted successfully",
+        "no_data": "No data found.",
+        "success_create": "Infrastructure created successfully",
+        "success_update": "Infrastructure updated successfully",
+        "success_delete": "Infrastructure deleted successfully",
         "error_load": "Failed to load infrastructure data",
-        "coming_soon": "Edit functionality coming soon"
-    }
+        "loading": "Loading infrastructure data...",
+        "test_success": "Connection test successful",
+        "test_failed": "Connection test failed"
+    },
+    "bulk_actions": {
+        "delete": "Delete Selected",
+        "maintenance": "Set Maintenance",
+        "active": "Set Active",
+        "deactivate": "Deactivate",
+        "to_trash": "Move to Trash"
+    },
+    "selected": "{count} selected",
+    "capabilities": "Capabilities"
 }

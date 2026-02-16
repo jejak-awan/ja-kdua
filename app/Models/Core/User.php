@@ -25,6 +25,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $last_login_ip
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property array<string, mixed>|null $preferences
+ * @property float $distance_km
  * @property-read \App\Models\Core\TwoFactorAuth|null $twoFactorAuth
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Core\Media[] $media
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Core\ActivityLog[] $activityLogs
@@ -52,6 +53,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'last_login_at',
         'last_login_ip',
         'preferences',
+        'current_lat',
+        'current_lng',
     ];
 
     /**
@@ -76,6 +79,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'last_login_at' => 'datetime',
             'password' => 'hashed',
             'preferences' => 'array',
+            'current_lat' => 'decimal:8',
+            'current_lng' => 'decimal:8',
         ];
     }
 
@@ -138,13 +143,23 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get the invoices for the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Isp\Billing\Invoice, $this>
+     */
+    public function invoices(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\Isp\Billing\Invoice::class, 'user_id');
+    }
+
+    /**
      * Get the ISP customer profile.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\Isp\Customer, $this>
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\Isp\Customer\Customer, $this>
      */
     public function customer(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->hasOne(\App\Models\Isp\Customer::class, 'user_id');
+        return $this->hasOne(\App\Models\Isp\Customer\Customer::class, 'user_id');
     }
 
     /**

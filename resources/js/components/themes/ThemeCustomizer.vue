@@ -72,7 +72,7 @@ const isDirty = computed(() => {
 
 const fetchMenus = async () => {
     try {
-        const response = await api.get('/admin/ja/menus');
+        const response = await api.get('/admin/janet/menus');
         const data = response.data.data || response.data;
         availableMenus.value = (Array.isArray(data) ? data : []).map((m: { id: number | string, name: string }) => ({
             value: m.id,
@@ -87,7 +87,7 @@ const fetchMenus = async () => {
 const fetchThemeDetails = async () => {
     loading.value = true;
     try {
-        const response = await api.get(`/admin/ja/themes/${props.theme.slug}`);
+        const response = await api.get(`/admin/janet/themes/${props.theme.slug}`);
         const data = response.data.data || response.data;
         fullTheme.value = data;
         loadSettings();
@@ -248,9 +248,9 @@ const resetSettings = async () => {
 const saveSettings = async () => {
     saving.value = true;
     try {
-        await api.put(`/admin/ja/themes/${props.theme.slug}/settings`, { settings: formValues.value });
+        await api.put(`/admin/janet/themes/${props.theme.slug}/settings`, { settings: formValues.value });
         if (customCss.value !== fullTheme.value.custom_css) {
-            await api.put(`/admin/ja/themes/${props.theme.slug}/custom-css`, { custom_css: customCss.value });
+            await api.put(`/admin/janet/themes/${props.theme.slug}/custom-css`, { custom_css: customCss.value });
         }
         toast.success('Success', 'Theme settings saved successfully.');
         initialSettings.value = JSON.parse(JSON.stringify(formValues.value));

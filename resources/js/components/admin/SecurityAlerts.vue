@@ -73,7 +73,7 @@ const pollInterval = ref<ReturnType<typeof setInterval> | null>(null);
 
 const fetchAlerts = async () => {
     try {
-        const response = await api.get('/admin/ja/security/alerts');
+        const response = await api.get('/admin/janet/security/alerts');
         alerts.value = response.data?.data?.alerts || [];
     } catch (error: unknown) {
         console.warn('Failed to fetch security alerts:', error);

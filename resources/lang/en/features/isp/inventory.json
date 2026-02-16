@@ -1,0 +1,36 @@
+{
+    "title": "Inventory Manager",
+    "subtitle": "Track hardware inventory and warehouse transactions.",
+    "add_item": "Add New Item",
+    "empty": "No inventory items found.",
+    "stock": "Stock",
+    "unit_price": "Unit Price",
+    "stats": {
+        "total_stock": "Total Stock",
+        "available": "Available",
+        "total_hpp": "Total COGS (HPP)",
+        "total_value": "Total Value"
+    },
+    "fields": {
+        "name": "Item Name",
+        "sku": "SKU",
+        "category": "Category",
+        "stock": "Current Stock",
+        "min_stock": "Min Stock",
+        "unit": "Unit",
+        "price": "Purchase Price",
+        "type": "Transaction Type",
+        "quantity": "Quantity",
+        "notes": "Notes",
+        "customer": "Customer (Optional)"
+    },
+    "modals": {
+        "add_title": "Add New Inventory",
+        "adjust_title": "Stock Adjustment",
+        "adjust_desc": "Record in, out, or adjustment transaction for {name}."
+    },
+    "messages": {
+        "success_create": "Inventory item created successfully",
+        "success_adjust": "Stock updated successfully"
+    }
+}

@@ -5,15 +5,35 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Isp\Network;
 
 use App\Http\Controllers\Api\Core\BaseApiController;
-use App\Models\Isp\Outage;
+use App\Models\Isp\Network\Outage;
+use App\Services\Isp\Network\RouterService;
+use App\Services\Isp\ThirdParty\WhatsAppNotificationService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class OutageController extends BaseApiController
 {
     /**
+     * @var RouterService
+     */
+    protected $routerService;
+
+    /**
+     * @var WhatsAppNotificationService
+     */
+    protected $whatsApp;
+
+    public function __construct(RouterService $routerService, WhatsAppNotificationService $whatsApp)
+    {
+        $this->routerService = $routerService;
+        $this->whatsApp = $whatsApp;
+    }
+
+    /**
      * List current and past outages (Admin)
      */
+    // ... (index method)
     public function index(): \Illuminate\Http\JsonResponse
     {
         $outages = Outage::with('node')->latest()->get();
@@ -38,16 +58,52 @@ class OutageController extends BaseApiController
 
         $outage = Outage::create($validated);
 
+        // Broadcast notification if node_id is present
+        if ($outage->node_id) {
+            $this->broadcastOutage($outage);
+        }
+
         return $this->success($outage, 'Outage report created successfully');
+    }
+
+    /**
+     * Broadcast outage notification to affected customers.
+     */
+    protected function broadcastOutage(Outage $outage): void
+    {
+        /** @var \App\Models\Isp\Network\ServiceNode $node */
+        $node = $outage->node;
+
+        // Find customers connected to this node
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Isp\Customer\Customer> $customers */
+        $customers = \App\Models\Isp\Customer\Customer::where('router_id', $outage->node_id)
+            ->where('status', 'active')
+            ->with('user')
+            ->get();
+
+        foreach ($customers as $customer) {
+            if ($customer->user->phone) {
+                $this->whatsApp->sendOutageAlert(
+                    $customer->user->phone,
+                    $node->name ?? 'Your Area',
+                    $outage->status,
+                    $outage->description ?? ''
+                );
+            }
+        }
     }
 
     /**
      * Update an outage report
      */
-    public function update(Request $request, mixed $id): \Illuminate\Http\JsonResponse
+    public function update(Request $request, string $id): \Illuminate\Http\JsonResponse
     {
-        $id = is_numeric($id) ? (int) $id : 0;
-        $outage = Outage::findOrFail($id);
+        $outageId = is_numeric($id) ? (int) $id : 0;
+        $outage = Outage::find($outageId);
+
+        if (! $outage) {
+            return $this->error('Outage report not found', 404);
+        }
 
         $validated = $request->validate([
             'status' => 'required|in:Investigating,Identified,Monitoring,Resolved',
@@ -57,7 +113,7 @@ class OutageController extends BaseApiController
 
         $outage->update($validated);
 
-        return $this->success($outage, 'Outage status updated');
+        return $this->success($outage, 'Outage status updated successfully');
     }
 
     /**

@@ -42,7 +42,7 @@ defineProps<DataTableProps>()
             <TableHead
               v-for="header in headerGroup.headers"
               :key="header.id"
-              class="h-11 px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap"
+              class="h-11 px-4 py-3 text-xs font-bold tracking-wider text-muted-foreground whitespace-nowrap"
               :style="{ width: header.getSize() !== 150 ? `${header.getSize()}px` : undefined }"
             >
               <div

@@ -1,0 +1,212 @@
+{
+    "status": {
+        "active": "Aktif",
+        "inactive": "Nonaktif",
+        "online": "Online",
+        "offline": "Offline",
+        "trash": "Tempat Sampah",
+        "maintenance": "Pemeliharaan"
+    },
+    "actions": {
+        "activate": "Aktifkan",
+        "deactivate": "Nonaktifkan",
+        "restore": "Pulihkan",
+        "delete_permanently": "Hapus Permanen",
+        "to_trash": "Pindahkan ke Sampah",
+        "download_config": "Unduh Konfig",
+        "view_details": "Lihat Detail"
+    },
+    "labels": {
+        "latency": "Latensi",
+        "throughput": "Throughput",
+        "incoming": "Masuk",
+        "outgoing": "Keluar",
+        "usage": "Penggunaan",
+        "history": "Riwayat",
+        "diagnostics": "Diagnostik"
+    },
+    "common": {
+        "status": {
+            "active": "Aktif",
+            "inactive": "Nonaktif",
+            "connecting": "Menghubungkan"
+        }
+    },
+    "monitor": {
+        "title": "NOC Dashboard",
+        "subtitle": "Pemantauan jaringan real-time dan metrik performa",
+        "health": "Kesehatan: {status}",
+        "health_status": {
+            "healthy": "Sehat",
+            "warning": "Peringatan",
+            "critical": "Kritis",
+            "connecting": "Menghubungkan"
+        },
+        "last_updated": "Terakhir diperbarui",
+        "throughput_title": "Throughput Global",
+        "throughput_subtitle": "Utilisasi bandwidth jaringan dari waktu ke waktu",
+        "incoming": "Masuk",
+        "outgoing": "Keluar",
+        "node_cpu": "CPU"
+    },
+    "noc": {
+        "tabs": {
+            "overview": "Ringkasan",
+            "sessions": "Sesi",
+            "radius": "RADIUS",
+            "traffic": "Trafik",
+            "health": "Kesehatan",
+            "map": "Peta",
+            "heatmap": "Peta Panas",
+            "radius_sessions": "Sesi",
+            "radius_logs": "Log",
+            "traffic_monitor": "Monitor",
+            "traffic_report": "Laporan"
+        }
+    },
+    "olt": {
+        "tabs": {
+            "list": "Daftar OLT",
+            "discovery": "Penemuan ZTP",
+            "logs": "Log Audit"
+        }
+    },
+    "analytics": {
+        "title": "Analitik",
+        "subtitle": "Revenue, analitik penggunaan, dan intelijen bisnis",
+        "tabs": {
+            "revenue": "Revenue",
+            "usage": "Penggunaan",
+            "bi": "Intelijen Bisnis"
+        }
+    },
+    "hotspot": {
+        "tabs": {
+            "vouchers": "Voucher",
+            "sold": "Terjual",
+            "ip_bindings": "IP Bindings",
+            "cookies": "Cookies"
+        }
+    },
+    "network": {
+        "title": "Manajemen Jaringan",
+        "subtitle": "Kelola infrastruktur jaringan dan pengalamatan IP",
+        "ipam": {
+            "title": "Manajemen Alamat IP",
+            "settings": {
+                "title": "Pengaturan"
+            }
+        },
+        "subnets_manager": {
+            "new": "Subnet Baru",
+            "desc": "Tambahkan subnet IP baru ke jaringan Anda",
+            "pool": "Pool Subnet",
+            "new_pool": "Tambah Subnet",
+            "select_subnet": "Pilih subnet",
+            "fields": {
+                "node": "Node Layanan"
+            }
+        },
+        "subnets": {
+            "fields": {
+                "prefix": "Prefix CIDR",
+                "gateway": "Gateway"
+            }
+        }
+    },
+    "infra": {
+        "title": "Infrastruktur",
+        "modals": {
+            "create_title": "Tambah Perangkat",
+            "edit_title": "Edit Perangkat",
+            "save": "Simpan",
+            "test_connection": "Tes Koneksi"
+        },
+        "messages": {
+            "success_create": "Berhasil dibuat",
+            "success_update": "Berhasil diperbarui",
+            "success_delete": "Berhasil dihapus",
+            "test_success": "Koneksi berhasil",
+            "test_failed": "Koneksi gagal"
+        },
+        "nodes": {
+            "stats": {
+                "total": "Total Node",
+                "active": "Aktif",
+                "maintenance": "Pemeliharaan",
+                "offline": "Offline"
+            },
+            "fields": {
+                "name": "Nama",
+                "ip": "Alamat IP",
+                "status": "Status",
+                "actions": "Aksi",
+                "search_placeholder": "Cari node..."
+            }
+        },
+        "olt": {
+            "title": "Jaringan Fiber — OLT",
+            "subtitle": "Kelola Optical Line Terminal",
+            "add_olt": "Tambah OLT",
+            "fields": {
+                "name": "Nama",
+                "vendor_type": "Vendor / Tipe",
+                "vendor": "Vendor",
+                "ip_address": "Alamat IP",
+                "ssh_port": "Port SSH",
+                "username": "Username",
+                "password": "Password"
+            },
+            "discovery": {
+                "title": "Penemuan ZTP",
+                "scan": "Pindai Jaringan"
+            },
+            "audit": {
+                "title": "Log Audit"
+            }
+        }
+    },
+    "admin": {
+        "vouchers": {
+            "title": "Mesin Voucher Hotspot",
+            "subtitle": "Buat massal dan kelola voucher akses hotspot",
+            "empty": "Tidak ada voucher yang cocok dengan pencarian Anda.",
+            "export_excel": "Spreadsheet Excel (.xlsx)",
+            "export_script": "Script RouterOS (.rsc)",
+            "cleanup": "Pembersihan Sistem",
+            "print_batch": "Cetak Batch",
+            "create_single": "Buat Satuan",
+            "sync_usage": "Sinkron Penggunaan",
+            "generate": "Buat Batch",
+            "count": "Jumlah",
+            "pattern": "Pola Kode",
+            "duration": "Durasi Berlaku",
+            "commission": "Komisi (Pratinjau)",
+            "print_immediate": "Cetak batch segera setelah pembuatan",
+            "generate_title": "Buat Batch Baru",
+            "create_single_title": "Buat User Hotspot Satuan",
+            "import_title": "Impor Voucher",
+            "cleanup_title": "Pembersihan Sistem",
+            "cleanup_description": "Hapus permanen voucher kedaluwarsa atau tersedia yang tidak lagi dibutuhkan.",
+            "before_date": "Dibuat Sebelum",
+            "danger_zone": "Zona Bahaya",
+            "cannot_be_undone": "Tindakan ini tidak dapat dibatalkan.",
+            "create_success": "User hotspot berhasil dibuat",
+            "generate_success": "Batch dibuat dan disinkronkan ke RADIUS",
+            "sync_success": "Menyinkronkan {count} voucher",
+            "limit_exceeded": "Batas 1000 voucher per batch",
+            "select_partner_optional": "Penjualan Langsung (Opsional)",
+            "select_file": "Klik untuk memilih file",
+            "formats_supported": "Format yang didukung: .xlsx, .xls",
+            "bulk_delete_confirm": "Yakin ingin menghapus {count} voucher?"
+        },
+        "inventory": {
+            "stats": {
+                "total_stock": "Total Stok",
+                "available": "Tersedia",
+                "total_hpp": "Total HPP",
+                "total_value": "Total Nilai"
+            }
+        }
+    }
+}

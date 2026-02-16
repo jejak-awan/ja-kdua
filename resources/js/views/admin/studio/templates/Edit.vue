@@ -193,7 +193,7 @@ const isDirty = computed(() => {
 const fetchTemplate = async () => {
     loading.value = true;
     try {
-        const response = await api.get(`/admin/ja/content-templates/${templateId}`);
+        const response = await api.get(`/admin/janet/content-templates/${templateId}`);
         const template = parseSingleResponse<ContentTemplate>(response);
         
         if (template) {
@@ -225,7 +225,7 @@ const handleSubmit = async () => {
     saving.value = true;
     clearErrors();
     try {
-        await api.put(`/admin/ja/content-templates/${templateId}`, form.value);
+        await api.put(`/admin/janet/content-templates/${templateId}`, form.value);
         toast.success.update('Template');
         
         // Update initial form after successful save

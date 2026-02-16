@@ -1,0 +1,212 @@
+{
+    "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "online": "Online",
+        "offline": "Offline",
+        "trash": "Trash",
+        "maintenance": "Maintenance"
+    },
+    "actions": {
+        "activate": "Activate",
+        "deactivate": "Deactivate",
+        "restore": "Restore",
+        "delete_permanently": "Delete Permanently",
+        "to_trash": "To Trash",
+        "download_config": "Download Config",
+        "view_details": "View Details"
+    },
+    "labels": {
+        "latency": "Latency",
+        "throughput": "Throughput",
+        "incoming": "Incoming",
+        "outgoing": "Outgoing",
+        "usage": "Usage",
+        "history": "History",
+        "diagnostics": "Diagnostics"
+    },
+    "common": {
+        "status": {
+            "active": "Active",
+            "inactive": "Inactive",
+            "connecting": "Connecting"
+        }
+    },
+    "monitor": {
+        "title": "NOC Dashboard",
+        "subtitle": "Real-time network monitoring and performance metrics",
+        "health": "Health: {status}",
+        "health_status": {
+            "healthy": "Healthy",
+            "warning": "Warning",
+            "critical": "Critical",
+            "connecting": "Connecting"
+        },
+        "last_updated": "Last updated",
+        "throughput_title": "Global Throughput",
+        "throughput_subtitle": "Network bandwidth utilization over time",
+        "incoming": "Incoming",
+        "outgoing": "Outgoing",
+        "node_cpu": "CPU"
+    },
+    "noc": {
+        "tabs": {
+            "overview": "Overview",
+            "sessions": "Sessions",
+            "radius": "RADIUS",
+            "traffic": "Traffic",
+            "health": "Health",
+            "map": "Map",
+            "heatmap": "Heatmap",
+            "radius_sessions": "Sessions",
+            "radius_logs": "Logs",
+            "traffic_monitor": "Monitor",
+            "traffic_report": "Report"
+        }
+    },
+    "olt": {
+        "tabs": {
+            "list": "OLT List",
+            "discovery": "ZTP Discovery",
+            "logs": "Audit Logs"
+        }
+    },
+    "analytics": {
+        "title": "Analytics",
+        "subtitle": "Revenue, usage analytics, and business intelligence",
+        "tabs": {
+            "revenue": "Revenue",
+            "usage": "Usage",
+            "bi": "Business Intelligence"
+        }
+    },
+    "hotspot": {
+        "tabs": {
+            "vouchers": "Vouchers",
+            "sold": "Sold",
+            "ip_bindings": "IP Bindings",
+            "cookies": "Cookies"
+        }
+    },
+    "network": {
+        "title": "Network Management",
+        "subtitle": "Manage network infrastructure and IP addressing",
+        "ipam": {
+            "title": "IP Address Management",
+            "settings": {
+                "title": "Settings"
+            }
+        },
+        "subnets_manager": {
+            "new": "New Subnet",
+            "desc": "Add a new IP subnet to your network",
+            "pool": "Subnet Pool",
+            "new_pool": "Add Subnet",
+            "select_subnet": "Select a subnet",
+            "fields": {
+                "node": "Service Node"
+            }
+        },
+        "subnets": {
+            "fields": {
+                "prefix": "CIDR Prefix",
+                "gateway": "Gateway"
+            }
+        }
+    },
+    "infra": {
+        "title": "Infrastructure",
+        "modals": {
+            "create_title": "Add Equipment",
+            "edit_title": "Edit Equipment",
+            "save": "Save",
+            "test_connection": "Test Connection"
+        },
+        "messages": {
+            "success_create": "Created successfully",
+            "success_update": "Updated successfully",
+            "success_delete": "Deleted successfully",
+            "test_success": "Connection successful",
+            "test_failed": "Connection failed"
+        },
+        "nodes": {
+            "stats": {
+                "total": "Total Nodes",
+                "active": "Active",
+                "maintenance": "Maintenance",
+                "offline": "Offline"
+            },
+            "fields": {
+                "name": "Name",
+                "ip": "IP Address",
+                "status": "Status",
+                "actions": "Actions",
+                "search_placeholder": "Search nodes..."
+            }
+        },
+        "olt": {
+            "title": "Fiber Network — OLT",
+            "subtitle": "Manage Optical Line Terminals",
+            "add_olt": "Add OLT",
+            "fields": {
+                "name": "Name",
+                "vendor_type": "Vendor / Type",
+                "vendor": "Vendor",
+                "ip_address": "IP Address",
+                "ssh_port": "SSH Port",
+                "username": "Username",
+                "password": "Password"
+            },
+            "discovery": {
+                "title": "ZTP Discovery",
+                "scan": "Scan Network"
+            },
+            "audit": {
+                "title": "Audit Logs"
+            }
+        }
+    },
+    "admin": {
+        "vouchers": {
+            "title": "Hotspot Voucher Engine",
+            "subtitle": "Bulk generate and manage hotspot access vouchers",
+            "empty": "No vouchers matching your search.",
+            "export_excel": "Excel Spreadsheet (.xlsx)",
+            "export_script": "RouterOS Script (.rsc)",
+            "cleanup": "System Cleanup",
+            "print_batch": "Print Batch",
+            "create_single": "Create Single",
+            "sync_usage": "Sync Usage",
+            "generate": "Generate Batch",
+            "count": "Quantity",
+            "pattern": "Code Pattern",
+            "duration": "Validity Duration",
+            "commission": "Commission (Preview)",
+            "print_immediate": "Print batch immediately after generation",
+            "generate_title": "Generate New Batch",
+            "create_single_title": "Create Single Hotspot User",
+            "import_title": "Import Vouchers",
+            "cleanup_title": "System Cleanup",
+            "cleanup_description": "Permanently remove expired or available vouchers that are no longer needed.",
+            "before_date": "Created Before",
+            "danger_zone": "Danger Zone",
+            "cannot_be_undone": "This action cannot be undone.",
+            "create_success": "Hotspot user created successfully",
+            "generate_success": "Batch generated and synced to RADIUS",
+            "sync_success": "Synchronized {count} vouchers",
+            "limit_exceeded": "Limit 1000 vouchers per batch",
+            "select_partner_optional": "Direct Sale (Optional)",
+            "select_file": "Click to select file",
+            "formats_supported": "Supported formats: .xlsx, .xls",
+            "bulk_delete_confirm": "Are you sure you want to delete {count} vouchers?"
+        },
+        "inventory": {
+            "stats": {
+                "total_stock": "Total Stock",
+                "available": "Available",
+                "total_hpp": "Total HPP",
+                "total_value": "Total Value"
+            }
+        }
+    }
+}

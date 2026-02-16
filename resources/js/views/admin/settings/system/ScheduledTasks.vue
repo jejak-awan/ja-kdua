@@ -704,7 +704,7 @@ async function fetchTasks(page = 1) : Promise<void> {
         search: search.value,
         per_page: pagination.value.per_page
     }
-    const response = await api.get('/admin/ja/scheduled-tasks', { params });
+    const response = await api.get('/admin/janet/scheduled-tasks', { params });
     
     // Handle both paginated and non-paginated responses for compatibility
     if (response.data?.meta) {
@@ -745,7 +745,7 @@ async function fetchTasks(page = 1) : Promise<void> {
 
 async function fetchAllowedCommands() : Promise<void> {
   try {
-    const response = await api.get('/admin/ja/scheduled-tasks/allowed-commands');
+    const response = await api.get('/admin/janet/scheduled-tasks/allowed-commands');
     if (response.data.data.commands) {
         allowedCommands.value = response.data.data.commands;
         appPath.value = response.data.data.base_path;
@@ -792,7 +792,7 @@ const handleBulkAction = async (action: string) => {
         }
 
         try {
-            const deletePromises = selectedTasks.value.map(id => api.delete(`/admin/ja/scheduled-tasks/${id}`));
+            const deletePromises = selectedTasks.value.map(id => api.delete(`/admin/janet/scheduled-tasks/${id}`));
             await Promise.all(deletePromises);
             
             toast.success.delete(`${selectedTasks.value.length} Tasks`);
@@ -846,10 +846,10 @@ async function saveTask() {
     errors.value = {};
     
     if (editingTask.value) {
-      await api.put(`/admin/ja/scheduled-tasks/${editingTask.value.id}`, form.value);
+      await api.put(`/admin/janet/scheduled-tasks/${editingTask.value.id}`, form.value);
       toast.success.update('Scheduled Task');
     } else {
-      await api.post('/admin/ja/scheduled-tasks', form.value);
+      await api.post('/admin/janet/scheduled-tasks', form.value);
       toast.success.create('Scheduled Task');
     }
     
@@ -882,7 +882,7 @@ async function runTask(task: ScheduledTask) {
 
   try {
     running.value = task.id;
-    const response = await api.post(`/admin/ja/scheduled-tasks/${task.id}/run`);
+    const response = await api.post(`/admin/janet/scheduled-tasks/${task.id}/run`);
     
     toast.success.action(t('features.scheduled_tasks.messages.executed') || 'Task executed successfully');
 
@@ -901,7 +901,7 @@ async function runTask(task: ScheduledTask) {
 async function toggleActive(task: ScheduledTask) : Promise<void> {
   try {
     const newState = !task.is_active;
-    await api.put(`/admin/ja/scheduled-tasks/${task.id}`, {
+    await api.put(`/admin/janet/scheduled-tasks/${task.id}`, {
       is_active: newState
     });
     
@@ -935,7 +935,7 @@ async function confirmDelete(task: ScheduledTask) {
   if (!confirmed) return;
 
   try {
-    await api.delete(`/admin/ja/scheduled-tasks/${task.id}`);
+    await api.delete(`/admin/janet/scheduled-tasks/${task.id}`);
     toast.success.delete();
     await fetchTasks(pagination.value.current_page);
   } catch (error: unknown) {
@@ -972,7 +972,7 @@ async function runAdhocCommand() {
     adhocOutput.value = '';
 
     // Run the command via dedicated ad-hoc endpoint
-    const response = await api.post('/admin/ja/scheduled-tasks/run-adhoc', {
+    const response = await api.post('/admin/janet/scheduled-tasks/run-adhoc', {
       command: adhocCommand.value.command,
       parameters: adhocCommand.value.parameters
     });

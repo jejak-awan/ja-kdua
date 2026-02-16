@@ -94,8 +94,11 @@ useHead({
         // BUT if no child sets title, this is the default.
         
         // 2. Route Meta Title
+        // 2. Route Meta Title
         if (route.meta?.title) {
-            return `${cmsStore.siteSettings?.site_name || 'JA CMS'} | ${route.meta.title}`;
+            const titleKey = route.meta.title as string;
+            const title = te(titleKey) ? t(titleKey) : titleKey;
+            return `${cmsStore.siteSettings?.site_name || 'JA CMS'} | ${title}`;
         }
         
         // 3. Auto-generated from Route Name (Fallback)

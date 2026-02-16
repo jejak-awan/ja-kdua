@@ -91,7 +91,7 @@ const handleSubscribe = async () => {
   success.value = false;
   
   try {
-    const response = await api.post('/cms/newsletter/subscribe', {
+    const response = await api.post('/ja/newsletter/subscribe', {
       email: email.value,
     });
     

@@ -36,7 +36,15 @@
         "title": "IPAM Manager",
         "search": "Search IP or Serial...",
         "assigned": "Assigned to Device",
-        "available": "Available for Use"
+        "available": "Available for Use",
+        "settings": {
+            "title": "IPAM Settings",
+            "desc": "Configure global settings for automatic IP allocation.",
+            "cidr": "Local Network CIDR",
+            "cidr_help": "The base network range for your local ISP (e.g., 10.0.0.0/8).",
+            "subnet_size": "Default Subnet Size",
+            "subnet_help": "The size of subnets automatically allocated to new routers."
+        }
     },
     "ip_manager": {
         "edit": "Edit IP Record",
@@ -85,16 +93,79 @@
             "port": "Port",
             "management_port": "Management Port",
             "api_port": "API Port",
-            "snmp_port": "SNMP Port"
+            "snmp_port": "SNMP Port",
+            "pretty_id": "Router ID",
+            "ip_type": "IP Type",
+            "node_type": "Node Type",
+            "radius_secret": "Radius Secret",
+            "auto_allocate": "Auto Allocate",
+            "vpn_server": "VPN Server",
+            "lat": "Latitude",
+            "lng": "Longitude",
+            "physical_location": "Physical Location"
         },
+        "status_online": "Online",
+        "status_offline": "Offline",
         "search_placeholder": "Search Router...",
         "new": "New Router",
         "edit": "Edit Router",
         "messages": {
             "success_create": "Router added successfully",
             "success_update": "Router updated successfully",
-            "success_delete": "Router deleted successfully"
+            "success_delete": "Router deleted successfully",
+            "success_restore": "Router restored successfully",
+            "success_force_delete": "Router permanently deleted"
+        },
+        "tabs": {
+            "general": "GENERAL",
+            "integration": "INTEGRATION"
+        },
+        "placeholders": {
+            "search": "Search Router...",
+            "custom_desc": "Enter custom description...",
+            "port": "e.g. 8728",
+            "ip": "e.g. 10.0.0.1",
+            "auto_allocate": "Auto-Allocated by System"
+        },
+        "presets": {
+            "core": "Core Router",
+            "gateway": "Router Gateway",
+            "distribution": "Distribution Router",
+            "custom": "Custom",
+            "selection_placeholder": "Select type or custom..."
+        },
+        "help": {
+            "vpn_server": "Allow other routers to connect via VPN",
+            "status_active": "Router is online and functional",
+            "status_inactive": "Integration setup is recommended",
+            "integration_desc": "MikroTik API, SNMP, and Radius secrets can be configured from the Integration tab {context}.",
+            "vpn_radius_note": "Note: For VPN RADIUS connections, please ensure the Radius server is accessible by the router.",
+            "radius_secret_match": "Must match MikroTik Radius configuration.",
+            "mode": "Connection Mode",
+            "tunnel": "Tunnel Type",
+            "rear_vpn_ip": "Rear VPN IP",
+            "preview": "Preview",
+            "generate": "Generate Script",
+            "reset": "Reset & Change Options",
+            "context_above": "above",
+            "context_after": "after adding the router"
+        },
+        "types": {
+            "router": "MikroTik Router",
+            "olt": "OLT Node",
+            "pop": "POP / Access Point"
         }
+    },
+    "connectivity": {
+        "title": "Connectivity",
+        "method": "Connect Method",
+        "status": "Connect Status",
+        "username": "API Username",
+        "password": "API Password",
+        "snmp_community": "SNMP Community",
+        "connected": "Connected",
+        "disconnected": "Disconnected",
+        "active_clients": "Active Clients"
     },
     "data_server": {
         "title": "Data Server",
@@ -106,24 +177,6 @@
             "success_create": "Data server added successfully",
             "success_update": "Data server updated successfully",
             "success_delete": "Data server deleted successfully"
-        },
-        "instructions": {
-            "edit_hint": "Click on the server name column to change data",
-            "matching_hint": "Server name must be the same as in Mikrotik",
-            "hotspot_path": "for hotspot see menu IP->Hotspot->Servers->Name",
-            "ppp_path": "For PPP see menu PPP->PPPoE Servers->Service name",
-            "purpose": "The function of this data server is to lock clients so they can only authenticate from one server"
-        },
-        "connectivity": {
-            "title": "Connectivity",
-            "method": "Connect Method",
-            "status": "Connect Status",
-            "username": "API Username",
-            "password": "API Password",
-            "snmp_community": "SNMP Community",
-            "connected": "Connected",
-            "disconnected": "Disconnected",
-            "active_clients": "Active Clients"
         },
         "script": {
             "title": "MikroTik Script",
@@ -139,10 +192,10 @@
                 "select": "-Select-",
                 "os_v6": "RouterOS v6",
                 "os_v7": "RouterOS v7",
-                "vpn_script": "SCRIPT VPN",
-                "pppoe_only": "PPPoE ONLY",
-                "hotspot_only": "HOTSPOT ONLY",
-                "pppoe_hotspot": "PPPoE + HOTSPOT"
+                "vpn_script": "Script VPN",
+                "pppoe_only": "PPPoE Only",
+                "hotspot_only": "Hotspot Only",
+                "pppoe_hotspot": "PPPoE + Hotspot"
             }
         }
     },
@@ -159,7 +212,13 @@
             "gateway_hint": "(See menu IP - Routes on your Mikrotik)"
         },
         "actions": {
-            "get_script": "Get Script"
+            "get_script": "Get Script",
+            "bulk_delete": "Delete Selected",
+            "bulk_restore": "Restore Selected",
+            "bulk_activate": "Activate Selected",
+            "bulk_deactivate": "Deactivate Selected",
+            "to_trash": "To Trash",
+            "delete_permanent": "Delete Permanent"
         },
         "messages": {
             "copied": "Script copied to clipboard!"
@@ -258,6 +317,33 @@
         "fields": {
             "coa_port": "CoA Port (Mikrotik)",
             "default_speed": "Fallback Speed (FUP)"
+        }
+    },
+    "vpn": {
+        "title": "VPN Client Management",
+        "subtitle": "Manage PPP Secrets on {router}",
+        "sidebar_title": "Routers (API)",
+        "search_router": "Search router...",
+        "no_routers": "No API routers found.",
+        "create": "Create VPN Client",
+        "creating": "Fetching secrets from router...",
+        "empty_title": "No VPN clients found",
+        "empty_desc": "Create your first VPN secret by clicking the \"Create VPN Client\" button above.",
+        "select_router_title": "Select a router",
+        "select_router_desc": "Please select an API-enabled router from the left sidebar to manage its VPN clients and PPP secrets.",
+        "modal": {
+            "title": "New VPN Client",
+            "subtitle": "Add a new PPP Secret to the MikroTik router.",
+            "username": "Username",
+            "password": "Password",
+            "service": "Service",
+            "profile": "Profile",
+            "remote_address": "Remote Address (Optional)",
+            "comment": "Comment"
+        },
+        "messages": {
+            "success_create": "VPN Secret created successfully",
+            "success_delete": "VPN Secret deleted successfully"
         }
     }
 }

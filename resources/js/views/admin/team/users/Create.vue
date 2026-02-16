@@ -300,7 +300,7 @@ const isValid = computed(() => {
 const fetchRoles = async () => {
     loadingRoles.value = true;
     try {
-        const response = await api.get('/admin/ja/roles');
+        const response = await api.get('/admin/janet/roles');
         const { data } = parseResponse(response);
         availableRoles.value = ensureArray(data);
     } catch (error: unknown) {
@@ -325,7 +325,7 @@ const handleSubmit = async () => {
     clearErrors();
     
     try {
-        await api.post('/admin/ja/users', form.value);
+        await api.post('/admin/janet/users', form.value);
         toast.success.create('User');
         router.push({ name: 'users.index' });
     } catch (error: unknown) {

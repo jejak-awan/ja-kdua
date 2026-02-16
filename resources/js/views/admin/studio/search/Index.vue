@@ -145,7 +145,7 @@ const performSearch = async () => {
     loading.value = true;
     
     try {
-        const response = await api.get('/admin/ja/search', {
+        const response = await api.get('/admin/janet/search', {
             params: { q: query.value },
         });
         const { data } = parseResponse(response);

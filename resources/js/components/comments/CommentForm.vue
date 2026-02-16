@@ -123,7 +123,7 @@ const handleSubmit = async () => {
     loading.value = true;
     clearErrors();
     try {
-        await api.post(`/cms/contents/${props.contentId}/comments`, form.value);
+        await api.post(`/ja/contents/${props.contentId}/comments`, form.value);
         
         // Reset form
         form.value = {

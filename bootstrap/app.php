@@ -24,6 +24,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Ensure guests are redirected to the named 'login' route (SPA)
         $middleware->redirectGuestsTo(fn () => route('login'));
 
+        // Global Middleware
+        $middleware->prepend(\App\Http\Middleware\Core\BlockMaliciousBots::class);
+
         $middleware->web(append: [
             \App\Http\Middleware\Core\CheckMaintenanceMode::class,
             \App\Http\Middleware\Core\HandleRedirects::class,

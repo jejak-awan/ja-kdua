@@ -341,7 +341,7 @@ const teamMembers: TeamMember[] = [
 
 onMounted(async () => {
   try {
-    const response = await api.get('/cms/contents/home')
+    const response = await api.get('/ja/contents/home')
     pageData.value = response.data.data
   } catch (error: unknown) {
     // Gracefully handle - fallback will render

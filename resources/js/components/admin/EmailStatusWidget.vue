@@ -124,7 +124,7 @@ const statusBadgeClass = computed(() => {
 
 const fetchStats = async () => {
   try {
-    const response = await api.get('/admin/ja/system/statistics');
+    const response = await api.get('/admin/janet/system/statistics');
     const data = parseSingleResponse(response) as { email?: EmailStats } | null;
     if (data && data.email) {
       stats.value = data.email;
@@ -136,7 +136,7 @@ const fetchStats = async () => {
 
 const fetchLogs = async () => {
   try {
-    const response = await api.get('/admin/ja/email-test/recent-journal?limit=5');
+    const response = await api.get('/admin/janet/email-test/recent-journal?limit=5');
     const { data } = parseResponse(response) as { data: { logs?: EmailLog[] } };
     if (data && Array.isArray(data.logs)) {
         logs.value = data.logs;

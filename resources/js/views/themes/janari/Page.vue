@@ -80,7 +80,7 @@ const fetchPage = async () => {
   
   loading.value = true;
   try {
-    const response = await api.get(`/cms/contents/${slug}`);
+    const response = await api.get(`/ja/contents/${slug}`);
     pageData.value = response.data.data || response.data;
   } catch (error) {
     logger.error('Failed to load page:', error);

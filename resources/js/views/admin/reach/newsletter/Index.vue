@@ -271,7 +271,7 @@ const fetchSubscribers = async () => {
             params[key] = value;
         });
 
-        const response = await api.get('/admin/ja/newsletter/subscribers', { params });
+        const response = await api.get('/admin/janet/newsletter/subscribers', { params });
         const { data, pagination: pag } = parseResponse(response);
         subscribers.value = data as Subscriber[];
         if (pag) {
@@ -316,10 +316,10 @@ const deleteSubscriber = async (subscriber: Subscriber) => {
 
     try {
         if (isTrashed) {
-             await api.delete(`/admin/ja/newsletter/subscribers/${subscriber.id}/force-delete`);
+             await api.delete(`/admin/janet/newsletter/subscribers/${subscriber.id}/force-delete`);
              toast.success.action(t('common.messages.success.deleted', { item: 'Subscriber' }));
         } else {
-            await api.delete(`/admin/ja/newsletter/subscribers/${subscriber.id}`);
+            await api.delete(`/admin/janet/newsletter/subscribers/${subscriber.id}`);
             toast.success.delete('Subscriber');
         }
         fetchSubscribers();
@@ -340,7 +340,7 @@ const restoreSubscriber = async (subscriber: Subscriber) => {
     if (!confirmed) return;
 
     try {
-        await api.post(`/admin/ja/newsletter/subscribers/${subscriber.id}/restore`);
+        await api.post(`/admin/janet/newsletter/subscribers/${subscriber.id}/restore`);
         toast.success.restore('Subscriber');
         fetchSubscribers();
     } catch (error: unknown) {
@@ -351,7 +351,7 @@ const restoreSubscriber = async (subscriber: Subscriber) => {
 
 const exportCsv = async () => {
     try {
-        const response = await api.get('/admin/ja/newsletter/export', {
+        const response = await api.get('/admin/janet/newsletter/export', {
             params: { status: filters.value.status },
             responseType: 'blob',
         });
@@ -402,7 +402,7 @@ const bulkAction = async (action: string) => {
          }
 
          try {
-             await api.post('/admin/ja/newsletter/subscribers/bulk-action', {
+             await api.post('/admin/janet/newsletter/subscribers/bulk-action', {
                  ids: selectedIds.value,
                  action: action
              });
@@ -414,7 +414,7 @@ const bulkAction = async (action: string) => {
          }
     } else if (action === 'restore') {
          try {
-             await api.post('/admin/ja/newsletter/subscribers/bulk-action', {
+             await api.post('/admin/janet/newsletter/subscribers/bulk-action', {
                  ids: selectedIds.value,
                  action: 'restore'
              });
@@ -426,7 +426,7 @@ const bulkAction = async (action: string) => {
          }
     } else if (action === 'unsubscribe' || action === 'subscribe') {
          try {
-             await api.post('/admin/ja/newsletter/subscribers/bulk-action', {
+             await api.post('/admin/janet/newsletter/subscribers/bulk-action', {
                  ids: selectedIds.value,
                  action: action
              });

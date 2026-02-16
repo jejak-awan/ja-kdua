@@ -1,0 +1,38 @@
+{
+    "title": "Manajer Inventaris",
+    "subtitle": "Lacak inventaris perangkat keras dan transaksi gudang.",
+    "add_item": "Tambah Item Baru",
+    "empty": "Tidak ada item inventaris ditemukan.",
+    "stock": "Stok",
+    "unit_price": "Harga Satuan",
+    "stats": {
+        "total_stock": "Total Stok",
+        "available": "Tersedia",
+        "total_hpp": "Total HPP",
+        "total_value": "Total Nilai"
+    },
+    "fields": {
+        "name": "Nama Item",
+        "sku": "SKU",
+        "category": "Kategori",
+        "stock": "Stok Saat Ini",
+        "min_stock": "Stok Minimum",
+        "unit": "Satuan",
+        "price": "Harga Beli",
+        "type": "Tipe Transaksi",
+        "quantity": "Jumlah",
+        "notes": "Catatan",
+        "customer": "Pelanggan (Opsional)"
+    },
+    "modals": {
+        "add_title": "Tambah Inventaris Baru",
+        "adjust": "Sesuaikan Stok",
+        "qr_track": "Lacak QR Perangkat",
+        "print_label": "Cetak Label QR"
+    },
+    "adjust_desc": "Catat transaksi masuk, keluar, atau penyesuaian untuk {name}.",
+    "messages": {
+        "success_create": "Item inventaris berhasil ditambahkan",
+        "success_adjust": "Stok berhasil diperbarui"
+    }
+}

@@ -369,7 +369,7 @@ const sorting = ref([{ id: 'created_at', desc: true }]);
 
 const fetchForm = async () => {
     try {
-        const response = await api.get(`/admin/ja/forms/${formId.value}`);
+        const response = await api.get(`/admin/janet/forms/${formId.value}`);
         form.value = parseSingleResponse(response);
     } catch (error) {
         logger.error('Failed to fetch form:', error);
@@ -390,7 +390,7 @@ const fetchStatistics = async () => {
             params.days = analyticsDays.value;
         }
 
-        const response = await api.get(`/admin/ja/forms/${formId.value}/submissions/statistics`, { params });
+        const response = await api.get(`/admin/janet/forms/${formId.value}/submissions/statistics`, { params });
         statistics.value = parseSingleResponse(response);
         
         if (!selectedAggregateField.value && statistics.value && (statistics.value.chartable_fields?.length ?? 0) > 0) {
@@ -415,7 +415,7 @@ const handlePresetChange = () => {
 
 const fetchSamples = async () => {
     try {
-        const response = await api.get(`/admin/ja/forms/${formId.value}/submissions`, {
+        const response = await api.get(`/admin/janet/forms/${formId.value}/submissions`, {
             params: { per_page: 20, sort_by: 'created_at', sort_order: 'desc' }
         });
         const data = parseSingleResponse(response) as { data: Record<string, unknown>[] };
@@ -531,7 +531,7 @@ const exportData = (format = 'xlsx') => {
         })
     });
     const baseUrl = import.meta.env.VITE_API_URL || '';
-    const url = `${baseUrl}/api/core/admin/ja/forms/${formId.value}/submissions/export?${params.toString()}`;
+    const url = `${baseUrl}/api/v1/admin/janet/forms/${formId.value}/submissions/export?${params.toString()}`;
     window.open(url, '_blank');
 };
 

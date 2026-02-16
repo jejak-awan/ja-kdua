@@ -33,74 +33,75 @@ export const navigationGroups: Record<string, NavItem[]> = {
         { name: 'redirects', to: '/admin/redirects', label: 'Redirects', permission: 'view redirects' },
     ],
 
-    // K2NET ISP Management
+    // K2NET ISP Management — Restructured
     isp: [
         {
-            label: 'Monitor & Ops',
-            labelKey: 'common.navigation.sections.monitoring_ops',
-            icon: 'activity',
+            label: 'Dashboard',
+            labelKey: 'common.navigation.sections.dashboard',
+            icon: 'layout',
             children: [
-                { name: 'isp-monitor', to: '/admin/isp/monitor', label: 'NOC Dashboard', icon: 'monitor', permission: 'manage settings' },
-                { name: 'isp.monitor.traffic', to: '/admin/isp/monitor/traffic', label: 'Real-time Traffic', icon: 'trending-up', permission: 'manage settings' },
-                { name: 'isp-radius-sessions', to: '/admin/isp/monitoring/radius/sessions', label: 'RADIUS Sessions', icon: 'users', permission: 'manage settings' },
-                { name: 'isp-radius-logs', to: '/admin/isp/monitoring/radius/logs', label: 'RADIUS Logs', icon: 'file-text', permission: 'manage settings' },
-                { name: 'isp-active-sessions', to: '/admin/isp/monitoring/sessions', label: 'Router Sessions', icon: 'network', permission: 'manage settings' },
-                { name: 'isp-outages', to: '/admin/isp/outages', label: 'Outage Tracker', icon: 'zap', permission: 'manage settings' },
+                { name: 'isp-admin', to: '/admin/isp/admin', label: 'Command Center', labelKey: 'common.navigation.menu.ispAdmin', icon: 'layout', permission: 'manage settings' },
+                { name: 'isp-monitor', to: '/admin/isp/monitor', label: 'NOC Dashboard', labelKey: 'common.navigation.menu.ispMonitor', icon: 'monitor', permission: 'manage settings' },
+                { name: 'isp-outages', to: '/admin/isp/outages', label: 'Outage Tracker', labelKey: 'common.navigation.menu.ispOutages', icon: 'zap', permission: 'manage settings' },
             ]
         },
         {
-            label: 'Network & Infra',
-            labelKey: 'common.navigation.sections.network_infra',
+            label: 'Jaringan',
+            labelKey: 'common.navigation.sections.network',
             icon: 'server',
             children: [
-                { name: 'isp-router', to: '/admin/isp/network/routers', label: 'Router Manager', icon: 'router', permission: 'manage settings' },
-                { name: 'isp-network-ipam', to: '/admin/isp/network/ipam', label: 'IPAM Manager', icon: 'layers', permission: 'manage settings' },
-                { name: 'isp-network-ip-pools', to: '/admin/isp/network/ip-pools', label: 'IP Pool', icon: 'database', permission: 'manage settings' },
-                { name: 'isp-odp', to: '/admin/isp/odp', label: 'ODP Manager', icon: 'box', permission: 'manage settings' },
-                { name: 'isp.network.topology', to: '/admin/isp/network/topology', label: 'Network Topology', icon: 'network', permission: 'manage settings' },
-                { name: 'isp-infra', to: '/admin/isp/infra', label: 'Service Nodes', icon: 'server', permission: 'manage settings' },
-                { name: 'isp-network-profiles', to: '/admin/isp/network/profiles', label: 'Network Profiles', icon: 'menu', permission: 'manage settings' },
+                { name: 'isp-infra', to: '/admin/isp/infra', label: 'Infrastruktur', labelKey: 'common.navigation.menu.ispInfra', icon: 'server', permission: 'manage settings' },
+                { name: 'isp-olts', to: '/admin/isp/network/olts', label: 'Fiber Network (OLT)', labelKey: 'common.navigation.menu.ispOlts', icon: 'network', permission: 'manage settings' },
+                { name: 'isp-odp', to: '/admin/isp/odp', label: 'ODP Management', labelKey: 'common.navigation.menu.ispOdp', icon: 'git-branch', permission: 'manage settings' },
+                { name: 'isp-network-ipam', to: '/admin/isp/network/ipam', label: 'IP Management', labelKey: 'common.navigation.menu.ispNetworkIpam', icon: 'layers', permission: 'manage settings' },
+                { name: 'isp-network-profiles', to: '/admin/isp/network/profiles', label: 'Profil Layanan', labelKey: 'common.navigation.menu.ispNetworkProfiles', icon: 'menu', permission: 'manage settings' },
             ]
         },
         {
-            label: 'Customers & Sales',
-            labelKey: 'common.navigation.sections.customers_sales',
+            label: 'Pelanggan',
+            labelKey: 'common.navigation.sections.customers',
             icon: 'users',
             children: [
-                { name: 'isp-subscription-customers', to: '/admin/isp/subscription/customers', label: 'Customers', icon: 'users', permission: 'manage settings' },
-                { name: 'isp-subscription-profiles', to: '/admin/isp/subscription/profiles', label: 'ISP Plans', icon: 'package', permission: 'manage settings' },
-                { name: 'isp-contracts', to: '/admin/isp/contracts', label: 'Service Contracts', icon: 'file-check', permission: 'manage settings' },
-                { name: 'isp.admin.service-requests', to: '/admin/isp/admin/service-requests', label: 'Service Requests', icon: 'file-plus', permission: 'manage settings' },
-                { name: 'isp.customers.map', to: '/admin/isp/customers/map', label: 'Customer Map', icon: 'map', permission: 'manage settings' },
-                { name: 'isp-vouchers', to: '/admin/isp/vouchers', label: 'Hotspot Vouchers', icon: 'ticket', permission: 'manage settings' },
-                { name: 'isp-partners', to: '/admin/isp/partners', label: 'Partners', icon: 'share-2', permission: 'manage settings' },
-                { name: 'isp-inventory', to: '/admin/isp/inventory', label: 'Stock Items', icon: 'archive', permission: 'manage settings' },
+                { name: 'isp-subscription-customers', to: '/admin/isp/subscription/customers', label: 'Daftar Pelanggan', labelKey: 'common.navigation.menu.ispClientDirectory', icon: 'users', permission: 'manage settings' },
+                { name: 'isp-subscription-profiles', to: '/admin/isp/subscription/profiles', label: 'Paket Layanan', labelKey: 'common.navigation.menu.ispSubscriptionPlans', icon: 'package', permission: 'manage settings' },
+                { name: 'isp-contracts', to: '/admin/isp/contracts', label: 'Kontrak', labelKey: 'common.navigation.menu.ispContracts', icon: 'file-check', permission: 'manage settings' },
+                { name: 'isp.admin.service-requests', to: '/admin/isp/admin/service-requests', label: 'Permintaan Layanan', labelKey: 'common.navigation.menu.ispServiceRequests', icon: 'file-plus', permission: 'manage settings' },
+                { name: 'isp-partners', to: '/admin/isp/partners', label: 'Mitra', labelKey: 'common.navigation.menu.ispPartners', icon: 'share-2', permission: 'manage settings' },
+                { name: 'isp.customers.map', to: '/admin/isp/customers/map', label: 'Peta Pelanggan', labelKey: 'common.navigation.menu.ispCustomerMap', icon: 'map-pin', permission: 'manage settings' },
             ]
         },
         {
-            label: 'Billing & Finance',
-            labelKey: 'common.navigation.sections.billing_finance',
+            label: 'Keuangan',
+            labelKey: 'common.navigation.sections.billing',
             icon: 'credit-card',
             children: [
-                { name: 'isp-billing', to: '/admin/isp/billing', label: 'Invoicing', icon: 'file-invoice', permission: 'manage settings' },
-                { name: 'isp-payments', to: '/admin/isp/billing/payments', label: 'Payment History', icon: 'history', permission: 'manage settings' },
-                { name: 'isp-payment-gateway', to: '/admin/isp/billing/gateway', label: 'Gateway Settings', icon: 'wallet', permission: 'manage settings' },
-                { name: 'isp.admin.analytics.revenue', to: '/admin/isp/admin/analytics/revenue', label: 'Revenue Reports', icon: 'bar-chart', permission: 'manage settings' },
-                { name: 'isp-coupons', to: '/admin/isp/coupons', label: 'Discount Coupons', icon: 'percent', permission: 'manage settings' },
+                { name: 'isp-billing', to: '/admin/isp/billing', label: 'Tagihan', labelKey: 'common.navigation.menu.ispBilling', icon: 'file-invoice', permission: 'manage settings' },
+                { name: 'isp-payments', to: '/admin/isp/billing/payments', label: 'Riwayat Bayar', labelKey: 'common.navigation.menu.ispPaymentHistory', icon: 'history', permission: 'manage settings' },
+                { name: 'isp-analytics', to: '/admin/isp/analytics', label: 'Analitik', labelKey: 'common.navigation.menu.ispAnalytics', icon: 'bar-chart', permission: 'manage settings' },
+                { name: 'isp-coupons', to: '/admin/isp/coupons', label: 'Kupon & Promo', labelKey: 'common.navigation.menu.ispCoupons', icon: 'percent', permission: 'manage settings' },
             ]
         },
         {
-            label: 'Support & Tools',
-            labelKey: 'common.navigation.sections.support_tools',
-            icon: 'wrench',
+            label: 'Hotspot & Inventaris',
+            labelKey: 'common.navigation.sections.inventory',
+            icon: 'archive',
             children: [
-                { name: 'isp-support', to: '/admin/isp/support', label: 'Ticket Manager', icon: 'life-buoy', permission: 'manage settings' },
-                { name: 'isp.support.wizard', to: '/admin/isp/support/wizard', label: 'Diagnostics', icon: 'wand', permission: 'manage settings' },
-                { name: 'isp-whatsapp', to: '/admin/isp/whatsapp', label: 'WA Blast', icon: 'message-circle', permission: 'manage settings' },
-                { name: 'isp-print-templates', to: '/admin/isp/print-templates', label: 'Print Templates', icon: 'printer', permission: 'manage settings' },
-                { name: 'isp-bgp-toolkit', to: '/admin/isp/tools/bgp', label: 'BGP Toolkit', icon: 'globe', permission: 'manage settings' },
-                { name: 'isp-activity-logs', to: '/admin/isp/admin/activity-logs', label: 'Activity Logs', icon: 'scroll', permission: 'manage settings' },
-                { name: 'isp-settings', to: '/admin/isp/settings', label: 'ISP Settings', icon: 'settings', permission: 'manage settings' },
+                { name: 'isp-inventory', to: '/admin/isp/inventory', label: 'Stok Barang', labelKey: 'common.navigation.menu.ispInventory', icon: 'archive', permission: 'manage settings' },
+                { name: 'isp-hotspot', to: '/admin/isp/hotspot', label: 'Hotspot & Voucher', labelKey: 'common.navigation.menu.ispHotspotVouchers', icon: 'ticket', permission: 'manage settings' },
+            ]
+        },
+        {
+            label: 'Pengaturan',
+            labelKey: 'common.navigation.sections.isp_admin',
+            icon: 'settings',
+            children: [
+                { name: 'isp-support', to: '/admin/isp/support', label: 'Tiket Bantuan', labelKey: 'common.navigation.menu.ispSupport', icon: 'life-buoy', permission: 'manage settings' },
+                { name: 'isp-whatsapp', to: '/admin/isp/whatsapp', label: 'WA Blast', labelKey: 'common.navigation.menu.ispWaBlast', icon: 'message-circle', permission: 'manage settings' },
+                { name: 'isp-bgp-toolkit', to: '/admin/isp/tools/bgp', label: 'BGP Toolkit', labelKey: 'common.navigation.menu.ispBgpToolkit', icon: 'globe', permission: 'manage settings' },
+                { name: 'isp.support.wizard', to: '/admin/isp/support/wizard', label: 'Diagnosis', labelKey: 'common.navigation.menu.ispDiagnostics', icon: 'wand', permission: 'manage settings' },
+                { name: 'isp-deployments', to: '/admin/isp/operations/deployments', label: 'Dispatch Center', labelKey: 'common.navigation.menu.ispDeployments', icon: 'truck', permission: 'manage settings' },
+                { name: 'isp-settings', to: '/admin/isp/settings', label: 'Pengaturan ISP', labelKey: 'common.navigation.menu.settings', icon: 'settings', permission: 'manage settings' },
+                { name: 'isp-activity-logs', to: '/admin/isp/admin/activity-logs', label: 'Log Aktivitas', labelKey: 'common.navigation.menu.ispAuditLogs', icon: 'scroll', permission: 'manage settings' },
             ]
         },
         {
@@ -108,8 +109,8 @@ export const navigationGroups: Record<string, NavItem[]> = {
             labelKey: 'common.navigation.sections.member_portal',
             icon: 'user',
             children: [
-                { name: 'isp-member', to: '/admin/isp/member', label: 'My Dashboard', icon: 'home', permission: 'view profile' },
-                { name: 'isp-member-support', to: '/admin/isp/member/support', label: 'Contact Support', icon: 'help-circle', permission: 'view profile' },
+                { name: 'isp-member', to: '/admin/isp/member', label: 'My Dashboard', labelKey: 'common.navigation.menu.ispMemberPortal', icon: 'home', permission: 'view profile' },
+                { name: 'isp-member-support', to: '/admin/isp/member/support', label: 'Contact Support', labelKey: 'common.navigation.menu.ispMemberSupport', icon: 'help-circle', permission: 'view profile' },
             ]
         },
     ],

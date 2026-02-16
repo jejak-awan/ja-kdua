@@ -11,7 +11,7 @@ const definition: MenuItemDefinition = {
     defaultTitle: 'Post',
 
     dataSource: {
-        endpoint: '/admin/ja/contents?type=post&status=published',
+        endpoint: '/admin/janet/contents?type=post&status=published',
         labelField: 'title',
         valueField: 'id'
     },
@@ -29,7 +29,7 @@ const definition: MenuItemDefinition = {
             type: 'data_select',
             label: 'features.menus.form.selectPost',
             required: true,
-            source: '/admin/ja/contents?type=post&status=published',
+            source: '/admin/janet/contents?type=post&status=published',
             labelField: 'title',
             valueField: 'id'
         },

@@ -1,6 +1,7 @@
 <template>
-    <!-- Dynamic Dashboard based on Role/Permissions -->
-    <component :is="activeDashboard" />
+    <div class="p-4 md:p-8">
+        <component :is="activeDashboard" />
+    </div>
 </template>
 
 <script setup lang="ts">

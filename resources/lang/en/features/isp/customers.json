@@ -8,6 +8,18 @@
     "coordinates": "Location",
     "view_profile": "View Profile",
     "contact": "Contact",
+    "map_modes": {
+        "markers": "Customer Markers",
+        "coverage": "Coverage Heatmap",
+        "revenue": "Revenue per Area",
+        "potential": "Expansion Potential"
+    },
+    "risk": {
+        "label": "Churn Risk",
+        "healthy": "Healthy",
+        "warning": "Warning",
+        "critical": "Critical"
+    },
     "stats": {
         "total": "Total Customers",
         "active": "Active",
@@ -17,6 +29,30 @@
     "actions": {
         "import": "Import Customers",
         "export": "Export Customers",
-        "new": "New Customer"
+        "new": "New Customer",
+        "isolate": "Isolate Customer",
+        "unisolate": "Restore Connection",
+        "view_technical": "Technical Details"
+    },
+    "fields": {
+        "status": "Status",
+        "username": "Username (PPPoE/Hotspot)",
+        "password": "Password",
+        "mac_address": "MAC Address",
+        "ip_address": "IP Address",
+        "fraud_alert": "Fraud Detection Alert",
+        "multi_login": "Multi-login Attempt",
+        "isolation_reason": "Isolation Reason",
+        "prorata_status": "Prorata Billing Applied",
+        "installation_fee": "Installation Fee"
+    },
+    "fraud": {
+        "title": "Fraud Detection",
+        "desc": "System detected suspicious activity for this account.",
+        "flags": {
+            "ttl": "TTL Mismatch (Potential Sharing)",
+            "multi_mac": "Multiple MAC Addresses",
+            "concurrent": "Concurrent Sessions"
+        }
     }
 }

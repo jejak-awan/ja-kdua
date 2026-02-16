@@ -278,7 +278,7 @@ const handleSubmit = async () => {
             is_active: formData.is_active,
             blocks: formData.blocks
         };
-        await api.post('/admin/ja/forms', payload);
+        await api.post('/admin/janet/forms', payload);
         toast.success.create('Form');
         router.push({ name: 'forms' });
     } catch (error: unknown) {

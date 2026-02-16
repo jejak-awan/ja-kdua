@@ -195,8 +195,12 @@ class FoundationSeeder extends Seeder
             ['key' => 'gemini_model', 'value' => 'gemini-pro', 'group' => 'ai', 'type' => 'string'],
             ['key' => 'openai_api_key', 'value' => '', 'group' => 'ai', 'type' => 'password'],
             ['key' => 'openai_model', 'value' => 'gpt-4-turbo', 'group' => 'ai', 'type' => 'string'],
-            ['key' => 'deepseek_api_key', 'value' => '', 'group' => 'ai', 'type' => 'password'],
             ['key' => 'deepseek_model', 'value' => 'deepseek-chat', 'group' => 'ai', 'type' => 'string'],
+
+            // ISP / Network
+            ['key' => 'isp_brand_name', 'value' => 'JANET', 'group' => 'isp', 'type' => 'string'],
+            ['key' => 'isp_local_network_cidr', 'value' => '10.0.0.0/8', 'group' => 'isp', 'type' => 'string'],
+            ['key' => 'isp_subnet_size', 'value' => '30', 'group' => 'isp', 'type' => 'integer'],
         ];
 
         foreach ($settings as $setting) {

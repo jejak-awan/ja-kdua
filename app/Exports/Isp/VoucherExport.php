@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exports\Isp;
 
-use App\Models\Isp\Voucher;
+use App\Models\Isp\Billing\Voucher;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;

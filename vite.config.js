@@ -1,7 +1,9 @@
 import { defineConfig } from 'vite';
+import path from 'path';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
     plugins: [
@@ -11,6 +13,13 @@ export default defineConfig({
         }),
         vue(),
         tailwindcss(),
+        visualizer({
+            filename: './storage/app/bundle-stats.html',
+            open: false,
+            gzipSize: true,
+            brotliSize: true,
+            template: 'treemap', // 'sunburst', 'treemap', 'network'
+        }),
     ],
     esbuild: {
         drop: ['console', 'debugger'],
@@ -18,7 +27,7 @@ export default defineConfig({
     resolve: {
         alias: {
             'vue': 'vue/dist/vue.esm-bundler.js',
-            '@': '/resources/js',
+            '@': path.resolve(__dirname, 'resources/js'),
         },
     },
     build: {
@@ -45,12 +54,22 @@ export default defineConfig({
                         return 'vendor-ui-charts';
                     }
 
-                    // 5. Utility libraries
+                    // 5. Lottie (isolated to prevent eval scan on other chunks)
+                    if (id.includes('lottie-web')) {
+                        return 'vendor-lottie';
+                    }
+
+                    // 6. Leaflet
+                    if (id.includes('leaflet')) {
+                        return 'vendor-leaflet';
+                    }
+
+                    // 7. Utility libraries
                     if (id.includes('axios') || id.includes('lodash') || id.includes('zod') || id.includes('dayjs')) {
                         return 'vendor-utils';
                     }
 
-                    // 6. Vue core (Put last to avoid catching everything with 'vue' in path)
+                    // 8. Vue core (Put last to avoid catching everything with 'vue' in path)
                     if (id.includes('node_modules/vue/') ||
                         id.includes('node_modules/vue-router/') ||
                         id.includes('node_modules/pinia/') ||
@@ -64,6 +83,7 @@ export default defineConfig({
         chunkSizeWarningLimit: 1000,
         sourcemap: false,
         minify: 'esbuild',
+        target: 'es2020',
     },
     optimizeDeps: {
         include: ['cropperjs', '@fullcalendar/core', '@fullcalendar/daygrid', '@fullcalendar/interaction', '@fullcalendar/vue3'],

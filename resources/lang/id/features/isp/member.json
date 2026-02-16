@@ -8,6 +8,7 @@
         "service_offline": "Layanan: Offline",
         "incident_title": "Insiden Layanan Aktif",
         "incident_desc": "Kami mendeteksi masalah di area Anda: {title}",
+        "pulse_desc": "Koneksi Anda saat ini optimal dan stabil.",
         "view_status": "Lihat Status Jaringan",
         "current_plan": "Paket Saat Ini",
         "bandwidth": "Bandwidth",
@@ -43,7 +44,11 @@
         "quick_actions": "Aksi Cepat",
         "reset_wifi": "Reset Koneksi WiFi",
         "contact_support": "Hubungi Dukungan Teknis",
-        "did_you_know": "Restart router menyelesaikan 90% masalah koneksi dengan membersihkan cache sementara dan menyegarkan alamat IP."
+        "did_you_know": "Restart router menyelesaikan 90% masalah koneksi dengan membersihkan cache sementara dan menyegarkan alamat IP.",
+        "resetting": "Mereset Koneksi...",
+        "resetting_desc": "Kami sedang mengirimkan sinyal reset ke router Anda. Ini akan memutuskan sambungan selama beberapa detik.",
+        "reset_success": "Sinyal reset berhasil dikirim. Harap tunggu perangkat Anda terhubung kembali.",
+        "reset_error": "Gagal mereset koneksi. Silakan hubungi dukungan jika masalah berlanjut."
     },
     "invoices": {
         "title": "Tagihan Saya",

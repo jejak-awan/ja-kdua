@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 // API Core
-Route::prefix('core')->group(function () {
+Route::prefix('v1')->group(function () {
     // Public Settings
     Route::get('/public/settings', [App\Http\Controllers\Api\Core\PublicSettingsController::class, 'index']);
     Route::get('/public-settings', [App\Http\Controllers\Api\Core\PublicSettingsController::class, 'index']); // Legacy alias
@@ -13,8 +13,9 @@ Route::prefix('core')->group(function () {
     Route::post('/captcha/verify', [App\Http\Controllers\Api\Core\CaptchaController::class, 'verify']);
     Route::get('/captcha/settings', [App\Http\Controllers\Api\Core\CaptchaController::class, 'settings']);
 
-    // Public ISP Status
+    // Public ISP Status & Payments
     Route::get('/public/isp/status', [App\Http\Controllers\Api\Isp\Network\OutageController::class, 'publicStatus']);
+    Route::post('/public/isp/payments/callback', [App\Http\Controllers\Api\Isp\Billing\PaymentController::class, 'callback']);
 
     // Public endpoint to clear rate limit (no auth required for emergency)
     Route::post('/clear-rate-limit', [App\Http\Controllers\Api\Core\SystemController::class, 'clearRateLimit']);
@@ -74,7 +75,7 @@ Route::prefix('core')->group(function () {
     Route::post('/two-factor/verify-code', [App\Http\Controllers\Api\Core\TwoFactorController::class, 'verifyCode'])->middleware('throttle:5,1');
 
     // Public CMS API (with rate limiting: 300 requests per minute)
-    Route::prefix('cms')->middleware('throttle:300,1')->group(function () {
+    Route::prefix('ja')->middleware('throttle:300,1')->group(function () {
         Route::get('/contents', [App\Http\Controllers\Api\Core\ContentController::class, 'index']);
         Route::get('/contents/{slug}', [App\Http\Controllers\Api\Core\ContentController::class, 'show']);
         Route::get('/contents/{slug}/related', [App\Http\Controllers\Api\Core\ContentController::class, 'related']);
@@ -131,7 +132,7 @@ Route::prefix('core')->group(function () {
     Route::post('journal/frontend', [App\Http\Controllers\Api\Core\FrontendLogController::class, 'store'])->middleware('throttle:300,1');
 
     // Admin Management API (aliased to bypass WAF 403 blocks on /admin/cms/)
-    Route::prefix('admin/ja')->middleware(['auth:sanctum', 'throttle:300,1'])->group(function () {
+    Route::prefix('admin/janet')->middleware(['auth:sanctum', 'throttle:300,1'])->group(function () {
         // Contents
         Route::get('contents/stats', [App\Http\Controllers\Api\Core\ContentController::class, 'stats']);
         Route::get('contents', [App\Http\Controllers\Api\Core\ContentController::class, 'adminIndex']);
@@ -584,236 +585,329 @@ Route::prefix('core')->group(function () {
         Route::apiResource('builder-presets', App\Http\Controllers\Api\Core\BuilderPresetController::class);
 
         // K2NET ISP Modules
-        Route::prefix('isp')->middleware('permission:manage isp')->group(function () {
-            // Infrastructure
-            Route::get('infra/stats', [App\Http\Controllers\Api\Isp\Network\InfraController::class, 'stats']);
-            Route::apiResource('infra', App\Http\Controllers\Api\Isp\Network\InfraController::class);
+        Route::prefix('isp')->group(function () {
+            // Member Portal (Customer Self-Service)
+            Route::get('member/dashboard', [App\Http\Controllers\Api\Isp\Customer\MemberPortalController::class, 'dashboard']);
+            Route::get('member/invoices', [App\Http\Controllers\Api\Isp\Customer\MemberPortalController::class, 'invoices']);
+            Route::get('member/usage', [App\Http\Controllers\Api\Isp\Customer\MemberPortalController::class, 'usage']);
+            Route::post('member/service-request', [App\Http\Controllers\Api\Isp\Customer\MemberPortalController::class, 'requestService']);
+            Route::post('member/diagnostics', [App\Http\Controllers\Api\Isp\Customer\MemberPortalController::class, 'diagnostics']);
+            Route::post('member/reset-connection', [App\Http\Controllers\Api\Isp\Customer\MemberPortalController::class, 'resetConnection']);
+            Route::put('member/profile', [App\Http\Controllers\Api\Isp\Customer\MemberPortalController::class, 'updateProfile']);
 
-            // Monitoring
-            Route::get('monitor/stats', [App\Http\Controllers\Api\Isp\Monitoring\MonitorController::class, 'stats']);
-            Route::get('monitor/traffic', [App\Http\Controllers\Api\Isp\Monitoring\TrafficController::class, 'live']);
-            Route::get('monitor/sessions', [App\Http\Controllers\Api\Isp\Monitoring\MonitorController::class, 'sessions']);
-            Route::post('monitor/disconnect', [App\Http\Controllers\Api\Isp\Monitoring\MonitorController::class, 'disconnect']);
-
-            // RADIUS Monitoring
-            Route::prefix('radius')->group(function () {
-                Route::get('sessions', [App\Http\Controllers\Api\Isp\Monitoring\RadiusMonitorController::class, 'sessions']);
-                Route::get('logs', [App\Http\Controllers\Api\Isp\Monitoring\RadiusMonitorController::class, 'logs']);
-                Route::get('status', [App\Http\Controllers\Api\Isp\Monitoring\RadiusMonitorController::class, 'status']);
+            // ISP Support & Tickets (Unified for Admins & Members)
+            Route::prefix('support/tickets')->group(function () {
+                Route::get('/', [App\Http\Controllers\Api\Isp\Support\SupportController::class, 'index']);
+                Route::post('/', [App\Http\Controllers\Api\Isp\Support\SupportController::class, 'store']);
+                Route::get('/{id}', [App\Http\Controllers\Api\Isp\Support\SupportController::class, 'show']);
+                Route::patch('/{id}/status', [App\Http\Controllers\Api\Isp\Support\SupportController::class, 'updateTicketStatus']);
             });
 
-            // IP Pool Management
-            Route::apiResource('ip-pools', App\Http\Controllers\Api\Isp\Network\IpPoolController::class);
-            Route::get('ip-pools/{ip_pool}/addresses', [App\Http\Controllers\Api\Isp\Network\IpPoolController::class, 'addresses']);
-            Route::patch('ip-pool-addresses/{address}', [App\Http\Controllers\Api\Isp\Network\IpPoolController::class, 'updateAddress']);
-            Route::post('ip-pools/{ip_pool}/regenerate', [App\Http\Controllers\Api\Isp\Network\IpPoolController::class, 'regenerateAddresses']);
-
-            // Sync
-            Route::post('sync/{id}', [App\Http\Controllers\Api\Isp\Business\SyncController::class, 'syncCustomer']);
-            Route::post('sync-all', [App\Http\Controllers\Api\Isp\Business\SyncController::class, 'syncAll']);
-
-            // Billing
-            Route::apiResource('subscription-profiles', App\Http\Controllers\Api\Isp\Business\IspPlanController::class);
-            Route::get('billing/plans', [App\Http\Controllers\Api\Isp\Business\BillingController::class, 'plans']);
-            Route::get('billing/invoices', [App\Http\Controllers\Api\Isp\Business\BillingController::class, 'invoices']);
-            Route::get('billing/invoices/{invoice}/download-pdf', [App\Http\Controllers\Api\Isp\Business\BillingController::class, 'downloadPdf']);
-            Route::get('billing/stats', [App\Http\Controllers\Api\Isp\Business\BillingController::class, 'stats']);
-            Route::post('billing/generate', [App\Http\Controllers\Api\Isp\Business\BillingController::class, 'generate']);
-            Route::post('billing/suspend-check', [App\Http\Controllers\Api\Isp\Business\BillingController::class, 'runOverdueCheck']);
-            Route::post('billing/invoices/{invoice}/pay', [App\Http\Controllers\Api\Isp\Business\BillingController::class, 'pay']);
-
-            // Member Portal
-            Route::get('member/dashboard', [App\Http\Controllers\Api\Isp\Business\MemberPortalController::class, 'dashboard']);
-            Route::get('member/invoices', [App\Http\Controllers\Api\Isp\Business\MemberPortalController::class, 'invoices']);
-            Route::get('member/usage', [App\Http\Controllers\Api\Isp\Business\MemberPortalController::class, 'usage']);
-            Route::post('member/service-request', [App\Http\Controllers\Api\Isp\Business\MemberPortalController::class, 'requestService']);
-            Route::post('member/diagnostics', [App\Http\Controllers\Api\Isp\Business\MemberPortalController::class, 'diagnostics']);
-            Route::put('member/profile', [App\Http\Controllers\Api\Isp\Business\MemberPortalController::class, 'updateProfile']);
-
-            // Payments
-            Route::get('payments/gateways', [App\Http\Controllers\Api\Isp\Business\PaymentController::class, 'indexGateways']);
-            Route::put('payments/gateways/{gateway}', [App\Http\Controllers\Api\Isp\Business\PaymentController::class, 'updateGateway']);
-            Route::post('payments/invoice/{invoice}/create', [App\Http\Controllers\Api\Isp\Business\PaymentController::class, 'createTransaction']);
-            Route::post('payments/callback', [App\Http\Controllers\Api\Isp\Business\PaymentController::class, 'callback']);
-
-            // Contracts
-            Route::apiResource('contracts', App\Http\Controllers\Api\Isp\Business\ContractController::class);
-
-            // Service Requests (Admin)
-            Route::prefix('service-requests')->group(function () {
-                Route::get('/', [App\Http\Controllers\Api\Isp\Support\ServiceRequestController::class, 'index']);
-                Route::patch('/{serviceRequest}/status', [App\Http\Controllers\Api\Isp\Support\ServiceRequestController::class, 'updateStatus']);
-                Route::post('/{serviceRequest}/execute', [App\Http\Controllers\Api\Isp\Support\ServiceRequestController::class, 'execute']);
+            // Diagnostics
+            Route::prefix('diagnosis')->group(function () {
+                Route::get('router/{id}', [App\Http\Controllers\Api\Isp\Support\SupportController::class, 'diagnoseRouter']);
+                Route::get('customer/{id}', [App\Http\Controllers\Api\Isp\Support\SupportController::class, 'diagnoseCustomer']);
             });
 
-            // Support Tickets
-            Route::prefix('support')->group(function () {
-                Route::get('tickets', [App\Http\Controllers\Api\Isp\Support\SupportController::class, 'index']);
-                Route::post('tickets', [App\Http\Controllers\Api\Isp\Support\SupportController::class, 'store']);
-                Route::get('tickets/{id}', [App\Http\Controllers\Api\Isp\Support\SupportController::class, 'show']);
-                Route::patch('tickets/{id}/status', [App\Http\Controllers\Api\Isp\Support\SupportController::class, 'updateStatus']);
-            });
+            // Partners (Biller accessible / stock check)
+            Route::get('partners', [App\Http\Controllers\Api\Isp\Customer\PartnerController::class, 'index']);
 
-            // Network Management (IPAM)
-            Route::prefix('network')->group(function () {
-                Route::get('subnets', [App\Http\Controllers\Api\Isp\Network\NetworkController::class, 'indexSubnets']);
-                Route::post('subnets', [App\Http\Controllers\Api\Isp\Network\NetworkController::class, 'storeSubnet']);
-                Route::get('subnets/{id}/ips', [App\Http\Controllers\Api\Isp\Network\NetworkController::class, 'indexIps']);
-                Route::get('profiles', [App\Http\Controllers\Api\Isp\Network\NetworkController::class, 'indexProfiles']);
-                Route::post('profiles', [App\Http\Controllers\Api\Isp\Network\NetworkController::class, 'storeProfile']);
-            });
+            // Customer Payments
+            Route::post('payments/invoice/{invoice}/create', [App\Http\Controllers\Api\Isp\Billing\PaymentController::class, 'createTransaction']);
 
-            // Outage Management
-            Route::prefix('outages')->group(function () {
-                Route::get('/', [App\Http\Controllers\Api\Isp\Network\OutageController::class, 'index']);
-                Route::post('/', [App\Http\Controllers\Api\Isp\Network\OutageController::class, 'store']);
-                Route::patch('/{id}', [App\Http\Controllers\Api\Isp\Network\OutageController::class, 'update']);
-            });
+            // Admin & Management (Management Permission Required)
+            Route::middleware('permission:manage isp')->group(function () {
+                // Infrastructure
+                Route::get('infra/stats', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'stats']);
+                Route::apiResource('infra', App\Http\Controllers\Api\Isp\Network\InfrastructureController::class);
 
-            // Router Management
-            Route::apiResource('routers', App\Http\Controllers\Api\Isp\Network\RouterController::class);
+                // Network Health & Remediation
+                Route::prefix('health')->group(function () {
+                    Route::get('vitals', [App\Http\Controllers\Api\Isp\Network\NetworkHealthController::class, 'index']);
+                    Route::get('vitals/{node}', [App\Http\Controllers\Api\Isp\Network\NetworkHealthController::class, 'show']);
+                    Route::post('remediate', [App\Http\Controllers\Api\Isp\Network\NetworkHealthController::class, 'remediate']);
+                    Route::get('jitter/{customer}', [App\Http\Controllers\Api\Isp\Network\NetworkHealthController::class, 'jitterTest']);
+                });
 
-            // Data Servers (Authentication Servers)
-            Route::apiResource('data-servers', App\Http\Controllers\Api\Isp\Support\DataServerController::class);
+                // Monitoring
+                Route::get('monitor/stats', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'dashboard']);
+                Route::get('monitor/traffic', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'liveTraffic']);
+                Route::get('monitor/heatmap', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'heatmap']);
+                Route::get('monitor/sessions', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'routerSessions']);
+                Route::post('monitor/disconnect', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'disconnectRouterSession']);
 
-            Route::get('customers/stats', [App\Http\Controllers\Api\Isp\Business\CustomerController::class, 'stats']);
-            Route::post('customers/import', [App\Http\Controllers\Api\Isp\Business\CustomerController::class, 'import']);
-            Route::get('customers/export', [App\Http\Controllers\Api\Isp\Business\CustomerController::class, 'export']);
-            Route::get('customers/geolocation', [App\Http\Controllers\Api\Isp\Business\GeolocationController::class, 'index']);
-            Route::apiResource('customers', App\Http\Controllers\Api\Isp\Business\CustomerController::class);
+                // RADIUS Monitoring
+                Route::prefix('radius')->group(function () {
+                    Route::get('sessions', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'radiusSessions']);
+                    Route::get('logs', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'radiusLogs']);
+                    Route::get('status', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'radiusStatus']);
+                    Route::post('disconnect', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'radiusDisconnect']);
+                });
 
-            // Analytics & Reporting
-            Route::prefix('analytics')->group(function () {
-                Route::get('/', [App\Http\Controllers\Api\Isp\Monitoring\AnalyticsController::class, 'index']);
-                Route::get('/usage', [App\Http\Controllers\Api\Isp\Monitoring\AnalyticsController::class, 'usage']);
-                Route::get('/revenue', [App\Http\Controllers\Api\Isp\Monitoring\AnalyticsController::class, 'revenue']);
-                Route::get('/top-talkers', [App\Http\Controllers\Api\Isp\Monitoring\AnalyticsController::class, 'topTalkers']);
-            });
+                // IP Pool Management
+                Route::apiResource('ip-pools', App\Http\Controllers\Api\Isp\Network\IpPoolController::class);
+                Route::get('ip-pools/{ip_pool}/addresses', [App\Http\Controllers\Api\Isp\Network\IpPoolController::class, 'addresses']);
+                Route::patch('ip-pool-addresses/{address}', [App\Http\Controllers\Api\Isp\Network\IpPoolController::class, 'updateAddress']);
+                Route::post('ip-pools/{ip_pool}/regenerate', [App\Http\Controllers\Api\Isp\Network\IpPoolController::class, 'regenerateAddresses']);
 
-            // ODPs
-            Route::apiResource('odps', App\Http\Controllers\Api\Isp\Network\OdpController::class);
+                // Sync
+                Route::post('sync/{id}', [App\Http\Controllers\Api\Isp\Network\SyncController::class, 'syncCustomer']);
+                Route::post('sync-all', [App\Http\Controllers\Api\Isp\Network\SyncController::class, 'syncAll']);
 
-            // Inventory
-            Route::prefix('inventory')->group(function () {
-                Route::get('/', [App\Http\Controllers\Api\Isp\Business\InventoryController::class, 'index']);
-                Route::post('/', [App\Http\Controllers\Api\Isp\Business\InventoryController::class, 'store']);
-                Route::post('/{inventory}/adjust', [App\Http\Controllers\Api\Isp\Business\InventoryController::class, 'adjustStock']);
-                Route::get('/{inventory}/transactions', [App\Http\Controllers\Api\Isp\Business\InventoryController::class, 'transactions']);
-                Route::delete('/{inventory}', [App\Http\Controllers\Api\Isp\Business\InventoryController::class, 'destroy']);
-            });
+                // Billing
+                Route::apiResource('subscription-profiles', App\Http\Controllers\Api\Isp\Billing\IspPlanController::class);
+                Route::get('billing-plans', [App\Http\Controllers\Api\Isp\Billing\IspPlanController::class, 'index']); // Alias for frontend
+                Route::get('billing/plans', [App\Http\Controllers\Api\Isp\Billing\BillingController::class, 'plans']);
+                Route::get('billing/invoices', [App\Http\Controllers\Api\Isp\Billing\BillingController::class, 'invoices']);
+                Route::get('billing/invoices/export', [App\Http\Controllers\Api\Isp\Billing\BillingController::class, 'exportExcel']);
+                Route::get('billing/invoices/{invoice}/download-pdf', [App\Http\Controllers\Api\Isp\Billing\BillingController::class, 'downloadPdf']);
+                // ... analytics/revenue routes were merged into MonitoringController ...
+                Route::post('billing/generate', [App\Http\Controllers\Api\Isp\Billing\BillingController::class, 'generate']);
+                Route::post('billing/suspend-check', [App\Http\Controllers\Api\Isp\Billing\BillingController::class, 'runOverdueCheck']);
+                Route::post('billing/preview-upgrade', [App\Http\Controllers\Api\Isp\Billing\BillingController::class, 'previewUpgrade']);
+                Route::post('billing/invoices/{invoice}/pay', [App\Http\Controllers\Api\Isp\Billing\BillingController::class, 'pay']);
 
-            // Vouchers
-            Route::prefix('vouchers')->group(function () {
-                Route::get('/', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'index']);
-                Route::post('/generate', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'generate']);
-                Route::post('/create-single', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'createSingle']);
-                Route::post('/sell', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'sell']);
-                Route::get('/stock-summary', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'stockSummary']);
-                Route::get('/sales-report', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'salesReport']);
-                Route::get('/summary', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'summary']);
-                Route::post('/cleanup', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'cleanup']);
-                Route::post('/import', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'import']);
-                Route::get('/export', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'export']);
-                Route::get('/export/script', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'exportScript']);
-                Route::get('/export/csv', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'exportCsv']);
-                Route::post('/bulk-delete', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'bulkDelete']);
-                Route::post('/bulk-refund', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'bulkRefund']);
-                Route::post('/bulk-reset-counter', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'bulkResetCounter']);
-                Route::post('/bulk-update-status', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'bulkUpdateStatus']);
-                Route::post('/{voucher}/refund', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'refund']);
-                Route::post('/{voucher}/reset-counter', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'resetCounter']);
-                Route::delete('/batch/{batchId}', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'destroyBatch']);
-                Route::delete('/{voucher}', [App\Http\Controllers\Api\Isp\Business\VoucherController::class, 'destroy']);
-            });
+                // BI & Analytics
+                Route::get('billing/analytics/bi', [App\Http\Controllers\Api\Isp\Billing\AnalyticsController::class, 'index']);
+                Route::get('billing/analytics/projections', [App\Http\Controllers\Api\Isp\Billing\AnalyticsController::class, 'projections']);
+                Route::get('billing/analytics/churn-risk', [App\Http\Controllers\Api\Isp\Billing\AnalyticsController::class, 'churnRisk']);
 
-            // Partner (Reseller/Biller) Management
-            Route::prefix('partners')->group(function () {
-                Route::get('/', [App\Http\Controllers\Api\Isp\Business\PartnerController::class, 'index']);
-                Route::post('/', [App\Http\Controllers\Api\Isp\Business\PartnerController::class, 'store']);
-                Route::get('/{id}', [App\Http\Controllers\Api\Isp\Business\PartnerController::class, 'show']);
-                Route::put('/{id}', [App\Http\Controllers\Api\Isp\Business\PartnerController::class, 'update']);
-                Route::delete('/{id}', [App\Http\Controllers\Api\Isp\Business\PartnerController::class, 'destroy']);
-                Route::post('/{id}/credit', [App\Http\Controllers\Api\Isp\Business\PartnerController::class, 'addCredit']);
-                Route::post('/{id}/debit', [App\Http\Controllers\Api\Isp\Business\PartnerController::class, 'addDebit']);
-                Route::get('/{id}/transactions', [App\Http\Controllers\Api\Isp\Business\PartnerController::class, 'transactions']);
-            });
+                // Payments (Admin)
+                Route::get('payments/gateways', [App\Http\Controllers\Api\Isp\Billing\PaymentController::class, 'indexGateways']);
+                Route::put('payments/gateways/{gateway}', [App\Http\Controllers\Api\Isp\Billing\PaymentController::class, 'updateGateway']);
+                Route::post('payments/callback', [App\Http\Controllers\Api\Isp\Billing\PaymentController::class, 'callback']);
 
-            // Customer Saldo Management
-            Route::prefix('customers/{customerId}/saldo')->group(function () {
-                Route::get('/', [App\Http\Controllers\Api\Isp\Business\SaldoController::class, 'show']);
-                Route::post('/credit', [App\Http\Controllers\Api\Isp\Business\SaldoController::class, 'addCredit']);
-                Route::post('/debit', [App\Http\Controllers\Api\Isp\Business\SaldoController::class, 'addDebit']);
-                Route::post('/pay-invoice', [App\Http\Controllers\Api\Isp\Business\SaldoController::class, 'payInvoice']);
-                Route::get('/transactions', [App\Http\Controllers\Api\Isp\Business\SaldoController::class, 'transactions']);
-            });
+                // Contracts
+                Route::apiResource('contracts', App\Http\Controllers\Api\Isp\Customer\ContractController::class);
 
-            // Discount Coupons
-            Route::prefix('coupons')->group(function () {
-                Route::get('/', [App\Http\Controllers\Api\Isp\Business\CouponController::class, 'index']);
-                Route::post('/', [App\Http\Controllers\Api\Isp\Business\CouponController::class, 'store']);
-                Route::get('/{id}', [App\Http\Controllers\Api\Isp\Business\CouponController::class, 'show']);
-                Route::put('/{id}', [App\Http\Controllers\Api\Isp\Business\CouponController::class, 'update']);
-                Route::delete('/{id}', [App\Http\Controllers\Api\Isp\Business\CouponController::class, 'destroy']);
-                Route::post('/validate', [App\Http\Controllers\Api\Isp\Business\CouponController::class, 'validateCoupon']);
-                Route::post('/redeem', [App\Http\Controllers\Api\Isp\Business\CouponController::class, 'redeem']);
-            });
+                // Service Requests (Admin)
+                Route::prefix('service-requests')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Isp\Support\SupportController::class, 'requestIndex']);
+                    Route::patch('/{serviceRequest}/status', [App\Http\Controllers\Api\Isp\Support\SupportController::class, 'updateRequestStatus']);
+                    Route::post('/{serviceRequest}/execute', [App\Http\Controllers\Api\Isp\Support\SupportController::class, 'executeRequest']);
+                });
 
-            // Print Templates
-            Route::prefix('print-templates')->group(function () {
-                Route::get('/', [App\Http\Controllers\Api\Isp\Support\PrintTemplateController::class, 'index']);
-                Route::post('/', [App\Http\Controllers\Api\Isp\Support\PrintTemplateController::class, 'store']);
-                Route::get('/variables', [App\Http\Controllers\Api\Isp\Support\PrintTemplateController::class, 'variables']);
-                Route::get('/{id}', [App\Http\Controllers\Api\Isp\Support\PrintTemplateController::class, 'show']);
-                Route::put('/{id}', [App\Http\Controllers\Api\Isp\Support\PrintTemplateController::class, 'update']);
-                Route::delete('/{id}', [App\Http\Controllers\Api\Isp\Support\PrintTemplateController::class, 'destroy']);
-                Route::get('/{id}/preview', [App\Http\Controllers\Api\Isp\Support\PrintTemplateController::class, 'preview']);
-            });
 
-            // BGP Toolkit
-            Route::prefix('tools/bgp')->group(function () {
-                Route::get('/lookup', [App\Http\Controllers\Api\Isp\Network\BgpToolkitController::class, 'lookup']);
-                Route::get('/prefixes', [App\Http\Controllers\Api\Isp\Network\BgpToolkitController::class, 'prefixes']);
-                Route::get('/download-address-list', [App\Http\Controllers\Api\Isp\Network\BgpToolkitController::class, 'downloadAddressList']);
-            });
+                // Network Management (IPAM)
+                Route::prefix('network')->group(function () {
+                    Route::get('subnets', [App\Http\Controllers\Api\Isp\Network\NetworkController::class, 'indexSubnets']);
+                    Route::post('subnets', [App\Http\Controllers\Api\Isp\Network\NetworkController::class, 'storeSubnet']);
+                    Route::get('subnets/{id}/ips', [App\Http\Controllers\Api\Isp\Network\NetworkController::class, 'indexIps']);
+                    Route::get('profiles', [App\Http\Controllers\Api\Isp\Network\NetworkController::class, 'indexProfiles']);
+                    Route::post('profiles', [App\Http\Controllers\Api\Isp\Network\NetworkController::class, 'storeProfile']);
+                });
 
-            // Activity Logs
-            Route::prefix('activity-logs')->group(function () {
-                Route::get('/', [App\Http\Controllers\Api\Isp\Monitoring\ActivityLogController::class, 'index']);
-            });
+                // Outage Management
+                Route::prefix('outages')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Isp\Network\OutageController::class, 'index']);
+                    Route::post('/', [App\Http\Controllers\Api\Isp\Network\OutageController::class, 'store']);
+                    Route::patch('/{id}', [App\Http\Controllers\Api\Isp\Network\OutageController::class, 'update']);
+                });
 
-            // Hotspot (Phase 9)
-            Route::prefix('hotspot')->group(function () {
-                // IP Bindings
-                Route::get('/ip-bindings', [App\Http\Controllers\Api\Isp\Monitoring\HotspotController::class, 'ipBindings']);
-                Route::post('/ip-bindings', [App\Http\Controllers\Api\Isp\Monitoring\HotspotController::class, 'addIpBinding']);
-                Route::delete('/ip-bindings/{id}', [App\Http\Controllers\Api\Isp\Monitoring\HotspotController::class, 'removeIpBinding']);
-                Route::patch('/ip-bindings/{id}/toggle', [App\Http\Controllers\Api\Isp\Monitoring\HotspotController::class, 'toggleIpBinding']);
-                // Cookies
-                Route::get('/cookies', [App\Http\Controllers\Api\Isp\Monitoring\HotspotController::class, 'cookies']);
-                Route::delete('/cookies/{id}', [App\Http\Controllers\Api\Isp\Monitoring\HotspotController::class, 'removeCookie']);
-                // Interfaces (for Traffic Monitor)
-                Route::get('/interfaces', [App\Http\Controllers\Api\Isp\Monitoring\HotspotController::class, 'interfaces']);
-                Route::get('/interface-traffic', [App\Http\Controllers\Api\Isp\Monitoring\HotspotController::class, 'interfaceTraffic']);
-            });
+                // Router Management (Merged into InfrastructureController)
+                Route::get('routers', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'routerIndex']);
+                Route::post('routers', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'store']);
+                Route::get('routers/{infra}', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'show']);
+                Route::put('routers/{infra}', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'update']);
+                Route::delete('routers/{infra}', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'destroy']);
+                
+                Route::post('routers/bulk-status', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'bulkStatus']);
+                Route::post('routers/bulk-destroy', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'bulkDestroy']);
+                Route::post('routers/bulk-force-destroy', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'bulkForceDestroy']);
+                Route::post('routers/bulk-restore', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'bulkRestore']);
+                Route::post('routers/{infra}/restore', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'restore']);
 
-            // WhatsApp Blast & Templates
-            Route::prefix('wa')->group(function () {
-                // Templates
-                Route::get('/templates', [App\Http\Controllers\Api\Isp\Support\WaBlastController::class, 'templates']);
-                Route::post('/templates', [App\Http\Controllers\Api\Isp\Support\WaBlastController::class, 'storeTemplate']);
-                Route::put('/templates/{id}', [App\Http\Controllers\Api\Isp\Support\WaBlastController::class, 'updateTemplate']);
-                Route::delete('/templates/{id}', [App\Http\Controllers\Api\Isp\Support\WaBlastController::class, 'destroyTemplate']);
-                // Blasts
-                Route::get('/blasts', [App\Http\Controllers\Api\Isp\Support\WaBlastController::class, 'blasts']);
-                Route::get('/blasts/{id}', [App\Http\Controllers\Api\Isp\Support\WaBlastController::class, 'showBlast']);
-                Route::post('/blasts', [App\Http\Controllers\Api\Isp\Support\WaBlastController::class, 'storeBlast']);
-                Route::post('/blasts/{id}/send', [App\Http\Controllers\Api\Isp\Support\WaBlastController::class, 'sendBlast']);
-                Route::delete('/blasts/{id}', [App\Http\Controllers\Api\Isp\Support\WaBlastController::class, 'destroyBlast']);
-                // Schedules
-                Route::get('/schedules', [App\Http\Controllers\Api\Isp\Support\WaBlastController::class, 'schedules']);
-                Route::post('/schedules', [App\Http\Controllers\Api\Isp\Support\WaBlastController::class, 'storeSchedule']);
-                Route::put('/schedules/{id}', [App\Http\Controllers\Api\Isp\Support\WaBlastController::class, 'updateSchedule']);
-                Route::delete('/schedules/{id}', [App\Http\Controllers\Api\Isp\Support\WaBlastController::class, 'destroySchedule']);
+                Route::get('routers/{infra}/test-connection', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'testRouterConnection']);
+                Route::post('routers/{infra}/reconstruct', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'reconstructRouter']);
+                Route::get('routers/{infra}/vpn-secrets', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'routerVpnSecrets']);
+                Route::post('routers/{infra}/vpn-secrets', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'storeRouterVpnSecret']);
+                Route::delete('routers/{infra}/vpn-secrets/{id}', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'destroyRouterVpnSecret']);
+                Route::post('routers/{infra}/script', [App\Http\Controllers\Api\Isp\Network\MikrotikScriptController::class, 'generate']);
+
+                // Service Zones (Data Servers)
+                Route::patch('service-zones/{service_zone}/toggle-active', [App\Http\Controllers\Api\Isp\Network\ServiceZoneController::class, 'toggleActive']);
+                Route::apiResource('service-zones', App\Http\Controllers\Api\Isp\Network\ServiceZoneController::class);
+
+                Route::get('customers/stats', [App\Http\Controllers\Api\Isp\Customer\CustomerController::class, 'stats']);
+                Route::post('customers/import', [App\Http\Controllers\Api\Isp\Customer\CustomerController::class, 'import']);
+                Route::get('customers/export', [App\Http\Controllers\Api\Isp\Customer\CustomerController::class, 'export']);
+                Route::get('customers/geolocation', [App\Http\Controllers\Api\Isp\Network\GeolocationController::class, 'index']);
+                Route::get('customers/topology', [App\Http\Controllers\Api\Isp\Network\GeolocationController::class, 'topology']);
+                Route::get('customers/heatmap', [App\Http\Controllers\Api\Isp\Network\GeolocationController::class, 'heatmap']);
+                Route::apiResource('customers', App\Http\Controllers\Api\Isp\Customer\CustomerController::class);
+
+                // Analytics & Reporting (Merged into MonitoringController)
+                Route::prefix('analytics')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'dashboard']);
+                    Route::get('/usage', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'usageTrends']);
+                    Route::get('/revenue', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'revenue']);
+                    Route::get('/bi', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'businessIntelligence']);
+                    Route::get('/top-talkers', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'topTalkers']);
+                });
+
+                Route::get('olts/discover', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'oltDiscover']);
+                Route::get('olts/logs', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'oltLogs']);
+                Route::get('olts', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'oltIndex']);
+                Route::apiResource('olts', App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, ['parameters' => ['olts' => 'infra']])->except(['index']);
+                Route::get('olts/{olt}/test-connection', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'testOltConnection']);
+                Route::get('olts/{olt}/logs', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'oltLogs']);
+                Route::get('olts/{olt}/discover', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'oltDiscover']);
+
+                // OLT Monitoring (Merged into MonitoringController)
+                Route::prefix('monitor/olt')->group(function () {
+                    Route::get('signals', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'oltSignalHistory']);
+                    Route::get('health-report/{customer}', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'downloadHealthReport']);
+                    Route::get('{olt}/signal-stats', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'oltSignalStats']);
+                });
+
+                // Network Monitoring (NOC & Traffic)
+                Route::prefix('monitor')->group(function () {
+                    Route::get('stats', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'dashboard']);
+                    Route::get('interfaces', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'interfaces']);
+                    Route::get('traffic', [App\Http\Controllers\Api\Isp\Network\MonitoringController::class, 'liveTraffic']);
+
+                    // Reporting
+                    Route::get('reports/traffic', [App\Http\Controllers\Api\Isp\Network\ReportingController::class, 'trafficReport']);
+                    Route::get('reports/sla', [App\Http\Controllers\Api\Isp\Network\ReportingController::class, 'slaReport']);
+                });
+
+                // ODPs (Part of Infrastructure)
+                Route::get('odps', [App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, 'odpIndex']);
+                Route::apiResource('odps', App\Http\Controllers\Api\Isp\Network\InfrastructureController::class, ['parameters' => ['odps' => 'infra']])->except(['index']);
+
+                // Inventory
+                Route::prefix('inventory')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Isp\Hardware\InventoryController::class, 'index']);
+                    Route::post('/', [App\Http\Controllers\Api\Isp\Hardware\InventoryController::class, 'store']);
+                    Route::get('/{inventory}/qr', [App\Http\Controllers\Api\Isp\Hardware\InventoryController::class, 'generateQr']);
+                    Route::post('/{inventory}/adjust', [App\Http\Controllers\Api\Isp\Hardware\InventoryController::class, 'adjustStock']);
+                    Route::get('/{inventory}/transactions', [App\Http\Controllers\Api\Isp\Hardware\InventoryController::class, 'transactions']);
+                    Route::delete('/{inventory}', [App\Http\Controllers\Api\Isp\Hardware\InventoryController::class, 'destroy']);
+                });
+
+                // Operations & Technicians
+                Route::prefix('operations')->group(function () {
+                    Route::get('technicians', [App\Http\Controllers\Api\Isp\Operations\TechnicianController::class, 'technicians']);
+                    Route::get('recommendations/{request}', [App\Http\Controllers\Api\Isp\Operations\TechnicianController::class, 'recommendations']);
+                    Route::get('deployments', [App\Http\Controllers\Api\Isp\Operations\TechnicianController::class, 'deployments']);
+                    Route::post('deploy', [App\Http\Controllers\Api\Isp\Operations\TechnicianController::class, 'deploy']);
+                    Route::patch('deployments/{deployment}/status', [App\Http\Controllers\Api\Isp\Operations\TechnicianController::class, 'updateStatus']);
+                });
+
+                // Vouchers
+                Route::prefix('vouchers')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'index']);
+                    Route::post('/generate', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'generate']);
+                    Route::post('/create-single', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'createSingle']);
+                    Route::post('/sell', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'sell']);
+                    Route::get('/stock-summary', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'stockSummary']);
+                    Route::get('/sales-report', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'salesReport']);
+                    Route::get('/summary', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'summary']);
+                    Route::post('/cleanup', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'cleanup']);
+                    Route::post('/sync-usage', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'syncUsage']);
+                    Route::post('/import', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'import']);
+                    Route::get('/export', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'export']);
+                    Route::get('/export/script', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'exportScript']);
+                    Route::get('/export/csv', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'exportCsv']);
+                    Route::post('/bulk-delete', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'bulkDelete']);
+                    Route::post('/bulk-refund', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'bulkRefund']);
+                    Route::post('/bulk-reset-counter', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'bulkResetCounter']);
+                    Route::post('/bulk-update-status', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'bulkUpdateStatus']);
+                    Route::post('/{voucher}/refund', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'refund']);
+                    Route::post('/{voucher}/reset-counter', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'resetCounter']);
+                    Route::delete('/batch/{batchId}', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'destroyBatch']);
+                    Route::delete('/{voucher}', [App\Http\Controllers\Api\Isp\Billing\VoucherController::class, 'destroy']);
+                });
+
+                // Partner (Reseller/Biller) Management
+                Route::prefix('partners')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Isp\Customer\PartnerController::class, 'index']);
+                    Route::post('/', [App\Http\Controllers\Api\Isp\Customer\PartnerController::class, 'store']);
+                    Route::get('/{id}', [App\Http\Controllers\Api\Isp\Customer\PartnerController::class, 'show']);
+                    Route::put('/{id}', [App\Http\Controllers\Api\Isp\Customer\PartnerController::class, 'update']);
+                    Route::delete('/{id}', [App\Http\Controllers\Api\Isp\Customer\PartnerController::class, 'destroy']);
+                    Route::post('/{id}/credit', [App\Http\Controllers\Api\Isp\Customer\PartnerController::class, 'addCredit']);
+                    Route::post('/{id}/debit', [App\Http\Controllers\Api\Isp\Customer\PartnerController::class, 'addDebit']);
+                    Route::get('/{id}/transactions', [App\Http\Controllers\Api\Isp\Customer\PartnerController::class, 'transactions']);
+                });
+
+                // Customer Saldo Management
+                Route::prefix('customers/{customerId}/saldo')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Isp\Billing\SaldoController::class, 'show']);
+                    Route::post('/credit', [App\Http\Controllers\Api\Isp\Billing\SaldoController::class, 'addCredit']);
+                    Route::post('/debit', [App\Http\Controllers\Api\Isp\Billing\SaldoController::class, 'addDebit']);
+                    Route::post('/pay-invoice', [App\Http\Controllers\Api\Isp\Billing\SaldoController::class, 'payInvoice']);
+                    Route::get('/transactions', [App\Http\Controllers\Api\Isp\Billing\SaldoController::class, 'transactions']);
+                });
+
+                // Discount Coupons
+                Route::prefix('coupons')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Isp\Customer\CouponController::class, 'index']);
+                    Route::post('/', [App\Http\Controllers\Api\Isp\Customer\CouponController::class, 'store']);
+                    Route::get('/{id}', [App\Http\Controllers\Api\Isp\Customer\CouponController::class, 'show']);
+                    Route::put('/{id}', [App\Http\Controllers\Api\Isp\Customer\CouponController::class, 'update']);
+                    Route::delete('/{id}', [App\Http\Controllers\Api\Isp\Customer\CouponController::class, 'destroy']);
+                    Route::post('/validate', [App\Http\Controllers\Api\Isp\Customer\CouponController::class, 'validateCoupon']);
+                    Route::post('/redeem', [App\Http\Controllers\Api\Isp\Customer\CouponController::class, 'redeem']);
+                });
+
+                // Print Templates
+                Route::prefix('print-templates')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Isp\Billing\PrintTemplateController::class, 'index']);
+                    Route::post('/', [App\Http\Controllers\Api\Isp\Billing\PrintTemplateController::class, 'store']);
+                    Route::get('/variables', [App\Http\Controllers\Api\Isp\Billing\PrintTemplateController::class, 'variables']);
+                    Route::get('/{id}', [App\Http\Controllers\Api\Isp\Billing\PrintTemplateController::class, 'show']);
+                    Route::put('/{id}', [App\Http\Controllers\Api\Isp\Billing\PrintTemplateController::class, 'update']);
+                    Route::delete('/{id}', [App\Http\Controllers\Api\Isp\Billing\PrintTemplateController::class, 'destroy']);
+                    Route::get('/{id}/preview', [App\Http\Controllers\Api\Isp\Billing\PrintTemplateController::class, 'preview']);
+                });
+
+                // BGP Toolkit
+                Route::prefix('tools/bgp')->group(function () {
+                    Route::get('/lookup', [App\Http\Controllers\Api\Isp\Network\BgpToolkitController::class, 'lookup']);
+                    Route::get('/prefixes', [App\Http\Controllers\Api\Isp\Network\BgpToolkitController::class, 'prefixes']);
+                    Route::get('/download-address-list', [App\Http\Controllers\Api\Isp\Network\BgpToolkitController::class, 'downloadAddressList']);
+                });
+
+                // Activity Logs
+                Route::prefix('activity-logs')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Isp\Support\ActivityLogController::class, 'index']);
+                });
+
+                // Hotspot (Phase 9)
+                Route::prefix('hotspot')->group(function () {
+                    // IP Bindings
+                    Route::get('/ip-bindings', [App\Http\Controllers\Api\Isp\Network\HotspotController::class, 'ipBindings']);
+                    Route::post('/ip-bindings', [App\Http\Controllers\Api\Isp\Network\HotspotController::class, 'addIpBinding']);
+                    Route::delete('/ip-bindings/{id}', [App\Http\Controllers\Api\Isp\Network\HotspotController::class, 'removeIpBinding']);
+                    Route::patch('/ip-bindings/{id}/toggle', [App\Http\Controllers\Api\Isp\Network\HotspotController::class, 'toggleIpBinding']);
+                    // Cookies
+                    Route::get('/cookies', [App\Http\Controllers\Api\Isp\Network\HotspotController::class, 'cookies']);
+                    Route::delete('/cookies/{id}', [App\Http\Controllers\Api\Isp\Network\HotspotController::class, 'removeCookie']);
+                    // Interfaces (for Traffic Monitor)
+                    Route::get('/interfaces', [App\Http\Controllers\Api\Isp\Network\HotspotController::class, 'interfaces']);
+                    Route::get('/interface-traffic', [App\Http\Controllers\Api\Isp\Network\HotspotController::class, 'interfaceTraffic']);
+                });
+
+                // WhatsApp Blast & Templates
+                Route::prefix('wa')->group(function () {
+                    // Templates
+                    Route::get('/templates', [App\Http\Controllers\Api\Isp\ThirdParty\WhatsAppBlastController::class, 'templates']);
+                    Route::post('/templates', [App\Http\Controllers\Api\Isp\ThirdParty\WhatsAppBlastController::class, 'storeTemplate']);
+                    Route::put('/templates/{id}', [App\Http\Controllers\Api\Isp\ThirdParty\WhatsAppBlastController::class, 'updateTemplate']);
+                    Route::delete('/templates/{id}', [App\Http\Controllers\Api\Isp\ThirdParty\WhatsAppBlastController::class, 'destroyTemplate']);
+                    // Blasts
+                    Route::get('/blasts', [App\Http\Controllers\Api\Isp\ThirdParty\WhatsAppBlastController::class, 'blasts']);
+                    Route::get('/blasts/{id}', [App\Http\Controllers\Api\Isp\ThirdParty\WhatsAppBlastController::class, 'showBlast']);
+                    Route::post('/blasts', [App\Http\Controllers\Api\Isp\ThirdParty\WhatsAppBlastController::class, 'storeBlast']);
+                    Route::post('/blasts/{id}/send', [App\Http\Controllers\Api\Isp\ThirdParty\WhatsAppBlastController::class, 'sendBlast']);
+                    Route::delete('/blasts/{id}', [App\Http\Controllers\Api\Isp\ThirdParty\WhatsAppBlastController::class, 'destroyBlast']);
+                    // Schedules
+                    Route::get('/schedules', [App\Http\Controllers\Api\Isp\ThirdParty\WhatsAppBlastController::class, 'schedules']);
+                    Route::post('/schedules', [App\Http\Controllers\Api\Isp\ThirdParty\WhatsAppBlastController::class, 'storeSchedule']);
+                    Route::put('/schedules/{id}', [App\Http\Controllers\Api\Isp\ThirdParty\WhatsAppBlastController::class, 'updateSchedule']);
+                    Route::delete('/schedules/{id}', [App\Http\Controllers\Api\Isp\ThirdParty\WhatsAppBlastController::class, 'destroySchedule']);
+                });
             });
         });
     });
@@ -821,8 +915,8 @@ Route::prefix('core')->group(function () {
 
 // Legacy routes (redirect to core)
 Route::post('/login', function () {
-    return response()->json(['message' => 'Please use /api/core/login'], 301);
+    return response()->json(['message' => 'Please use /api/v1/login'], 301);
 });
 Route::post('/register', function () {
-    return response()->json(['message' => 'Please use /api/core/register'], 301);
+    return response()->json(['message' => 'Please use /api/v1/register'], 301);
 });

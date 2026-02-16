@@ -47,7 +47,7 @@ const search = async () => {
   
   loading.value = true
   try {
-    const response = await api.get('/cms/search', {
+    const response = await api.get('/ja/search', {
       params: { q: searchQuery.value }
     })
     results.value = response.data.data || []

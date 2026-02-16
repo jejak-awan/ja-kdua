@@ -170,10 +170,10 @@ const handleSubmit = async () => {
     clearErrors();
     try {
         if (isEdit.value) {
-            await api.put(`/admin/ja/tags/${props.tag?.id}`, form.value);
+            await api.put(`/admin/janet/tags/${props.tag?.id}`, form.value);
             toast.success.update('Tag');
         } else {
-            await api.post('/admin/ja/tags', form.value);
+            await api.post('/admin/janet/tags', form.value);
             toast.success.create('Tag');
         }
         

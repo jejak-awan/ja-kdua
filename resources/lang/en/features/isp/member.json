@@ -8,6 +8,7 @@
         "service_offline": "Service: Offline",
         "incident_title": "Active Service Incident",
         "incident_desc": "We've identified an issue affecting your area: {title}",
+        "pulse_desc": "Your connection is currently optimized and stable.",
         "view_status": "View Network Status",
         "current_plan": "Current Plan",
         "bandwidth": "Bandwidth",
@@ -43,7 +44,11 @@
         "quick_actions": "Quick Actions",
         "reset_wifi": "Reset WiFi Connection",
         "contact_support": "Contact Technical Support",
-        "did_you_know": "Restarting your router solves 90% of connectivity issues by clearing temporary cache and refreshing the IP assignment."
+        "did_you_know": "Restarting your router solves 90% of connectivity issues by clearing temporary cache and refreshing the IP assignment.",
+        "resetting": "Resetting Connection...",
+        "resetting_desc": "We are sending a reset signal to your router. This will disconnect your device for a few seconds.",
+        "reset_success": "Reset signal sent successfully. Please wait for your device to reconnect.",
+        "reset_error": "Failed to reset connection. Please contact support if the issue persists."
     },
     "invoices": {
         "title": "My Invoices",

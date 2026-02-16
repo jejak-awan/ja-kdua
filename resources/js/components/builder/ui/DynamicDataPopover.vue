@@ -133,7 +133,7 @@ import SearchX from 'lucide-vue-next/dist/esm/icons/search-x.js';
         content_id: props.contentId || builder?.content.value.id
       };
       
-      const response = await api.get('/admin/ja/builder/dynamic-sources', { params });
+      const response = await api.get('/admin/janet/builder/dynamic-sources', { params });
       dataGroups.value = response.data?.data || response.data || {};
     } catch (err) {
       logger.error('Failed to fetch dynamic sources:', err);

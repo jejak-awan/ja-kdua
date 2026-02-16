@@ -147,7 +147,7 @@ const downloadFile = (file: FileItem) => {
 
 const extractFile = async (file: FileItem) => {
     try {
-        await api.post('/admin/ja/file-manager/extract', { path: file.path.replace(/^\//, '') });
+        await api.post('/admin/janet/file-manager/extract', { path: file.path.replace(/^\//, '') });
         toast.success.action(t('features.file_manager.messages.extracted', 'Extracted'));
         await fetchCurrentPath();
     } catch (_error) {
@@ -157,7 +157,7 @@ const extractFile = async (file: FileItem) => {
 
 const compressItems = async (paths: string[]) => {
     try {
-        await api.post('/admin/ja/file-manager/compress', { paths: paths.map(p => p.replace(/^\//, '')) });
+        await api.post('/admin/janet/file-manager/compress', { paths: paths.map(p => p.replace(/^\//, '')) });
         toast.success.action(t('features.file_manager.messages.compressed', 'Compressed'));
         await fetchCurrentPath();
     } catch (_error) {

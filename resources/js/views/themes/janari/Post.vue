@@ -111,7 +111,7 @@ watch(() => post.value, () => {
 onMounted(async () => {
     try {
         const slug = route.params.slug as string;
-        const response = await api.get(`/cms/contents/${slug}`);
+        const response = await api.get(`/ja/contents/${slug}`);
         post.value = response.data.data || response.data;
     } catch (error) {
         logger.error('Failed to load post:', error);

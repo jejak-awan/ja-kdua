@@ -405,7 +405,7 @@ const formatDate = (date: string) => {
 
 const fetchQueueHealth = async (): Promise<void> => {
     try {
-        const res = await api.get('/admin/ja/system/info');
+        const res = await api.get('/admin/janet/system/info');
         const data = parseSingleResponse<{ queue_health?: QueueHealth }>(res);
         queueHealth.value = data?.queue_health || null;
     } catch (error: unknown) {
@@ -417,8 +417,8 @@ const fetchQueueHealth = async (): Promise<void> => {
 const fetchData = async (): Promise<void> => {
     try {
         const [rolesRes, usersRes] = await Promise.all([
-            api.get('/admin/ja/roles'),
-            api.get('/admin/ja/users')
+            api.get('/admin/janet/roles'),
+            api.get('/admin/janet/users')
         ]);
         roles.value = parseResponse<Role>(rolesRes).data;
         users.value = parseResponse<User>(usersRes).data;
@@ -432,7 +432,7 @@ const fetchData = async (): Promise<void> => {
 
 const fetchHistory = async (page = 1) : Promise<void> => {
     try {
-        const res = await api.get('/admin/ja/notifications/system', {
+        const res = await api.get('/admin/janet/notifications/system', {
             params: { page, limit: 10 }
         });
         const parsed = parseResponse<Notification>(res);
@@ -504,7 +504,7 @@ const handleBulkRevoke = async () => {
 
     bulkRevoking.value = true;
     try {
-        await api.post('/admin/ja/notifications/system/bulk-revoke', {
+        await api.post('/admin/janet/notifications/system/bulk-revoke', {
             broadcasts: selectedItems.value
         });
         toast.success.action(t('features.system.notifications.messages.revoked'));
@@ -530,7 +530,7 @@ const handleRevoke = async (notification: Notification) => {
 
     revoking.value = notification.id;
     try {
-        await api.delete('/admin/ja/notifications/system/revoke', {
+        await api.delete('/admin/janet/notifications/system/revoke', {
             data: {
                 title: notification.title,
                 message: notification.message,
@@ -569,7 +569,7 @@ const handleSend = async () => {
 
     sending.value = true;
     try {
-        await api.post('/admin/ja/notifications/broadcast', form);
+        await api.post('/admin/janet/notifications/broadcast', form);
         toast.success.action(form.is_async 
             ? t('features.system.notifications.messages.sent') 
             : 'Notifikasi berhasil dikirim secara langsung'

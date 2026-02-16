@@ -2,16 +2,16 @@
     <div class="container mx-auto p-6">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight">{{ $t('isp.hotspot.ip_bindings.title', 'IP Bindings') }}</h1>
-                <p class="text-muted-foreground">{{ $t('isp.hotspot.ip_bindings.subtitle', 'Manage MAC/IP bypass rules for hotspot login') }}</p>
+                <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('isp.hotspot.ip_bindings.title', 'IP Bindings') }}</h2>
+                <p class="text-sm text-muted-foreground mt-1">{{ $t('isp.hotspot.ip_bindings.subtitle', 'Manage MAC/IP bypass rules for hotspot login') }}</p>
             </div>
-            <Button @click="showAddModal = true">
+            <Button @click="showAddModal = true" class="rounded-xl">
                 <Plus class="w-4 h-4 mr-2" />
                 {{ $t('common.actions.add', 'Add') }}
             </Button>
         </div>
 
-        <Card>
+        <Card class="border-border/40 shadow-sm rounded-xl overflow-hidden">
             <CardContent class="p-0">
                 <DataTable
                     :table="table"
@@ -31,16 +31,16 @@
                 <div class="grid gap-4 py-4">
                     <div class="grid gap-2">
                         <Label for="mac">MAC Address</Label>
-                        <Input v-model="formData.mac" id="mac" placeholder="00:11:22:33:44:55" />
+                        <Input v-model="formData.mac" id="mac" placeholder="00:11:22:33:44:55" class="rounded-xl" />
                     </div>
                     <div class="grid gap-2">
                         <Label for="address">IP Address</Label>
-                        <Input v-model="formData.address" id="address" placeholder="192.168.1.100" />
+                        <Input v-model="formData.address" id="address" placeholder="192.168.1.100" class="rounded-xl" />
                     </div>
                     <div class="grid gap-2">
                         <Label for="type">Type</Label>
                         <Select v-model="formData.type">
-                            <SelectTrigger id="type">
+                            <SelectTrigger id="type" class="rounded-xl">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -52,12 +52,12 @@
                     </div>
                     <div class="grid gap-2">
                         <Label for="comment">{{ $t('common.fields.comment', 'Comment') }}</Label>
-                        <Input v-model="formData.comment" id="comment" placeholder="Staff device" />
+                        <Input v-model="formData.comment" id="comment" placeholder="Staff device" class="rounded-xl" />
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" @click="showAddModal = false">{{ $t('common.actions.cancel', 'Cancel') }}</Button>
-                    <Button @click="addBinding" :disabled="saving">
+                    <Button variant="outline" @click="showAddModal = false" class="rounded-xl">{{ $t('common.actions.cancel', 'Cancel') }}</Button>
+                    <Button @click="addBinding" :disabled="saving" class="rounded-xl">
                         <LoaderCircle v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                         {{ $t('common.actions.add', 'Add') }}
                     </Button>
@@ -190,7 +190,7 @@ const table = useVueTable({
 const fetchBindings = async () => {
     loading.value = true;
     try {
-        const res = await api.get('/admin/ja/isp/hotspot/ip-bindings');
+        const res = await api.get('/admin/janet/isp/hotspot/ip-bindings');
         bindings.value = res.data.data;
     } catch (error) {
         console.error('Failed to fetch IP bindings', error);
@@ -203,7 +203,7 @@ const fetchBindings = async () => {
 const addBinding = async () => {
     saving.value = true;
     try {
-        await api.post('/admin/ja/isp/hotspot/ip-bindings', formData.value);
+        await api.post('/admin/janet/isp/hotspot/ip-bindings', formData.value);
         toast.success.action(t('isp.hotspot.ip_bindings.add_success', 'IP Binding added successfully'));
         showAddModal.value = false;
         formData.value = { mac: '', address: '', type: 'bypassed', comment: '' };
@@ -226,7 +226,7 @@ const deleteBinding = async (id: string) => {
     if (!confirmed) return;
     
     try {
-        await api.delete(`/admin/ja/isp/hotspot/ip-bindings/${id}`);
+        await api.delete(`/admin/janet/isp/hotspot/ip-bindings/${id}`);
         toast.success.delete('IP Binding');
         fetchBindings();
     } catch (error) {
@@ -237,7 +237,7 @@ const deleteBinding = async (id: string) => {
 
 const toggleBinding = async (binding: IpBinding) => {
     try {
-        await api.patch(`/admin/ja/isp/hotspot/ip-bindings/${binding.id}/toggle`, {
+        await api.patch(`/admin/janet/isp/hotspot/ip-bindings/${binding.id}/toggle`, {
             disabled: !binding.disabled
         });
         toast.success.update('IP Binding');

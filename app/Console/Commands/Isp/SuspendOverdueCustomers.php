@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands\Isp;
 
-use App\Services\Isp\BillingService;
+use App\Services\Isp\Billing\BillingService;
 use Illuminate\Console\Command;
 
 class SuspendOverdueCustomers extends Command

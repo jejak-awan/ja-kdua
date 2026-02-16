@@ -622,7 +622,7 @@ const fetchMenuParentItems = async (menuId: string | number) => {
     
     loadingParentItems.value = true;
     try {
-        const response = await api.get(`/admin/ja/menus/${menuId}/items`);
+        const response = await api.get(`/admin/janet/menus/${menuId}/items`);
         const data = response.data?.data || response.data || [];
         const flatItems = Array.isArray(data) ? data : [];
         

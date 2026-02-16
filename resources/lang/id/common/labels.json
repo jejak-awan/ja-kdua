@@ -1,6 +1,8 @@
 {
     "name": "Nama",
+    "general": "Umum",
     "email": "Email",
+    "phone": "WhatsApp / Telepon",
     "password": "Kata Sandi",
     "confirmPassword": "Konfirmasi Kata Sandi",
     "title": "Judul",

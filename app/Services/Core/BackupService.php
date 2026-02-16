@@ -145,22 +145,33 @@ class BackupService
             } elseif ($defaultConnection === 'pgsql') {
                 /** @var int|string $port */
                 $port = config('database.connections.pgsql.port', 5432);
-                \putenv("PGPASSWORD={$password}");
+                // Use connection URI format to avoid password prompt issues
+                // postgresql://user:password@host:port/dbname
+                $connectionUri = sprintf(
+                    'postgresql://%s:%s@%s:%s/%s',
+                    $username,
+                    urlencode($password),
+                    $host,
+                    $port,
+                    $database
+                );
 
+                // Keep 2>&1 to capture errors in the file, so we can read them if it fails
                 $command = sprintf(
-                    'pg_dump --host=%s --port=%s --username=%s --format=plain %s > %s 2>&1',
-                    escapeshellarg($host),
-                    escapeshellarg((string) $port),
-                    escapeshellarg($username),
-                    escapeshellarg($database),
+                    'pg_dump --format=plain --dbname=%s > %s 2>&1',
+                    escapeshellarg($connectionUri),
                     escapeshellarg($tempSqlFile)
                 );
 
                 $result = $this->executeCommand($command);
-                \putenv('PGPASSWORD');
+                // No need to unset PGPASSWORD since we didn't use it
 
                 if ($result['returnCode'] !== 0) {
-                    throw new \Exception('pg_dump failed: '.implode("\n", $result['output']));
+                    $errorOutput = 'Unknown error';
+                    if (file_exists($tempSqlFile)) {
+                        $errorOutput = file_get_contents($tempSqlFile) ?: 'Empty error log';
+                    }
+                    throw new \Exception('pg_dump failed: ' . $errorOutput);
                 }
             } else {
                 throw new \Exception('Unsupported database driver: '.$defaultConnection);
@@ -368,27 +379,33 @@ class BackupService
                     /** @var string $database */
                     $database = config('database.connections.pgsql.database', '');
                     /** @var string $username */
-                    $username = config('cache.connections.pgsql.username', '');
+                    $username = config('database.connections.pgsql.username', '');
                     /** @var string $password */
-                    $password = config('cache.connections.pgsql.password', '');
+                    $password = config('database.connections.pgsql.password', '');
                     /** @var string $host */
-                    $host = config('cache.connections.pgsql.host', '');
+                    $host = config('database.connections.pgsql.host', '');
                     /** @var int|string $port */
-                    $port = config('cache.connections.pgsql.port', 5432);
+                    $port = config('database.connections.pgsql.port', 5432);
 
-                    \putenv("PGPASSWORD={$password}");
+                    // Use connection URI format to avoid password prompt issues
+                    // postgresql://user:password@host:port/dbname
+                    $connectionUri = sprintf(
+                        'postgresql://%s:%s@%s:%s/%s',
+                        $username,
+                        urlencode($password),
+                        $host,
+                        $port,
+                        $database
+                    );
 
                     $command = sprintf(
-                        'psql --host=%s --port=%s --username=%s %s < %s 2>&1',
-                        escapeshellarg($host),
-                        escapeshellarg((string) $port),
-                        escapeshellarg($username),
-                        escapeshellarg($database),
+                        'psql --dbname=%s < %s 2>&1',
+                        escapeshellarg($connectionUri),
                         escapeshellarg($sqlPath)
                     );
 
                     $result = $this->executeCommand($command);
-                    \putenv('PGPASSWORD');
+                    // No need to unset PGPASSWORD since we didn't use it
 
                     if ($result['returnCode'] !== 0) {
                         throw new \Exception('PostgreSQL restore failed: '.implode("\n", $result['output']));
@@ -429,7 +446,7 @@ class BackupService
         /** @var string $path */
         $path = $backup->path;
 
-        if (Storage::disk($disk)->exists($path)) {
+        if ($path && Storage::disk($disk)->exists($path)) {
             Storage::disk($disk)->delete($path);
         }
 

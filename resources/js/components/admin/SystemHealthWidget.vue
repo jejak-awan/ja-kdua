@@ -250,7 +250,7 @@ const fetchHealth = async () => {
 
     loading.value = true;
     try {
-        const response = await api.get('/admin/ja/system/health/detailed');
+        const response = await api.get('/admin/janet/system/health/detailed');
         const data = parseSingleResponse(response);
         if (data) {
             health.value = data as SystemHealth;

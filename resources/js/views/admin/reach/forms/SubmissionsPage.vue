@@ -521,7 +521,7 @@ const selectedRowsCount = computed(() => Object.keys(rowSelection.value).length)
 // --- API Methods ---
 const fetchForm = async () => {
     try {
-        const response = await api.get(`/admin/ja/forms/${formId.value}`);
+        const response = await api.get(`/admin/janet/forms/${formId.value}`);
         form.value = (response.data?.data || response.data) as Form;
     } catch (error: unknown) {
         logger.error('Error fetching form:', error);
@@ -550,7 +550,7 @@ const fetchSubmissions = async (page = 1) => {
             ...(dateFrom.value && { date_from: dateFrom.value }),
             ...(dateTo.value && { date_to: dateTo.value })
         };
-        const response = await api.get(`/admin/ja/forms/${formId.value}/submissions`, { params });
+        const response = await api.get(`/admin/janet/forms/${formId.value}/submissions`, { params });
         const paginatedData = response.data?.data || response.data;
         submissions.value = paginatedData?.data || [];
         pagination.value = {
@@ -569,7 +569,7 @@ const fetchSubmissions = async (page = 1) => {
 
 const fetchStatistics = async () => {
     try {
-        const response = await api.get(`/admin/ja/forms/${formId.value}/submissions/statistics`);
+        const response = await api.get(`/admin/janet/forms/${formId.value}/submissions/statistics`);
         statistics.value = parseSingleResponse(response) as SubmissionStatistics;
     } catch (error) {
         logger.error('Failed to fetch statistics:', error);
@@ -590,7 +590,7 @@ const viewSubmission = async (submission: Submission) => {
 
 const markAsRead = async (submission: Submission, refresh = true) => {
     try {
-        await api.put(`/admin/ja/form-submissions/${submission.id}/read`);
+        await api.put(`/admin/janet/form-submissions/${submission.id}/read`);
         if (refresh) {
             fetchSubmissions(pagination.value?.current_page || 1);
             fetchStatistics();
@@ -604,7 +604,7 @@ const markAsRead = async (submission: Submission, refresh = true) => {
 
 const archiveSubmission = async (submission: Submission) => {
     try {
-        await api.put(`/admin/ja/form-submissions/${submission.id}/archive`);
+        await api.put(`/admin/janet/form-submissions/${submission.id}/archive`);
         fetchSubmissions(pagination.value?.current_page || 1);
         fetchStatistics();
     } catch (error: unknown) {
@@ -623,7 +623,7 @@ const deleteSubmission = async (submission: Submission) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/ja/form-submissions/${submission.id}`);
+        await api.delete(`/admin/janet/form-submissions/${submission.id}`);
         submissions.value = submissions.value.filter(s => s.id !== submission.id);
         toast.success.default(t('features.forms.submissions.messages.deleteSuccess'));
         fetchStatistics();
@@ -640,7 +640,7 @@ const handleBulkMarkRead = async () => {
     const selectedIds = selectedRows.map(row => row.original.id);
     
     try {
-        await Promise.all(selectedIds.map(id => api.put(`/admin/ja/form-submissions/${id}/read`)));
+        await Promise.all(selectedIds.map(id => api.put(`/admin/janet/form-submissions/${id}/read`)));
         toast.success.default(t('features.forms.submissions.messages.bulkReadSuccess', { count: selectedIds.length }));
         fetchSubmissions(pagination.value?.current_page || 1);
         fetchStatistics();
@@ -664,7 +664,7 @@ const handleBulkArchive = async () => {
     if (!confirmed) return;
 
     try {
-        await Promise.all(selectedIds.map(id => api.put(`/admin/ja/form-submissions/${id}/archive`)));
+        await Promise.all(selectedIds.map(id => api.put(`/admin/janet/form-submissions/${id}/archive`)));
         toast.success.default(t('features.forms.submissions.messages.bulkArchiveSuccess', { count: selectedIds.length }));
         fetchSubmissions(pagination.value?.current_page || 1);
         fetchStatistics();
@@ -688,7 +688,7 @@ const handleBulkDelete = async () => {
     if (!confirmed) return;
 
     try {
-        await Promise.all(selectedIds.map(id => api.delete(`/admin/ja/form-submissions/${id}`)));
+        await Promise.all(selectedIds.map(id => api.delete(`/admin/janet/form-submissions/${id}`)));
         toast.success.default(t('features.forms.submissions.messages.bulkDeleteSuccess', { count: selectedIds.length }));
         fetchSubmissions(pagination.value?.current_page || 1);
         fetchStatistics();
@@ -718,7 +718,7 @@ const exportSubmissions = async (format = 'xlsx') => {
             ...(dateTo.value && { date_to: dateTo.value })
         });
         const baseUrl = import.meta.env.VITE_API_URL || '';
-        const url = `${baseUrl}/api/core/admin/ja/forms/${formId.value}/submissions/export?${params.toString()}`;
+        const url = `${baseUrl}/api/v1/admin/janet/forms/${formId.value}/submissions/export?${params.toString()}`;
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', `submissions-${formId.value}.${format}`);
@@ -736,7 +736,7 @@ const exportPdf = (submission: Submission) => {
     if (!submission) return;
     try {
         const baseUrl = import.meta.env.VITE_API_URL || '';
-        const exportUrl = `${baseUrl}/api/core/admin/ja/form-submissions/${submission.id}/export-pdf`;
+        const exportUrl = `${baseUrl}/api/v1/admin/janet/form-submissions/${submission.id}/export-pdf`;
         window.open(exportUrl, '_blank');
     } catch (error: unknown) {
         logger.error('Failed to export PDF:', error);

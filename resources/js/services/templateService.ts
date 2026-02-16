@@ -11,15 +11,15 @@ export interface TemplateData {
 
 export default {
     getTemplates(params?: Record<string, unknown>): Promise<AxiosResponse> {
-        return api.get('/admin/ja/content-templates', { params });
+        return api.get('/admin/janet/content-templates', { params });
     },
     saveTemplate(data: TemplateData): Promise<AxiosResponse> {
-        return api.post('/admin/ja/content-templates', data);
+        return api.post('/admin/janet/content-templates', data);
     },
     deleteTemplate(id: number | string): Promise<AxiosResponse> {
-        return api.delete(`/admin/ja/content-templates/${id}`);
+        return api.delete(`/admin/janet/content-templates/${id}`);
     },
     getTemplate(id: number | string): Promise<AxiosResponse> {
-        return api.get(`/admin/ja/content-templates/${id}`);
+        return api.get(`/admin/janet/content-templates/${id}`);
     }
 }

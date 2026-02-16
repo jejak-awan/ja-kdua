@@ -366,7 +366,7 @@ const fetchCategories = async (page = 1) => {
             params.is_active = statusFilter.value === 'active' ? 1 : 0;
         }
 
-        const response = await api.get('/admin/ja/categories', { params });
+        const response = await api.get('/admin/janet/categories', { params });
         const { data, pagination: paginationData } = parseResponse<Category>(response);
         
         categories.value = data || [];
@@ -446,7 +446,7 @@ const deleteCategory = async (category: Category) => {
 
     if (confirmed) {
         try {
-            await api.delete(`/admin/ja/categories/${category.id}`);
+            await api.delete(`/admin/janet/categories/${category.id}`);
             fetchCategories(pagination.value.current_page);
             toast.success.delete('Category');
         } catch (error: unknown) {
@@ -468,7 +468,7 @@ const confirmBulkDelete = async () => {
 
    if (confirmed) {
         try {
-            await api.post('/admin/ja/categories/bulk-destroy', { ids: selectedIds.value });
+            await api.post('/admin/janet/categories/bulk-destroy', { ids: selectedIds.value });
             const count = selectedIds.value.length;
             selectedIds.value = [];
             fetchCategories(pagination.value.current_page);

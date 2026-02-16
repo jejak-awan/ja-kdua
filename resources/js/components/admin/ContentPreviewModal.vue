@@ -107,8 +107,8 @@ const emit = defineEmits<{
     (e: 'publish'): void;
 }>();
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const { activeTheme, themeSettings } = useTheme();
+useTheme();
+
 const selectedDevice = ref<string>('desktop');
 
 const devices: Device[] = [

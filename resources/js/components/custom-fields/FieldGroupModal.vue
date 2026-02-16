@@ -157,10 +157,10 @@ const handleSubmit = async () => {
             attachable_type: form.value.attachable_type === 'none' ? null : form.value.attachable_type
         };
         if (props.fieldGroup) {
-            await api.put(`/admin/ja/field-groups/${props.fieldGroup.id}`, payload);
+            await api.put(`/admin/janet/field-groups/${props.fieldGroup.id}`, payload);
             toast.success.update(t('features.developer.custom_fields.tabs.groups'));
         } else {
-            await api.post('/admin/ja/field-groups', form.value);
+            await api.post('/admin/janet/field-groups', form.value);
             toast.success.create(t('features.developer.custom_fields.tabs.groups'));
         }
         emit('saved');

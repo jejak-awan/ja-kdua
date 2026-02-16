@@ -77,7 +77,7 @@ const hasStarted = ref(false)
 const trackEvent = async (event: 'view' | 'start') => {
   if (props.previewMode) return
   try {
-    await api.post(`/cms/forms/${props.slug}/track`, { event })
+    await api.post(`/ja/forms/${props.slug}/track`, { event })
   } catch (_err) {
     // Silent fail for analytics tracking
   }
@@ -122,7 +122,7 @@ const renderingContext = computed(() => ({
 const fetchForm = async () => {
   loading.value = true
   try {
-    const response = await api.get(`/cms/forms/${props.slug}`)
+    const response = await api.get(`/ja/forms/${props.slug}`)
     form.value = response.data
     // Initialize form data with default values if any
   } catch (err: unknown) {
@@ -150,7 +150,7 @@ const handleSubmit = async () => {
   error.value = null
   
   try {
-    await api.post(`/cms/forms/${props.slug}/submit`, formData)
+    await api.post(`/ja/forms/${props.slug}/submit`, formData)
     success.value = true
     
     if (form.value?.redirect_url) {

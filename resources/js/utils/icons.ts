@@ -304,6 +304,71 @@ export const getIcon = (name: string) => {
         menu: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
             h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M4 6h16M4 12h16M4 18h16' })
         ]),
+        database: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('ellipse', { cx: '12', cy: '5', rx: '9', ry: '3', 'stroke-width': '2' }),
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5' }),
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M3 12c0 1.66 4 3 9 3s9-1.34 9-3' })
+        ]),
+        archive: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M21 8v13H3V8M1 3h22v5H1V3zm10 8h2' })
+        ]),
+        'share-2': () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('circle', { cx: '18', cy: '5', r: '3', 'stroke-width': '2' }),
+            h('circle', { cx: '6', cy: '12', r: '3', 'stroke-width': '2' }),
+            h('circle', { cx: '18', cy: '19', r: '3', 'stroke-width': '2' }),
+            h('line', { x1: '8.59', y1: '13.51', x2: '15.42', y2: '17.49', 'stroke-width': '2' }),
+            h('line', { x1: '15.41', y1: '6.51', x2: '8.59', y2: '10.49', 'stroke-width': '2' })
+        ]),
+        'file-invoice': () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z' }),
+            h('polyline', { points: '14 2 14 8 20 8', 'stroke-width': '2' }),
+            h('line', { x1: '16', y1: '13', x2: '8', y2: '13', 'stroke-width': '2' }),
+            h('line', { x1: '16', y1: '17', x2: '8', y2: '17', 'stroke-width': '2' }),
+            h('line', { x1: '10', y1: '9', x2: '8', y2: '9', 'stroke-width': '2' })
+        ]),
+        percent: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('line', { x1: '19', y1: '5', x2: '5', y2: '19', 'stroke-width': '2' }),
+            h('circle', { cx: '6.5', cy: '6.5', r: '2.5', 'stroke-width': '2' }),
+            h('circle', { cx: '17.5', cy: '17.5', r: '2.5', 'stroke-width': '2' })
+        ]),
+        'life-buoy': () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('circle', { cx: '12', cy: '12', r: '10', 'stroke-width': '2' }),
+            h('circle', { cx: '12', cy: '12', r: '4', 'stroke-width': '2' }),
+            h('line', { x1: '4.93', y1: '4.93', x2: '9.17', y2: '9.17', 'stroke-width': '2' }),
+            h('line', { x1: '14.83', y1: '14.83', x2: '19.07', y2: '19.07', 'stroke-width': '2' }),
+            h('line', { x1: '14.83', y1: '9.17', x2: '19.07', y2: '4.93', 'stroke-width': '2' }),
+            h('line', { x1: '4.93', y1: '19.07', x2: '9.17', y2: '14.83', 'stroke-width': '2' })
+        ]),
+        'message-circle': () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z' })
+        ]),
+        printer: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('polyline', { points: '6 9 6 2 18 2 18 9', 'stroke-width': '2' }),
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2' }),
+            h('rect', { x: '6', y: '14', width: '12', height: '8', 'stroke-width': '2' })
+        ]),
+        globe: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('circle', { cx: '12', cy: '12', r: '10', 'stroke-width': '2' }),
+            h('line', { x1: '2', y1: '12', x2: '22', y2: '12', 'stroke-width': '2' }),
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z' })
+        ]),
+        monitor: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('rect', { x: '2', y: '3', width: '20', height: '14', rx: '2', ry: '2', 'stroke-width': '2' }),
+            h('line', { x1: '8', y1: '21', x2: '16', y2: '21', 'stroke-width': '2' }),
+            h('line', { x1: '12', y1: '17', x2: '12', y2: '21', 'stroke-width': '2' })
+        ]),
+        'help-circle': () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('circle', { cx: '12', cy: '12', r: '10', 'stroke-width': '2' }),
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3m0 4h.01' })
+        ]),
+        home: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z' }),
+            h('polyline', { points: '9 22 9 12 15 12 15 22', 'stroke-width': '2' })
+        ]),
+        scroll: () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M8 21h12a2 2 0 002-2v-2H10v2a2 2 0 11-4 0V5a2 2 0 00-2-2 2 2 0 00-2 2v3h3' }),
+            h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M19 17V5a2 2 0 00-2-2H4' })
+        ]),
     };
     return icons[name as keyof typeof icons] || icons.dashboard;
 };

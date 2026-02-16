@@ -9,6 +9,23 @@
     "outgoing": "Outgoing",
     "node_cpu": "CPU Load",
     "connecting": "Connecting...",
+    "aggregation": "Aggregation",
+    "throughput": "Throughput",
+    "total_in": "Total In",
+    "total_out": "Total Out",
+    "avg_load": "Avg Load",
+    "latency": "Latency",
+    "realtime": "Realtime",
+    "historical": "Historical",
+    "active_nodes": "Active Nodes",
+    "system_status": "System Status",
+    "latency_unit": "Latency (ms)",
+    "health_status": {
+        "healthy": "Healthy",
+        "warning": "Warning",
+        "critical": "Critical",
+        "connecting": "Connecting"
+    },
     "active_sessions": {
         "title": "Online Sessions",
         "description": "Monitor and manage active customer connections.",
@@ -80,5 +97,38 @@
             "error_fetch": "Failed to fetch RADIUS data",
             "error_disconnect": "Failed to disconnect session"
         }
+    },
+    "health_center": {
+        "title": "Network Health Center",
+        "subtitle": "Monitor network vitals, SLA compliance, and system alerts.",
+        "vitals": {
+            "title": "Network Vital Signs",
+            "latency": "Latency",
+            "packet_loss": "Packet Loss",
+            "uptime": "Uptime",
+            "jitter": "Jitter"
+        },
+        "alerts": {
+            "title": "System Alerts",
+            "no_alerts": "No active alerts",
+            "critical": "Critical",
+            "warning": "Warning",
+            "info": "Info"
+        }
+    },
+    "enterprise_assurance": {
+        "title": "Enterprise Assurance",
+        "subtitle": "Generate official Network Health Certificates for your clients.",
+        "customer_search": "Customer Search",
+        "search_placeholder": "Enter Customer ID or Name...",
+        "generate": "Generate Certificate",
+        "generating": "Generating..."
+    },
+    "coverage_heatmap": {
+        "title": "Coverage Heatmap",
+        "subtitle": "Visualize network coverage and signal strength across your service area.",
+        "signal_strength": "Signal Strength",
+        "customer_density": "Customer Density",
+        "no_data": "No geolocation data available."
     }
 }

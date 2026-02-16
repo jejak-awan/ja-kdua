@@ -329,10 +329,10 @@ const handleSubmit = async () => {
     clearErrors();
     try {
         if (isEdit.value) {
-            await api.put(`/admin/ja/categories/${props.category?.id}`, payload);
+            await api.put(`/admin/janet/categories/${props.category?.id}`, payload);
             toast.success.update('Category');
         } else {
-            await api.post('/admin/ja/categories', payload);
+            await api.post('/admin/janet/categories', payload);
             toast.success.create('Category');
         }
         

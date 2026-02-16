@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Isp\Network;
 
 use App\Http\Controllers\Api\Core\BaseApiController;
-use App\Models\Isp\IpPool;
-use App\Models\Isp\IpPoolAddress;
+use App\Models\Isp\Network\IpPool;
+use App\Models\Isp\Network\IpPoolAddress;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -36,7 +36,7 @@ class IpPoolController extends BaseApiController
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:ip_pools,name',
+            'name' => 'required|string|max:255|unique:isp_ip_pools,name',
             'network' => 'required|string|max:255',
             'gateway' => 'nullable|ip',
             'dns_primary' => 'nullable|ip',
@@ -79,7 +79,7 @@ class IpPoolController extends BaseApiController
     public function update(Request $request, IpPool $ipPool): JsonResponse
     {
         $validated = $request->validate([
-            'name' => ['sometimes', 'required', 'string', 'max:255', Rule::unique('ip_pools', 'name')->ignore($ipPool->id)],
+            'name' => ['sometimes', 'required', 'string', 'max:255', Rule::unique('isp_ip_pools', 'name')->ignore($ipPool->id)],
             'gateway' => 'nullable|ip',
             'dns_primary' => 'nullable|ip',
             'dns_secondary' => 'nullable|ip',

@@ -107,7 +107,7 @@ const handleCommand = async (prompt: string) => {
     
     loading.value = true;
     try {
-        const response = await api.post<AiGenerateResponse>('/admin/ja/ai/generate', {
+        const response = await api.post<AiGenerateResponse>('/admin/janet/ai/generate', {
             prompt: prompt,
             context: props.context
         });

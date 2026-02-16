@@ -1,0 +1,30 @@
+{
+    "title": "Pusat Dispatch",
+    "subtitle": "Kelola penugasan teknisi dan operasional lapangan.",
+    "deployment": {
+        "title": "Status Penugasan",
+        "update_status": "Ubah Status",
+        "select_status": "Pilih Status",
+        "in_progress": "Sedang Berjalan",
+        "completed": "Selesai",
+        "cancelled": "Dibatalkan",
+        "notes": "Catatan",
+        "cancel": "Batal",
+        "save": "Simpan Perubahan"
+    },
+    "dispatch": {
+        "title": "Tugaskan Teknisi",
+        "select_technician": "Pilih Teknisi",
+        "recommended": "Rekomendasi (Terdekat)",
+        "notes_label": "Catatan Tambahan",
+        "notes_placeholder": "Masukkan instruksi penugasan...",
+        "km_away": "{distance} km jarak",
+        "calculating": "Menghitung jarak...",
+        "cancel": "Batal",
+        "deploy": "Tugaskan"
+    },
+    "actions": {
+        "approve_all": "Setujui Semua",
+        "reject_all": "Tolak Semua"
+    }
+}

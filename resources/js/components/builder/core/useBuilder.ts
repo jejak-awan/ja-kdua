@@ -53,7 +53,7 @@ export default function useBuilder(initialData = { blocks: [] as BlockInstance[]
 
     async function loadTheme(_slug: string | null = null): Promise<void> {
         try {
-            const response = await api.get(`/cms/themes/active?type=frontend`)
+            const response = await api.get(`/ja/themes/active?type=frontend`)
             const data = response.data?.data || response.data
 
             if (data) {

@@ -658,7 +658,7 @@ const warming = ref(false)
 // Methods
 const loadSettings = async () : Promise<void> => {
   try {
-    const response = await api.get('/admin/ja/redis/settings')
+    const response = await api.get('/admin/janet/redis/settings')
     settings.value = response.data.data
     
     // Flatten settings for form
@@ -682,7 +682,7 @@ const saveSettings = async () : Promise<void> => {
       value
     }))
 
-    await api.put('/admin/ja/redis/settings', {
+    await api.put('/admin/janet/redis/settings', {
       settings: settingsArray
     })
 
@@ -720,7 +720,7 @@ const testConnection = async () : Promise<void> => {
   connectionStatus.value = null
 
   try {
-    const response = await api.get('/admin/ja/redis/test-connection')
+    const response = await api.get('/admin/janet/redis/test-connection')
     connectionStatus.value = {
       type: 'success',
       message: `✅ ${response.data.data.message || t('features.redis.messages.testSuccess')} (${response.data.data.response_time})`
@@ -747,7 +747,7 @@ const testConnection = async () : Promise<void> => {
 const loadStats = async () : Promise<void> => {
   loadingStats.value = true
   try {
-    const response = await api.get('/admin/ja/redis/info')
+    const response = await api.get('/admin/janet/redis/info')
     stats.value = response.data.data
   } catch (error: unknown) {
     logger.error('Failed to load Redis stats:', error)
@@ -758,7 +758,7 @@ const loadStats = async () : Promise<void> => {
 
 const loadCacheStats = async () : Promise<void> => {
   try {
-    const response = await api.get('/admin/ja/redis/cache-stats')
+    const response = await api.get('/admin/janet/redis/cache-stats')
     cacheStats.value = response.data.data
   } catch (error: unknown) {
     logger.error('Failed to load cache stats:', error)
@@ -767,7 +767,7 @@ const loadCacheStats = async () : Promise<void> => {
 
 const getCacheStatus = async () : Promise<void> => {
     try {
-        const response = await api.get('/admin/ja/system/cache-status')
+        const response = await api.get('/admin/janet/system/cache-status')
         const data = response.data.data
         cacheDriver.value = data.driver
     } catch (error: unknown) {
@@ -799,7 +799,7 @@ const flushCache = async (type: string) : Promise<void> => {
 
   flushing.value = true
   try {
-    await api.post('/admin/ja/redis/flush-cache', { type })
+    await api.post('/admin/janet/redis/flush-cache', { type })
     toast.success.action(t('features.redis.messages.flushSuccess', { type }))
     
     if (isDestructive) {
@@ -845,7 +845,7 @@ const warmCache = async () : Promise<void> => {
 
   warming.value = true
   try {
-    await api.post('/admin/ja/redis/warm-cache')
+    await api.post('/admin/janet/redis/warm-cache')
     toast.success.action(t('features.redis.messages.warmSuccess'))
     
     // Force logout handling - warm cache typically clears everything first

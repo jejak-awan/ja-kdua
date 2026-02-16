@@ -339,7 +339,7 @@ const getRoleRank = (roleName: string) => ROLE_RANKS[roleName] || 0;
 const fetchRoles = async () => {
     loadingRoles.value = true;
     try {
-        const response = await api.get('/admin/ja/roles');
+        const response = await api.get('/admin/janet/roles');
         const { data } = parseResponse(response);
         availableRoles.value = ensureArray(data);
     } catch (error: unknown) {
@@ -353,7 +353,7 @@ const fetchUser = async () => {
     loading.value = true;
     try {
         const userId = route.params.id;
-        const response = await api.get(`/admin/ja/users/${userId}`);
+        const response = await api.get(`/admin/janet/users/${userId}`);
         const data = parseSingleResponse(response) as User;
         
         // Guard: hierarchy check
@@ -414,7 +414,7 @@ const handleSubmit = async () => {
         if (!payload.password) delete payload.password;
         if (!payload.password_confirmation) delete payload.password_confirmation;
         
-        await api.put(`/admin/ja/users/${route.params.id}`, payload);
+        await api.put(`/admin/janet/users/${route.params.id}`, payload);
         
         // Refresh auth user if updating self
         if (authStore.user?.id === Number(route.params.id)) {

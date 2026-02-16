@@ -13,8 +13,7 @@
             </div>
         </div>
 
-        <!-- Row 1: Statistics Cards -->
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" v-if="authStore.hasPermission('view content')">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <!-- Contents Card -->
             <Card class="border-border/40 bg-card">
                 <CardContent class="p-6">
@@ -190,6 +189,7 @@ import {
     SelectValue
 } from '@/components/ui';
 import RefreshCw from 'lucide-vue-next/dist/esm/icons/refresh-cw.js';
+import AreaChart from 'lucide-vue-next/dist/esm/icons/chart-area.js';
 import FileText from 'lucide-vue-next/dist/esm/icons/file-text.js';
 import Library from 'lucide-vue-next/dist/esm/icons/library.js';
 import Image from 'lucide-vue-next/dist/esm/icons/image.js';
@@ -200,19 +200,25 @@ import Clock3 from 'lucide-vue-next/dist/esm/icons/clock-3.js';
 import AlertCircle from 'lucide-vue-next/dist/esm/icons/circle-alert.js';
 import BarChart3 from 'lucide-vue-next/dist/esm/icons/chart-bar-stacked.js';
 import Loader2 from 'lucide-vue-next/dist/esm/icons/loader-circle.js';
-import AreaChart from 'lucide-vue-next/dist/esm/icons/chart-area.js';
 
 const authStore = useAuthStore();
+
 const stats = ref<SystemStats>({
     contents: { total: 0, published: 0, pending: 0 },
     media: { total: 0 },
     users: { total: 0 },
 });
+
 const visitsDesktop = ref<TrafficDataPoint[]>([]); 
 const visitsMobile = ref<TrafficDataPoint[]>([]);
 const loadingVisits = ref(false);
 const timeRange = ref('7'); 
 const recentActivityWidget = ref<InstanceType<typeof RecentActivityWidget> | null>(null);
+
+const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('id-ID').format(val || 0);
+};
+
 
 const refreshDashboard = async () => {
     if (loadingVisits.value) return;

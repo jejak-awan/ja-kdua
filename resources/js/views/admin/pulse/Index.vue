@@ -194,11 +194,11 @@ const recentSecurity = ref<SecurityLog[]>([]);
 const fetchStats = async () => {
     try {
         // Fetch activity logs stats
-        const activityStats = await api.get('/admin/ja/activity-journal/statistics').catch(() => ({ data: {} }));
+        const activityStats = await api.get('/admin/janet/activity-journal/statistics').catch(() => ({ data: {} }));
         stats.value.activity = activityStats.data?.data || activityStats.data || {};
 
         // Fetch security stats
-        const securityStats = await api.get('/admin/ja/security/stats').catch(() => ({ data: {} }));
+        const securityStats = await api.get('/admin/janet/security/stats').catch(() => ({ data: {} }));
         const secData = securityStats.data?.data || securityStats.data || {};
         stats.value.security = {
             ...secData,
@@ -206,14 +206,14 @@ const fetchStats = async () => {
         };
 
         // Fetch login history stats
-        const loginStats = await api.get('/admin/ja/access-journal/statistics').catch(() => ({ data: {} }));
+        const loginStats = await api.get('/admin/janet/access-journal/statistics').catch(() => ({ data: {} }));
         const logData = loginStats.data?.data || loginStats.data || {};
         stats.value.login = {
             ...logData,
             total: (logData.total_logins || 0) + (logData.failed_logins || 0)
         };
 
-        const systemLogs = await api.get('/admin/ja/system-journal').catch(() => ({ data: { data: [] } }));
+        const systemLogs = await api.get('/admin/janet/system-journal').catch(() => ({ data: { data: [] } }));
         stats.value.system = { files: (systemLogs.data?.data || []).length };
     } catch (error: unknown) {
         logger.error('Failed to fetch stats:', error);
@@ -223,10 +223,10 @@ const fetchStats = async () => {
 const fetchRecentLogs = async () => {
     try {
         // Fetch recent activity
-        const activityResponse = await api.get('/admin/ja/activity-journal/recent?limit=10').catch(() => ({ data: {} }));
+        const activityResponse = await api.get('/admin/janet/activity-journal/recent?limit=10').catch(() => ({ data: {} }));
         recentActivity.value = activityResponse.data?.data || [];
 
-        const securityResponse = await api.get('/admin/ja/security/journal?per_page=10').catch(() => ({ data: { data: { data: [] } } }));
+        const securityResponse = await api.get('/admin/janet/security/journal?per_page=10').catch(() => ({ data: { data: { data: [] } } }));
         const secData = securityResponse.data?.data?.data || securityResponse.data?.data || [];
         recentSecurity.value = Array.isArray(secData) ? secData : [];
     } catch (error: unknown) {

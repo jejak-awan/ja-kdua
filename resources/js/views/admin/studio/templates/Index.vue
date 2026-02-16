@@ -265,7 +265,7 @@ const fetchTemplates = async (page: number | string = 1) => {
             trashed: trashedFilter.value !== 'without' ? trashedFilter.value : undefined
         };
 
-        const response = await api.get('/admin/ja/content-templates', { params });
+        const response = await api.get('/admin/janet/content-templates', { params });
         const { data, pagination: pag } = parseResponse(response);
         
         templates.value = ensureArray(data);
@@ -281,7 +281,7 @@ const fetchTemplates = async (page: number | string = 1) => {
 
 const createFromTemplate = async (template: Template) => {
     try {
-        const response = await api.post(`/admin/ja/content-templates/${template.id}/create-content`);
+        const response = await api.post(`/admin/janet/content-templates/${template.id}/create-content`);
         const content = parseSingleResponse<{ id: string | number }>(response);
         if (content && content.id) {
             toast.success.createFromTemplate();
@@ -308,10 +308,10 @@ const handleDelete = async (template: Template) => {
 
     try {
         if (isTrashed) {
-            await api.delete(`/admin/ja/content-templates/${template.id}/force-delete`);
+            await api.delete(`/admin/janet/content-templates/${template.id}/force-delete`);
             toast.success.action(t('common.messages.success.deleted', { item: 'Template' }));
         } else {
-            await api.delete(`/admin/ja/content-templates/${template.id}`);
+            await api.delete(`/admin/janet/content-templates/${template.id}`);
             toast.success.delete('Template');
         }
         await fetchTemplates(pagination.value?.current_page || 1);
@@ -332,7 +332,7 @@ const handleRestore = async (template: Template) => {
     if (!confirmed) return;
 
     try {
-        await api.post(`/admin/ja/content-templates/${template.id}/restore`);
+        await api.post(`/admin/janet/content-templates/${template.id}/restore`);
         toast.success.restore('Template');
         await fetchTemplates(pagination.value?.current_page || 1);
     } catch (error: unknown) {
@@ -380,7 +380,7 @@ const handleBulkAction = async () => {
         }
 
         try {
-            await api.post('/admin/ja/content-templates/bulk-action', {
+            await api.post('/admin/janet/content-templates/bulk-action', {
                 action: action,
                 ids: selectedTemplates.value
             });
@@ -393,7 +393,7 @@ const handleBulkAction = async () => {
         }
     } else if (action === 'restore') {
         try {
-            await api.post('/admin/ja/content-templates/bulk-action', {
+            await api.post('/admin/janet/content-templates/bulk-action', {
                 action: 'restore',
                 ids: selectedTemplates.value
             });

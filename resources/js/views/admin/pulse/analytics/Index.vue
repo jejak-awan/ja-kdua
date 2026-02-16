@@ -387,15 +387,15 @@ const fetchAnalytics = async () => {
     try {
         const params = { date_from: dateFrom.value, date_to: dateTo.value };
         const [overviewRes, visitsRes, topPagesRes, topContentRes, devicesRes, browsersRes, countriesRes, referrersRes, realtimeRes] = await Promise.all([
-            api.get('/admin/ja/analytics/overview', { params }),
-            api.get('/admin/ja/analytics/visits', { params }),
-            api.get('/admin/ja/analytics/top-pages', { params }),
-            api.get('/admin/ja/analytics/top-content', { params }),
-            api.get('/admin/ja/analytics/devices', { params }),
-            api.get('/admin/ja/analytics/browsers', { params }),
-            api.get('/admin/ja/analytics/countries', { params }),
-            api.get('/admin/ja/analytics/referrers', { params }),
-            api.get('/admin/ja/analytics/realtime'),
+            api.get('/admin/janet/analytics/overview', { params }),
+            api.get('/admin/janet/analytics/visits', { params }),
+            api.get('/admin/janet/analytics/top-pages', { params }),
+            api.get('/admin/janet/analytics/top-content', { params }),
+            api.get('/admin/janet/analytics/devices', { params }),
+            api.get('/admin/janet/analytics/browsers', { params }),
+            api.get('/admin/janet/analytics/countries', { params }),
+            api.get('/admin/janet/analytics/referrers', { params }),
+            api.get('/admin/janet/analytics/realtime'),
         ]);
 
         overview.value = parseSingleResponse(overviewRes) || {};
@@ -426,7 +426,7 @@ const exportData = async (type: string) => {
     showExportMenu.value = false;
     exporting.value = true;
     try {
-        const response = await api.get('/admin/ja/analytics/export', {
+        const response = await api.get('/admin/janet/analytics/export', {
             params: { date_from: dateFrom.value, date_to: dateTo.value, type },
             responseType: 'blob'
         });
@@ -451,7 +451,7 @@ const exportData = async (type: string) => {
 onMounted(() => {
     fetchAnalytics();
     refreshInterval = setInterval(() => {
-        api.get('/admin/ja/analytics/realtime').then(res => {
+        api.get('/admin/janet/analytics/realtime').then(res => {
             realtime.value = parseSingleResponse(res) || {};
         }).catch(err => {
             logger.error('Realtime fetch failed:', err);

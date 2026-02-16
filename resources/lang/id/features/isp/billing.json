@@ -32,7 +32,8 @@
         "suspending": "Mengisolir...",
         "set_paid": "Tandai Lunas",
         "set_unpaid": "Tandai Belum Bayar",
-        "cancel_invoices": "Batalkan Invoice"
+        "cancel_invoices": "Batalkan Invoice",
+        "export_excel": "Ekspor ke Excel"
     },
     "messages": {
         "error_load": "Gagal memuat data penagihan",
@@ -69,7 +70,9 @@
             "price": "Harga",
             "price_help": "Harga diluar PPN",
             "type": "Jenis Tagihan",
-            "status": "Status"
+            "status": "Status",
+            "speed": "Kecepatan (Upload/Download)",
+            "features": "Fitur Tambahan"
         },
         "options": {
             "prepaid": "Prabayar (Prepaid)",
@@ -138,9 +141,9 @@
         }
     },
     "gateway": {
-        "title": "Payment Gateway",
+        "title": "Gerbang Pembayaran",
         "subtitle": "Konfigurasi integrasi pembayaran otomatis.",
-        "midtrans_desc": "Gateway pembayaran terpopuler di Indonesia",
+        "midtrans_desc": "Gerbang pembayaran terpopuler di Indonesia",
         "xendit_desc": "Solusi pembayaran untuk bisnis digital",
         "manual": "Transfer Manual",
         "manual_desc": "Pembayaran via transfer bank",
@@ -149,7 +152,7 @@
         "client_key": "Client Key",
         "api_key": "API Key",
         "callback_token": "Callback Token",
-        "sandbox_mode": "Mode Sandbox (Testing)",
+        "sandbox_mode": "Mode Sandbox (Uji Coba)",
         "bank_name": "Nama Bank",
         "account_number": "Nomor Rekening",
         "account_name": "Nama Pemilik Rekening",
@@ -200,22 +203,56 @@
             "billing_due_date": "Tanggal Jatuh Tempo",
             "unique_code": "Kode Unik",
             "is_taxed": "Kena PPN 11%",
-            "billing_notes": "Catatan Billing"
+            "billing_notes": "Catatan Billing",
+            "partner": "Mitra / Partner"
         },
         "placeholders": {
             "select_reseller": "Pilih Mitra",
             "select_router": "Pilih Router",
             "select_server": "Pilih Server",
-            "address_list": "Auto-added to list",
+            "address_list": "Otomatis ditambahkan",
             "select_category": "-Pilih-",
-            "billing_due_date": "Tgl (1-28)"
+            "billing_due_date": "Tgl (1-28)",
+            "select_province": "Pilih Provinsi",
+            "select_city": "Pilih Kota/Kabupaten",
+            "select_district": "Pilih Kecamatan",
+            "select_village": "Pilih Kelurahan/Desa",
+            "select_partner": "Pilih Mitra"
         },
         "options": {
             "fiber": "Fiber Optic",
-            "wireless": "Wireless"
+            "wireless": "Wireless",
+            "none": "- Kosong -",
+            "status": {
+                "active": "Aktif",
+                "isolated": "Isolir",
+                "inactive": "Non-aktif",
+                "suspended": "Suspen"
+            }
         },
         "headers": {
-            "mikrotik_auth": "Mikrotik Authentication"
+            "mikrotik_auth": "Autentikasi Mikrotik",
+            "location_selection": "Pilih Lokasi (Pin di Peta)",
+            "usage_monitor": "Monitor Trafik",
+            "network_summary": "Ringkasan Jaringan"
+        },
+        "labels": {
+            "no_coordinates": "Koordinat belum dipilih",
+            "use_current_location": "Gunakan Lokasi Saat Ini",
+            "fetching_location": "Mengambil lokasi...",
+            "searching_address": "Mencari alamat...",
+            "address_found": "Alamat ditemukan",
+            "location_error": "Gagal mengambil lokasi",
+            "map_instruction": "Klik di mana saja di peta untuk menentukan titik pemasangan",
+            "total_data": "TOTAL DATA",
+            "fup_progress": "PROGRES FUP",
+            "cycle_ends": "Siklus berakhir:",
+            "ipv4": "Alamat IPv4",
+            "not_assigned": "BELUM DIALOKASIKAN",
+            "service_date": "Tanggal Layanan",
+            "pending": "MENUNGGU",
+            "tax_description": "Pajak Pertambahan Nilai (PPN)",
+            "grand_total": "Total Keseluruhan:"
         },
         "messages": {
             "invoice_feature_soon": "Fitur Item Invoice Awal (Biaya Pasang/Alat) akan tersedia segera."
@@ -235,5 +272,14 @@
                 "item_name": "seperti: Biaya Pasang, Router ONU, dll"
             }
         }
+    },
+    "options": {
+        "prepaid": "Prabayar (Prepaid)",
+        "postpaid": "Pascabayar (Postpaid)",
+        "fixed": "Tanggal Tetap (misal: Tgl 1)",
+        "profile": "Durasi Profile (30 Hari)",
+        "monthly": "Anniversary (Tgl Pemasangan)",
+        "payment_date": "Pada Tgl Jatuh Tempo",
+        "isolation_date": "Pada Tgl Isolir Spesifik"
     }
 }

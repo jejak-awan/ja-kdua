@@ -50,7 +50,7 @@ export function useLanguage() {
     const loadLanguages = async () => {
         loading.value = true;
         try {
-            const response = await api.get('/cms/languages');
+            const response = await api.get('/ja/languages');
             const { data } = parseResponse(response);
             languages.value = ensureArray(data);
         } catch (error) {

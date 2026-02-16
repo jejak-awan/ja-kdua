@@ -164,7 +164,7 @@ const handleEventDrop = async (info: EventDropArg) => {
     if (!newDate) return;
 
     try {
-        await api.put(`/admin/ja/contents/${contentId}`, {
+        await api.put(`/admin/janet/contents/${contentId}`, {
             published_at: newDate.toISOString().split('T')[0],
         });
         await fetchContents();
@@ -188,7 +188,7 @@ const handleDateClick = (info: DateClickArg) => {
 
 const fetchContents = async () => {
     try {
-        const response = await api.get('/admin/ja/contents', {
+        const response = await api.get('/admin/janet/contents', {
             params: {
                 per_page: 1000, // Get all for calendar
             },
@@ -203,7 +203,7 @@ const fetchContents = async () => {
 
 const fetchCategories = async () => {
     try {
-        const response = await api.get('/admin/ja/categories');
+        const response = await api.get('/admin/janet/categories');
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
     } catch (_error: unknown) {

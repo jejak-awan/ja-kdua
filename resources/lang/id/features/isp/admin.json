@@ -1,0 +1,30 @@
+{
+    "title": "Pusat Komando ISP",
+    "subtitle": "Intelijen Bisnis & Pemantauan Sistem Real-time",
+    "settings": "Pengaturan ISP",
+    "settings_desc": "Kelola konfigurasi sistem dan preferensi layanan",
+    "payment_gateway": "Gerbang Pembayaran",
+    "payment_gateway_desc": "Konfigurasi metode pembayaran dan integrasi",
+    "mikrotik": "Konfigurasi MikroTik",
+    "mikrotik_desc": "Manajemen API router dan sinkronisasi jaringan",
+    "system_status": "Status Sistem",
+    "recent_activity": "Aktivitas Terakhir",
+    "no_activity": "Tidak ada aktivitas terbaru",
+    "synthesizing_data": "Mensintesis Data...",
+    "mrr": "Pendapatan Bulanan Berulang",
+    "mrr_growth": "+5,2% dari bulan lalu",
+    "churn_rate": "Tingkat Churn Tahunan",
+    "churn_optimization": "-0,5% optimasi",
+    "growth_forecast": "Prakiraan Pertumbuhan 6B",
+    "growth_target": "Tercapai sesuai Target Q4",
+    "clv": "Nilai Seumur Hidup Rata-rata",
+    "clv_score": "Skor retensi tinggi",
+    "financial_projection": "Proyeksi Keuangan (12B)",
+    "projection_desc": "Proyeksi MRR berdasarkan momentum 6 bulan terakhir",
+    "status": {
+        "router": "Status Router",
+        "radius": "Server RADIUS",
+        "whatsapp": "Gateway WhatsApp",
+        "payment": "Gateway Pembayaran"
+    }
+}

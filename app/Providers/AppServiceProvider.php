@@ -27,8 +27,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Bind WhatsApp Service
         $this->app->bind(
-            \App\Services\Isp\WhatsApp\WhatsAppServiceInterface::class,
-            \App\Services\Isp\WhatsApp\WhatsAppClient::class
+            \App\Services\Isp\ThirdParty\WhatsAppServiceInterface::class,
+            \App\Services\Isp\ThirdParty\WhatsAppClient::class
         );
 
     }
@@ -142,7 +142,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         \App\Models\Core\MediaFolder::observe(\App\Observers\Core\MediaFolderObserver::class);
-        \App\Models\Isp\Customer::observe(\App\Observers\Isp\CustomerObserver::class);
+        \App\Models\Isp\Customer\Customer::observe(\App\Observers\Isp\CustomerObserver::class);
 
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {

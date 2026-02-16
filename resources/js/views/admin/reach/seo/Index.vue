@@ -318,7 +318,7 @@ const isDirty = computed(() => {
 
 const fetchRobotsTxt = async () => {
     try {
-        const response = await api.get('/admin/ja/seo/robots-txt');
+        const response = await api.get('/admin/janet/seo/robots-txt');
         const data = parseSingleResponse<{ content: string }>(response) || { content: '' };
         robotsContent.value = data.content || '';
         initialRobotsContent.value = robotsContent.value;
@@ -330,7 +330,7 @@ const fetchRobotsTxt = async () => {
 const saveRobotsTxt = async () => {
     savingRobots.value = true;
     try {
-        await api.put('/admin/ja/seo/robots-txt', { content: robotsContent.value });
+        await api.put('/admin/janet/seo/robots-txt', { content: robotsContent.value });
         initialRobotsContent.value = robotsContent.value;
         toast.success.save();
     } catch (error: unknown) {
@@ -344,7 +344,7 @@ const saveRobotsTxt = async () => {
 const generateSitemap = async () => {
     generatingSitemap.value = true;
     try {
-        await api.get('/admin/ja/seo/sitemap');
+        await api.get('/admin/janet/seo/sitemap');
         toast.success.action(t('features.seo.sitemap.generated'));
     } catch (error: unknown) {
         logger.error('Failed to generate sitemap:', error);
@@ -361,7 +361,7 @@ const copySitemapUrl = () => {
 
 const fetchContents = async () => {
     try {
-        const response = await api.get('/admin/ja/contents');
+        const response = await api.get('/admin/janet/contents');
         const { data } = parseResponse(response);
         contents.value = ensureArray(data) as SeoContent[];
     } catch (error: unknown) {
@@ -375,7 +375,7 @@ const runAnalysis = async () => {
     
     analyzing.value = true;
     try {
-        const response = await api.get(`/admin/ja/contents/${selectedContentId.value}/seo-analysis`);
+        const response = await api.get(`/admin/janet/contents/${selectedContentId.value}/seo-analysis`);
         analysisResults.value = parseSingleResponse<Record<string, AnalysisResult>>(response) || {};
     } catch (error: unknown) {
         logger.error('Failed to run SEO analysis:', error);
@@ -390,7 +390,7 @@ const generateSchema = async () => {
     
     generatingSchema.value = true;
     try {
-        const response = await api.get(`/admin/ja/contents/${selectedContentForSchema.value}/schema`);
+        const response = await api.get(`/admin/janet/contents/${selectedContentForSchema.value}/schema`);
         const schema = parseSingleResponse<Record<string, unknown>>(response) || {};
         schemaJson.value = JSON.stringify(schema, null, 2);
     } catch (error: unknown) {

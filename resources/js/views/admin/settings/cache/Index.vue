@@ -158,7 +158,7 @@ const { confirm } = useConfirm();
 const fetchCacheStats = async () => {
     try {
         // Try to get cache stats from SystemController
-        const response = await api.get('/admin/ja/system/cache-status');
+        const response = await api.get('/admin/janet/system/cache-status');
         const data = parseSingleResponse<CacheStats>(response);
         if (data) {
             cacheStats.value = {
@@ -191,7 +191,7 @@ const clearAllCache = async () => {
 
     clearing.value = true;
     try {
-        await api.post('/admin/ja/cache/clear');
+        await api.post('/admin/janet/cache/clear');
         toast.success('All cache cleared successfully');
         await fetchCacheStats();
     } catch (error: unknown) {
@@ -214,7 +214,7 @@ const clearContentCache = async () => {
 
     clearing.value = true;
     try {
-        await api.post('/admin/ja/cache/clear-content');
+        await api.post('/admin/janet/cache/clear-content');
         toast.success('Content cache cleared successfully');
         await fetchCacheStats();
     } catch (error: unknown) {
@@ -228,7 +228,7 @@ const clearContentCache = async () => {
 const warmUpCache = async () => {
     warming.value = true;
     try {
-        await api.post('/admin/ja/cache/warm-up');
+        await api.post('/admin/janet/cache/warm-up');
         toast.success('Cache warmed up successfully');
         await fetchCacheStats();
     } catch (error: unknown) {

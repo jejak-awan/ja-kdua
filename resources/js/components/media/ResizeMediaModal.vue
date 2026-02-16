@@ -166,7 +166,7 @@ const handleResize = async () => {
 
     resizing.value = true;
     try {
-        await api.post(`/admin/ja/media/${props.media.id}/resize`, {
+        await api.post(`/admin/janet/media/${props.media.id}/resize`, {
             width: width.value,
             height: height.value,
             maintain_aspect_ratio: maintainAspectRatio.value,

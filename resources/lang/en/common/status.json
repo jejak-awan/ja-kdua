@@ -3,5 +3,8 @@
     "success": "Success",
     "failed": "Failed",
     "active": "Active",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "not_configured": "Not configured",
     "all": "All"
 }

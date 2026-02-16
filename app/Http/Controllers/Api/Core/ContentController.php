@@ -22,11 +22,30 @@ class ContentController extends BaseApiController
     }
 
     /**
-     * List published contents.
+     * @OA\Get(
+     *     path="/api/v1/content",
+     *     summary="List published contents",
+     *     tags={"Content"},
      *
-     * @return \Illuminate\Http\JsonResponse
+     *     @OA\Parameter(name="page", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="category_id", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="type", in="query", @OA\Schema(type="string", enum={"post", "page"})),
+     *     @OA\Parameter(name="search", in="query", @OA\Schema(type="string")),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Contents retrieved successfully",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     )
+     * )
      */
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $result = $this->contentService->getPublishedContents($request);
 
@@ -60,9 +79,6 @@ class ContentController extends BaseApiController
      *     ),
      *     @OA\Response(response=404, description="Not found")
      * )
-     */
-    /**
-     * Display the specified content.
      */
     public function show(\Illuminate\Http\Request $request, string $slug): \Illuminate\Http\JsonResponse
     {
@@ -114,7 +130,15 @@ class ContentController extends BaseApiController
     }
 
     /**
-     * Get related content.
+     * @OA\Get(
+     *     path="/api/v1/content/{slug}/related",
+     *     summary="Get related content",
+     *     tags={"Content"},
+     *
+     *     @OA\Parameter(name="slug", in="path", required=true, @OA\Schema(type="string")),
+     *
+     *     @OA\Response(response=200, description="Related content retrieved successfully")
+     * )
      */
     public function related(string $slug): \Illuminate\Http\JsonResponse
     {
@@ -124,7 +148,16 @@ class ContentController extends BaseApiController
     }
 
     /**
-     * Preview content.
+     * @OA\Get(
+     *     path="/api/admin/ja/contents/{content}/preview",
+     *     summary="Preview content",
+     *     tags={"Content"},
+     *
+     *     @OA\Parameter(name="content", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="Content preview details"),
+     *     security={{"sanctum":{}}}
+     * )
      */
     public function preview(Request $request, Content $content): \Illuminate\Http\JsonResponse
     {
@@ -151,7 +184,21 @@ class ContentController extends BaseApiController
     }
 
     /**
-     * List all contents for admin.
+     * @OA\Get(
+     *     path="/api/admin/ja/contents",
+     *     summary="List all contents for admin",
+     *     tags={"Content"},
+     *
+     *     @OA\Parameter(name="page", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="status", in="query", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="category_id", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="type", in="query", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="search", in="query", @OA\Schema(type="string")),
+     *
+     *     @OA\Response(response=200, description="Contents retrieved successfully"),
+     *     security={{"sanctum":{}}}
+     * )
      */
     public function adminIndex(Request $request): \Illuminate\Http\JsonResponse
     {
@@ -207,7 +254,16 @@ class ContentController extends BaseApiController
     }
 
     /**
-     * Display the specified content for admin.
+     * @OA\Get(
+     *     path="/api/admin/ja/contents/{content}",
+     *     summary="Display the specified content for admin",
+     *     tags={"Content"},
+     *
+     *     @OA\Parameter(name="content", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="Content details retrieved successfully"),
+     *     security={{"sanctum":{}}}
+     * )
      */
     public function adminShow(Request $request, Content $content): \Illuminate\Http\JsonResponse
     {
@@ -505,6 +561,18 @@ class ContentController extends BaseApiController
         return $this->success($content, 'Content updated successfully');
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/admin/ja/contents/{content}/toggle-featured",
+     *     summary="Toggle featured status",
+     *     tags={"Content"},
+     *
+     *     @OA\Parameter(name="content", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="Status updated"),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function toggleFeatured(Request $request, Content $content): \Illuminate\Http\JsonResponse
     {
         $isFeatured = $this->contentService->toggleFeatured($content);
@@ -513,7 +581,18 @@ class ContentController extends BaseApiController
     }
 
     /**
-     * Auto-save draft (lightweight save without revisions, webhooks, or search indexing)
+     * @OA\Post(
+     *     path="/api/admin/ja/contents/autosave/{content?}",
+     *     summary="Auto-save draft",
+     *     tags={"Content"},
+     *
+     *     @OA\Parameter(name="content", in="path", required=false, @OA\Schema(type="integer")),
+     *
+     *     @OA\RequestBody(required=true, @OA\JsonContent(type="object")),
+     *
+     *     @OA\Response(response=200, description="Draft auto-saved"),
+     *     security={{"sanctum":{}}}
+     * )
      */
     public function autosave(Request $request, ?Content $content = null): \Illuminate\Http\JsonResponse
     {
@@ -628,7 +707,16 @@ class ContentController extends BaseApiController
     }
 
     /**
-     * Duplicate the specified content.
+     * @OA\Post(
+     *     path="/api/admin/ja/contents/{content}/duplicate",
+     *     summary="Duplicate content",
+     *     tags={"Content"},
+     *
+     *     @OA\Parameter(name="content", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=201, description="Content duplicated"),
+     *     security={{"sanctum":{}}}
+     * )
      */
     public function duplicate(Request $request, Content $content): \Illuminate\Http\JsonResponse
     {
@@ -644,7 +732,16 @@ class ContentController extends BaseApiController
     }
 
     /**
-     * Approve pending content.
+     * @OA\Post(
+     *     path="/api/admin/ja/contents/{content}/approve",
+     *     summary="Approve pending content",
+     *     tags={"Content"},
+     *
+     *     @OA\Parameter(name="content", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="Content approved"),
+     *     security={{"sanctum":{}}}
+     * )
      */
     public function approve(Request $request, Content $content): \Illuminate\Http\JsonResponse
     {
@@ -673,7 +770,16 @@ class ContentController extends BaseApiController
     }
 
     /**
-     * Reject pending content.
+     * @OA\Post(
+     *     path="/api/admin/ja/contents/{content}/reject",
+     *     summary="Reject pending content",
+     *     tags={"Content"},
+     *
+     *     @OA\Parameter(name="content", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="Content rejected"),
+     *     security={{"sanctum":{}}}
+     * )
      */
     public function reject(Request $request, Content $content): \Illuminate\Http\JsonResponse
     {
@@ -699,7 +805,26 @@ class ContentController extends BaseApiController
     }
 
     /**
-     * Handle bulk actions for contents.
+     * @OA\Post(
+     *     path="/api/admin/ja/contents/bulk-action",
+     *     summary="Bulk actions for contents",
+     *     tags={"Content"},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"action", "content_ids"},
+     *
+     *             @OA\Property(property="action", type="string", enum={"publish", "approve", "reject", "draft", "archive", "delete", "change_category", "restore", "force_delete"}),
+     *             @OA\Property(property="content_ids", type="array", @OA\Items(type="integer")),
+     *             @OA\Property(property="category_id", type="integer")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=200, description="Bulk action completed"),
+     *     security={{"sanctum":{}}}
+     * )
      */
     public function bulkAction(Request $request): \Illuminate\Http\JsonResponse
     {
@@ -750,7 +875,16 @@ class ContentController extends BaseApiController
     }
 
     /**
-     * Lock content for editing.
+     * @OA\Post(
+     *     path="/api/admin/ja/contents/{content}/lock",
+     *     summary="Lock content for editing",
+     *     tags={"Content"},
+     *
+     *     @OA\Parameter(name="content", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="Content locked"),
+     *     security={{"sanctum":{}}}
+     * )
      */
     public function lock(Request $request, Content $content): \Illuminate\Http\JsonResponse
     {
@@ -790,7 +924,16 @@ class ContentController extends BaseApiController
     }
 
     /**
-     * Unlock content.
+     * @OA\Post(
+     *     path="/api/admin/ja/contents/{content}/unlock",
+     *     summary="Unlock content",
+     *     tags={"Content"},
+     *
+     *     @OA\Parameter(name="content", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="Content unlocked"),
+     *     security={{"sanctum":{}}}
+     * )
      */
     public function unlock(Request $request, Content $content): \Illuminate\Http\JsonResponse
     {

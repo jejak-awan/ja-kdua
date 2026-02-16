@@ -221,7 +221,7 @@ const handleUpload = async () => {
         });
         formData.append('path', props.path);
 
-        await api.post('/admin/ja/file-manager/upload', formData, {
+        await api.post('/admin/janet/file-manager/upload', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },

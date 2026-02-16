@@ -32,6 +32,15 @@ class CspReportController extends BaseApiController
                 return response()->json(['status' => 'ignored'], 200);
             }
 
+            // Log to security channel for immediate visibility
+            Log::channel('security')->warning('CSP Violation Reported', [
+                'ip' => $request->ip(),
+                'blocked_uri' => $report['blocked-uri'] ?? 'unknown',
+                'violated_directive' => $report['violated-directive'] ?? 'unknown',
+                'document_uri' => $report['document-uri'] ?? 'unknown',
+                'user_agent' => $request->userAgent(),
+            ]);
+
             CspReport::create([
                 'document_uri' => is_string($report['document-uri'] ?? null) ? $report['document-uri'] : '',
                 'violated_directive' => is_string($report['violated-directive'] ?? null) ? $report['violated-directive'] : '',
@@ -133,7 +142,7 @@ class CspReportController extends BaseApiController
                 ->orderByDesc('count')
                 ->limit(10)
                 ->get(),
-            'recent_trend' => CspReport::select(\DB::raw('DATE(created_at) as date'), \DB::raw('count(*) as count'))
+            'recent_trend' => CspReport::select(\DB::raw('created_at::date as date'), \DB::raw('count(*) as count'))
                 ->where('created_at', '>=', now()->subDays(30))
                 ->groupBy('date')
                 ->orderBy('date')

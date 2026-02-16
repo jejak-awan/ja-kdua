@@ -152,7 +152,7 @@ const formatDate = (dateString: string | undefined) => {
 
 const fetchPosts = async () => {
     try {
-        const response = await api.get('/cms/contents', {
+        const response = await api.get('/ja/contents', {
             params: {
                 type: 'post',
                 status: 'published',
@@ -201,7 +201,7 @@ const fetchPosts = async () => {
 onMounted(async () => {
   try {
     // Try to get the "blog" CMS page first
-    const response = await api.get('/cms/contents/blog')
+    const response = await api.get('/ja/contents/blog')
     pageData.value = response.data.data
   } catch (error: unknown) {
     if (typeof error === 'object' && error !== null && 'response' in error) {

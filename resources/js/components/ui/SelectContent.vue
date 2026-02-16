@@ -3,7 +3,7 @@
     <SelectContent
       v-bind="delegatedProps"
       :class="cn(
-        'relative !z-[100001] min-w-[8rem] overflow-hidden rounded-xl border border-border/60 bg-popover text-popover-foreground shadow-xl',
+        'relative !z-[100005] min-w-[8rem] overflow-hidden rounded-xl border border-border/60 bg-popover text-popover-foreground shadow-xl',
         props.class
       )"
     >

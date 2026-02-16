@@ -1,6 +1,8 @@
 {
     "name": "Name",
+    "general": "General",
     "email": "Email",
+    "phone": "Phone / WhatsApp",
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "title": "Title",

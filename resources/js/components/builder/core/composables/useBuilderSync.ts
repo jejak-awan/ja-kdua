@@ -36,7 +36,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
     async function fetchPages(): Promise<void> {
         pagesLoading.value = true
         try {
-            const response = await api.get('/admin/ja/contents', {
+            const response = await api.get('/admin/janet/contents', {
                 params: { type: 'page', per_page: 100 }
             })
             const data = response.data?.data || response.data
@@ -55,7 +55,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
 
     async function loadContent(id: number | string): Promise<void> {
         try {
-            const response = await api.get(`/admin/ja/contents/${id}`)
+            const response = await api.get(`/admin/janet/contents/${id}`)
             const data = response.data?.data || response.data
 
             if (data) {
@@ -159,7 +159,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
                 category_id: null,
                 blocks: []
             }
-            const response = await api.post('/admin/ja/contents', payload)
+            const response = await api.post('/admin/janet/contents', payload)
             const newPage = response.data?.data || response.data
 
             if (newPage) {
@@ -181,7 +181,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
 
     async function deletePage(id: number | string): Promise<void> {
         try {
-            await api.delete(`/admin/ja/contents/${id}`)
+            await api.delete(`/admin/janet/contents/${id}`)
             await fetchPages()
 
             const numericId = typeof id === 'string' ? parseInt(id) : id
@@ -219,7 +219,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
                 payload.tags = content.value.tags.filter((t: { id?: number }) => t.id).map((t: { id?: number }) => t.id)
                 payload.new_tags = content.value.tags.filter((t: { id?: number, name?: string }) => !t.id).map((t: { id?: number, name?: string }) => t.name)
             }
-            const response = await api.put(`/admin/ja/contents/${content.value.id}`, payload)
+            const response = await api.put(`/admin/janet/contents/${content.value.id}`, payload)
             markAsSaved()
             return response.data
         } catch (error: unknown) {
@@ -232,7 +232,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         const vars = globalVariables.getVariables()
         if (content.value.id) {
             try {
-                const response = await api.put(`/admin/ja/contents/${content.value.id}`, { global_variables: vars })
+                const response = await api.put(`/admin/janet/contents/${content.value.id}`, { global_variables: vars })
                 return response.data
             } catch (error: unknown) {
                 logger.error('Failed to save global variables to content:', error instanceof Error ? error.message : String(error));
@@ -243,7 +243,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
             try {
                 const currentSettings = themeSettings.value || {}
                 const newSettings = { ...currentSettings, global_variables: vars }
-                const response = await api.put(`/admin/ja/themes/${activeTheme.value}/settings`, { settings: newSettings })
+                const response = await api.put(`/admin/janet/themes/${activeTheme.value}/settings`, { settings: newSettings })
                 themeSettings.value = newSettings
                 return response.data
             } catch (error: unknown) {
@@ -257,9 +257,9 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
     async function fetchMetadata(): Promise<void> {
         try {
             const [catsRes, tagsRes, menusRes] = await Promise.all([
-                api.get('/admin/ja/categories'),
-                api.get('/admin/ja/tags'),
-                api.get('/admin/ja/menus')
+                api.get('/admin/janet/categories'),
+                api.get('/admin/janet/tags'),
+                api.get('/admin/janet/menus')
             ])
             const ensureArray = (res: unknown) => {
                 const response = res as { data?: { data?: unknown[] } | unknown[] };
@@ -277,7 +277,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
     async function fetchThemes(): Promise<void> {
         loadingThemes.value = true
         try {
-            const response = await api.get('/admin/ja/themes')
+            const response = await api.get('/admin/janet/themes')
             const data = response.data?.data || response.data
             availableThemes.value = Array.isArray(data) ? data : (data.data || [])
         } catch (error: unknown) {
@@ -311,7 +311,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
 
     async function updateThemeSettings(themeSlug: string, settings: Record<string, unknown>): Promise<void> {
         try {
-            await api.put(`/admin/ja/themes/${themeSlug}/settings`, { settings })
+            await api.put(`/admin/janet/themes/${themeSlug}/settings`, { settings })
             themeSettings.value = { ...settings }
         } catch (error: unknown) {
             logger.error('Failed to update theme settings:', error instanceof Error ? error.message : String(error));
@@ -321,7 +321,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
 
     async function fetchTemplates(): Promise<unknown[]> {
         try {
-            const response = await api.get('/admin/ja/contents', {
+            const response = await api.get('/admin/janet/contents', {
                 params: { type: 'layout', per_page: 100 }
             })
             const data = response.data?.data || response.data
@@ -342,7 +342,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
                 blocks: [],
                 meta: { template_type: data.type }
             }
-            const response = await api.post('/admin/ja/contents', payload)
+            const response = await api.post('/admin/janet/contents', payload)
             return response.data?.data || response.data
         } catch (error: unknown) {
             logger.error('Failed to create template:', error instanceof Error ? error.message : String(error));
@@ -352,7 +352,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
 
     async function deleteTemplate(id: number | string): Promise<boolean> {
         try {
-            await api.delete(`/admin/ja/contents/${id}`)
+            await api.delete(`/admin/janet/contents/${id}`)
             return true
         } catch (error: unknown) {
             logger.error('Failed to delete template:', error instanceof Error ? error.message : String(error));
@@ -362,7 +362,7 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
 
     async function updateContentMeta(id: number | string, meta: Record<string, unknown>): Promise<Record<string, unknown>> {
         try {
-            const response = await api.put(`/admin/ja/contents/${id}`, { meta })
+            const response = await api.put(`/admin/janet/contents/${id}`, { meta })
             return response.data?.data || response.data
         } catch (error: unknown) {
             logger.error('Failed to update content meta:', error instanceof Error ? error.message : String(error));

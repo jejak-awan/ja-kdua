@@ -420,7 +420,7 @@ const handleSearch = () => {
     loading.value = true;
     searchTimeout.value = setTimeout(async () => {
         try {
-            const response = await api.get('/admin/ja/search', {
+            const response = await api.get('/admin/janet/search', {
                 params: { q: searchQuery.value, limit: 10 }
             });
             // API returns { data: { results: [...], total: ... } }

@@ -3,5 +3,8 @@
     "success": "Berhasil",
     "failed": "Gagal",
     "active": "Aktif",
+    "connected": "Terhubung",
+    "disconnected": "Terputus",
+    "not_configured": "Belum dikonfigurasi",
     "all": "Semua"
 }

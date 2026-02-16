@@ -268,7 +268,7 @@ const stopDrag = () => {
 
 const fetchProviders = async () => {
     try {
-        const response = await api.get<AiProvidersResponse>('/admin/ja/ai/providers');
+        const response = await api.get<AiProvidersResponse>('/admin/janet/ai/providers');
         providers.value = response.data.data;
         
         // Ensure selected provider is valid/active
@@ -306,7 +306,7 @@ const fetchModels = async () => {
     
     loadingModels.value = true;
     try {
-        const response = await api.get<AiModelsResponse>(`/admin/ja/ai/models/${provider}`);
+        const response = await api.get<AiModelsResponse>(`/admin/janet/ai/models/${provider}`);
         models.value[provider] = response.data.data;
         
         if (models.value[provider].length > 0) {
@@ -324,7 +324,7 @@ const handleCommand = async (prompt: string) => {
     
     loading.value = true;
     try {
-        const response = await api.post<AiGenerateResponse>('/admin/ja/ai/generate', {
+        const response = await api.post<AiGenerateResponse>('/admin/janet/ai/generate', {
             prompt: prompt,
             context: props.context,
             provider: selectedProvider.value,

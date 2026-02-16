@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Notifications\Isp;
 
-use App\Models\Isp\Invoice;
+use App\Models\Isp\Billing\Invoice;
 use App\Notifications\Channels\WhatsAppChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;

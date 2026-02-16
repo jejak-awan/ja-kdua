@@ -313,7 +313,7 @@ const fetchNotifications = async () => {
     
     loadingNotifications.value = true;
     try {
-        const response = await api.get('/admin/ja/notifications?limit=5');
+        const response = await api.get('/admin/janet/notifications?limit=5');
         
         let data: Notification[] = [];
         if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
@@ -336,7 +336,7 @@ const fetchNotifications = async () => {
 const handleNotificationClick = async (notification: Notification) => {
     if (!notification.read_at) {
         try {
-            await api.put(`/admin/ja/notifications/${notification.id}/read`);
+            await api.put(`/admin/janet/notifications/${notification.id}/read`);
             notification.read_at = new Date().toISOString();
         } catch (error) {
             logger.error('Failed to mark notification as read:', error);

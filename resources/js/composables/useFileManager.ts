@@ -274,7 +274,7 @@ export function useFileManager() {
     const fetchCurrentPath = async () => {
         loading.value = true;
         try {
-            const response = await api.get('/admin/ja/file-manager', {
+            const response = await api.get('/admin/janet/file-manager', {
                 params: {
                     path: currentPath.value,
                     page: currentPage.value,
@@ -308,7 +308,7 @@ export function useFileManager() {
         if (scannedPaths.value.has(path) && !recursive) return;
 
         try {
-            const response = await api.get('/admin/ja/file-manager', {
+            const response = await api.get('/admin/janet/file-manager', {
                 params: { path },
             });
             const data = parseSingleResponse<{ folders: FolderItem[] }>(response) || { folders: [] };
@@ -334,7 +334,7 @@ export function useFileManager() {
 
     const fetchFilters = async () => {
         try {
-            const response = await api.get('/admin/ja/media/filters'); // Using media filters endpoint for authors as it's shared
+            const response = await api.get('/admin/janet/media/filters'); // Using media filters endpoint for authors as it's shared
             if (response.data.success) {
                 availableFilters.value = response.data.data;
             }
@@ -411,7 +411,7 @@ export function useFileManager() {
         if (!confirmed) return;
 
         try {
-            const url = isFolder ? '/admin/ja/file-manager/folder/delete' : '/admin/ja/file-manager/delete';
+            const url = isFolder ? '/admin/janet/file-manager/folder/delete' : '/admin/janet/file-manager/delete';
             await api.post(url, { path: item.path.replace(/^\//, '') });
 
             if (isFolder) {
@@ -438,7 +438,7 @@ export function useFileManager() {
         try {
             for (const item of selectedItems.value) {
                 const isFolder = 'children' in item || !('extension' in item);
-                const url = isFolder ? '/admin/ja/file-manager/folder/delete' : '/admin/ja/file-manager/delete';
+                const url = isFolder ? '/admin/janet/file-manager/folder/delete' : '/admin/janet/file-manager/delete';
                 await api.post(url, { path: item.path.replace(/^\//, '') });
                 if (isFolder) allFolders.value = allFolders.value.filter(f => f.path !== item.path);
             }
@@ -466,7 +466,7 @@ export function useFileManager() {
         if (clipboard.value.items.length === 0) return;
         loading.value = true;
         try {
-            const endpoint = clipboard.value.action === 'move' ? '/admin/ja/file-manager/move' : '/admin/ja/file-manager/copy';
+            const endpoint = clipboard.value.action === 'move' ? '/admin/janet/file-manager/move' : '/admin/janet/file-manager/copy';
             for (const item of clipboard.value.items) {
                 await api.post(endpoint, {
                     source: item.path.replace(/^\//, ''),
@@ -488,7 +488,7 @@ export function useFileManager() {
 
     const moveItem = async (sourcePath: string, destinationPath: string, type: 'file' | 'folder') => {
         try {
-            await api.post('/admin/ja/file-manager/move', {
+            await api.post('/admin/janet/file-manager/move', {
                 source: sourcePath.replace(/^\//, ''),
                 destination: destinationPath === '/' ? '' : destinationPath.replace(/^\//, ''),
                 type
@@ -505,7 +505,7 @@ export function useFileManager() {
     const fetchTrash = async () => {
         trashLoading.value = true;
         try {
-            const response = await api.get('/admin/ja/file-manager/trash');
+            const response = await api.get('/admin/janet/file-manager/trash');
             trashItems.value = response.data?.data?.items || [];
         } catch (error) {
             logger.error('Failed to fetch trash:', error);
@@ -516,7 +516,7 @@ export function useFileManager() {
 
     const restoreTrashItem = async (item: TrashItem) => {
         try {
-            await api.post('/admin/ja/file-manager/restore', { id: item.id });
+            await api.post('/admin/janet/file-manager/restore', { id: item.id });
             await fetchTrash();
             allFolders.value = [];
             await fetchAllFolders();
@@ -536,7 +536,7 @@ export function useFileManager() {
         });
         if (!confirmed) return;
         try {
-            await api.post('/admin/ja/file-manager/trash/empty');
+            await api.post('/admin/janet/file-manager/trash/empty');
             toast.success.action(t('features.file_manager.messages.trashEmptied'));
             fetchTrash();
         } catch (error) {
@@ -553,7 +553,7 @@ export function useFileManager() {
         });
         if (!confirmed) return;
         try {
-            await api.post('/admin/ja/file-manager/trash/permanent', { id: item.id });
+            await api.post('/admin/janet/file-manager/trash/permanent', { id: item.id });
             toast.success.action(t('features.file_manager.messages.deleteSuccess'));
             fetchTrash();
         } catch (error) {

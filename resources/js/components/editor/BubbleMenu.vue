@@ -34,7 +34,8 @@ defineProps<{
     editor: Editor | undefined;
 }>();
 
-const shouldShow = (props: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const shouldShow = (props: any) => {
     const { editor } = props;
     // Don't show if image or video is selected (we will have a different bubble for that)
     if (editor.isActive('image') || editor.isActive('video') || editor.isActive('htmlEmbed') || editor.isActive('icon')) {

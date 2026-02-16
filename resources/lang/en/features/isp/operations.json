@@ -1,0 +1,30 @@
+{
+    "title": "Dispatch Center",
+    "subtitle": "Manage technician deployments and field operations.",
+    "deployment": {
+        "title": "Deployment Status",
+        "update_status": "Update Status",
+        "select_status": "Select Status",
+        "in_progress": "In Progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "notes": "Notes",
+        "cancel": "Cancel",
+        "save": "Save Changes"
+    },
+    "dispatch": {
+        "title": "Deploy Technician",
+        "select_technician": "Select Technician",
+        "recommended": "Recommended (Nearest)",
+        "notes_label": "Additional Notes",
+        "notes_placeholder": "Enter dispatch instructions...",
+        "km_away": "{distance} km away",
+        "calculating": "Calculating proximity...",
+        "cancel": "Cancel",
+        "deploy": "Deploy"
+    },
+    "actions": {
+        "approve_all": "Approve All",
+        "reject_all": "Reject All"
+    }
+}

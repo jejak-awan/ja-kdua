@@ -334,7 +334,7 @@ const handleSubmit = async () => {
     
     saving.value = true;
     try {
-        await api.put(`/admin/ja/media/${activeMedia.value.id}`, {
+        await api.put(`/admin/janet/media/${activeMedia.value.id}`, {
             name: form.value.name,
             alt: form.value.alt,
             description: form.value.description,

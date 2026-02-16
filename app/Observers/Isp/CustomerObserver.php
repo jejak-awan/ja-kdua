@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\Observers\Isp;
 
-use App\Models\Isp\Customer;
-use App\Models\Isp\IpPool;
-use App\Models\Isp\IpPoolAddress;
-use App\Services\Isp\RadiusIntegration;
+use App\Models\Isp\Customer\Customer;
+use App\Models\Isp\Network\IpPool;
+use App\Models\Isp\Network\IpPoolAddress;
 use Illuminate\Support\Facades\Log;
 
 class CustomerObserver
 {
-    protected RadiusIntegration $radius;
+    protected \App\Services\Isp\Network\RadiusService $radius;
 
-    public function __construct(RadiusIntegration $radius)
+    public function __construct(\App\Services\Isp\Network\RadiusService $radius)
     {
         $this->radius = $radius;
     }
@@ -53,11 +52,23 @@ class CustomerObserver
         $password = (string) $customer->mikrotik_password;
         $login = (string) $customer->mikrotik_login;
 
-        $this->radius->syncUser($login, $password, $attributes);
+        // Service Zone Locking
+        $checkAttributes = [];
+        $enforceZone = \App\Models\Core\Setting::get('radius_enforce_service_zone', false);
+
+        if ($enforceZone && $customer->server_id) {
+            $serviceZone = \App\Models\Isp\Network\ServiceZone::find($customer->server_id);
+            if ($serviceZone) {
+                // Lock user to this specific Service Name (e.g. Hotspot-Utama)
+                $checkAttributes['Called-Station-Id'] = $serviceZone->name;
+            }
+        }
+
+        $this->radius->syncUser($login, $password, $attributes, $checkAttributes);
 
         // If critical attributes changed, trigger CoA to force re-auth
-        if ($customer->isDirty(['status', 'billing_plan_id', 'mikrotik_password'])) {
-            Log::info("CustomerObserver: Triggering CoA for #{$customer->id} due to change in status/plan/password");
+        if ($customer->isDirty(['status', 'billing_plan_id', 'mikrotik_password', 'server_id'])) {
+            Log::info("CustomerObserver: Triggering CoA for #{$customer->id} due to change in status/plan/password/server");
             $this->radius->sendDisconnectRequest($customer);
         }
     }

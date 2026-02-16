@@ -94,7 +94,7 @@ const selectedMenu = computed(() => {
 const fetchMenus = async () => {
     isLoading.value = true;
     try {
-        const response = await api.get('/admin/ja/menus', {
+        const response = await api.get('/admin/janet/menus', {
             params: {
                 trashed: trashedFilter.value
             }
@@ -177,10 +177,10 @@ const deleteCurrentMenu = async () => {
 
     try {
         if (isTrashed) {
-             await api.delete(`/admin/ja/menus/${selectedMenuId.value}/force-delete`);
+             await api.delete(`/admin/janet/menus/${selectedMenuId.value}/force-delete`);
              toast.success.action(t('common.messages.success.deleted', { item: 'Menu' }));
         } else {
-            await api.delete(`/admin/ja/menus/${selectedMenuId.value}`);
+            await api.delete(`/admin/janet/menus/${selectedMenuId.value}`);
             toast.success.delete(t('features.menus.title'));
         }
         selectedMenuId.value = null;
@@ -204,7 +204,7 @@ const restoreCurrentMenu = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post(`/admin/ja/menus/${selectedMenuId.value}/restore`);
+        await api.post(`/admin/janet/menus/${selectedMenuId.value}/restore`);
         toast.success.restore('Menu');
         await fetchMenus();
     } catch (error: unknown) {

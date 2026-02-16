@@ -421,7 +421,7 @@ const trashedFilter = computed({
 // Fetch locations
 const fetchLocations = async () => {
     try {
-        const response = await api.get('/admin/ja/themes/active/locations');
+        const response = await api.get('/admin/janet/themes/active/locations');
         const data = response.data?.data || response.data || {};
         locations.value = Object.entries(data).map(([key, label]) => ({
             value: key,

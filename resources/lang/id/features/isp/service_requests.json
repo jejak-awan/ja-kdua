@@ -25,6 +25,7 @@
         "approve": "Setujui",
         "reject": "Tolak",
         "execute": "Jalankan Provisi",
+        "dispatch": "Tugaskan Teknisi",
         "viewDetails": "Lihat Detail"
     },
     "messages": {

@@ -236,7 +236,7 @@ const fetchHistory = async (page: number = 1) : Promise<void> => {
         if (dateFrom.value) params.append('date_from', dateFrom.value);
         if (dateTo.value) params.append('date_to', dateTo.value);
 
-        const response = await api.get(`/admin/ja/access-journal?${params.toString()}`);
+        const response = await api.get(`/admin/janet/access-journal?${params.toString()}`);
         
         // Parse nested response
         let data: LoginEntry[] = [];
@@ -257,7 +257,7 @@ const fetchHistory = async (page: number = 1) : Promise<void> => {
 
 const fetchStatistics = async () : Promise<void> => {
     try {
-        const response = await api.get('/admin/ja/access-journal/statistics');
+        const response = await api.get('/admin/janet/access-journal/statistics');
         statistics.value = response.data?.data || response.data;
     } catch (error: unknown) {
         logger.error('Failed to fetch statistics:', error);
@@ -266,7 +266,7 @@ const fetchStatistics = async () : Promise<void> => {
 
 const fetchUsers = async () : Promise<void> => {
     try {
-        const response = await api.get('/admin/ja/users');
+        const response = await api.get('/admin/janet/users');
         const data = response.data?.data?.data || response.data?.data || [];
         users.value = Array.isArray(data) ? data : [];
     } catch (error: unknown) {
@@ -286,7 +286,7 @@ const clearLogs = async () : Promise<void> => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/ja/access-journal/clear');
+        await api.post('/admin/janet/access-journal/clear');
         await fetchHistory();
         await fetchStatistics();
         toast.success.action(t('features.system.logs.messages.cleared') || 'Logs cleared successfully');
@@ -305,7 +305,7 @@ const exportHistory = async () : Promise<void> => {
         if (dateFrom.value) params.append('date_from', dateFrom.value);
         if (dateTo.value) params.append('date_to', dateTo.value);
 
-        const response = await api.get(`/admin/ja/access-journal/export?${params.toString()}`, {
+        const response = await api.get(`/admin/janet/access-journal/export?${params.toString()}`, {
             responseType: 'blob'
         });
 

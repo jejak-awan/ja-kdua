@@ -1,0 +1,30 @@
+{
+    "title": "ISP Command Center",
+    "subtitle": "Business Intelligence & Real-time System Monitoring",
+    "settings": "ISP Settings",
+    "settings_desc": "Manage system configurations and service preferences",
+    "payment_gateway": "Payment Gateway",
+    "payment_gateway_desc": "Configure payment methods and integrations",
+    "mikrotik": "MikroTik Config",
+    "mikrotik_desc": "Router API management and network synchronization",
+    "system_status": "System Status",
+    "recent_activity": "Recent Activity",
+    "no_activity": "No recent activity",
+    "synthesizing_data": "Synthesizing Data...",
+    "mrr": "Monthly Recurring Revenue",
+    "mrr_growth": "+5.2% vs last month",
+    "churn_rate": "Annual Churn Rate",
+    "churn_optimization": "-0.5% optimization",
+    "growth_forecast": "6M Growth Forecast",
+    "growth_target": "On track for Q4 Target",
+    "clv": "Avg Lifetime Value",
+    "clv_score": "High retention score",
+    "financial_projection": "Financial Projection (12M)",
+    "projection_desc": "Projected MRR based on historical 6-month momentum",
+    "status": {
+        "router": "Router Status",
+        "radius": "RADIUS Server",
+        "whatsapp": "WhatsApp Gateway",
+        "payment": "Payment Gateway"
+    }
+}

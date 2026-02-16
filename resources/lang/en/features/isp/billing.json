@@ -32,7 +32,8 @@
         "suspending": "Suspending...",
         "set_paid": "Set as Paid",
         "set_unpaid": "Set as Unpaid",
-        "cancel_invoices": "Cancel Invoices"
+        "cancel_invoices": "Cancel Invoices",
+        "export_excel": "Export to Excel"
     },
     "messages": {
         "error_load": "Failed to load billing data",
@@ -69,7 +70,9 @@
             "price": "Price",
             "price_help": "Price excluding VAT",
             "type": "Billing Type",
-            "status": "Status"
+            "status": "Status",
+            "speed": "Speed (Upload/Download)",
+            "features": "Additional Features"
         },
         "options": {
             "prepaid": "Prepaid",
@@ -199,8 +202,9 @@
             "service_category": "Service Category",
             "billing_due_date": "Due Date",
             "unique_code": "Unique Code",
-            "is_taxed": "Tax (PPN 11%)",
-            "billing_notes": "Billing Notes"
+            "is_taxed": "Taxable (VAT 11%)",
+            "billing_notes": "Billing Notes",
+            "partner": "Partner/Reseller"
         },
         "placeholders": {
             "select_reseller": "Select Partner",
@@ -208,14 +212,47 @@
             "select_server": "Select Server",
             "address_list": "Auto-added to list",
             "select_category": "-Select-",
-            "billing_due_date": "Day (1-28)"
+            "billing_due_date": "Day (1-28)",
+            "select_province": "Select Province",
+            "select_city": "Select City/Regency",
+            "select_district": "Select District",
+            "select_village": "Select Village",
+            "select_partner": "Select Partner"
         },
         "options": {
             "fiber": "Fiber Optic",
-            "wireless": "Wireless"
+            "wireless": "Wireless",
+            "none": "- None -",
+            "status": {
+                "active": "Active",
+                "isolated": "Isolated",
+                "inactive": "Inactive",
+                "suspended": "Suspended"
+            }
         },
         "headers": {
-            "mikrotik_auth": "Mikrotik Authentication"
+            "mikrotik_auth": "Mikrotik Authentication",
+            "location_selection": "Select Location (Pin on Map)",
+            "usage_monitor": "Traffic Monitor",
+            "network_summary": "Network Summary"
+        },
+        "labels": {
+            "no_coordinates": "Coordinates not selected",
+            "use_current_location": "Use Current Location",
+            "fetching_location": "Fetching location...",
+            "searching_address": "Searching address...",
+            "address_found": "Address found",
+            "location_error": "Failed to get location",
+            "map_instruction": "Click anywhere on the map to set the installation point",
+            "total_data": "TOTAL DATA",
+            "fup_progress": "FUP PROGRESS",
+            "cycle_ends": "Cycle ends:",
+            "ipv4": "IPv4 Address",
+            "not_assigned": "NOT ASSIGNED",
+            "service_date": "Service Date",
+            "pending": "PENDING",
+            "tax_description": "Value Added Tax (VAT 11%)",
+            "grand_total": "Grand Total:"
         },
         "messages": {
             "invoice_feature_soon": "Initial Invoice Items (Setup/Hardware) will be available soon."
@@ -235,5 +272,14 @@
                 "item_name": "e.g., Installation Fee, Router ONU, etc."
             }
         }
+    },
+    "options": {
+        "prepaid": "Prepaid (Prabayar)",
+        "postpaid": "Postpaid (Pascabayar)",
+        "fixed": "Fixed Date (e.g. 1st of Month)",
+        "profile": "Profile Duration (30 Days)",
+        "monthly": "Anniversary (Installation Date)",
+        "payment_date": "On Due Date (Jatuh Tempo)",
+        "isolation_date": "On Specific Isolation Date"
     }
 }

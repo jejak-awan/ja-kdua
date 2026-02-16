@@ -121,6 +121,8 @@ class SecurityHeaders
         $connectSrc[] = 'wss://localhost:5173';
 
         $connectSrc = array_merge($connectSrc, [
+            'https://nominatim.openstreetmap.org',
+            'https://www.emsifa.com',
             'https://static.cloudflareinsights.com',
             'https://cloudflareinsights.com',
             'wss:',

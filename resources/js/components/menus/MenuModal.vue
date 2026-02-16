@@ -107,7 +107,7 @@ const loadingLocations = ref(false);
 const fetchLocations = async () => {
     loadingLocations.value = true;
     try {
-        const response = await api.get('/admin/ja/themes/active/locations');
+        const response = await api.get('/admin/janet/themes/active/locations');
         const data = response.data?.data || response.data || {};
         
         // Transform { key: label } to [{ value: key, label: label }]
@@ -137,7 +137,7 @@ const handleSubmit = async () => {
     saving.value = true;
     clearErrors();
     try {
-        const response = await api.post('/admin/ja/menus', form.value);
+        const response = await api.post('/admin/janet/menus', form.value);
         const menu = response.data.data || response.data;
         toast.success.create('Menu');
         emit('saved', menu);

@@ -210,13 +210,13 @@ const filteredRedirects = computed(() => {
 const fetchRedirects = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/ja/redirects');
+        const response = await api.get('/admin/janet/redirects');
         const { data } = parseResponse(response);
         redirects.value = ensureArray(data) as Redirect[];
         
         // Fetch statistics
         try {
-            const statsResponse = await api.get('/admin/ja/redirects/statistics');
+            const statsResponse = await api.get('/admin/janet/redirects/statistics');
             statistics.value = parseSingleResponse(statsResponse) as RedirectStatistics;
         } catch (error: unknown) {
             // Calculate from redirects if endpoint doesn't exist
@@ -250,7 +250,7 @@ const deleteRedirect = async (redirect: Redirect) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/ja/redirects/${redirect.id}`);
+        await api.delete(`/admin/janet/redirects/${redirect.id}`);
         toast.success.delete(t('features.redirects.title'));
         fetchRedirects();
     } catch (error: unknown) {

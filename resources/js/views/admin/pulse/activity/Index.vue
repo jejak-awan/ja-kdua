@@ -324,7 +324,7 @@ const fetchLogs = async (page: number = 1) => {
         if (dateTo.value) params.date_to = dateTo.value;
         if (search.value) params.search = search.value;
         
-        const response = await api.get('/admin/ja/activity-journal', { params });
+        const response = await api.get('/admin/janet/activity-journal', { params });
         const { data, pagination: pag } = parseResponse<ActivityLog[]>(response);
         
         logs.value = ensureArray(data);
@@ -332,7 +332,7 @@ const fetchLogs = async (page: number = 1) => {
         
         // Fetch statistics (only on first load or if needed)
         try {
-            const statsResponse = await api.get('/admin/ja/activity-journal/statistics');
+            const statsResponse = await api.get('/admin/janet/activity-journal/statistics');
             statistics.value = statsResponse.data?.data || statsResponse.data;
         } catch {
             // Fallback stats if endpoint fails
@@ -368,7 +368,7 @@ const clearLogs = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/ja/activity-journal/clear');
+        await api.post('/admin/janet/activity-journal/clear');
         toast.success.action(t('features.system.logs.messages.cleared'));
         fetchLogs();
     } catch (error: unknown) {
@@ -386,7 +386,7 @@ const exportLogs = async () => {
         if (dateFrom.value) params.append('date_from', dateFrom.value);
         if (dateTo.value) params.append('date_to', dateTo.value);
         
-        const response = await api.get(`/admin/ja/activity-journal/export?${params.toString()}`, {
+        const response = await api.get(`/admin/janet/activity-journal/export?${params.toString()}`, {
             responseType: 'blob'
         });
         
@@ -410,7 +410,7 @@ const exportLogs = async () => {
 
 const fetchUsers = async () => {
     try {
-        const response = await api.get('/admin/ja/users');
+        const response = await api.get('/admin/janet/users');
         const data = response.data?.data?.data || response.data?.data || response.data || [];
         users.value = Array.isArray(data) ? data : [];
     } catch (error: unknown) {

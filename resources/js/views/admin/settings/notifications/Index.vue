@@ -239,7 +239,7 @@ const fetchNotifications = async () => {
     }
     
     try {
-        const response = await api.get('/admin/ja/notifications');
+        const response = await api.get('/admin/janet/notifications');
         let data = [];
         
         // Handle paginated response structure: { success: true, data: { data: [...] } }
@@ -269,7 +269,7 @@ const fetchNotifications = async () => {
 
 const markAsRead = async (notification: Notification) => {
     try {
-        await api.put(`/admin/ja/notifications/${notification.id}/read`);
+        await api.put(`/admin/janet/notifications/${notification.id}/read`);
         toast.success.default(t('features.notifications.messages.markReadSuccess'));
         
         // Optimistic update
@@ -286,7 +286,7 @@ const markAsRead = async (notification: Notification) => {
 
 const markAllAsRead = async () => {
     try {
-        await api.put('/admin/ja/notifications/read-all');
+        await api.put('/admin/janet/notifications/read-all');
         toast.success.default(t('features.notifications.messages.markAllReadSuccess'));
         fetchNotifications();
     } catch (error: unknown) {
@@ -306,7 +306,7 @@ const deleteNotification = async (notification: Notification) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/ja/notifications/${notification.id}`);
+        await api.delete(`/admin/janet/notifications/${notification.id}`);
         toast.success.default(t('features.notifications.messages.deleteSuccess'));
         
         // Optimistic update

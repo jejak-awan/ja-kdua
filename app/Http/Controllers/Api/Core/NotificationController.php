@@ -135,8 +135,8 @@ class NotificationController extends BaseApiController
         $limit = is_numeric($limitRaw) ? (int) $limitRaw : 20;
 
         // Group by title, message, type, and approximate created_at to find unique "broadcasts"
-        $notifications = Notification::selectRaw('MIN(id) as id, title, message, type, MIN(created_at) as created_at, COUNT(*) as recipient_count')
-            ->groupBy('title', 'message', 'type', \DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:%i")')) // Group by minute
+        $notifications = Notification::selectRaw("MIN(id) as id, title, message, type, MIN(created_at) as created_at, COUNT(*) as recipient_count")
+            ->groupBy('title', 'message', 'type', \DB::raw("to_char(created_at, 'YYYY-MM-DD HH24:MI')")) // Group by minute
             ->orderBy('created_at', 'desc')
             ->paginate($limit);
 
@@ -170,7 +170,7 @@ class NotificationController extends BaseApiController
 
         $countRaw = Notification::where('title', $request->title)
             ->where('message', $request->message)
-            ->where(\DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:%i")'), $createdAt)
+            ->where(\DB::raw("to_char(created_at, 'YYYY-MM-DD HH24:MI')"), $createdAt)
             ->delete();
 
         $count = is_numeric($countRaw) ? (int) $countRaw : 0;
@@ -218,7 +218,7 @@ class NotificationController extends BaseApiController
 
             $countRaw = Notification::where('title', $title)
                 ->where('message', $message)
-                ->where(\DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:%i")'), $createdAt)
+                ->where(\DB::raw("to_char(created_at, 'YYYY-MM-DD HH24:MI')"), $createdAt)
                 ->delete();
 
             $count = is_numeric($countRaw) ? (int) $countRaw : 0;

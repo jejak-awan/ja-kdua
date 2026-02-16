@@ -1,0 +1,83 @@
+{
+    "title": "Manajemen Radius",
+    "subtitle": "Pantau sesi aktif dan kelola node radius.",
+    "tabs": {
+        "nodes": "Node Radius",
+        "zones": "Zona Layanan",
+        "sessions": "Sesi Aktif",
+        "logs": "Log Auth"
+    },
+    "stats": {
+        "active_sessions": "Sesi Aktif",
+        "total_routers": "Total Router",
+        "total_users": "Total Pengguna",
+        "service_status": "Layanan Radius",
+        "operational": "Operasional",
+        "offline": "Offline",
+        "refresh": "Segarkan Statistik",
+        "active_sessions_desc": "Koneksi global",
+        "total_routers_desc": "NAS Terdaftar",
+        "total_users_desc": "Total Kredensial",
+        "no_nodes_desc": "Tidak Ada Node Terkonfigurasi"
+    },
+    "nodes": {
+        "title": "Node Server Radius",
+        "subtitle": "Kelola endpoint server fisik untuk autentikasi FreeRADIUS.",
+        "local_node": "Node FreeRADIUS Lokal"
+    },
+    "zones": {
+        "title": "Zona Layanan",
+        "subtitle": "Tentukan Nama Layanan untuk mengunci pengguna ke area tertentu.",
+        "enforce_locking": "Wajibkan Penguncian",
+        "add_zone": "Tambah Zona",
+        "add_zone_desc": "Buat Zona Layanan untuk mengelompokkan dan mengunci pengguna.",
+        "fields": {
+            "name": "Nama Zona",
+            "ip": "Alamat IP (Opsional)",
+            "ip_desc": "IP Router/NAS untuk referensi.",
+            "status": "Status"
+        },
+        "messages": {
+            "success_add": "Zona Layanan ditambahkan",
+            "success_update": "Zona Layanan diperbarui",
+            "success_delete": "Zona Layanan dihapus",
+            "toggle_active": "Zona {status}",
+            "enforce_enabled": "Penguncian Zona Layanan Diaktifkan",
+            "enforce_disabled": "Penguncian Zona Layanan Dinonaktifkan"
+        }
+    },
+    "sessions": {
+        "title": "Sesi Akunting Aktif",
+        "subtitle": "Data real-time dari akunting untuk pengguna yang sedang terhubung.",
+        "sync": "Sinkronkan Data",
+        "fields": {
+            "username": "Username",
+            "client_ip": "IP Klien",
+            "nas_router": "NAS / Router",
+            "mac_address": "Alamat MAC",
+            "up_since": "Aktif Sejak"
+        }
+    },
+    "logs": {
+        "title": "Riwayat Autentikasi",
+        "subtitle": "Log audit dari semua upaya permintaan akses.",
+        "fields": {
+            "username": "Username",
+            "result": "Hasil",
+            "date_time": "Tanggal & Waktu"
+        },
+        "results": {
+            "accepted": "Diterima",
+            "rejected": "Ditolak"
+        }
+    },
+    "actions": {
+        "disconnect": "Putuskan",
+        "sync": "Sinkronasi Data",
+        "refresh": "Segarkan"
+    },
+    "messages": {
+        "confirm_disconnect": "Apakah Anda yakin ingin memutuskan sesi untuk pengguna \"{name}\"?",
+        "success_disconnect": "Permintaan pemutusan terkirim (CoA)"
+    }
+}

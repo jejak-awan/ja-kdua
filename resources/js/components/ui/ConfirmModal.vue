@@ -1,6 +1,6 @@
 <template>
     <Dialog :open="isOpen" @update:open="handleClose">
-        <DialogContent class="sm:max-w-md">
+        <DialogContent class="sm:max-w-md !z-[100050]">
             <DialogHeader>
                 <DialogTitle class="flex items-center gap-2">
                     <component 

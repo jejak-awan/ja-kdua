@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Isp\Network;
 
 use App\Http\Controllers\Api\Core\BaseApiController;
-use App\Services\Isp\BgpToolkitService;
+use App\Services\Isp\Network\BgpToolkitService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -22,8 +22,8 @@ class BgpToolkitController extends BaseApiController
     public function lookup(Request $request): JsonResponse
     {
         $asn = $request->input('asn');
-        if (! is_string($asn) || $asn === '') {
-            return $this->error('ASN is required', 422);
+        if (! is_string($asn) || ! preg_match('/^(AS)?\d+$/i', $asn)) {
+            return $this->error('Valid ASN is required (e.g. AS123 or 123)', 422);
         }
 
         $result = $this->bgpService->lookupAsn($asn);
@@ -41,8 +41,8 @@ class BgpToolkitController extends BaseApiController
     public function prefixes(Request $request): JsonResponse
     {
         $asn = $request->input('asn');
-        if (! is_string($asn) || $asn === '') {
-            return $this->error('ASN is required', 422);
+        if (! is_string($asn) || ! preg_match('/^(AS)?\d+$/i', $asn)) {
+            return $this->error('Valid ASN is required', 422);
         }
 
         $prefixes = $this->bgpService->getAsPrefixes($asn);
@@ -60,14 +60,17 @@ class BgpToolkitController extends BaseApiController
     public function downloadAddressList(Request $request): StreamedResponse|JsonResponse
     {
         $asn = $request->input('asn');
-        if (! is_string($asn) || $asn === '') {
-            return $this->error('ASN is required', 422);
+        if (! is_string($asn) || ! preg_match('/^(AS)?\d+$/i', $asn)) {
+            return $this->error('Valid ASN is required', 422);
         }
 
         $listName = $request->input('list_name');
         if (! is_string($listName) || $listName === '') {
             $listName = 'AS'.ltrim(strtoupper($asn), 'AS');
         }
+
+        // Basic sanitization for list name
+        $listName = preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $listName) ?? $listName;
 
         $prefixes = $this->bgpService->getAsPrefixes($asn);
 

@@ -27,10 +27,10 @@ class QueryCacheService
      * Cache a query result with automatic key generation
      *
      * @param  string  $key  Cache key
-     * @param  callable  $callback  Query callback
+     * @param  \Closure(): mixed  $callback  Query callback
      * @param  int  $ttl  Time to live in seconds
      */
-    public function remember(string $key, callable $callback, int $ttl = self::TTL_MEDIUM): mixed
+    public function remember(string $key, \Closure $callback, int $ttl = self::TTL_MEDIUM): mixed
     {
         return Cache::remember($key, $ttl, $callback);
     }
@@ -39,9 +39,9 @@ class QueryCacheService
      * Cache analytics data (longer TTL)
      *
      * @param  string  $key  Cache key
-     * @param  callable  $callback  Query callback
+     * @param  \Closure(): mixed  $callback  Query callback
      */
-    public function rememberAnalytics(string $key, callable $callback): mixed
+    public function rememberAnalytics(string $key, \Closure $callback): mixed
     {
         return $this->remember("analytics:{$key}", $callback, self::TTL_LONG);
     }
@@ -50,9 +50,9 @@ class QueryCacheService
      * Cache dashboard data (medium TTL)
      *
      * @param  string  $key  Cache key
-     * @param  callable  $callback  Query callback
+     * @param  \Closure(): mixed  $callback  Query callback
      */
-    public function rememberDashboard(string $key, callable $callback): mixed
+    public function rememberDashboard(string $key, \Closure $callback): mixed
     {
         return $this->remember("dashboard:{$key}", $callback, self::TTL_MEDIUM);
     }
@@ -61,9 +61,9 @@ class QueryCacheService
      * Cache statistics (long TTL)
      *
      * @param  string  $key  Cache key
-     * @param  callable  $callback  Query callback
+     * @param  \Closure(): mixed  $callback  Query callback
      */
-    public function rememberStats(string $key, callable $callback): mixed
+    public function rememberStats(string $key, \Closure $callback): mixed
     {
         return $this->remember("stats:{$key}", $callback, self::TTL_LONG);
     }
@@ -78,9 +78,9 @@ class QueryCacheService
         if (str_contains($pattern, '*')) {
             // For Redis, use pattern matching
             if (config('cache.default') === 'redis') {
-                $keys = Cache::getRedis()->keys($pattern);
+                $keys = \Illuminate\Support\Facades\Redis::keys($pattern);
                 if (! empty($keys)) {
-                    Cache::getRedis()->del($keys);
+                    \Illuminate\Support\Facades\Redis::del($keys);
                 }
             } else {
                 // For file cache, just forget the exact key
@@ -119,7 +119,7 @@ class QueryCacheService
      * Generate cache key from parameters
      *
      * @param  string  $prefix  Key prefix
-     * @param  array  $params  Parameters to include in key
+     * @param  array<mixed>  $params  Parameters to include in key
      */
     public function generateKey(string $prefix, array $params = []): string
     {

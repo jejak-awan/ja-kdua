@@ -224,7 +224,7 @@ const uploadFile = async () => {
     if (effectiveConstraints.value.maxHeight) formData.append('max_height', effectiveConstraints.value.maxHeight.toString());
 
     try {
-        const response = await api.post('/admin/ja/media/upload', formData, {
+        const response = await api.post('/admin/janet/media/upload', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },

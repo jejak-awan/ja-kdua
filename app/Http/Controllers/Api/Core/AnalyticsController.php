@@ -257,14 +257,23 @@ class AnalyticsController extends BaseApiController
         $limitRaw = $request->input('limit', 10);
         $limit = is_numeric($limitRaw) ? (int) $limitRaw : 10;
 
+        // key: domain, value: count
         $referrers = AnalyticsVisit::whereBetween('visited_at', [$dateFrom, $dateTo])
             ->whereNotNull('referer')
             ->where('referer', '!=', '')
-            ->select('referer', DB::raw('count(*) as count'))
-            ->groupBy('referer')
+            // Normalize: lower case, remove protocol, remove www, remove path
+            ->selectRaw("regexp_replace(regexp_replace(lower(referer), '^https?://(www\.)?', ''), '/.*', '') as referer_host, count(*) as count")
+            ->groupBy('referer_host')
             ->orderByDesc('count')
             ->limit($limit)
-            ->get();
+            ->get()
+            ->map(function ($visit) {
+                /** @var AnalyticsVisit $visit */
+                return [
+                    'referer' => (string) $visit->referer_host,
+                    'count' => (int) $visit->count,
+                ];
+            });
 
         return $this->success($referrers, 'Referrer analytics retrieved successfully');
     }
@@ -478,15 +487,15 @@ class AnalyticsController extends BaseApiController
     {
         switch ($groupBy) {
             case 'hour':
-                return "DATE_FORMAT(visited_at, '%Y-%m-%d %H:00:00') as period, count(*) as visits";
+                return "to_char(visited_at, 'YYYY-MM-DD HH24:00:00') as period, count(*) as visits";
             case 'day':
-                return 'DATE(visited_at) as period, count(*) as visits';
+                return 'visited_at::date as period, count(*) as visits';
             case 'week':
-                return 'YEARWEEK(visited_at, 1) as period, count(*) as visits';
+                return "to_char(visited_at, 'IYYYIW') as period, count(*) as visits";
             case 'month':
-                return "DATE_FORMAT(visited_at, '%Y-%m') as period, count(*) as visits";
+                return "to_char(visited_at, 'YYYY-MM') as period, count(*) as visits";
             default:
-                return 'DATE(visited_at) as period, count(*) as visits';
+                return 'visited_at::date as period, count(*) as visits';
         }
     }
 
@@ -497,15 +506,15 @@ class AnalyticsController extends BaseApiController
     {
         switch ($groupBy) {
             case 'hour':
-                return "DATE_FORMAT(visited_at, '%Y-%m-%d %H:00:00')";
+                return "to_char(visited_at, 'YYYY-MM-DD HH24:00:00')";
             case 'day':
-                return 'DATE(visited_at)';
+                return 'visited_at::date';
             case 'week':
-                return 'YEARWEEK(visited_at, 1)';
+                return "to_char(visited_at, 'IYYYIW')";
             case 'month':
-                return "DATE_FORMAT(visited_at, '%Y-%m')";
+                return "to_char(visited_at, 'YYYY-MM')";
             default:
-                return 'DATE(visited_at)';
+                return 'visited_at::date';
         }
     }
 

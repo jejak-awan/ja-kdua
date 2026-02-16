@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Notifications\Channels;
 
-use App\Services\Isp\WhatsApp\WhatsAppServiceInterface;
+use App\Services\Isp\ThirdParty\WhatsAppServiceInterface;
 use Illuminate\Notifications\Notification;
 
 class WhatsAppChannel

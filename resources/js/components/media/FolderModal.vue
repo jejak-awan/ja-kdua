@@ -141,7 +141,7 @@ const canManageMedia = authStore.hasPermission('manage media');
 
 const fetchFolders = async () => {
     try {
-        const response = await api.get('/admin/ja/media-folders');
+        const response = await api.get('/admin/janet/media-folders');
         const data = response.data.data || response.data || [];
         folders.value = data.filter((f: MediaFolder) => !f.is_trashed);
     } catch (error) {
@@ -154,7 +154,7 @@ const handleSubmit = async () => {
 
     saving.value = true;
     try {
-        await api.post('/admin/ja/media-folders', form.value);
+        await api.post('/admin/janet/media-folders', form.value);
         toast.success.create('Folder');
         emit('created');
         emit('close');

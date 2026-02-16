@@ -137,7 +137,7 @@ onMounted(async () => {
     await cmsStore.fetchPublicSettings()
 
     // 2. Fetch specific page content
-    const response = await api.get('/cms/contents/contact')
+    const response = await api.get('/ja/contents/contact')
     pageData.value = response.data.data
   } catch (error) {
     logger.warning('[Contact] Static fallback mode engaged due to fetch error:', error)

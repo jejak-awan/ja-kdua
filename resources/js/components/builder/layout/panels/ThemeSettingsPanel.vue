@@ -48,7 +48,7 @@
 
               <div v-else-if="setting.type === 'range'" class="range-setting">
                 <input type="range" v-model.number="formValues[setting.key]" :min="setting.min" :max="setting.max" :step="setting.step" @input="handleInput" />
-                <span class="range-value">{{ formValues[setting.key] }}{{ (setting as any).unit || 'px' }}</span>
+                <span class="range-value">{{ formValues[setting.key] }}{{ setting.unit || 'px' }}</span>
               </div>
 
               <textarea v-else-if="setting.type === 'textarea'" v-model="formValues[setting.key]" class="textarea-input" rows="3" @input="handleInput"></textarea>
@@ -87,6 +87,7 @@ import type { ThemeSetting } from '@/types/theme';
 
 interface SettingItem extends ThemeSetting {
   key: string;
+  unit?: string;
 }
 
 const ColorField = defineAsyncComponent(() => import('@/components/builder/fields/ColorField.vue'));

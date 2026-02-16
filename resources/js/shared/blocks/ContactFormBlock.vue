@@ -112,7 +112,7 @@ const handleSubmit = async () => {
 
     try {
         const formSlug = (settings.value.formSlug as string) || 'contact'
-        const response = await api.post(`/cms/forms/${formSlug}/submit`, formData)
+        const response = await api.post(`/ja/forms/${formSlug}/submit`, formData)
         
         if (response.data?.success) {
             submitted.value = true

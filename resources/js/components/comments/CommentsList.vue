@@ -146,7 +146,7 @@ const formatDate = (date: string) => {
 const fetchComments = async () => {
     loading.value = true;
     try {
-        const response = await api.get(`/cms/contents/${props.contentId}/comments`);
+        const response = await api.get(`/ja/contents/${props.contentId}/comments`);
         const data = response.data?.data || response.data;
         comments.value = Array.isArray(data) ? data : [];
     } catch (error: unknown) {

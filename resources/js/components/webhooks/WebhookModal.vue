@@ -199,10 +199,10 @@ const handleSubmit = async () => {
     saving.value = true;
     try {
         if (props.webhook) {
-            await api.put(`/admin/ja/webhooks/${props.webhook.id}`, form.value);
+            await api.put(`/admin/janet/webhooks/${props.webhook.id}`, form.value);
             toast.success.update('Webhook');
         } else {
-            await api.post('/admin/ja/webhooks', form.value);
+            await api.post('/admin/janet/webhooks', form.value);
             toast.success.create('Webhook');
         }
         emit('saved');

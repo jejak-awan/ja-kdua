@@ -133,7 +133,7 @@ const teamMembers: TeamMember[] = [
 onMounted(async () => {
   try {
     // Fetch about page content
-    const response = await api.get('/cms/contents/about')
+    const response = await api.get('/ja/contents/about')
     pageData.value = response.data.data
   } catch (error) {
     logger.error('Failed to fetch about page:', error)

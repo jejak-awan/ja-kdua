@@ -482,7 +482,7 @@ const fetchUsers = async () => {
             params.active = 1;
         }
 
-        const response = await api.get('/admin/ja/users', { params });
+        const response = await api.get('/admin/janet/users', { params });
         const { data, pagination: paginationData } = parseResponse(response);
         // Ensure each user has roles array
         users.value = (ensureArray(data) as User[]).map((user: User) => ({
@@ -502,7 +502,7 @@ const fetchUsers = async () => {
 
 const fetchStats = async () => {
     try {
-        const response = await api.get('/admin/ja/users/stats');
+        const response = await api.get('/admin/janet/users/stats');
         // The BaseApiController returns { success: true, data: { ... }, message: ... }
         // parseResponse returns { data: [...], pagination: ... } which is for lists.
         // We just need the raw data object here.
@@ -535,7 +535,7 @@ const clearFilters = () => {
 
 const fetchRoles = async () => {
     try {
-        const response = await api.get('/admin/ja/roles').catch(() => null);
+        const response = await api.get('/admin/janet/roles').catch(() => null);
         if (response) {
             const { data: rolesData } = parseResponse(response);
             roles.value = ensureArray(rolesData);
@@ -588,7 +588,7 @@ const deleteUser = async (user: User) => {
     }
 
     try {
-        await api.delete(`/admin/ja/users/${user.id}`);
+        await api.delete(`/admin/janet/users/${user.id}`);
         await fetchUsers();
         toast.success.delete('User');
     } catch (error: unknown) {
@@ -610,7 +610,7 @@ const forceLogoutUser = async (user: User) => {
     }
 
     try {
-        await api.post(`/admin/ja/users/${user.id}/force-logout`);
+        await api.post(`/admin/janet/users/${user.id}/force-logout`);
         
         toast.success.action('User forced logout');
     } catch (error: unknown) {
@@ -621,7 +621,7 @@ const forceLogoutUser = async (user: User) => {
 
 const verifyUser = async (user: User) => {
     try {
-        await api.post(`/admin/ja/users/${user.id}/verify`);
+        await api.post(`/admin/janet/users/${user.id}/verify`);
         toast.success.action('User verified');
         await fetchUsers();
     } catch (error: unknown) {
@@ -641,7 +641,7 @@ const restoreUser = async (user: User) => {
     if (!confirmed) return;
 
     try {
-        await api.post(`/admin/ja/users/${user.id}/restore`);
+        await api.post(`/admin/janet/users/${user.id}/restore`);
         toast.success.action('User restored');
         await fetchUsers();
     } catch (error: unknown) {
@@ -661,7 +661,7 @@ const forceDeleteUser = async (user: User) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/ja/users/${user.id}/force-delete`);
+        await api.delete(`/admin/janet/users/${user.id}/force-delete`);
         toast.success.action('User permanently deleted');
         await fetchUsers();
     } catch (error: unknown) {
@@ -721,7 +721,7 @@ const bulkAction = async (action: string) => {
     }
 
     try {
-        await api.post('/admin/ja/users/bulk-action', {
+        await api.post('/admin/janet/users/bulk-action', {
             ids: selectedIds.value,
             action: action
         });

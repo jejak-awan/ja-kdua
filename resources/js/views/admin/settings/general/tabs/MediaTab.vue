@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import api from '@/services/api'
 import axios from 'axios'
 import SettingGroup from '@/components/settings/SettingGroup.vue'
 import SettingField from '@/components/settings/SettingField.vue'
@@ -181,7 +182,7 @@ const testConnection = async () => {
     testResult.value = null;
     try {
         // Send current formData to test endpoint
-        const response = await axios.post('/api/admin/settings/test-storage', {
+        const response = await api.post('/admin/janet/settings/test-storage', {
             driver: props.formData.storage_driver,
             config: props.formData
         });
@@ -230,7 +231,7 @@ const startMigration = async () => {
 
     try {
         // 1. Scan files
-        const response = await axios.get('/api/storage/migration/files');
+        const response = await api.get('/admin/janet/storage/migration/files');
         const files = response.data.data; // Array of paths
         totalFiles.value = files.length;
 
@@ -252,7 +253,7 @@ const startMigration = async () => {
 
             const batch = files.slice(i, i + batchSize);
             try {
-                const res = await axios.post('/api/storage/migration/batch', { files: batch });
+                const res = await api.post('/admin/janet/storage/migration/batch', { files: batch });
                 const result = res.data.data;
                 
                 // Log failures

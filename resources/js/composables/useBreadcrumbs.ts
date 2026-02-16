@@ -29,6 +29,7 @@ const breadcrumbConfig: Record<string, string> = {
     '/admin/settings': 'common.navigation.menu.settings',
     '/admin/backups': 'common.navigation.menu.backups',
     '/admin/security-journal': 'common.navigation.menu.securityJournal',
+    '/admin/isp': 'common.navigation.menu.isp',
     '/admin/security-journal/csp-reports': 'features.security.tabs.cspReports',
     '/admin/security-journal/slow-queries': 'features.security.tabs.slowQueries',
     '/admin/security-journal/dependency-vulnerabilities': 'features.security.tabs.vulnerabilities',
@@ -158,7 +159,8 @@ export function useBreadcrumbs() {
 
         // If route has custom title in meta, use it for last item
         if (route.meta?.title && breadcrumbs.length > 0) {
-            breadcrumbs[breadcrumbs.length - 1].label = route.meta.title as string;
+            const title = route.meta.title as string;
+            breadcrumbs[breadcrumbs.length - 1].label = te(title) ? t(title) : title;
         }
 
         return breadcrumbs;

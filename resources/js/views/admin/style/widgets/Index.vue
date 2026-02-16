@@ -106,7 +106,7 @@ const editingWidget = ref<Widget | null>(null);
 const fetchWidgets = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/ja/widgets');
+        const response = await api.get('/admin/janet/widgets');
         const { data } = parseResponse(response);
         widgets.value = ensureArray(data);
     } catch (error: unknown) {
@@ -132,7 +132,7 @@ const deleteWidget = async (widget: Widget) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/ja/widgets/${widget.id}`);
+        await api.delete(`/admin/janet/widgets/${widget.id}`);
         toast.success.delete(t('features.widgets.title'));
         fetchWidgets();
     } catch (error: unknown) {

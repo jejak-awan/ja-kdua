@@ -12,11 +12,11 @@ export const useCmsStore = defineStore('cms', {
         media: [],
         settings: {}, // Store settings by group or flat key-value
         siteSettings: {
-            site_name: 'JA-CMS',
+            site_name: 'K2NET',
             site_description: '',
             site_url: '',
             admin_email: '',
-            site_version: 'v1.0 Janari',
+            site_version: 'v1.0',
             site_logo: '',
             site_favicon: '/favicon.svg'
         },
@@ -41,7 +41,7 @@ export const useCmsStore = defineStore('cms', {
             // Create and store the promise for this fetch operation
             const promise = (async () => {
                 try {
-                    const response = await api.get(`/admin/ja/settings/group/${group}`);
+                    const response = await api.get(`/admin/janet/settings/group/${group}`);
                     const settingsData = response.data?.data || response.data || {};
                     this.settings = { ...this.settings, ...settingsData };
                     return settingsData;
@@ -74,7 +74,7 @@ export const useCmsStore = defineStore('cms', {
         async fetchContents(params: Record<string, unknown> = {}) {
             this.loading = true;
             try {
-                const response = await api.get('/cms/contents', { params });
+                const response = await api.get('/ja/contents', { params });
                 const { data } = parseResponse(response);
                 this.contents = ensureArray(data);
                 return { data: this.contents };
@@ -90,7 +90,7 @@ export const useCmsStore = defineStore('cms', {
         async fetchContent(slug: string): Promise<Content | null> {
             this.loading = true;
             try {
-                const response = await api.get(`/cms/contents/${slug}`);
+                const response = await api.get(`/ja/contents/${slug}`);
                 this.currentContent = response.data;
                 return response.data;
             } catch (error: unknown) {
@@ -103,7 +103,7 @@ export const useCmsStore = defineStore('cms', {
 
         async fetchCategories() {
             try {
-                const response = await api.get('/cms/categories');
+                const response = await api.get('/ja/categories');
                 const { data } = parseResponse(response);
                 this.categories = ensureArray(data);
                 return this.categories;
@@ -116,7 +116,7 @@ export const useCmsStore = defineStore('cms', {
 
         async fetchTags() {
             try {
-                const response = await api.get('/cms/tags');
+                const response = await api.get('/ja/tags');
                 const { data } = parseResponse(response);
                 this.tags = ensureArray(data);
                 return this.tags;

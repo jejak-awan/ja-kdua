@@ -367,7 +367,7 @@ class FormSubmissionController extends BaseApiController
 
         // Time-series data (Daily) - Using Carbon objects now
         $dailyData = (clone $periodQuery)
-            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
+            ->select(DB::raw('created_at::date as date'), DB::raw('count(*) as count'))
             ->groupBy('date')
             ->orderBy('date', 'ASC')
             ->get();
@@ -387,7 +387,7 @@ class FormSubmissionController extends BaseApiController
 
         // Peak Activity (Hourly)
         $hourlyData = (clone $periodQuery)
-            ->select(DB::raw('HOUR(created_at) as hour'), DB::raw('count(*) as count'))
+            ->select(DB::raw('EXTRACT(HOUR FROM created_at) as hour'), DB::raw('count(*) as count'))
             ->groupBy('hour')
             ->orderBy('hour', 'ASC')
             ->get();
@@ -404,7 +404,7 @@ class FormSubmissionController extends BaseApiController
 
         // Peak Activity (Weekly)
         $weeklyData = (clone $periodQuery)
-            ->select(DB::raw('DAYOFWEEK(created_at) as day'), DB::raw('count(*) as count'))
+            ->select(DB::raw('EXTRACT(DOW FROM created_at) + 1 as day'), DB::raw('count(*) as count'))
             ->groupBy('day')
             ->orderBy('day', 'ASC')
             ->get();

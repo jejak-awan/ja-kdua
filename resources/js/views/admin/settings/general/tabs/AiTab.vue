@@ -185,7 +185,7 @@ import {
     Input
 } from '@/components/ui';
 import { useToast } from '@/composables/useToast';
-import axios from 'axios';
+import api from '@/services/api';
 
 interface Setting {
     id: number | string;
@@ -249,7 +249,7 @@ const toggleKeyVisibility = (id: string) => {
 // Fetch Providers
 const fetchProviders = async () => {
     try {
-        const response = await axios.get('/api/core/admin/ja/ai/providers');
+        const response = await api.get('/admin/janet/ai/providers');
         providers.value = response.data.data;
         
         // Ensure default provider is set
@@ -273,7 +273,7 @@ const fetchModels = async (providerId: string, force = false) => {
     try {
         // Pass API key if available in form data, to allow fetching without saving first
         const apiKey = props.formData[`${providerId}_api_key`];
-        const response = await axios.get(`/api/core/admin/ja/ai/models/${providerId}`, {
+        const response = await api.get(`/admin/janet/ai/models/${providerId}`, {
             params: { api_key: apiKey }
         });
         
@@ -295,7 +295,7 @@ const testConnection = async (providerId: string) => {
     testSuccess.value = { ...testSuccess.value, [providerId]: false };
     
     try {
-         await axios.post('/api/core/admin/ja/ai/test', {
+         await api.post('/admin/janet/ai/test', {
             provider: providerId,
             api_key: props.formData[`${providerId}_api_key`]
         });

@@ -4,7 +4,7 @@
         "title": "JA-CMS API Documentation",
         "description": "Comprehensive API documentation for JA-CMS Content Management System",
         "contact": {
-            "email": "support@kdua.net"
+            "email": "support@jejakawan.com"
         },
         "license": {
             "name": "MIT",
@@ -19,172 +19,13 @@
         }
     ],
     "paths": {
-        "/api/v1/login": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "User login",
-                "description": "Authenticate user and return access token",
-                "operationId": "bae68d1c55329ecb6e41f48285840c8f",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "email",
-                                    "password"
-                                ],
-                                "properties": {
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "user@example.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "password"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Login successful",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Login successful"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "user": {
-                                                    "type": "object"
-                                                },
-                                                "token": {
-                                                    "type": "string",
-                                                    "example": "1|xxxxxxxxxxxx"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ValidationErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Email not verified",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/register": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "User registration",
-                "description": "Register a new user account",
-                "operationId": "ad77fe138bcb384ad65d167d5c8d1cc0",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "name",
-                                    "email",
-                                    "password",
-                                    "password_confirmation"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "John Doe"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "user@example.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "password"
-                                    },
-                                    "password_confirmation": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "password"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Registration successful",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SuccessResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ValidationErrorResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/categories": {
             "get": {
                 "tags": [
                     "Categories"
                 ],
                 "summary": "List all categories",
-                "operationId": "e225c2b7eb5daf7fb16e00f4f07ff030",
+                "operationId": "c927c5254e252343a04ebc5eb552d719",
                 "parameters": [
                     {
                         "name": "tree",
@@ -228,7 +69,7 @@
                     "Categories"
                 ],
                 "summary": "Create a new category",
-                "operationId": "dd76b8d73b7ea8b4951f03d7c0904c92",
+                "operationId": "d623e8ea5f1c0a7e699e30170dd5ebcc",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -300,7 +141,7 @@
                     "Categories"
                 ],
                 "summary": "Get category details",
-                "operationId": "d5023633bd2ab475b5f7d3fe21113fd9",
+                "operationId": "537ef806622449a63dbe9602f6ea0024",
                 "parameters": [
                     {
                         "name": "category",
@@ -345,7 +186,7 @@
                     "Categories"
                 ],
                 "summary": "Update a category",
-                "operationId": "fef831466f74165300ad79335535294d",
+                "operationId": "5d476fb5722f4dde6dc13f2e7ac4de9b",
                 "parameters": [
                     {
                         "name": "category",
@@ -403,7 +244,7 @@
                     "Categories"
                 ],
                 "summary": "Delete a category",
-                "operationId": "9d956da3b4cf5d9bf6b8b59812334243",
+                "operationId": "1ce8c13d349cc473409507e56e000a5b",
                 "parameters": [
                     {
                         "name": "category",
@@ -432,7 +273,7 @@
                     "Categories"
                 ],
                 "summary": "Move category (hierarchical)",
-                "operationId": "b0add6d76e1698a3d7de01cf6833bd96",
+                "operationId": "0073d3ba0fcb2d3d579afaa57b0eafce",
                 "parameters": [
                     {
                         "name": "category",
@@ -478,7 +319,7 @@
                     "Categories"
                 ],
                 "summary": "Bulk delete categories",
-                "operationId": "eb3e7118119207a31654ae27821f5963",
+                "operationId": "167b8ca9dffa3c53026b5213166f964a",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -508,13 +349,87 @@
                 ]
             }
         },
+        "/api/v1/content": {
+            "get": {
+                "tags": [
+                    "Content"
+                ],
+                "summary": "List published contents",
+                "operationId": "21d402b10e6eb0391f8a97ccc85d0ea6",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "post",
+                                "page"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contents retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/content/{slug}": {
             "get": {
                 "tags": [
                     "Content"
                 ],
                 "summary": "Get published content by slug",
-                "operationId": "d7a7c0032633b696ce1a49c2befd4dbf",
+                "operationId": "389bd885a6b41ad2ed0403522cd5e18c",
                 "parameters": [
                     {
                         "name": "slug",
@@ -535,16 +450,50 @@
                 }
             }
         },
-        "/api/v1/contents/stats": {
+        "/api/v1/content/{slug}/related": {
             "get": {
                 "tags": [
                     "Content"
                 ],
-                "summary": "Get content statistics",
-                "operationId": "5dfdbe273a10ff826ece53449841a73d",
+                "summary": "Get related content",
+                "operationId": "427bf89eab777bf6c196bc0ab32fba60",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Stats"
+                        "description": "Related content retrieved successfully"
+                    }
+                }
+            }
+        },
+        "/api/admin/ja/contents/{content}/preview": {
+            "get": {
+                "tags": [
+                    "Content"
+                ],
+                "summary": "Preview content",
+                "operationId": "5b9096d2f708210ac14b879ca22a9a00",
+                "parameters": [
+                    {
+                        "name": "content",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Content preview details"
                     }
                 },
                 "security": [
@@ -554,44 +503,292 @@
                 ]
             }
         },
-        "/api/v1/contents": {
+        "/api/admin/ja/contents": {
+            "get": {
+                "tags": [
+                    "Content"
+                ],
+                "summary": "List all contents for admin",
+                "operationId": "97b96b9f98ec75f184a8b6e2f01cc2cf",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contents retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/ja/contents/{content}": {
+            "get": {
+                "tags": [
+                    "Content"
+                ],
+                "summary": "Display the specified content for admin",
+                "operationId": "06a3707a4c807e462d2aac9a72f989e0",
+                "parameters": [
+                    {
+                        "name": "content",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Content details retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/ja/contents/{content}/toggle-featured": {
             "post": {
                 "tags": [
                     "Content"
                 ],
-                "summary": "Create new content",
-                "operationId": "3c433646aa564baa8177ff062d0a8807",
+                "summary": "Toggle featured status",
+                "operationId": "fef616201f42df9ec160828feaf6f1fb",
+                "parameters": [
+                    {
+                        "name": "content",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status updated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/ja/contents/autosave/{content?}": {
+            "post": {
+                "tags": [
+                    "Content"
+                ],
+                "summary": "Auto-save draft",
+                "operationId": "3f61117b2fb9a33a7a8af59e9392a0f0",
+                "parameters": [
+                    {
+                        "name": "content",
+                        "in": "path",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Draft auto-saved"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/ja/contents/{content}/duplicate": {
+            "post": {
+                "tags": [
+                    "Content"
+                ],
+                "summary": "Duplicate content",
+                "operationId": "cb421dc6614e198e7845d6377db73948",
+                "parameters": [
+                    {
+                        "name": "content",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Content duplicated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/ja/contents/{content}/approve": {
+            "post": {
+                "tags": [
+                    "Content"
+                ],
+                "summary": "Approve pending content",
+                "operationId": "acab71e092e688254b3e471af927408d",
+                "parameters": [
+                    {
+                        "name": "content",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Content approved"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/ja/contents/{content}/reject": {
+            "post": {
+                "tags": [
+                    "Content"
+                ],
+                "summary": "Reject pending content",
+                "operationId": "c9e47dcd01823df5cbde915bb270c3c6",
+                "parameters": [
+                    {
+                        "name": "content",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Content rejected"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/ja/contents/bulk-action": {
+            "post": {
+                "tags": [
+                    "Content"
+                ],
+                "summary": "Bulk actions for contents",
+                "operationId": "d79ef5e396eb0c6367b754ce797e33c3",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "title",
-                                    "status",
-                                    "type"
+                                    "action",
+                                    "content_ids"
                                 ],
                                 "properties": {
-                                    "title": {
-                                        "type": "string"
-                                    },
-                                    "status": {
+                                    "action": {
                                         "type": "string",
                                         "enum": [
+                                            "publish",
+                                            "approve",
+                                            "reject",
                                             "draft",
-                                            "pending",
-                                            "published"
+                                            "archive",
+                                            "delete",
+                                            "change_category",
+                                            "restore",
+                                            "force_delete"
                                         ]
                                     },
-                                    "type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "post",
-                                            "page"
-                                        ]
+                                    "content_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
                                     },
-                                    "body": {
-                                        "type": "string"
+                                    "category_id": {
+                                        "type": "integer"
                                     }
                                 },
                                 "type": "object"
@@ -600,8 +797,8 @@
                     }
                 },
                 "responses": {
-                    "201": {
-                        "description": "Created"
+                    "200": {
+                        "description": "Bulk action completed"
                     }
                 },
                 "security": [
@@ -611,50 +808,13 @@
                 ]
             }
         },
-        "/api/v1/contents/{content}": {
-            "put": {
+        "/api/admin/ja/contents/{content}/lock": {
+            "post": {
                 "tags": [
                     "Content"
                 ],
-                "summary": "Update content",
-                "operationId": "4708042d0b2dc1ce674c6437d78d3332",
-                "parameters": [
-                    {
-                        "name": "content",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Updated"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Content"
-                ],
-                "summary": "Delete content",
-                "operationId": "7a1aa461fe8a328169e0e5334125ea87",
+                "summary": "Lock content for editing",
+                "operationId": "576c8a6e5e950c154ac5c69f28a5eea2",
                 "parameters": [
                     {
                         "name": "content",
@@ -667,7 +827,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Deleted"
+                        "description": "Content locked"
                     }
                 },
                 "security": [
@@ -677,41 +837,26 @@
                 ]
             }
         },
-        "/api/v1/file-manager/upload": {
+        "/api/admin/ja/contents/{content}/unlock": {
             "post": {
                 "tags": [
-                    "File Manager"
+                    "Content"
                 ],
-                "summary": "Upload file to specific path",
-                "operationId": "cf714a89f2d9786289b117d1451a520f",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "multipart/form-data": {
-                            "schema": {
-                                "required": [
-                                    "file"
-                                ],
-                                "properties": {
-                                    "file": {
-                                        "type": "string",
-                                        "format": "binary"
-                                    },
-                                    "disk": {
-                                        "type": "string"
-                                    },
-                                    "path": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
+                "summary": "Unlock content",
+                "operationId": "20e9b12ed4d4ff6b0862d008c6e2e992",
+                "parameters": [
+                    {
+                        "name": "content",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
                         }
                     }
-                },
+                ],
                 "responses": {
-                    "201": {
-                        "description": "Uploaded"
+                    "200": {
+                        "description": "Content unlocked"
                     }
                 },
                 "security": [
@@ -721,40 +866,16 @@
                 ]
             }
         },
-        "/api/v1/file-manager/folder": {
-            "post": {
+        "/api/admin/ja/dashboard/admin": {
+            "get": {
                 "tags": [
-                    "File Manager"
+                    "Dashboard"
                 ],
-                "summary": "Create new folder",
-                "operationId": "f2dca1b175a56281633baaca4ddde29c",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "name"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string"
-                                    },
-                                    "disk": {
-                                        "type": "string"
-                                    },
-                                    "path": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
+                "summary": "Get admin dashboard data",
+                "operationId": "3a56307d116e6a972d355d7c54072d1d",
                 "responses": {
-                    "201": {
-                        "description": "Created"
+                    "200": {
+                        "description": "Dashboard data retrieved successfully"
                     }
                 },
                 "security": [
@@ -764,16 +885,112 @@
                 ]
             }
         },
-        "/api/v1/media/statistics": {
+        "/api/admin/ja/dashboard/creator": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get creator dashboard data",
+                "operationId": "91e61dd843d74a092d8054da544e186f",
+                "parameters": [
+                    {
+                        "name": "days",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 30
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dashboard data retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/ja/dashboard/viewer": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get viewer dashboard data",
+                "operationId": "9557c6c3f410923a7a302cd45b5759c9",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard data retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/ja/media": {
             "get": {
                 "tags": [
                     "Media"
                 ],
-                "summary": "Get media statistics",
-                "operationId": "02898e5ef6792d061d54395ad771c4d7",
+                "summary": "List media files",
+                "operationId": "ab811c6eb528159baa696ea8edfd54dd",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "folder_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "mime_type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "trashed",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "only",
+                                "with"
+                            ]
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Statistics retrieved successfully"
+                        "description": "Media retrieved successfully"
                     }
                 },
                 "security": [
@@ -783,34 +1000,31 @@
                 ]
             }
         },
-        "/api/v1/media/upload": {
+        "/api/admin/ja/media/upload-multiple": {
             "post": {
                 "tags": [
                     "Media"
                 ],
-                "summary": "Upload a single media file",
-                "operationId": "7ff50fb7baeca2626aeb337957ff2001",
+                "summary": "Upload multiple media files",
+                "operationId": "9b29e027c3c21249f670996c642aa9bc",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "multipart/form-data": {
                             "schema": {
                                 "required": [
-                                    "file"
+                                    "files[]"
                                 ],
                                 "properties": {
-                                    "file": {
-                                        "type": "string",
-                                        "format": "binary"
+                                    "files[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
                                     },
                                     "folder_id": {
                                         "type": "integer"
-                                    },
-                                    "alt": {
-                                        "type": "string"
-                                    },
-                                    "caption": {
-                                        "type": "string"
                                     }
                                 },
                                 "type": "object"
@@ -820,14 +1034,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Media uploaded successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SuccessResponse"
-                                }
-                            }
-                        }
+                        "description": "Media uploaded successfully"
                     }
                 },
                 "security": [
@@ -837,13 +1044,13 @@
                 ]
             }
         },
-        "/api/v1/media/{media}": {
+        "/api/admin/ja/media/{media}/usage": {
             "get": {
                 "tags": [
                     "Media"
                 ],
-                "summary": "Get media details",
-                "operationId": "031a39ddcba69f3a4ccbad3e088e254d",
+                "summary": "Get media usage information",
+                "operationId": "133990bfb03088c7cf4e6d2139382c51",
                 "parameters": [
                     {
                         "name": "media",
@@ -856,7 +1063,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Media details retrieved"
+                        "description": "Usage info retrieved"
                     }
                 },
                 "security": [
@@ -864,46 +1071,18 @@
                         "sanctum": []
                     }
                 ]
-            },
-            "put": {
+            }
+        },
+        "/api/admin/ja/media/scan": {
+            "post": {
                 "tags": [
                     "Media"
                 ],
-                "summary": "Update media metadata",
-                "operationId": "787e90053c2977caa3d0e5cb873dafc4",
-                "parameters": [
-                    {
-                        "name": "media",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "name": {
-                                        "type": "string"
-                                    },
-                                    "alt": {
-                                        "type": "string"
-                                    },
-                                    "caption": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
+                "summary": "Scan storage for new media files",
+                "operationId": "64a9c1422e113e576bbcf4523642067d",
                 "responses": {
                     "200": {
-                        "description": "Media updated successfully"
+                        "description": "Scan completed"
                     }
                 },
                 "security": [
@@ -911,16 +1090,47 @@
                         "sanctum": []
                     }
                 ]
-            },
+            }
+        },
+        "/api/admin/ja/media/{id}/restore": {
+            "post": {
+                "tags": [
+                    "Media"
+                ],
+                "summary": "Restore trashed media",
+                "operationId": "80e50d13e3728e2c29deba10c84ac08d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Media restored"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/ja/media/{id}/force": {
             "delete": {
                 "tags": [
                     "Media"
                 ],
-                "summary": "Delete media",
-                "operationId": "e15b62e9628faf0871cf99dae20145c9",
+                "summary": "Permanently delete media",
+                "operationId": "4480c9c8174a21012cd8e80bcf836139",
                 "parameters": [
                     {
-                        "name": "media",
+                        "name": "id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -928,10 +1138,8 @@
                         }
                     },
                     {
-                        "name": "permanent",
+                        "name": "force",
                         "in": "query",
-                        "description": "Skip trash if true",
-                        "required": false,
                         "schema": {
                             "type": "boolean"
                         }
@@ -939,7 +1147,26 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Media deleted successfully"
+                        "description": "Media permanently deleted"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/ja/media/empty-trash": {
+            "post": {
+                "tags": [
+                    "Media"
+                ],
+                "summary": "Permanently delete all trashed media",
+                "operationId": "08d70283b068a2c21e394ad5a9fe24ec",
+                "responses": {
+                    "200": {
+                        "description": "Trash emptied"
                     }
                 },
                 "security": [
@@ -955,7 +1182,7 @@
                     "Tags"
                 ],
                 "summary": "List all tags",
-                "operationId": "e320cb59dba3e323dacbbc502509717c",
+                "operationId": "359afc3c25de5822d6bb50dd25d4221e",
                 "parameters": [
                     {
                         "name": "search",
@@ -1013,7 +1240,7 @@
                     "Tags"
                 ],
                 "summary": "Create a new tag",
-                "operationId": "d5b48558ae6b21f20e758584734e2cd7",
+                "operationId": "78d69730038f66f087716ebee8875a69",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1067,7 +1294,7 @@
                     "Tags"
                 ],
                 "summary": "Get tag details",
-                "operationId": "1937d4b1e540b35b8281880ee8e048cd",
+                "operationId": "44eb4dd4408a1dd6edc1a196055018d7",
                 "parameters": [
                     {
                         "name": "tag",
@@ -1094,7 +1321,7 @@
                     "Tags"
                 ],
                 "summary": "Update a tag",
-                "operationId": "2f4fe8b384b5d312602ee2a65151104b",
+                "operationId": "8bf57050ac19a68db04ea48be923f32b",
                 "parameters": [
                     {
                         "name": "tag",
@@ -1142,7 +1369,7 @@
                     "Tags"
                 ],
                 "summary": "Delete a tag",
-                "operationId": "17300156bba0320ee22d525aa7b0a582",
+                "operationId": "36eaef133bc1d416740166618d630dd8",
                 "parameters": [
                     {
                         "name": "tag",
@@ -1171,7 +1398,7 @@
                     "Tags"
                 ],
                 "summary": "Bulk delete tags",
-                "operationId": "b6f743adec9cdf155db3f32cf5a9bab3",
+                "operationId": "001f7f84bfd3451d795fad03a5ed98d8",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1207,7 +1434,7 @@
                     "Tags"
                 ],
                 "summary": "Get tag statistics",
-                "operationId": "979ab3ee59adc73fe5675c0b8b6a0d4e",
+                "operationId": "1f251697030e22f6ca8858f686937e19",
                 "responses": {
                     "200": {
                         "description": "Statistics retrieved successfully"
@@ -1357,10 +1584,6 @@
     },
     "tags": [
         {
-            "name": "Authentication",
-            "description": "User authentication endpoints"
-        },
-        {
             "name": "Categories",
             "description": "Category management endpoints"
         },
@@ -1369,7 +1592,7 @@
             "description": "Content management endpoints"
         },
         {
-            "name": "File Manager"
+            "name": "Dashboard"
         },
         {
             "name": "Media",

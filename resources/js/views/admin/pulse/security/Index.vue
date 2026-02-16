@@ -312,7 +312,7 @@ const auditRunning = ref(false);
 const vulnPagination = ref<PaginationInfo>({ total: 0, current_page: 1, last_page: 1 });
 
 // Filters state
-const cspFilters = reactive({ status: 'new', directive: 'all', date_from: '', date_to: '', page: 1, per_page: 50 });
+const cspFilters = reactive({ status: 'new', directive: '', date_from: '', date_to: '', page: 1, per_page: 50 });
 const slowQueryFilters = reactive({ route: '', min_duration: '', date_from: '', date_to: '', page: 1, per_page: 50 });
 const vulnFilters = reactive({ source: 'all', severity: 'all', status: 'all', package: '', page: 1, per_page: 50 });
 
@@ -322,7 +322,7 @@ const vulnFilters = reactive({ source: 'all', severity: 'all', status: 'all', pa
 const fetchLogs = async (): Promise<void> => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/ja/security/journal', { params: { per_page: 100 } });
+        const response = await api.get('/admin/janet/security/journal', { params: { per_page: 100 } });
         const { data } = parseResponse<Log[]>(response);
         logs.value = ensureArray(data);
     } catch (error: unknown) {
@@ -341,7 +341,7 @@ const clearLogs = async (): Promise<void> => {
     });
     if (!confirmed) return;
     try {
-        await api.delete('admin/ja/security/journal');
+        await api.delete('/admin/janet/security/journal');
         toast.success.action(t('features.system.logs.messages.cleared'));
         fetchLogs();
     } catch (error: unknown) {
@@ -352,7 +352,7 @@ const clearLogs = async (): Promise<void> => {
 
 const fetchStats = async (): Promise<void> => {
     try {
-        const response = await api.get('admin/ja/security/stats');
+        const response = await api.get('/admin/janet/security/stats');
         statistics.value = parseSingleResponse<Statistics>(response) as Statistics || null;
     } catch (error: unknown) {
         logger.error('Failed to fetch stats:', error);
@@ -361,7 +361,7 @@ const fetchStats = async (): Promise<void> => {
 
 const fetchBlocklist = async (): Promise<void> => {
     try {
-        const response = await api.get('admin/ja/security/blocklist');
+        const response = await api.get('/admin/janet/security/blocklist');
         blocklist.value = ensureArray(parseSingleResponse<IpManagementItem[]>(response)) as IpManagementItem[];
     } catch (error: unknown) {
         logger.error('Failed to fetch blocklist:', error);
@@ -370,7 +370,7 @@ const fetchBlocklist = async (): Promise<void> => {
 
 const fetchWhitelist = async (): Promise<void> => {
     try {
-        const response = await api.get('admin/ja/security/whitelist');
+        const response = await api.get('/admin/janet/security/whitelist');
         whitelist.value = ensureArray(parseSingleResponse<IpManagementItem[]>(response)) as IpManagementItem[];
     } catch (error: unknown) {
         logger.error('Failed to fetch whitelist:', error);
@@ -389,7 +389,7 @@ const blockIP = async (ip: string): Promise<void> => {
     });
     if (!confirmed) return;
     try {
-        await api.post('admin/ja/security/block-ip', { ip_address: ip });
+        await api.post('/admin/janet/security/block-ip', { ip_address: ip });
         toast.success.action(t('features.security.messages.blockSuccess'));
         await fetchBlocklist();
         await fetchLogs();
@@ -401,7 +401,7 @@ const blockIP = async (ip: string): Promise<void> => {
 
 const checkIPStatus = async (ip: string): Promise<void> => {
     try {
-        const response = await api.get('admin/ja/security/check-ip', { params: { ip_address: ip } });
+        const response = await api.get('/admin/janet/security/check-ip', { params: { ip_address: ip } });
         const status = parseSingleResponse<IpStatus>(response) as IpStatus || null;
         overviewTabRef.value?.setIpStatus(status);
     } catch (error: unknown) {
@@ -419,7 +419,7 @@ const blockIPFromLog = async (ip: string): Promise<void> => {
     });
     if (!confirmed) return;
     try {
-        await api.post('admin/ja/security/block-ip', { ip_address: ip });
+        await api.post('/admin/janet/security/block-ip', { ip_address: ip });
         toast.success.action(t('features.security.messages.blockSuccess'));
         await fetchBlocklist();
         await fetchLogs();
@@ -439,7 +439,7 @@ const bulkBlockFromLogs = async (ips: string[]): Promise<void> => {
     });
     if (!confirmed) return;
     try {
-        await api.post('admin/ja/security/bulk-block', { ips });
+        await api.post('/admin/janet/security/bulk-block', { ips });
         toast.success.action(t('features.security.messages.bulkBlockSuccess'));
         overviewTabRef.value?.clearSelection();
         await fetchBlocklist();
@@ -462,7 +462,7 @@ const removeFromBlocklist = async (ip: string): Promise<void> => {
     });
     if (!confirmed) return;
     try {
-        await api.post('admin/ja/security/unblock-ip', { ip_address: ip });
+        await api.post('/admin/janet/security/unblock-ip', { ip_address: ip });
         toast.success.action(t('features.security.messages.unblockSuccess'));
         await fetchBlocklist();
     } catch (error: unknown) {
@@ -480,8 +480,8 @@ const moveToWhitelist = async (ip: string): Promise<void> => {
     });
     if (!confirmed) return;
     try {
-        await api.post('/admin/ja/security/unblock-ip', { ip_address: ip });
-        await api.post('/admin/ja/security/whitelist-ip', { ip_address: ip });
+        await api.post('/admin/janet/security/unblock-ip', { ip_address: ip });
+        await api.post('/admin/janet/security/whitelist-ip', { ip_address: ip });
         toast.success.action(t('features.security.messages.movedToWhitelist'));
         await fetchBlocklist();
         await fetchWhitelist();
@@ -501,7 +501,7 @@ const bulkUnblock = async (ips: string[]): Promise<void> => {
     });
     if (!confirmed) return;
     try {
-        await api.post('/admin/ja/security/bulk-unblock', { ips });
+        await api.post('/admin/janet/security/bulk-unblock', { ips });
         toast.success.action(t('features.security.messages.bulkUnblockSuccess'));
         blocklistTabRef.value?.clearSelection();
         await fetchBlocklist();
@@ -516,7 +516,7 @@ const bulkUnblock = async (ips: string[]): Promise<void> => {
 // ========================================
 const addToWhitelist = async (ip: string): Promise<void> => {
     try {
-        await api.post('/admin/ja/security/whitelist-ip', { ip_address: ip });
+        await api.post('/admin/janet/security/whitelist-ip', { ip_address: ip });
         toast.success.action(t('features.security.messages.whitelistSuccess'));
         await fetchWhitelist();
     } catch (error: unknown) {
@@ -534,7 +534,7 @@ const removeFromWhitelist = async (ip: string): Promise<void> => {
     });
     if (!confirmed) return;
     try {
-        await api.post('/admin/ja/security/remove-whitelist', { data: { ip_address: ip } });
+        await api.post('/admin/janet/security/remove-whitelist', { data: { ip_address: ip } });
         toast.success.action(t('features.security.messages.whitelistRemoveSuccess'));
         await fetchWhitelist();
     } catch (error: unknown) {
@@ -553,7 +553,7 @@ const bulkRemoveWhitelist = async (ips: string[]): Promise<void> => {
     });
     if (!confirmed) return;
     try {
-        await api.post('/admin/ja/security/bulk-remove-whitelist', { ips });
+        await api.post('/admin/janet/security/bulk-remove-whitelist', { ips });
         toast.success.action(t('features.security.messages.bulkWhitelistRemoveSuccess'));
         whitelistTabRef.value?.clearSelection();
         await fetchWhitelist();
@@ -571,7 +571,7 @@ const fetchCspReports = async (): Promise<void> => {
     try {
         const params: Record<string, string | number> = { ...cspFilters };
         if (params.status === 'all') params.status = '';
-        const response = await api.get('admin/ja/security/csp-reports', { params });
+        const response = await api.get('/admin/janet/security/csp-reports', { params });
         const result = response.data?.data ? response.data.data : response.data;
         cspReports.value = (result.data as CspReport[]) || [];
         cspPagination.value = { total: result.total || 0, current_page: result.current_page || 1, last_page: result.last_page || 1 };
@@ -584,7 +584,7 @@ const fetchCspReports = async (): Promise<void> => {
 
 const fetchCspStats = async (): Promise<void> => {
     try {
-        const response = await api.get('admin/ja/security/csp-reports/statistics');
+        const response = await api.get('/admin/janet/security/csp-reports/statistics');
         cspStats.value = (response.data?.data as CspStats) || {};
     } catch (error: unknown) {
         logger.error('Failed to fetch CSP stats:', error);
@@ -609,7 +609,7 @@ const cspBulkAction = async (action: string, ids: number[]): Promise<void> => {
     });
     if (!confirmed) return;
     try {
-        await api.post('/admin/ja/security/csp-reports/bulk-action', { ids, action });
+        await api.post('/admin/janet/security/csp-reports/bulk-action', { ids, action });
         toast.success.action(t('common.messages.success.actionSuccess', { item: 'Reports', action: action.replace('_', ' ') }));
         fetchCspReports();
         fetchCspStats();
@@ -624,7 +624,7 @@ const cspBulkAction = async (action: string, ids: number[]): Promise<void> => {
 const fetchSlowQueries = async (): Promise<void> => {
     slowQueryLoading.value = true;
     try {
-        const response = await api.get('/admin/ja/security/slow-queries', { params: slowQueryFilters });
+        const response = await api.get('/admin/janet/security/slow-queries', { params: slowQueryFilters });
         slowQueries.value = (response.data?.data?.data as SlowQuery[]) || [];
         slowQueryPagination.value = { total: response.data?.data?.total || 0, current_page: response.data?.data?.current_page || 1, last_page: response.data?.data?.last_page || 1 };
     } catch (error: unknown) {
@@ -636,7 +636,7 @@ const fetchSlowQueries = async (): Promise<void> => {
 
 const fetchSlowQueryStats = async (): Promise<void> => {
     try {
-        const response = await api.get('/admin/ja/security/slow-queries/statistics');
+        const response = await api.get('/admin/janet/security/slow-queries/statistics');
         slowQueryStats.value = (response.data?.data as SlowQueryStats) || {};
     } catch (error: unknown) {
         logger.error('Failed to fetch slow query stats:', error);
@@ -662,7 +662,7 @@ const fetchVulnerabilities = async (): Promise<void> => {
         if (params.source === 'all') params.source = '';
         if (params.severity === 'all') params.severity = '';
         if (params.status === 'all') params.status = '';
-        const response = await api.get('/admin/ja/security/dependency-vulnerabilities', { params });
+        const response = await api.get('/admin/janet/security/dependency-vulnerabilities', { params });
         const result = response.data?.data ? response.data.data : response.data;
         vulnerabilities.value = (result.data as Vulnerability[]) || [];
         vulnPagination.value = { total: result.total || 0, current_page: result.current_page || 1, last_page: result.last_page || 1 };
@@ -675,7 +675,7 @@ const fetchVulnerabilities = async (): Promise<void> => {
 
 const fetchVulnStats = async (): Promise<void> => {
     try {
-        const response = await api.get('/admin/ja/security/dependency-vulnerabilities/statistics');
+        const response = await api.get('/admin/janet/security/dependency-vulnerabilities/statistics');
         vulnStats.value = (response.data?.data as VulnStats) || { total: 0, critical: 0, high: 0, medium: 0, low: 0 };
     } catch (error: unknown) {
         logger.error('Failed to fetch vulnerability stats:', error);
@@ -685,7 +685,7 @@ const fetchVulnStats = async (): Promise<void> => {
 const runDependencyAudit = async (): Promise<void> => {
     auditRunning.value = true;
     try {
-        await api.post('/admin/ja/security/run-dependency-audit');
+        await api.post('/admin/janet/security/run-dependency-audit');
         toast.success.action(t('features.security.vulnerabilities.auditCompleted'));
         fetchVulnerabilities();
         fetchVulnStats();
@@ -698,7 +698,7 @@ const runDependencyAudit = async (): Promise<void> => {
 
 const updateVulnStatus = async (vuln: Vulnerability, status: string): Promise<void> => {
     try {
-        await api.put(`/admin/ja/security/dependency-vulnerabilities/${vuln.id}`, { status });
+        await api.put(`/admin/janet/security/dependency-vulnerabilities/${vuln.id}`, { status });
         vuln.status = status;
         toast.success.action(t('common.messages.success.updated', { item: 'Status' }));
     } catch (error: unknown) {

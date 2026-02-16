@@ -176,10 +176,10 @@ const handleSubmit = async () => {
             status_code: Number(form.value.status_code)
         };
         if (props.redirect) {
-            await api.put(`/admin/ja/redirects/${props.redirect.id}`, payload);
+            await api.put(`/admin/janet/redirects/${props.redirect.id}`, payload);
             toast.success.update(t('features.redirects.title'));
         } else {
-            await api.post('/admin/ja/redirects', payload);
+            await api.post('/admin/janet/redirects', payload);
             toast.success.create(t('features.redirects.title'));
         }
         emit('saved');

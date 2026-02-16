@@ -28,6 +28,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read string|null $city
  * @property-read \App\Models\Core\User|null $user
  * @property-read \App\Models\Core\AnalyticsSession|null $session
+ * @property string $referer_host
+ * @property int $count
  */
 class AnalyticsVisit extends Model
 {

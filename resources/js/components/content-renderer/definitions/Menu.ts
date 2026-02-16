@@ -13,7 +13,7 @@ export default {
             key: 'menu_id',
             type: 'data_select',
             label: 'System Menu',
-            source: '/admin/ja/menus',
+            source: '/admin/janet/menus',
             description: 'Select a menu managed in the Menu Builder.',
             default: null
         },

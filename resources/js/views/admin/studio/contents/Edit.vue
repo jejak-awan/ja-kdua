@@ -309,7 +309,7 @@ const formatDateTimeLocal = (dateString: string | undefined | null): string | un
 const fetchContent = async () => {
     loading.value = true;
     try {
-        const response = await api.get(`/admin/ja/contents/${contentId}`);
+        const response = await api.get(`/admin/janet/contents/${contentId}`);
         const content = parseSingleResponse<Content>(response);
         
         if (content) {
@@ -382,7 +382,7 @@ const fetchContent = async () => {
 
 const lockContent = async () => {
     try {
-        const response = await api.post(`/admin/ja/contents/${contentId}/lock`);
+        const response = await api.post(`/admin/janet/contents/${contentId}/lock`);
         const data = parseSingleResponse<LockStatus>(response);
         if (data && typeof data === 'object' && 'is_locked' in data) {
             lockStatus.value = data;
@@ -402,7 +402,7 @@ const lockContent = async () => {
 
 const checkLockStatus = async () => {
     try {
-        const response = await api.get(`/admin/ja/contents/${contentId}/lock-status`);
+        const response = await api.get(`/admin/janet/contents/${contentId}/lock-status`);
         const data = parseSingleResponse<LockStatus>(response);
         if (data) {
             lockStatus.value = data;
@@ -414,7 +414,7 @@ const checkLockStatus = async () => {
 
 const handleUnlock = async () => {
     try {
-        await api.post(`/admin/ja/contents/${contentId}/unlock`);
+        await api.post(`/admin/janet/contents/${contentId}/unlock`);
         lockStatus.value = { is_locked: false, can_unlock: true };
         if (lockInterval.value) {
             clearInterval(lockInterval.value);
@@ -451,7 +451,7 @@ const handlePublishFromPreview = async () => {
 
 const fetchCategories = async () => {
     try {
-        const response = await api.get('/admin/ja/categories', { params: { per_page: 100 } });
+        const response = await api.get('/admin/janet/categories', { params: { per_page: 100 } });
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
     } catch (error: unknown) {
@@ -466,7 +466,7 @@ const fetchTags = async (query = '') => {
         if (query) {
             params.search = query;
         }
-        const response = await api.get('/admin/ja/tags', { params });
+        const response = await api.get('/admin/janet/tags', { params });
         const { data } = parseResponse(response);
         tags.value = ensureArray(data);
     } catch (error: unknown) {
@@ -476,7 +476,7 @@ const fetchTags = async (query = '') => {
 
 const fetchMenus = async () => {
     try {
-        const response = await api.get('/admin/ja/menus');
+        const response = await api.get('/admin/janet/menus');
         const data = response.data?.data || response.data || [];
         menus.value = Array.isArray(data) ? data : [];
     } catch (error: unknown) {
@@ -541,7 +541,7 @@ const handleSubmit = async (status: string | null = null) => {
             new_tags: newTags,
         };
 
-        const response = await api.put(`/admin/ja/contents/${contentId}`, payload);
+        const response = await api.put(`/admin/janet/contents/${contentId}`, payload);
         const updatedContent = parseSingleResponse(response);
         
         if (updatedContent) {

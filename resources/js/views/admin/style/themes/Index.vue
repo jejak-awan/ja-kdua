@@ -255,7 +255,7 @@ const selectedTheme = ref<Theme | null>(null);
 const fetchThemes = async () => {
     try {
         const params = selectedType.value ? { type: selectedType.value } : {};
-        const response = await api.get('/admin/ja/themes', { params });
+        const response = await api.get('/admin/janet/themes', { params });
         const { data } = parseResponse(response);
         themes.value = ensureArray(data);
     } catch (error: unknown) {
@@ -267,7 +267,7 @@ const fetchThemes = async () => {
 const scanThemes = async () => {
     scanning.value = true;
     try {
-        const response = await api.post('/admin/ja/themes/scan');
+        const response = await api.post('/admin/janet/themes/scan');
         await fetchThemes();
         const count = response.data?.data?.count || 0;
         toast.success(t('features.themes.messages.scanSuccess', { count }));
@@ -290,7 +290,7 @@ const activateTheme = async (theme: Theme) => {
     if (!confirmed) return;
 
     try {
-        await api.post(`/admin/ja/themes/${theme.slug}/activate`);
+        await api.post(`/admin/janet/themes/${theme.slug}/activate`);
         await fetchThemes();
         toast.success(t('features.themes.messages.activateSuccess'));
     } catch (error: unknown) {
@@ -301,7 +301,7 @@ const activateTheme = async (theme: Theme) => {
 
 const validateTheme = async (theme: Theme) => {
     try {
-        const response = await api.post(`/admin/ja/themes/${theme.slug}/validate`);
+        const response = await api.post(`/admin/janet/themes/${theme.slug}/validate`);
         const data = response.data?.data || response.data;
         
         if (data.valid) {

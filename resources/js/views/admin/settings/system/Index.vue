@@ -284,12 +284,12 @@ const displayDisk = computed(() => {
 const fetchSystemInfo = async (): Promise<void> => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/ja/system/info');
+        const response = await api.get('/admin/janet/system/info');
         systemInfo.value = parseSingleResponse<SystemInfo>(response) || {};
 
         // Fetch cache status
         try {
-            const cacheResponse = await api.get('/admin/ja/system/cache-status');
+            const cacheResponse = await api.get('/admin/janet/system/cache-status');
             cacheStatus.value = parseSingleResponse<CacheData>(cacheResponse)?.status || 'Active';
         } catch (error: unknown) {
             logger.warning('Failed to fetch cache status:', error);

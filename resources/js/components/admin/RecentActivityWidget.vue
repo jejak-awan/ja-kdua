@@ -133,7 +133,7 @@ const fetchActivities = async () => {
     }
     
     try {
-        const response = await api.get('/admin/ja/activity-journal', { params: { per_page: 6 } });
+        const response = await api.get('/admin/janet/activity-journal', { params: { per_page: 6 } });
         const { data } = parseResponse(response);
         activities.value = (data as Activity[]) || [];
     } catch (error: unknown) {

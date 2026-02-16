@@ -24,7 +24,7 @@ export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 }
 
 const api: AxiosInstance = axios.create({
-    baseURL: '/api/core',
+    baseURL: '/api/v1',
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -180,7 +180,7 @@ api.interceptors.response.use(
             triggerVaporLock();
 
             // Public endpoints are frontend routes that don't require session termination on 401
-            const publicEndpoints = ['/api/core/cms/', '/api/core/cms/contents', '/api/core/cms/categories', '/api/core/cms/tags', '/api/core/cms/themes/active', '/api/core/cms/search', '/api/core/cms/languages'];
+            const publicEndpoints = ['/api/v1/ja/', '/api/v1/ja/contents', '/api/v1/ja/categories', '/api/v1/ja/tags', '/api/v1/ja/themes/active', '/api/v1/ja/search', '/api/v1/ja/languages'];
             const isPublicEndpoint = publicEndpoints.some(endpoint => url.startsWith(endpoint));
             const hasAuthHeader = !!error.config?.headers?.Authorization;
 

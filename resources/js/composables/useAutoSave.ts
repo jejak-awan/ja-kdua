@@ -114,10 +114,10 @@ export function useAutoSave(form: Ref<Record<string, unknown>>, contentId: Ref<n
 
             if (currentContentId) {
                 // Update existing content
-                response = await api.patch(`/admin/ja/contents/${currentContentId}/autosave`, payload);
+                response = await api.patch(`/admin/janet/contents/${currentContentId}/autosave`, payload);
             } else {
                 // Create new draft
-                response = await api.post('/admin/ja/contents/autosave', payload);
+                response = await api.post('/admin/janet/contents/autosave', payload);
 
                 // If new content was created, update contentId
                 if (response.data?.data?.id) {

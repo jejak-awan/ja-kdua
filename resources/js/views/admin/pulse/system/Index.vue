@@ -159,7 +159,7 @@ const highlightedLogContent = computed(() => {
 
 const fetchLogFiles = async () : Promise<void> => {
     try {
-        const response = await api.get('admin/ja/system-journal');
+        const response = await api.get('admin/janet/system-journal');
         const { data } = parseResponse<LogFile[]>(response);
         logFiles.value = ensureArray(data);
     } catch (error: unknown) {
@@ -172,7 +172,7 @@ const selectLogFile = async (logFile: LogFile) : Promise<void> => {
     selectedLogFile.value = logFile;
     loadingLog.value = true;
     try {
-        const response = await api.get(`admin/ja/system-journal/${logFile.name}`);
+        const response = await api.get(`admin/janet/system-journal/${logFile.name}`);
         const data = parseSingleResponse<LogResponse>(response) || { content: '' };
         logContent.value = data.content || '';
     } catch (error: unknown) {
@@ -191,7 +191,7 @@ const refreshLog = () => {
 
 const downloadLog = async (logFile: LogFile) : Promise<void> => {
     try {
-        const response = await api.get(`admin/ja/system-journal/${logFile.name}/download`, {
+        const response = await api.get(`admin/janet/system-journal/${logFile.name}/download`, {
             responseType: 'blob',
         });
         const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -220,7 +220,7 @@ const clearLogs = async () : Promise<void> => {
 
     clearing.value = true;
     try {
-        await api.delete('admin/ja/system-journal');
+        await api.delete('admin/janet/system-journal');
         toast.success.action(t('features.system.logs.messages.cleared'));
         logContent.value = '';
         fetchLogFiles();

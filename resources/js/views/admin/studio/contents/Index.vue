@@ -270,7 +270,7 @@ const fetchContents = async (page: number = 1) => {
             params.status = statusFilter.value;
         }
 
-        const response = await api.get('/admin/ja/contents', { params });
+        const response = await api.get('/admin/janet/contents', { params });
         const { data, pagination: meta } = parseResponse<Content[]>(response);
         
         contents.value = ensureArray(data);
@@ -288,7 +288,7 @@ const fetchContents = async (page: number = 1) => {
 
 const fetchStats = async () => {
     try {
-        const response = await api.get('/admin/ja/contents/stats');
+        const response = await api.get('/admin/janet/contents/stats');
         const data = parseSingleResponse<ContentStats>(response);
         stats.value = data || {
             total: 0,
@@ -309,7 +309,7 @@ const toggleFeatured = async (content: Content) => {
     content.is_featured = !previousState;
 
     try {
-        await api.patch(`/admin/ja/contents/${content.id}/toggle-featured`);
+        await api.patch(`/admin/janet/contents/${content.id}/toggle-featured`);
         toast.success.action(t('common.messages.success.updated'));
     } catch (error: unknown) {
         content.is_featured = previousState;
@@ -366,7 +366,7 @@ const handleBulkAction = async (action: string) => {
     }
 
     try {
-        await api.post('/admin/ja/contents/bulk-action', {
+        await api.post('/admin/janet/contents/bulk-action', {
             action: action,
             content_ids: selectedContents.value,
         });
@@ -394,7 +394,7 @@ const handleEmptyTrash = async () => {
     if (!confirmed) return;
 
     try {
-        await api.delete('/admin/ja/contents/trash/empty');
+        await api.delete('/admin/janet/contents/trash/empty');
         await fetchContents();
         await fetchStats();
         toast.success.action(t('common.messages.success.deleted') || 'Trash emptied successfully');
@@ -413,7 +413,7 @@ const handleDelete = async (content: Content) => {
     });
     if (!confirmed) return;
     try {
-        await api.delete(`/admin/ja/contents/${content.id}`);
+        await api.delete(`/admin/janet/contents/${content.id}`);
         await fetchContents();
         await fetchStats();
     } catch (error: unknown) {
@@ -433,7 +433,7 @@ const handleRestore = async (content: Content) => {
     if (!confirmed) return;
 
     try {
-        await api.put(`/admin/ja/contents/${content.id}/restore`);
+        await api.put(`/admin/janet/contents/${content.id}/restore`);
         await fetchContents();
         await fetchStats();
         toast.success.action(t('common.messages.success.restored') || 'Content restored');
@@ -452,7 +452,7 @@ const handleForceDelete = async (content: Content) => {
     });
     if (!confirmed) return;
     try {
-        await api.delete(`/admin/ja/contents/${content.id}/force-delete`);
+        await api.delete(`/admin/janet/contents/${content.id}/force-delete`);
         await fetchContents();
         await fetchStats();
     } catch (error: unknown) {

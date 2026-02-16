@@ -3,7 +3,7 @@
 namespace App\Imports\Isp;
 
 use App\Models\Core\User;
-use App\Models\Isp\Customer;
+use App\Models\Isp\Customer\Customer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\ToModel;

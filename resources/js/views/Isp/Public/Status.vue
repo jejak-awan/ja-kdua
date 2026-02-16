@@ -5,9 +5,9 @@
             <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-primary-foreground">
                 <Globe class="w-6 h-6" />
             </div>
-            <h1 class="text-2xl font-black tracking-tighter uppercase transition-all hover:tracking-normal cursor-default">
+            <h2 class="text-2xl font-black tracking-tighter transition-all hover:tracking-normal cursor-default">
                 K2NET <span class="text-primary font-light">Status</span>
-            </h1>
+            </h2>
         </div>
 
         <div class="w-full max-w-2xl space-y-8">
@@ -29,7 +29,7 @@
                         <p class="text-muted-foreground">
                             {{ statusData?.is_healthy ? t('isp.outages.public.description_healthy') : t('isp.outages.public.description_issues') }}
                         </p>
-                        <div class="pt-4 text-[10px] text-muted-foreground uppercase tracking-widest">
+                        <div class="pt-4 text-[10px] text-muted-foreground tracking-tight">
                             {{ t('isp.outages.public.last_checked') }}: {{ dayjs(statusData?.last_updated).format('HH:mm:ss') }}
                         </div>
                     </div>
@@ -38,7 +38,7 @@
 
             <!-- Active Incidents -->
             <div v-if="statusData?.active_incidents?.length" class="space-y-4">
-                <h3 class="text-sm font-semibold uppercase tracking-widest text-muted-foreground px-2">
+                <h3 class="text-sm font-semibold tracking-tight text-muted-foreground px-2">
                     {{ t('isp.outages.public.active') }}
                 </h3>
                 <Card v-for="incident in statusData.active_incidents" :key="incident.id" class="rounded-2xl border-l-4 border-l-destructive shadow-sm">
@@ -66,7 +66,7 @@
 
             <!-- Recent History -->
             <div class="space-y-4">
-                <h3 class="text-sm font-semibold uppercase tracking-widest text-muted-foreground px-2">
+                <h3 class="text-sm font-semibold tracking-tight text-muted-foreground px-2">
                     {{ t('isp.outages.public.recent') }}
                 </h3>
                 <div class="bg-card/30 rounded-2xl border border-border divide-y divide-border overflow-hidden">
@@ -78,7 +78,7 @@
                         <div class="space-y-1">
                             <div class="font-bold">{{ incident.title }}</div>
                             <p class="text-xs text-muted-foreground line-clamp-2">{{ incident.description }}</p>
-                            <div class="text-[10px] text-muted-foreground uppercase pt-1">
+                            <div class="text-[10px] text-muted-foreground pt-1">
                                 Resolved on {{ dayjs(incident.resolved_at).format('MMM DD, HH:mm') }}
                             </div>
                         </div>
@@ -142,7 +142,7 @@ const loading = ref(true);
 const fetchStatus = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/api/core/public/isp/status');
+        const response = await api.get('/public/isp/status');
         if (response.data.success) {
             statusData.value = response.data.data;
         }

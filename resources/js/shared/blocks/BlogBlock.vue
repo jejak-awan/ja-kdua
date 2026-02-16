@@ -146,7 +146,7 @@ const fetchPosts = async () => {
         
         const sort = order === 'desc' ? `-${sortField}` : sortField
         
-        const response = await api.get('/cms/contents', {
+        const response = await api.get('/ja/contents', {
             params: {
                 type: 'post',
                 category: category || undefined,

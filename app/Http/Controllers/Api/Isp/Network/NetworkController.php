@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Isp\Network;
 
 use App\Http\Controllers\Api\Core\BaseApiController;
-use App\Models\Isp\IpAddress;
-use App\Models\Isp\IspPlan;
-use App\Models\Isp\Subnet;
+use App\Models\Isp\Network\IpAddress;
+use App\Models\Isp\Billing\IspPlan;
+use App\Models\Isp\Network\Subnet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -90,7 +90,7 @@ class NetworkController extends BaseApiController
     public function storeProfile(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
-            'id' => 'nullable|exists:isp_service_profiles,id',
+            'id' => 'nullable|exists:isp_plans,id',
             'name' => 'required|string',
             'download_limit' => 'required|integer',
             'upload_limit' => 'required|integer',

@@ -19,8 +19,8 @@ export const useContentStore = defineStore('content', {
             this.loading = true;
             try {
                 // Determine endpoint based on type? 
-                // Currently code uses /cms/contents/{slug} generic endpoint
-                const response = await api.get(`/cms/contents/${slug}`);
+                // Currently code uses /ja/contents/{slug} generic endpoint
+                const response = await api.get(`/ja/contents/${slug}`);
                 this.currentContent = response.data.data || response.data;
             } catch (e) {
                 logger.error('Failed to fetch content:', e);

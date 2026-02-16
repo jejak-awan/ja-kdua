@@ -498,7 +498,7 @@ const isDirty = computed(() => {
 const fetchRoles = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/ja/roles?limit=100');
+        const response = await api.get('/admin/janet/roles?limit=100');
         // Handle Laravel paginated response structure: 
         // response.data (axios) -> .data (Common Response) -> .data (Paginator collection)
         const rawRoles = response.data?.data?.data || response.data?.data || response.data || [];
@@ -513,7 +513,7 @@ const fetchRoles = async () => {
 
 const fetchPermissions = async () => {
     try {
-        const response = await api.get('/admin/ja/roles/permissions');
+        const response = await api.get('/admin/janet/roles/permissions');
         const rawPerms = response.data?.data || response.data || {};
         
         // Sanitize permissions
@@ -684,18 +684,18 @@ const saveChanges = async () => {
     try {
         if (workspaceMode.value === 'create') {
             if (!validateWithZod({ name: form.value.name, permissions: form.value.permissions })) return;
-            await api.post('/admin/ja/roles', { name: form.value.name, permissions: form.value.permissions });
+            await api.post('/admin/janet/roles', { name: form.value.name, permissions: form.value.permissions });
             toast.success.create('Role');
             router.push({ name: 'roles' }); // Back to index
         } else if (workspaceMode.value === 'edit') {
             if (!activeRoleId.value) return;
             if (!validateWithZod({ name: form.value.name, permissions: form.value.permissions })) return;
-            await api.put(`/admin/ja/roles/${activeRoleId.value}`, { name: form.value.name, permissions: form.value.permissions });
+            await api.put(`/admin/janet/roles/${activeRoleId.value}`, { name: form.value.name, permissions: form.value.permissions });
             toast.success.update('Role');
         } else if (workspaceMode.value === 'comparison') {
             const promises = Object.entries(form.value.matrixPermissions).map(([rId, perms]) => {
                 const role = getRole(rId);
-                return api.put(`/admin/ja/roles/${rId}`, { name: role?.name, permissions: perms });
+                return api.put(`/admin/janet/roles/${rId}`, { name: role?.name, permissions: perms });
             });
             await Promise.all(promises);
             toast.success.update('Roles synced successfully');
@@ -728,7 +728,7 @@ const deleteRole = async (role: Role) => {
     const confirmed = await confirm({ title: 'Delete Role', message: `Delete "${role.name}"?`, variant: 'danger' });
     if (!confirmed) return;
     try {
-        await api.delete(`/admin/ja/roles/${role.id}`);
+        await api.delete(`/admin/janet/roles/${role.id}`);
         toast.success.delete('Role');
         if (activeRoleId.value === role.id) router.push({ name: 'roles' });
         selectedRoleIds.value = selectedRoleIds.value.filter(id => id !== role.id);

@@ -8,6 +8,18 @@
     "coordinates": "Lokasi",
     "view_profile": "Lihat Profil",
     "contact": "Hubungi",
+    "map_modes": {
+        "markers": "Titik Pelanggan",
+        "coverage": "Heatmap Coverage",
+        "revenue": "Revenue per Area",
+        "potential": "Potensi Ekspansi"
+    },
+    "risk": {
+        "label": "Risiko Churn",
+        "healthy": "Sehat",
+        "warning": "Waspada",
+        "critical": "Kritis"
+    },
     "stats": {
         "total": "Total Pelanggan",
         "active": "Aktif",
@@ -17,6 +29,30 @@
     "actions": {
         "import": "Impor Pelanggan",
         "export": "Ekspor Pelanggan",
-        "new": "Pelanggan Baru"
+        "new": "Pelanggan Baru",
+        "isolate": "Isolir Pelanggan",
+        "unisolate": "Pulihkan Koneksi",
+        "view_technical": "Detail Teknis"
+    },
+    "fields": {
+        "status": "Status",
+        "username": "Username (PPPoE/Hotspot)",
+        "password": "Kata Sandi",
+        "mac_address": "Alamat MAC",
+        "ip_address": "Alamat IP",
+        "fraud_alert": "Peringatan Deteksi Fraud",
+        "multi_login": "Upaya Multi-login",
+        "isolation_reason": "Alasan Isolir",
+        "prorata_status": "Prorata Diterapkan",
+        "installation_fee": "Biaya Pemasangan"
+    },
+    "fraud": {
+        "title": "Deteksi Fraud",
+        "desc": "Sistem mendeteksi aktivitas mencurigakan pada akun ini.",
+        "flags": {
+            "ttl": "TTL Tidak Cocok (Potensi Berbagi)",
+            "multi_mac": "Beberapa Alamat MAC",
+            "concurrent": "Sesi Simultan"
+        }
     }
 }

@@ -286,7 +286,7 @@ const currentSettings = computed(() => {
 const fetchSettings = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/ja/settings');
+        const response = await api.get('/admin/janet/settings');
         const { data } = parseResponse(response);
         settings.value = ensureArray(data) as Setting[];
 
@@ -417,7 +417,7 @@ const handleSubmit = async () => {
             };
         });
 
-        await api.post('/admin/ja/settings/bulk-update', {
+        await api.post('/admin/janet/settings/bulk-update', {
             settings: settingsToUpdate,
         });
         
@@ -451,7 +451,7 @@ const validateEmailConfig = async () => {
     validatingConfig.value = true;
     configValidation.value = null;
     try {
-        const response = await api.get('/admin/ja/email-test/validate-config');
+        const response = await api.get('/admin/janet/email-test/validate-config');
         configValidation.value = parseSingleResponse<{ valid: boolean; errors: string[]; warnings: string[] }>(response);
     } catch (error: unknown) {
         let errorMsg = t('features.settings.emailTest.failed');
@@ -473,7 +473,7 @@ const testSmtpConnection = async () => {
     testingConnection.value = true;
     connectionResult.value = null;
     try {
-        const response = await api.post('/admin/ja/email-test/test-connection');
+        const response = await api.post('/admin/janet/email-test/test-connection');
         connectionResult.value = parseSingleResponse<{ connected: boolean; host: string; port: string; error?: string }>(response);
     } catch (error: unknown) {
         let errorMsg = t('features.settings.emailTest.failed');
@@ -504,7 +504,7 @@ const sendTestEmail = async () => {
     sendingTestEmail.value = true;
     testEmailResult.value = null;
     try {
-        const response = await api.post('/admin/ja/email-test/send-test', {
+        const response = await api.post('/admin/janet/email-test/send-test', {
             to: testEmail.value.to,
             subject: testEmail.value.subject || undefined,
             message: testEmail.value.message || undefined,
@@ -537,7 +537,7 @@ const sendTestEmail = async () => {
 const getQueueStatus = async () => {
     loadingQueueStatus.value = true;
     try {
-        const response = await api.get('/admin/ja/email-test/queue-status');
+        const response = await api.get('/admin/janet/email-test/queue-status');
         queueStatus.value = parseSingleResponse<QueueStatus>(response);
     } catch {
         queueStatus.value = {
@@ -554,7 +554,7 @@ const getQueueStatus = async () => {
 const getRecentLogs = async () => {
     loadingLogs.value = true;
     try {
-        const response = await api.get('/admin/ja/email-test/recent-journal?limit=10');
+        const response = await api.get('/admin/janet/email-test/recent-journal?limit=10');
         const parsed = parseSingleResponse<{ logs: EmailLog[] }>(response);
         emailLogs.value = parsed?.logs || [];
     } catch {
@@ -567,7 +567,7 @@ const getRecentLogs = async () => {
 // Cache Management Methods
 const getCacheStatus = async () => {
     try {
-        const response = await api.get('/admin/ja/system/cache-status');
+        const response = await api.get('/admin/janet/system/cache-status');
         cacheStatus.value = parseSingleResponse<CacheStatus>(response);
     } catch (error: unknown) {
         logger.error('Failed to get cache status:', error);
@@ -586,7 +586,7 @@ const clearSystemCache = async () => {
     
     clearingCache.value = true;
     try {
-        await api.post('/admin/ja/system/cache/clear');
+        await api.post('/admin/janet/system/cache/clear');
         toast.success.action(t('features.settings.cache.cleared'));
         getCacheStatus();
     } catch (error: unknown) {
@@ -599,7 +599,7 @@ const clearSystemCache = async () => {
 const warmSystemCache = async () => {
     warmingCache.value = true;
     try {
-        await api.post('/admin/ja/system/cache/warm');
+        await api.post('/admin/janet/system/cache/warm');
         toast.success.action(t('features.settings.cache.warmed'));
         getCacheStatus();
     } catch (error: unknown) {

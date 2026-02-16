@@ -241,7 +241,7 @@ const isDirty = computed(() => {
 const fetchForm = async () => {
     loading.value = true;
     try {
-        const response = await api.get(`/admin/ja/forms/${route.params.id}`);
+        const response = await api.get(`/admin/janet/forms/${route.params.id}`);
         const data = response.data?.data || response.data;
         Object.assign(formData, {
             name: data.name,
@@ -298,7 +298,7 @@ const handleSubmit = async () => {
             is_active: formData.is_active,
             blocks: formData.blocks
         };
-        await api.put(`/admin/ja/forms/${route.params.id}`, payload);
+        await api.put(`/admin/janet/forms/${route.params.id}`, payload);
         initialForm.value = JSON.parse(JSON.stringify(formData));
         toast.success.update('Form');
         router.push({ name: 'forms' });

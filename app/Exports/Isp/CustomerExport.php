@@ -2,7 +2,7 @@
 
 namespace App\Exports\Isp;
 
-use App\Models\Isp\Customer;
+use App\Models\Isp\Customer\Customer;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;

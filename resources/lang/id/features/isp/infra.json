@@ -1,13 +1,16 @@
 {
+    "title": "Manajemen Infrastruktur",
+    "subtitle": "Kelola node jaringan, OLT, dan router utama Anda.",
     "map_title": "Peta Infrastruktur",
     "map_subtitle": "Tampilan geografis topologi jaringan Anda.",
     "list_view": "Tampilan Daftar",
+    "inventory": "Inventaris",
+    "vpn": "VPN",
     "type": "Tipe",
     "status": "Status",
-    "view_details": "LIHAT DETAIL LENGKAP",
+    "view_details": "Lihat Detail Lengkap",
     "nodes": {
-        "title": "Manajemen Infrastruktur",
-        "subtitle": "Kelola node jaringan, OLT, dan router utama Anda.",
+        "title": "Node",
         "add_node": "Tambah Node",
         "stats": {
             "total": "Total Node",
@@ -24,7 +27,10 @@
             "actions": "Aksi",
             "search_placeholder": "Cari node atau IP...",
             "lat": "Latitudo",
-            "lng": "Longitudo"
+            "lng": "Longitudo",
+            "api_username": "Username API",
+            "api_password": "Password API",
+            "snmp_community": "SNMP Community"
         },
         "types": {
             "all": "Semua Tipe",
@@ -39,18 +45,149 @@
             "inactive": "Offline"
         }
     },
+    "router": {
+        "title": "Router & Server",
+        "add": "Tambah Router",
+        "fields": {
+            "name": "Nama Router",
+            "ip": "Alamat IP",
+            "pretty_id": "ID Router",
+            "ip_type": "Tipe IP",
+            "node_type": "Tipe Node",
+            "radius_secret": "Secret Radius",
+            "online": "Online",
+            "management_port": "Port Mgmt",
+            "api_port": "Port API",
+            "snmp_port": "Port SNMP",
+            "vpn_server": "Server VPN",
+            "connection_type": "Tipe Koneksi",
+            "auto_allocate": "Alokasi Otomatis",
+            "physical_location": "Lokasi Fisik"
+        },
+        "presets": {
+            "core": "Core Router",
+            "router": "Router Gateway",
+            "distribution": "Router Distribusi",
+            "custom": "Kustom",
+            "selection_placeholder": "Pilih preset atau kustom..."
+        },
+        "placeholders": {
+            "custom_desc": "Masukkan deskripsi kustom...",
+            "auto_allocate": "Dialokasikan oleh IPAM",
+            "ip": "misal: 10.0.0.1",
+            "port": "misal: 8728"
+        },
+        "help": {
+            "vpn_server": "Aktifkan kapabilitas server VPN pada node ini.",
+            "status_active": "Node online dan beroperasi.",
+            "status_inactive": "Node sedang tidak aktif atau dalam pengaturan.",
+            "integration_desc": "Konfigurasikan API, SNMP, dan secret Radius di tab Integrasi {context}.",
+            "context_above": "di atas",
+            "context_after": "setelah menambahkan node",
+            "vpn_radius_note": "Catatan: VPN RADIUS membutuhkan node dapat dijangkau oleh server Radius.",
+            "radius_secret_match": "Harus cocok dengan secret pada MikroTik/NAS.",
+            "mode": "Mode Koneksi",
+            "tunnel": "Tipe Tunnel",
+            "rear_vpn_ip": "IP VPN Belakang",
+            "preview": "Pratinjau Script",
+            "generate": "Generate Script",
+            "reset": "Reset Opsi"
+        },
+        "types": {
+            "router": "Router MikroTik",
+            "olt": "Node OLT",
+            "pop": "POP / Access Point"
+        },
+        "status_online": "Online",
+        "status_offline": "Offline",
+        "tabs": {
+            "general": "UMUM",
+            "integration": "INTEGRASI"
+        },
+        "messages": {
+            "script_generated": "Script konfigurasi berhasil dibuat"
+        }
+    },
+    "olt": {
+        "title": "Ekosistem OLT",
+        "subtitle": "Kelola dan monitor infrastruktur OLT multi-vendor.",
+        "add_olt": "Tambah OLT",
+        "fields": {
+            "vendor": "Vendor",
+            "model": "Model",
+            "hardware": "Detail Perangkat",
+            "signal": "Kualitas Sinyal",
+            "reachability": "Aksesibilitas",
+            "port": "Port SSH",
+            "sn": "Nomor Seri (SN)",
+            "interface": "Antarmuka / Port",
+            "name": "Nama OLT",
+            "ip_address": "Alamat IP",
+            "username": "Username",
+            "password": "Password",
+            "vendor_type": "Tipe Vendor"
+        },
+        "details": {
+            "tabs": {
+                "overview": "Ikhtisar",
+                "telemetry": "Telemetri",
+                "audit": "Log Audit",
+                "topology": "Topologi"
+            },
+            "overview": {
+                "hardware": "Detail Perangkat",
+                "system_health": "Kesehatan Sistem",
+                "ssh_reachability": "Aksesibilitas SSH",
+                "reachable": "TERHUBUNG",
+                "unreachable": "TERPUTUS",
+                "link_new_odp": "Hubungkan ODP Baru"
+            }
+        },
+        "telemetry": {
+            "optical_power": "Distribusi Daya Optik",
+            "rx_power": "Rata-rata Rx Power",
+            "samples": "sampel"
+        },
+        "discovery": {
+            "title": "ZTP Discovery",
+            "subtitle": "Kelola dan konfigurasi perangkat yang ditemukan belum terdaftar.",
+            "scan": "Pindai Perangkat",
+            "no_equipment": "Tidak ada perangkat ditemukan",
+            "no_equipment_desc": "Semua perangkat yang terhubung sudah dikonfigurasi atau sedang menunggu pendaftaran.",
+            "discovered_badge": "Ditemukan",
+            "provision": "Registrasi Sekarang",
+            "unknown_parent": "OLT Tidak Diketahui"
+        },
+        "messages": {
+            "discovery_started": "Pemindaian ZTP dimulai, ini mungkin memakan waktu beberapa detik...",
+            "save_first": "Simpan konfigurasi terlebih dahulu."
+        }
+    },
     "modals": {
-        "create_title": "Tambah Node Infrastruktur Baru",
-        "edit_title": "Edit Node Infrastruktur",
-        "save": "Simpan Node",
-        "delete_confirm": "Apakah Anda yakin ingin menghapus {name}?"
+        "create_title": "Tambah Infrastruktur Baru",
+        "edit_title": "Edit Infrastruktur",
+        "save": "Simpan Perubahan",
+        "delete_confirm": "Apakah Anda yakin ingin menghapus {name}?",
+        "test_connection": "Uji Koneksi"
     },
     "messages": {
         "no_nodes": "Tidak ada node infrastruktur ditemukan.",
-        "success_create": "Node berhasil dibuat",
-        "success_update": "Node berhasil diperbarui",
-        "success_delete": "Node berhasil dihapus",
+        "no_data": "Data tidak ditemukan.",
+        "success_create": "Infrastruktur berhasil dibuat",
+        "success_update": "Infrastruktur berhasil diperbarui",
+        "success_delete": "Infrastruktur berhasil dihapus",
         "error_load": "Gagal memuat data infrastruktur",
-        "coming_soon": "Fitur edit akan segera hadir"
-    }
+        "loading": "Memuat data infrastruktur...",
+        "test_success": "Uji koneksi berhasil",
+        "test_failed": "Uji koneksi gagal"
+    },
+    "bulk_actions": {
+        "delete": "Hapus Terpilih",
+        "maintenance": "Set Maintenance",
+        "active": "Set Aktif",
+        "deactivate": "Nonaktifkan",
+        "to_trash": "Ke Tong Sampah"
+    },
+    "selected": "{count} terpilih",
+    "capabilities": "Kapabilitas"
 }

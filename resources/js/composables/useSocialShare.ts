@@ -147,7 +147,7 @@ export function useSocialShare() {
         // This would typically call your backend API
         // which aggregates share counts from various platforms
         try {
-            const response = await fetch(`/api/core/share-count?url=${encodeURIComponent(url)}`);
+            const response = await fetch(`/api/v1/share-count?url=${encodeURIComponent(url)}`);
             if (response.ok) {
                 const data = await response.json();
                 return data.count || 0;
@@ -164,7 +164,7 @@ export function useSocialShare() {
     const trackShare = async (platform: string, url: string): Promise<void> => {
         // Send analytics event to backend
         try {
-            await fetch('/api/core/analytics/share', {
+            await fetch('/api/v1/analytics/share', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

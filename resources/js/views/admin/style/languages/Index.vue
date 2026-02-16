@@ -283,7 +283,7 @@ const browserLocale = getBrowserLocale();
 const fetchLanguages = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/ja/languages');
+        const response = await api.get('/admin/janet/languages');
         const { data } = parseResponse(response);
         languages.value = ensureArray(data);
     } catch (error: unknown) {
@@ -296,7 +296,7 @@ const fetchLanguages = async () => {
 
 const setDefault = async (lang: Language) => {
     try {
-        await api.post(`/admin/ja/languages/${lang.id}/set-default`);
+        await api.post(`/admin/janet/languages/${lang.id}/set-default`);
         await fetchLanguages();
         toast.success.action(t('features.languages.messages.set_default_success') || 'Default language updated');
     } catch (error: unknown) {
@@ -315,7 +315,7 @@ const deleteLanguage = async (lang: Language) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/ja/languages/${lang.id}`);
+        await api.delete(`/admin/janet/languages/${lang.id}`);
         await fetchLanguages();
         toast.success.delete('Language');
     } catch (error: unknown) {
@@ -329,7 +329,7 @@ const createLanguage = async () => {
     creating.value = true;
     clearErrors();
     try {
-        await api.post('/admin/ja/languages', {
+        await api.post('/admin/janet/languages', {
             code: form.value.code,
             name: form.value.name,
             create_from_template: form.value.create_from_template,
@@ -354,7 +354,7 @@ const createLanguage = async () => {
 const exportPack = async (lang: Language) => {
     exporting.value = lang.id;
     try {
-        const response = await api.get(`/admin/ja/languages/${lang.id}/export-pack`, {
+        const response = await api.get(`/admin/janet/languages/${lang.id}/export-pack`, {
             responseType: 'blob',
         });
         
@@ -391,7 +391,7 @@ const importPack = async () => {
         const formData = new FormData();
         formData.append('file', selectedFile.value);
 
-        await api.post('/admin/ja/languages/import-pack', formData, {
+        await api.post('/admin/janet/languages/import-pack', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
         });
 

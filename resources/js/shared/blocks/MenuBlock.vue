@@ -118,17 +118,17 @@ const fetchMenu = async () => {
             // Check if it's likely an ID or a Slug
             const isNumeric = /^\d+$/.test(menuId)
             if (isNumeric) {
-                response = await api.get(`/cms/menus/${menuId}`)
+                response = await api.get(`/ja/menus/${menuId}`)
             } else {
                 // Try fetching by location first, as it's common for builder
-                response = await api.get(`/cms/menus/location/${menuId}`).catch(() => {
+                response = await api.get(`/ja/menus/location/${menuId}`).catch(() => {
                     // Fallback to direct show if location fails
-                    return api.get(`/cms/menus/${menuId}`)
+                    return api.get(`/ja/menus/${menuId}`)
                 })
             }
         } else {
             // Default to 'main' location
-            response = await api.get('/cms/menus/location/main')
+            response = await api.get('/ja/menus/location/main')
         }
         
         if (response?.data?.success) {

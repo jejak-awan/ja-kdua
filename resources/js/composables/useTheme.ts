@@ -61,8 +61,8 @@ export function useTheme() {
         try {
             // Use public endpoint for frontend theme (no auth required)
             const endpoint = type === 'frontend'
-                ? `/cms/themes/active?type=${type}`
-                : `/admin/ja/themes/active?type=${type}`;
+                ? `/ja/themes/active?type=${type}`
+                : `/admin/janet/themes/active?type=${type}`;
 
             const response = await api.get(endpoint);
             const data = response.data?.data || response.data;

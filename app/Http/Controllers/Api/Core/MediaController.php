@@ -10,6 +10,7 @@ use App\Services\Core\CacheService;
 use App\Services\Core\MediaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(name="Media")
@@ -24,9 +25,23 @@ class MediaController extends BaseApiController
     }
 
     /**
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Get(
+     *     path="/api/admin/ja/media",
+     *     summary="List media files",
+     *     tags={"Media"},
+     *
+     *     @OA\Parameter(name="page", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="folder_id", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="mime_type", in="query", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="search", in="query", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="trashed", in="query", @OA\Schema(type="string", enum={"only", "with"})),
+     *
+     *     @OA\Response(response=200, description="Media retrieved successfully"),
+     *     security={{"sanctum":{}}}
+     * )
      */
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = Media::with(['folder', 'usages', 'tags']);
 
@@ -170,16 +185,23 @@ class MediaController extends BaseApiController
         $totalSize = (clone $query)->sum('size');
         $trashCount = (clone $query)->onlyTrashed()->count();
 
-        $typeBreakdown = (clone $query)->selectRaw('
+        $typeBreakdown = (clone $query)->selectRaw("
             CASE 
-                WHEN mime_type LIKE "image/%" THEN "image"
-                WHEN mime_type LIKE "video/%" THEN "video"
-                WHEN mime_type LIKE "application/%" THEN "document"
-                ELSE "other"
+                WHEN mime_type LIKE 'image/%' THEN 'image'
+                WHEN mime_type LIKE 'video/%' THEN 'video'
+                WHEN mime_type LIKE 'application/%' THEN 'document'
+                ELSE 'other'
             END as type,
             COUNT(*) as count
-        ')
-            ->groupBy('type')
+        ")
+            ->groupBy(DB::raw("
+                CASE 
+                    WHEN mime_type LIKE 'image/%' THEN 'image'
+                    WHEN mime_type LIKE 'video/%' THEN 'video'
+                    WHEN mime_type LIKE 'application/%' THEN 'document'
+                    ELSE 'other'
+                END
+            "))
             ->get();
 
         return $this->success([
@@ -340,9 +362,31 @@ class MediaController extends BaseApiController
     }
 
     /**
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Post(
+     *     path="/api/admin/ja/media/upload-multiple",
+     *     summary="Upload multiple media files",
+     *     tags={"Media"},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *
+     *             @OA\Schema(
+     *                 required={"files[]"},
+     *
+     *                 @OA\Property(property="files[]", type="array", @OA\Items(type="string", format="binary")),
+     *                 @OA\Property(property="folder_id", type="integer")
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=201, description="Media uploaded successfully"),
+     *     security={{"sanctum":{}}}
+     * )
      */
-    public function uploadMultiple(Request $request)
+    public function uploadMultiple(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
         /** @var User|null $user */
@@ -454,9 +498,18 @@ class MediaController extends BaseApiController
     }
 
     /**
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Get(
+     *     path="/api/admin/ja/media/{media}/usage",
+     *     summary="Get media usage information",
+     *     tags={"Media"},
+     *
+     *     @OA\Parameter(name="media", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="Usage info retrieved"),
+     *     security={{"sanctum":{}}}
+     * )
      */
-    public function usage(Request $request, Media $media)
+    public function usage(Request $request, Media $media): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
         /** @var User|null $user */
@@ -664,9 +717,16 @@ class MediaController extends BaseApiController
     }
 
     /**
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Post(
+     *     path="/api/admin/ja/media/scan",
+     *     summary="Scan storage for new media files",
+     *     tags={"Media"},
+     *
+     *     @OA\Response(response=200, description="Scan completed"),
+     *     security={{"sanctum":{}}}
+     * )
      */
-    public function scan(Request $request)
+    public function scan(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
         /** @var User|null $user */
@@ -684,6 +744,18 @@ class MediaController extends BaseApiController
         return $this->success($stats, 'Media scan completed successfully. Added '.$stats['added'].' new files.');
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/admin/ja/media/{id}/restore",
+     *     summary="Restore trashed media",
+     *     tags={"Media"},
+     *
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
+     *     @OA\Response(response=200, description="Media restored"),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function restore(Request $request, int|string $id): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
@@ -727,6 +799,19 @@ class MediaController extends BaseApiController
         return $this->success($fresh ? $fresh->load(['folder', 'usages']) : $media, 'Media restored successfully');
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/admin/ja/media/{id}/force",
+     *     summary="Permanently delete media",
+     *     tags={"Media"},
+     *
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="force", in="query", @OA\Schema(type="boolean")),
+     *
+     *     @OA\Response(response=200, description="Media permanently deleted"),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function forceDelete(Request $request, int|string $id): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
@@ -778,11 +863,16 @@ class MediaController extends BaseApiController
     }
 
     /**
-     * Empty all trash - permanently delete all trashed media and folders
+     * @OA\Post(
+     *     path="/api/admin/ja/media/empty-trash",
+     *     summary="Permanently delete all trashed media",
+     *     tags={"Media"},
      *
-     * @return \Illuminate\Http\JsonResponse
+     *     @OA\Response(response=200, description="Trash emptied"),
+     *     security={{"sanctum":{}}}
+     * )
      */
-    public function emptyTrash(Request $request)
+    public function emptyTrash(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
         /** @var User|null $user */

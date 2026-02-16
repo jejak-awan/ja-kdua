@@ -148,7 +148,7 @@ const handleVerify = async (token: string, email: string) => {
     messageType.value = '';
 
     try {
-        const response = await api.post('/api/core/verify-email', {
+        const response = await api.post('/verify-email', {
             token,
             email,
         });
@@ -185,7 +185,7 @@ const handleResend = async () => {
 
     try {
         const email = route.query.email || '';
-        const response = await api.post('/api/core/resend-verification', {
+        const response = await api.post('/resend-verification', {
             email,
         });
 

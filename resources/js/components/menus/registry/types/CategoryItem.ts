@@ -11,7 +11,7 @@ const definition: MenuItemDefinition = {
     defaultTitle: 'Category',
 
     dataSource: {
-        endpoint: '/admin/ja/categories',
+        endpoint: '/admin/janet/categories',
         labelField: 'name',
         valueField: 'id'
     },
@@ -29,7 +29,7 @@ const definition: MenuItemDefinition = {
             type: 'data_select',
             label: 'features.menus.form.selectCategory',
             required: true,
-            source: '/admin/ja/categories',
+            source: '/admin/janet/categories',
             labelField: 'name',
             valueField: 'id'
         },

@@ -314,7 +314,7 @@ const fetchTags = async (page = 1) => {
             params.usage = filterUsage.value;
         }
 
-        const response = await api.get('/admin/ja/tags', { params });
+        const response = await api.get('/admin/janet/tags', { params });
         const { data, pagination: paginationData } = parseResponse(response);
         
         tags.value = (data as unknown as Tag[]) || [];
@@ -325,7 +325,7 @@ const fetchTags = async (page = 1) => {
         }
 
         try {
-            const statsResponse = await api.get('/admin/ja/tags/statistics');
+            const statsResponse = await api.get('/admin/janet/tags/statistics');
             statistics.value = statsResponse.data.data || statsResponse.data;
         } catch (error: unknown) {
             logger.error('Failed to fetch statistics:', error);
@@ -362,7 +362,7 @@ const bulkDelete = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/ja/tags/bulk-delete', { ids: selectedIds.value });
+        await api.post('/admin/janet/tags/bulk-delete', { ids: selectedIds.value });
         selectedIds.value = [];
         await fetchTags(pagination.value.current_page);
         toast.success.delete('Tags');
@@ -398,7 +398,7 @@ const deleteTag = async (tag: Tag) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/ja/tags/${tag.id}`);
+        await api.delete(`/admin/janet/tags/${tag.id}`);
         await fetchTags();
         toast.success.delete('Tag');
     } catch (error: unknown) {

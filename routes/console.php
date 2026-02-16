@@ -3,8 +3,37 @@
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
+use App\Jobs\Isp\StaleSessionCleanupJob;
 
-Schedule::command('isp:check-fup')->hourly()->withoutOverlapping();
+Schedule::job(new StaleSessionCleanupJob())->everyFifteenMinutes()->withoutOverlapping();
+Schedule::command('isp:sync-voucher-usage')->everyFiveMinutes()->withoutOverlapping();
+
+// --- Phase 6 & 7: Network Operations ---
+// Poll node health every minute for real-time dashboards and auto-incidents
+Schedule::command('isp:health-poll')->everyMinute()->withoutOverlapping();
+Schedule::command('isp:poll-traffic')->everyMinute()->withoutOverlapping();
+
+// Run security & audit maintenance every 15 minutes
+Schedule::command('isp:maintenance-poll')->everyFifteenMinutes()->withoutOverlapping();
+
+// Daily full network drift audit at 3 AM
+Schedule::command('isp:maintenance-poll --type=drift')->dailyAt('03:00')->withoutOverlapping();
+
+// Daily router configuration backup at 4 AM
+Schedule::command('isp:router-backup')->dailyAt('04:00')->withoutOverlapping();
+
+// Hourly automated billing isolation
+Schedule::command('isp:isolate-overdue')->hourly()->withoutOverlapping();
+
+// Hourly proactive network healing
+Schedule::job(new \App\Jobs\Isp\NetworkHealingJob())->hourly()->withoutOverlapping();
+
+// --- Phase 10: Multi-Vendor OLT Automation ---
+// Poll optical signal levels every 15 minutes
+Schedule::command('isp:poll-olt-signals')->everyFifteenMinutes()->withoutOverlapping();
+
+// Scan for unconfigured ONUs every 5 minutes
+Schedule::command('isp:discover-onus')->everyFiveMinutes()->withoutOverlapping();
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());

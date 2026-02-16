@@ -67,7 +67,7 @@ export async function resolveTag(tag: string, context: DynamicContext = {}): Pro
     }
 
     try {
-        const response = await api.post('/admin/ja/builder/resolve-dynamic', {
+        const response = await api.post('/admin/janet/builder/resolve-dynamic', {
             tags: [tag],
             content_id: context.contentId,
             loop_item: context.loopItem
@@ -132,7 +132,7 @@ export async function resolveTags(tags: string[], context: DynamicContext = {}):
     }
 
     try {
-        const response = await api.post('/admin/ja/builder/resolve-dynamic', {
+        const response = await api.post('/admin/janet/builder/resolve-dynamic', {
             tags: uncachedTags,
             content_id: context.contentId,
             loop_item: context.loopItem

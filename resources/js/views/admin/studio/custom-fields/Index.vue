@@ -224,7 +224,7 @@ const filteredFields = computed(() => {
 const fetchFieldGroups = async () => {
     loadingGroups.value = true;
     try {
-        const response = await api.get('/admin/ja/field-groups');
+        const response = await api.get('/admin/janet/field-groups');
         const { data } = parseResponse<FieldGroup>(response);
         fieldGroups.value = ensureArray<FieldGroup>(data);
     } catch (error: unknown) {
@@ -237,7 +237,7 @@ const fetchFieldGroups = async () => {
 const fetchCustomFields = async () => {
     loadingFields.value = true;
     try {
-        const response = await api.get('/admin/ja/custom-fields');
+        const response = await api.get('/admin/janet/custom-fields');
         const { data } = parseResponse<CustomField>(response);
         customFields.value = ensureArray<CustomField>(data);
     } catch (error: unknown) {
@@ -264,7 +264,7 @@ const deleteGroup = async (group: FieldGroup) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/ja/custom-fields/groups/${group.id}`);
+        await api.delete(`/admin/janet/custom-fields/groups/${group.id}`);
         toast.success.delete(t('features.developer.custom_fields.tabs.groups'));
         fetchFieldGroups();
     } catch (error: unknown) {
@@ -301,7 +301,7 @@ const deleteField = async (field: CustomField) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/ja/custom-fields/fields/${field.id}`);
+        await api.delete(`/admin/janet/custom-fields/fields/${field.id}`);
         toast.success.delete(t('features.developer.custom_fields.tabs.fields'));
         fetchCustomFields();
     } catch (error: unknown) {

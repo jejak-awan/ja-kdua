@@ -2,17 +2,17 @@
     <div class="container mx-auto p-6">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight">{{ $t('isp.hotspot.cookies.title', 'Hotspot Cookies') }}</h1>
-                <p class="text-muted-foreground">{{ $t('isp.hotspot.cookies.subtitle', 'Active "remember me" sessions for hotspot users') }}</p>
+                <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('isp.hotspot.cookies.title', 'Hotspot Cookies') }}</h2>
+                <p class="text-sm text-muted-foreground mt-1">{{ $t('isp.hotspot.cookies.subtitle', 'Active "remember me" sessions for hotspot users') }}</p>
             </div>
-            <Button @click="fetchCookies" :disabled="loading">
+            <Button @click="fetchCookies" :disabled="loading" class="rounded-xl">
                 <RefreshCw v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
                 <RefreshCw v-else class="w-4 h-4 mr-2" />
                 {{ $t('common.actions.refresh', 'Refresh') }}
             </Button>
         </div>
 
-        <Card>
+        <Card class="border-border/40 shadow-sm rounded-xl overflow-hidden">
             <CardContent class="p-0">
                 <DataTable
                     :table="table"
@@ -107,7 +107,7 @@ const table = useVueTable({
 const fetchCookies = async () => {
     loading.value = true;
     try {
-        const res = await api.get('/admin/ja/isp/hotspot/cookies');
+        const res = await api.get('/admin/janet/isp/hotspot/cookies');
         cookies.value = res.data.data;
     } catch (error) {
         console.error('Failed to fetch hotspot cookies', error);
@@ -127,7 +127,7 @@ const deleteCookie = async (id: string) => {
     if (!confirmed) return;
     
     try {
-        await api.delete(`/admin/ja/isp/hotspot/cookies/${id}`);
+        await api.delete(`/admin/janet/isp/hotspot/cookies/${id}`);
         toast.success.delete('Hotspot Cookie');
         fetchCookies();
     } catch (error) {

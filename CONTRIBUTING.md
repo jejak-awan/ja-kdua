@@ -93,6 +93,15 @@ Thank you for your interest in contributing to JA-CMS! This document provides gu
 npm run lint:fix
 ```
 
+### ISP Module Specifics
+
+- **Translations**: All user-facing strings must use `$t('isp.section.key')`. Translation files are in `resources/lang/{en,id}/features/isp/`.
+- **Dark Mode**: Never use raw `bg-white`. Use semantic tokens: `bg-background`, `bg-card`, `bg-popover`.
+- **Components**: Use Shadcn UI (Radix Vue) components. Data tables must use TanStack Vue Table.
+- **Backend**: All services require `declare(strict_types=1)`. All controllers must extend `BaseApiController`.
+- **Style Guide**: Follow the [K2NET Style Guide](docs/guidelines/K2NET_STYLE_GUIDE.md) for naming conventions, design patterns, and UI/UX consistency.
+- **PHPStan**: Level 9 is mandatory. No `mixed` types allowed.
+
 ## Testing
 
 ### Writing Tests

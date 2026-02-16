@@ -2,8 +2,7 @@
 
 namespace App\Console\Commands\Isp;
 
-use App\Models\Isp\Customer;
-use App\Services\Isp\RadiusIntegration;
+use App\Models\Isp\Customer\Customer;
 use Illuminate\Console\Command;
 
 class CheckFup extends Command
@@ -25,7 +24,7 @@ class CheckFup extends Command
     /**
      * Execute the console command.
      */
-    public function handle(RadiusIntegration $radius): int
+    public function handle(\App\Services\Isp\Network\RadiusService $radius): int
     {
         $customerId = $this->argument('customer_id');
 

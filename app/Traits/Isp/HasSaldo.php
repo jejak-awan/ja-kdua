@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Traits\Isp;
 
-use App\Models\Isp\Transaction;
+use App\Models\Isp\Billing\Transaction;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\DB;
 
@@ -46,15 +46,18 @@ trait HasSaldo
     protected function processTransaction(string $type, float $amount, string $category, ?string $description = null, ?string $referenceType = null, ?int $referenceId = null, ?int $createdBy = null): Transaction
     {
         return DB::transaction(function () use ($type, $amount, $category, $description, $referenceType, $referenceId, $createdBy) {
+            // Get fresh data to ensure accurate saldo_before
+            $this->refresh();
             $saldoBefore = (float) $this->saldo;
 
             if ($type === 'credit') {
-                $this->saldo += $amount;
+                $this->increment('saldo', $amount);
             } else {
-                $this->saldo -= $amount;
+                $this->decrement('saldo', $amount);
             }
 
-            $this->save();
+            // Refresh again to get the updated saldo after increment/decrement
+            $this->refresh();
 
             return $this->transactions()->create([
                 'type' => $type,

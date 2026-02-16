@@ -28,7 +28,17 @@ K2NET is a powerful, modern, and flexible Headless CMS built with **Laravel 12**
 *   **API-First:** Fully documented REST API (Swagger/OpenAPI) for frontend consumption.
 *   **Theme Engine:** Support for custom themes with asset compilation.
 *   **Plugin System:** Extensible architecture for adding new functionality.
-*   **Multi-language:** UI localization support.
+*   **Multi-language:** UI localization support (English/Indonesian).
+
+### ISP Module
+*   **Customer Management:** Subscriber lifecycle, contracts, partner/reseller management.
+*   **Network Operations:** Multi-vendor OLT support (ZTE, Huawei, VSOL, Global, HIOSO, HSQG, Zymlink), NOC Dashboard, Coverage Heatmap.
+*   **Billing Engine:** Automated invoicing, multi-gateway payments (Midtrans/Xendit), plan management, proration, tax (PPN/BHP/USO).
+*   **RADIUS Integration:** FreeRADIUS AAA, CoA disconnect, session monitoring, HA cluster support.
+*   **Field Operations:** Intelligent technician dispatch (Haversine proximity), service request workflow, troubleshoot wizard.
+*   **Inventory & Vouchers:** Hardware tracking, hotspot/PPPoE voucher generation with QR codes.
+*   **Enterprise Reporting:** Excel/PDF export, Network Health Certificates, SLA compliance reports.
+*   **WhatsApp Integration:** Templated messaging, broadcast campaigns, scheduled notifications.
 
 ---
 
@@ -37,8 +47,9 @@ K2NET is a powerful, modern, and flexible Headless CMS built with **Laravel 12**
 ### Backend
 *   **Framework:** [Laravel 12.x](https://laravel.com)
 *   **Language:** PHP 8.2+
-*   **Database:** MySQL / MariaDB
+*   **Database:** PostgreSQL (primary), MySQL (legacy support)
 *   **Cache/Queue:** Redis using `predis`
+*   **Excel/PDF:** Maatwebsite Excel, mPDF
 *   **API Docs:** L5-Swagger
 *   **Authentication:** Laravel Sanctum
 
@@ -112,7 +123,7 @@ This will compile the Vue application into `public/build` for Laravel to serve.
 ## 📂 Project Structure
 
 ```
-/var/www/k2net
+/var/www/ja-kdua
 ├── app/                  # Laravel Core Code (Models, Controllers, Services)
 ├── config/               # Application Configuration
 ├── database/             # Migrations, Factories, Seeders
