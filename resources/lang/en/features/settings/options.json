@@ -163,6 +163,18 @@
             "inconvenience": "Sorry for the inconvenience. We're performing some maintenance and will be back shortly.",
             "exciting": "Something exciting is coming! Stay tuned for our launch.",
             "better_exp": "We are updating our system to provide you a better experience. We'll be back online soon."
+        },
+        "shieldProtectionMode": {
+            "off": "Disabled",
+            "suspicious": "Suspicious Traffic Only",
+            "always": "Always Challenge (Strict)"
+        },
+        "shieldProtectionDifficulty": {
+            "3": "3 - Very Light",
+            "4": "4 - Normal (Recommended)",
+            "5": "5 - Strict",
+            "6": "6 - Very Strict",
+            "7": "7 - Paranoid"
         }
     }
 }

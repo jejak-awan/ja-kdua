@@ -296,7 +296,8 @@ class RouterMonitoringService
 
                 $this->api->disconnect();
 
-                Cache::put($cacheKey, $stats, 30);
+                // Cache for 5 minutes to allow background poller to keep it warm
+                Cache::put($cacheKey, $stats, 300);
             }
         } catch (\Exception $e) {
             Log::error('RouterMonitoringService: getMonitoredStats Failed: '.$e->getMessage());

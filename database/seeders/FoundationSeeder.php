@@ -167,6 +167,9 @@ class FoundationSeeder extends Seeder
             ['key' => 'captcha_method', 'value' => 'slider', 'group' => 'security', 'type' => 'string'],
             ['key' => 'captcha_on_login', 'value' => '1', 'group' => 'security', 'type' => 'boolean'],
             ['key' => 'captcha_on_register', 'value' => '1', 'group' => 'security', 'type' => 'boolean'],
+            ['key' => 'shield_protection_mode', 'value' => 'off', 'group' => 'security', 'type' => 'string'],
+            ['key' => 'shield_protection_difficulty', 'value' => '4', 'group' => 'security', 'type' => 'integer'],
+            ['key' => 'shield_log_verification_success', 'value' => '0', 'group' => 'security', 'type' => 'boolean'],
 
             // Performance
             ['key' => 'enable_cache', 'value' => '1', 'group' => 'performance', 'type' => 'boolean'],

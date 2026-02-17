@@ -81,6 +81,10 @@
         "maintenance": {
             "title": "Maintenance Mode",
             "description": "Configure Coming Soon / Under Maintenance page."
+        },
+        "botShield": {
+            "title": "Bot Shield (Anti-Scraper)",
+            "description": "Proof-of-Work protection against AI scrapers and automated bots."
         }
     },
     "enabled": "Enabled",

@@ -448,4 +448,144 @@ class SecurityService
 
         return in_array($ip, $localhostIps);
     }
+
+    /**
+     * Check if the request has already passed the security shield (Trust Cache).
+     */
+    public function isShieldVerified(string $ipAddress, string $userAgent): bool
+    {
+        $key = 'shield:verified:'.md5($ipAddress.$userAgent);
+
+        return Cache::has($this->cachePrefix.$key);
+    }
+
+    /**
+     * Record a successful shield verification.
+     */
+    public function recordShieldVerification(string $ipAddress, string $userAgent): void
+    {
+        $key = 'shield:verified:'.md5($ipAddress.$userAgent);
+        // Trust for 24 hours
+        Cache::put($this->cachePrefix.$key, true, now()->addDay());
+
+        // Only log success if enabled in settings
+        if (\App\Models\Core\Setting::get('shield_log_verification_success', false)) {
+            SecurityLog::log('shield_verified', null, $ipAddress, 'Security shield challenge passed', [
+                'user_agent' => $userAgent,
+            ]);
+        }
+    }
+
+    /**
+     * Generate a signed nonce for the PoW challenge.
+     */
+    public function generateShieldNonce(string $ipAddress): string
+    {
+        $timestamp = time();
+        $salt = bin2hex(random_bytes(16));
+        $data = "{$ipAddress}:{$timestamp}:{$salt}";
+        $key = config('app.key');
+        $signature = hash_hmac('sha256', $data, is_string($key) ? $key : '');
+
+        return base64_encode("{$data}:{$signature}");
+    }
+
+    /**
+     * Verify the PoW solution.
+     */
+    public function verifyShieldSolution(string $nonce, string $solution, string $ipAddress): bool
+    {
+        $decoded = base64_decode($nonce);
+        if (! $decoded) {
+            return false;
+        }
+
+        $parts = explode(':', $decoded);
+        if (count($parts) !== 4) {
+            return false;
+        }
+
+        [$nonceIp, $timestamp, $salt, $signature] = $parts;
+
+        // Verify IP matches
+        if ($nonceIp !== $ipAddress) {
+            return false;
+        }
+
+        // Verify signature
+        $extData = "{$nonceIp}:{$timestamp}:{$salt}";
+        $key = config('app.key');
+        if (! hash_equals(hash_hmac('sha256', $extData, is_string($key) ? $key : ''), $signature)) {
+            return false;
+        }
+
+        // Verify TTL (nonce valid for 10 minutes)
+        if (time() - (int) $timestamp > 600) {
+            return false;
+        }
+
+        // Verify PoW solution
+        // The solution 'n' must make SHA256(nonce + n) start with the required number of zeros
+        $difficulty = $this->getShieldDifficulty();
+        $hash = hash('sha256', $nonce.$solution);
+        $target = str_repeat('0', $difficulty);
+
+        return str_starts_with($hash, $target);
+    }
+
+    /**
+     * Get dynamic difficulty based on recent traffic.
+     */
+    public function getShieldDifficulty(): int
+    {
+        $settingValue = \App\Models\Core\Setting::get('shield_protection_difficulty', 4);
+        $baseDifficulty = is_numeric($settingValue) ? (int) $settingValue : 4;
+
+        // Check for traffic spike in last minute
+        $spikeKey = $this->cachePrefix.'shield:attempts_per_minute';
+        $attemptsValue = Cache::get($spikeKey, 0);
+        $attempts = is_numeric($attemptsValue) ? (int) $attemptsValue : 0;
+
+        // Simple scaling: add 1 zero if attempts > 500/min, add 2 if > 2000/min
+        if ($attempts > 2000) {
+            return $baseDifficulty + 2;
+        } elseif ($attempts > 500) {
+            return $baseDifficulty + 1;
+        }
+
+        return $baseDifficulty;
+    }
+
+    /**
+     * Track verification attempts for dynamic scaling.
+     */
+    public function trackShieldAttempt(): void
+    {
+        $key = $this->cachePrefix.'shield:attempts_per_minute';
+        if (! Cache::has($key)) {
+            Cache::put($key, 1, 60);
+        } else {
+            Cache::increment($key);
+        }
+    }
+
+    /**
+     * Get statistics for the Bot Shield protection.
+     *
+     * @return array<string, mixed>
+     */
+    public function getShieldStats(): array
+    {
+        $attemptsKey = $this->cachePrefix.'shield:attempts_per_minute';
+        $attemptsValue = Cache::get($attemptsKey, 0);
+        $attempts = is_numeric($attemptsValue) ? (int) $attemptsValue : 0;
+
+        return [
+            'verifications' => SecurityLog::where('event_type', 'shield_verified')->count(),
+            'failures' => SecurityLog::where('event_type', 'shield_failed')->count(),
+            'honeypot' => SecurityLog::where('event_type', 'shield_honeypot')->count(),
+            'currentDifficulty' => $this->getShieldDifficulty(),
+            'isScaling' => $attempts > 500,
+        ];
+    }
 }

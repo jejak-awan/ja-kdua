@@ -4,6 +4,13 @@
     <!-- System Lock Overlay (Maintenance / Crash) -->
     <SystemOverlay />
 
+    <!-- Bot Shield Overlay (PoW Challenge) -->
+    <ShieldOverlay 
+        :visible="securityStore.isShieldVisible"
+        :progress="securityStore.shieldProgress"
+        :status-text="securityStore.shieldStatus"
+    />
+
     <!-- Session Timeout Warning Modal -->
     <SessionTimeoutModal
         :is-visible="isWarningVisible"
@@ -43,6 +50,8 @@ import { useLanguage } from './composables/useLanguage';
 import { useConfirm } from './composables/useConfirm';
 import { SessionTimeoutModal, Toast, ConfirmModal, GlobalErrorModal } from '@/components/ui';
 import SystemOverlay from './components/shared/SystemOverlay.vue';
+import ShieldOverlay from './components/shared/ShieldOverlay.vue';
+import { useSecurityStore } from './stores/security';
 import { SystemMonitor } from './services/SystemMonitor';
 import { setToastInstance, type ToastInstance } from './services/toast';
 
@@ -51,6 +60,7 @@ const cmsStore = useCmsStore();
 const { loadActiveTheme } = useTheme();
 const { initializeLanguage } = useLanguage();
 const { confirmState } = useConfirm();
+const securityStore = useSecurityStore();
 
 // Toast reference
 const toastRef = ref<ToastInstance | null>(null);

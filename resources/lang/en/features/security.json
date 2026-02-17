@@ -6,7 +6,8 @@
         "whitelist": "Whitelist",
         "cspReports": "CSP Reports",
         "slowQueries": "Slow Queries",
-        "vulnerabilities": "Vulnerabilities"
+        "vulnerabilities": "Vulnerabilities",
+        "shieldJournal": "Shield Journal"
     },
     "statistics": {
         "events": "Security Events",
@@ -113,7 +114,44 @@
             "ip_blocked_temp": "IP Blocked Temporarily",
             "session_invalidated": "Session Invalidated",
             "session_limit_reached": "Session Limit Reached",
-            "force_logout": "Force Logout"
+            "force_logout": "Force Logout",
+            "shield_verified": "Shield Verified",
+            "shield_failed": "Shield Verification Failed",
+            "shield_honeypot": "Honeypot Triggered"
+        }
+    },
+    "shield": {
+        "title": "Bot Shield Journal",
+        "description": "Monitor Proof-of-Work challenge activity and automated bot detections",
+        "stats": {
+            "verifications": "Total Verifications",
+            "failures": "Verification Failures",
+            "honeypot": "Honeypot Triggers",
+            "difficulty": "Current Difficulty"
+        },
+        "table": {
+            "ip": "IP Address",
+            "userAgent": "User Agent",
+            "status": "Status",
+            "date": "Date"
+        },
+        "challenge": {
+            "title": "Verifying Connection",
+            "message": "We are securing your session to protect against automated threats. This will only take a moment.",
+            "status": {
+                "initializing": "Initializing security check...",
+                "verifying": "Verifying connection...",
+                "analyzing": "Analyzing security metrics...",
+                "finalizing": "Finalizing verification...",
+                "verified": "Verified! Continuing...",
+                "failed": "Verification failed. Retrying..."
+            },
+            "steps": {
+                "analyze": "Analyze",
+                "solve": "Solve",
+                "verify": "Verify"
+            },
+            "retry": "Try Again"
         }
     },
     "messages": {

@@ -148,9 +148,9 @@
             "email": "Email Code"
         },
         "twoFactorEnforced": {
-            "no": "Optional for all users",
-            "admin": "Mandatory for Admins",
-            "all": "Mandatory for All Users"
+            "no": "Opsional untuk semua pengguna",
+            "admin": "Wajib untuk Admin",
+            "all": "Wajib untuk Semua Pengguna"
         },
         "maintenanceTitlePresets": {
             "coming_soon": "Segera Hadir",
@@ -163,6 +163,18 @@
             "inconvenience": "Mohon maaf atas ketidaknyamanannya. Kami sedang melakukan pemeliharaan dan akan segera kembali.",
             "exciting": "Sesuatu yang menarik akan segera hadir! Nantikan peluncuran kami.",
             "better_exp": "Kami sedang memperbarui sistem untuk memberikan pengalaman yang lebih baik. Kami akan segera online kembali."
+        },
+        "shieldProtectionMode": {
+            "off": "Nonaktif",
+            "suspicious": "Hanya Trafik Mencurigakan",
+            "always": "Selalu Tantang (Sangat Ketat)"
+        },
+        "shieldProtectionDifficulty": {
+            "3": "3 - Sangat Ringan",
+            "4": "4 - Normal (Direkomendasikan)",
+            "5": "5 - Ketat",
+            "6": "6 - Sangat Ketat",
+            "7": "7 - Paranoid"
         }
     }
 }

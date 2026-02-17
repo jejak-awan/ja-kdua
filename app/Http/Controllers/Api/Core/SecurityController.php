@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api\Core;
 
+use App\Helpers\IpHelper;
 use App\Models\Core\SecurityLog;
 use App\Services\Core\SecurityAlertService;
 use App\Services\Core\SecurityService;
@@ -350,5 +353,96 @@ class SecurityController extends BaseApiController
 
             return $this->error('Failed to clear security logs', 500);
         }
+    }
+
+    /**
+     * Verify the Proof-of-Work solution for the security shield.
+     */
+    public function verifyConnection(Request $request): \Illuminate\Http\JsonResponse
+    {
+        // 1. Honeypot check: If any honeypot field is filled, it's a bot.
+        $ip = IpHelper::getClientIp($request);
+        if ($request->filled('_hp_email') || $request->filled('_hp_subject')) {
+            $this->securityService->blockIpPermanently($ip, 'Security Shield: Honeypot trap triggered');
+
+            return $this->error('Access Denied', 403);
+        }
+
+        $nonceRaw = $request->input('nonce');
+        $nonce = is_string($nonceRaw) ? $nonceRaw : '';
+
+        $solutionRaw = $request->input('solution');
+        $solution = is_string($solutionRaw) ? $solutionRaw : '';
+
+        if (! $nonce || ! $solution) {
+            return $this->error('Missing challenge details', 400);
+        }
+
+        // Track attempt for dynamic scaling
+        $this->securityService->trackShieldAttempt();
+
+        if ($this->securityService->verifyShieldSolution($nonce, $solution, $ip)) {
+            // Record verification in Trust Cache
+            $this->securityService->recordShieldVerification($ip, (string) $request->userAgent());
+
+            return $this->success([
+                'verified' => true,
+                'redirect_to' => $request->input('redirect_to') ?? session()->pull('shield_redirect_to', '/'),
+            ], 'Connection verified successfully');
+        }
+
+        return $this->error('Challenge verification failed', 422);
+    }
+
+    /**
+     * Get the Bot Shield journal of security events.
+     */
+    public function shieldJournal(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $perPageRaw = $request->input('per_page', 50);
+        $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 50;
+
+        $logs = SecurityLog::whereIn('event_type', ['shield_verified', 'shield_failed', 'shield_honeypot'])
+            ->latest()
+            ->paginate($perPage);
+
+        return $this->paginated($logs, 'Shield journal retrieved successfully');
+    }
+
+    /**
+     * Clear Bot Shield logs.
+     */
+    public function clearShieldLogs(Request $request): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $retainDaysRaw = $request->input('retain_days');
+            
+            $query = SecurityLog::whereIn('event_type', ['shield_verified', 'shield_failed', 'shield_honeypot']);
+
+            if ($retainDaysRaw) {
+                $retainDays = is_numeric($retainDaysRaw) ? (int) $retainDaysRaw : 0;
+                $count = $query->where('created_at', '<', now()->subDays($retainDays))->delete();
+                $message = "Cleared {$count} shield logs older than {$retainDays} days";
+            } else {
+                $count = $query->delete();
+                $message = "All shield logs cleared successfully";
+            }
+
+            return $this->success(null, $message);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Shield logs clear error: '.$e->getMessage());
+
+            return $this->error('Failed to clear shield logs', 500);
+        }
+    }
+
+    /**
+     * Get statistics for the Bot Shield.
+     */
+    public function shieldStats(): \Illuminate\Http\JsonResponse
+    {
+        $stats = $this->securityService->getShieldStats();
+
+        return $this->success($stats, 'Shield statistics retrieved successfully');
     }
 }

@@ -6,7 +6,8 @@
         "whitelist": "Daftar Putih",
         "cspReports": "Laporan CSP",
         "slowQueries": "Query Lambat",
-        "vulnerabilities": "Kerentanan"
+        "vulnerabilities": "Kerentanan",
+        "shieldJournal": "Shield Journal"
     },
     "statistics": {
         "events": "Event Keamanan",
@@ -103,7 +104,7 @@
             "login_failed": "Login Gagal",
             "login_success": "Login Berhasil",
             "ip_blocked": "IP Diblokir",
-            "ip_unblocked": "IP Dibuka Blokir",
+            "ip_unblocked": "IP Utama Dibuka Blokir",
             "suspicious_activity": "Aktivitas Mencurigakan",
             "ip_whitelisted": "IP Masuk Daftar Putih",
             "ip_whitelist_removed": "Dihapus dari Daftar Putih",
@@ -113,7 +114,44 @@
             "ip_blocked_temp": "IP Diblokir Sementara",
             "session_invalidated": "Sesi Diinvalidasi",
             "session_limit_reached": "Batas Sesi Tercapai",
-            "force_logout": "Logout Paksa"
+            "force_logout": "Logout Paksa",
+            "shield_verified": "Verifikasi Shield Berhasil",
+            "shield_failed": "Verifikasi Shield Gagal",
+            "shield_honeypot": "Honeypot Terdeteksi"
+        }
+    },
+    "shield": {
+        "title": "Bot Shield Journal",
+        "description": "Pantau aktivitas tantangan Proof-of-Work dan deteksi bot otomatis",
+        "stats": {
+            "verifications": "Total Verifikasi",
+            "failures": "Verifikasi Gagal",
+            "honeypot": "Honeypot Trigger",
+            "difficulty": "Kesulitan Saat Ini"
+        },
+        "table": {
+            "ip": "Alamat IP",
+            "userAgent": "User Agent",
+            "status": "Status",
+            "date": "Tanggal"
+        },
+        "challenge": {
+            "title": "Memverifikasi Koneksi",
+            "message": "Kami mengamankan sesi Anda untuk melindungi dari ancaman otomatis. Ini hanya akan memakan waktu sejenak.",
+            "status": {
+                "initializing": "Menginisialisasi pemeriksaan keamanan...",
+                "verifying": "Memverifikasi koneksi...",
+                "analyzing": "Menganalisis metrik keamanan...",
+                "finalizing": "Finalisasi verifikasi...",
+                "verified": "Terverifikasi! Melanjutkan...",
+                "failed": "Verifikasi gagal. Mencoba kembali..."
+            },
+            "steps": {
+                "analyze": "Analisis",
+                "solve": "Selesaikan",
+                "verify": "Verifikasi"
+            },
+            "retry": "Coba Lagi"
         }
     },
     "messages": {

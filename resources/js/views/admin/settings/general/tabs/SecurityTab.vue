@@ -163,6 +163,16 @@ const securitySettingsGrouped = computed(() => {
             settings: [],
             defaultExpanded: false,
         },
+        {
+            id: 'bot-shield',
+            title: t('features.settings.groups.botShield.title'),
+            description: t('features.settings.groups.botShield.description'),
+            icon: ShieldCheckIcon,
+            color: 'indigo',
+            keys: ['shield_protection_mode', 'shield_protection_difficulty', 'shield_log_verification_success'],
+            settings: [],
+            defaultExpanded: false,
+        },
     ]
     
     groups.forEach(group => {

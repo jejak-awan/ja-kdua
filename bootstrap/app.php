@@ -15,7 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         __DIR__.'/../app/Console/Commands',
     ])
     ->withMiddleware(function (Middleware $middleware): void {
-        // Trust proxies for correct client IP detection
+        // Security Layer: Order matters (TrustProxies first, then Bots, then Challenge)
+        $middleware->prepend(\App\Http\Middleware\Core\VerifyConnection::class);
+        $middleware->prepend(\App\Http\Middleware\Core\BlockMaliciousBots::class);
         $middleware->prepend(\App\Http\Middleware\Core\TrustProxies::class);
 
         // Enable Sanctum stateful API for SPA
@@ -23,9 +25,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Ensure guests are redirected to the named 'login' route (SPA)
         $middleware->redirectGuestsTo(fn () => route('login'));
-
-        // Global Middleware
-        $middleware->prepend(\App\Http\Middleware\Core\BlockMaliciousBots::class);
 
         $middleware->web(append: [
             \App\Http\Middleware\Core\CheckMaintenanceMode::class,
@@ -40,11 +39,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \App\Http\Middleware\Core\CheckPermission::class,
         ]);
 
-        // Exempt analytics from CSRF protection (public tracking endpoint)
+        // Exempt analytics and security verification from CSRF protection
         $middleware->validateCsrfTokens(except: [
             'api/v1/analytics/*',
             'api/v1/security/csp-report*',
             'api/v1/security/crep-collect*',
+            'api/v1/security/verify-connection',
             'v1/security/csp-report*',
             'v1/security/crep-collect*',
             '*/security/crep-collect*',

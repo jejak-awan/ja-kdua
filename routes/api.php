@@ -26,6 +26,10 @@ Route::prefix('v1')->group(function () {
     Route::post('/security/crep-collect', [App\Http\Controllers\Api\Core\CspReportController::class, 'store'])
         ->middleware('throttle:100,1');
 
+    // Bot Shield Verification (public, rate-limited)
+    Route::post('/security/verify-connection', [App\Http\Controllers\Api\Core\SecurityController::class, 'verifyConnection'])
+        ->middleware('throttle:10,1');
+
     // Authentication Routes (rate limiting handled by SecurityService with progressive blocking)
     Route::post('/login', [App\Http\Controllers\Api\Core\AuthController::class, 'login'])
         ->middleware('throttle:60,1'); // Increase Laravel throttle to avoid conflict with SecurityService
@@ -497,6 +501,11 @@ Route::prefix('v1')->group(function () {
             Route::post('csp-reports/bulk-action', [App\Http\Controllers\Api\Core\CspReportController::class, 'bulkAction'])->middleware('permission:manage settings');
             Route::get('csp-reports/statistics', [App\Http\Controllers\Api\Core\CspReportController::class, 'statistics'])->middleware('permission:manage settings');
 
+            // Bot Shield
+            Route::get('shield/journal', [App\Http\Controllers\Api\Core\SecurityController::class, 'shieldJournal'])->middleware('permission:manage settings');
+            Route::post('shield/clear', [App\Http\Controllers\Api\Core\SecurityController::class, 'clearShieldLogs'])->middleware('permission:manage settings');
+            Route::get('shield/stats', [App\Http\Controllers\Api\Core\SecurityController::class, 'shieldStats'])->middleware('permission:manage settings');
+
             // Slow Queries
             Route::get('slow-queries', [App\Http\Controllers\Api\Core\SlowQueryController::class, 'index'])->middleware('permission:manage settings');
             Route::get('slow-queries/statistics', [App\Http\Controllers\Api\Core\SlowQueryController::class, 'statistics'])->middleware('permission:manage settings');
@@ -702,6 +711,7 @@ Route::prefix('v1')->group(function () {
                     Route::get('/', [App\Http\Controllers\Api\Isp\Network\OutageController::class, 'index']);
                     Route::post('/', [App\Http\Controllers\Api\Isp\Network\OutageController::class, 'store']);
                     Route::patch('/{id}', [App\Http\Controllers\Api\Isp\Network\OutageController::class, 'update']);
+                    Route::delete('/{id}', [App\Http\Controllers\Api\Isp\Network\OutageController::class, 'destroy']);
                 });
 
                 // Router Management (Merged into InfrastructureController)

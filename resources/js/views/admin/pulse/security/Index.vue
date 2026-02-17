@@ -10,7 +10,11 @@
                 <h1 class="text-2xl font-bold text-foreground">{{ $t('features.security.title') }}</h1>
             </div>
             <div class="flex items-center space-x-2">
-                <Button variant="destructive" @click="clearLogs">
+                <Button 
+                    v-if="showClearButton" 
+                    variant="destructive" 
+                    @click="handleClearLogs"
+                >
                     <Trash2 class="w-4 h-4 mr-2" />
                     {{ $t('features.system.logs.clear') }}
                 </Button>
@@ -49,6 +53,10 @@
                         <TabsTrigger value="vulnerabilities" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
                             <ShieldAlert class="w-4 h-4 mr-2" />
                             {{ $t('features.security.tabs.vulnerabilities') }}
+                        </TabsTrigger>
+                        <TabsTrigger value="shield-journal" class="relative px-6 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none transition-colors">
+                            <ShieldCheck class="w-4 h-4 mr-2" />
+                            {{ $t('features.security.tabs.shieldJournal') }}
                         </TabsTrigger>
                     </TabsList>
                 </div>
@@ -144,6 +152,19 @@
                         @per-page-change="(val) => { vulnFilters.per_page = val; vulnFilters.page = 1; fetchVulnerabilities(); }"
                     />
                 </TabsContent>
+
+                <!-- Shield Journal Tab -->
+                <TabsContent value="shield-journal">
+                    <ShieldJournalTab
+                        :logs="shieldLogs"
+                        :stats="shieldStats"
+                        :loading="shieldLoading"
+                        :pagination="shieldPagination"
+                        @refresh="fetchShieldLogs"
+                        @page-change="(val) => { shieldPage = val; fetchShieldLogs(); }"
+                        @block-ip="blockIP"
+                    />
+                </TabsContent>
             </Tabs>
         </div>
     </div>
@@ -151,7 +172,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger';
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
@@ -168,6 +189,7 @@ import WhitelistTab from './components/WhitelistTab.vue';
 import CspReportsTab from './components/CspReportsTab.vue';
 import SlowQueriesTab from './components/SlowQueriesTab.vue';
 import VulnerabilitiesTab from './components/VulnerabilitiesTab.vue';
+import ShieldJournalTab from './components/ShieldJournalTab.vue';
 
 // Icons
 import ShieldAlert from 'lucide-vue-next/dist/esm/icons/shield-alert.js';
@@ -180,6 +202,8 @@ import ArrowLeft from 'lucide-vue-next/dist/esm/icons/arrow-left.js';
 import BarChart3 from 'lucide-vue-next/dist/esm/icons/chart-bar-stacked.js';
 import FileWarning from 'lucide-vue-next/dist/esm/icons/file-x.js';
 import Timer from 'lucide-vue-next/dist/esm/icons/timer.js';
+
+import type { ShieldLog, ShieldStats, PaginationInfo as SecurityPaginationInfo } from '@/types/security';
 
 // Types
 interface User {
@@ -311,6 +335,13 @@ const vulnLoading = ref(false);
 const auditRunning = ref(false);
 const vulnPagination = ref<PaginationInfo>({ total: 0, current_page: 1, last_page: 1 });
 
+// Shield Journal
+const shieldLogs = ref<ShieldLog[]>([]);
+const shieldStats = ref<ShieldStats>({ verifications: 0, failures: 0, honeypot: 0, currentDifficulty: 4, isScaling: false });
+const shieldLoading = ref(false);
+const shieldPagination = ref<SecurityPaginationInfo>({ total: 0, current_page: 1, last_page: 1 });
+const shieldPage = ref(1);
+
 // Filters state
 const cspFilters = reactive({ status: 'new', directive: '', date_from: '', date_to: '', page: 1, per_page: 50 });
 const slowQueryFilters = reactive({ route: '', min_duration: '', date_from: '', date_to: '', page: 1, per_page: 50 });
@@ -319,6 +350,28 @@ const vulnFilters = reactive({ source: 'all', severity: 'all', status: 'all', pa
 // ========================================
 // CORE FETCH FUNCTIONS
 // ========================================
+const fetchShieldLogs = async (): Promise<void> => {
+    shieldLoading.value = true;
+    try {
+        const response = await api.get('/admin/janet/security/shield/journal', { params: { page: shieldPage.value } });
+        const result = response.data?.data ? response.data.data : response.data;
+        shieldLogs.value = (result.data as ShieldLog[]) || [];
+        shieldPagination.value = { total: result.total || 0, current_page: result.current_page || 1, last_page: result.last_page || 1 };
+    } catch (error: unknown) {
+        logger.error('Failed to fetch shield logs:', error);
+    } finally {
+        shieldLoading.value = false;
+    }
+};
+
+const fetchShieldStats = async (): Promise<void> => {
+    try {
+        const response = await api.get('/admin/janet/security/shield/stats');
+        shieldStats.value = (response.data?.data as ShieldStats) || { verifications: 0, failures: 0, honeypot: 0, currentDifficulty: 4, isScaling: false };
+    } catch (error: unknown) {
+        logger.error('Failed to fetch shield stats:', error);
+    }
+};
 const fetchLogs = async (): Promise<void> => {
     loading.value = true;
     try {
@@ -349,6 +402,36 @@ const clearLogs = async (): Promise<void> => {
         toast.error.fromResponse(error);
     }
 };
+
+const clearShieldLogs = async (): Promise<void> => {
+    const confirmed = await confirm({
+        title: t('common.actions.clear'),
+        message: t('common.dialogs.confirmDelete', 'Are you sure you want to clear all shield logs?'),
+        variant: 'danger',
+        confirmText: t('common.actions.clear'),
+    });
+    if (!confirmed) return;
+
+    try {
+        await api.post('/security/shield/clear');
+        toast.success.default(t('features.security.logs.cleared', 'Shield logs cleared successfully'));
+        fetchShieldLogs();
+    } catch (error) {
+        toast.error.default(t('common.errors.generic'));
+    }
+};
+
+const handleClearLogs = () => {
+    if (activeTab.value === 'shield-journal') {
+        clearShieldLogs();
+    } else {
+        clearLogs();
+    }
+};
+
+const showClearButton = computed(() => {
+    return ['overview', 'shield-journal'].includes(activeTab.value);
+});
 
 const fetchStats = async (): Promise<void> => {
     try {
@@ -720,6 +803,9 @@ const resetVulnFilters = (): void => {
 // ========================================
 const refreshAll = async (): Promise<void> => {
     await Promise.all([fetchLogs(), fetchStats(), fetchBlocklist(), fetchWhitelist()]);
+    if (activeTab.value === 'shield-journal') {
+        await Promise.all([fetchShieldLogs(), fetchShieldStats()]);
+    }
 };
 
 watch(activeTab, (newTab: string) => {
@@ -732,6 +818,9 @@ watch(activeTab, (newTab: string) => {
     } else if (newTab === 'vulnerabilities' && vulnerabilities.value.length === 0) {
         fetchVulnerabilities();
         fetchVulnStats();
+    } else if (newTab === 'shield-journal' && shieldLogs.value.length === 0) {
+        fetchShieldLogs();
+        fetchShieldStats();
     }
 });
 

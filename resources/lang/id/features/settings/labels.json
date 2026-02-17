@@ -68,8 +68,8 @@
         "enable_watermark": "Aktifkan Watermark",
         "watermark_text": "Teks Watermark",
         "storage_driver": "Driver Penyimpanan",
-        "two_factor_method": "2FA Method",
-        "two_factor_enforced_roles": "2FA Enforcement",
+        "two_factor_method": "Metode 2FA",
+        "two_factor_enforced_roles": "Penegakan 2FA",
         "aws_access_key_id": "AWS Access Key ID",
         "aws_secret_access_key": "AWS Secret Access Key",
         "aws_default_region": "AWS Default Region",
@@ -90,6 +90,9 @@
         "maintenance_title": "Judul Halaman Maintenance",
         "maintenance_message": "Pesan Maintenance",
         "maintenance_countdown_enabled": "Aktifkan Penghitung Waktu Mundur",
-        "maintenance_end_time": "Waktu Selesai Maintenance"
+        "maintenance_end_time": "Waktu Selesai Maintenance",
+        "shield_protection_mode": "Mode Bot Shield",
+        "shield_protection_difficulty": "Tingkat Kesulitan PoW",
+        "shield_log_verification_success": "Catat Verifikasi Berhasil"
     }
 }

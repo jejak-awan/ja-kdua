@@ -39,9 +39,11 @@ class MikrotikService
      */
     public function getNodeStats(ServiceNode $node): array
     {
-        $resources = $this->routerService->getSystemResource($node);
-        $traffic = $this->routerService->getInterfaceTraffic($node);
-        $activeClients = $this->routerService->getActiveClientCount($node);
+        $stats = $this->routerService->getMonitoredStats($node);
+        
+        $resources = $stats['resource'] ?? [];
+        $traffic = $stats['traffic'] ?? [];
+        $activeClients = $stats['active_count'] ?? 0;
 
         return [
             'node_id' => (int) $node->id,
@@ -71,10 +73,16 @@ class MikrotikService
         $totalClients = 0;
 
         foreach ($nodes as $node) {
-            $traffic = $this->routerService->getInterfaceTraffic($node);
-            $totalIn += ($traffic['rx'] ?? 0);
-            $totalOut += ($traffic['tx'] ?? 0);
-            $totalClients += $this->routerService->getActiveClientCount($node);
+            // Optimization: Use getMonitoredStats to fetch both traffic and client counts in one connection
+            // This method also utilizes cache, reducing real-time overhead
+            $stats = $this->routerService->getMonitoredStats($node);
+
+            if (isset($stats['traffic'])) {
+                $totalIn += ($stats['traffic']['rx'] ?? 0);
+                $totalOut += ($stats['traffic']['tx'] ?? 0);
+            }
+
+            $totalClients += ($stats['active_count'] ?? 0);
         }
 
         return [

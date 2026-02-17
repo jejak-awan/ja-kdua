@@ -81,6 +81,9 @@
         "maintenance_message": "The message displayed on the maintenance page.",
         "maintenance_countdown_enabled": "Show a live countdown timer until the site becomes live again.",
         "maintenance_end_time": "When the maintenance is scheduled to end. The site will automatically become live after this time.",
+        "shield_protection_mode": "Proof-of-Work (PoW) security layer to deter AI scrapers and bots. 'Suspicious Traffic Only' mode minimizes friction for legitimate users.",
+        "shield_protection_difficulty": "Number of leading zeros required in the proof hash. Higher values increase bot CPU usage. Normal (4) is recommended.",
+        "shield_log_verification_success": "If enabled, successful verification attempts will be logged in the Security Journal. Default: Disabled to reduce log volume.",
         "comments": {
             "security": {
                 "enable_reply": "Allow users to reply to other comments",

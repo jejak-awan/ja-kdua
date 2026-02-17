@@ -192,6 +192,20 @@ export const captchaMethodOptions: SettingsOption[] = [
     { value: 'image', labelKey: 'features.settings.options.captchaMethod.image' },
 ]
 
+export const shieldProtectionModeOptions: SettingsOption[] = [
+    { value: 'off', labelKey: 'features.settings.options.shieldProtectionMode.off' },
+    { value: 'suspicious', labelKey: 'features.settings.options.shieldProtectionMode.suspicious' },
+    { value: 'always', labelKey: 'features.settings.options.shieldProtectionMode.always' },
+]
+
+export const shieldProtectionDifficultyOptions: SettingsOption[] = [
+    { value: 3, labelKey: 'features.settings.options.shieldProtectionDifficulty.3' },
+    { value: 4, labelKey: 'features.settings.options.shieldProtectionDifficulty.4' },
+    { value: 5, labelKey: 'features.settings.options.shieldProtectionDifficulty.5' },
+    { value: 6, labelKey: 'features.settings.options.shieldProtectionDifficulty.6' },
+    { value: 7, labelKey: 'features.settings.options.shieldProtectionDifficulty.7' },
+]
+
 // Maintenance presets options
 export const maintenanceTitlePresets: SettingsOption[] = [
     { value: 'Coming Soon', labelKey: 'features.settings.options.maintenanceTitlePresets.coming_soon' },
@@ -234,6 +248,9 @@ export function getFieldOptions(fieldKey: string): SettingsOption[] | null {
         cache_ttl: cacheTtlOptions,
         // Media options
         max_upload_size: maxUploadSizeOptions,
+        // Bot Shield options
+        shield_protection_mode: shieldProtectionModeOptions,
+        shield_protection_difficulty: shieldProtectionDifficultyOptions,
     }
 
     return optionsMap[fieldKey] || null

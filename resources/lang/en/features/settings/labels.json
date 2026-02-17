@@ -81,6 +81,9 @@
         "maintenance_message": "Maintenance Message",
         "maintenance_countdown_enabled": "Enable Countdown Timer",
         "maintenance_end_time": "Maintenance End Time",
+        "shield_protection_mode": "Bot Shield Mode",
+        "shield_protection_difficulty": "PoW Difficulty Level",
+        "shield_log_verification_success": "Log Successful Verifications",
         "comments": {
             "security": {
                 "enable_reply": "Enable Replies",

@@ -40,8 +40,17 @@ class RouterHealthJob implements ShouldQueue
         try {
             Log::info("Health Poller: Checking router {$this->router->name} ({$this->router->ip_address})");
             
-            $status = $service->getDetailedStatus($this->router);
-            $resources = $service->getSystemResource($this->router);
+            // Use getMonitoredStats to populate cache for dashboard and get all metrics in one connection
+            $stats = $service->getMonitoredStats($this->router);
+            
+            // Map stats back to expected format for health check logic
+            $isConnected = !empty($stats['resource']);
+            $resources = $stats['resource'] ?? [];
+            
+            $status = [
+                'is_connected' => $isConnected,
+                'active_count' => $stats['active_count'] ?? 0,
+            ];
             
             $cacheKey = "router_status_{$this->router->id}";
             $failCountKey = "router_fail_count_{$this->router->id}";

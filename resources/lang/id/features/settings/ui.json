@@ -81,6 +81,10 @@
         "maintenance": {
             "title": "Mode Maintenance",
             "description": "Konfigurasi halaman Coming Soon / Under Maintenance."
+        },
+        "botShield": {
+            "title": "Bot Shield (Keamanan Lanjutan)",
+            "description": "Perlindungan Proof-of-Work terhadap AI scrapers, bots, dan serangan otomatis."
         }
     },
     "enabled": "Aktif",

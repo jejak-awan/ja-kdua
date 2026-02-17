@@ -117,6 +117,23 @@ class OutageController extends BaseApiController
     }
 
     /**
+     * Delete an outage report
+     */
+    public function destroy(string $id): \Illuminate\Http\JsonResponse
+    {
+        $outageId = is_numeric($id) ? (int) $id : 0;
+        $outage = Outage::find($outageId);
+
+        if (! $outage) {
+            return $this->error('Outage report not found', 404);
+        }
+
+        $outage->delete();
+
+        return $this->success(null, 'Outage report deleted successfully');
+    }
+
+    /**
      * Public Status (No Auth)
      */
     public function publicStatus(): \Illuminate\Http\JsonResponse

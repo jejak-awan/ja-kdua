@@ -2,6 +2,7 @@ import { logger } from '@/utils/logger';
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosError, type AxiosResponse } from 'axios';
 import { SystemMonitor } from './SystemMonitor';
 import { useSystemError } from '@/composables/useSystemError';
+import { useSecurityStore } from '@/stores/security';
 
 const { showError } = useSystemError();
 
@@ -227,8 +228,25 @@ api.interceptors.response.use(
             logger.debug('403 Forbidden:', { url: error.config?.url });
         }
 
-        // Handle 429 Rate Limit - ensure retry_after is in response data
+        // Handle 429 Rate Limit - check for Bot Shield challenge
         if (error.response?.status === 429) {
+            const shieldNonce = error.response.headers?.['x-shield-challenge'] || (error.response.data as any)?.challenge?.nonce;
+            const shieldDifficulty = parseInt(error.response.headers?.['x-shield-difficulty'] || (error.response.data as any)?.challenge?.difficulty || '0', 10);
+
+            if (shieldNonce && shieldDifficulty > 0) {
+                try {
+                    const securityStore = useSecurityStore();
+                    const solution = await securityStore.solveChallenge(shieldNonce, shieldDifficulty);
+
+                    if (solution !== null && error.config) {
+                        // Resubmit original request - it will now include the new cookies set by verification
+                        return api(error.config);
+                    }
+                } catch (solveError) {
+                    logger.error('Shield challenge solve failed:', solveError);
+                }
+            }
+
             if (error.response.data && !error.response.data.retry_after) {
                 const retryAfter = error.response.headers?.['retry-after'] ||
                     error.response.headers?.['Retry-After'] ||
